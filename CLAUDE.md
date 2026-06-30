@@ -286,9 +286,12 @@ FAQ・Voice・末尾の再CTA まで**10セクションの骨格が一致**。�
 - リポジトリ：`git@github.com:yoshida55/desing_kanpu_create.git`（SSH）。
 - **コードだけGitに上げる**。`venv/`・`data/`（screenshots/videos/assets/camps/sqlite）・`.env`は
   `.gitignore`で除外（**.envにはAPIキーが入るので絶対に上げない**）。
-- 同期バッチ（プロジェクト直下）：
-  - `同期_プル.bat`（`git pull`）… 作業前に最新を取る
-  - `同期_プッシュ.bat`（`add → commit → push`）… 作業後に上げる
+- **同期は中央の「一斉バッチ」を使う**（プロジェクト個別バッチは作らない）：
+  - `D:\99_AIソフト\85_bat(会社・家同期)\commit_all_実行.bat`（add→commit→push を全リポ一斉）
+  - `D:\99_AIソフト\85_bat(会社・家同期)\pull_all.bat`（全リポ一斉 pull）
+  - これは `D:\99_AIソフト` 配下の **.git＋リモートを持つフォルダを自動で拾う**ので、
+    この 86_ は**git化＆リモート設定済み＝自動で対象**（手動登録不要）。
+  - 自動対象から外したいときは、そのフォルダに `.manual_commit_only` を置く。
 - 別PC（会社）で初めて使うとき：
   1. `git clone git@github.com:yoshida55/desing_kanpu_create.git`
   2. README の手順で venv 構築（torch等インストール／playwright install chromium）
