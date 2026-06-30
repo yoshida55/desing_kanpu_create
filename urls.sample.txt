@@ -1,0 +1,5 @@
+# 1行1URL（# で始まる行はコメント）
+# python cli.py ingest --list urls.sample.txt のように使う
+https://www.apple.com/jp/
+https://stripe.com/jp
+https://www.notion.com/ja

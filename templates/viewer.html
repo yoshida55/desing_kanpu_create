@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>デザイン参照ストック — 検索</title>
+  <style>
+    /* ┌─────────────────────────────────────────┐
+       │ 共通                                       │
+       └─────────────────────────────────────────┘ */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
+
+    /* ┌─────────────────────────────────────────┐
+       │ 検索バー（上部に固定）                      │
+       └─────────────────────────────────────────┘ */
+    /* position: fixed は親1箇所だけ（中の要素は通常フロー） */
+    .search_bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e0e0e0;
+      padding: 1.6rem 2.4rem;
+    }
+    /* 検索ボックスと件数指定を横並びにする親 */
+    .search_inner {
+      display: flex; /* 入力欄とボタンを1行に */
+      gap: 1.2rem;
+      align-items: center;
+      max-width: 90rem;
+      margin: 0 auto;
+    }
+    .search_input {
+      flex: 1;
+      font-size: 1.7rem;
+      padding: 1.2rem 1.6rem;
+      border: 1px solid #d0d0d5;
+      border-radius: 1rem;
+      outline: none;
+    }
+    .search_input:focus { border-color: #0066cc; }
+    .search_top {
+      width: 7rem;
+      font-size: 1.5rem;
+      padding: 1.2rem 0.8rem;
+      border: 1px solid #d0d0d5;
+      border-radius: 1rem;
+      text-align: center;
+    }
+    .search_button {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: #0066cc;
+      border: none;
+      border-radius: 1rem;
+      padding: 1.2rem 2.4rem;
+      cursor: pointer;
+    }
+    .search_button:hover { background: #0055aa; }
+    .search_hint {
+      max-width: 90rem;
+      margin: 0.8rem auto 0;
+      font-size: 1.2rem;
+      color: #86868b;
+    }
+
+    /* ┌─────────────────────────────────────────┐
+       │ 登録（URLを追加する入力ボックス）           │
+       └─────────────────────────────────────────┘ */
+    /* 設定パネル */
+    .set_box { max-width: 90rem; margin: 1rem auto 0; }
+    .set_toggle {
+      font-size: 1.3rem; color: #444; background: #eee;
+      border: 1px solid #ddd; border-radius: 1rem;
+      padding: 0.7rem 1.4rem; cursor: pointer;
+    }
+    .set_toggle:hover { background: #e4e4e4; }
+    .set_panel {
+      display: none;
+      margin-top: 1rem;
+      padding: 1.6rem;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 1rem;
+    }
+    .set_panel.is_open { display: block; }
+    .set_row {
+      display: flex; /* ラベルと入力を1行に */
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .set_label { width: 14rem; font-size: 1.3rem; color: #555; }
+    .set_radio { font-size: 1.4rem; }
+    .set_input {
+      flex: 1;
+      min-width: 24rem;
+      font-size: 1.4rem;
+      padding: 0.8rem 1.2rem;
+      border: 1px solid #d0d0d5;
+      border-radius: 0.8rem;
+    }
+    .set_input_s { flex: 0 0 16rem; min-width: 12rem; }
+    .set_state { font-size: 1.2rem; color: #888; }
+    .set_actions { display: flex; align-items: center; gap: 1.2rem; }
+    .set_save {
+      font-size: 1.4rem; font-weight: 700; color: #fff; background: #1d1d1f;
+      border: none; border-radius: 1rem; padding: 0.9rem 1.8rem; cursor: pointer;
+    }
+    .set_save:hover { background: #000; }
+    .set_test {
+      font-size: 1.3rem; color: #1d1d1f; background: #f0f0f2;
+      border: 1px solid #ddd; border-radius: 1rem; padding: 0.9rem 1.4rem; cursor: pointer;
+    }
+    .set_test:hover { background: #e6e6ea; }
+    .set_msg { font-size: 1.3rem; color: #444; }
+
+    /* 一括アクションのまとまり */
+    .bulk_box {
+      max-width: 90rem;
+      margin: 1.2rem auto 0;
+      display: flex; /* ボタンと状況を横並び */
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .bulk_button {
+      font-size: 1.3rem;
+      color: #4b2ea8;
+      background: #efe9ff;
+      border: 1px solid #d6c9ff;
+      border-radius: 1rem;
+      padding: 0.8rem 1.6rem;
+      cursor: pointer;
+    }
+    .bulk_button:hover { background: #e4dbff; }
+    .bulk_button:disabled { color: #aaa; cursor: default; }
+    .bulk_state { font-size: 1.25rem; color: #6e6e73; }
+
+    /* カンプ生成 */
+    .camp_box { max-width: 90rem; margin: 1rem auto 0; }
+    .camp_toggle {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #b8530a;
+      background: #fff3e8;
+      border: 1px solid #ffd2a8;
+      border-radius: 1rem;
+      padding: 0.8rem 1.6rem;
+      cursor: pointer;
+    }
+    .camp_toggle:hover { background: #ffe9d6; }
+    .camp_panel { display: none; margin-top: 1rem; }
+    .camp_panel.is_open { display: block; }
+    .camp_input {
+      width: 100%;
+      min-height: 7rem;
+      font-size: 1.4rem;
+      font-family: inherit;
+      padding: 1.2rem 1.6rem;
+      border: 1px solid #d0d0d5;
+      border-radius: 1rem;
+      outline: none;
+      resize: vertical;
+    }
+    .camp_input:focus { border-color: #b8530a; }
+    .camp_actions { display: flex; align-items: center; gap: 1.2rem; margin-top: 0.8rem; }
+    .camp_button {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      background: #b8530a;
+      border: none;
+      border-radius: 1rem;
+      padding: 1rem 2rem;
+      cursor: pointer;
+    }
+    .camp_button:hover { background: #a04708; }
+    .camp_button:disabled { background: #ccc; cursor: default; }
+    .camp_state { font-size: 1.3rem; color: #6e6e73; }
+    .camp_state a { color: #b8530a; font-weight: 700; }
+    /* 生成中の進捗バー */
+    .camp_progress { display: none; margin-top: 1.2rem; }
+    .camp_progress.is_on { display: block; }
+    .camp_bar {
+      height: 0.8rem;
+      background: #f0e3d4;
+      border-radius: 0.4rem;
+      overflow: hidden;
+    }
+    /* 終わりが読めない処理なので、流れ続けるインジケータ（不確定バー） */
+    .camp_bar span {
+      display: block;
+      height: 100%;
+      width: 35%;
+      background: #b8530a;
+      border-radius: 0.4rem;
+      animation: camp_flow 1.3s ease-in-out infinite;
+    }
+    @keyframes camp_flow {
+      0% { margin-left: -35%; }
+      100% { margin-left: 100%; }
+    }
+    .camp_prog_text { margin-top: 0.6rem; font-size: 1.3rem; color: #6e6e73; }
+
+    .add_box {
+      max-width: 90rem;
+      margin: 1.2rem auto 0;
+    }
+    /* 開閉する見出し（クリックで入力欄が出る） */
+    .add_toggle {
+      font-size: 1.3rem;
+      color: #0066cc;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .add_toggle:hover { text-decoration: underline; }
+    /* 入力欄ひとまとまり（既定は非表示） */
+    .add_panel {
+      display: none;
+      margin-top: 1rem;
+    }
+    .add_panel.is_open { display: block; }
+    .add_input {
+      width: 100%;
+      min-height: 8rem;
+      font-size: 1.4rem;
+      font-family: inherit;
+      padding: 1.2rem 1.6rem;
+      border: 1px solid #d0d0d5;
+      border-radius: 1rem;
+      outline: none;
+      resize: vertical;
+    }
+    .add_input:focus { border-color: #0066cc; }
+    .add_actions {
+      display: flex; /* ボタンと状況メッセージを横並びに */
+      align-items: center;
+      gap: 1.2rem;
+      margin-top: 0.8rem;
+    }
+    .add_button {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: #1d1d1f;
+      border: none;
+      border-radius: 1rem;
+      padding: 1rem 2rem;
+      cursor: pointer;
+    }
+    .add_button:hover { background: #000000; }
+    .add_button:disabled { background: #b0b0b5; cursor: default; }
+    .add_state { font-size: 1.3rem; color: #6e6e73; }
+
+    /* ┌─────────────────────────────────────────┐
+       │ 検索結果                                   │
+       └─────────────────────────────────────────┘ */
+    .result_status {
+      max-width: 120rem;
+      margin: 2rem auto 0;
+      padding: 0 2.4rem;
+      font-size: 1.4rem;
+      color: #6e6e73;
+    }
+    /* カードを並べる親（列数はあとで変えやすいよう手法は名前に入れない） */
+    /* カードは小さめ＝一度にたくさん見渡せるようにする */
+    .result_list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+      gap: 1.6rem;
+      max-width: 150rem;
+      margin: 1.6rem auto;
+      padding: 0 2.4rem 4rem;
+    }
+    .result_item {
+      background: #ffffff;
+      border-radius: 1.2rem;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+    /* 画像の上にスコアを乗せる土台。ホバー中は全体(fullpage)を流す */
+    .result_anchor {
+      position: relative;
+      display: block;
+      aspect-ratio: 1440 / 900; /* 撮影viewport比の窓 */
+      overflow: hidden; /* fullpageのはみ出しを隠す＝この窓の中だけ見せる */
+      background: #eee;
+      cursor: pointer; /* クリックで詳細が開くことを示す */
+    }
+    /* 「詳細を見る」の常時表示の目印（クリックできると分かるように） */
+    .result_anchor::after {
+      content: "🔍 詳細";
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.1rem;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 0.3rem 0.8rem;
+      border-radius: 0.8rem;
+      pointer-events: none;
+    }
+    /* ファーストビュー（通常時に見せる画像） */
+    .result_img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      transition: opacity 0.2s;
+    }
+    /* ページ全体（ホバー時に上から下へ流して見せる） */
+    .result_full {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: auto; /* 縦長のまま。JSでtranslateYして流す */
+      display: block;
+      opacity: 0;
+    }
+    .result_anchor.is_preview .result_img { opacity: 0; }
+    .result_anchor.is_preview .result_full { opacity: 1; }
+    /* 録画した動き（ホバー時に再生） */
+    .result_video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      opacity: 0;
+    }
+    /* 動画があるカードは、ホバー時に静止画スクロールではなく動画を見せる */
+    .result_anchor.is_video.is_preview .result_full { opacity: 0; }
+    .result_anchor.is_video.is_preview .result_video { opacity: 1; }
+    /* ホバー中だと分かる小さな目印 */
+    .result_peek {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 1rem;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 0.3rem 0.7rem;
+      border-radius: 0.6rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .result_anchor:hover .result_peek { opacity: 1; }
+    /* 画像左上に乗せるスコアのバッジ */
+    .result_score {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.4rem 0.9rem;
+      border-radius: 0.8rem;
+    }
+    .result_body { padding: 1.2rem 1.6rem 1.6rem; }
+    .result_url {
+      display: block;
+      font-size: 1.3rem;
+      color: #0066cc;
+      word-break: break-all;
+      text-decoration: none;
+      margin-bottom: 0.8rem;
+    }
+    .result_url:hover { text-decoration: underline; }
+    /* 検出したアニメ系ライブラリのタグ（カンプ生成の手がかり） */
+    .result_libs {
+      display: flex; /* タグを横に並べる */
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .result_lib {
+      font-size: 1.05rem;
+      color: #7a3e00;
+      background: #fff2e0;
+      border: 1px solid #ffd9a8;
+      border-radius: 0.6rem;
+      padding: 0.2rem 0.7rem;
+    }
+    /* 抽出した配色のスワッチ */
+    .result_swatches {
+      display: flex; /* 色のチップを横に並べる */
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+    .result_swatch {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.4rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    /* ベースに生成ボタン */
+    .result_base {
+      font-size: 1.15rem;
+      color: #b8530a;
+      background: #fff3e8;
+      border: 1px solid #ffd2a8;
+      border-radius: 0.8rem;
+      padding: 0.5rem 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .result_base:hover { background: #ffe9d6; }
+    .result_base:disabled { color: #aaa; cursor: default; }
+
+    /* Claudeが書いた雰囲気の説明文 */
+    .result_vibe {
+      font-size: 1.15rem;
+      line-height: 1.6em;
+      color: #555;
+      margin: 0 0 0.8rem;
+      background: #f7f5ff;
+      border-left: 3px solid #b9a9ff;
+      padding: 0.7rem 0.9rem;
+      border-radius: 0.4rem;
+    }
+    /* 雰囲気を言語化ボタン */
+    .result_describe {
+      font-size: 1.15rem;
+      color: #4b2ea8;
+      background: #efe9ff;
+      border: 1px solid #d6c9ff;
+      border-radius: 0.8rem;
+      padding: 0.5rem 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .result_describe:hover { background: #e4dbff; }
+    .result_describe:disabled { color: #aaa; cursor: default; }
+    .result_meta {
+      display: flex; /* 日付と「似てる」ボタンを左右に */
+      justify-content: space-between;
+      align-items: center;
+    }
+    .result_date { font-size: 1.1rem; color: #86868b; }
+    .result_similar {
+      font-size: 1.2rem;
+      color: #1d1d1f;
+      background: #f0f0f2;
+      border: 1px solid #e0e0e0;
+      border-radius: 0.8rem;
+      padding: 0.5rem 1.1rem;
+      cursor: pointer;
+    }
+    .result_similar:hover { background: #e6e6ea; }
+    /* 削除ボタン（控えめな見た目・ホバーで赤く） */
+    .result_delete {
+      font-size: 1.2rem;
+      color: #999;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    .result_delete:hover { color: #d0021b; }
+    /* 動きを録るボタン */
+    .result_record {
+      font-size: 1.15rem;
+      color: #1d1d1f;
+      background: #f0f0f2;
+      border: 1px solid #e0e0e0;
+      border-radius: 0.8rem;
+      padding: 0.5rem 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .result_record:hover { background: #e6e6ea; }
+    .result_record:disabled { color: #aaa; cursor: default; }
+    /* ボタン2つをまとめる箱（似てる＋削除） */
+    .result_tools {
+      display: flex; /* 横並び */
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .result_empty {
+      max-width: 120rem;
+      margin: 4rem auto;
+      padding: 0 2.4rem;
+      color: #86868b;
+      font-size: 1.5rem;
+    }
+
+    /* ┌─────────────────────────────────────────┐
+       │ 詳細ビュー（モーダル）                      │
+       └─────────────────────────────────────────┘ */
+    /* 画面全体を覆う土台（position: fixed は親のここ1箇所だけ） */
+    .detail_overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 100;
+      padding: 3rem;
+    }
+    .detail_overlay.is_open { display: flex; }
+    .detail_modal {
+      background: #fff;
+      border-radius: 1.4rem;
+      width: 100%;
+      max-width: 130rem;
+      margin: auto;
+      max-height: 90vh;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .detail_close {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      font-size: 1.8rem;
+      width: 3.6rem;
+      height: 3.6rem;
+      border: none;
+      border-radius: 50%;
+      background: #f0f0f2;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .detail_close:hover { background: #e2e2e6; }
+    .detail_head {
+      padding: 1.8rem 2.4rem;
+      border-bottom: 1px solid #eee;
+    }
+    .detail_url { font-size: 1.5rem; color: #0066cc; word-break: break-all; text-decoration: none; }
+    .detail_url:hover { text-decoration: underline; }
+    .detail_date { display: block; font-size: 1.2rem; color: #999; margin-top: 0.3rem; }
+    /* 左右に分ける（左=ビジュアル / 右=情報） */
+    .detail_body {
+      display: flex;
+      gap: 0;
+      overflow: hidden;
+      flex: 1;
+    }
+    .detail_visual {
+      flex: 1.4;
+      background: #f5f5f7;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .detail_tabs { display: flex; gap: 0.6rem; padding: 1.2rem; }
+    .detail_tab {
+      font-size: 1.3rem; padding: 0.6rem 1.4rem; border-radius: 0.8rem;
+      border: 1px solid #ddd; background: #fff; cursor: pointer;
+    }
+    .detail_tab.is_on { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+    /* 全体スクショは縦長なのでこのペイン内でスクロールして見る */
+    .detail_pane { overflow: auto; padding: 0 1.2rem 1.2rem; flex: 1; }
+    .detail_pane img { width: 100%; display: block; border-radius: 0.6rem; }
+    .detail_pane video { width: 100%; display: block; border-radius: 0.6rem; background: #000; }
+    .detail_info { flex: 1; padding: 1.8rem 2.4rem; overflow: auto; }
+    .detail_h { font-size: 1.25rem; color: #888; margin: 1.6rem 0 0.6rem; }
+    .detail_h:first-child { margin-top: 0; }
+    .detail_swatches { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    /* 色チップ（クリックでコピー） */
+    .detail_swatch {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 1.15rem; padding: 0.3rem 0.6rem 0.3rem 0.3rem;
+      border: 1px solid #e0e0e0; border-radius: 0.8rem; cursor: pointer; background: #fff;
+    }
+    .detail_swatch:hover { background: #f4f4f6; }
+    .detail_chip { width: 2rem; height: 2rem; border-radius: 0.4rem; border: 1px solid rgba(0,0,0,.1); }
+    .detail_kv { font-size: 1.3rem; color: #444; line-height: 1.8em; }
+    .detail_libs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .detail_vibe { font-size: 1.3rem; line-height: 1.7em; color: #555; background: #f7f5ff; border-left: 3px solid #b9a9ff; padding: 0.9rem 1.1rem; border-radius: 0.4rem; }
+    /* 抜き出した画像のギャラリー */
+    .detail_assets {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+    }
+    .detail_asset {
+      aspect-ratio: 1;
+      border: 1px solid #eee;
+      border-radius: 0.6rem;
+      overflow: hidden;
+      background: #faf7f2 center/12px 12px;
+    }
+    .detail_asset img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .detail_extract {
+      font-size: 1.3rem; color: #b8530a; background: #fff3e8;
+      border: 1px solid #ffd2a8; border-radius: 0.9rem; padding: 0.7rem 1.4rem; cursor: pointer;
+    }
+    .detail_extract:hover { background: #ffe9d6; }
+    .detail_extract:disabled { color: #aaa; cursor: default; }
+    .detail_actions { margin-top: 1.8rem; }
+    .detail_base {
+      font-size: 1.4rem; font-weight: 700; color: #fff; background: #b8530a;
+      border: none; border-radius: 1rem; padding: 1rem 1.8rem; cursor: pointer;
+    }
+    .detail_base:hover { background: #a04708; }
+  </style>
+</head>
+<body>
+  <!-- 検索バー（上部固定）。Enter または ボタンで検索 -->
+  <header class="search_bar">
+    <div class="search_inner">
+      <input
+        class="search_input"
+        type="text"
+        id="query"
+        placeholder="雰囲気を言葉で（例：落ち着いた上品な青系 / 黒背景でミニマル）"
+        autofocus>
+      <input class="search_top" type="number" id="top" value="24" min="1" max="100" title="表示件数">
+      <button class="search_button" id="go">検索</button>
+    </div>
+    <p class="search_hint">言葉を変えて何度でも試せます。カードの「似てるのを探す」で芋づる式にたどれます。</p>
+
+    <!-- 設定：HTML生成のプロバイダ・APIキー（.envに保存） -->
+    <div class="set_box">
+      <button class="set_toggle" id="set_toggle">⚙ 設定（生成エンジン・APIキー）</button>
+      <div class="set_panel" id="set_panel">
+        <div class="set_row">
+          <span class="set_label">カンプ生成エンジン</span>
+          <label class="set_radio"><input type="radio" name="provider" value="anthropic"> Claude (Opus 4.8)</label>
+          <label class="set_radio"><input type="radio" name="provider" value="openai"> GPT (OpenAI)</label>
+        </div>
+        <div class="set_row">
+          <span class="set_label">OpenAIモデル</span>
+          <input class="set_input set_input_s" id="set_openai_model" placeholder="gpt-5.4 / gpt-5.5">
+        </div>
+        <div class="set_row">
+          <span class="set_label">OpenAI APIキー</span>
+          <input class="set_input" id="set_openai_key" type="password" placeholder="sk-... （空欄なら変更しない）">
+          <span class="set_state" id="set_openai_state"></span>
+        </div>
+        <div class="set_row">
+          <span class="set_label">Anthropic APIキー</span>
+          <input class="set_input" id="set_anthropic_key" type="password" placeholder="sk-ant-... （空欄なら変更しない）">
+          <span class="set_state" id="set_anthropic_state"></span>
+        </div>
+        <div class="set_actions">
+          <button class="set_save" id="set_save">設定を保存（.envに書き込み）</button>
+          <button class="set_test" id="set_test">接続テスト</button>
+          <span class="set_msg" id="set_msg"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 一括アクション：未処理サイトを裏で全部言語化 -->
+    <div class="bulk_box">
+      <button class="bulk_button" id="describe_all">✨ 未処理を全部言語化（裏で進む）</button>
+      <span class="bulk_state" id="describe_all_state"></span>
+    </div>
+
+    <!-- カンプ生成：ストックを参照して新しいカンプHTMLを作る（最終目標） -->
+    <div class="camp_box">
+      <button class="camp_toggle" id="camp_toggle">🎨 カンプを生成する（ストックを参照してAIが作る）</button>
+      <div class="camp_panel" id="camp_panel">
+        <textarea
+          class="camp_input"
+          id="camp_input"
+          placeholder="作りたいサイトを書く（例：製造業のコーポレートサイト。落ち着いた青系で信頼感。会社概要・製品・採用のセクション）　※生成は2分前後かかります"></textarea>
+        <div class="camp_actions">
+          <button class="camp_button" id="camp_button">この内容でカンプを生成</button>
+          <span class="camp_state" id="camp_state"></span>
+        </div>
+        <!-- 生成中の進捗（バー＋段階＋経過秒） -->
+        <div class="camp_progress" id="camp_progress">
+          <div class="camp_bar"><span></span></div>
+          <div class="camp_prog_text" id="camp_prog_text"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 登録：URLを入力して追加する（クリックで開く） -->
+    <div class="add_box">
+      <button class="add_toggle" id="add_toggle">＋ サイトを登録する</button>
+      <div class="add_panel" id="add_panel">
+        <textarea
+          class="add_input"
+          id="add_input"
+          placeholder="登録したいURLを入力（複数なら1行に1つ）&#10;https://example.com&#10;https://another.com"></textarea>
+        <div class="add_actions">
+          <button class="add_button" id="add_button">登録する（撮影＋ベクトル化）</button>
+          <span class="add_state" id="add_state"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <p class="result_status" id="status">登録済みのサイトを表示しています。</p>
+  <main class="result_list" id="list"></main>
+
+  <!-- 詳細ビュー（カードの画像クリックで開く・サンプルをしっかり見る画面） -->
+  <div class="detail_overlay" id="detail_overlay">
+    <div class="detail_modal">
+      <button class="detail_close" id="detail_close" title="閉じる">✕</button>
+      <div class="detail_head">
+        <a class="detail_url" id="detail_url" target="_blank" rel="noopener noreferrer"></a>
+        <span class="detail_date" id="detail_date"></span>
+      </div>
+      <div class="detail_body">
+        <!-- 左：全体ビジュアル（全体スクショ／録画を切替） -->
+        <div class="detail_visual">
+          <div class="detail_tabs">
+            <button class="detail_tab is_on" data-tab="full">全体スクショ</button>
+            <button class="detail_tab" data-tab="video" id="detail_tab_video">録画</button>
+          </div>
+          <div class="detail_pane" id="detail_pane_full"><img id="detail_full_img" alt="サイト全体"></div>
+          <div class="detail_pane" id="detail_pane_video" hidden>
+            <video id="detail_video_el" controls loop muted playsinline></video>
+          </div>
+        </div>
+        <!-- 右：参考情報（色・フォント・ライブラリ・雰囲気） -->
+        <div class="detail_info">
+          <h4 class="detail_h">配色（クリックでコピー）</h4>
+          <div class="detail_swatches" id="detail_swatches"></div>
+          <h4 class="detail_h">フォント</h4>
+          <div class="detail_kv" id="detail_fonts"></div>
+          <h4 class="detail_h">その他</h4>
+          <div class="detail_kv" id="detail_meta"></div>
+          <h4 class="detail_h">アニメ系ライブラリ</h4>
+          <div class="detail_libs" id="detail_libs"></div>
+          <h4 class="detail_h">雰囲気</h4>
+          <p class="detail_vibe" id="detail_vibe"></p>
+          <h4 class="detail_h">画像（このサイトから抜き出し）</h4>
+          <div class="detail_assets" id="detail_assets"></div>
+          <button class="detail_extract" id="detail_extract">🖼 画像を抜き出す</button>
+          <div class="detail_actions">
+            <button class="detail_base" id="detail_base">🎨 これをベースに生成</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // JSが動かす部品は素直にidで掴む（このページはJS専用ページなので衝突しない）
+    const input  = document.querySelector("#query");
+    const topBox = document.querySelector("#top");
+    const goBtn  = document.querySelector("#go");
+    const list   = document.querySelector("#list");
+    const status = document.querySelector("#status");
+
+    // カード1枚分のHTMLを組み立てる
+    function card(hit) {
+      const score = (hit.score === null || hit.score === undefined)
+        ? "" : `<span class="result_score">${hit.score.toFixed(4)}</span>`;
+      const date = hit.captured_at ? hit.captured_at.slice(0, 10) : "";
+      return `
+        <article class="result_item">
+          <!-- ホバーで流し見（録画があれば動画）、クリックで詳細ビューを開く -->
+          <div class="result_anchor" data-detail="${hit.site_id}" role="button" tabindex="0" title="クリックで詳細">
+            <img class="result_img" src="${hit.img}" alt="サイトのファーストビュー" loading="lazy">
+            <!-- data-full は重いので、ホバーした時に初めて読み込む -->
+            <img class="result_full" data-full="/img/${hit.site_id}/fullpage" alt="サイト全体">
+            ${hit.has_video ? `<video class="result_video" data-src="/video/${hit.site_id}" muted loop playsinline preload="none"></video>` : ""}
+            ${score}
+            <span class="result_peek">${hit.has_video ? "ホバーで動き / クリックで詳細" : "ホバーで全体 / クリックで詳細"}</span>
+          </div>
+          <div class="result_body">
+            <a class="result_url" href="${hit.url}" target="_blank" rel="noopener noreferrer">${hit.url}</a>
+            ${(hit.swatches && hit.swatches.length) ? `<div class="result_swatches" title="抽出した配色">${hit.swatches.map((c) => `<span class="result_swatch" style="background:${c}"></span>`).join("")}</div>` : ""}
+            ${(hit.libs && hit.libs.length) ? `<div class="result_libs">${hit.libs.map((l) => `<span class="result_lib">${l}</span>`).join("")}</div>` : ""}
+            ${hit.vibe ? `<p class="result_vibe">${hit.vibe}</p>` : ""}
+            <div class="result_meta">
+              <span class="result_date">${date}</span>
+              <div class="result_tools">
+                <button class="result_similar" data-id="${hit.site_id}">似てるのを探す</button>
+                <button class="result_describe" data-id="${hit.site_id}" title="Claudeが雰囲気を言葉にして検索に効かせる">${hit.describing ? "言語化中…" : (hit.vibe ? "✨済" : "✨雰囲気")}</button>
+                <button class="result_base" data-id="${hit.site_id}" title="このサイトの配色・字組みをベースにカンプ生成">🎨ベースに生成</button>
+                <button class="result_record" data-id="${hit.site_id}" title="${hit.has_video ? "動きを録り直す" : "ホバーで動きを見られるよう録画する"}">${hit.recording ? "録画中…" : (hit.has_video ? "🎬済" : "🎬動き")}</button>
+                <button class="result_delete" data-id="${hit.site_id}" data-url="${hit.url}" title="削除">🗑</button>
+              </div>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    // 結果を描画する
+    function render(hits) {
+      if (!hits.length) {
+        list.innerHTML = `<p class="result_empty">ヒットなし。言葉を変えてみてください。</p>`;
+        return;
+      }
+      list.innerHTML = hits.map(card).join("");
+      setupHover();  // カードごとにホバーの流し見を仕込む
+    }
+
+    // ホバーすると、録画があれば動画を再生・なければ全体(fullpage)を流す
+    function setupHover() {
+      list.querySelectorAll(".result_anchor").forEach((anchor) => {
+        const full = anchor.querySelector(".result_full");
+        const vid = anchor.querySelector(".result_video");
+        if (vid) anchor.classList.add("is_video");
+
+        anchor.addEventListener("mouseenter", () => {
+          anchor.classList.add("is_preview");
+          if (vid) {
+            // 動画があるカード：動画を再生（初回だけ読み込む）
+            if (!vid.src) vid.src = vid.dataset.src;
+            vid.currentTime = 0;
+            vid.play().catch(() => {});
+            return;
+          }
+          if (!full) return;
+          if (!full.src) full.src = full.dataset.full;  // 初回だけ読み込む
+          const startScroll = () => {
+            const dist = full.offsetHeight - anchor.offsetHeight;  // 流す距離
+            if (dist <= 0) return;  // 短いページは流さない
+            const dur = Math.min(10, Math.max(2.5, dist / 180));
+            full.style.transition = `transform ${dur}s linear`;
+            requestAnimationFrame(() => {
+              full.style.transform = `translateY(-${dist}px)`;
+            });
+          };
+          if (full.complete && full.naturalHeight) startScroll();
+          else full.onload = startScroll;
+        });
+
+        anchor.addEventListener("mouseleave", () => {
+          anchor.classList.remove("is_preview");
+          if (vid) { vid.pause(); return; }
+          if (!full) return;
+          full.style.transition = "transform 0.4s ease";
+          full.style.transform = "translateY(0)";  // 先頭に戻す
+        });
+      });
+    }
+
+    // 「動きを録る」：録画を依頼 → 完了をポーリングして反映
+    async function record(siteId, btn) {
+      btn.disabled = true;
+      btn.textContent = "録画中…";
+      status.textContent = "実ブラウザでスクロールしながら録画しています…（十数秒）";
+      const res = await fetch("/api/record_animation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: siteId }),
+      });
+      const data = await res.json();
+      if (!data.ok) { status.textContent = data.message; btn.disabled = false; btn.textContent = "🎬動きを録る"; return; }
+      // 完了するまで /api/sites を見て has_video を待つ
+      const wait = async () => {
+        const s = await fetch("/api/sites").then((r) => r.json());
+        const me = s.hits.find((h) => h.site_id === siteId);
+        if (me && me.has_video) {
+          status.textContent = "録画できました。ホバーで動きが見られます。";
+          loadAll();
+        } else {
+          setTimeout(wait, 1500);
+        }
+      };
+      setTimeout(wait, 1500);
+    }
+
+    // text検索
+    async function search() {
+      const q = input.value.trim();
+      const top = topBox.value || 24;
+      if (!q) { loadAll(); return; }
+      status.textContent = `「${q}」で検索中…`;
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&top=${top}`);
+      const data = await res.json();
+      status.textContent = `「${data.query}」の検索結果：${data.hits.length} 件（スコアが高いほど雰囲気が近い）`;
+      render(data.hits);
+    }
+
+    // 似た検索（登録済みサイト起点・モデル不要で一瞬）
+    async function similar(siteId) {
+      const top = topBox.value || 24;
+      status.textContent = "似たデザインを探しています…";
+      const res = await fetch(`/api/similar?id=${encodeURIComponent(siteId)}&top=${top}`);
+      const data = await res.json();
+      status.textContent = `このサイトに似たデザイン：${data.hits.length} 件`;
+      render(data.hits);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // 「未処理を全部言語化」：裏でまとめて進める。進捗を見ながら一覧を更新
+    const descAllBtn = document.querySelector("#describe_all");
+    const descAllState = document.querySelector("#describe_all_state");
+    descAllBtn.addEventListener("click", async () => {
+      descAllBtn.disabled = true;
+      descAllState.textContent = "開始しています…";
+      const res = await fetch("/api/describe_all", { method: "POST" });
+      const data = await res.json();
+      if (!data.ok) { descAllState.textContent = data.message; descAllBtn.disabled = false; return; }
+      if (data.total === 0) { descAllState.textContent = "未処理はありません"; descAllBtn.disabled = false; return; }
+      pollDescribeAll();
+    });
+    async function pollDescribeAll() {
+      const s = await fetch("/api/sites").then((r) => r.json());
+      const d = s.describe || {};
+      if (d.running) {
+        descAllState.textContent = `言語化中 ${d.done}/${d.total}…（このまま検索などしてOK）`;
+        render(s.hits);
+        setTimeout(pollDescribeAll, 1500);
+      } else {
+        descAllState.textContent = "全部の言語化が終わりました";
+        descAllBtn.disabled = false;
+        loadAll();
+      }
+    }
+
+    // 設定パネル：プロバイダ・APIキーを .env に保存
+    const setToggle = document.querySelector("#set_toggle");
+    const setPanel = document.querySelector("#set_panel");
+    const setMsg = document.querySelector("#set_msg");
+    setToggle.addEventListener("click", () => {
+      setPanel.classList.toggle("is_open");
+      if (setPanel.classList.contains("is_open")) loadSettings();
+    });
+    async function loadSettings() {
+      const s = await fetch("/api/settings").then((r) => r.json());
+      document.querySelectorAll('input[name="provider"]').forEach((r) => { r.checked = (r.value === s.provider); });
+      document.querySelector("#set_openai_model").value = s.openai_model || "";
+      document.querySelector("#set_openai_state").textContent = s.openai_set ? "設定済み ✓" : "未設定";
+      document.querySelector("#set_anthropic_state").textContent = s.anthropic_set ? "設定済み ✓" : "未設定";
+      // 保存済みなら欄に●●●を出す（次に開いた時「入ってる」と一目で分かる）。
+      // 実キーは出さない＝●だけ。空欄のままなら保存時に変更されない。
+      const oKey = document.querySelector("#set_openai_key");
+      oKey.placeholder = s.openai_set ? "●●●●●●●●●●●●●●●●  保存済み（変える時だけ入力）" : "sk-... （未設定）";
+      const aKey = document.querySelector("#set_anthropic_key");
+      aKey.placeholder = s.anthropic_set ? "●●●●●●●●●●●●●●●●  保存済み（変える時だけ入力）" : "sk-ant-... （未設定）";
+    }
+    // 接続テスト：入力中のキー（未保存でもOK）で、本当に使えるか確かめる
+    document.querySelector("#set_test").addEventListener("click", async () => {
+      const provider = (document.querySelector('input[name="provider"]:checked') || {}).value || "anthropic";
+      const testBtn = document.querySelector("#set_test");
+      testBtn.disabled = true;
+      setMsg.textContent = "テスト中…（数秒）";
+      try {
+        const res = await fetch("/api/test_key", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider,
+            openai_api_key: document.querySelector("#set_openai_key").value,
+            anthropic_api_key: document.querySelector("#set_anthropic_key").value,
+          }),
+        });
+        const d = await res.json();
+        setMsg.textContent = (d.ok ? "✅ " : "⚠ NG：") + d.message;
+      } catch (e) {
+        setMsg.textContent = "テスト失敗（サーバ未応答かも）：" + e;
+      } finally {
+        testBtn.disabled = false;
+      }
+    });
+
+    // エンジン(プロバイダ)はラジオを変えた瞬間に自動保存（保存ボタンを押し忘れる事故を防ぐ）
+    document.querySelectorAll('input[name="provider"]').forEach((r) => {
+      r.addEventListener("change", async () => {
+        if (!r.checked) return;
+        setMsg.textContent = "エンジンを切替中…";
+        try {
+          const res = await fetch("/api/settings", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ provider: r.value }),
+          });
+          const d = await res.json();
+          setMsg.textContent = "エンジンを「" + (r.value === "openai" ? "GPT" : "Claude") + "」に切替。" + (d.message || "");
+          loadSettings();
+        } catch (e) { setMsg.textContent = "切替失敗：" + e; }
+      });
+    });
+
+    document.querySelector("#set_save").addEventListener("click", async () => {
+      const provider = (document.querySelector('input[name="provider"]:checked') || {}).value || "anthropic";
+      const body = {
+        provider,
+        openai_model: document.querySelector("#set_openai_model").value,
+        openai_api_key: document.querySelector("#set_openai_key").value,
+        anthropic_api_key: document.querySelector("#set_anthropic_key").value,
+      };
+      const saveBtn = document.querySelector("#set_save");
+      saveBtn.disabled = true;
+      setMsg.textContent = "保存中…";
+      try {
+        const res = await fetch("/api/settings", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const d = await res.json();
+        setMsg.textContent = d.message || "保存しました";
+        // キー入力欄はクリア（画面に残さない）
+        document.querySelector("#set_openai_key").value = "";
+        document.querySelector("#set_anthropic_key").value = "";
+        loadSettings();
+      } catch (e) {
+        setMsg.textContent = "保存に失敗：" + e;
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    // カンプ生成：ブリーフを送る → 裏で生成 → できたら新タブで開く
+    const campToggle = document.querySelector("#camp_toggle");
+    const campPanel = document.querySelector("#camp_panel");
+    const campInput = document.querySelector("#camp_input");
+    const campBtn = document.querySelector("#camp_button");
+    const campState = document.querySelector("#camp_state");
+    campToggle.addEventListener("click", () => {
+      campPanel.classList.toggle("is_open");
+      if (campPanel.classList.contains("is_open")) campInput.focus();
+    });
+    // 進捗バーと経過秒の管理
+    const campProgress = document.querySelector("#camp_progress");
+    const campProgText = document.querySelector("#camp_prog_text");
+    let campStart = 0, campTimer = null, campPhase = "";
+    function campTick() {
+      const sec = Math.floor((Date.now() - campStart) / 1000);
+      campProgText.textContent = `${campPhase || "生成中…"} ／ 経過 ${sec} 秒`;
+    }
+    function startCampUI() {
+      campBtn.disabled = true;
+      campState.textContent = "";
+      campProgress.classList.add("is_on");
+      campStart = Date.now();
+      campPhase = "開始しています…";
+      campTick();
+      clearInterval(campTimer);
+      campTimer = setInterval(campTick, 1000);  // 1秒ごとに経過を更新
+    }
+    function stopCampUI() {
+      clearInterval(campTimer); campTimer = null;
+      campProgress.classList.remove("is_on");
+      campBtn.disabled = false;
+    }
+
+    campBtn.addEventListener("click", async () => {
+      const brief = campInput.value.trim();
+      if (!brief) { campState.textContent = "作りたいサイトを書いてください"; return; }
+      startCampUI();
+      try {
+        const res = await fetch("/api/generate_camp", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ brief }),
+        });
+        const data = await res.json();
+        if (!data.ok) { campState.textContent = data.message; stopCampUI(); return; }
+        pollCamp();
+      } catch (e) { campState.textContent = "通信エラー：" + e; stopCampUI(); }
+    });
+    async function pollCamp() {
+      let j;
+      try { j = await fetch("/api/generate_camp/status").then((r) => r.json()); }
+      catch (e) { setTimeout(pollCamp, 1500); return; }
+      if (j.state === "running") {
+        campPhase = j.phase || "生成中…";
+        campTick();
+        setTimeout(pollCamp, 1000);
+      } else if (j.state === "done") {
+        const sec = Math.floor((Date.now() - campStart) / 1000);
+        const refs = (j.refs || []).map((r) => r.url).join(" / ");
+        const url = "/camp/" + j.file;
+        stopCampUI();
+        campState.innerHTML = `できました（${sec}秒）→ <a href="${url}" target="_blank" rel="noopener">カンプを開く</a>　<span style="color:#999">（参考: ${refs}）</span>`;
+        window.open(url, "_blank");
+      } else if (j.state === "error") {
+        stopCampUI();
+        campState.textContent = "生成に失敗：" + (j.message || "");
+      } else {
+        stopCampUI();
+      }
+    }
+
+    // 初期表示（登録済み一覧）
+    async function loadAll() {
+      const res = await fetch("/api/sites");
+      const data = await res.json();
+      status.textContent = `登録済み：${data.hits.length} 件（言葉で検索すると雰囲気の近い順に並びます）`;
+      render(data.hits);
+    }
+
+    // イベント：ボタン・Enter・「似てる」ボタン（カードは動的生成なので親で受ける）
+    goBtn.addEventListener("click", search);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") search(); });
+    list.addEventListener("click", (e) => {
+      const sim = e.target.closest(".result_similar");
+      if (sim) { similar(sim.dataset.id); return; }
+      const anchor = e.target.closest(".result_anchor");
+      if (anchor) { openDetail(anchor.dataset.detail); return; }
+      const rec = e.target.closest(".result_record");
+      if (rec) { record(rec.dataset.id, rec); return; }
+      const desc = e.target.closest(".result_describe");
+      if (desc) { describe(desc.dataset.id, desc); return; }
+      const base = e.target.closest(".result_base");
+      if (base) { baseGenerate(base.dataset.id); return; }
+      const del = e.target.closest(".result_delete");
+      if (del) remove(del.dataset.id, del.dataset.url);
+    });
+
+    // 詳細ビュー：カードをクリックすると、そのサイトの全部を1画面で見る
+    const detailOverlay = document.querySelector("#detail_overlay");
+    function switchDetailTab(tab) {
+      document.querySelectorAll(".detail_tab").forEach((b) => b.classList.toggle("is_on", b.dataset.tab === tab));
+      document.querySelector("#detail_pane_full").hidden = tab !== "full";
+      document.querySelector("#detail_pane_video").hidden = tab !== "video";
+      const vel = document.querySelector("#detail_video_el");
+      if (tab === "video") vel.play().catch(() => {}); else vel.pause();
+    }
+    function closeDetail() {
+      detailOverlay.classList.remove("is_open");
+      document.querySelector("#detail_video_el").pause();
+    }
+    async function openDetail(id) {
+      let d;
+      try { d = await fetch("/api/site/" + id).then((r) => r.json()); }
+      catch (e) { status.textContent = "詳細の取得に失敗：" + e; return; }
+      document.querySelector("#detail_url").textContent = d.url;
+      document.querySelector("#detail_url").href = d.url;
+      document.querySelector("#detail_date").textContent = "撮影日: " + (d.captured_at || "").slice(0, 10);
+      document.querySelector("#detail_full_img").src = d.fullpage;
+      const vtab = document.querySelector("#detail_tab_video");
+      const vel = document.querySelector("#detail_video_el");
+      if (d.has_video) { vtab.style.display = ""; vel.src = d.video; } else { vtab.style.display = "none"; vel.removeAttribute("src"); }
+      switchDetailTab("full");
+      // 配色（重複・透明を除く）
+      const t = d.tokens || {};
+      const seen = new Set(), uniq = [];
+      [...(t.accent || []), ...(t.bg || []), ...(t.text || [])].forEach((c) => {
+        if (c && !seen.has(c) && !(c.indexOf("rgba") >= 0 && c.trim().endsWith(", 0)"))) { seen.add(c); uniq.push(c); }
+      });
+      document.querySelector("#detail_swatches").innerHTML = uniq.length
+        ? uniq.slice(0, 12).map((c) => `<button class="detail_swatch" data-color="${c}"><span class="detail_chip" style="background:${c}"></span>${c}</button>`).join("")
+        : "<span style='color:#999;font-size:1.3rem'>未抽出（録画かベース生成で抽出されます）</span>";
+      document.querySelector("#detail_fonts").innerHTML = `見出し: ${t.head_font || "—"}<br>本文: ${t.body_font || "—"}`;
+      document.querySelector("#detail_meta").innerHTML = `角丸: ${(t.radius || []).join(" / ") || "—"}<br>コンテナ幅: ${t.container_max || "—"}`;
+      document.querySelector("#detail_libs").innerHTML = (d.libs || []).length
+        ? d.libs.map((l) => `<span class="result_lib">${l}</span>`).join("")
+        : "<span style='color:#999;font-size:1.3rem'>検出なし</span>";
+      document.querySelector("#detail_vibe").textContent = d.vibe || "（未言語化）";
+      document.querySelector("#detail_base").dataset.id = id;
+      renderAssets(d);
+      document.querySelector("#detail_extract").dataset.id = id;
+      detailOverlay.classList.add("is_open");
+    }
+    // 抜き出した画像のギャラリーを描画
+    function renderAssets(d) {
+      const box = document.querySelector("#detail_assets");
+      const btn = document.querySelector("#detail_extract");
+      box.innerHTML = (d.assets || []).length
+        ? d.assets.map((u) => `<a class="detail_asset" href="${u}" target="_blank" rel="noopener" title="クリックで原寸"><img src="${u}" alt="抜き出した画像" loading="lazy"></a>`).join("")
+        : "<span style='color:#999;font-size:1.3rem'>まだ抜き出していません</span>";
+      if (d.extracting) { btn.disabled = true; btn.textContent = "抜き出し中…（十数秒）"; }
+      else { btn.disabled = false; btn.textContent = (d.assets || []).length ? "🖼 もう一度抜き出す" : "🖼 画像を抜き出す"; }
+    }
+    // 「画像を抜き出す」：実ページから収集 → 完了したらギャラリー更新
+    document.querySelector("#detail_extract").addEventListener("click", async (e) => {
+      const id = e.currentTarget.dataset.id;
+      const btn = e.currentTarget;
+      btn.disabled = true; btn.textContent = "抜き出し中…（十数秒）";
+      const res = await fetch("/api/extract_images", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (!data.ok) { btn.disabled = false; btn.textContent = "🖼 画像を抜き出す"; status.textContent = data.message; return; }
+      const wait = async () => {
+        const d = await fetch("/api/site/" + id).then((r) => r.json());
+        if (d.extracting) { setTimeout(wait, 1500); }
+        else { renderAssets(d); status.textContent = `画像を ${(d.assets || []).length} 枚 抜き出しました`; }
+      };
+      setTimeout(wait, 1500);
+    });
+    document.querySelector("#detail_close").addEventListener("click", closeDetail);
+    detailOverlay.addEventListener("click", (e) => {
+      if (e.target === detailOverlay) { closeDetail(); return; }
+      const tab = e.target.closest(".detail_tab");
+      if (tab) { switchDetailTab(tab.dataset.tab); return; }
+      const sw = e.target.closest(".detail_swatch");
+      if (sw) { navigator.clipboard?.writeText(sw.dataset.color); status.textContent = "色をコピー: " + sw.dataset.color; return; }
+      const base = e.target.closest(".detail_base");
+      if (base) { closeDetail(); baseGenerate(base.dataset.id); return; }
+    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });
+
+    // 「🎨ベースに生成」：このサイトの配色・字組みを主役にしてカンプ生成
+    async function baseGenerate(siteId) {
+      const brief = prompt("どんなサイトを作りますか？（このサイトの配色・字組みをベースにします）");
+      if (!brief || !brief.trim()) return;
+      campPanel.classList.add("is_open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      startCampUI();
+      try {
+        const res = await fetch("/api/generate_camp", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ brief: brief.trim(), base_id: siteId }),
+        });
+        const data = await res.json();
+        if (!data.ok) { campState.textContent = data.message; stopCampUI(); return; }
+        pollCamp();
+      } catch (e) { campState.textContent = "通信エラー：" + e; stopCampUI(); }
+    }
+
+    // 「✨雰囲気」：Claudeに雰囲気を言語化させる → 完了をポーリングして反映
+    async function describe(siteId, btn) {
+      btn.disabled = true;
+      btn.textContent = "言語化中…";
+      status.textContent = "Claudeがサイトの雰囲気を言葉にしています…";
+      const res = await fetch("/api/describe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: siteId }),
+      });
+      const data = await res.json();
+      if (!data.ok) { status.textContent = data.message; btn.disabled = false; btn.textContent = "✨雰囲気"; return; }
+      const wait = async () => {
+        const s = await fetch("/api/sites").then((r) => r.json());
+        const me = s.hits.find((h) => h.site_id === siteId);
+        if (me && me.vibe) {
+          status.textContent = "雰囲気を言語化しました。抽象的な言葉でも探しやすくなります。";
+          loadAll();
+        } else {
+          setTimeout(wait, 1500);
+        }
+      };
+      setTimeout(wait, 1500);
+    }
+
+    // 削除：確認してからサーバに依頼 → 一覧を更新
+    async function remove(siteId, url) {
+      if (!confirm(`このサイトを削除しますか？\n${url}`)) return;
+      const res = await fetch("/api/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: siteId }),
+      });
+      const data = await res.json();
+      status.textContent = data.message || "削除しました";
+      loadAll();
+    }
+
+    // 登録パネルの開閉
+    const addToggle = document.querySelector("#add_toggle");
+    const addPanel  = document.querySelector("#add_panel");
+    const addInput  = document.querySelector("#add_input");
+    const addBtn    = document.querySelector("#add_button");
+    const addState  = document.querySelector("#add_state");
+
+    addToggle.addEventListener("click", () => {
+      addPanel.classList.toggle("is_open");
+      if (addPanel.classList.contains("is_open")) addInput.focus();
+    });
+
+    // 登録：URLを送って「ジョブ」を開始 → 進捗をポーリングして表示する
+    // （撮影は1件ずつ時間がかかるので、1リクエストで待たせず裏で進める）
+    async function register() {
+      const urls = addInput.value.trim();
+      if (!urls) { addState.textContent = "URLを入力してください"; return; }
+      addBtn.disabled = true;
+      addState.textContent = "登録を開始しています…";
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ urls }),
+        });
+        const data = await res.json();
+        if (!data.ok) { addState.textContent = data.message || "開始できませんでした"; addBtn.disabled = false; return; }
+        addInput.value = "";
+        pollProgress();  // 進捗の監視を始める
+      } catch (err) {
+        addState.textContent = "通信エラー：" + err;
+        addBtn.disabled = false;
+      }
+    }
+
+    // 進捗を1.2秒ごとに見に行き、状況をテキストで出す
+    async function pollProgress() {
+      try {
+        const res = await fetch("/api/register/status");
+        const j = await res.json();
+        if (j.state === "running") {
+          if (j.phase === "capture") {
+            addState.textContent = `撮影中 ${j.done}/${j.total}：${j.current || ""}`;
+          } else if (j.phase === "embed") {
+            addState.textContent = `ベクトル化中…（撮影 ${j.saved}件 完了）`;
+          }
+          loadAll();  // 撮れたものから一覧に反映していく
+          setTimeout(pollProgress, 1200);
+        } else if (j.state === "done") {
+          addState.textContent = j.message || "完了";
+          addBtn.disabled = false;
+          loadAll();
+        } else if (j.state === "error") {
+          addState.textContent = j.message || "エラーが発生しました";
+          addBtn.disabled = false;
+          loadAll();
+        } else {
+          addBtn.disabled = false;
+        }
+      } catch (err) {
+        addState.textContent = "進捗の取得に失敗：" + err;
+        addBtn.disabled = false;
+      }
+    }
+    addBtn.addEventListener("click", register);
+
+    loadAll();
+
+    // ページを開いた時、もしカンプ生成が進行中なら進捗表示を再開する
+    // （生成中にリロードしても「今どうなってるか」が分かる）
+    (async function resumeCampIfRunning() {
+      try {
+        const j = await fetch("/api/generate_camp/status").then((r) => r.json());
+        if (j.state === "running") {
+          campPanel.classList.add("is_open");
+          startCampUI();
+          pollCamp();
+        }
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

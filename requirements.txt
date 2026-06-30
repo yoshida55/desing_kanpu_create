@@ -1,0 +1,16 @@
+# デザイン参照ストック & 曖昧検索システム（Phase 1）
+
+# 撮影（Playwright / Chromium）
+playwright>=1.44
+
+# 埋め込み（SigLIP-2 = HuggingFace transformers）
+transformers>=4.45
+# torch は環境(GPU/CPU)でインストール方法が違うので README を参照
+torch>=2.2
+pillow>=10.0
+
+# 検索（numpy総当たり）
+numpy>=1.26
+
+# ローカルビューア（Phase 2：検索ボックス付きUI）
+flask>=3.0
