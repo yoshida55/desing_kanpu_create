@@ -52,8 +52,9 @@ class CaptureConfig:
     # 非headlessでbot壁(Cloudflare等)が解けるのを待つ上限（秒）
     bot_wall_clear_wait_s: int = 15
     # アニメ参照用のスクロール録画の設定（オンデマンドで欲しいサイトだけ）
+    # 幅は1280（PCレイアウト維持）、高さを縦長にして"Webページらしい縦長"の録画にする
     video_w: int = 1280
-    video_h: int = 720
+    video_h: int = 1600
     video_scroll_steps: int = 12      # 上から下まで何回に分けてスクロールするか
     video_step_pause_ms: int = 700    # 1ステップごとの間（アニメが見える間）
 

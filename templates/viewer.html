@@ -554,16 +554,16 @@
       inset: 0;
       background: rgba(0, 0, 0, 0.55);
       z-index: 100;
-      padding: 3rem;
+      padding: 1.2rem; /* 余白を減らして中身(ポップアップ)を大きく */
     }
     .detail_overlay.is_open { display: flex; }
     .detail_modal {
       background: #fff;
       border-radius: 1.4rem;
       width: 100%;
-      max-width: 130rem;
+      max-width: 150rem;   /* ポップアップ自体を大きく */
       margin: auto;
-      max-height: 90vh;
+      max-height: 96vh;    /* 縦もほぼ画面いっぱいに */
       overflow: hidden;
       position: relative;
       display: flex;
@@ -590,31 +590,32 @@
     .detail_url { font-size: 1.5rem; color: #0066cc; word-break: break-all; text-decoration: none; }
     .detail_url:hover { text-decoration: underline; }
     .detail_date { display: block; font-size: 1.2rem; color: #999; margin-top: 0.3rem; }
-    /* 左右に分ける（左=ビジュアル / 右=情報） */
+    /* 縦積み：上=ビジュアル(動画を大きく) / 下=情報。全体を縦スクロール */
     .detail_body {
       display: flex;
+      flex-direction: column;   /* 左右分割 → 上下積みに変更 */
       gap: 0;
-      overflow: hidden;
+      overflow-y: auto;
       flex: 1;
     }
     .detail_visual {
-      flex: 1.4;
+      width: 100%;
       background: #f5f5f7;
       display: flex;
       flex-direction: column;
       min-width: 0;
     }
-    .detail_tabs { display: flex; gap: 0.6rem; padding: 1.2rem; }
+    .detail_tabs { display: flex; gap: 0.6rem; padding: 1.2rem; flex-wrap: wrap; }
     .detail_tab {
       font-size: 1.3rem; padding: 0.6rem 1.4rem; border-radius: 0.8rem;
       border: 1px solid #ddd; background: #fff; cursor: pointer;
     }
     .detail_tab.is_on { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
-    /* 全体スクショは縦長なのでこのペイン内でスクロールして見る */
-    .detail_pane { overflow: auto; padding: 0 1.2rem 1.2rem; flex: 1; }
+    /* 上部ビジュアルは大きく見せる。縦長スクショはこの中でスクロール */
+    .detail_pane { overflow: auto; padding: 0 1.2rem 1.2rem; max-height: 78vh; }
     .detail_pane img { width: 100%; display: block; border-radius: 0.6rem; }
     .detail_pane video { width: 100%; display: block; border-radius: 0.6rem; background: #000; }
-    .detail_info { flex: 1; padding: 1.8rem 2.4rem; overflow: auto; }
+    .detail_info { width: 100%; padding: 1.8rem 2.4rem; border-top: 1px solid #eee; }
     .detail_h { font-size: 1.25rem; color: #888; margin: 1.6rem 0 0.6rem; }
     .detail_h:first-child { margin-top: 0; }
     .detail_swatches { display: flex; flex-wrap: wrap; gap: 0.6rem; }
@@ -672,7 +673,7 @@
     .detail_anim_stage { padding: 1.2rem; }
     .anim_stage_grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
       gap: 1.2rem;
     }
     .anim_cell {
@@ -680,21 +681,21 @@
       padding: 0.9rem; text-align: center;
     }
     .anim_cell_stage {
-      height: 10rem; display: flex; align-items: center; justify-content: center;
+      height: 12rem; display: flex; align-items: center; justify-content: center;
       background: #f4f5f8; border-radius: 0.6rem; overflow: hidden;
     }
-    /* keyframes を実際に走らせるデモ用の箱（無限ループで常に動く） */
+    /* 実際のサイト画像に、抜き出した動きを当てて再生するプレビュー箱（無限ループ） */
     .anim_demo_box {
-      width: 5.5rem; height: 5.5rem; border-radius: 1rem;
-      background: linear-gradient(135deg, #5b8def, #a06bf0);
-      color: #fff; font-weight: 700; font-size: 1.8rem;
-      display: flex; align-items: center; justify-content: center;
+      width: 90%; aspect-ratio: 16 / 10;
+      background-color: #fff;
+      background-size: cover; background-position: top center;
+      border-radius: 0.6rem; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
       animation-duration: 1.8s;
       animation-timing-function: ease-in-out;
       animation-iteration-count: infinite;
       animation-direction: alternate;
     }
-    .anim_lottie_cell lottie-player { width: 100%; height: 10rem; }
+    .anim_lottie_cell lottie-player { width: 100%; height: 12rem; }
     .anim_cell_name {
       margin-top: 0.6rem; font-size: 1.15rem; color: #555;
       font-family: ui-monospace, Consolas, monospace; word-break: break-all;
@@ -702,6 +703,55 @@
     .anim_stage_hint {
       color: #999; font-size: 1.35rem; line-height: 1.8em;
       padding: 3rem 2rem; text-align: center;
+    }
+    /* 表示モード切替（サイト全体 / サンプル一覧） */
+    .anim_modebar { display: flex; gap: 0.6rem; margin-bottom: 1rem; }
+    .anim_mode {
+      font-size: 1.25rem; color: #444; background: #f0f0f2;
+      border: 1px solid #ddd; border-radius: 0.8rem; padding: 0.5rem 1.1rem; cursor: pointer;
+    }
+    .anim_mode.is_on { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+    .anim_replay {
+      margin-left: auto; font-size: 1.25rem; color: #2b6cb0;
+      background: #ebf3fb; border: 1px solid #cfe0f2; border-radius: 0.8rem;
+      padding: 0.5rem 1.1rem; cursor: pointer;
+    }
+    .anim_replay:hover { background: #dcecfb; }
+    /* サイト全体プレビュー：本物のサイトのように縦に繋げ、上から順に出現 */
+    /* 継ぎ目対策：同じ画像を重ねて clip-path で各セクションだけ見せる（位置ズレ0） */
+    .anim_site { width: 100%; max-width: 100rem; margin: 0 auto; }
+    /* カードのホバーと同じ「サイトを自動スクロールして動かす」窓 */
+    .anim_scroller {
+      position: relative; width: 100%; height: 68vh; max-height: 62rem;
+      overflow: hidden; border-radius: 0.6rem; background: #fff;
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.12);
+    }
+    .anim_scroll_img {
+      position: absolute; top: 0; left: 0; width: 100%; display: block;
+      will-change: transform;
+    }
+    /* 録画動画（本物のアニメ）を全体プレビューで再生。縦長を高さ基準で大きく＆黒帯なし */
+    .anim_scroller_video {
+      height: 66vh; max-height: none; width: auto; max-width: 100%;
+      margin: 0 auto; aspect-ratio: 4 / 5;   /* JSが実寸比で上書き */
+    }
+    .anim_video_el {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; background: #000; display: block;
+    }
+    .anim_note { font-size: 1.2rem; color: #8a8a8f; margin-bottom: 0.6rem; line-height: 1.6em; }
+    /* スクロールで出現（reveal）。--rev に抽出したkeyframe名が入る */
+    .anim_reveal { opacity: 0; }
+    .anim_reveal.is_in {
+      animation-name: var(--rev, anim_reveal_default);
+      animation-duration: 0.9s;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      animation-fill-mode: both;
+    }
+    /* 抽出物に"入り"アニメが無いとき用の保険 */
+    @keyframes anim_reveal_default {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: none; }
     }
     .detail_extract.is_anim { color: #2b6cb0; background: #ebf3fb; border-color: #cfe0f2; }
     .detail_extract.is_anim:hover { background: #dcecfb; }
@@ -1234,12 +1284,14 @@
       document.querySelector("#detail_pane_anim").hidden = tab !== "anim";
       const vel = document.querySelector("#detail_video_el");
       if (tab === "video") vel.play().catch(() => {}); else vel.pause();
-      // アニメタブを開いたら、抜き出したアニメを実際に動かして表示する
+      // アニメタブを開いたら自動スクロール開始。離れたら止める。
       if (tab === "anim" && _currentDetail) renderAnimStage(_currentDetail);
+      else stopSitePreview();
     }
     function closeDetail() {
       detailOverlay.classList.remove("is_open");
       document.querySelector("#detail_video_el").pause();
+      stopSitePreview();  // 自動スクロール・動画を止める（CPU節約）
     }
     async function openDetail(id) {
       let d;
@@ -1253,7 +1305,8 @@
       const vtab = document.querySelector("#detail_tab_video");
       const vel = document.querySelector("#detail_video_el");
       if (d.has_video) { vtab.style.display = ""; vel.src = d.video; } else { vtab.style.display = "none"; vel.removeAttribute("src"); }
-      switchDetailTab("full");
+      // 動画があるサイトは「アニメ再生（動画）」を主役として最初に表示する
+      switchDetailTab(d.has_video ? "anim" : "full");
       // 配色（重複・透明を除く）
       const t = d.tokens || {};
       const seen = new Set(), uniq = [];
@@ -1325,29 +1378,122 @@
       if (!el) { el = document.createElement("style"); el.id = "anim_kf_style"; document.head.appendChild(el); }
       el.textContent = (kf || []).map((k) => k.css).join("\n");
     }
+    // "入り"に使える keyframe を1つ選ぶ（サイト全体プレビューのreveal用）
+    function pickRevealKeyframe(kf) {
+      const pref = ["fadeup", "fadein", "slideup", "slidein", "reveal", "appear"];
+      for (const p of pref) {
+        const hit = (kf || []).find((k) => (k.name || "").toLowerCase().includes(p));
+        if (hit) return hit.name;
+      }
+      return (kf && kf[0]) ? kf[0].name : "anim_reveal_default";
+    }
+    // サンプル一覧（keyframeごとの小さな実サイト画像＋Lottie）
+    function buildAnimGrid(d, kf, lot) {
+      const preview = d.firstview || "";
+      const cells = [];
+      lot.forEach((u, i) => {
+        cells.push(`<div class="anim_cell anim_lottie_cell"><div class="anim_cell_stage"><lottie-player src="${u}" background="transparent" speed="1" loop autoplay></lottie-player></div><div class="anim_cell_name">lottie_${i}.json</div></div>`);
+      });
+      kf.forEach((k) => {
+        cells.push(`<div class="anim_cell"><div class="anim_cell_stage"><div class="anim_demo_box" style="animation-name:${k.name}; background-image:url('${preview}')"></div></div><div class="anim_cell_name">@${escapeHtml(k.name)}</div></div>`);
+      });
+      return `<div class="anim_stage_grid">${cells.join("")}</div>`;
+    }
+    // サイト全体プレビュー
+    let _panRAF = null;
+    function stopAutoPan() { if (_panRAF) { cancelAnimationFrame(_panRAF); _panRAF = null; } }
+    // 全体プレビューを止める（スクロール停止＋動画停止）
+    function stopSitePreview() {
+      stopAutoPan();
+      const v = document.querySelector("#anim_site video");
+      if (v) v.pause();
+    }
+    function sliceSitePreview() {
+      const box = document.querySelector("#anim_site");
+      if (!box) return;
+      const d = _currentDetail || {};
+      // ★本物のアニメは録画動画にしか無い。録画があればそれを再生（カードのホバーと同じ動き）。
+      if (d.has_video && d.video) {
+        stopAutoPan();
+        box.innerHTML = `<div class="anim_scroller anim_scroller_video"><video class="anim_video_el" src="${d.video}" muted loop autoplay playsinline></video></div>`;
+        const v = box.querySelector("video");
+        if (v) {
+          // 枠を録画の実寸比に合わせる（縦長でも横長でも黒帯ゼロで表示）
+          v.addEventListener("loadedmetadata", () => {
+            if (v.videoWidth && v.videoHeight) {
+              v.parentElement.style.aspectRatio = v.videoWidth + " / " + v.videoHeight;
+            }
+          });
+          v.play().catch(() => {});
+        }
+        return;
+      }
+      // 録画が無い場合：スクショを自動スクロール（写真なので本物のアニメは出ない＝録画を促す）
+      const url = box.dataset.full;
+      box.innerHTML = `<div class="anim_note">これは静止画（スクショ）の自動スクロールです。実際のフェードイン等の動きを見るには、カード右下の「🎬動き」で録画してください。</div>`
+        + `<div class="anim_scroller" id="anim_scroller"><img class="anim_scroll_img" id="anim_scroll_img" src="${url}" alt="サイト全体"></div>`;
+      const img = document.querySelector("#anim_scroll_img");
+      const begin = () => playSiteReveal();
+      if (img.complete && img.naturalHeight) begin();
+      else img.onload = begin;
+    }
+    // 自動スクロール（上→下→上をゆっくり繰り返す）。カードのホバーと同じ"動き"。
+    function playSiteReveal() {
+      stopAutoPan();
+      const win = document.querySelector("#anim_scroller");
+      const img = document.querySelector("#anim_scroll_img");
+      if (!win || !img) return;
+      const maxY = Math.max(0, img.clientHeight - win.clientHeight);
+      if (maxY < 5) return;  // スクロールする高さが無ければ何もしない
+      let y = 0, dir = 1, last = performance.now();
+      const speed = 90;  // px/秒（スクロールの速さ）
+      const loop = (now) => {
+        const dt = Math.min(0.05, (now - last) / 1000); last = now;
+        y += dir * speed * dt;
+        if (y >= maxY) { y = maxY; dir = -1; }   // 一番下で折り返す
+        else if (y <= 0) { y = 0; dir = 1; }     // 一番上で折り返す
+        img.style.transform = `translateY(${-y}px)`;
+        _panRAF = requestAnimationFrame(loop);
+      };
+      _panRAF = requestAnimationFrame(loop);
+    }
     // 左の大枠で、抜き出したアニメを「実際に動かして」見せる
     function renderAnimStage(d) {
       const stage = document.querySelector("#detail_anim_stage");
       if (!stage) return;
       const a = d.anim || {};
       const kf = a.keyframes || [], lot = a.lottie || [];
-      if (!kf.length && !lot.length) {
-        stage.innerHTML = `<div class="anim_stage_hint">まだアニメを抜き出していません。<br>右側の「🎞 アニメを抜き出す」で抽出すると、ここで実際に動いて見られます。</div>`;
-        return;
-      }
       injectKeyframes(kf);
-      const cells = [];
-      // Lottie（実再生・ループ自動再生）
-      lot.forEach((u, i) => {
-        cells.push(`<div class="anim_cell anim_lottie_cell"><div class="anim_cell_stage"><lottie-player src="${u}" background="transparent" speed="1" loop autoplay></lottie-player></div><div class="anim_cell_name">lottie_${i}.json</div></div>`);
-      });
-      // CSS @keyframes（デモ箱に適用して実際に動かす）
-      kf.forEach((k) => {
-        cells.push(`<div class="anim_cell"><div class="anim_cell_stage"><div class="anim_demo_box" style="animation-name:${k.name}">Aa</div></div><div class="anim_cell_name">@${escapeHtml(k.name)}</div></div>`);
-      });
-      stage.innerHTML = `<div class="anim_stage_grid">${cells.join("")}</div>`;
+      const rev = pickRevealKeyframe(kf);
+      // サンプル一覧は抽出物があれば描画、無ければ案内（動画プレビュー自体は常に出す）
+      const gridHtml = (kf.length || lot.length)
+        ? buildAnimGrid(d, kf, lot)
+        : `<div class="anim_stage_hint">CSSアニメ/Lottieはまだ抜き出していません。右の「🎞 アニメを抜き出す」で抽出できます。</div>`;
+      stage.innerHTML = `
+        <div class="anim_modebar">
+          <button class="anim_mode is_on" data-mode="site">🖥 サイト全体で再生</button>
+          <button class="anim_mode" data-mode="grid">🔲 動きサンプル一覧</button>
+          <button class="anim_replay" id="anim_replay">▶ 最初から</button>
+        </div>
+        <div class="anim_view" id="anim_view_site">
+          <div class="anim_site" id="anim_site" data-full="${d.fullpage}" data-rev="${rev}"></div>
+        </div>
+        <div class="anim_view" id="anim_view_grid" hidden>${gridHtml}</div>`;
       if (lot.length) ensureLottie();
+      sliceSitePreview();  // カードのホバーと同じ「自動スクロールで動かす」を仕込む
     }
+    // モード切替（サイト全体 / サンプル一覧）＋「もう一度再生」
+    document.querySelector("#detail_anim_stage").addEventListener("click", (e) => {
+      if (e.target.closest("#anim_replay")) { sliceSitePreview(); return; }
+      const btn = e.target.closest(".anim_mode");
+      if (!btn) return;
+      const mode = btn.dataset.mode;
+      document.querySelectorAll("#detail_anim_stage .anim_mode").forEach((b) => b.classList.toggle("is_on", b === btn));
+      document.querySelector("#anim_view_site").hidden = mode !== "site";
+      document.querySelector("#anim_view_grid").hidden = mode !== "grid";
+      if (mode === "site") sliceSitePreview();  // サイトに戻したら再生（録画優先）
+      else stopSitePreview();                   // サンプル一覧では止める
+    });
     // 抜き出した画像のギャラリーを描画
     function renderAssets(d) {
       const box = document.querySelector("#detail_assets");
