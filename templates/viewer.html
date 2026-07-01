@@ -188,6 +188,13 @@
     .camp_toggle:hover { background: #ffe9d6; }
     .camp_panel { display: none; margin-top: 1rem; }
     .camp_panel.is_open { display: block; }
+    /* mix & match：ベース／アニメ参照のセレクト */
+    .camp_mix { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+    .camp_lbl { flex: 1; min-width: 26rem; font-size: 1.25rem; color: #555; display: flex; flex-direction: column; gap: 0.4rem; }
+    .camp_sel {
+      font-size: 1.35rem; padding: 0.7rem 1rem; border: 1px solid #d0d0d5;
+      border-radius: 0.8rem; background: #fff; cursor: pointer;
+    }
     .camp_input {
       width: 100%;
       min-height: 7rem;
@@ -238,6 +245,42 @@
       100% { margin-left: 100%; }
     }
     .camp_prog_text { margin-top: 0.6rem; font-size: 1.3rem; color: #6e6e73; }
+    /* 複数ジョブの一覧（同時進行を並べる） */
+    .camp_jobs { margin-top: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; }
+    .camp_job {
+      border: 1px solid #eee; border-radius: 0.8rem; padding: 0.8rem 1.1rem;
+      background: #fafafa; font-size: 1.3rem; color: #444;
+    }
+    .camp_job.is_done { background: #f2f9f2; border-color: #cfe9cf; }
+    .camp_job.is_err { background: #fdf2f2; border-color: #f0cccc; color: #b00; }
+    .camp_job_bar { height: 0.6rem; background: #f0e3d4; border-radius: 0.3rem; overflow: hidden; margin-bottom: 0.5rem; }
+    .camp_job_bar span {
+      display: block; height: 100%; width: 35%; background: #b8530a; border-radius: 0.3rem;
+      animation: camp_flow 1.3s ease-in-out infinite;
+    }
+    .camp_job a { color: #b8530a; font-weight: 700; }
+    /* 部分編集：改善案チップ＋自由指示 */
+    .camp_edit_row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.6rem; }
+    .camp_suggest_btn {
+      font-size: 1.2rem; color: #4b2ea8; background: #efe9ff; border: 1px solid #d6c9ff;
+      border-radius: 0.8rem; padding: 0.5rem 1rem; cursor: pointer; white-space: nowrap;
+    }
+    .camp_suggest_btn:hover { background: #e4dbff; }
+    .camp_edit_in {
+      flex: 1; min-width: 18rem; font-size: 1.2rem; padding: 0.5rem 0.8rem;
+      border: 1px solid #d0d0d5; border-radius: 0.8rem;
+    }
+    .camp_editall_btn {
+      font-size: 1.2rem; color: #b8530a; background: #fff3e8; border: 1px solid #ffd2a8;
+      border-radius: 0.8rem; padding: 0.5rem 1rem; cursor: pointer; white-space: nowrap;
+    }
+    .camp_editall_btn:hover { background: #ffe9d6; }
+    .camp_sugg { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+    .sugg_chip {
+      font-size: 1.2rem; color: #1d1d1f; background: #fff; border: 1px solid #d8d8dd;
+      border-radius: 1rem; padding: 0.5rem 1rem; cursor: pointer; text-align: left;
+    }
+    .sugg_chip:hover { background: #f0f0f2; border-color: #b8b8bf; }
 
     .add_box {
       max-width: 90rem;
@@ -583,13 +626,15 @@
       z-index: 2;
     }
     .detail_close:hover { background: #e2e2e6; }
+    /* URLと撮影日を横並びにしてヘッダーを薄く（縦を節約） */
     .detail_head {
-      padding: 1.8rem 2.4rem;
+      padding: 1rem 5rem 1rem 2.4rem;   /* 右は✕ボタンぶん空ける */
       border-bottom: 1px solid #eee;
+      display: flex; align-items: baseline; gap: 1.2rem; flex-wrap: wrap;
     }
     .detail_url { font-size: 1.5rem; color: #0066cc; word-break: break-all; text-decoration: none; }
     .detail_url:hover { text-decoration: underline; }
-    .detail_date { display: block; font-size: 1.2rem; color: #999; margin-top: 0.3rem; }
+    .detail_date { font-size: 1.2rem; color: #999; white-space: nowrap; }
     /* 縦積み：上=ビジュアル(動画を大きく) / 下=情報。全体を縦スクロール */
     .detail_body {
       display: flex;
@@ -605,7 +650,9 @@
       flex-direction: column;
       min-width: 0;
     }
-    .detail_tabs { display: flex; gap: 0.6rem; padding: 1.2rem; flex-wrap: wrap; }
+    .detail_tabs { display: flex; gap: 0.6rem; padding: 0.9rem 1.2rem; flex-wrap: wrap; align-items: center; }
+    /* アニメ再生のモードボタンをタブ行の右端に寄せるスロット */
+    .detail_modebar_slot { margin-left: auto; display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
     .detail_tab {
       font-size: 1.3rem; padding: 0.6rem 1.4rem; border-radius: 0.8rem;
       border: 1px solid #ddd; background: #fff; cursor: pointer;
@@ -670,7 +717,8 @@
       border: 1px solid #e2cef0; border-radius: 0.5rem; padding: 0.3rem 0.8rem; text-decoration: none;
     }
     /* 左の大枠で「抜き出したアニメを実際に動かして」見せるステージ */
-    .detail_anim_stage { padding: 1.2rem; }
+    .detail_anim_stage { padding: 0.4rem; }
+    .detail_pane_anim_wrap { }
     .anim_stage_grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
@@ -732,7 +780,7 @@
     }
     /* 録画動画（本物のアニメ）を全体プレビューで再生。縦長を高さ基準で大きく＆黒帯なし */
     .anim_scroller_video {
-      height: 66vh; max-height: none; width: auto; max-width: 100%;
+      height: 74vh; max-height: none; width: auto; max-width: 100%;
       margin: 0 auto; aspect-ratio: 4 / 5;   /* JSが実寸比で上書き */
     }
     .anim_video_el {
@@ -830,6 +878,15 @@
 
     <!-- カンプ生成パネル：ストックを参照して新しいカンプHTMLを作る（最終目標） -->
     <div class="camp_panel" id="camp_panel">
+      <!-- mix & match：ベースA(見た目)＋アニメ参照B(動き)を選ぶ -->
+      <div class="camp_mix">
+        <label class="camp_lbl">🎨 ベース（見た目・レイアウト）
+          <select class="camp_sel" id="camp_base"><option value="">おまかせ（ブリーフから自動選択）</option></select>
+        </label>
+        <label class="camp_lbl">🎞 アニメ参照（動きの種類）
+          <select class="camp_sel" id="camp_anim"><option value="">なし（標準のふわっと出現）</option></select>
+        </label>
+      </div>
       <textarea
         class="camp_input"
         id="camp_input"
@@ -838,11 +895,8 @@
         <button class="camp_button" id="camp_button">この内容でカンプを生成</button>
         <span class="camp_state" id="camp_state"></span>
       </div>
-      <!-- 生成中の進捗（バー＋段階＋経過秒） -->
-      <div class="camp_progress" id="camp_progress">
-        <div class="camp_bar"><span></span></div>
-        <div class="camp_prog_text" id="camp_prog_text"></div>
-      </div>
+      <!-- 生成中/完了ジョブの一覧（複数同時進行を並べて表示） -->
+      <div class="camp_jobs" id="camp_jobs"></div>
     </div>
 
     <!-- 登録パネル：URLを入力して追加する（トグルで開く） -->
@@ -876,6 +930,8 @@
             <button class="detail_tab is_on" data-tab="full">全体スクショ</button>
             <button class="detail_tab" data-tab="video" id="detail_tab_video">録画</button>
             <button class="detail_tab" data-tab="anim">🎞 アニメ再生</button>
+            <!-- アニメ再生時のモードボタンは、この右寄せスロットに入れる（縦を節約） -->
+            <div class="detail_modebar_slot" id="detail_modebar_slot"></div>
           </div>
           <div class="detail_pane" id="detail_pane_full"><img id="detail_full_img" alt="サイト全体"></div>
           <div class="detail_pane" id="detail_pane_video" hidden>
@@ -1187,65 +1243,123 @@
       campPanel.classList.toggle("is_open");
       if (campPanel.classList.contains("is_open")) campInput.focus();
     });
-    // 進捗バーと経過秒の管理
-    const campProgress = document.querySelector("#camp_progress");
-    const campProgText = document.querySelector("#camp_prog_text");
-    let campStart = 0, campTimer = null, campPhase = "";
-    function campTick() {
-      const sec = Math.floor((Date.now() - campStart) / 1000);
-      campProgText.textContent = `${campPhase || "生成中…"} ／ 経過 ${sec} 秒`;
-    }
-    function startCampUI() {
-      campBtn.disabled = true;
-      campState.textContent = "";
-      campProgress.classList.add("is_on");
-      campStart = Date.now();
-      campPhase = "開始しています…";
-      campTick();
-      clearInterval(campTimer);
-      campTimer = setInterval(campTick, 1000);  // 1秒ごとに経過を更新
-    }
-    function stopCampUI() {
-      clearInterval(campTimer); campTimer = null;
-      campProgress.classList.remove("is_on");
-      campBtn.disabled = false;
-    }
+    // 複数ジョブの管理（同時進行OK）。ローカルで開始時刻を覚えて経過秒を出す。
+    const campJobs = document.querySelector("#camp_jobs");
+    const _campLocal = {};   // job_id -> { start, brief }
+    const _campOpened = {};  // 完了時に1回だけ新タブで開くための記録
+    let _campPoller = null;
 
     campBtn.addEventListener("click", async () => {
       const brief = campInput.value.trim();
       if (!brief) { campState.textContent = "作りたいサイトを書いてください"; return; }
-      startCampUI();
+      const base_id = document.querySelector("#camp_base").value;
+      const anim_id = document.querySelector("#camp_anim").value;
+      campState.textContent = "";
       try {
         const res = await fetch("/api/generate_camp", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ brief }),
+          body: JSON.stringify({ brief, base_id, anim_id }),
         });
         const data = await res.json();
-        if (!data.ok) { campState.textContent = data.message; stopCampUI(); return; }
-        pollCamp();
-      } catch (e) { campState.textContent = "通信エラー：" + e; stopCampUI(); }
+        if (!data.ok) { campState.textContent = data.message; return; }
+        _campLocal[data.job_id] = { start: Date.now(), brief };
+        campState.textContent = "生成を開始しました（下に進捗が出ます／続けて別の生成もできます）";
+        renderCampJobs({});      // すぐに「開始中」カードを出す
+        startCampPoller();
+      } catch (e) { campState.textContent = "通信エラー：" + e; }
     });
-    async function pollCamp() {
-      let j;
-      try { j = await fetch("/api/generate_camp/status").then((r) => r.json()); }
-      catch (e) { setTimeout(pollCamp, 1500); return; }
-      if (j.state === "running") {
-        campPhase = j.phase || "生成中…";
-        campTick();
-        setTimeout(pollCamp, 1000);
-      } else if (j.state === "done") {
-        const sec = Math.floor((Date.now() - campStart) / 1000);
+
+    function startCampPoller() {
+      if (_campPoller) return;
+      _campPoller = setInterval(pollCampAll, 1000);
+      pollCampAll();
+    }
+    async function pollCampAll() {
+      let data;
+      try { data = await fetch("/api/generate_camp/status").then((r) => r.json()); }
+      catch (e) { return; }
+      const jobs = data.jobs || {};
+      renderCampJobs(jobs);
+      // ローカルに開始済みで、まだサーバーに現れていないジョブがあるか
+      const localPending = Object.keys(_campLocal).some((id) => !jobs[id] || jobs[id].state === "running");
+      if (!localPending) { clearInterval(_campPoller); _campPoller = null; }
+    }
+    const _esc = (s) => String(s || "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    // 1ジョブぶんのカード中身HTML（done は改善案・自由指示のUI付き）
+    function jobCardHtml(j, sec) {
+      const brief = _esc((j.brief || "").slice(0, 34));
+      if (j.state === "done") {
         const refs = (j.refs || []).map((r) => r.url).join(" / ");
-        const url = "/camp/" + j.file;
-        stopCampUI();
-        campState.innerHTML = `できました（${sec}秒）→ <a href="${url}" target="_blank" rel="noopener">カンプを開く</a>　<span style="color:#999">（参考: ${refs}）</span>`;
-        window.open(url, "_blank");
-      } else if (j.state === "error") {
-        stopCampUI();
-        campState.textContent = "生成に失敗：" + (j.message || "");
-      } else {
-        stopCampUI();
+        const animRef = j.anim_ref ? `／動き:${_esc(j.anim_ref)}` : "";
+        return `<div>✅ <b>${brief}</b>（${sec}秒）→ <a href="/camp/${j.file}" target="_blank" rel="noopener">カンプを開く</a> <span style="color:#999">（${_esc(refs)}${animRef}）</span></div>
+          <div class="camp_edit_row">
+            <button class="camp_suggest_btn" data-file="${j.file}">💡 改善案を出す</button>
+            <input class="camp_edit_in" placeholder="自分で指示（例：全体を明るく／ヒーローを大きく）">
+            <button class="camp_editall_btn" data-file="${j.file}">この指示で直す</button>
+          </div>
+          <div class="camp_sugg"></div>`;
       }
+      if (j.state === "error") return `❌ <b>${brief}</b> 失敗：${_esc(j.message)}`;
+      return `<div class="camp_job_bar"><span></span></div>🕒 <b>${brief}…</b> ｜ ${_esc(j.phase || "生成中")} ／ 経過 ${sec}秒`;
+    }
+    // ジョブ一覧を更新（done/error は1回だけ組んで＝改善案チップや入力を消さない）
+    function renderCampJobs(jobs) {
+      const ids = [...new Set([...Object.keys(_campLocal), ...Object.keys(jobs)])]
+        .sort((a, b) => ((_campLocal[b]?.start || 0) - (_campLocal[a]?.start || 0)));
+      ids.forEach((id) => {
+        const j = jobs[id] || { state: "running", phase: "開始しています…", brief: _campLocal[id]?.brief };
+        const start = _campLocal[id]?.start || Date.now();
+        const sec = Math.floor((Date.now() - start) / 1000);
+        let el = document.getElementById("cj_" + id);
+        if (!el) { el = document.createElement("div"); el.id = "cj_" + id; campJobs.prepend(el); }
+        el.className = "camp_job" + (j.state === "done" ? " is_done" : j.state === "error" ? " is_err" : "");
+        // running は毎秒更新。done/error になったら一度だけ組み直す（以後は触らない）
+        if (j.state === "running" || el.dataset.state !== j.state) {
+          if (j.state !== "running") el.dataset.state = j.state;
+          el.innerHTML = jobCardHtml(j, sec);
+          if (j.state === "done" && !_campOpened[id]) { _campOpened[id] = 1; window.open("/camp/" + j.file, "_blank"); }
+        }
+      });
+    }
+    // 改善案・自由指示・チップ適用（ジョブ一覧内のクリックをまとめて受ける）
+    campJobs.addEventListener("click", async (e) => {
+      const sBtn = e.target.closest(".camp_suggest_btn");
+      if (sBtn) { loadSuggestions(sBtn); return; }
+      const chip = e.target.closest(".sugg_chip");
+      if (chip) { applyEdit(chip.dataset.file, chip.dataset.section, chip.dataset.instruction); return; }
+      const allBtn = e.target.closest(".camp_editall_btn");
+      if (allBtn) {
+        const inp = allBtn.parentElement.querySelector(".camp_edit_in");
+        applyEdit(allBtn.dataset.file, -1, (inp?.value || "").trim());
+      }
+    });
+    async function loadSuggestions(btn) {
+      const file = btn.dataset.file;
+      const box = btn.closest(".camp_job").querySelector(".camp_sugg");
+      btn.disabled = true; btn.textContent = "考え中…（十数秒）";
+      try {
+        const data = await fetch("/api/camp_suggest", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file }),
+        }).then((r) => r.json());
+        if (!data.ok) { box.textContent = data.message || "失敗しました"; btn.disabled = false; btn.textContent = "💡 改善案を出す"; return; }
+        const chips = (data.suggestions || []).map((s) =>
+          `<button class="sugg_chip" data-file="${file}" data-section="${s.section}" data-instruction="${_esc(s.instruction).replace(/"/g, "&quot;")}">${_esc(s.label)}</button>`
+        ).join("");
+        box.innerHTML = chips || "<span style='color:#999;font-size:1.2rem'>案が出ませんでした</span>";
+        btn.disabled = false; btn.textContent = "💡 別の案を出す";
+      } catch (err) { box.textContent = "通信エラー：" + err; btn.disabled = false; btn.textContent = "💡 改善案を出す"; }
+    }
+    function applyEdit(file, section, instruction) {
+      if (!instruction) { campState.textContent = "指示が空です"; return; }
+      fetch("/api/edit_camp", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file, section: Number(section), instruction }),
+      }).then((r) => r.json()).then((data) => {
+        if (!data.ok) { campState.textContent = data.message; return; }
+        _campLocal[data.job_id] = { start: Date.now(), brief: "部分編集: " + instruction.slice(0, 24) };
+        campState.textContent = "部分編集を開始しました（下に進捗が出ます）";
+        renderCampJobs({}); startCampPoller();
+      }).catch((e) => { campState.textContent = "通信エラー：" + e; });
     }
 
     // 初期表示（登録済み一覧）
@@ -1254,6 +1368,17 @@
       const data = await res.json();
       status.textContent = `登録済み：${data.hits.length} 件（言葉で検索すると雰囲気の近い順に並びます）`;
       render(data.hits);
+      populateCampSelects(data.hits);  // mix & match のドロップダウンを埋める
+    }
+    // カンプ生成の「ベースA」「アニメ参照B」セレクトを、登録サイトで埋める
+    function populateCampSelects(sites) {
+      const baseSel = document.querySelector("#camp_base");
+      const animSel = document.querySelector("#camp_anim");
+      if (!baseSel || !animSel) return;
+      const shorten = (u) => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
+      const opts = (sites || []).map((s) => `<option value="${s.site_id}">${shorten(s.url)}</option>`).join("");
+      baseSel.innerHTML = `<option value="">おまかせ（ブリーフから自動選択）</option>` + opts;
+      animSel.innerHTML = `<option value="">なし（標準のふわっと出現）</option>` + opts;
     }
 
     // イベント：ボタン・Enter・「似てる」ボタン（カードは動的生成なので親で受ける）
@@ -1284,9 +1409,13 @@
       document.querySelector("#detail_pane_anim").hidden = tab !== "anim";
       const vel = document.querySelector("#detail_video_el");
       if (tab === "video") vel.play().catch(() => {}); else vel.pause();
-      // アニメタブを開いたら自動スクロール開始。離れたら止める。
+      // アニメタブを開いたら再生開始。離れたら止めて、右端のモードボタンも消す。
       if (tab === "anim" && _currentDetail) renderAnimStage(_currentDetail);
-      else stopSitePreview();
+      else {
+        stopSitePreview();
+        const slot = document.querySelector("#detail_modebar_slot");
+        if (slot) slot.innerHTML = "";
+      }
     }
     function closeDetail() {
       detailOverlay.classList.remove("is_open");
@@ -1415,8 +1544,11 @@
       // ★本物のアニメは録画動画にしか無い。録画があればそれを再生（カードのホバーと同じ動き）。
       if (d.has_video && d.video) {
         stopAutoPan();
-        box.innerHTML = `<div class="anim_scroller anim_scroller_video"><video class="anim_video_el" src="${d.video}" muted loop autoplay playsinline></video></div>`;
+        // controls付き＝バーでシーク・一時停止できる。さらにホイールで前後スクロール可。
+        box.innerHTML = `<div class="anim_note">🖱 マウスホイールで前後にスクロール／下のバーでも操作できます</div>`
+          + `<div class="anim_scroller anim_scroller_video"><video class="anim_video_el" src="${d.video}" muted loop autoplay playsinline controls></video></div>`;
         const v = box.querySelector("video");
+        const scroller = box.querySelector(".anim_scroller");
         if (v) {
           // 枠を録画の実寸比に合わせる（縦長でも横長でも黒帯ゼロで表示）
           v.addEventListener("loadedmetadata", () => {
@@ -1425,6 +1557,14 @@
             }
           });
           v.play().catch(() => {});
+          // マウスホイールで動画をシーク＝サイトを自分でスクロールする感覚
+          scroller.addEventListener("wheel", (ev) => {
+            if (!v.duration) return;
+            ev.preventDefault();
+            v.pause();
+            const step = (ev.deltaY / 100) * 0.4;  // 1ノッチ ≒ 0.4秒ぶん進む/戻る
+            v.currentTime = Math.max(0, Math.min(v.duration - 0.05, v.currentTime + step));
+          }, { passive: false });
         }
         return;
       }
@@ -1469,12 +1609,15 @@
       const gridHtml = (kf.length || lot.length)
         ? buildAnimGrid(d, kf, lot)
         : `<div class="anim_stage_hint">CSSアニメ/Lottieはまだ抜き出していません。右の「🎞 アニメを抜き出す」で抽出できます。</div>`;
-      stage.innerHTML = `
-        <div class="anim_modebar">
+      // モードボタンはタブ行の右端スロットへ（動画の縦を最大化）
+      const slot = document.querySelector("#detail_modebar_slot");
+      if (slot) {
+        slot.innerHTML = `
           <button class="anim_mode is_on" data-mode="site">🖥 サイト全体で再生</button>
           <button class="anim_mode" data-mode="grid">🔲 動きサンプル一覧</button>
-          <button class="anim_replay" id="anim_replay">▶ 最初から</button>
-        </div>
+          <button class="anim_replay" id="anim_replay">▶ 最初から</button>`;
+      }
+      stage.innerHTML = `
         <div class="anim_view" id="anim_view_site">
           <div class="anim_site" id="anim_site" data-full="${d.fullpage}" data-rev="${rev}"></div>
         </div>
@@ -1482,13 +1625,13 @@
       if (lot.length) ensureLottie();
       sliceSitePreview();  // カードのホバーと同じ「自動スクロールで動かす」を仕込む
     }
-    // モード切替（サイト全体 / サンプル一覧）＋「もう一度再生」
-    document.querySelector("#detail_anim_stage").addEventListener("click", (e) => {
+    // モード切替（サイト全体 / サンプル一覧）＋「最初から」。ボタンは .detail_visual 内にある
+    document.querySelector(".detail_visual").addEventListener("click", (e) => {
       if (e.target.closest("#anim_replay")) { sliceSitePreview(); return; }
       const btn = e.target.closest(".anim_mode");
       if (!btn) return;
       const mode = btn.dataset.mode;
-      document.querySelectorAll("#detail_anim_stage .anim_mode").forEach((b) => b.classList.toggle("is_on", b === btn));
+      document.querySelectorAll("#detail_modebar_slot .anim_mode").forEach((b) => b.classList.toggle("is_on", b === btn));
       document.querySelector("#anim_view_site").hidden = mode !== "site";
       document.querySelector("#anim_view_grid").hidden = mode !== "grid";
       if (mode === "site") sliceSitePreview();  // サイトに戻したら再生（録画優先）
@@ -1597,21 +1740,14 @@
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });
 
     // 「🎨ベースに生成」：このサイトの配色・字組みを主役にしてカンプ生成
-    async function baseGenerate(siteId) {
-      const brief = prompt("どんなサイトを作りますか？（このサイトの配色・字組みをベースにします）");
-      if (!brief || !brief.trim()) return;
+    function baseGenerate(siteId) {
+      // このサイトを「ベースA」に設定して mix & match パネルを開く
       campPanel.classList.add("is_open");
+      const baseSel = document.querySelector("#camp_base");
+      if (baseSel) baseSel.value = siteId;
       window.scrollTo({ top: 0, behavior: "smooth" });
-      startCampUI();
-      try {
-        const res = await fetch("/api/generate_camp", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ brief: brief.trim(), base_id: siteId }),
-        });
-        const data = await res.json();
-        if (!data.ok) { campState.textContent = data.message; stopCampUI(); return; }
-        pollCamp();
-      } catch (e) { campState.textContent = "通信エラー：" + e; stopCampUI(); }
+      campInput.focus();
+      campState.textContent = "このサイトをベースにしました。必要なら『アニメ参照』を選び、作りたい内容を書いて「生成」を押してください。";
     }
 
     // 「✨雰囲気」：Claudeに雰囲気を言語化させる → 完了をポーリングして反映
@@ -1720,16 +1856,20 @@
 
     loadAll();
 
-    // ページを開いた時、もしカンプ生成が進行中なら進捗表示を再開する
-    // （生成中にリロードしても「今どうなってるか」が分かる）
+    // ページを開いた時、進行中/完了のカンプ生成ジョブがあれば表示を復帰する
+    // （生成中にリロードしても「今どうなってるか」が分かる。複数対応）
     (async function resumeCampIfRunning() {
       try {
-        const j = await fetch("/api/generate_camp/status").then((r) => r.json());
-        if (j.state === "running") {
-          campPanel.classList.add("is_open");
-          startCampUI();
-          pollCamp();
-        }
+        const data = await fetch("/api/generate_camp/status").then((r) => r.json());
+        const jobs = data.jobs || {};
+        if (!Object.keys(jobs).length) return;
+        Object.keys(jobs).forEach((id) => {
+          if (!_campLocal[id]) _campLocal[id] = { start: Date.now(), brief: jobs[id].brief };
+          if (jobs[id].state !== "running") _campOpened[id] = 1;  // 既に終わってた分は自動で開かない
+        });
+        campPanel.classList.add("is_open");
+        renderCampJobs(jobs);
+        if (Object.values(jobs).some((j) => j.state === "running")) startCampPoller();
       } catch (e) {}
     })();
   </script>

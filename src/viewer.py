@@ -53,9 +53,11 @@ _REC_LOCK = threading.Lock()
 _DESC_JOB: dict = {"running": False, "done": 0, "total": 0, "current": ""}
 _DESC_LOCK = threading.Lock()
 
-# カンプ生成ジョブ（同時に1つ）。生成は時間がかかるので非同期＋ポーリング。
-_CAMP_JOB: dict = {"state": "idle"}
+# カンプ生成ジョブ（複数同時OK）。job_id -> {state, phase, brief, ...result}。
+# 生成は時間がかかるので非同期＋ポーリング。並行して2〜数本まわせる。
+_CAMP_JOBS: dict = {}
 _CAMP_LOCK = threading.Lock()
+_CAMP_MAX = 4  # 同時に走らせる上限（メモリ/APIレート保護）
 
 # 画像抜き出し中のサイトID（同時に1つ）
 _EXTRACTING: dict = {"site_id": None}
@@ -630,72 +632,152 @@ def api_describe_all():
     return jsonify({"ok": True, "total": len(targets)})
 
 
-def _camp_phase(text: str) -> None:
-    """カンプ生成の「今どの段階か」を更新する（フロントが表示する）。"""
+def _camp_set(job_id: str, **kw) -> None:
+    """指定ジョブの状態を更新する（フロントが表示する）。"""
     with _CAMP_LOCK:
-        _CAMP_JOB["phase"] = text
-    log.info("カンプ生成 段階: %s", text)
+        j = _CAMP_JOBS.setdefault(job_id, {})
+        j.update(kw)
 
 
-def _run_camp_job(brief: str, base_site_id: str) -> None:
-    """バックグラウンドでカンプを生成（参考選び＋Claude）。
+def _run_camp_job(job_id: str, brief: str, base_site_id: str, anim_ref_id: str = "") -> None:
+    """バックグラウンドでカンプを生成（参考選び＋Claude/GPT）。複数同時に走ってよい。
 
     use_model=False：参考選びにSigLIPを使わない（モデルを読まない）。
     base_site_id があれば、そのサイトのトークンが無いときは先に抽出してから生成する。
-    各段階を _CAMP_JOB['phase'] に書くので、フロントで進捗が見える。
+    anim_ref_id があれば、そのサイトのアニメ素材が無いときは先に抽出してから生成する
+    （mix & match：Aの見た目にBの動き）。
+    各段階を そのジョブの 'phase' に書くので、フロントで進捗が見える。
     """
     try:
-        _camp_phase("参考サイトを準備しています…")
+        _camp_set(job_id, phase="参考サイトを準備しています…")
         if base_site_id:
             from . import tokens as _tokens
             with db.connect() as conn:
                 row = db.get_site(conn, base_site_id)
             if row and not row["design_tokens"]:
-                _camp_phase("手本サイトのデザイントークンを抽出中…")
+                _camp_set(job_id, phase="手本サイトのデザイントークンを抽出中…")
                 try:
                     _tokens.extract_and_store(row["url"])
                 except Exception:
                     log.exception("トークン抽出に失敗（続行）")
+        if anim_ref_id:
+            with db.connect() as conn:
+                brow = db.get_site(conn, anim_ref_id)
+            if brow and not brow["animation_snippets"]:
+                _camp_set(job_id, phase="アニメ参照サイトの動きを抽出中…")
+                try:
+                    snip = anim.extract_animations(brow["url"])
+                    with db.connect() as conn:
+                        db.update_anim_snippets(conn, anim_ref_id, _json.dumps(snip, ensure_ascii=False))
+                except Exception:
+                    log.exception("アニメ抽出に失敗（続行）")
         prov = "GPT" if config.CONFIG.htmlgen.provider == "openai" else "Claude"
-        _camp_phase(f"{prov}がHTMLを書いています…（一番長い段階・2分前後かかります）")
-        result = camp.generate_camp(brief, use_model=False, base_site_id=base_site_id or None)
-        with _CAMP_LOCK:
-            _CAMP_JOB.clear()
-            _CAMP_JOB.update(state="done", **result)
+        _camp_set(job_id, phase=f"{prov}がHTMLを書いています…（一番長い段階・2分前後）")
+        result = camp.generate_camp(
+            brief, use_model=False,
+            base_site_id=base_site_id or None,
+            anim_ref_id=anim_ref_id or None,
+        )
+        _camp_set(job_id, state="done", **result)
     except Exception as exc:  # noqa: BLE001
         log.exception("カンプ生成に失敗")
-        with _CAMP_LOCK:
-            _CAMP_JOB.clear()
-            _CAMP_JOB.update(state="error", message=str(exc))
+        _camp_set(job_id, state="error", message=str(exc))
 
 
 @app.route("/api/generate_camp", methods=["POST"])
 def api_generate_camp():
-    """ブリーフからカンプを生成する（非同期）。進捗は /api/generate_camp/status。
+    """ブリーフからカンプを生成する（非同期・複数同時OK）。進捗は /api/generate_camp/status。
 
-    base_id を渡すと、そのサイトを"主役の参考"にして配色・字組みを強く寄せる。
+    base_id を渡すと配色・字組みを強く寄せる。anim_id で動きの種類を寄せる（mix & match）。
+    返り値の job_id で、そのジョブの進捗を追える。
     """
     if not config.CONFIG.vibe.enabled:
         return jsonify({"ok": False, "message": "APIキーが未設定です（.env を確認）"}), 400
     data = request.get_json(silent=True) or {}
     brief = (data.get("brief") or "").strip()
     base_site_id = (data.get("base_id") or "").strip()
+    anim_ref_id = (data.get("anim_id") or "").strip()
     if not brief:
         return jsonify({"ok": False, "message": "作りたいサイトの説明を入力してください"}), 400
     with _CAMP_LOCK:
-        if _CAMP_JOB.get("state") == "running":
-            return jsonify({"ok": False, "message": "別の生成が進行中です"}), 409
-        _CAMP_JOB.clear()
-        _CAMP_JOB.update(state="running", brief=brief, phase="開始しています…")
-    log.info("カンプ生成ジョブ開始: %s (base=%s)", brief, base_site_id)
-    threading.Thread(target=_run_camp_job, args=(brief, base_site_id), daemon=True).start()
-    return jsonify({"ok": True})
+        running = sum(1 for j in _CAMP_JOBS.values() if j.get("state") == "running")
+        if running >= _CAMP_MAX:
+            return jsonify(
+                {"ok": False, "message": f"同時生成は最大{_CAMP_MAX}件までです（少し待って）"}
+            ), 429
+        job_id = uuid.uuid4().hex
+        _CAMP_JOBS[job_id] = {"state": "running", "brief": brief, "phase": "開始しています…"}
+    log.info("カンプ生成ジョブ開始[%s]: %s (base=%s, anim=%s)", job_id[:6], brief, base_site_id, anim_ref_id)
+    threading.Thread(
+        target=_run_camp_job, args=(job_id, brief, base_site_id, anim_ref_id), daemon=True
+    ).start()
+    return jsonify({"ok": True, "job_id": job_id})
 
 
 @app.route("/api/generate_camp/status")
 def api_generate_camp_status():
+    """全カンプ生成ジョブの状態を返す（複数同時進行を1回で取得）。"""
     with _CAMP_LOCK:
-        return jsonify(dict(_CAMP_JOB))
+        return jsonify({"jobs": {k: dict(v) for k, v in _CAMP_JOBS.items()}})
+
+
+@app.route("/api/camp_suggest", methods=["POST"])
+def api_camp_suggest():
+    """カンプを見てAIが改善案を複数出す（同期。ユーザーは選ぶだけ）。"""
+    if not config.CONFIG.vibe.enabled:
+        return jsonify({"ok": False, "message": "APIキーが未設定です（.env を確認）"}), 400
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    if not fn or not (config.CAMP_DIR / fn).exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    try:
+        suggestions = camp.suggest_edits(fn)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("改善案の生成に失敗")
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True, "suggestions": suggestions})
+
+
+def _run_edit_job(job_id: str, fn: str, section: int, instruction: str) -> None:
+    """バックグラウンドでカンプを部分編集する（生成ジョブ一覧に相乗り）。"""
+    try:
+        prov = "GPT" if config.CONFIG.htmlgen.provider == "openai" else "Claude"
+        scope = "全体" if section is None or section < 0 else f"セクション{section + 1}"
+        _camp_set(job_id, phase=f"{prov}が{scope}を直しています…")
+        result = camp.edit_camp_section(fn, section, instruction)
+        _camp_set(job_id, state="done", **result)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("部分編集に失敗")
+        _camp_set(job_id, state="error", message=str(exc))
+
+
+@app.route("/api/edit_camp", methods=["POST"])
+def api_edit_camp():
+    """既存カンプを、指示（または改善案）で直して新バージョンを作る（非同期・複数OK）。"""
+    if not config.CONFIG.vibe.enabled:
+        return jsonify({"ok": False, "message": "APIキーが未設定です（.env を確認）"}), 400
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    instruction = (data.get("instruction") or "").strip()
+    try:
+        section = int(data.get("section", -1))
+    except Exception:  # noqa: BLE001
+        section = -1
+    if not fn or not (config.CAMP_DIR / fn).exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    if not instruction:
+        return jsonify({"ok": False, "message": "修正指示を入れてください"}), 400
+    with _CAMP_LOCK:
+        running = sum(1 for j in _CAMP_JOBS.values() if j.get("state") == "running")
+        if running >= _CAMP_MAX:
+            return jsonify({"ok": False, "message": f"同時処理は最大{_CAMP_MAX}件までです（少し待って）"}), 429
+        job_id = uuid.uuid4().hex
+        _CAMP_JOBS[job_id] = {"state": "running", "brief": f"部分編集: {instruction[:24]}", "phase": "開始しています…"}
+    log.info("部分編集ジョブ開始[%s]: %s section=%s / %s", job_id[:6], fn, section, instruction)
+    threading.Thread(
+        target=_run_edit_job, args=(job_id, fn, section, instruction), daemon=True
+    ).start()
+    return jsonify({"ok": True, "job_id": job_id})
 
 
 @app.route("/camp/<path:filename>")
