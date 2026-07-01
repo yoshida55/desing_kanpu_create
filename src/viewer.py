@@ -1182,6 +1182,26 @@ _EDIT_BAR = """
 #__ce_cm .__ce_size button:hover{background:#dceafe}
 #__ce_savebar{position:fixed;left:20px;bottom:20px;z-index:2147483003;background:#1a7f37;color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 12px 32px rgba(0,0,0,.3);font-family:system-ui,sans-serif;display:none}
 #__ce_savebar.show{display:block}
+#__ce_cm .__ce_anim{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+#__ce_cm .__ce_anim button{text-align:left;background:#fff4fb;border:1px solid #f3cfe8;border-radius:8px;padding:6px 8px;cursor:pointer;line-height:1.25}
+#__ce_cm .__ce_anim b{display:block;font-size:12.5px;color:#1d1d1f;font-weight:700}
+#__ce_cm .__ce_anim span{font-size:10.5px;color:#a06a8f}
+@keyframes __ceax_fadeup{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes __ceax_fade{from{opacity:0}to{opacity:1}}
+@keyframes __ceax_left{from{opacity:0;transform:translateX(-48px)}to{opacity:1;transform:none}}
+@keyframes __ceax_right{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:none}}
+@keyframes __ceax_zoom{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+@keyframes __ceax_pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes __ceax_float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes __ceax_bounce{0%{transform:translateY(0)}30%{transform:translateY(-18px)}60%{transform:translateY(0)}80%{transform:translateY(-8px)}100%{transform:translateY(0)}}
+.__ceax_fadeup{animation:__ceax_fadeup .8s ease both}
+.__ceax_fade{animation:__ceax_fade .8s ease both}
+.__ceax_left{animation:__ceax_left .8s ease both}
+.__ceax_right{animation:__ceax_right .8s ease both}
+.__ceax_zoom{animation:__ceax_zoom .8s ease both}
+.__ceax_pulse{animation:__ceax_pulse 1.6s ease-in-out infinite}
+.__ceax_float{animation:__ceax_float 2.4s ease-in-out infinite}
+.__ceax_bounce{animation:__ceax_bounce 1.2s ease infinite}
 #__ce_toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:2147483004;background:#1d1d1f;color:#fff;border-radius:14px;padding:15px 24px;box-shadow:0 16px 44px rgba(0,0,0,.42);font-family:system-ui,sans-serif;min-width:320px;max-width:92vw;text-align:center}
 #__ce_toast .bar{height:7px;background:#43434a;border-radius:4px;overflow:hidden;margin-bottom:9px}
 #__ce_toast .bar span{display:block;height:100%;width:35%;background:#ff9a3c;border-radius:4px;animation:__ce_flow 1.2s ease-in-out infinite}
@@ -1191,6 +1211,8 @@ _EDIT_BAR = """
 <div id="__ce">
   <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span class="sv" id="__ce_save">⭐ 名前を付けて保存</span><span class="x" id="__ce_mn">✕ 閉じる</span></div>
   <div class="bd">
+    <div class="lbl plain">🤖 修正・おしゃれに使うAI（モデルは⚙設定で）</div>
+    <select id="__ce_ai"><option value="anthropic">Claude</option><option value="openai">GPT</option><option value="deepseek">DeepSeek（激安）</option><option value="gemini">Gemini</option></select>
     <div class="lbl plain">① どこを直す？</div>
     <select id="__ce_sec"><option value="-1">ページ全体</option></select>
     <div class="lbl">🎬 アニメ・背景装飾を付ける（選んだ所に適用）</div>
@@ -1211,6 +1233,17 @@ _EDIT_BAR = """
   var sec=document.getElementById('__ce_sec'),inp=document.getElementById('__ce_in'),
       sg=document.getElementById('__ce_sg'),go=document.getElementById('__ce_go'),
       chips=document.getElementById('__ce_chips'),msg=document.getElementById('__ce_msg');
+  // 修正・おしゃれに使うAIエンジンを、その場で切り替え（設定画面に行かず即反映）
+  var aiSel=document.getElementById('__ce_ai');
+  if(aiSel){
+    aiSel.value=%EDIT_PROVIDER_JSON%;
+    aiSel.addEventListener('change',function(){
+      var nm=aiSel.options[aiSel.selectedIndex].text;
+      fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edit_provider:aiSel.value})})
+        .then(function(r){return r.json();}).then(function(){ msg.textContent='修正・おしゃれに使うAIを「'+nm+'」にしました'; })
+        .catch(function(){ msg.textContent='AIの切替に失敗しました'; });
+    });
+  }
   // ヘッダを掴んでウィンドウ自体を移動できる（クリックでの開閉と両立：動いた時だけトグルを抑制）
   var hd=document.getElementById('__ce_hd'), hDrag=false, hMoved=false, hSX=0,hSY=0,hL=0,hT=0;
   hd.addEventListener('mousedown',function(e){
@@ -1248,6 +1281,24 @@ _EDIT_BAR = """
       }).catch(function(){ saveBtn.textContent='⭐ 名前を付けて保存'; });
   });
   var esc=function(s){return String(s||'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});};
+  // その場で再生できるアニメ（AIなし・プレビュー用）。kはCSSクラス__ceax_k に対応。
+  var ANIMS=[
+    {k:'fadeup',b:'ふわっと出現',d:'下から浮かぶ'},
+    {k:'fade',b:'スッと出る',d:'フェード'},
+    {k:'left',b:'左から',d:'スライドイン'},
+    {k:'right',b:'右から',d:'スライドイン'},
+    {k:'zoom',b:'ズームイン',d:'拡大しながら'},
+    {k:'pulse',b:'脈打つ',d:'ループ・鼓動'},
+    {k:'float',b:'ゆらゆら',d:'ループ・浮遊'},
+    {k:'bounce',b:'バウンド',d:'ループ・弾む'}
+  ];
+  // 「このセクションをおしゃれに」ボタンの一括指示。中身は保ちつつ質感だけ上げる。
+  var STYLE_INS='プロのWebデザイナーとして、このセクションの見た目を現代的で洗練された印象にブラッシュアップする。'
+    +'文言・画像・情報の中身は一切変えず、余白（ゆとり）・タイポグラフィ（見出しと本文のサイズ/太さ/行間の階層）・'
+    +'配色のコントラストとアクセント・角丸や影の質感・要素の整列とリズムを整えて、上品で今っぽい仕上がりにする。'
+    +'レイアウトの骨格・順番・情報量は保ち、派手すぎる色や過度な装飾は避け、既存のクラス構造を活かす。'
+    +'html.jsが付いた時だけ初期非表示にする保険を入れ、JSが無くても中身が見える状態を保つ。'
+    +'★このセクションだけに適用し、他のセクションや他の要素は一切変えない。';
   fetch('/api/camp_sections?file='+encodeURIComponent(FILE)).then(function(r){return r.json();}).then(function(d){
     (d.sections||[]).forEach(function(s){var o=document.createElement('option');o.value=s.index;o.textContent=(s.index+1)+'. '+s.label;sec.appendChild(o);});
   }).catch(function(){});
@@ -1339,9 +1390,10 @@ _EDIT_BAR = """
     if(!imgMode) return;
     var im=e.target.closest('img'); if(!im||im.closest('#__ce')||im.closest('#__ce_pk')) return;
     e.preventDefault(); e.stopPropagation();
-    openPicker(camImgs().indexOf(im));
+    openPicker({el:im,type:'img',url:im.currentSrc||im.src});
   }, true);
-  function openPicker(idx){
+  // cand = {el, type:'img'|'bg', url}。img も 背景画像 も同じ入口で差し替える。
+  function openPicker(cand){
     fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
       var ups=d.uploads||[];
       var items = ups.length
@@ -1353,14 +1405,33 @@ _EDIT_BAR = """
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
         var it=e.target.closest('.it'); if(!it) return;
+        if(!cand||!cand.el){ msg.textContent='対象が見つかりません'; ov.remove(); return; }
         ov.remove(); msg.textContent='差し替え中…';
-        fetch('/api/swap_image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,index:idx,src:it.dataset.src})})
-        .then(function(r){return r.json();}).then(function(d){
-          if(!d.ok){msg.textContent='失敗：'+d.message;return;}
-          location.href='/camp/'+d.file;
-        }).catch(function(){msg.textContent='通信エラー';});
+        var url=it.dataset.src;
+        // 背景画像でも<img>でも、ブラウザ側で差し替えて位置・角度ごと保存（角度が戻らない）
+        if(cand.type==='bg'){
+          cand.el.style.setProperty('background-image','url("'+url+'")','important');
+        } else {
+          cand.el.src=url; cand.el.removeAttribute('srcset');
+          var pic=cand.el.closest?cand.el.closest('picture'):null;
+          if(pic){ [].slice.call(pic.querySelectorAll('source')).forEach(function(s){s.removeAttribute('srcset');}); }
+        }
+        markDirty(); saveLayout();
       });
     }).catch(function(){msg.textContent='画像一覧の取得に失敗';});
+  }
+  // 重なった画像（img・背景）のうち、どれを差し替えるかをサムネで先に選ばせる
+  function pickWhichImg(list){
+    var items=list.map(function(c,i){return '<div class="it" data-i="'+i+'"><img src="'+c.url+'"><span>'+(c.type==='bg'?'背景':'画像')+(i+1)+(i===0?'（前面）':'')+'</span></div>';}).join('');
+    var ov=document.createElement('div'); ov.id='__ce_pk';
+    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>どの画像を差し替える？（重なっています）</h4><div class="gr">'+items+'</div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+      var it=e.target.closest('.it'); if(!it) return;
+      var c=list[+it.getAttribute('data-i')]; ov.remove(); closeMenu();
+      openPicker(c);
+    });
   }
   // 画像の背後にアップロード画像を敷く（水彩テクスチャ等）。選ぶとAIがその画像URLを背景に敷く。
   function openBgPicker(imgEl, sIdx){
@@ -1386,18 +1457,27 @@ _EDIT_BAR = """
     }).catch(function(){msg.textContent='画像一覧の取得に失敗';});
   }
   // ===== 右クリックで、その要素に直接アニメ/指示/改善案を出す =====
-  var curMenu=null, curEl=null;
-  function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){curEl.classList.remove('__ce_sel');curEl=null;} }
+  var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
+  try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
+  function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); curEl.style.removeProperty('opacity'); if(curEl.getAttribute('data-cetx')!=null){applyTf(curEl);}else{curEl.style.removeProperty('transform');} curEl.classList.remove('__ce_sel');curEl=null;} }
   // ===== 位置の直接調整（AIなし・transformで即反映）=====
   // 要素を translate で浮かせて動かす。元のtransformは data-cebt に退避して壊さない。
   // 元のtransformを1度だけ退避（自前のtranslate/scaleが無い時だけ）
-  function _cebt(el){ if(el.getAttribute('data-cebt')===null){ var t=el.style.transform||''; el.setAttribute('data-cebt', (t.indexOf('translate')<0&&t.indexOf('scale')<0)?t:''); } }
+  // 元の変形(回転など)を1度だけ退避。インラインに無ければ、CSSクラス由来の計算値(matrix=回転含む)を拾う。
+  function _cebt(el){
+    if(el.getAttribute('data-cebt')!==null) return;
+    var t=el.style.transform||'';
+    if(t && t.indexOf('translate')<0 && t.indexOf('scale')<0){ el.setAttribute('data-cebt', t); return; }
+    var c=''; try{ c=getComputedStyle(el).transform; }catch(_){}
+    el.setAttribute('data-cebt', (c && c!=='none') ? c : '');
+  }
   // 位置(translate)＋大きさ(scaleX,scaleY)をまとめて当てる。アニメ/トランジションは止めて最優先で反映。
   function applyTf(el){
     var x=+el.getAttribute('data-cetx')||0, y=+el.getAttribute('data-cety')||0;
     var sx=+el.getAttribute('data-cesx')||1, sy=+el.getAttribute('data-cesy')||1;
-    el.style.setProperty('transform-origin','top left','important');
-    el.style.setProperty('transform','translate('+x+'px,'+y+'px) scale('+sx+','+sy+') '+(el.getAttribute('data-cebt')||''),'important');
+    var ro=+el.getAttribute('data-cero')||0;
+    el.style.setProperty('transform-origin','center','important');
+    el.style.setProperty('transform','translate('+x+'px,'+y+'px) rotate('+ro+'deg) scale('+sx+','+sy+') '+(el.getAttribute('data-cebt')||''),'important');
     el.style.setProperty('animation','none','important');
     el.style.setProperty('transition','none','important');
     markDirty();
@@ -1411,10 +1491,61 @@ _EDIT_BAR = """
     if(sx<0.2)sx=0.2; if(sx>5)sx=5; if(sy<0.2)sy=0.2; if(sy>5)sy=5;
     el.setAttribute('data-cesx',sx); el.setAttribute('data-cesy',sy); applyTf(el);
   }
+  function rotateBy(el,delta){ _cebt(el); el.setAttribute('data-cero',(+el.getAttribute('data-cero')||0)+delta); applyTf(el); }
+  // アニメをその場で再生（プレビュー・保存なし）。Web Animations APIでJSから直接動かす＝CSSに依存せず確実。
+  var WA={
+    fadeup:{k:[{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'translateY(0)'}],o:{duration:800,easing:'ease'}},
+    fade:{k:[{opacity:0},{opacity:1}],o:{duration:800,easing:'ease'}},
+    left:{k:[{opacity:0,transform:'translateX(-48px)'},{opacity:1,transform:'translateX(0)'}],o:{duration:800,easing:'ease'}},
+    right:{k:[{opacity:0,transform:'translateX(48px)'},{opacity:1,transform:'translateX(0)'}],o:{duration:800,easing:'ease'}},
+    zoom:{k:[{opacity:0,transform:'scale(.86)'},{opacity:1,transform:'scale(1)'}],o:{duration:800,easing:'ease'}},
+    pulse:{k:[{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],o:{duration:1400,easing:'ease-in-out',iterations:Infinity}},
+    float:{k:[{transform:'translateY(0)'},{transform:'translateY(-10px)'},{transform:'translateY(0)'}],o:{duration:2200,easing:'ease-in-out',iterations:Infinity}},
+    bounce:{k:[{transform:'translateY(0)'},{transform:'translateY(-18px)'},{transform:'translateY(0)'},{transform:'translateY(-8px)'},{transform:'translateY(0)'}],o:{duration:1200,easing:'ease',iterations:Infinity}}
+  };
+  // 定義：f=開始, t=終了, loop=ループ, mid=ループ中の振れ幅
+  var ANDEF={
+    fade:{d:800,f:{o:0},t:{o:1}},
+    fadeup:{d:800,f:{o:0,y:28},t:{o:1,y:0}},
+    left:{d:800,f:{o:0,x:-48},t:{o:1,x:0}},
+    right:{d:800,f:{o:0,x:48},t:{o:1,x:0}},
+    zoom:{d:800,f:{o:0,s:.86},t:{o:1,s:1}},
+    pulse:{d:1400,loop:1,mid:{s:.06}},
+    float:{d:2200,loop:1,mid:{y:-12}},
+    bounce:{d:1200,loop:1,mid:{y:-18}}
+  };
+  function stopAnim(el){ if(el&&el.__ceRAF){ cancelAnimationFrame(el.__ceRAF); el.__ceRAF=null; } }
+  function playAnim(el,k){
+    if(!el){ if(msg)msg.textContent='⚠ 要素が選ばれていません（もう一度右クリックで選んでください）'; return; }
+    var D=ANDEF[k]; if(!D){ if(msg)msg.textContent='⚠ 未対応の動き：'+k; return; }
+    stopAnim(el);
+    var base=el.getAttribute('data-cebt')||'';  // 元の変形(回転など)は保つ
+    var start=null;
+    function frame(ts){
+      if(start===null) start=ts;
+      var el_p=(ts-start)/D.d, o=1,x=0,y=0,s=1;
+      if(D.loop){
+        var pp=el_p%1, tri=pp<.5?pp*2:2-pp*2;  // 0→1→0
+        if(D.mid.s!=null) s=1+D.mid.s*tri;
+        if(D.mid.y!=null) y=D.mid.y*tri;
+      } else {
+        var q=Math.min(1,el_p); q=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2;  // easeInOut
+        o=(D.f.o!=null?D.f.o:1)+(((D.t.o!=null?D.t.o:1))-(D.f.o!=null?D.f.o:1))*q;
+        if(D.f.x!=null) x=D.f.x+((D.t.x||0)-D.f.x)*q;
+        if(D.f.y!=null) y=D.f.y+((D.t.y||0)-D.f.y)*q;
+        if(D.f.s!=null) s=D.f.s+((D.t.s||1)-D.f.s)*q;
+      }
+      el.style.setProperty('opacity',o,'important');
+      el.style.setProperty('transform','translate('+x+'px,'+y+'px) scale('+s+') '+base,'important');
+      if(D.loop || el_p<1){ el.__ceRAF=requestAnimationFrame(frame); }
+      else { el.__ceRAF=null; el.style.removeProperty('opacity'); if(el.getAttribute('data-cetx')!=null){ applyTf(el); } else { el.style.removeProperty('transform'); } }
+    }
+    el.__ceRAF=requestAnimationFrame(frame);
+    if(msg) msg.textContent='▶ 再生「'+k+'」（もう一度で再生・別要素選択で停止）';
+  }
   function resetPos(el){
     el.style.removeProperty('transform'); el.style.removeProperty('transform-origin'); el.style.removeProperty('animation'); el.style.removeProperty('transition');
-    var bt=el.getAttribute('data-cebt'); if(bt) el.style.transform=bt;
-    el.removeAttribute('data-cetx'); el.removeAttribute('data-cety'); el.removeAttribute('data-cesx'); el.removeAttribute('data-cesy'); el.removeAttribute('data-cebt');
+    el.removeAttribute('data-cetx'); el.removeAttribute('data-cety'); el.removeAttribute('data-cesx'); el.removeAttribute('data-cesy'); el.removeAttribute('data-cero'); el.removeAttribute('data-cebt');
     markDirty();
   }
   // ドラッグで動かす：対象要素に直接 mousedown を付ける（確実に掴める）
@@ -1436,6 +1567,12 @@ _EDIT_BAR = """
     if(btn) btn.textContent='✋ ドラッグ終了';
     msg.textContent='要素を掴んで動かせます（もう一度押すと終了）';
   }
+  // 右クリック直後に呼ぶ：確実にドラッグON（トグルではない）
+  function setDragOn(el,btn){
+    if(dragEl && dragEl!==el){ dragEl.removeEventListener('mousedown',_dDown,true); dragEl.style.cursor=''; }
+    dragEl=el; el.style.cursor='move'; el.addEventListener('mousedown',_dDown,true);
+    if(btn) btn.textContent='✋ ドラッグ中（もう一度押すと解除）';
+  }
   // 位置/大きさを変えたら、ヘッダの保存ボタンを「💾 変更を保存」に変えて緑で目立たせる（ボタンは1つに統一）
   var _dirty=false;
   function markDirty(){
@@ -1449,6 +1586,9 @@ _EDIT_BAR = """
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     [].slice.call(doc.querySelectorAll('.__ce_sel,.__ce_hl')).forEach(function(n){n.classList.remove('__ce_sel','__ce_hl');});
+    // プレビュー用アニメ(__ceax_*)は一時的なものなので保存に残さない（クラス・インライン両方）
+    [].slice.call(doc.querySelectorAll('[class*="__ceax_"]')).forEach(function(n){ [].slice.call(n.classList).forEach(function(cl){ if(cl.indexOf('__ceax_')===0) n.classList.remove(cl); }); });
+    [].slice.call(doc.querySelectorAll('[style*="__ceax"]')).forEach(function(n){ n.style.removeProperty('animation'); });
     [].slice.call(doc.querySelectorAll('script')).forEach(function(s){ if(/__ce/.test(s.textContent)) s.remove(); });
     [].slice.call(doc.querySelectorAll('style')).forEach(function(s){ if(/#__ce/.test(s.textContent)) s.remove(); });
     return '<!doctype html>\\n'+doc.outerHTML;
@@ -1493,10 +1633,36 @@ _EDIT_BAR = """
     var sIdx=secIndexOf(el), d=descEl(el);
     // 画像なら「AIなしの即差し替え」を最優先で出す（画像のAI指示は不安定なため）
     var imgEl = (el.tagName==='IMG') ? el : (el.querySelector ? el.querySelector('img') : null);
-    var swapH = imgEl
+    // 右クリック座標に重なる「画像」を集める：<img> と 背景画像(background-image) の両方。前面→背面順。
+    var cands=[];
+    function _has(n){ return cands.some(function(c){return c.el===n;}); }
+    function _addBg(n){
+      var bg=''; try{ bg=getComputedStyle(n).backgroundImage; }catch(_){}
+      var mm=bg&&bg.match(/url\\(["']?(.*?)["']?\\)/);
+      if(mm && mm[1] && mm[1].indexOf('data:')!==0 && !_has(n)){ cands.push({el:n,type:'bg',url:mm[1]}); }
+    }
+    document.elementsFromPoint(e.clientX, e.clientY).forEach(function(n){
+      if(!n.closest || n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
+      if(n.tagName==='IMG'){ if(!_has(n)) cands.push({el:n,type:'img',url:n.currentSrc||n.src}); return; }
+      _addBg(n);
+    });
+    // pointer-events:none の装飾など、座標検出で拾えない背面の背景画像も、矩形が重なれば候補に足す
+    var scope=(el.closest && el.closest('section'))||document.body;
+    [].slice.call(scope.querySelectorAll('*')).forEach(function(n){
+      if(n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
+      var r=n.getBoundingClientRect();
+      if(!r.width||e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom) return;
+      if(n.tagName==='IMG'){ if(!_has(n)) cands.push({el:n,type:'img',url:n.currentSrc||n.src}); return; }
+      _addBg(n);
+    });
+    if(!cands.length){
+      var fb=(el.tagName==='IMG')?[el]:(el.querySelectorAll?[].slice.call(el.querySelectorAll('img')):[]);
+      fb.forEach(function(im){cands.push({el:im,type:'img',url:im.currentSrc||im.src});});
+    }
+    var swapH = cands.length
       ? '<button class="go2" id="__ce_cmswap" style="background:#1a7f37;margin-bottom:6px">🖼 この画像を差し替え（AIなし・一瞬）</button>'
-        +'<button class="go2" id="__ce_cmbg" style="background:#0b6bcb;margin-bottom:6px">🎨 この画像の背後に画像を敷く（水彩など）</button>'
-        +'<div class="cap" style="margin:0 0 8px">画像はこれが確実です（差し替えは一瞬・背景敷きはAIで数秒）</div>'
+        +(imgEl?'<button class="go2" id="__ce_cmbg" style="background:#0b6bcb;margin-bottom:6px">🎨 この画像の背後に画像を敷く（水彩など）</button>':'')
+        +'<div class="cap" style="margin:0 0 8px">画像はこれが確実です（差し替えは一瞬）</div>'
       : '';
     var agh=PRESETS.map(function(p,i){return '<button class="ag2" data-i="'+i+'"><b>'+esc(p.b)+'</b><span>'+esc(p.d)+'</span></button>';}).join('');
     var m=document.createElement('div'); m.id='__ce_cm';
@@ -1509,24 +1675,46 @@ _EDIT_BAR = """
       +'<div class="__ce_size">'
       +'<button data-sx="1.1" data-sy="1.1">＋ 大きく</button><button data-sx="0.909" data-sy="0.909">－ 小さく</button>'
       +'<button data-sx="1.1" data-sy="1">⇔ 横に長く</button><button data-sx="0.909" data-sy="1">⇔ 横を縮め</button>'
-      +'<button data-sx="1" data-sy="1.1">⇕ 縦に長く</button><button data-sx="1" data-sy="0.909">⇕ 縦を縮め</button></div>'
+      +'<button data-sx="1" data-sy="1.1">⇕ 縦に長く</button><button data-sx="1" data-sy="0.909">⇕ 縦を縮め</button>'
+      +'<button data-ro="-6">⟲ 左に回す</button><button data-ro="6">⟳ 右に回す</button></div>'
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 ドラッグで動かす（押して開始/終了）</button>'
-      +'<div class="cap">🎬 この要素に付ける</div>'+agh
+      +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
+      +'<div class="cap">▶ 動きを試す（その場で再生・AIなし）</div>'
+      +'<div class="__ce_anim">'+ANIMS.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
+      +'<div class="cap">🎬 この要素に付ける（AIが本組み込み）</div>'+agh
       +'<div class="cap" style="margin-top:8px">✍ この要素に自分で指示</div>'
       +'<input id="__ce_cmin" placeholder="例：もっと大きく赤く"><button class="go2" id="__ce_cmgo">この要素を直す</button>'
       +'<button class="go2" style="background:#4b2ea8" id="__ce_cmsg">💡 この要素の改善案</button>'
       +'<div class="chips" id="__ce_cmchips"></div></div>';
     document.body.appendChild(m);
     var mw=290, mh=Math.min(window.innerHeight*0.72, m.offsetHeight||420);
-    m.style.left=Math.max(10,Math.min(e.clientX, window.innerWidth-mw-10))+'px';
-    m.style.top=Math.max(10,Math.min(e.clientY, window.innerHeight-mh-10))+'px';
+    if(lastMenuPos){  // 前回ドラッグで動かした場所があれば、そこに出す（邪魔にならない位置を覚える）
+      m.style.left=Math.max(0,Math.min(lastMenuPos.left, window.innerWidth-60))+'px';
+      m.style.top=Math.max(0,Math.min(lastMenuPos.top, window.innerHeight-40))+'px';
+    } else {
+      m.style.left=Math.max(10,Math.min(e.clientX, window.innerWidth-mw-10))+'px';
+      m.style.top=Math.max(10,Math.min(e.clientY, window.innerHeight-mh-10))+'px';
+    }
     curMenu=m;
+    // このメニュー(パネル)自体も、黒いヘッダ部分を掴んで動かせる
+    (function(){
+      var mh=m.querySelector('.h'); mh.style.cursor='move';
+      mh.addEventListener('mousedown',function(ev){
+        if(ev.target.closest('.c')) return;  // 閉じる✕は除く
+        var r=m.getBoundingClientRect(), msx=ev.clientX, msy=ev.clientY, ml=r.left, mt=r.top; ev.preventDefault();
+        function mv(e){ m.style.left=Math.max(0,Math.min(ml+(e.clientX-msx), window.innerWidth-60))+'px'; m.style.top=Math.max(0,Math.min(mt+(e.clientY-msy), window.innerHeight-40))+'px'; }
+        function up(){ var rr=m.getBoundingClientRect(); lastMenuPos={left:rr.left, top:rr.top}; try{localStorage.setItem('__ce_menupos',JSON.stringify(lastMenuPos));}catch(_){}; document.removeEventListener('mousemove',mv,true); document.removeEventListener('mouseup',up,true); }
+        document.addEventListener('mousemove',mv,true); document.addEventListener('mouseup',up,true);
+      });
+    })();
     var tail=' ★重要：この要素だけに適用し、他の要素や他のセクションは一切変えない。対象要素は「'+d+'」。アニメはCSS/素のJSで実装し、スクロール出現系はhtml.jsが付いた時だけ初期非表示にする保険を入れてJSが無くても中身が見えるようにする。';
     m.querySelector('.bd2').addEventListener('click',function(ev){
       var nb=ev.target.closest('.__ce_nudge button');
       if(nb){ if(nb.getAttribute('data-rst')) resetPos(curEl); else nudge(curEl, +nb.getAttribute('data-nx'), +nb.getAttribute('data-ny')); return; }
       var sb=ev.target.closest('.__ce_size button');
-      if(sb){ scaleBy(curEl, +sb.getAttribute('data-sx'), +sb.getAttribute('data-sy')); return; }
+      if(sb){ if(sb.hasAttribute('data-ro')) rotateBy(curEl, +sb.getAttribute('data-ro')); else scaleBy(curEl, +sb.getAttribute('data-sx'), +sb.getAttribute('data-sy')); return; }
+      var ak=ev.target.closest('.__ce_anim button');
+      if(ak){ playAnim(curEl, ak.getAttribute('data-ak')); return; }
       var dg=ev.target.closest('#__ce_cmdrag');
       if(dg){ toggleDrag(curEl, dg); return; }
       var ag=ev.target.closest('.ag2');
@@ -1547,9 +1735,9 @@ _EDIT_BAR = """
     m.querySelector('#__ce_cmx').addEventListener('click',closeMenu);
     var swBtn=m.querySelector('#__ce_cmswap');
     if(swBtn){ swBtn.addEventListener('click',function(){
-      var idx=camImgs().indexOf(imgEl); closeMenu();
-      if(idx<0){ alert('この画像は差し替え対象外です（背景画像かもしれません）'); return; }
-      openPicker(idx);
+      if(cands.length>1){ pickWhichImg(cands); return; }   // 重なっている→どれを差し替えるか選ぶ
+      if(!cands.length){ alert('差し替えられる画像がありません'); return; }
+      closeMenu(); openPicker(cands[0]);
     }); }
     var bgBtn=m.querySelector('#__ce_cmbg');
     if(bgBtn){ bgBtn.addEventListener('click',function(){
@@ -1558,6 +1746,8 @@ _EDIT_BAR = """
     m.querySelector('#__ce_cmgo').addEventListener('click',function(){
       var v=m.querySelector('#__ce_cmin').value.trim(); if(v) applyEl(sIdx, v+tail);
     });
+    var stBtn=m.querySelector('#__ce_cmstyle');
+    if(stBtn) stBtn.addEventListener('click',function(){ applyEl(sIdx, STYLE_INS); });
     m.querySelector('#__ce_cmsg').addEventListener('click',function(){
       var b=m.querySelector('#__ce_cmsg'); b.disabled=true; b.textContent='考え中…';
       fetch('/api/camp_suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:sIdx})})
@@ -1567,6 +1757,8 @@ _EDIT_BAR = """
         m.querySelector('#__ce_cmchips').innerHTML=(dd.suggestions||[]).map(function(s){return '<button class="chip" data-ins="'+esc(s.instruction)+'">'+esc(s.label)+'</button>';}).join('');
       }).catch(function(){b.disabled=false;b.textContent='💡 この要素の改善案';});
     });
+    // 基本は「移動」なので、右クリックした瞬間からドラッグで動かせる状態にする
+    setDragOn(el, m.querySelector('#__ce_cmdrag'));
   });
   // メニュー外をクリックしたら閉じる＆選択マーカー(青点線)も消す（枠が残らないように）
   document.addEventListener('click',function(e){ if((curMenu||curEl) && !e.target.closest('#__ce_cm')) closeMenu(); }, true);
@@ -1601,7 +1793,8 @@ _SERVE_SAFETY = """
 
 def _inject_edit_bar(html: str, filename: str) -> str:
     """カンプHTMLの末尾に編集バーを差し込む（</body>直前）。あわせて保険を注入。"""
-    bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename))
+    bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename)).replace(
+        "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider))
     low = html.lower()
     if "</body>" in low:
         i = low.rfind("</body>")

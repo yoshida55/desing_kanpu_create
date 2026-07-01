@@ -1558,6 +1558,9 @@
         const favCls = c.fav ? " is_fav" : "";
         return `<div class="hist_row${favCls}"><span class="h_title" title="${_esc(c.name || c.title || c.file)}">${label}</span><span class="h_date">${ds}</span><button class="h_name" data-file="${c.file}" data-name="${_esc(c.name || "")}" title="名前を付けて保存">✎ 名前</button><a href="/camp/${c.file}" target="_blank" rel="noopener">開く</a><button class="h_del" data-file="${c.file}" title="削除">🗑</button></div>`;
       }).join("");
+      // 履歴を開いたら、新しい順の先頭（＝一番上）が見えるようにスクロールする
+      campHistList.scrollTop = 0;
+      try { campHistToggle.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {}
     }
     campHistList.addEventListener("click", async (e) => {
       const nameBtn = e.target.closest(".h_name");
