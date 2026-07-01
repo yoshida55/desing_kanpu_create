@@ -134,16 +134,29 @@ def extract_animations(url: str) -> dict:
     log.info("アニメの抜き出し開始: %s", norm_url)
     collected: dict = {"keyframes": [], "transitions": [], "animations": [], "lottie": []}
     lottie_saved: list[str] = []
+    # 各段階の所要時間を測る（どこが遅いか特定する用のプロトタイプログ）
+    t_all = time.monotonic()
+
+    def _lap(label: str, since: float) -> float:
+        dt = time.monotonic() - since
+        log.info("  [計測] %s: %.1f 秒", label, dt)
+        return time.monotonic()
+
     with sync_playwright() as p:
+        t = time.monotonic()
         browser = p.chromium.launch(headless=cfg.headless)
         context = browser.new_context(
             viewport={"width": cfg.viewport_w, "height": cfg.viewport_h},
             user_agent=cfg.user_agent,
         )
         page = context.new_page()
-        page.set_default_navigation_timeout(cfg.nav_timeout_ms)
+        # アニメ抽出は完璧な描画を待たなくてよいので、遷移の上限も短くする（暴走防止）。
+        page.set_default_navigation_timeout(min(cfg.nav_timeout_ms, 20_000))
+        page.set_default_timeout(8000)  # 各ページ操作の上限（暴走防止）
+        t = _lap("ブラウザ起動", t)
         try:
             page.goto(norm_url, wait_until="domcontentloaded")
+            t = _lap("goto(ページを開く)", t)
             # keyframes はスタイルシートに載っているので、スクショほど厳密に待たなくてよい。
             # 待ち時間を短めにして体感を速くする（取りこぼしは実データで様子見）。
             try:
@@ -152,27 +165,46 @@ def extract_animations(url: str) -> dict:
                 )
             except PWTimeout:
                 pass
+            t = _lap("networkidle待ち", t)
             page.wait_for_timeout(600)  # 保険の待ち（短め）
             # 遅延読み込みのアニメ要素/Lottieを発火させる軽いスクロール（高速版）。
-            # 1ページ丸ごとをゆっくり舐めず、速く下まで行って先頭に戻すだけ。
+            # ★必ず自分で止まる：最大120回(約6秒)で打ち切る＋innerHeightが0でも回り続けない。
+            #   これが無いと、遅延ロードでページが伸び続けるサイトで無限ループ→ハングした。
             try:
                 page.evaluate(
-                    "async()=>{await new Promise(r=>{let y=0;const t=setInterval(()=>{window.scrollBy(0,window.innerHeight*1.5);y+=window.innerHeight*1.5;if(y>=document.body.scrollHeight){clearInterval(t);r();}},50);});window.scrollTo(0,0);}"
+                    "async()=>{await new Promise(r=>{let y=0,i=0;const step=Math.max(window.innerHeight*1.5,600);"
+                    "const t=setInterval(()=>{i++;window.scrollBy(0,step);y+=step;"
+                    "if(y>=document.body.scrollHeight||i>120){clearInterval(t);r();}},50);});"
+                    "window.scrollTo(0,0);}"
                 )
                 page.wait_for_timeout(200)
             except Exception:  # noqa: BLE001
                 pass
+            t = _lap("スクロール", t)
             collected = page.evaluate(_COLLECT_JS) or collected
+            t = _lap("CSS/Lottie収集(evaluate)", t)
+            log.info(
+                "  収集結果: keyframes %d / transition %d / lottie候補 %d",
+                len(collected.get("keyframes", [])),
+                len(collected.get("transitions", [])),
+                len(collected.get("lottie", [])),
+            )
         except Exception as exc:  # noqa: BLE001
             log.error("ページを開けず: %s (%s)", norm_url, exc)
 
-        # Lottie JSON をDL（ブラウザのセッションで取る＝保護されていても取れることがある）
+        # Lottie JSON をDL（ブラウザのセッションで取る＝保護されていても取れることがある）。
+        # ★遅い/応答しないURLで待ち続けないよう、1件6秒・全体10秒で必ず打ち切る。
+        t = time.monotonic()
         seen_hash = set()
+        lottie_deadline = time.monotonic() + 10.0
         for u in (collected.get("lottie") or []):
-            if len(lottie_saved) >= 12:
+            if len(lottie_saved) >= 12 or time.monotonic() > lottie_deadline:
+                log.info("  Lottie取得を打ち切り（上限到達）")
                 break
+            t_one = time.monotonic()
             try:
-                resp = context.request.get(u, timeout=15000)
+                resp = context.request.get(u, timeout=6000)
+                log.info("  Lottie取得 %.1f秒: %s", time.monotonic() - t_one, u[:90])
                 if not resp.ok:
                     continue
                 data = resp.body()
@@ -194,9 +226,12 @@ def extract_animations(url: str) -> dict:
                 lottie_saved.append(str((out_dir / f"lottie_{idx:02d}.json").relative_to(config.PROJECT_ROOT)))
             except Exception:  # noqa: BLE001
                 continue
+        _lap("Lottie取得(合計)", t)
 
+        t = time.monotonic()
         context.close()
         browser.close()
+        _lap("ブラウザ終了", t)
 
     result = {
         "keyframes": collected.get("keyframes", []),
@@ -206,7 +241,8 @@ def extract_animations(url: str) -> dict:
         "lottie_urls": collected.get("lottie", []),
     }
     log.info(
-        "アニメの抜き出し完了: keyframes %d / transition %d / animation %d / lottie %d",
+        "アニメの抜き出し完了(総%.1f秒): keyframes %d / transition %d / animation %d / lottie %d",
+        time.monotonic() - t_all,
         len(result["keyframes"]), len(result["transitions"]),
         len(result["animations"]), len(lottie_saved),
     )

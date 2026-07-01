@@ -1391,7 +1391,10 @@
         // 目安までは素直に伸び、超えたら95%で足踏み（完了で100%にする）
         const pct = Math.min(95, (sec / EST) * 100);
         fill.style.width = pct.toFixed(0) + "%";
-        txt.textContent = `抜き出し中… ${sec.toFixed(0)} 秒（目安 ${EST} 秒）`;
+        // 60秒を超えたら異常（バックエンドは25秒前後で必ず終わる）→ 案内を出す
+        txt.textContent = sec > 60
+          ? `時間がかかっています… ${sec.toFixed(0)} 秒（サーバー再起動が必要かも）`
+          : `抜き出し中… ${sec.toFixed(0)} 秒（目安 ${EST} 秒）`;
       }, 200);
     }
     function finishAnimProgress(ok) {
@@ -1419,7 +1422,10 @@
         btn.disabled = false; btn.textContent = "🎞 アニメを抜き出す"; status.textContent = data.message; return;
       }
       const wait = async () => {
-        const d = await fetch("/api/site/" + id).then((r) => r.json());
+        let d;
+        // 一時的な通信エラーで監視が止まらないよう、失敗しても再試行する
+        try { d = await fetch("/api/site/" + id).then((r) => r.json()); }
+        catch (err) { setTimeout(wait, 1500); return; }
         if (d.anim_extracting) { setTimeout(wait, 1200); }
         else {
           finishAnimProgress(true);
