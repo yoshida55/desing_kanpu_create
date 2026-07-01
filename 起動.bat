@@ -5,6 +5,9 @@ rem iHTMLƒtƒ@ƒCƒ‹‚ğ’¼Úƒ_ƒuƒ‹ƒNƒŠƒbƒN‚·‚é‚Æ file:// ‚É‚È‚èƒ{ƒ^ƒ“‚ª“®‚©‚È‚¢‚Ì‚Å’
 
 cd /d "%~dp0"
 
+rem Šù‚É5000”Ô‚Å“®‚¢‚Ä‚¢‚éŒÃ‚¢ƒT[ƒo[‚ğ~‚ß‚éiƒ]ƒ“ƒr‘ÎôE“ñd‹N“®–h~j
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":5000" ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>&1
+
 if not exist "venv\Scripts\python.exe" (
   echo venv ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñBæ‚ÉŠÂ‹«\’z‚ğ‚µ‚Ä‚­‚¾‚³‚¢iREADMEQÆjB
   pause

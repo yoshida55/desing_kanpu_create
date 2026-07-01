@@ -62,37 +62,43 @@ def _ref_image_block(image_path: Path, max_w: int = 900, max_h: int = 900) -> Op
 # - reveal系要素を IntersectionObserver で監視し、画面に入ったら表示クラスを付ける
 # - 画面内(ヒーロー等)は読み込み時に表示、下方はスクロールで順次表示＝ちゃんとアニメする
 # - JSが万一動かなくても、html.js が付かない＝中身は見えるまま（白画面にならない）
-_REVIEW_FALLBACK = """
+# 保険スクリプトは、差し替え時に「古いのを消して新しいのを入れ直す」ため
+# コメントで挟んで一意にマークする（_finalize_html が古い版を剥がして最新を入れる）。
+_SAFE_START = "<!--__CE_SAFE_START__-->"
+_SAFE_END = "<!--__CE_SAFE_END__-->"
+_REVIEW_FALLBACK = _SAFE_START + """
 <script>
 (function(){
   var html=document.documentElement;
   html.classList.add('js');
   var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
-  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
   function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
   function run(){
     var els=document.querySelectorAll(SEL);
-    if(!els.length) return;
-    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
-    var io=new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
-    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
-    els.forEach(function(el){ io.observe(el); });
-    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
-    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
     setTimeout(function(){
-      els.forEach(function(e){
-        if(parseFloat(getComputedStyle(e).opacity)===0){
-          show(e); e.style.opacity='1'; e.style.transform='none';
-        }
-      });
-    }, 3500);
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i], cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
   else run();
 })();
 </script>
-"""
+""" + _SAFE_END
 
 
 def _finalize_html(html: str) -> str:
@@ -107,6 +113,13 @@ def _finalize_html(html: str) -> str:
     if html.count("<script") > html.count("</script>"):
         cut = html.rfind("<script")
         html = html[:cut].rstrip()
+
+    # 既に入っている保険スクリプト（前回の版）を剥がす→最新版を入れ直す。
+    # （何度も編集しても重複せず、常に最新の"全部見える保険"が効くようにする）
+    html = re.sub(
+        re.escape(_SAFE_START) + r".*?" + re.escape(_SAFE_END),
+        "", html, flags=re.DOTALL,
+    )
 
     low = html.lower()
     if "</body>" in low:
@@ -140,25 +153,42 @@ def _to_openai_content(content: list) -> list:
     return out
 
 
+def _anthropic_text(msg) -> str:
+    """Claudeの返答から本文テキストだけを結合して返す。
+
+    Sonnet 5 / Opus 4.8 等は「考える過程(ThinkingBlock)」も content に混ぜて返すため、
+    先頭ブロックを決め打ちで .text すると落ちる。type=='text' のブロックだけ拾う。
+    """
+    parts = []
+    for b in msg.content:
+        if getattr(b, "type", None) == "text":
+            parts.append(getattr(b, "text", ""))
+    if parts:
+        return "".join(parts)
+    # 保険：type が付いていない実装でも text 属性があれば拾う
+    return "".join(getattr(b, "text", "") for b in msg.content)
+
+
 def _call_anthropic(system: str, content: list) -> str:
     from anthropic import Anthropic
 
     vcfg = config.CONFIG.vibe
-    client = Anthropic(api_key=vcfg.api_key)
+    # 制限時間を付ける（固まっても180秒で諦めてエラー→「永遠に続く」を防ぐ）
+    client = Anthropic(api_key=vcfg.api_key, timeout=180.0, max_retries=1)
     msg = client.messages.create(
         model=vcfg.model,
         max_tokens=16000,
         system=system,
         messages=[{"role": "user", "content": content}],
     )
-    return msg.content[0].text
+    return _anthropic_text(msg)
 
 
 def _call_openai(system: str, content: list) -> str:
     from openai import OpenAI
 
     hcfg = config.CONFIG.htmlgen
-    client = OpenAI(api_key=hcfg.openai_api_key)
+    client = OpenAI(api_key=hcfg.openai_api_key, timeout=180.0, max_retries=1)
     resp = client.chat.completions.create(
         model=hcfg.openai_model,
         max_completion_tokens=16000,
@@ -170,13 +200,88 @@ def _call_openai(system: str, content: list) -> str:
     return resp.choices[0].message.content or ""
 
 
-def _call_llm(system: str, content: list) -> tuple[str, str]:
-    """設定のプロバイダでHTMLを生成。返り値は (本文, 使ったモデル表示)。"""
+def _call_gemini(system: str, content: list) -> str:
+    """Gemini（無料枠が使える）でHTMLを生成（REST直叩き・SDK不要）。
+
+    Anthropic形式の content（text/image ブロック）を Gemini の parts に変換して送る。
+    """
+    import urllib.request
+
+    gcfg = config.CONFIG.gemini
+    parts: list = []
+    for b in content:
+        if b.get("type") == "text":
+            parts.append({"text": b["text"]})
+        elif b.get("type") == "image":
+            src = b["source"]
+            parts.append({"inline_data": {
+                "mime_type": src.get("media_type", "image/jpeg"),
+                "data": src["data"],
+            }})
+    body = {
+        "systemInstruction": {"parts": [{"text": system}]},
+        "contents": [{"role": "user", "parts": parts}],
+        # HTML全文はトークンが要るので上限を大きく取る
+        "generationConfig": {"maxOutputTokens": 32768, "temperature": 0.7},
+    }
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{gcfg.model}:generateContent?key={gcfg.api_key}"
+    )
+    req = urllib.request.Request(
+        url, data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=150) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    cand = data["candidates"][0]
+    return "".join(p.get("text", "") for p in cand["content"]["parts"])
+
+
+def _call_deepseek(system: str, content: list) -> str:
+    """DeepSeek（OpenAI互換・激安）でHTMLを生成。
+
+    DeepSeekは画像入力に非対応の想定なので、テキストのブロックだけ送る。
+    （修正はテキストのみ＝影響なし。生成の画像手本は渡せない点は割り切り）
+    """
+    from openai import OpenAI
+
+    dcfg = config.CONFIG.deepseek
+    client = OpenAI(
+        api_key=dcfg.api_key, base_url=dcfg.base_url, timeout=180.0, max_retries=1
+    )
+    text = "\n\n".join(b["text"] for b in content if b.get("type") == "text")
+    resp = client.chat.completions.create(
+        model=dcfg.model,
+        max_tokens=8000,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": text},
+        ],
+    )
+    return resp.choices[0].message.content or ""
+
+
+def _call_llm(system: str, content: list, provider: str | None = None) -> tuple[str, str]:
+    """指定プロバイダでHTMLを生成。返り値は (本文, 使ったモデル表示)。
+
+    provider を渡さなければ「生成用エンジン」(htmlgen.provider)を使う。
+    修正時は provider=htmlgen.edit_provider を渡して別エンジンにできる。
+    """
     hcfg = config.CONFIG.htmlgen
-    if hcfg.provider == "openai":
+    provider = provider or hcfg.provider
+    if provider == "openai":
         if not hcfg.openai_enabled:
             raise RuntimeError("OPENAI_API_KEY が未設定です（.env を確認）")
         return _call_openai(system, content), f"openai:{hcfg.openai_model}"
+    if provider == "gemini":
+        if not config.CONFIG.gemini.enabled:
+            raise RuntimeError("GEMINI_API_KEY が未設定です（.env を確認）")
+        return _call_gemini(system, content), f"gemini:{config.CONFIG.gemini.model}"
+    if provider == "deepseek":
+        if not config.CONFIG.deepseek.enabled:
+            raise RuntimeError("DEEPSEEK_API_KEY が未設定です（.env を確認）")
+        return _call_deepseek(system, content), f"deepseek:{config.CONFIG.deepseek.model}"
     if not config.CONFIG.vibe.enabled:
         raise RuntimeError("ANTHROPIC_API_KEY が未設定です（.env を確認）")
     return _call_anthropic(system, content), f"anthropic:{config.CONFIG.vibe.model}"
@@ -321,6 +426,11 @@ def generate_camp(
             anim_ref_url = brow["url"] if brow else None
             log.info("アニメ参照B を使用: %s", anim_ref_url)
 
+    # ②'' ユーザー提供の実画像があれば、それを優先的に使わせる
+    up_block = uploads_prompt_block()
+    if up_block:
+        content.append({"type": "text", "text": up_block})
+
     # ③ 生成指示（参照→作り直し・1ファイルHTML・AIっぽさ回避）
     content.append(
         {
@@ -341,14 +451,17 @@ def generate_camp(
                 "【AIっぽさを避ける】\n"
                 "- ❌ 手本に無いのに『横3カラム均等カード』を足さない（最もAIっぽい）\n"
                 "- ✅ 手本の非対称・メリハリ・余白のリズムをそのまま活かす\n\n"
-                "【画像（重要・ヘタな絵を描かない）】\n"
+                "【画像（重要・確実に表示させる）】\n"
                 "- ❌ 人物・風景・モノを CSSの図形やSVGで手描きしない（稚拙になるので絶対禁止）\n"
-                "- ✅ 写真が入る所は **LoremFlickr のダミー写真**を使う：\n"
-                "     https://loremflickr.com/{幅}/{高さ}/{英語キーワード}?lock={固有の数字}\n"
-                "     キーワードはサイトのテーマに合わせる（例 cafe,coffee / factory,industry / books,reading）。\n"
-                "     lock は画像ごとに違う数字にして固定（毎回変わらないように）。\n"
+                "- ✅ 上に『使える実画像（ユーザー提供）』があれば、内容の合う場所に**それを最優先で使う**"
+                "（<img src> に一覧のURLをそのまま入れる。合う画像が無い所だけ次のpicsum）\n"
+                "- ✅ 実画像で足りない所は **picsum.photos** を使う（安定・毎回同じ画像）：\n"
+                "     https://picsum.photos/seed/{英語の固有シード}/{幅}/{高さ}\n"
+                "     seed は画像ごとに違う語にする（例 team1, office2, hands3）。\n"
                 "- <img> には width/height か aspect-ratio と object-fit:cover を必ず指定\n"
-                "- 画像が読めない時に備え、画像の親に**ブランド色のbackground**を敷いておく\n"
+                "- ★画像が空に見えないよう二重の保険を必ず入れる：\n"
+                "   1) 画像の**親要素に必ずグラデーション/ブランド色の background** を敷く（読込中や失敗でも色で埋まる）\n"
+                "   2) <img> に onerror=\"this.style.display='none'\" を付ける（失敗時にalt文字を画面に出さない）\n"
                 "- アイコンは絵文字か、シンプルな線のインラインSVGのみ（イラストは描かない）\n\n"
                 "【アニメーション（本物っぽさの肝・しっかり入れる）】\n"
                 "- スクロールで各セクションが**ふわっと出現**（fade＋少し下から上へ。複数要素は少しずつ時間差=stagger）\n"
@@ -401,9 +514,19 @@ _EDIT_SYSTEM = (
 
 
 def _strip_fragment(text: str) -> str:
-    """AI返答から HTML 断片（セクション）を取り出す（```html フェンス除去）。"""
+    """AI返答から HTML 断片（セクション）を取り出す。
+
+    ```html フェンスを外し、さらに前後の説明文（Geminiが付けがち）を落とす：
+    最初の '<' から最後の '>' までを HTML 本体とみなす。
+    """
     m = re.search(r"```(?:html)?\s*(.*?)```", text, flags=re.DOTALL | re.IGNORECASE)
-    return (m.group(1) if m else text).strip()
+    if m:
+        text = m.group(1)
+    text = text.strip()
+    lt, gt = text.find("<"), text.rfind(">")
+    if lt != -1 and gt != -1 and gt > lt:
+        text = text[lt:gt + 1]
+    return text.strip()
 
 
 def _extract_json(text: str):
@@ -427,22 +550,44 @@ def list_camp_sections(html: str) -> list[dict]:
     return out
 
 
-def suggest_edits(filename: str, n: int = 6) -> list[dict]:
-    """カンプを見て、1クリックで試せる改善案を n 個提案する（種類を散らす）。"""
+def suggest_edits(filename: str, n: int = 10, section: int = -1) -> list[dict]:
+    """カンプを見て、1クリックで試せる改善案を n 個提案する（種類を散らす）。
+
+    section>=0 なら、そのセクションだけを見て「そのセクション向けの具体案」を多めに出す。
+    section<0 なら、ページ全体から散らして出す。
+    """
     html = (config.CAMP_DIR / filename).read_text(encoding="utf-8")
     secs = list_camp_sections(html)
-    sec_list = "\n".join(f"{s['index']}: {s['label']}" for s in secs) or "(セクション未検出)"
-    prompt = (
-        f"次のランディングページHTMLを見て、クライアントに提示できる具体的な改善案を{n}個出してください。\n"
-        "各案は1クリックで適用できる粒度（1つの狙いに絞る）にする。\n\n"
-        f"# セクション一覧（index で指定する）\n{sec_list}\n\n"
-        f"# HTML\n{html}\n\n"
-        "# 出力（JSON配列だけ・前置きや説明は書かない）\n"
-        '[{"label":"20字以内のボタン文言","section":該当セクションのindex(整数。全体なら-1),"instruction":"AIに渡す具体的な修正指示を1文で"}]\n'
-        "・label例：ヒーロー画像を実写に／料金表にホバーで浮く動き／CTAを黄色で目立たせる／余白を広げて上品に\n"
-        "・種類を散らす（画像・配色・レイアウト・アニメ・コピーなど）"
+    matches = list(_SEC_RE.finditer(html))
+
+    if 0 <= section < len(matches):
+        label = secs[section]["label"] if section < len(secs) else f"セクション{section + 1}"
+        target = matches[section].group(0)
+        prompt = (
+            f"次はランディングページの『{label}』セクションのHTMLです。"
+            f"このセクションだけをより良くする具体的な改善案を{n}個、たくさん出してください。\n"
+            "実際のこのHTMLの中身を見て、そこにある要素に対する具体案にする（一般論でなく）。\n"
+            "種類を散らす：画像／配色／レイアウト／余白／アニメ・動き／コピー文／装飾・あしらい／文字組み。\n\n"
+            f"# このセクションのHTML\n{target}\n\n"
+            "# 出力（JSON配列だけ・前置き無し）\n"
+            f'[{{"label":"20字以内のボタン文言","section":{section},"instruction":"具体的な修正指示を1文で"}}]'
+        )
+    else:
+        sec_list = "\n".join(f"{s['index']}: {s['label']}" for s in secs) or "(セクション未検出)"
+        prompt = (
+            f"次のランディングページHTMLを見て、具体的な改善案を{n}個、たくさん出してください。\n"
+            "各案は1クリックで適用できる粒度（1つの狙いに絞る）にする。\n\n"
+            f"# セクション一覧（index で指定する）\n{sec_list}\n\n"
+            f"# HTML\n{html}\n\n"
+            "# 出力（JSON配列だけ・前置き無し）\n"
+            '[{"label":"20字以内のボタン文言","section":該当セクションのindex(整数。全体なら-1),"instruction":"具体的な修正指示を1文で"}]\n'
+            "・label例：ヒーロー画像を実写に／料金表にホバーで浮く動き／CTAを黄色で目立たせる／余白を広げて上品に\n"
+            "・種類を散らす（画像・配色・レイアウト・アニメ・コピーなど）"
+        )
+    raw, _ = _call_llm(
+        _SUGGEST_SYSTEM, [{"type": "text", "text": prompt}],
+        provider=config.CONFIG.htmlgen.edit_provider,
     )
-    raw, _ = _call_llm(_SUGGEST_SYSTEM, [{"type": "text", "text": prompt}])
     try:
         items = _extract_json(raw)
     except Exception:  # noqa: BLE001
@@ -464,6 +609,188 @@ def suggest_edits(filename: str, n: int = 6) -> list[dict]:
     return out
 
 
+# ── ユーザー自前画像：アップロード → AIが内容を説明 → 生成/編集で優先使用 ──────
+_IMG_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+_UPLOAD_BASE = "http://127.0.0.1:5000/uploads/"  # このツールの配信URL（ローカル固定）
+
+
+def _uploads_meta_path() -> Path:
+    return config.UPLOAD_DIR / "_captions.json"
+
+
+def load_uploads_meta() -> dict:
+    p = _uploads_meta_path()
+    if p.exists():
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            return {}
+    return {}
+
+
+def save_uploads_meta(meta: dict) -> None:
+    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    _uploads_meta_path().write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+# ── カンプの「名前を付けて保存（お気に入り）」メタ ──────────────
+# ファイル名 → {"name": 表示名, "fav": True} を JSON で持つ。
+# HTMLファイル自体は汚さない（メタは別ファイル）。
+def _camp_names_path() -> Path:
+    return config.CAMP_DIR / "_names.json"
+
+
+def load_camp_names() -> dict:
+    p = _camp_names_path()
+    if p.exists():
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            return {}
+    return {}
+
+
+def save_camp_names(meta: dict) -> None:
+    config.CAMP_DIR.mkdir(parents=True, exist_ok=True)
+    _camp_names_path().write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def set_camp_name(filename: str, name: str, fav: bool = True) -> dict:
+    """カンプに表示名を付ける（お気に入り登録）。名前が空なら登録を外す。"""
+    meta = load_camp_names()
+    name = (name or "").strip()
+    if not name:
+        meta.pop(filename, None)
+    else:
+        meta[filename] = {"name": name[:60], "fav": bool(fav)}
+    save_camp_names(meta)
+    return meta.get(filename, {})
+
+
+def list_uploads() -> list[dict]:
+    """アップロード済み画像の一覧（file, url, caption）。"""
+    meta = load_uploads_meta()
+    out = []
+    if not config.UPLOAD_DIR.exists():
+        return out
+    for p in sorted(config.UPLOAD_DIR.iterdir()):
+        if p.name.startswith("_") or not p.is_file() or p.suffix.lower() not in _IMG_EXTS:
+            continue
+        out.append({"file": p.name, "url": _UPLOAD_BASE + p.name, "caption": meta.get(p.name, "")})
+    return out
+
+
+_CAPTION_PROMPT = (
+    "この画像をWebサイトの写真素材として使う前提で、日本語1行(30字以内)で説明して。"
+    "人物/風景/建物/商品などの内容と雰囲気を端的に。説明文だけ返す。"
+)
+
+
+def _caption_gemini(path: Path) -> str:
+    """Gemini（無料枠が使える）で画像に日本語1行キャプションを付ける。REST直叩き。"""
+    import urllib.request
+
+    from PIL import Image
+
+    gcfg = config.CONFIG.gemini
+    img = Image.open(path).convert("RGB")
+    img.thumbnail((760, 760))
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=80)
+    b64 = base64.b64encode(buf.getvalue()).decode()
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{gcfg.model}:generateContent?key={gcfg.api_key}"
+    )
+    body = {"contents": [{"parts": [
+        {"text": _CAPTION_PROMPT},
+        {"inline_data": {"mime_type": "image/jpeg", "data": b64}},
+    ]}]}
+    req = urllib.request.Request(
+        url, data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    text = data["candidates"][0]["content"]["parts"][0]["text"]
+    return text.strip().replace("\n", " ")[:60]
+
+
+def caption_image(path: Path) -> str:
+    """画像を見て、Web素材向けの日本語1行キャプションを付ける。
+
+    Gemini（無料枠・安い）が設定されていれば優先。無ければ生成用LLM（Claude/GPT）で代替。
+    """
+    if config.CONFIG.gemini.enabled:
+        try:
+            cap = _caption_gemini(path)
+            if cap:
+                return cap
+        except Exception:  # noqa: BLE001
+            log.exception("Geminiキャプション失敗 → 生成用LLMで代替")
+
+    blk = _ref_image_block(path, max_w=760, max_h=760)
+    if not blk:
+        return ""
+    content = [blk, {"type": "text", "text": _CAPTION_PROMPT}]
+    try:
+        raw, _ = _call_llm("あなたは画像に短いキャプションを付けるアシスタントです。", content)
+        return raw.strip().replace("\n", " ")[:60]
+    except Exception:  # noqa: BLE001
+        log.exception("画像キャプション生成に失敗")
+        return ""
+
+
+def uploads_prompt_block() -> str:
+    """アップロード画像の一覧を、生成/編集プロンプト用の指示文にする。"""
+    ups = list_uploads()
+    if not ups:
+        return ""
+    lines = [
+        "# 使える実画像（ユーザー提供・picsumより優先して使う）",
+        "内容の合う場所には、下の実画像を <img src> に**そのままのURLで**使うこと（合う画像が無い所だけpicsum）。",
+    ]
+    for u in ups:
+        lines.append(f"- {u['url']} … {u['caption'] or '(説明なし)'}")
+    return "\n".join(lines)
+
+
+_IMG_TAG_RE = re.compile(r"<img\b[^>]*>", re.IGNORECASE)
+
+
+def swap_image(filename: str, index: int, new_src: str) -> dict:
+    """カンプ内の index 番目の <img> の src を new_src に差し替える（AI不使用・一瞬）。
+
+    生成物の画像だけを、アップロード画像に手で置き換える用。別ファイルで保存。
+    """
+    new_src = (new_src or "").strip()
+    if not new_src:
+        raise ValueError("差し替える画像が指定されていません")
+    html = (config.CAMP_DIR / filename).read_text(encoding="utf-8")
+    tags = list(_IMG_TAG_RE.finditer(html))
+    if index < 0 or index >= len(tags):
+        raise ValueError("対象の画像が見つかりません")
+    m = tags[index]
+    tag = m.group(0)
+    if re.search(r"""src\s*=\s*["']""", tag, flags=re.IGNORECASE):
+        # 既存の src="..." / src='...' を置換（onerror等は残す）
+        new_tag = re.sub(
+            r"""(src\s*=\s*)(["']).*?\2""",
+            lambda mm: mm.group(1) + '"' + new_src + '"',
+            tag, count=1, flags=re.IGNORECASE,
+        )
+    else:
+        new_tag = tag[:-1].rstrip() + f' src="{new_src}">'
+    new_html = html[:m.start()] + new_tag + html[m.end():]
+
+    config.CAMP_DIR.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    out = config.CAMP_DIR / f"camp_{ts}.html"
+    out.write_text(new_html, encoding="utf-8")
+    log.info("画像差し替え(AI不使用): %s img[%d] → %s", filename, index, new_src)
+    return {"file": out.name, "swapped_index": index}
+
+
 def edit_camp_section(filename: str, section_index: int, instruction: str) -> dict:
     """指定セクションだけを依頼どおり直す（速い）。section_index<0 は全体編集（遅い）。
 
@@ -475,15 +802,17 @@ def edit_camp_section(filename: str, section_index: int, instruction: str) -> di
     html = (config.CAMP_DIR / filename).read_text(encoding="utf-8")
     matches = list(_SEC_RE.finditer(html))
     whole = section_index is None or section_index < 0 or not matches or section_index >= len(matches)
+    up_block = uploads_prompt_block()  # ユーザー提供画像があれば編集でも使う
+    up_txt = ("\n\n" + up_block) if up_block else ""
 
     if whole:
         # 全体編集：HTML全部を渡して直す（確実だが遅い）
         content = [{"type": "text", "text": (
             "次のLP全体を、依頼どおり**最小限だけ**直してHTML全体を返してください。"
             "指示に無い所は変えない。トーン・配色・フォントは維持。\n\n"
-            f"# 依頼\n{instruction}\n\n# 現在のHTML\n{html}\n\n返答はHTMLだけ。"
+            f"# 依頼\n{instruction}{up_txt}\n\n# 現在のHTML\n{html}\n\n返答はHTMLだけ。"
         )}]
-        raw, used = _call_llm(_EDIT_SYSTEM, content)
+        raw, used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
         new_html = _finalize_html(_strip_html(raw))
     else:
         m = matches[section_index]
@@ -494,16 +823,19 @@ def edit_camp_section(filename: str, section_index: int, instruction: str) -> di
             "指定セクションだけを依頼どおり直してください。全体のトーン・配色・フォントは保つ。\n\n"
             f"# ページ全体のCSS（参考・むやみに変えない）\n{style_ctx}\n\n"
             f"# 直す対象セクション（このHTMLだけを直す）\n{section_html}\n\n"
-            f"# 依頼\n{instruction}\n\n"
+            f"# 依頼\n{instruction}{up_txt}\n\n"
             "# 出力ルール\n"
             "- このセクションの**新しいHTMLだけ**返す（<section>…</section> 一式）\n"
             "- 見た目の変更でCSSが要る場合は、返すセクションの中に <style> を入れて完結させる（既存クラスの上書きも可）\n"
-            "- 画像は LoremFlickr の実写を使う（人物や絵をCSSで手描きしない）\n"
+            "- 写真は、上の『使える実画像』があればURLをそのまま優先使用。無ければ picsum.photos（https://picsum.photos/seed/{英語シード}/{幅}/{高さ}）。\n"
+            "  親要素にグラデ/色backgroundを敷き、<img>に onerror=\"this.style.display='none'\" を付けて空表示を防ぐ（絵は手描きしない）\n"
             "- 返答は HTML だけ。説明やマークダウンの前置きは書かない"
         )}]
-        raw, used = _call_llm(_EDIT_SYSTEM, content)
+        raw, used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
         new_section = _strip_fragment(raw)
         new_html = html[:m.start()] + new_section + html[m.end():]
+        # 差し替え後も必ず"全部見える保険"を入れ直す（出現アニメで真っ黒に消えるのを防ぐ）
+        new_html = _finalize_html(new_html)
 
     config.CAMP_DIR.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")

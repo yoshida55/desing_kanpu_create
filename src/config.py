@@ -22,6 +22,7 @@ SCREENSHOT_DIR = DATA_DIR / "screenshots"
 VIDEO_DIR = DATA_DIR / "videos"  # スクロール録画(アニメ参照用)
 ASSET_DIR = DATA_DIR / "assets"  # サイトから抜き出した画像
 ANIM_DIR = DATA_DIR / "anim"  # サイトから抜き出したアニメ素材(Lottie JSON等)
+UPLOAD_DIR = DATA_DIR / "uploads"  # ユーザーがアップロードした自前画像（カンプに使う）
 CAMP_DIR = DATA_DIR / "camps"  # 生成したカンプHTML
 DB_PATH = DATA_DIR / "design_stock.sqlite"
 RESULTS_HTML_PATH = PROJECT_ROOT / "results.html"
@@ -100,9 +101,18 @@ class VibeConfig:
 class HtmlGenConfig:
     """カンプHTML生成に使うLLM（Claude / OpenAI を切替）。"""
 
-    # "anthropic"（Claude）/ "openai"（GPT）
+    # "anthropic"（Claude）/ "openai"（GPT）/ "gemini"
+    # provider＝最初のカンプ生成に使うエンジン
     provider: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_HTML_PROVIDER", "anthropic")
+    )
+    # edit_provider＝生成後の「修正」に使うエンジン（未指定なら生成と同じ）
+    # 修正は小さい差分なので安いGeminiに逃がす、といった使い分けができる。
+    edit_provider: str = field(
+        default_factory=lambda: os.environ.get(
+            "DESIGN_STOCK_EDIT_PROVIDER",
+            os.environ.get("DESIGN_STOCK_HTML_PROVIDER", "anthropic"),
+        )
     )
     openai_api_key: str = field(default_factory=lambda: os.environ.get("OPENAI_API_KEY", ""))
     openai_model: str = field(
@@ -113,6 +123,42 @@ class HtmlGenConfig:
     def openai_enabled(self) -> bool:
         key = self.openai_api_key.strip()
         return bool(key) and key.startswith("sk-") and "ここに" not in key
+
+
+@dataclass(frozen=True)
+class GeminiConfig:
+    """画像の説明づけ（キャプション）用の Gemini。無料枠が使えて安上がり。"""
+
+    api_key: str = field(default_factory=lambda: os.environ.get("GEMINI_API_KEY", ""))
+    model: str = field(
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_GEMINI_MODEL", "gemini-3.1-flash-lite")
+    )
+
+    @property
+    def enabled(self) -> bool:
+        key = self.api_key.strip()
+        return bool(key) and "ここに" not in key
+
+
+@dataclass(frozen=True)
+class DeepSeekConfig:
+    """DeepSeek（中国製・激安）。OpenAI互換APIなので base_url 差し替えで使う。
+
+    修正はテキストのみなので相性が良い（画像は送らない）。生成は画像を渡せない前提。
+    """
+
+    api_key: str = field(default_factory=lambda: os.environ.get("DEEPSEEK_API_KEY", ""))
+    model: str = field(
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_DEEPSEEK_MODEL", "deepseek-v4-flash")
+    )
+    base_url: str = field(
+        default_factory=lambda: os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+    )
+
+    @property
+    def enabled(self) -> bool:
+        key = self.api_key.strip()
+        return bool(key) and "ここに" not in key
 
 
 @dataclass(frozen=True)
@@ -129,6 +175,8 @@ class AppConfig:
     search: SearchConfig = field(default_factory=SearchConfig)
     vibe: VibeConfig = field(default_factory=VibeConfig)
     htmlgen: HtmlGenConfig = field(default_factory=HtmlGenConfig)
+    gemini: GeminiConfig = field(default_factory=GeminiConfig)
+    deepseek: DeepSeekConfig = field(default_factory=DeepSeekConfig)
 
 
 # どこからでも import して使う共有インスタンス
@@ -178,3 +226,4 @@ def ensure_dirs() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
     ANIM_DIR.mkdir(parents=True, exist_ok=True)
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)

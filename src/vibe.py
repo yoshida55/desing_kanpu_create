@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import base64
 import io
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -44,16 +45,50 @@ def _image_to_base64_jpeg(image_path: Path, max_side: int = 1024) -> str:
     return base64.b64encode(buf.getvalue()).decode()
 
 
+def _describe_gemini(b64_jpeg: str) -> str:
+    """Gemini（無料枠が使える）で雰囲気を1段落で説明させる（REST直叩き）。"""
+    import urllib.request
+
+    gcfg = config.CONFIG.gemini
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{gcfg.model}:generateContent?key={gcfg.api_key}"
+    )
+    body = {"contents": [{"parts": [
+        {"text": _PROMPT},
+        {"inline_data": {"mime_type": "image/jpeg", "data": b64_jpeg}},
+    ]}]}
+    req = urllib.request.Request(
+        url, data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+
 def generate_vibe_description(image_path: Path) -> str:
-    """スクショ1枚 → Claude が雰囲気を1段落で説明した文章を返す。"""
+    """スクショ1枚 → AIが雰囲気を1段落で説明した文章を返す。
+
+    Gemini（無料枠・安い）が設定されていれば優先。無ければ Claude で代替。
+    """
+    b64 = _image_to_base64_jpeg(image_path)
+
+    if config.CONFIG.gemini.enabled:
+        try:
+            txt = _describe_gemini(b64)
+            if txt:
+                return txt
+        except Exception:  # noqa: BLE001
+            log.exception("Geminiでの雰囲気説明に失敗 → Claudeで代替")
+
     cfg = config.CONFIG.vibe
     if not cfg.enabled:
         raise RuntimeError(
-            "ANTHROPIC_API_KEY が未設定です（.env にキーを貼ってください）"
+            "GEMINI_API_KEY も ANTHROPIC_API_KEY も未設定です（.env にキーを貼ってください）"
         )
     from anthropic import Anthropic
 
-    b64 = _image_to_base64_jpeg(image_path)
     client = Anthropic(api_key=cfg.api_key)
     msg = client.messages.create(
         model=cfg.model,
@@ -75,7 +110,9 @@ def generate_vibe_description(image_path: Path) -> str:
             }
         ],
     )
-    return msg.content[0].text.strip()
+    # Sonnet 5/Opus 4.8 は ThinkingBlock も返すので、text ブロックだけ拾う
+    parts = [getattr(b, "text", "") for b in msg.content if getattr(b, "type", None) == "text"]
+    return ("".join(parts) or "".join(getattr(b, "text", "") for b in msg.content)).strip()
 
 
 def describe_one(

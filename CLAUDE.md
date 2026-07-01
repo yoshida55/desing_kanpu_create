@@ -3,7 +3,58 @@
 このファイルは、このプロジェクトで作業する Claude（と人間）が最初に読む案内図。
 **何を・なぜ作っているか／今どこまで出来ているか／次に何をするか**をここに集約する。
 
-最終更新: 2026-07-01
+最終更新: 2026-07-02
+
+---
+
+## 0. 直近の大改修（2026-07-02）＝カンプ「その場編集」とマルチエンジン
+
+この日、カンプ生成後の**「見ながらその場で直す」体験**と**エンジンの選択肢**を大きく強化した。
+以下はすべて実装済み。詳細は各コード（`camp.py` / `viewer.py` の `_EDIT_BAR` / `config.py`）。
+
+### ① マルチエンジン（生成／修正を別々に選べる）
+- 生成／修正で**別エンジン**を指定できる（`HtmlGenConfig.provider` = 生成、`edit_provider` = 修正）。
+  - `.env`：`DESIGN_STOCK_HTML_PROVIDER` / `DESIGN_STOCK_EDIT_PROVIDER`。
+- 対応プロバイダ：**Claude / GPT(OpenAI) / Gemini / DeepSeek**。`camp._call_llm(system, content, provider)` が出し分け。
+  - `_call_anthropic` / `_call_openai` / `_call_gemini`(REST) / `_call_deepseek`(OpenAI互換・base_url差し替え)。
+- **モデルもドロップダウンで選ぶ**（⚙設定）。選んだ瞬間に自動保存（ラジオもモデルも）。
+  - Claude：**Haiku 4.5(修正に最適/激安 $1/$5)** / Opus 4.8 / Sonnet 5 / Sonnet 4.6。
+  - GPT：gpt-5.5 / gpt-5.4。Gemini：3.1 flash-lite / flash。
+  - **DeepSeek：V4-Pro($0.44/$0.87・Haiku超えの精度)** / V4-Flash(最安 $0.14/$0.28)。`DEEPSEEK_API_KEY`。
+- **接続テスト**は Claude/GPT/DeepSeek＋Gemini をまとめて検証（`_test_all`/`_test_key`/`_test_gemini`/`_test_deepseek`）。
+- キー未設定の判定は用途別：`_gen_ready()`（生成）/ `_edit_ready()`（修正）/ `_provider_ready(provider)`。
+
+### ② コスト設計（破産回避）★重要
+- **料金は「出力トークン」が主。全文を返す＝高い**。
+  - **セクション修正（右クリック or ①で選択）＝数円**。**ページ全体を直す＝数十〜100円**（全文往復＋thinking）。
+- `submit()` は section=-1（ページ全体）のとき**確認ダイアログで警告**（うっかり高額を防ぐ）。
+- LLM呼び出しに**制限時間**（Claude/OpenAI=180s・Gemini/DeepSeek=150/180s）→「永遠に続く」を根絶。
+- **おすすめ運用**：生成=GPT/Claude（画像手本が要る）／修正=**DeepSeek V4-Pro か Haiku 4.5**／説明=Gemini。
+- ⚠ **DeepSeekは画像を送らない実装**（テキストのみ）。修正はテキストだけなので最適。**生成にDeepSeekを使うと手本スクショを渡せず"らしさ"が落ちる**。
+
+### ③ その場編集バー（`_EDIT_BAR` を `/camp/<file>` で注入）
+- **右クリック**した要素に直接：アニメ／背景装飾／自由指示／改善案を出せる。
+  - `pickTarget()`：1文字ずつ分割spanなどインライン断片を掴んだら、**見出し等のまとまりまで親を上る**。
+  - 選択マーカーは**青い点線**（`.__ce_sel`）＝デザインの枠と見分けやすく、外クリック/読込で消える。
+- **プリセット**（`PRESETS`）：アニメ10種＋**背景装飾6種**（ドット/ストライプ/方眼/幾何学/紙質感/水彩にじみ）。
+  - 背景プリセットは `bg:1` フラグ付き。**画像を右クリック時は「画像の周りだけ」／余白を右クリック時は「セクション全体」**に出し分け。
+- **画像は右クリックで2択**：🖼差し替え（AIなし・一瞬 `swap_image`）／🎨背後に画像を敷く（水彩など・`openBgPicker`→AI）。
+  - 画像のAI指示は不安定なので、差し替え/背景敷きを優先提示。
+- **進捗トースト**（画面下・経過秒＋段階表示）。編集は非同期ジョブ（複数同時OK）。
+- **⭐名前を付けて保存**：良い版に名前を付けてお気に入り登録（`camp.set_camp_name`→`data/camps/_names.json`）。
+  - HTML本体は汚さず別JSONに記録。履歴一覧で名前付きは上にオレンジ＋⭐表示、✎で改名。
+
+### ④ 「消える(真っ黒)」対策＝全部見える保険
+- 出現アニメの `opacity:0` がトリガー不発で残ると真っ黒に。→ **保険を二重化**：
+  - 生成/修正時：`_REVIEW_FALLBACK`（`_SAFE_START/END`で挟む・`_finalize_html`が古い版を剥がして最新を入れ直す）。
+  - **配信時**：`_SERVE_SAFETY`（`_inject_edit_bar`で全カンプに注入）→**古い壊れたファイルも見た瞬間に直る**。
+  - どちらも「クラス名に関係なく、透明/非表示の要素を2.2〜2.5秒後に強制表示」する。
+- セクション修正も必ず `_finalize_html` を通す（差し替え後に保険が効く）。
+
+### ⑤ 効いたバグ修正
+- **ThinkingBlockエラー**：Sonnet 5 / Opus 4.8 は考える過程(ThinkingBlock)も返す。
+  `content[0].text` 決め打ちで落ちていた → `_anthropic_text(msg)` で **type=='text' のブロックだけ結合**（`vibe.py`も同様）。
+- **Geminiの説明文混入**：`_strip_fragment` を強化（```フェンス除去＋最初の`<`〜最後の`>`だけ採用）。
 
 ---
 

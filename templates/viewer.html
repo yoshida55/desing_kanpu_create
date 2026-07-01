@@ -188,6 +188,33 @@
     .camp_toggle:hover { background: #ffe9d6; }
     .camp_panel { display: none; margin-top: 1rem; }
     .camp_panel.is_open { display: block; }
+    /* 自分の画像アップロード */
+    /* 画像アップロードは折りたたみで生成ボタンの下に置く */
+    .camp_up { margin-top: 1rem; }
+    .camp_up_toggle {
+      font-size: 1.3rem; color: #2b6cb0; background: #eaf2fb; border: 1px solid #c7ddf5;
+      border-radius: 1rem; padding: 0.6rem 1.4rem; cursor: pointer;
+    }
+    .camp_up_toggle:hover { background: #dceafb; }
+    .camp_uploads { background: #f7f9fc; border: 1px solid #e4ebf3; border-radius: 1rem; padding: 1.2rem; margin-top: 0.8rem; }
+    .cu_head { font-size: 1.3rem; font-weight: 700; color: #2b6cb0; margin-bottom: 0.8rem; }
+    .cu_actions { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+    .cu_btn {
+      font-size: 1.25rem; font-weight: 700; color: #2b6cb0; background: #eaf2fb;
+      border: 1px solid #c7ddf5; border-radius: 0.8rem; padding: 0.6rem 1.2rem; cursor: pointer; white-space: nowrap;
+    }
+    .cu_btn:hover { background: #dceafb; }
+    .cu_go { color: #fff; background: #2b6cb0; border-color: #2b6cb0; }
+    .cu_go:hover { background: #245c9c; }
+    .cu_path { flex: 1; min-width: 20rem; font-size: 1.2rem; padding: 0.6rem 0.9rem; border: 1px solid #d0d0d5; border-radius: 0.8rem; }
+    .cu_state { font-size: 1.2rem; color: #6e6e73; }
+    .cu_grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 0.8rem; margin-top: 1rem; }
+    .cu_card { background: #fff; border: 1px solid #eee; border-radius: 0.8rem; overflow: hidden; position: relative; }
+    .cu_card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: #eef2f7; }
+    .cu_cap { font-size: 1.05rem; color: #555; padding: 0.4rem 0.5rem; line-height: 1.4em; min-height: 2.6em; }
+    .cu_del { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.55); color: #fff; border: none; border-radius: 50%; width: 2.2rem; height: 2.2rem; cursor: pointer; font-size: 1.2rem; }
+    .cu_del:hover { background: #d0021b; }
+    .cu_empty { color: #999; font-size: 1.2rem; grid-column: 1/-1; }
     /* mix & match：ベース／アニメ参照のセレクト */
     .camp_mix { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
     .camp_lbl { flex: 1; min-width: 26rem; font-size: 1.25rem; color: #555; display: flex; flex-direction: column; gap: 0.4rem; }
@@ -281,6 +308,28 @@
       border-radius: 1rem; padding: 0.5rem 1rem; cursor: pointer; text-align: left;
     }
     .sugg_chip:hover { background: #f0f0f2; border-color: #b8b8bf; }
+    /* 生成したカンプの履歴 */
+    .camp_hist { margin-top: 1.2rem; }
+    .camp_hist_toggle {
+      font-size: 1.3rem; color: #444; background: #eee; border: 1px solid #ddd;
+      border-radius: 1rem; padding: 0.6rem 1.4rem; cursor: pointer;
+    }
+    .camp_hist_toggle:hover { background: #e4e4e4; }
+    .camp_hist_list { margin-top: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .hist_row.is_fav { background: #fff7ee; border-radius: 8px; }
+    .hist_row.is_fav .h_title { color: #b8530a; font-weight: 700; }
+    .h_name { background: #f2f2f4; border: 1px solid #ddd; border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
+    .h_name:hover { background: #e6e6e8; }
+    .hist_row {
+      display: flex; align-items: center; gap: 1rem; background: #fff;
+      border: 1px solid #eee; border-radius: 0.8rem; padding: 0.7rem 1rem; font-size: 1.3rem;
+    }
+    .hist_row .h_title { flex: 1; color: #1d1d1f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist_row .h_date { font-size: 1.15rem; color: #999; white-space: nowrap; }
+    .hist_row a { color: #b8530a; font-weight: 700; white-space: nowrap; }
+    .hist_row .h_del { color: #bbb; background: none; border: none; cursor: pointer; font-size: 1.3rem; }
+    .hist_row .h_del:hover { color: #d0021b; }
+    .hist_empty { color: #999; font-size: 1.25rem; padding: 0.6rem; }
 
     .add_box {
       max-width: 90rem;
@@ -445,14 +494,18 @@
       padding: 0.4rem 0.9rem;
       border-radius: 0.8rem;
     }
-    .result_body { padding: 1.2rem 1.6rem 1.6rem; }
+    .result_body { padding: 0.9rem 1.2rem 1.1rem; }
+    /* ドメイン＋済タグ＋日付を1行に（文字を詰めてスッキリ） */
+    .result_head { display: flex; align-items: baseline; gap: 0.6rem; }
     .result_url {
-      display: block;
-      font-size: 1.3rem;
+      flex: 1;
+      min-width: 0;
+      font-size: 1.25rem;
       color: #0066cc;
-      word-break: break-all;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       text-decoration: none;
-      margin-bottom: 0.8rem;
     }
     .result_url:hover { text-decoration: underline; }
     /* 検出したアニメ系ライブラリのタグ（カンプ生成の手がかり） */
@@ -470,16 +523,16 @@
       border-radius: 0.6rem;
       padding: 0.2rem 0.7rem;
     }
-    /* 抽出した配色のスワッチ */
+    /* 抽出した配色のスワッチ（細い帯で控えめに） */
     .result_swatches {
       display: flex; /* 色のチップを横に並べる */
-      gap: 0.4rem;
-      margin-bottom: 0.8rem;
+      gap: 0.3rem;
+      margin-top: 0.6rem;
     }
     .result_swatch {
-      width: 2rem;
-      height: 2rem;
-      border-radius: 0.4rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 0.3rem;
       border: 1px solid rgba(0, 0, 0, 0.1);
     }
     /* ベースに生成ボタン */
@@ -496,16 +549,16 @@
     .result_base:hover { background: #ffe9d6; }
     .result_base:disabled { color: #aaa; cursor: default; }
 
-    /* Claudeが書いた雰囲気の説明文 */
-    .result_vibe {
-      font-size: 1.15rem;
-      line-height: 1.6em;
-      color: #555;
-      margin: 0 0 0.8rem;
-      background: #f7f5ff;
-      border-left: 3px solid #b9a9ff;
-      padding: 0.7rem 0.9rem;
-      border-radius: 0.4rem;
+    /* 雰囲気を言語化済みを示す小さなタグ（本文はカードに出さない＝AI用なので） */
+    .result_done {
+      flex: none;
+      font-size: 0.95rem;
+      color: #4b2ea8;
+      background: #efe9ff;
+      border: 1px solid #d6c9ff;
+      border-radius: 0.5rem;
+      padding: 0.1rem 0.5rem;
+      white-space: nowrap;
     }
     /* 雰囲気を言語化ボタン */
     .result_describe {
@@ -520,14 +573,7 @@
     }
     .result_describe:hover { background: #e4dbff; }
     .result_describe:disabled { color: #aaa; cursor: default; }
-    .result_meta {
-      display: flex; /* 日付とボタン群。カードが狭いので折り返す */
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .result_date { font-size: 1.1rem; color: #86868b; }
+    .result_date { flex: none; font-size: 1.05rem; color: #a0a0a5; white-space: nowrap; }
     .result_similar {
       font-size: 1.2rem;
       color: #1d1d1f;
@@ -561,13 +607,22 @@
     }
     .result_record:hover { background: #e6e6ea; }
     .result_record:disabled { color: #aaa; cursor: default; }
-    /* ボタン群をまとめる箱（似てる／雰囲気／ベース／録画／削除）
-       カードが狭いので折り返し可。各ボタンは改行させない(nowrap) */
+    /* ボタン群：ふだんは畳んでスッキリ、カードにホバーした時だけ出す */
     .result_tools {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
       gap: 0.4rem;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      margin-top: 0;
+      transition: max-height 0.22s ease, opacity 0.2s ease, margin-top 0.22s ease;
+    }
+    .result_item:hover .result_tools {
+      max-height: 8rem;
+      opacity: 1;
+      margin-top: 0.8rem;
     }
     /* カード内のボタンは全部コンパクト＆1語で改行させない（縦積み文字化を防ぐ） */
     .result_similar,
@@ -845,13 +900,34 @@
     <!-- 設定パネル（生成エンジン・APIキー・一括言語化。トグルで開く） -->
     <div class="set_panel" id="set_panel">
       <div class="set_row">
-        <span class="set_label">カンプ生成エンジン</span>
-        <label class="set_radio"><input type="radio" name="provider" value="anthropic"> Claude (Opus 4.8)</label>
+        <span class="set_label">カンプ生成エンジン<br><small style="color:#999">最初の1枚を作る</small></span>
+        <label class="set_radio"><input type="radio" name="provider" value="anthropic"> Claude</label>
         <label class="set_radio"><input type="radio" name="provider" value="openai"> GPT (OpenAI)</label>
+        <label class="set_radio"><input type="radio" name="provider" value="gemini"> Gemini（無料枠）</label>
+        <label class="set_radio"><input type="radio" name="provider" value="deepseek"> DeepSeek（激安）</label>
       </div>
       <div class="set_row">
-        <span class="set_label">OpenAIモデル</span>
-        <input class="set_input set_input_s" id="set_openai_model" placeholder="gpt-5.4 / gpt-5.5">
+        <span class="set_label">カンプ修正エンジン<br><small style="color:#999">生成後の手直し</small></span>
+        <label class="set_radio"><input type="radio" name="edit_provider" value="anthropic"> Claude</label>
+        <label class="set_radio"><input type="radio" name="edit_provider" value="openai"> GPT (OpenAI)</label>
+        <label class="set_radio"><input type="radio" name="edit_provider" value="gemini"> Gemini（無料枠）</label>
+        <label class="set_radio"><input type="radio" name="edit_provider" value="deepseek"> DeepSeek（激安）</label>
+      </div>
+      <div class="set_row">
+        <span class="set_label">Claudeモデル</span>
+        <select class="set_input set_input_s" id="set_anthropic_model">
+          <option value="claude-haiku-4-5">Haiku 4.5（修正に最適・激安 $1/$5）⭐</option>
+          <option value="claude-opus-4-8">Opus 4.8（最高品質・$5/$25）</option>
+          <option value="claude-sonnet-5">Sonnet 5（Opusに迫る・$3/$15）</option>
+          <option value="claude-sonnet-4-6">Sonnet 4.6（旧・$3/$15）</option>
+        </select>
+      </div>
+      <div class="set_row">
+        <span class="set_label">GPTモデル</span>
+        <select class="set_input set_input_s" id="set_openai_model">
+          <option value="gpt-5.5">GPT-5.5（高品質）</option>
+          <option value="gpt-5.4">GPT-5.4（半額・ほぼ同等）</option>
+        </select>
       </div>
       <div class="set_row">
         <span class="set_label">OpenAI APIキー</span>
@@ -862,6 +938,30 @@
         <span class="set_label">Anthropic APIキー</span>
         <input class="set_input" id="set_anthropic_key" type="password" placeholder="sk-ant-... （空欄なら変更しない）">
         <span class="set_state" id="set_anthropic_state"></span>
+      </div>
+      <div class="set_row set_row_sep">
+        <span class="set_label">DeepSeekモデル<br><small style="color:#999">中国製・激安・修正向き</small></span>
+        <select class="set_input set_input_s" id="set_deepseek_model">
+          <option value="deepseek-v4-pro">V4-Pro（高精度・$0.44/$0.87）⭐</option>
+          <option value="deepseek-v4-flash">V4-Flash（最安・$0.14/$0.28）</option>
+        </select>
+      </div>
+      <div class="set_row">
+        <span class="set_label">DeepSeek APIキー</span>
+        <input class="set_input" id="set_deepseek_key" type="password" placeholder="sk-... （空欄なら変更しない）">
+        <span class="set_state" id="set_deepseek_state"></span>
+      </div>
+      <div class="set_row set_row_sep">
+        <span class="set_label">AIの説明づけ（Gemini）<br><small style="color:#999">サイトの雰囲気・画像の説明</small></span>
+        <select class="set_input set_input_s" id="set_gemini_model">
+          <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite（安い・推奨）</option>
+          <option value="gemini-3.1-flash">Gemini 3.1 Flash（高品質）</option>
+        </select>
+      </div>
+      <div class="set_row">
+        <span class="set_label">Gemini APIキー</span>
+        <input class="set_input" id="set_gemini_key" type="password" placeholder="AIza... （空欄なら変更しない）">
+        <span class="set_state" id="set_gemini_state"></span>
       </div>
       <div class="set_actions">
         <button class="set_save" id="set_save">設定を保存（.envに書き込み）</button>
@@ -895,8 +995,27 @@
         <button class="camp_button" id="camp_button">この内容でカンプを生成</button>
         <span class="camp_state" id="camp_state"></span>
       </div>
+      <!-- 自分の画像（AIが生成に使う）：折りたたみで下に置く -->
+      <div class="camp_up">
+        <button class="camp_up_toggle" id="cu_toggle">🖼 自分の画像を追加（AIが生成で使う）</button>
+        <div class="camp_uploads" id="camp_uploads" hidden>
+          <div class="cu_actions">
+            <label class="cu_btn">＋ 画像を選ぶ<input type="file" id="cu_files" accept="image/*" multiple hidden></label>
+            <label class="cu_btn">📁 フォルダごと<input type="file" id="cu_folder" webkitdirectory multiple hidden></label>
+            <input class="cu_path" id="cu_path" placeholder="またはフォルダのパスを貼付（例 D:\写真\素材）">
+            <button class="cu_btn cu_go" id="cu_import">取り込む</button>
+            <span class="cu_state" id="cu_state"></span>
+          </div>
+          <div class="cu_grid" id="cu_grid"></div>
+        </div>
+      </div>
       <!-- 生成中/完了ジョブの一覧（複数同時進行を並べて表示） -->
       <div class="camp_jobs" id="camp_jobs"></div>
+      <!-- 保存済みカンプの履歴（いつでも開き直せる＝作り直し不要） -->
+      <div class="camp_hist">
+        <button class="camp_hist_toggle" id="camp_hist_toggle">🗂 生成したカンプの履歴</button>
+        <div class="camp_hist_list" id="camp_hist_list" hidden></div>
+      </div>
     </div>
 
     <!-- 登録パネル：URLを入力して追加する（トグルで開く） -->
@@ -998,19 +1117,18 @@
             <span class="result_peek">${hit.has_video ? "ホバーで動き / クリックで詳細" : "ホバーで全体 / クリックで詳細"}</span>
           </div>
           <div class="result_body">
-            <a class="result_url" href="${hit.url}" target="_blank" rel="noopener noreferrer">${hit.url}</a>
+            <div class="result_head">
+              <a class="result_url" href="${hit.url}" target="_blank" rel="noopener noreferrer" title="${hit.url}">${hit.url.replace(/^https?:\/\//, "").replace(/\/+$/, "")}</a>
+              ${hit.vibe ? `<span class="result_done" title="AIが雰囲気を言語化済み">✨済</span>` : ""}
+              <span class="result_date">${(date || "").slice(5)}</span>
+            </div>
             ${(hit.swatches && hit.swatches.length) ? `<div class="result_swatches" title="抽出した配色">${hit.swatches.map((c) => `<span class="result_swatch" style="background:${c}"></span>`).join("")}</div>` : ""}
-            ${(hit.libs && hit.libs.length) ? `<div class="result_libs">${hit.libs.map((l) => `<span class="result_lib">${l}</span>`).join("")}</div>` : ""}
-            ${hit.vibe ? `<p class="result_vibe">${hit.vibe}</p>` : ""}
-            <div class="result_meta">
-              <span class="result_date">${date}</span>
-              <div class="result_tools">
-                <button class="result_similar" data-id="${hit.site_id}" title="この見た目に似たサイトを探す">🔍似てる</button>
-                <button class="result_describe" data-id="${hit.site_id}" title="Claudeが雰囲気を言葉にして検索に効かせる">${hit.describing ? "言語化中…" : (hit.vibe ? "✨済" : "✨雰囲気")}</button>
-                <button class="result_base" data-id="${hit.site_id}" title="このサイトの配色・字組みをベースにカンプ生成">🎨ベース</button>
-                <button class="result_record" data-id="${hit.site_id}" title="${hit.has_video ? "動きを録り直す" : "ホバーで動きを見られるよう録画する"}">${hit.recording ? "録画中…" : (hit.has_video ? "🎬済" : "🎬動き")}</button>
-                <button class="result_delete" data-id="${hit.site_id}" data-url="${hit.url}" title="削除">🗑</button>
-              </div>
+            <div class="result_tools">
+              <button class="result_similar" data-id="${hit.site_id}" title="この見た目に似たサイトを探す">🔍似てる</button>
+              <button class="result_describe" data-id="${hit.site_id}" title="Claudeが雰囲気を言葉にして検索に効かせる">${hit.describing ? "言語化中…" : (hit.vibe ? "✨済" : "✨雰囲気")}</button>
+              <button class="result_base" data-id="${hit.site_id}" title="このサイトの配色・字組みをベースにカンプ生成">🎨ベース</button>
+              <button class="result_record" data-id="${hit.site_id}" title="${hit.has_video ? "動きを録り直す" : "ホバーで動きを見られるよう録画する"}">${hit.recording ? "録画中…" : (hit.has_video ? "🎬済" : "🎬動き")}</button>
+              <button class="result_delete" data-id="${hit.site_id}" data-url="${hit.url}" title="削除">🗑</button>
             </div>
           </div>
         </article>`;
@@ -1153,7 +1271,17 @@
     async function loadSettings() {
       const s = await fetch("/api/settings").then((r) => r.json());
       document.querySelectorAll('input[name="provider"]').forEach((r) => { r.checked = (r.value === s.provider); });
+      document.querySelectorAll('input[name="edit_provider"]').forEach((r) => { r.checked = (r.value === (s.edit_provider || s.provider)); });
       document.querySelector("#set_openai_model").value = s.openai_model || "";
+      if (s.anthropic_model) document.querySelector("#set_anthropic_model").value = s.anthropic_model;
+      if (s.gemini_model) document.querySelector("#set_gemini_model").value = s.gemini_model;
+      if (s.deepseek_model) document.querySelector("#set_deepseek_model").value = s.deepseek_model;
+      const gKey = document.querySelector("#set_gemini_key");
+      gKey.placeholder = s.gemini_set ? "●●●●●●●●  保存済み（変える時だけ入力）" : "AIza... （未設定）";
+      document.querySelector("#set_gemini_state").textContent = s.gemini_set ? "設定済み ✓" : "未設定";
+      const dKey = document.querySelector("#set_deepseek_key");
+      dKey.placeholder = s.deepseek_set ? "●●●●●●●●  保存済み（変える時だけ入力）" : "sk-... （未設定）";
+      document.querySelector("#set_deepseek_state").textContent = s.deepseek_set ? "設定済み ✓" : "未設定";
       document.querySelector("#set_openai_state").textContent = s.openai_set ? "設定済み ✓" : "未設定";
       document.querySelector("#set_anthropic_state").textContent = s.anthropic_set ? "設定済み ✓" : "未設定";
       // 保存済みなら欄に●●●を出す（次に開いた時「入ってる」と一目で分かる）。
@@ -1176,10 +1304,12 @@
             provider,
             openai_api_key: document.querySelector("#set_openai_key").value,
             anthropic_api_key: document.querySelector("#set_anthropic_key").value,
+            gemini_api_key: document.querySelector("#set_gemini_key").value,
+            deepseek_api_key: document.querySelector("#set_deepseek_key").value,
           }),
         });
         const d = await res.json();
-        setMsg.textContent = (d.ok ? "✅ " : "⚠ NG：") + d.message;
+        setMsg.textContent = d.message;
       } catch (e) {
         setMsg.textContent = "テスト失敗（サーバ未応答かも）：" + e;
       } finally {
@@ -1188,29 +1318,73 @@
     });
 
     // エンジン(プロバイダ)はラジオを変えた瞬間に自動保存（保存ボタンを押し忘れる事故を防ぐ）
+    const provLabel = (v) => (v === "openai" ? "GPT" : v === "gemini" ? "Gemini" : v === "deepseek" ? "DeepSeek" : "Claude");
     document.querySelectorAll('input[name="provider"]').forEach((r) => {
       r.addEventListener("change", async () => {
         if (!r.checked) return;
-        setMsg.textContent = "エンジンを切替中…";
+        setMsg.textContent = "生成エンジンを切替中…";
         try {
           const res = await fetch("/api/settings", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ provider: r.value }),
           });
           const d = await res.json();
-          setMsg.textContent = "エンジンを「" + (r.value === "openai" ? "GPT" : "Claude") + "」に切替。" + (d.message || "");
+          setMsg.textContent = "生成エンジンを「" + provLabel(r.value) + "」に切替。" + (d.message || "");
           loadSettings();
         } catch (e) { setMsg.textContent = "切替失敗：" + e; }
+      });
+    });
+    // 修正エンジンも同様に、変えた瞬間に自動保存
+    document.querySelectorAll('input[name="edit_provider"]').forEach((r) => {
+      r.addEventListener("change", async () => {
+        if (!r.checked) return;
+        setMsg.textContent = "修正エンジンを切替中…";
+        try {
+          const res = await fetch("/api/settings", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ edit_provider: r.value }),
+          });
+          const d = await res.json();
+          setMsg.textContent = "修正エンジンを「" + provLabel(r.value) + "」に切替。" + (d.message || "");
+          loadSettings();
+        } catch (e) { setMsg.textContent = "切替失敗：" + e; }
+      });
+    });
+    // モデル選択も、変えた瞬間に自動保存する（保存ボタンの押し忘れで「Opusに戻る」を防ぐ）
+    [["#set_anthropic_model", "anthropic_model", "Claude"],
+     ["#set_openai_model", "openai_model", "GPT"],
+     ["#set_gemini_model", "gemini_model", "Gemini"],
+     ["#set_deepseek_model", "deepseek_model", "DeepSeek"]].forEach((t) => {
+      const elm = document.querySelector(t[0]);
+      if (!elm) return;
+      elm.addEventListener("change", async () => {
+        const label = elm.options[elm.selectedIndex].text;
+        setMsg.textContent = t[2] + "モデルを保存中…";
+        try {
+          const body = {}; body[t[1]] = elm.value;
+          await fetch("/api/settings", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          setMsg.textContent = t[2] + "モデルを「" + label + "」に設定しました";
+        } catch (e) { setMsg.textContent = "保存失敗：" + e; }
       });
     });
 
     document.querySelector("#set_save").addEventListener("click", async () => {
       const provider = (document.querySelector('input[name="provider"]:checked') || {}).value || "anthropic";
+      const edit_provider = (document.querySelector('input[name="edit_provider"]:checked') || {}).value || provider;
       const body = {
         provider,
+        edit_provider,
+        anthropic_model: document.querySelector("#set_anthropic_model").value,
+        gemini_model: document.querySelector("#set_gemini_model").value,
+        gemini_api_key: document.querySelector("#set_gemini_key").value,
         openai_model: document.querySelector("#set_openai_model").value,
         openai_api_key: document.querySelector("#set_openai_key").value,
         anthropic_api_key: document.querySelector("#set_anthropic_key").value,
+        deepseek_model: document.querySelector("#set_deepseek_model").value,
+        deepseek_api_key: document.querySelector("#set_deepseek_key").value,
       };
       const saveBtn = document.querySelector("#set_save");
       saveBtn.disabled = true;
@@ -1225,6 +1399,7 @@
         // キー入力欄はクリア（画面に残さない）
         document.querySelector("#set_openai_key").value = "";
         document.querySelector("#set_anthropic_key").value = "";
+        document.querySelector("#set_deepseek_key").value = "";
         loadSettings();
       } catch (e) {
         setMsg.textContent = "保存に失敗：" + e;
@@ -1242,6 +1417,78 @@
     campToggle.addEventListener("click", () => {
       campPanel.classList.toggle("is_open");
       if (campPanel.classList.contains("is_open")) campInput.focus();
+    });
+    // 画像アップロードは折りたたみ。開いた時だけ読み込む（生成コントロールを上に保つ）
+    document.querySelector("#cu_toggle").addEventListener("click", () => {
+      const box = document.querySelector("#camp_uploads");
+      const show = box.hidden;
+      box.hidden = !show;
+      if (show) loadUploads();
+    });
+
+    // ===== 自分の画像アップロード（AIが内容を判断して生成/編集で使う）=====
+    const cuGrid = document.querySelector("#cu_grid");
+    const cuState = document.querySelector("#cu_state");
+    let _cuPoll = null;
+    document.querySelector("#cu_files").addEventListener("change", (e) => uploadImages(e.target.files));
+    document.querySelector("#cu_folder").addEventListener("change", (e) => uploadImages(e.target.files));
+    document.querySelector("#cu_import").addEventListener("click", importFolder);
+    async function uploadImages(fileList) {
+      const files = [...(fileList || [])].filter((f) => f.type && f.type.startsWith("image/"));
+      if (!files.length) { cuState.textContent = "画像が見つかりません"; return; }
+      const fd = new FormData();
+      files.forEach((f) => fd.append("images", f));
+      cuState.textContent = `アップロード中…（${files.length}枚）`;
+      try {
+        const d = await fetch("/api/upload", { method: "POST", body: fd }).then((r) => r.json());
+        if (!d.ok) { cuState.textContent = d.message; return; }
+        cuState.textContent = `${d.saved}枚 追加。AIが説明を付けています…`;
+        renderUploads(d.uploads); pollUploads();
+      } catch (e) { cuState.textContent = "アップロード失敗：" + e; }
+    }
+    async function importFolder() {
+      const path = document.querySelector("#cu_path").value.trim();
+      if (!path) { cuState.textContent = "フォルダのパスを入れてください"; return; }
+      cuState.textContent = "フォルダを取り込み中…";
+      try {
+        const d = await fetch("/api/import_folder", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path }),
+        }).then((r) => r.json());
+        if (!d.ok) { cuState.textContent = d.message; return; }
+        cuState.textContent = `${d.saved}枚 取り込み。AIが説明を付けています…`;
+        renderUploads(d.uploads); pollUploads();
+      } catch (e) { cuState.textContent = "取り込み失敗：" + e; }
+    }
+    async function loadUploads() {
+      try {
+        const d = await fetch("/api/uploads").then((r) => r.json());
+        renderUploads(d.uploads);
+        if (d.captioning) pollUploads();
+      } catch (e) {}
+    }
+    function pollUploads() {
+      clearInterval(_cuPoll);
+      _cuPoll = setInterval(async () => {
+        try {
+          const d = await fetch("/api/uploads").then((r) => r.json());
+          renderUploads(d.uploads);
+          if (!d.captioning) { clearInterval(_cuPoll); _cuPoll = null; cuState.textContent = "説明づけ完了。生成・編集でこの画像が使われます"; }
+        } catch (e) { clearInterval(_cuPoll); _cuPoll = null; }
+      }, 2500);
+    }
+    function renderUploads(ups) {
+      ups = ups || [];
+      if (!ups.length) { cuGrid.innerHTML = "<div class='cu_empty'>まだ画像がありません。上のボタンで追加してください</div>"; return; }
+      cuGrid.innerHTML = ups.map((u) =>
+        `<div class="cu_card"><button class="cu_del" data-file="${u.file}" title="削除">×</button><img src="${u.url}" alt="" loading="lazy"><div class="cu_cap">${u.caption ? _esc(u.caption) : "<span style='color:#aaa'>説明づけ中…</span>"}</div></div>`
+      ).join("");
+    }
+    cuGrid.addEventListener("click", async (e) => {
+      const del = e.target.closest(".cu_del");
+      if (!del) return;
+      try { await fetch("/api/upload_delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file: del.dataset.file }) }); }
+      catch (err) {}
+      loadUploads();
     });
     // 複数ジョブの管理（同時進行OK）。ローカルで開始時刻を覚えて経過秒を出す。
     const campJobs = document.querySelector("#camp_jobs");
@@ -1282,8 +1529,53 @@
       renderCampJobs(jobs);
       // ローカルに開始済みで、まだサーバーに現れていないジョブがあるか
       const localPending = Object.keys(_campLocal).some((id) => !jobs[id] || jobs[id].state === "running");
-      if (!localPending) { clearInterval(_campPoller); _campPoller = null; }
+      if (!localPending) {
+        clearInterval(_campPoller); _campPoller = null;
+        if (!campHistList.hidden) loadCampHistory();  // 新しくできた分を履歴に反映
+      }
     }
+
+    // 生成したカンプの履歴（保存済みファイルを一覧・いつでも開き直せる）
+    const campHistToggle = document.querySelector("#camp_hist_toggle");
+    const campHistList = document.querySelector("#camp_hist_list");
+    campHistToggle.addEventListener("click", () => {
+      const show = campHistList.hidden;
+      campHistList.hidden = !show;
+      if (show) loadCampHistory();
+    });
+    async function loadCampHistory() {
+      campHistList.innerHTML = "<div class='hist_empty'>読み込み中…</div>";
+      let data;
+      try { data = await fetch("/api/camps").then((r) => r.json()); }
+      catch (e) { campHistList.innerHTML = "<div class='hist_empty'>取得に失敗しました</div>"; return; }
+      const camps = data.camps || [];
+      if (!camps.length) { campHistList.innerHTML = "<div class='hist_empty'>まだ生成したカンプがありません</div>"; return; }
+      campHistList.innerHTML = camps.map((c) => {
+        const d = new Date(c.mtime * 1000);
+        const ds = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+        const title = _esc(c.title || c.file);
+        const label = c.name ? ("⭐ " + _esc(c.name)) : title;
+        const favCls = c.fav ? " is_fav" : "";
+        return `<div class="hist_row${favCls}"><span class="h_title" title="${_esc(c.name || c.title || c.file)}">${label}</span><span class="h_date">${ds}</span><button class="h_name" data-file="${c.file}" data-name="${_esc(c.name || "")}" title="名前を付けて保存">✎ 名前</button><a href="/camp/${c.file}" target="_blank" rel="noopener">開く</a><button class="h_del" data-file="${c.file}" title="削除">🗑</button></div>`;
+      }).join("");
+    }
+    campHistList.addEventListener("click", async (e) => {
+      const nameBtn = e.target.closest(".h_name");
+      if (nameBtn) {
+        const name = prompt("このカンプに名前を付けて保存します（空にすると解除）\n例：ヒーロー完成版 / 配色OK版", nameBtn.dataset.name || "");
+        if (name === null) return;
+        try { await fetch("/api/camp_name", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file: nameBtn.dataset.file, name }) }); }
+        catch (err) {}
+        loadCampHistory();
+        return;
+      }
+      const del = e.target.closest(".h_del");
+      if (!del) return;
+      if (!confirm("このカンプを削除しますか？")) return;
+      try { await fetch("/api/camp_delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file: del.dataset.file }) }); }
+      catch (err) {}
+      loadCampHistory();
+    });
     const _esc = (s) => String(s || "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
     // 1ジョブぶんのカード中身HTML（done は改善案・自由指示のUI付き）
     function jobCardHtml(j, sec) {
@@ -1376,7 +1668,13 @@
       const animSel = document.querySelector("#camp_anim");
       if (!baseSel || !animSel) return;
       const shorten = (u) => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
-      const opts = (sites || []).map((s) => `<option value="${s.site_id}">${shorten(s.url)}</option>`).join("");
+      // URLだけだと分かりにくいので、AIの説明(雰囲気)を短く添えて「どんなサイトか」を出す
+      const label = (s) => {
+        const d = shorten(s.url);
+        const v = (s.vibe || "").replace(/\s+/g, "").slice(0, 28);
+        return _esc(v ? (d + " — " + v + "…") : d);
+      };
+      const opts = (sites || []).map((s) => `<option value="${s.site_id}">${label(s)}</option>`).join("");
       baseSel.innerHTML = `<option value="">おまかせ（ブリーフから自動選択）</option>` + opts;
       animSel.innerHTML = `<option value="">なし（標準のふわっと出現）</option>` + opts;
     }
