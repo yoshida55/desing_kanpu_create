@@ -198,6 +198,18 @@ def update_tokens(conn: sqlite3.Connection, site_id: str, tokens_json: str) -> N
     )
 
 
+def update_anim_snippets(
+    conn: sqlite3.Connection, site_id: str, snippets_json: str
+) -> None:
+    """抜き出したアニメ素材(@keyframes/transition/Lottie等・JSON文字列)を記録する。
+
+    animation_status は録画と共用のため、ここでは触らない（録画状態を壊さない）。
+    """
+    conn.execute(
+        "UPDATE site SET animation_snippets = ? WHERE id = ?", (snippets_json, site_id)
+    )
+
+
 def update_vibe(
     conn: sqlite3.Connection, site_id: str, description: str, embedding_blob: bytes
 ) -> None:

@@ -21,7 +21,7 @@ from pathlib import Path
 
 from flask import Flask, abort, jsonify, request, send_file
 
-from . import assets, camp, config, db, embed, ingest, search, vibe
+from . import anim, assets, camp, config, db, embed, ingest, search, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -60,6 +60,10 @@ _CAMP_LOCK = threading.Lock()
 # 画像抜き出し中のサイトID（同時に1つ）
 _EXTRACTING: dict = {"site_id": None}
 _EXT_LOCK = threading.Lock()
+
+# アニメ抜き出し中のサイトID（同時に1つ）
+_ANIM_EXTRACTING: dict = {"site_id": None}
+_ANIM_LOCK = threading.Lock()
 
 
 def _swatches(design_tokens_json) -> list[str]:
@@ -395,8 +399,70 @@ def api_site(site_id: str):
                 f"/assets/{site_id}/{Path(p).name}" for p in assets.list_assets(site_id)
             ],
             "extracting": _EXTRACTING.get("site_id") == site_id,
+            # 抜き出したアニメ素材（@keyframes/transition/Lottie）と、抜き出し中かどうか
+            "anim": _anim_payload(row, site_id),
+            "anim_extracting": _ANIM_EXTRACTING.get("site_id") == site_id,
         }
     )
+
+
+def _anim_payload(row, site_id: str) -> dict:
+    """DBの animation_snippets(JSON) を、画面が使いやすい形にして返す。"""
+    snippets = {}
+    if row["animation_snippets"]:
+        try:
+            snippets = _json.loads(row["animation_snippets"])
+        except Exception:  # noqa: BLE001
+            snippets = {}
+    return {
+        "keyframes": snippets.get("keyframes", []),
+        "transitions": snippets.get("transitions", []),
+        "animations": snippets.get("animations", []),
+        # 保存済みLottieは配信URL(/anim/<id>/<file>)に直して返す
+        "lottie": [
+            f"/anim/{site_id}/{Path(p).name}" for p in anim.list_lottie(site_id)
+        ],
+    }
+
+
+def _run_anim_job(site_id: str, url: str) -> None:
+    """バックグラウンドでアニメ素材を抜き出し、DBに保存する。"""
+    try:
+        snippets = anim.extract_animations(url)
+        with db.connect() as conn:
+            db.update_anim_snippets(conn, site_id, _json.dumps(snippets, ensure_ascii=False))
+    except Exception:  # noqa: BLE001
+        log.exception("アニメ抜き出しに失敗: %s", url)
+    finally:
+        with _ANIM_LOCK:
+            _ANIM_EXTRACTING["site_id"] = None
+
+
+@app.route("/api/extract_anim", methods=["POST"])
+def api_extract_anim():
+    """指定サイトのアニメ素材(@keyframes/transition/Lottie)を抜き出す（非同期）。"""
+    data = request.get_json(silent=True) or {}
+    site_id = (data.get("id") or "").strip()
+    with db.connect() as conn:
+        row = db.get_site(conn, site_id)
+    if not row:
+        return jsonify({"ok": False, "message": "見つかりません"}), 404
+    with _ANIM_LOCK:
+        if _ANIM_EXTRACTING.get("site_id") is not None:
+            return jsonify({"ok": False, "message": "別のアニメ抜き出しが進行中です"}), 409
+        _ANIM_EXTRACTING["site_id"] = site_id
+    log.info("アニメ抜き出しジョブ開始: %s", row["url"])
+    threading.Thread(target=_run_anim_job, args=(site_id, row["url"]), daemon=True).start()
+    return jsonify({"ok": True, "site_id": site_id})
+
+
+@app.route("/anim/<site_id>/<path:filename>")
+def anim_file(site_id: str, filename: str):
+    """抜き出したLottie JSONを返す。"""
+    path = config.ANIM_DIR / site_id / filename
+    if not path.exists() or not path.is_file():
+        abort(404)
+    return send_file(path, mimetype="application/json")
 
 
 def _run_extract_job(site_id: str, url: str) -> None:

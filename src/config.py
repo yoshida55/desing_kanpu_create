@@ -21,6 +21,7 @@ DATA_DIR = PROJECT_ROOT / "data"
 SCREENSHOT_DIR = DATA_DIR / "screenshots"
 VIDEO_DIR = DATA_DIR / "videos"  # スクロール録画(アニメ参照用)
 ASSET_DIR = DATA_DIR / "assets"  # サイトから抜き出した画像
+ANIM_DIR = DATA_DIR / "anim"  # サイトから抜き出したアニメ素材(Lottie JSON等)
 CAMP_DIR = DATA_DIR / "camps"  # 生成したカンプHTML
 DB_PATH = DATA_DIR / "design_stock.sqlite"
 RESULTS_HTML_PATH = PROJECT_ROOT / "results.html"
@@ -175,3 +176,4 @@ def ensure_dirs() -> None:
     """データ用ディレクトリを用意する（無ければ作る）。"""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    ANIM_DIR.mkdir(parents=True, exist_ok=True)

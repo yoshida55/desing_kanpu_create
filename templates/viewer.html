@@ -27,7 +27,7 @@
       background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid #e0e0e0;
-      padding: 1.6rem 2.4rem;
+      padding: 1rem 2.4rem; /* ギャラリーを広く見せるため上下を詰める */
     }
     /* 検索ボックスと件数指定を横並びにする親 */
     .search_inner {
@@ -67,10 +67,38 @@
     .search_button:hover { background: #0055aa; }
     .search_hint {
       max-width: 90rem;
-      margin: 0.8rem auto 0;
+      margin: 0.6rem auto 0;
       font-size: 1.2rem;
       color: #86868b;
     }
+
+    /* ┌─────────────────────────────────────────┐
+       │ コンパクトなツールバー（設定/生成/登録を1行に）│
+       └─────────────────────────────────────────┘ */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      max-width: 90rem;
+      margin: 0.8rem auto 0;
+    }
+    .tool_btn {
+      font-size: 1.3rem;
+      font-weight: 700;
+      border-radius: 1rem;
+      padding: 0.6rem 1.4rem;
+      cursor: pointer;
+    }
+    .tool_set  { color: #444;    background: #eee;     border: 1px solid #ddd; }
+    .tool_set:hover  { background: #e4e4e4; }
+    .tool_camp { color: #b8530a; background: #fff3e8;  border: 1px solid #ffd2a8; }
+    .tool_camp:hover { background: #ffe9d6; }
+    .tool_add  { color: #0066cc; background: #eaf2fb;  border: 1px solid #c7ddf5; }
+    .tool_add:hover  { background: #dceafb; }
+    /* トグルで開くパネルは中央寄せ・詰めた余白で表示 */
+    .set_panel, .camp_panel, .add_panel { max-width: 90rem; margin: 0.8rem auto 0; }
+    /* 設定内の区切り（言語化ブロックを軽く分ける） */
+    .set_row_sep { border-top: 1px solid #eee; padding-top: 1.2rem; margin-top: 0.4rem; }
 
     /* ┌─────────────────────────────────────────┐
        │ 登録（URLを追加する入力ボックス）           │
@@ -268,7 +296,7 @@
        └─────────────────────────────────────────┘ */
     .result_status {
       max-width: 120rem;
-      margin: 2rem auto 0;
+      margin: 1rem auto 0;
       padding: 0 2.4rem;
       font-size: 1.4rem;
       color: #6e6e73;
@@ -280,7 +308,7 @@
       grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
       gap: 1.6rem;
       max-width: 150rem;
-      margin: 1.6rem auto;
+      margin: 1rem auto;
       padding: 0 2.4rem 4rem;
     }
     .result_item {
@@ -450,9 +478,11 @@
     .result_describe:hover { background: #e4dbff; }
     .result_describe:disabled { color: #aaa; cursor: default; }
     .result_meta {
-      display: flex; /* 日付と「似てる」ボタンを左右に */
+      display: flex; /* 日付とボタン群。カードが狭いので折り返す */
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
     .result_date { font-size: 1.1rem; color: #86868b; }
     .result_similar {
@@ -488,12 +518,24 @@
     }
     .result_record:hover { background: #e6e6ea; }
     .result_record:disabled { color: #aaa; cursor: default; }
-    /* ボタン2つをまとめる箱（似てる＋削除） */
+    /* ボタン群をまとめる箱（似てる／雰囲気／ベース／録画／削除）
+       カードが狭いので折り返し可。各ボタンは改行させない(nowrap) */
     .result_tools {
-      display: flex; /* 横並び */
+      display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 0.4rem;
     }
+    /* カード内のボタンは全部コンパクト＆1語で改行させない（縦積み文字化を防ぐ） */
+    .result_similar,
+    .result_describe,
+    .result_base,
+    .result_record {
+      font-size: 1.1rem;
+      padding: 0.4rem 0.7rem;
+      white-space: nowrap;
+    }
+    .result_delete { padding: 0.4rem; }
     .result_empty {
       max-width: 120rem;
       margin: 4rem auto;
@@ -608,6 +650,61 @@
     }
     .detail_extract:hover { background: #ffe9d6; }
     .detail_extract:disabled { color: #aaa; cursor: default; }
+    /* 抜き出したアニメ素材（keyframes/transitionのコード片・Lottie） */
+    .detail_anim { margin-bottom: 0.8rem; }
+    .detail_anim_tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem; }
+    .detail_anim_tag {
+      font-size: 1.2rem; color: #2b6cb0; background: #ebf3fb;
+      border: 1px solid #cfe0f2; border-radius: 0.5rem; padding: 0.25rem 0.7rem;
+    }
+    .detail_anim_code {
+      font-family: ui-monospace, Consolas, monospace; font-size: 1.15rem;
+      white-space: pre; overflow: auto; max-height: 16rem;
+      background: #1d1f27; color: #d7dae0; border-radius: 0.6rem;
+      padding: 0.9rem 1.1rem; margin: 0.4rem 0 0.8rem;
+    }
+    .detail_anim_lottie { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .detail_anim_lottie a {
+      font-size: 1.2rem; color: #7a3ea0; background: #f6edfb;
+      border: 1px solid #e2cef0; border-radius: 0.5rem; padding: 0.3rem 0.8rem; text-decoration: none;
+    }
+    /* 左の大枠で「抜き出したアニメを実際に動かして」見せるステージ */
+    .detail_anim_stage { padding: 1.2rem; }
+    .anim_stage_grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+      gap: 1.2rem;
+    }
+    .anim_cell {
+      background: #fff; border: 1px solid #ececf0; border-radius: 0.8rem;
+      padding: 0.9rem; text-align: center;
+    }
+    .anim_cell_stage {
+      height: 10rem; display: flex; align-items: center; justify-content: center;
+      background: #f4f5f8; border-radius: 0.6rem; overflow: hidden;
+    }
+    /* keyframes を実際に走らせるデモ用の箱（無限ループで常に動く） */
+    .anim_demo_box {
+      width: 5.5rem; height: 5.5rem; border-radius: 1rem;
+      background: linear-gradient(135deg, #5b8def, #a06bf0);
+      color: #fff; font-weight: 700; font-size: 1.8rem;
+      display: flex; align-items: center; justify-content: center;
+      animation-duration: 1.8s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+    }
+    .anim_lottie_cell lottie-player { width: 100%; height: 10rem; }
+    .anim_cell_name {
+      margin-top: 0.6rem; font-size: 1.15rem; color: #555;
+      font-family: ui-monospace, Consolas, monospace; word-break: break-all;
+    }
+    .anim_stage_hint {
+      color: #999; font-size: 1.35rem; line-height: 1.8em;
+      padding: 3rem 2rem; text-align: center;
+    }
+    .detail_extract.is_anim { color: #2b6cb0; background: #ebf3fb; border-color: #cfe0f2; }
+    .detail_extract.is_anim:hover { background: #dcecfb; }
     .detail_actions { margin-top: 1.8rem; }
     .detail_base {
       font-size: 1.4rem; font-weight: 700; color: #fff; background: #b8530a;
@@ -631,75 +728,73 @@
     </div>
     <p class="search_hint">言葉を変えて何度でも試せます。カードの「似てるのを探す」で芋づる式にたどれます。</p>
 
-    <!-- 設定：HTML生成のプロバイダ・APIキー（.envに保存） -->
-    <div class="set_box">
-      <button class="set_toggle" id="set_toggle">⚙ 設定（生成エンジン・APIキー）</button>
-      <div class="set_panel" id="set_panel">
-        <div class="set_row">
-          <span class="set_label">カンプ生成エンジン</span>
-          <label class="set_radio"><input type="radio" name="provider" value="anthropic"> Claude (Opus 4.8)</label>
-          <label class="set_radio"><input type="radio" name="provider" value="openai"> GPT (OpenAI)</label>
-        </div>
-        <div class="set_row">
-          <span class="set_label">OpenAIモデル</span>
-          <input class="set_input set_input_s" id="set_openai_model" placeholder="gpt-5.4 / gpt-5.5">
-        </div>
-        <div class="set_row">
-          <span class="set_label">OpenAI APIキー</span>
-          <input class="set_input" id="set_openai_key" type="password" placeholder="sk-... （空欄なら変更しない）">
-          <span class="set_state" id="set_openai_state"></span>
-        </div>
-        <div class="set_row">
-          <span class="set_label">Anthropic APIキー</span>
-          <input class="set_input" id="set_anthropic_key" type="password" placeholder="sk-ant-... （空欄なら変更しない）">
-          <span class="set_state" id="set_anthropic_state"></span>
-        </div>
-        <div class="set_actions">
-          <button class="set_save" id="set_save">設定を保存（.envに書き込み）</button>
-          <button class="set_test" id="set_test">接続テスト</button>
-          <span class="set_msg" id="set_msg"></span>
-        </div>
+    <!-- コンパクトなツールバー：主要トグルを1行にまとめてギャラリーを広く見せる -->
+    <div class="toolbar">
+      <button class="tool_btn tool_set" id="set_toggle">⚙ 設定</button>
+      <button class="tool_btn tool_camp" id="camp_toggle">🎨 カンプを生成</button>
+      <button class="tool_btn tool_add" id="add_toggle">＋ サイトを登録</button>
+    </div>
+
+    <!-- 設定パネル（生成エンジン・APIキー・一括言語化。トグルで開く） -->
+    <div class="set_panel" id="set_panel">
+      <div class="set_row">
+        <span class="set_label">カンプ生成エンジン</span>
+        <label class="set_radio"><input type="radio" name="provider" value="anthropic"> Claude (Opus 4.8)</label>
+        <label class="set_radio"><input type="radio" name="provider" value="openai"> GPT (OpenAI)</label>
+      </div>
+      <div class="set_row">
+        <span class="set_label">OpenAIモデル</span>
+        <input class="set_input set_input_s" id="set_openai_model" placeholder="gpt-5.4 / gpt-5.5">
+      </div>
+      <div class="set_row">
+        <span class="set_label">OpenAI APIキー</span>
+        <input class="set_input" id="set_openai_key" type="password" placeholder="sk-... （空欄なら変更しない）">
+        <span class="set_state" id="set_openai_state"></span>
+      </div>
+      <div class="set_row">
+        <span class="set_label">Anthropic APIキー</span>
+        <input class="set_input" id="set_anthropic_key" type="password" placeholder="sk-ant-... （空欄なら変更しない）">
+        <span class="set_state" id="set_anthropic_state"></span>
+      </div>
+      <div class="set_actions">
+        <button class="set_save" id="set_save">設定を保存（.envに書き込み）</button>
+        <button class="set_test" id="set_test">接続テスト</button>
+        <span class="set_msg" id="set_msg"></span>
+      </div>
+      <!-- 一括：未処理サイトを裏で全部言語化（設定内に移動） -->
+      <div class="set_row set_row_sep">
+        <span class="set_label">未処理サイト</span>
+        <button class="bulk_button" id="describe_all">✨ 未処理を全部言語化（裏で進む）</button>
+        <span class="bulk_state" id="describe_all_state"></span>
       </div>
     </div>
 
-    <!-- 一括アクション：未処理サイトを裏で全部言語化 -->
-    <div class="bulk_box">
-      <button class="bulk_button" id="describe_all">✨ 未処理を全部言語化（裏で進む）</button>
-      <span class="bulk_state" id="describe_all_state"></span>
-    </div>
-
-    <!-- カンプ生成：ストックを参照して新しいカンプHTMLを作る（最終目標） -->
-    <div class="camp_box">
-      <button class="camp_toggle" id="camp_toggle">🎨 カンプを生成する（ストックを参照してAIが作る）</button>
-      <div class="camp_panel" id="camp_panel">
-        <textarea
-          class="camp_input"
-          id="camp_input"
-          placeholder="作りたいサイトを書く（例：製造業のコーポレートサイト。落ち着いた青系で信頼感。会社概要・製品・採用のセクション）　※生成は2分前後かかります"></textarea>
-        <div class="camp_actions">
-          <button class="camp_button" id="camp_button">この内容でカンプを生成</button>
-          <span class="camp_state" id="camp_state"></span>
-        </div>
-        <!-- 生成中の進捗（バー＋段階＋経過秒） -->
-        <div class="camp_progress" id="camp_progress">
-          <div class="camp_bar"><span></span></div>
-          <div class="camp_prog_text" id="camp_prog_text"></div>
-        </div>
+    <!-- カンプ生成パネル：ストックを参照して新しいカンプHTMLを作る（最終目標） -->
+    <div class="camp_panel" id="camp_panel">
+      <textarea
+        class="camp_input"
+        id="camp_input"
+        placeholder="作りたいサイトを書く（例：製造業のコーポレートサイト。落ち着いた青系で信頼感。会社概要・製品・採用のセクション）　※生成は2分前後かかります"></textarea>
+      <div class="camp_actions">
+        <button class="camp_button" id="camp_button">この内容でカンプを生成</button>
+        <span class="camp_state" id="camp_state"></span>
+      </div>
+      <!-- 生成中の進捗（バー＋段階＋経過秒） -->
+      <div class="camp_progress" id="camp_progress">
+        <div class="camp_bar"><span></span></div>
+        <div class="camp_prog_text" id="camp_prog_text"></div>
       </div>
     </div>
 
-    <!-- 登録：URLを入力して追加する（クリックで開く） -->
-    <div class="add_box">
-      <button class="add_toggle" id="add_toggle">＋ サイトを登録する</button>
-      <div class="add_panel" id="add_panel">
-        <textarea
-          class="add_input"
-          id="add_input"
-          placeholder="登録したいURLを入力（複数なら1行に1つ）&#10;https://example.com&#10;https://another.com"></textarea>
-        <div class="add_actions">
-          <button class="add_button" id="add_button">登録する（撮影＋ベクトル化）</button>
-          <span class="add_state" id="add_state"></span>
-        </div>
+    <!-- 登録パネル：URLを入力して追加する（トグルで開く） -->
+    <div class="add_panel" id="add_panel">
+      <textarea
+        class="add_input"
+        id="add_input"
+        placeholder="登録したいURLを入力（複数なら1行に1つ）&#10;https://example.com&#10;https://another.com"></textarea>
+      <div class="add_actions">
+        <button class="add_button" id="add_button">登録する（撮影＋ベクトル化）</button>
+        <span class="add_state" id="add_state"></span>
       </div>
     </div>
   </header>
@@ -721,10 +816,15 @@
           <div class="detail_tabs">
             <button class="detail_tab is_on" data-tab="full">全体スクショ</button>
             <button class="detail_tab" data-tab="video" id="detail_tab_video">録画</button>
+            <button class="detail_tab" data-tab="anim">🎞 アニメ再生</button>
           </div>
           <div class="detail_pane" id="detail_pane_full"><img id="detail_full_img" alt="サイト全体"></div>
           <div class="detail_pane" id="detail_pane_video" hidden>
             <video id="detail_video_el" controls loop muted playsinline></video>
+          </div>
+          <!-- 抜き出したアニメを「実際に動かして」見せる大枠 -->
+          <div class="detail_pane" id="detail_pane_anim" hidden>
+            <div class="detail_anim_stage" id="detail_anim_stage"></div>
           </div>
         </div>
         <!-- 右：参考情報（色・フォント・ライブラリ・雰囲気） -->
@@ -742,6 +842,9 @@
           <h4 class="detail_h">画像（このサイトから抜き出し）</h4>
           <div class="detail_assets" id="detail_assets"></div>
           <button class="detail_extract" id="detail_extract">🖼 画像を抜き出す</button>
+          <h4 class="detail_h">アニメーション（このサイトから抜き出し）</h4>
+          <div class="detail_anim" id="detail_anim"></div>
+          <button class="detail_extract is_anim" id="detail_extract_anim">🎞 アニメを抜き出す</button>
           <div class="detail_actions">
             <button class="detail_base" id="detail_base">🎨 これをベースに生成</button>
           </div>
@@ -782,9 +885,9 @@
             <div class="result_meta">
               <span class="result_date">${date}</span>
               <div class="result_tools">
-                <button class="result_similar" data-id="${hit.site_id}">似てるのを探す</button>
+                <button class="result_similar" data-id="${hit.site_id}" title="この見た目に似たサイトを探す">🔍似てる</button>
                 <button class="result_describe" data-id="${hit.site_id}" title="Claudeが雰囲気を言葉にして検索に効かせる">${hit.describing ? "言語化中…" : (hit.vibe ? "✨済" : "✨雰囲気")}</button>
-                <button class="result_base" data-id="${hit.site_id}" title="このサイトの配色・字組みをベースにカンプ生成">🎨ベースに生成</button>
+                <button class="result_base" data-id="${hit.site_id}" title="このサイトの配色・字組みをベースにカンプ生成">🎨ベース</button>
                 <button class="result_record" data-id="${hit.site_id}" title="${hit.has_video ? "動きを録り直す" : "ホバーで動きを見られるよう録画する"}">${hit.recording ? "録画中…" : (hit.has_video ? "🎬済" : "🎬動き")}</button>
                 <button class="result_delete" data-id="${hit.site_id}" data-url="${hit.url}" title="削除">🗑</button>
               </div>
@@ -1109,12 +1212,16 @@
 
     // 詳細ビュー：カードをクリックすると、そのサイトの全部を1画面で見る
     const detailOverlay = document.querySelector("#detail_overlay");
+    let _currentDetail = null;  // いま開いているサイトの詳細（タブ切替で再利用）
     function switchDetailTab(tab) {
       document.querySelectorAll(".detail_tab").forEach((b) => b.classList.toggle("is_on", b.dataset.tab === tab));
       document.querySelector("#detail_pane_full").hidden = tab !== "full";
       document.querySelector("#detail_pane_video").hidden = tab !== "video";
+      document.querySelector("#detail_pane_anim").hidden = tab !== "anim";
       const vel = document.querySelector("#detail_video_el");
       if (tab === "video") vel.play().catch(() => {}); else vel.pause();
+      // アニメタブを開いたら、抜き出したアニメを実際に動かして表示する
+      if (tab === "anim" && _currentDetail) renderAnimStage(_currentDetail);
     }
     function closeDetail() {
       detailOverlay.classList.remove("is_open");
@@ -1124,6 +1231,7 @@
       let d;
       try { d = await fetch("/api/site/" + id).then((r) => r.json()); }
       catch (e) { status.textContent = "詳細の取得に失敗：" + e; return; }
+      _currentDetail = d;  // タブ切替（アニメ再生）で使い回す
       document.querySelector("#detail_url").textContent = d.url;
       document.querySelector("#detail_url").href = d.url;
       document.querySelector("#detail_date").textContent = "撮影日: " + (d.captured_at || "").slice(0, 10);
@@ -1149,8 +1257,82 @@
       document.querySelector("#detail_vibe").textContent = d.vibe || "（未言語化）";
       document.querySelector("#detail_base").dataset.id = id;
       renderAssets(d);
+      renderAnim(d);
       document.querySelector("#detail_extract").dataset.id = id;
+      document.querySelector("#detail_extract_anim").dataset.id = id;
       detailOverlay.classList.add("is_open");
+    }
+    // 抜き出したアニメ素材（keyframes/transition/Lottie）を描画
+    function renderAnim(d) {
+      const box = document.querySelector("#detail_anim");
+      const btn = document.querySelector("#detail_extract_anim");
+      const a = d.anim || {};
+      const kf = a.keyframes || [], tr = a.transitions || [], lot = a.lottie || [];
+      const parts = [];
+      // 使える keyframes 名をタグで、本文をコード片で
+      if (kf.length) {
+        parts.push(`<div class="detail_anim_tags">${kf.map((k) => `<span class="detail_anim_tag">@${k.name}</span>`).join("")}</div>`);
+        parts.push(`<div class="detail_anim_code">${kf.slice(0, 6).map((k) => escapeHtml(k.css)).join("\n\n")}</div>`);
+      }
+      if (tr.length) {
+        parts.push(`<h4 class="detail_h" style="margin-top:.4rem">transition</h4>`);
+        parts.push(`<div class="detail_anim_code">${tr.map(escapeHtml).join("\n")}</div>`);
+      }
+      if (lot.length) {
+        parts.push(`<h4 class="detail_h" style="margin-top:.4rem">Lottie JSON</h4>`);
+        parts.push(`<div class="detail_anim_lottie">${lot.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">🎬 lottie_${i}.json</a>`).join("")}</div>`);
+      }
+      box.innerHTML = parts.length ? parts.join("") : "<span style='color:#999;font-size:1.3rem'>まだ抜き出していません</span>";
+      const has = kf.length || tr.length || lot.length;
+      if (d.anim_extracting) { btn.disabled = true; btn.textContent = "抜き出し中…（十数秒）"; }
+      else { btn.disabled = false; btn.textContent = has ? "🎞 もう一度抜き出す" : "🎞 アニメを抜き出す"; }
+    }
+    // コード片をそのまま安全に表示するためのHTMLエスケープ
+    function escapeHtml(s) {
+      return String(s || "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    }
+    // Lottie の再生に使う web component を、必要になった時だけ読み込む
+    let _lottieLoad = null;
+    function ensureLottie() {
+      if (window.customElements && customElements.get("lottie-player")) return Promise.resolve(true);
+      if (_lottieLoad) return _lottieLoad;
+      _lottieLoad = new Promise((res) => {
+        const s = document.createElement("script");
+        s.src = "https://unpkg.com/@lottiefiles/lottie-player@2.0.8/dist/lottie-player.js";
+        s.onload = () => res(true);
+        s.onerror = () => res(false);
+        document.head.appendChild(s);
+      });
+      return _lottieLoad;
+    }
+    // 抽出した @keyframes をページに注入する（デモ箱が実際に動くようにするため）
+    function injectKeyframes(kf) {
+      let el = document.getElementById("anim_kf_style");
+      if (!el) { el = document.createElement("style"); el.id = "anim_kf_style"; document.head.appendChild(el); }
+      el.textContent = (kf || []).map((k) => k.css).join("\n");
+    }
+    // 左の大枠で、抜き出したアニメを「実際に動かして」見せる
+    function renderAnimStage(d) {
+      const stage = document.querySelector("#detail_anim_stage");
+      if (!stage) return;
+      const a = d.anim || {};
+      const kf = a.keyframes || [], lot = a.lottie || [];
+      if (!kf.length && !lot.length) {
+        stage.innerHTML = `<div class="anim_stage_hint">まだアニメを抜き出していません。<br>右側の「🎞 アニメを抜き出す」で抽出すると、ここで実際に動いて見られます。</div>`;
+        return;
+      }
+      injectKeyframes(kf);
+      const cells = [];
+      // Lottie（実再生・ループ自動再生）
+      lot.forEach((u, i) => {
+        cells.push(`<div class="anim_cell anim_lottie_cell"><div class="anim_cell_stage"><lottie-player src="${u}" background="transparent" speed="1" loop autoplay></lottie-player></div><div class="anim_cell_name">lottie_${i}.json</div></div>`);
+      });
+      // CSS @keyframes（デモ箱に適用して実際に動かす）
+      kf.forEach((k) => {
+        cells.push(`<div class="anim_cell"><div class="anim_cell_stage"><div class="anim_demo_box" style="animation-name:${k.name}">Aa</div></div><div class="anim_cell_name">@${escapeHtml(k.name)}</div></div>`);
+      });
+      stage.innerHTML = `<div class="anim_stage_grid">${cells.join("")}</div>`;
+      if (lot.length) ensureLottie();
     }
     // 抜き出した画像のギャラリーを描画
     function renderAssets(d) {
@@ -1177,6 +1359,30 @@
         const d = await fetch("/api/site/" + id).then((r) => r.json());
         if (d.extracting) { setTimeout(wait, 1500); }
         else { renderAssets(d); status.textContent = `画像を ${(d.assets || []).length} 枚 抜き出しました`; }
+      };
+      setTimeout(wait, 1500);
+    });
+    // 「アニメを抜き出す」：実ページから @keyframes/transition/Lottie を収集 → 完了したら描画
+    document.querySelector("#detail_extract_anim").addEventListener("click", async (e) => {
+      const id = e.currentTarget.dataset.id;
+      const btn = e.currentTarget;
+      btn.disabled = true; btn.textContent = "抜き出し中…（十数秒）";
+      const res = await fetch("/api/extract_anim", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (!data.ok) { btn.disabled = false; btn.textContent = "🎞 アニメを抜き出す"; status.textContent = data.message; return; }
+      const wait = async () => {
+        const d = await fetch("/api/site/" + id).then((r) => r.json());
+        if (d.anim_extracting) { setTimeout(wait, 1500); }
+        else {
+          _currentDetail = d;         // 左のアニメ再生タブでも使えるよう更新
+          renderAnim(d);
+          renderAnimStage(d);         // 左の大枠を「実際に動く」状態へ更新
+          const a = d.anim || {};
+          status.textContent = `アニメを抜き出しました（keyframes ${(a.keyframes || []).length} / transition ${(a.transitions || []).length} / Lottie ${(a.lottie || []).length}）`;
+        }
       };
       setTimeout(wait, 1500);
     });
