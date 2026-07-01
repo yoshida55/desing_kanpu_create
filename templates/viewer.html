@@ -705,6 +705,15 @@
     }
     .detail_extract.is_anim { color: #2b6cb0; background: #ebf3fb; border-color: #cfe0f2; }
     .detail_extract.is_anim:hover { background: #dcecfb; }
+    /* アニメ抜き出し中の進捗（経過秒＋目安に対する伸びるバー） */
+    .anim_prog { margin-top: 0.7rem; max-width: 34rem; }
+    .anim_prog_bar { height: 0.7rem; background: #e6eef8; border-radius: 0.4rem; overflow: hidden; }
+    .anim_prog_bar span {
+      display: block; height: 100%; width: 0%;
+      background: #2b6cb0; border-radius: 0.4rem;
+      transition: width 0.2s linear;
+    }
+    .anim_prog_text { margin-top: 0.45rem; font-size: 1.2rem; color: #2b6cb0; }
     .detail_actions { margin-top: 1.8rem; }
     .detail_base {
       font-size: 1.4rem; font-weight: 700; color: #fff; background: #b8530a;
@@ -845,6 +854,11 @@
           <h4 class="detail_h">アニメーション（このサイトから抜き出し）</h4>
           <div class="detail_anim" id="detail_anim"></div>
           <button class="detail_extract is_anim" id="detail_extract_anim">🎞 アニメを抜き出す</button>
+          <!-- 抜き出し中の進捗（バー＋経過秒＋目安。終わりが見えるように） -->
+          <div class="anim_prog" id="anim_prog" hidden>
+            <div class="anim_prog_bar"><span id="anim_prog_fill"></span></div>
+            <div class="anim_prog_text" id="anim_prog_text"></div>
+          </div>
           <div class="detail_actions">
             <button class="detail_base" id="detail_base">🎨 これをベースに生成</button>
           </div>
@@ -1362,21 +1376,53 @@
       };
       setTimeout(wait, 1500);
     });
+    // アニメ抜き出しの進捗バー（経過秒を出しつつ、目安に対して伸ばす＝終わりが見える）
+    let _animProgTimer = null;
+    function startAnimProgress() {
+      const wrap = document.querySelector("#anim_prog");
+      const fill = document.querySelector("#anim_prog_fill");
+      const txt = document.querySelector("#anim_prog_text");
+      wrap.hidden = false;
+      const start = Date.now();
+      const EST = 20;  // 目安の秒数（この辺で終わることが多い）
+      clearInterval(_animProgTimer);
+      _animProgTimer = setInterval(() => {
+        const sec = (Date.now() - start) / 1000;
+        // 目安までは素直に伸び、超えたら95%で足踏み（完了で100%にする）
+        const pct = Math.min(95, (sec / EST) * 100);
+        fill.style.width = pct.toFixed(0) + "%";
+        txt.textContent = `抜き出し中… ${sec.toFixed(0)} 秒（目安 ${EST} 秒）`;
+      }, 200);
+    }
+    function finishAnimProgress(ok) {
+      clearInterval(_animProgTimer); _animProgTimer = null;
+      const wrap = document.querySelector("#anim_prog");
+      const fill = document.querySelector("#anim_prog_fill");
+      const txt = document.querySelector("#anim_prog_text");
+      fill.style.width = "100%";
+      txt.textContent = ok ? "完了！" : "終了しました";
+      setTimeout(() => { wrap.hidden = true; fill.style.width = "0%"; }, 1200);
+    }
     // 「アニメを抜き出す」：実ページから @keyframes/transition/Lottie を収集 → 完了したら描画
     document.querySelector("#detail_extract_anim").addEventListener("click", async (e) => {
       const id = e.currentTarget.dataset.id;
       const btn = e.currentTarget;
-      btn.disabled = true; btn.textContent = "抜き出し中…（十数秒）";
+      btn.disabled = true; btn.textContent = "抜き出し中…";
+      startAnimProgress();
       const res = await fetch("/api/extract_anim", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
       const data = await res.json();
-      if (!data.ok) { btn.disabled = false; btn.textContent = "🎞 アニメを抜き出す"; status.textContent = data.message; return; }
+      if (!data.ok) {
+        finishAnimProgress(false);
+        btn.disabled = false; btn.textContent = "🎞 アニメを抜き出す"; status.textContent = data.message; return;
+      }
       const wait = async () => {
         const d = await fetch("/api/site/" + id).then((r) => r.json());
-        if (d.anim_extracting) { setTimeout(wait, 1500); }
+        if (d.anim_extracting) { setTimeout(wait, 1200); }
         else {
+          finishAnimProgress(true);
           _currentDetail = d;         // 左のアニメ再生タブでも使えるよう更新
           renderAnim(d);
           renderAnimStage(d);         // 左の大枠を「実際に動く」状態へ更新
@@ -1384,7 +1430,7 @@
           status.textContent = `アニメを抜き出しました（keyframes ${(a.keyframes || []).length} / transition ${(a.transitions || []).length} / Lottie ${(a.lottie || []).length}）`;
         }
       };
-      setTimeout(wait, 1500);
+      setTimeout(wait, 1200);
     });
     document.querySelector("#detail_close").addEventListener("click", closeDetail);
     detailOverlay.addEventListener("click", (e) => {

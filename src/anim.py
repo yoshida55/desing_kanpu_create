@@ -21,6 +21,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import time
 from pathlib import Path
 
 from playwright.sync_api import TimeoutError as PWTimeout, sync_playwright
@@ -143,17 +144,22 @@ def extract_animations(url: str) -> dict:
         page.set_default_navigation_timeout(cfg.nav_timeout_ms)
         try:
             page.goto(norm_url, wait_until="domcontentloaded")
+            # keyframes はスタイルシートに載っているので、スクショほど厳密に待たなくてよい。
+            # 待ち時間を短めにして体感を速くする（取りこぼしは実データで様子見）。
             try:
-                page.wait_for_load_state("networkidle", timeout=cfg.networkidle_timeout_ms)
+                page.wait_for_load_state(
+                    "networkidle", timeout=min(cfg.networkidle_timeout_ms, 3500)
+                )
             except PWTimeout:
                 pass
-            page.wait_for_timeout(cfg.settle_after_load_ms)
-            # スクロールで遅延読み込みのCSS/アニメ要素も発火させる
+            page.wait_for_timeout(600)  # 保険の待ち（短め）
+            # 遅延読み込みのアニメ要素/Lottieを発火させる軽いスクロール（高速版）。
+            # 1ページ丸ごとをゆっくり舐めず、速く下まで行って先頭に戻すだけ。
             try:
                 page.evaluate(
-                    "async()=>{await new Promise(r=>{let y=0;const t=setInterval(()=>{window.scrollBy(0,window.innerHeight);y+=window.innerHeight;if(y>=document.body.scrollHeight){clearInterval(t);r();}},120);});}"
+                    "async()=>{await new Promise(r=>{let y=0;const t=setInterval(()=>{window.scrollBy(0,window.innerHeight*1.5);y+=window.innerHeight*1.5;if(y>=document.body.scrollHeight){clearInterval(t);r();}},50);});window.scrollTo(0,0);}"
                 )
-                page.wait_for_timeout(500)
+                page.wait_for_timeout(200)
             except Exception:  # noqa: BLE001
                 pass
             collected = page.evaluate(_COLLECT_JS) or collected
