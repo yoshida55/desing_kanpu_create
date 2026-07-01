@@ -380,9 +380,15 @@ def _test_gemini(gemini_key: str = "") -> Optional[tuple[bool, str]]:
 
 
 def _test_all(provider: str, openai_key: str = "", anthropic_key: str = "", gemini_key: str = "", deepseek_key: str = "") -> tuple[bool, str]:
-    """生成エンジン（Claude/GPT/DeepSeek）＋説明づけ（Gemini）をまとめてテストしメッセージを組む。"""
+    """生成エンジン＋修正エンジン（DeepSeek等）＋説明づけ（Gemini）をまとめてテストしメッセージを組む。"""
     ok, msg = _test_key(provider, openai_key, anthropic_key, deepseek_key)
-    parts = [("✅ " if ok else "⚠ ") + msg]
+    parts = [("✅ " if ok else "⚠ ") + "生成: " + msg]
+    # 修正エンジンが生成と別なら、それも確認する（例：生成=GPT／修正=DeepSeek）
+    edit_provider = config.CONFIG.htmlgen.edit_provider
+    if edit_provider and edit_provider != provider:
+        eok, emsg = _test_key(edit_provider, openai_key, anthropic_key, deepseek_key)
+        parts.append(("✅ " if eok else "⚠ ") + "修正: " + emsg)
+        ok = ok and eok
     g = _test_gemini(gemini_key)
     if g is not None:
         parts.append(("✅ " if g[0] else "⚠ ") + g[1])
@@ -1080,6 +1086,28 @@ def api_camp_delete():
     return jsonify({"ok": True})
 
 
+@app.route("/api/save_camp_html", methods=["POST"])
+def api_save_camp_html():
+    """ドラッグ/矢印での位置調整をHTMLに焼き込む（LLM不使用・その場保存）。
+
+    クライアントが編集UI（#__ce系）を除いたHTML全体を送ってくる。念のため
+    最低限の妥当性（htmlタグがある・空でない）を見てから上書き保存する。
+    """
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    html = data.get("html") or ""
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "ファイルが見つかりません"}), 404
+    if len(html) < 200 or "</html>" not in html.lower():
+        return jsonify({"ok": False, "message": "HTMLが空か壊れています（保存中止）"}), 400
+    try:
+        p.write_text(html, encoding="utf-8")
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True, "file": fn})
+
+
 @app.route("/api/camp_sections")
 def api_camp_sections():
     """カンプのセクション一覧（編集バーのドロップダウン用）。"""
@@ -1145,6 +1173,15 @@ _EDIT_BAR = """
 #__ce_cm .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 #__ce_cm .chip{background:#f2f2f4;border:1px solid #ddd;border-radius:999px;padding:5px 9px;font-size:11.5px;cursor:pointer;color:#1d1d1f}
 .__ce_sel{outline:2px dashed #2b7fff !important;outline-offset:3px}
+#__ce_cm .__ce_nudge{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0 6px}
+#__ce_cm .__ce_nudge button{background:#eef3ff;border:1px solid #cfe0fb;border-radius:7px;padding:8px 0;font-size:14px;cursor:pointer;color:#1d1d1f;font-weight:700}
+#__ce_cm .__ce_nudge button:hover{background:#dceafe}
+#__ce_cm .__ce_nudge .sp{visibility:hidden}
+#__ce_cm .__ce_size{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:2px 0 8px}
+#__ce_cm .__ce_size button{background:#eef3ff;border:1px solid #cfe0fb;border-radius:7px;padding:8px 0;font-size:13px;cursor:pointer;color:#1d1d1f;font-weight:700}
+#__ce_cm .__ce_size button:hover{background:#dceafe}
+#__ce_savebar{position:fixed;left:20px;bottom:20px;z-index:2147483003;background:#1a7f37;color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 12px 32px rgba(0,0,0,.3);font-family:system-ui,sans-serif;display:none}
+#__ce_savebar.show{display:block}
 #__ce_toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:2147483004;background:#1d1d1f;color:#fff;border-radius:14px;padding:15px 24px;box-shadow:0 16px 44px rgba(0,0,0,.42);font-family:system-ui,sans-serif;min-width:320px;max-width:92vw;text-align:center}
 #__ce_toast .bar{height:7px;background:#43434a;border-radius:4px;overflow:hidden;margin-bottom:9px}
 #__ce_toast .bar span{display:block;height:100%;width:35%;background:#ff9a3c;border-radius:4px;animation:__ce_flow 1.2s ease-in-out infinite}
@@ -1174,13 +1211,32 @@ _EDIT_BAR = """
   var sec=document.getElementById('__ce_sec'),inp=document.getElementById('__ce_in'),
       sg=document.getElementById('__ce_sg'),go=document.getElementById('__ce_go'),
       chips=document.getElementById('__ce_chips'),msg=document.getElementById('__ce_msg');
-  document.getElementById('__ce_hd').addEventListener('click',function(){
+  // ヘッダを掴んでウィンドウ自体を移動できる（クリックでの開閉と両立：動いた時だけトグルを抑制）
+  var hd=document.getElementById('__ce_hd'), hDrag=false, hMoved=false, hSX=0,hSY=0,hL=0,hT=0;
+  hd.addEventListener('mousedown',function(e){
+    if(e.target.closest('#__ce_save')) return;  // 保存ボタンは除外
+    var r=box.getBoundingClientRect();
+    hDrag=true; hMoved=false; hSX=e.clientX; hSY=e.clientY; hL=r.left; hT=r.top;
+    box.style.right='auto'; box.style.bottom='auto'; box.style.left=hL+'px'; box.style.top=hT+'px';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!hDrag) return;
+    var dx=e.clientX-hSX, dy=e.clientY-hSY;
+    if(Math.abs(dx)+Math.abs(dy)>3) hMoved=true;
+    box.style.left=Math.max(0,Math.min(hL+dx, window.innerWidth-60))+'px';
+    box.style.top=Math.max(0,Math.min(hT+dy, window.innerHeight-40))+'px';
+  },true);
+  document.addEventListener('mouseup',function(){ hDrag=false; },true);
+  hd.addEventListener('click',function(){
+    if(hMoved){ hMoved=false; return; }  // ドラッグ直後はトグルしない
     box.classList.toggle('min'); document.getElementById('__ce_mn').textContent=box.classList.contains('min')?'▲ ひらく':'✕ 閉じる';
   });
   // ⭐名前を付けて保存（お気に入り登録）。壊れる前の良い版に名前を付けて残せる。
   var saveBtn=document.getElementById('__ce_save');
   saveBtn.addEventListener('click',function(ev){
     ev.stopPropagation();  // ヘッダのトグル(開閉)と競合させない
+    if(_dirty){ saveLayout(); return; }  // 位置/大きさを動かしていたら、それをHTMLに焼き込む
     var cur=(document.title||'').trim();
     var name=window.prompt('このカンプに名前を付けて保存します（履歴の上に「⭐名前」で残ります）\\n例：ヒーロー完成版 / 配色OK版',cur);
     if(name===null) return;  // キャンセル
@@ -1332,6 +1388,79 @@ _EDIT_BAR = """
   // ===== 右クリックで、その要素に直接アニメ/指示/改善案を出す =====
   var curMenu=null, curEl=null;
   function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){curEl.classList.remove('__ce_sel');curEl=null;} }
+  // ===== 位置の直接調整（AIなし・transformで即反映）=====
+  // 要素を translate で浮かせて動かす。元のtransformは data-cebt に退避して壊さない。
+  // 元のtransformを1度だけ退避（自前のtranslate/scaleが無い時だけ）
+  function _cebt(el){ if(el.getAttribute('data-cebt')===null){ var t=el.style.transform||''; el.setAttribute('data-cebt', (t.indexOf('translate')<0&&t.indexOf('scale')<0)?t:''); } }
+  // 位置(translate)＋大きさ(scaleX,scaleY)をまとめて当てる。アニメ/トランジションは止めて最優先で反映。
+  function applyTf(el){
+    var x=+el.getAttribute('data-cetx')||0, y=+el.getAttribute('data-cety')||0;
+    var sx=+el.getAttribute('data-cesx')||1, sy=+el.getAttribute('data-cesy')||1;
+    el.style.setProperty('transform-origin','top left','important');
+    el.style.setProperty('transform','translate('+x+'px,'+y+'px) scale('+sx+','+sy+') '+(el.getAttribute('data-cebt')||''),'important');
+    el.style.setProperty('animation','none','important');
+    el.style.setProperty('transition','none','important');
+    markDirty();
+  }
+  function setPos(el,x,y){ _cebt(el); el.setAttribute('data-cetx',x); el.setAttribute('data-cety',y); applyTf(el); }
+  function nudge(el,dx,dy){ setPos(el,(+el.getAttribute('data-cetx')||0)+dx,(+el.getAttribute('data-cety')||0)+dy); }
+  // fx=横倍率, fy=縦倍率（1なら変えない）。横だけ長く/縦だけ長く/等倍を1関数で。
+  function scaleBy(el,fx,fy){
+    _cebt(el);
+    var sx=(+el.getAttribute('data-cesx')||1)*fx, sy=(+el.getAttribute('data-cesy')||1)*fy;
+    if(sx<0.2)sx=0.2; if(sx>5)sx=5; if(sy<0.2)sy=0.2; if(sy>5)sy=5;
+    el.setAttribute('data-cesx',sx); el.setAttribute('data-cesy',sy); applyTf(el);
+  }
+  function resetPos(el){
+    el.style.removeProperty('transform'); el.style.removeProperty('transform-origin'); el.style.removeProperty('animation'); el.style.removeProperty('transition');
+    var bt=el.getAttribute('data-cebt'); if(bt) el.style.transform=bt;
+    el.removeAttribute('data-cetx'); el.removeAttribute('data-cety'); el.removeAttribute('data-cesx'); el.removeAttribute('data-cesy'); el.removeAttribute('data-cebt');
+    markDirty();
+  }
+  // ドラッグで動かす：対象要素に直接 mousedown を付ける（確実に掴める）
+  var dragEl=null, dActive=false, dSX=0,dSY=0,dOX=0,dOY=0;
+  function _dDown(e){
+    dActive=true; dSX=e.clientX; dSY=e.clientY;
+    dOX=+dragEl.getAttribute('data-cetx')||0; dOY=+dragEl.getAttribute('data-cety')||0;
+    document.body.style.userSelect='none'; e.preventDefault(); e.stopPropagation();
+  }
+  document.addEventListener('mousemove',function(e){ if(dActive&&dragEl) setPos(dragEl, dOX+(e.clientX-dSX), dOY+(e.clientY-dSY)); },true);
+  document.addEventListener('mouseup',function(){ if(dActive){ dActive=false; document.body.style.userSelect=''; } },true);
+  function toggleDrag(el,btn){
+    if(dragEl===el){ // 同じ要素をもう一度押したら終了
+      el.removeEventListener('mousedown',_dDown,true); el.style.cursor=''; dragEl=null;
+      if(btn) btn.textContent='🖱 ドラッグで動かす（押して開始/終了）'; msg.textContent=''; return;
+    }
+    if(dragEl){ dragEl.removeEventListener('mousedown',_dDown,true); dragEl.style.cursor=''; }
+    dragEl=el; el.style.cursor='move'; el.addEventListener('mousedown',_dDown,true);
+    if(btn) btn.textContent='✋ ドラッグ終了';
+    msg.textContent='要素を掴んで動かせます（もう一度押すと終了）';
+  }
+  // 位置/大きさを変えたら、ヘッダの保存ボタンを「💾 変更を保存」に変えて緑で目立たせる（ボタンは1つに統一）
+  var _dirty=false;
+  function markDirty(){
+    _dirty=true;
+    var b=document.getElementById('__ce_save');
+    if(b){ b.textContent='💾 変更を保存'; b.classList.add('saved'); }
+  }
+  function cleanHtml(){
+    var doc=document.documentElement.cloneNode(true);
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar'].forEach(function(sel){
+      [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
+    });
+    [].slice.call(doc.querySelectorAll('.__ce_sel,.__ce_hl')).forEach(function(n){n.classList.remove('__ce_sel','__ce_hl');});
+    [].slice.call(doc.querySelectorAll('script')).forEach(function(s){ if(/__ce/.test(s.textContent)) s.remove(); });
+    [].slice.call(doc.querySelectorAll('style')).forEach(function(s){ if(/#__ce/.test(s.textContent)) s.remove(); });
+    return '<!doctype html>\\n'+doc.outerHTML;
+  }
+  function saveLayout(){
+    var b=document.getElementById('__ce_save'); if(b) b.textContent='保存中…';
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.ok){ if(b) b.textContent='✅ 保存しました'; setTimeout(function(){location.reload();},600); }
+      else { if(b) b.textContent='⚠ 失敗：'+(d.message||''); }
+    }).catch(function(){ if(b) b.textContent='⚠ 通信エラー'; });
+  }
   function descEl(el){
     var tag=el.tagName.toLowerCase();
     var cls=(typeof el.className==='string'&&el.className.trim())?'.'+el.className.trim().split(/\\s+/).slice(0,2).join('.'):'';
@@ -1372,7 +1501,17 @@ _EDIT_BAR = """
     var agh=PRESETS.map(function(p,i){return '<button class="ag2" data-i="'+i+'"><b>'+esc(p.b)+'</b><span>'+esc(p.d)+'</span></button>';}).join('');
     var m=document.createElement('div'); m.id='__ce_cm';
     m.innerHTML='<div class="h"><span class="t">'+esc(d)+'</span><span class="c" id="__ce_cmx">✕</span></div>'
-      +'<div class="bd2">'+swapH+'<div class="cap">🎬 この要素に付ける</div>'+agh
+      +'<div class="bd2">'+swapH
+      +'<div class="cap">🖱 位置を動かす（AIなし・即反映）</div>'
+      +'<div class="__ce_nudge"><span class="sp"></span><button data-nx="0" data-ny="-6">↑</button><span class="sp"></span>'
+      +'<button data-nx="-6" data-ny="0">←</button><button data-rst="1">⟲</button><button data-nx="6" data-ny="0">→</button>'
+      +'<span class="sp"></span><button data-nx="0" data-ny="6">↓</button><span class="sp"></span></div>'
+      +'<div class="__ce_size">'
+      +'<button data-sx="1.1" data-sy="1.1">＋ 大きく</button><button data-sx="0.909" data-sy="0.909">－ 小さく</button>'
+      +'<button data-sx="1.1" data-sy="1">⇔ 横に長く</button><button data-sx="0.909" data-sy="1">⇔ 横を縮め</button>'
+      +'<button data-sx="1" data-sy="1.1">⇕ 縦に長く</button><button data-sx="1" data-sy="0.909">⇕ 縦を縮め</button></div>'
+      +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 ドラッグで動かす（押して開始/終了）</button>'
+      +'<div class="cap">🎬 この要素に付ける</div>'+agh
       +'<div class="cap" style="margin-top:8px">✍ この要素に自分で指示</div>'
       +'<input id="__ce_cmin" placeholder="例：もっと大きく赤く"><button class="go2" id="__ce_cmgo">この要素を直す</button>'
       +'<button class="go2" style="background:#4b2ea8" id="__ce_cmsg">💡 この要素の改善案</button>'
@@ -1384,6 +1523,12 @@ _EDIT_BAR = """
     curMenu=m;
     var tail=' ★重要：この要素だけに適用し、他の要素や他のセクションは一切変えない。対象要素は「'+d+'」。アニメはCSS/素のJSで実装し、スクロール出現系はhtml.jsが付いた時だけ初期非表示にする保険を入れてJSが無くても中身が見えるようにする。';
     m.querySelector('.bd2').addEventListener('click',function(ev){
+      var nb=ev.target.closest('.__ce_nudge button');
+      if(nb){ if(nb.getAttribute('data-rst')) resetPos(curEl); else nudge(curEl, +nb.getAttribute('data-nx'), +nb.getAttribute('data-ny')); return; }
+      var sb=ev.target.closest('.__ce_size button');
+      if(sb){ scaleBy(curEl, +sb.getAttribute('data-sx'), +sb.getAttribute('data-sy')); return; }
+      var dg=ev.target.closest('#__ce_cmdrag');
+      if(dg){ toggleDrag(curEl, dg); return; }
       var ag=ev.target.closest('.ag2');
       if(ag){ var pp=PRESETS[+ag.dataset.i];
         if(pp.bg){
