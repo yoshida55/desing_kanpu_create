@@ -1086,6 +1086,7 @@
           </div>
           <div class="detail_actions">
             <button class="detail_base" id="detail_base">🎨 これをベースに生成</button>
+            <button class="detail_base" id="detail_clone" style="background:#0b6e4f">📋 忠実クローン（AIなし）</button>
           </div>
         </div>
       </div>
@@ -1757,6 +1758,7 @@
       renderAnim(d);
       document.querySelector("#detail_extract").dataset.id = id;
       document.querySelector("#detail_extract_anim").dataset.id = id;
+      document.querySelector("#detail_clone").dataset.id = id;
       detailOverlay.classList.add("is_open");
     }
     // 抜き出したアニメ素材（keyframes/transition/Lottie）を描画
@@ -1963,6 +1965,28 @@
         const d = await fetch("/api/site/" + id).then((r) => r.json());
         if (d.extracting) { setTimeout(wait, 1500); }
         else { renderAssets(d); status.textContent = `画像を ${(d.assets || []).length} 枚 抜き出しました`; }
+      };
+      setTimeout(wait, 1500);
+    });
+    // 「忠実クローン」：実ページのDOM・CSS・画像を吸い出してカンプ化（AI不使用）
+    document.querySelector("#detail_clone").addEventListener("click", async (e) => {
+      const id = e.currentTarget.dataset.id;
+      const btn = e.currentTarget;
+      // OK=元サイトのJSも残す（本物のアニメが動くかも／壊れるサイトもある）、キャンセル=安全な通常版
+      const keepJs = confirm("元サイトのJS（本物のアニメ）も残しますか？\n\nOK = 残す（GSAP等の演出が動く可能性あり。ただし壊れて表示が乱れるサイトもある）\nキャンセル = 残さない（安全。代わりにスクロール出現アニメを自動注入）");
+      btn.disabled = true; btn.textContent = "クローン中…";
+      const res = await fetch("/api/clone_site", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, keep_js: keepJs }),
+      });
+      const data = await res.json();
+      if (!data.ok) { btn.disabled = false; btn.textContent = "📋 忠実クローン（AIなし）"; status.textContent = data.message; return; }
+      const wait = async () => {
+        const d = await fetch("/api/clone_site/status").then((r) => r.json());
+        if (d.site_id) { btn.textContent = "クローン中… " + (d.phase || ""); setTimeout(wait, 1500); return; }
+        btn.disabled = false; btn.textContent = "📋 忠実クローン（AIなし）";
+        if (d.error) { status.textContent = "クローン失敗: " + d.error; return; }
+        if (d.file) { status.textContent = "クローン完了！新しいタブで開きます"; window.open("/camp/" + encodeURIComponent(d.file), "_blank"); }
       };
       setTimeout(wait, 1500);
     });

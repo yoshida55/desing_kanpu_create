@@ -22,7 +22,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, assets, camp, config, db, embed, ingest, search, vibe
+from . import anim, assets, camp, clone, config, db, embed, ingest, search, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -67,6 +67,14 @@ _EXT_LOCK = threading.Lock()
 # アニメ抜き出し中のサイトID（同時に1つ）
 _ANIM_EXTRACTING: dict = {"site_id": None}
 _ANIM_LOCK = threading.Lock()
+
+# 忠実クローン中の状態（同時に1つ・実ページを開くので重い）
+_CLONING: dict = {"site_id": None, "phase": "", "file": None, "error": None}
+_CLONE_LOCK = threading.Lock()
+
+# 一括改善（Before→After）中の状態（同時に1つ・LLMを何度も呼ぶ）
+_IMPROVING: dict = {"file": None, "phase": "", "result": None, "error": None}
+_IMPROVE_LOCK = threading.Lock()
 
 
 def _swatches(design_tokens_json) -> list[str]:
@@ -610,6 +618,107 @@ def api_extract_images():
     return jsonify({"ok": True, "site_id": site_id})
 
 
+def _run_clone_job(site_id: str, url: str, keep_js: bool) -> None:
+    """バックグラウンドで忠実クローンを作る。"""
+    def prog(msg: str) -> None:
+        _CLONING["phase"] = msg
+
+    try:
+        result = clone.clone_site(url, keep_js=keep_js, progress=prog)
+        with _CLONE_LOCK:
+            _CLONING["file"] = result["file"]
+            _CLONING["phase"] = f"完了（素材 {result['assets']} 件）"
+    except Exception as exc:  # noqa: BLE001
+        log.exception("クローンジョブが落ちました: %s", url)
+        with _CLONE_LOCK:
+            _CLONING["error"] = str(exc)
+    finally:
+        with _CLONE_LOCK:
+            _CLONING["site_id"] = None
+
+
+@app.route("/api/clone_site", methods=["POST"])
+def api_clone_site():
+    """登録サイトを忠実クローンする（非同期・AI不使用・DOMごと吸い出し）。"""
+    data = request.get_json(silent=True) or {}
+    site_id = (data.get("id") or "").strip()
+    keep_js = bool(data.get("keep_js"))
+    with db.connect() as conn:
+        row = db.get_site(conn, site_id)
+    if not row:
+        return jsonify({"ok": False, "message": "見つかりません"}), 404
+    with _CLONE_LOCK:
+        if _CLONING.get("site_id") is not None:
+            return jsonify({"ok": False, "message": "別のクローンが進行中です"}), 409
+        _CLONING.update({"site_id": site_id, "phase": "開始しています…", "file": None, "error": None})
+    log.info("クローンジョブ開始: %s (keep_js=%s)", row["url"], keep_js)
+    threading.Thread(target=_run_clone_job, args=(site_id, row["url"], keep_js), daemon=True).start()
+    return jsonify({"ok": True, "site_id": site_id})
+
+
+@app.route("/api/clone_site/status")
+def api_clone_site_status():
+    """クローンの進捗（phase）と完成ファイル名を返す。"""
+    with _CLONE_LOCK:
+        return jsonify(dict(_CLONING))
+
+
+def _run_improve_job(filename: str, limit: int, targets: list | None, hint: str, ref_id: str) -> None:
+    """バックグラウンドで全セクション一括改善を回す。"""
+    def prog(msg: str) -> None:
+        _IMPROVING["phase"] = msg
+
+    try:
+        result = camp.improve_all(filename, limit=limit, targets=targets, hint=hint,
+                                  ref_id=ref_id, progress=prog)
+        with _IMPROVE_LOCK:
+            _IMPROVING["result"] = result
+            _IMPROVING["phase"] = f"完了（{result['improved']}/{result['total']}セクション改善）"
+    except Exception as exc:  # noqa: BLE001
+        log.exception("一括改善ジョブが落ちました: %s", filename)
+        with _IMPROVE_LOCK:
+            _IMPROVING["error"] = str(exc)
+    finally:
+        with _IMPROVE_LOCK:
+            _IMPROVING["file"] = None
+
+
+@app.route("/api/improve_camp", methods=["POST"])
+def api_improve_camp():
+    """カンプ/クローンの全セクションを一括で今風に改善（非同期・営業のAfter版づくり）。"""
+    if not _edit_ready():
+        return jsonify({"ok": False, "message": "修正エンジンのAPIキーが未設定です（⚙設定を確認）"}), 400
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    try:
+        limit = int(data.get("limit", 0) or 0)  # 0=全部、N=最初のNセクションだけ
+    except Exception:  # noqa: BLE001
+        limit = 0
+    # sections=[1,4] のような0始まり番号リスト（指定があれば limit より優先）
+    targets = None
+    raw_secs = data.get("sections")
+    if isinstance(raw_secs, list):
+        targets = [int(x) for x in raw_secs if isinstance(x, (int, float)) and int(x) >= 0] or None
+    if not fn or not (config.CAMP_DIR / fn).exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    with _IMPROVE_LOCK:
+        if _IMPROVING.get("file") is not None:
+            return jsonify({"ok": False, "message": "別の一括改善が進行中です"}), 409
+        _IMPROVING.update({"file": fn, "phase": "開始しています…", "result": None, "error": None})
+    hint = (data.get("hint") or "").strip()[:500]
+    ref_id = (data.get("ref_id") or "").strip()
+    log.info("一括改善ジョブ開始: %s (limit=%d, sections=%s, hint=%s, ref=%s)", fn, limit, targets, hint, ref_id)
+    threading.Thread(target=_run_improve_job, args=(fn, limit, targets, hint, ref_id), daemon=True).start()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/improve_camp/status")
+def api_improve_camp_status():
+    """一括改善の進捗（phase）と結果を返す。"""
+    with _IMPROVE_LOCK:
+        return jsonify(dict(_IMPROVING))
+
+
 @app.route("/assets/<site_id>/<path:filename>")
 def asset_file(site_id: str, filename: str):
     """抜き出した画像を返す。"""
@@ -1040,7 +1149,8 @@ def api_camps():
     """保存済みカンプの一覧（履歴）。名前付き（お気に入り）を先頭に、あとは新しい順。"""
     names = camp.load_camp_names()
     items = []
-    for p in sorted(config.CAMP_DIR.glob("camp_*.html")):
+    # 生成カンプ(camp_*)＋お気に入りスナップショット(fav_*)の両方を拾う
+    for p in sorted(list(config.CAMP_DIR.glob("camp_*.html")) + list(config.CAMP_DIR.glob("fav_*.html"))):
         try:
             head = p.read_text(encoding="utf-8", errors="ignore")[:2000]
         except Exception:  # noqa: BLE001
@@ -1071,6 +1181,22 @@ def api_camp_name():
     return jsonify({"ok": True, "name": info.get("name", ""), "fav": bool(info.get("fav"))})
 
 
+@app.route("/api/save_favorite", methods=["POST"])
+def api_save_favorite():
+    """現在の完成形DOM（見た目＋焼き込んだ動き）を『お気に入り』として複製保存する。
+    クライアントが編集UIを除いたHTML全体（cleanHtml）＋名前を送ってくる。"""
+    data = request.get_json(silent=True) or {}
+    html = data.get("html") or ""
+    name = (data.get("name") or "").strip()
+    try:
+        info = camp.save_favorite(html, name)
+    except ValueError as exc:
+        return jsonify({"ok": False, "message": str(exc)}), 400
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True, "file": info["file"], "name": info["name"]})
+
+
 @app.route("/api/camp_delete", methods=["POST"])
 def api_camp_delete():
     """保存済みカンプを1件削除する（履歴の掃除用）。"""
@@ -1081,6 +1207,11 @@ def api_camp_delete():
         return jsonify({"ok": False, "message": "見つかりません"}), 404
     try:
         p.unlink()
+        # クローンの素材フォルダ（<名前>_files）も一緒に消す
+        files_dir = config.CAMP_DIR / f"{p.stem}_files"
+        if files_dir.is_dir():
+            import shutil
+            shutil.rmtree(files_dir, ignore_errors=True)
     except Exception as exc:  # noqa: BLE001
         return jsonify({"ok": False, "message": str(exc)}), 500
     return jsonify({"ok": True})
@@ -1159,6 +1290,11 @@ _EDIT_BAR = """
 #__ce_pk .it:hover{border-color:#2b6cb0;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 #__ce_pk .it img{width:100%;height:80px;object-fit:cover;display:block;background:#eef2f7}
 #__ce_pk .it span{display:block;font-size:11px;color:#555;padding:4px 6px}
+#__ce_pk .favgr{display:grid;grid-template-columns:1fr;gap:8px}
+#__ce_pk .favgr .it{padding:10px 12px;cursor:pointer}
+#__ce_pk .favgr .it.now{border-color:#e8a300;background:#fffaf0}
+#__ce_pk .favgr .nm{font-weight:700;font-size:13px;color:#1d1d1f}
+#__ce_pk .favgr .dt{font-size:11px;color:#888;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #__ce_cm{position:fixed;z-index:2147483002;width:290px;max-width:92vw;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 16px 44px rgba(0,0,0,.32);font-family:system-ui,sans-serif;color:#1d1d1f;overflow:hidden}
 #__ce_cm .h{background:#1d1d1f;color:#fff;padding:9px 12px;font-size:12px;font-weight:700;display:flex;gap:6px;align-items:center}
 #__ce_cm .h .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1186,6 +1322,11 @@ _EDIT_BAR = """
 #__ce_cm .__ce_anim button{text-align:left;background:#fff4fb;border:1px solid #f3cfe8;border-radius:8px;padding:6px 8px;cursor:pointer;line-height:1.25}
 #__ce_cm .__ce_anim b{display:block;font-size:12.5px;color:#1d1d1f;font-weight:700}
 #__ce_cm .__ce_anim span{font-size:10.5px;color:#a06a8f}
+#__ce_cm .__ce_anim button.on{outline:2px solid #1a7f37;background:#eaf8ee}
+#__ce_cm .__fx_ctl{background:#f2fbf5;border:1px solid #cfead6;border-radius:8px;padding:8px;margin:0 0 8px}
+#__ce_cm .__fx_ctl label{display:block;font-size:11px;color:#3a6b48;margin-bottom:8px;font-weight:700}
+#__ce_cm .__fx_ctl label span{float:right;color:#1a7f37}
+#__ce_cm .__fx_ctl input[type=range]{width:100%;margin-top:3px;accent-color:#1a7f37}
 @keyframes __ceax_fadeup{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
 @keyframes __ceax_fade{from{opacity:0}to{opacity:1}}
 @keyframes __ceax_left{from{opacity:0;transform:translateX(-48px)}to{opacity:1;transform:none}}
@@ -1209,7 +1350,7 @@ _EDIT_BAR = """
 #__ce_toast .tx{font-size:14.5px;font-weight:700}
 </style>
 <div id="__ce">
-  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span class="sv" id="__ce_save">⭐ 名前を付けて保存</span><span class="x" id="__ce_mn">✕ 閉じる</span></div>
+  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">✕ 閉じる</span></div>
   <div class="bd">
     <div class="lbl plain">🤖 修正・おしゃれに使うAI（モデルは⚙設定で）</div>
     <select id="__ce_ai"><option value="anthropic">Claude</option><option value="openai">GPT</option><option value="deepseek">DeepSeek（激安）</option><option value="gemini">Gemini</option></select>
@@ -1223,6 +1364,12 @@ _EDIT_BAR = """
     <div class="lbl">✍ 自分で指示</div>
     <div class="row"><input id="__ce_in" placeholder="例：見出しを大きく／CTAを黄色に"><button class="go" id="__ce_go">直す</button></div>
     <button class="im" id="__ce_img">🖼 画像を差し替え（AIなし・無料）</button>
+    <div class="lbl plain">🎨 一括改善の手本（ストックの登録サイトに寄せる）</div>
+    <select id="__ce_ref"><option value="">なし（AIおまかせ）</option></select>
+    <button class="im" id="__ce_improve" style="background:#7c3aed;color:#fff">🚀 ページ全体を今風に（一括改善）</button>
+    <div class="lbl plain">⭐ お気に入り（今の完成形を丸ごと残す→選ぶと再現）</div>
+    <button class="im" id="__ce_fav" style="background:#e8a300;color:#fff">⭐ お気に入りに保存（この完成形を残す）</button>
+    <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">★ お気に入り一覧（選ぶと再現）</button>
     <div class="msg" id="__ce_msg">💡 直したい所を<b>右クリック</b>すると、その要素に直接アニメ・指示が出せます</div>
   </div>
 </div>
@@ -1242,6 +1389,53 @@ _EDIT_BAR = """
       fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edit_provider:aiSel.value})})
         .then(function(r){return r.json();}).then(function(){ msg.textContent='修正・おしゃれに使うAIを「'+nm+'」にしました'; })
         .catch(function(){ msg.textContent='AIの切替に失敗しました'; });
+    });
+  }
+  // 🎨 手本サイトのドロップダウンをストックから埋める（改善の方向性を画像で見せる用）
+  var refSel=document.getElementById('__ce_ref');
+  if(refSel){
+    fetch('/api/sites').then(function(r){return r.json();}).then(function(d){
+      (d.hits||[]).forEach(function(h){
+        var o=document.createElement('option');
+        o.value=h.site_id;
+        var u=h.url.replace(/^https?:\\/\\//,'').replace(/\\/$/,'');
+        o.textContent=u.length>42?u.slice(0,42)+'…':u;
+        refSel.appendChild(o);
+      });
+    }).catch(function(){});
+  }
+  // 🚀 一括改善（Before→After営業デモ）：全セクションを順に今風へ。完了したらAfter版を開く
+  var impBtn=document.getElementById('__ce_improve');
+  if(impBtn){
+    impBtn.addEventListener('click',function(){
+      var v=prompt('どのセクションを改善しますか？\\n空欄 or 0 = 全部（目安20〜50円・数分）\\n数字1つ（例 3）= 最初の3セクションだけ\\nカンマ区切り（例 2,5）= その番号のセクションだけ。1つだけなら「5,」\\n※Claude/GPT選択時はスクショ付きで渡します（見た目判断が正確）','');
+      if(v===null) return;  // キャンセル
+      v=(v||'').trim();
+      var lim=0, targets=null;
+      if(v.indexOf(',')>-1){
+        targets=v.split(',').map(function(x){return parseInt(x.trim(),10);})
+                 .filter(function(n){return n>=1;}).map(function(n){return n-1;});
+        if(!targets.length){ msg.textContent='セクション番号が読めませんでした'; return; }
+      } else { lim=parseInt(v,10)||0; }
+      var hint=prompt('デザインの方向性があれば一言で（空欄OK）\\n例：高級ホテルのように上品に／ポップで元気に／黒基調でスタイリッシュに／アニメ多めで動きのあるページに','');
+      if(hint===null) return;  // キャンセル
+      impBtn.disabled=true; impBtn.textContent='🚀 今の状態を保存中…';
+      flushThen(function(){ impBtn.textContent='🚀 一括改善中…';
+      fetch('/api/improve_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,limit:lim,sections:targets,hint:(hint||'').trim(),ref_id:(refSel?refSel.value:'')})})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(!d.ok){ msg.textContent=d.message||'開始できませんでした'; impBtn.disabled=false; impBtn.textContent='🚀 ページ全体を今風に（一括改善）'; return; }
+          var poll=function(){
+            fetch('/api/improve_camp/status').then(function(r){return r.json();}).then(function(s){
+              if(s.file){ var t='🚀 '+(s.phase||'改善中…'); msg.textContent=t; impBtn.textContent=t; setTimeout(poll,2000); return; }
+              impBtn.disabled=false; impBtn.textContent='🚀 ページ全体を今風に（一括改善）';
+              if(s.error){ msg.textContent='一括改善に失敗: '+s.error; return; }
+              if(s.result&&s.result.file){ msg.textContent='完了！After版を開きます'; location.href='/camp/'+encodeURIComponent(s.result.file); }
+            }).catch(function(){ setTimeout(poll,3000); });
+          };
+          setTimeout(poll,2000);
+        }).catch(function(){ msg.textContent='通信に失敗しました'; impBtn.disabled=false; impBtn.textContent='🚀 ページ全体を今風に（一括改善）'; });
+      });
     });
   }
   // ヘッダを掴んでウィンドウ自体を移動できる（クリックでの開閉と両立：動いた時だけトグルを抑制）
@@ -1265,32 +1459,65 @@ _EDIT_BAR = """
     if(hMoved){ hMoved=false; return; }  // ドラッグ直後はトグルしない
     box.classList.toggle('min'); document.getElementById('__ce_mn').textContent=box.classList.contains('min')?'▲ ひらく':'✕ 閉じる';
   });
-  // ⭐名前を付けて保存（お気に入り登録）。壊れる前の良い版に名前を付けて残せる。
+  // ヘッダの保存ボタン＝この版を上書き保存（動き・位置・画像差し替えを現ファイルに焼き込む）
   var saveBtn=document.getElementById('__ce_save');
   saveBtn.addEventListener('click',function(ev){
     ev.stopPropagation();  // ヘッダのトグル(開閉)と競合させない
-    if(_dirty){ saveLayout(); return; }  // 位置/大きさを動かしていたら、それをHTMLに焼き込む
-    var cur=(document.title||'').trim();
-    var name=window.prompt('このカンプに名前を付けて保存します（履歴の上に「⭐名前」で残ります）\\n例：ヒーロー完成版 / 配色OK版',cur);
-    if(name===null) return;  // キャンセル
-    saveBtn.textContent='保存中…';
-    fetch('/api/camp_name',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,name:name})})
-      .then(function(r){return r.json();}).then(function(d){
-        if(d.ok && d.name){ saveBtn.textContent='✅ 保存「'+d.name+'」'; saveBtn.classList.add('saved'); }
-        else { saveBtn.textContent='⭐ 名前を付けて保存'; saveBtn.classList.remove('saved'); }
-      }).catch(function(){ saveBtn.textContent='⭐ 名前を付けて保存'; });
+    saveLayout();
   });
   var esc=function(s){return String(s||'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});};
-  // その場で再生できるアニメ（AIなし・プレビュー用）。kはCSSクラス__ceax_k に対応。
-  var ANIMS=[
-    {k:'fadeup',b:'ふわっと出現',d:'下から浮かぶ'},
-    {k:'fade',b:'スッと出る',d:'フェード'},
-    {k:'left',b:'左から',d:'スライドイン'},
-    {k:'right',b:'右から',d:'スライドイン'},
-    {k:'zoom',b:'ズームイン',d:'拡大しながら'},
-    {k:'pulse',b:'脈打つ',d:'ループ・鼓動'},
-    {k:'float',b:'ゆらゆら',d:'ループ・浮遊'},
-    {k:'bounce',b:'バウンド',d:'ループ・弾む'}
+  // ⭐ お気に入り＝いまの完成形（見た目＋焼き込んだ動き）を別ファイルに丸ごと保存。選ぶとそのまま再現。
+  var favBtn=document.getElementById('__ce_fav');
+  if(favBtn) favBtn.addEventListener('click',function(){
+    var cur=(document.title||'').trim();
+    var name=window.prompt('この完成形を「お気に入り」として丸ごと保存します（見た目＋動き＋スクロール発火ごと）。\\n★一覧からいつでも呼び出して再現・サンプルに使えます。\\n名前をどうぞ：', cur);
+    if(name===null) return;  // キャンセル
+    favBtn.disabled=true; var old=favBtn.textContent; favBtn.textContent='保存中…';
+    fetch('/api/save_favorite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanHtml(),name:name})})
+    .then(function(r){return r.json();}).then(function(d){
+      favBtn.disabled=false; favBtn.textContent=old;
+      if(d.ok){ msg.textContent='⭐お気に入りに保存しました「'+(d.name||'')+'」。★一覧から呼び出せます'; }
+      else { msg.textContent='保存失敗：'+(d.message||''); }
+    }).catch(function(){ favBtn.disabled=false; favBtn.textContent=old; msg.textContent='通信エラー'; });
+  });
+  // ★ お気に入り一覧＝貯めた完成形を選ぶと、そのカンプを開いて丸ごと再現（サンプル切替に使える）
+  var favListBtn=document.getElementById('__ce_favlist');
+  if(favListBtn) favListBtn.addEventListener('click',function(){
+    fetch('/api/camps').then(function(r){return r.json();}).then(function(d){
+      var favs=(d.camps||[]).filter(function(c){return c.fav;});
+      var items = favs.length
+        ? favs.map(function(c){ var cur=(c.file===FILE)?' （今開いている版）':''; return '<div class="it'+(c.file===FILE?' now':'')+'" data-file="'+c.file+'"><div class="nm">⭐ '+esc(c.name||c.file)+cur+'</div><div class="dt">'+esc(c.title||'')+'</div></div>'; }).join('')
+        : '<div style="color:#999;padding:8px">まだお気に入りがありません（上の「⭐お気に入りに保存」で貯まります）</div>';
+      var ov=document.createElement('div'); ov.id='__ce_pk';
+      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>★ お気に入り一覧（クリックで開いて再現）</h4><div class="favgr">'+items+'</div></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click',function(e){
+        if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+        var it=e.target.closest('.it'); if(!it) return;
+        var f=it.getAttribute('data-file'); if(f===FILE){ ov.remove(); return; }
+        if(_dirty && !confirm('保存していない変更があります。お気に入りを開くと、その変更は失われます。開きますか？')) return;
+        location.href='/camp/'+encodeURIComponent(f);
+      });
+    }).catch(function(){ msg.textContent='お気に入り一覧の取得に失敗しました'; });
+  });
+  // その場で再生できるアニメ（AIなし）。g=種類(in/loop/char)、dir=動きの向き、sl=調整スライダー。
+  // クリックで即プレビュー→スライダーで調整→「付ける」で無料で焼き込む。
+  var FX=[
+    {k:'fadeup',b:'ふわっと出現',d:'下から浮かぶ',g:'in',dir:'y',sl:[{k:'dist',l:'移動量',min:6,max:140,def:28},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
+    {k:'fade',b:'スッと出る',d:'フェード',g:'in',sl:[{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
+    {k:'left',b:'左から',d:'スライドイン',g:'in',dir:'xl',sl:[{k:'dist',l:'移動量',min:10,max:220,def:48},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
+    {k:'right',b:'右から',d:'スライドイン',g:'in',dir:'xr',sl:[{k:'dist',l:'移動量',min:10,max:220,def:48},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
+    {k:'zoom',b:'ズームイン',d:'拡大しながら',g:'in',dir:'s',sl:[{k:'scale',l:'開始の大きさ',min:40,max:98,def:86,u:'%'},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
+    {k:'blur',b:'ぼやけて出現',d:'ブラー→くっきり',g:'in',dir:'bl',sl:[{k:'blur',l:'ぼかし',min:2,max:40,def:14},{k:'dur',l:'速さ',min:200,max:2200,def:900,u:'ms'}]},
+    {k:'flip',b:'3Dフリップ',d:'くるっと回転',g:'in',dir:'ry',sl:[{k:'deg',l:'回転角',min:20,max:180,def:90,u:'°'},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
+    {k:'rise',b:'せり上がり',d:'下からスッと上へ',g:'in',dir:'clip',sl:[{k:'dist',l:'移動量',min:10,max:140,def:40},{k:'dur',l:'速さ',min:200,max:2200,def:900,u:'ms'}]},
+    {k:'stagger',b:'一文字ずつ',d:'文字が順に出現',g:'char',sl:[{k:'stag',l:'文字の間隔',min:15,max:150,def:45,u:'ms'},{k:'dist',l:'移動量',min:0,max:40,def:16}]},
+    {k:'typewriter',b:'タイプライター',d:'打ち込み風',g:'char',type:1,sl:[{k:'stag',l:'打つ速さ',min:20,max:200,def:60,u:'ms'}]},
+    {k:'wave',b:'波打ち',d:'文字が波打つ(ループ)',g:'char',loop:1,sl:[{k:'amp',l:'ゆれ幅',min:4,max:30,def:10},{k:'dur',l:'速さ',min:800,max:3000,def:1600,u:'ms'}]},
+    {k:'glow',b:'ネオングロー',d:'光る(ループ)',g:'loop',glow:1,sl:[{k:'dur',l:'速さ',min:600,max:3200,def:1800,u:'ms'}]},
+    {k:'pulse',b:'脈打つ',d:'鼓動(ループ)',g:'loop',dir:'ps',sl:[{k:'amp',l:'強さ',min:2,max:20,def:6,u:'%'},{k:'dur',l:'速さ',min:600,max:3000,def:1400,u:'ms'}]},
+    {k:'float',b:'ゆらゆら',d:'浮遊(ループ)',g:'loop',dir:'fy',sl:[{k:'amp',l:'ゆれ幅',min:4,max:40,def:12},{k:'dur',l:'速さ',min:1000,max:4000,def:2200,u:'ms'}]},
+    {k:'bounce',b:'バウンド',d:'弾む(ループ)',g:'loop',dir:'by',sl:[{k:'amp',l:'高さ',min:6,max:50,def:18},{k:'dur',l:'速さ',min:600,max:2600,def:1200,u:'ms'}]}
   ];
   // 「このセクションをおしゃれに」ボタンの一括指示。中身は保ちつつ質感だけ上げる。
   var STYLE_INS='プロのWebデザイナーとして、このセクションの見た目を現代的で洗練された印象にブラッシュアップする。'
@@ -1305,14 +1532,14 @@ _EDIT_BAR = """
   // アニメのプリセット（説明つき・クリックで選んだ所に適用）
   var PRESETS=[
    {b:'ふわっと出現',d:'スクロールで下から浮かぶ',i:'このセクションの主要な要素に、スクロールで画面に入ったら下から少し上へ動きながらフェードインする出現アニメを付ける。複数要素は時間差(stagger)で。IntersectionObserverで実装し、html.jsが付いた時だけ初期非表示にする保険を入れてJSが無くても中身が見えるようにする'},
-   {b:'ホバーで浮く',d:'カード/ボタンが浮く',i:'このセクションのカードやボタンに、ホバーで少し浮き上がり影が濃くなる滑らかなtransitionを付ける'},
-   {b:'画像ズーム',d:'画像がゆっくり拡大',i:'このセクションの画像に、ホバー時にゆっくり拡大するズーム効果を付ける（枠はoverflow:hidden、imgはobject-fit:coverではみ出さない）'},
+   {b:'ホバーで浮く',d:'カード/ボタンが浮く',ai:1,i:'このセクションのカードやボタンに、ホバーで少し浮き上がり影が濃くなる滑らかなtransitionを付ける'},
+   {b:'画像ズーム',d:'画像がゆっくり拡大',ai:1,i:'このセクションの画像に、ホバー時にゆっくり拡大するズーム効果を付ける（枠はoverflow:hidden、imgはobject-fit:coverではみ出さない）'},
    {b:'横からスライド',d:'左右からスッと登場',i:'このセクションの要素を、スクロールで画面に入ったら左右から滑り込んで現れるアニメにする（保険付き）'},
    {b:'見出しを強調',d:'タイトルが順に出る',i:'このセクションの見出しを、表示時に単語ごとに少しずつ現れる軽いアニメにする'},
-   {b:'背景グラデ',d:'背景色がゆっくり流れる',i:'このセクションの背景に、ゆっくり色が移動するグラデーションアニメ(@keyframes)を付ける'},
-   {b:'波の区切り',d:'セクション境界に波',i:'このセクションの下端に、SVGの波型の区切り装飾を入れる'},
-   {b:'パララックス',d:'背景がゆっくり動く',i:'このセクションの背景に、スクロールに合わせてゆっくり視差移動する簡易パララックスをCSS/素のJSで付ける'},
-   {b:'数字カウント',d:'数値が0から増える',i:'このセクションに実績や料金などの数値があれば、表示時に0から目標値までカウントアップするアニメを付ける'},
+   {b:'背景グラデ',d:'背景色がゆっくり流れる',ai:1,i:'このセクションの背景に、ゆっくり色が移動するグラデーションアニメ(@keyframes)を付ける'},
+   {b:'波の区切り',d:'セクション境界に波',ai:1,i:'このセクションの下端に、SVGの波型の区切り装飾を入れる'},
+   {b:'パララックス',d:'背景がゆっくり動く',ai:1,i:'このセクションの背景に、スクロールに合わせてゆっくり視差移動する簡易パララックスをCSS/素のJSで付ける'},
+   {b:'数字カウント',d:'数値が0から増える',ai:1,i:'このセクションに実績や料金などの数値があれば、表示時に0から目標値までカウントアップするアニメを付ける'},
    {b:'脈打つCTA',d:'ボタンが軽く鼓動',i:'このセクションのメインのボタン(CTA)に、注意を引く軽い鼓動(pulse)アニメを付ける（うるさくない範囲で）'},
    {b:'背景にドット柄',d:'水玉の模様を薄く',bg:1,i:'このセクションの背景に、薄いドット(水玉)柄をCSSのradial-gradientで敷く。既存の背景色の上に重ね、文字が読める薄さにする。中身のレイアウトや文字は変えない'},
    {b:'背景にストライプ',d:'斜めの縞模様',bg:1,i:'このセクションの背景に、ごく薄い斜めストライプをrepeating-linear-gradientで付ける。うるさくない薄さで文字は可読に保つ。中身は変えない'},
@@ -1346,12 +1573,27 @@ _EDIT_BAR = """
     if(Number(section)<0){
       if(!confirm('⚠ これは「ページ全体を書き直す」修正です。\\n時間がかかり、料金も高め（数十円〜）になります。\\n\\n特定の場所だけ直すなら【キャンセル】して、\\n・①で直すセクションを選ぶ か\\n・直したい所を右クリック\\nすると安く（数円）速く直せます。\\n\\nこのままページ全体を直しますか？')) { msg.textContent='キャンセルしました（①でセクションを選ぶと安いです）'; return; }
     }
-    busy(true); msg.textContent='生成中…'; showToast('AIが直しています…（十数秒〜）');
-    fetch('/api/edit_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:Number(section),instruction:instruction})})
-    .then(function(r){return r.json();}).then(function(d){
-      if(!d.ok){msg.textContent='失敗：'+d.message;busy(false);hideToast();return;}
-      poll(d.job_id);
-    }).catch(function(){msg.textContent='通信エラー';busy(false);hideToast();});
+    busy(true); msg.textContent='今の状態を保存中…'; showToast('AIが直しています…（十数秒〜）');
+    // ★AIに渡す前に、今の見た目（移動・手修正・焼き込みアニメ）をディスクへ保存する。
+    //   AIはファイルを読んで直すので、保存しないと「以前の状態」に対してかかり手修正が戻ってしまう。
+    flushThen(function(){
+      msg.textContent='生成中…';
+      fetch('/api/edit_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:Number(section),instruction:instruction})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(!d.ok){msg.textContent='失敗：'+d.message;busy(false);hideToast();return;}
+        poll(d.job_id);
+      }).catch(function(){msg.textContent='通信エラー';busy(false);hideToast();});
+    });
+  }
+  // AIに渡す前に、今のDOM（移動・手修正・焼き込み）をディスクに保存してからcbを実行する（＝AIが「今」を見る）。
+  function flushThen(cb){
+    var html;
+    try{ html=cleanHtml(); }catch(_){ cb(); return; }
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:html})})
+      .then(function(r){return r.json();}).then(function(){
+        _dirty=false; var sb=document.getElementById('__ce_save'); if(sb){ sb.textContent='💾 保存'; sb.classList.remove('saved'); }
+        cb();
+      }).catch(function(){ cb(); });  // 保存に失敗しても処理は続ける（最悪でも従来どおり）
   }
   function poll(id){
     fetch('/api/generate_camp/status').then(function(r){return r.json();}).then(function(d){
@@ -1459,7 +1701,7 @@ _EDIT_BAR = """
   // ===== 右クリックで、その要素に直接アニメ/指示/改善案を出す =====
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
-  function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); curEl.style.removeProperty('opacity'); if(curEl.getAttribute('data-cetx')!=null){applyTf(curEl);}else{curEl.style.removeProperty('transform');} curEl.classList.remove('__ce_sel');curEl=null;} }
+  function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} curAnim=null; curP={}; }
   // ===== 位置の直接調整（AIなし・transformで即反映）=====
   // 要素を translate で浮かせて動かす。元のtransformは data-cebt に退避して壊さない。
   // 元のtransformを1度だけ退避（自前のtranslate/scaleが無い時だけ）
@@ -1492,60 +1734,248 @@ _EDIT_BAR = """
     el.setAttribute('data-cesx',sx); el.setAttribute('data-cesy',sy); applyTf(el);
   }
   function rotateBy(el,delta){ _cebt(el); el.setAttribute('data-cero',(+el.getAttribute('data-cero')||0)+delta); applyTf(el); }
-  // アニメをその場で再生（プレビュー・保存なし）。Web Animations APIでJSから直接動かす＝CSSに依存せず確実。
-  var WA={
-    fadeup:{k:[{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'translateY(0)'}],o:{duration:800,easing:'ease'}},
-    fade:{k:[{opacity:0},{opacity:1}],o:{duration:800,easing:'ease'}},
-    left:{k:[{opacity:0,transform:'translateX(-48px)'},{opacity:1,transform:'translateX(0)'}],o:{duration:800,easing:'ease'}},
-    right:{k:[{opacity:0,transform:'translateX(48px)'},{opacity:1,transform:'translateX(0)'}],o:{duration:800,easing:'ease'}},
-    zoom:{k:[{opacity:0,transform:'scale(.86)'},{opacity:1,transform:'scale(1)'}],o:{duration:800,easing:'ease'}},
-    pulse:{k:[{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],o:{duration:1400,easing:'ease-in-out',iterations:Infinity}},
-    float:{k:[{transform:'translateY(0)'},{transform:'translateY(-10px)'},{transform:'translateY(0)'}],o:{duration:2200,easing:'ease-in-out',iterations:Infinity}},
-    bounce:{k:[{transform:'translateY(0)'},{transform:'translateY(-18px)'},{transform:'translateY(0)'},{transform:'translateY(-8px)'},{transform:'translateY(0)'}],o:{duration:1200,easing:'ease',iterations:Infinity}}
-  };
-  // 定義：f=開始, t=終了, loop=ループ, mid=ループ中の振れ幅
-  var ANDEF={
-    fade:{d:800,f:{o:0},t:{o:1}},
-    fadeup:{d:800,f:{o:0,y:28},t:{o:1,y:0}},
-    left:{d:800,f:{o:0,x:-48},t:{o:1,x:0}},
-    right:{d:800,f:{o:0,x:48},t:{o:1,x:0}},
-    zoom:{d:800,f:{o:0,s:.86},t:{o:1,s:1}},
-    pulse:{d:1400,loop:1,mid:{s:.06}},
-    float:{d:2200,loop:1,mid:{y:-12}},
-    bounce:{d:1200,loop:1,mid:{y:-18}}
-  };
-  function stopAnim(el){ if(el&&el.__ceRAF){ cancelAnimationFrame(el.__ceRAF); el.__ceRAF=null; } }
-  function playAnim(el,k){
-    if(!el){ if(msg)msg.textContent='⚠ 要素が選ばれていません（もう一度右クリックで選んでください）'; return; }
-    var D=ANDEF[k]; if(!D){ if(msg)msg.textContent='⚠ 未対応の動き：'+k; return; }
-    stopAnim(el);
-    var base=el.getAttribute('data-cebt')||'';  // 元の変形(回転など)は保つ
-    var start=null;
-    function frame(ts){
-      if(start===null) start=ts;
-      var el_p=(ts-start)/D.d, o=1,x=0,y=0,s=1;
-      if(D.loop){
-        var pp=el_p%1, tri=pp<.5?pp*2:2-pp*2;  // 0→1→0
-        if(D.mid.s!=null) s=1+D.mid.s*tri;
-        if(D.mid.y!=null) y=D.mid.y*tri;
-      } else {
-        var q=Math.min(1,el_p); q=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2;  // easeInOut
-        o=(D.f.o!=null?D.f.o:1)+(((D.t.o!=null?D.t.o:1))-(D.f.o!=null?D.f.o:1))*q;
-        if(D.f.x!=null) x=D.f.x+((D.t.x||0)-D.f.x)*q;
-        if(D.f.y!=null) y=D.f.y+((D.t.y||0)-D.f.y)*q;
-        if(D.f.s!=null) s=D.f.s+((D.t.s||1)-D.f.s)*q;
+  // 画像のサイズ変更：transform:scaleだと引き伸ばされて歪む。幅・高さを変え、object-fit:coverで
+  // はみ出しは切り取る（縦横比を保ったまま枠を満たす）＝横に長くしても画像が歪まない。
+  function sizeImg(el,fx,fy){
+    var w=(+el.getAttribute('data-cew'))||el.offsetWidth;
+    var h=(+el.getAttribute('data-ceh'))||el.offsetHeight;
+    w*=fx; h*=fy;
+    if(w<20)w=20; if(h<20)h=20; if(w>4000)w=4000; if(h>4000)h=4000;
+    el.setAttribute('data-cew',w); el.setAttribute('data-ceh',h);
+    el.style.setProperty('width',Math.round(w)+'px','important');
+    el.style.setProperty('height',Math.round(h)+'px','important');
+    el.style.setProperty('object-fit','cover','important');
+    el.style.setProperty('max-width','none','important');  // 元CSSのmax-width:100%等に負けないように
+    markDirty();
+  }
+  // ===== 動きプレビュー（RAFで毎フレーム手動描画＝この環境で確実）＋ 無料の焼き込み =====
+  var curAnim=null, curP={};  // いまプレビュー中のアニメkと、その調整値
+  function fxDef(k){ for(var i=0;i<FX.length;i++){ if(FX[i].k===k) return FX[i]; } return null; }
+  function fxParam(a,key){ if(curP[key]!=null) return curP[key]; for(var i=0;i<a.sl.length;i++){ if(a.sl[i].k===key) return a.sl[i].def; } return 0; }
+  // プレビューで当てた一時styleを消し、確定状態（位置など）に戻す
+  function clearPreviewStyle(el){
+    if(!el) return;
+    ['opacity','filter','clip-path','text-shadow'].forEach(function(p){ el.style.removeProperty(p); });
+    if(el.getAttribute('data-cetx')!=null){ applyTf(el); } else { el.style.removeProperty('transform'); }
+  }
+  function stopAnim(el){
+    if(el&&el.__ceRAF){ cancelAnimationFrame(el.__ceRAF); el.__ceRAF=null; }
+    if(el&&el.__fxHTML!=null){ el.innerHTML=el.__fxHTML; el.__fxHTML=null; }  // 文字分割していたら元に戻す
+  }
+  // 文字を1つずつ <span class="fxa_ch"> に包む（子タグは壊さない）。戻すのはinnerHTML復元で。
+  function splitChars(el){
+    var spans=[], texts=[], w=document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), t;
+    while(t=w.nextNode()){
+      if(t.parentNode&&t.parentNode.classList&&t.parentNode.classList.contains('fxa_ch')) continue;  // 既に包まれた文字は二重に包まない
+      if(t.nodeValue && t.nodeValue.replace(/\\s/g,'').length) texts.push(t);
+    }
+    texts.forEach(function(tn){
+      var frag=document.createDocumentFragment(), s=tn.nodeValue;
+      for(var i=0;i<s.length;i++){
+        var ch=s[i];
+        if(/\\s/.test(ch)){ frag.appendChild(document.createTextNode(ch)); continue; }
+        var sp=document.createElement('span'); sp.className='fxa_ch'; sp.textContent=ch; sp.style.display='inline-block';
+        spans.push(sp); frag.appendChild(sp);
       }
-      el.style.setProperty('opacity',o,'important');
-      el.style.setProperty('transform','translate('+x+'px,'+y+'px) scale('+s+') '+base,'important');
-      if(D.loop || el_p<1){ el.__ceRAF=requestAnimationFrame(frame); }
-      else { el.__ceRAF=null; el.style.removeProperty('opacity'); if(el.getAttribute('data-cetx')!=null){ applyTf(el); } else { el.style.removeProperty('transform'); } }
+      tn.parentNode.replaceChild(frag,tn);
+    });
+    return spans;
+  }
+  // 既に1文字ずつ包まれていたら、ほどいて元テキストに戻す（2回目以降の焼き込みで入れ子になり壊れるのを防ぐ）
+  function fxUnsplit(el){
+    if(!el||!el.querySelector) return;
+    var sp;
+    while(sp=el.querySelector('.fxa_ch')){ sp.replaceWith(document.createTextNode(sp.textContent||'')); }
+    try{ el.normalize(); }catch(_){}  // 隣り合うテキストを1つに結合＝元の文字列に戻す
+  }
+  // 一括改善(GPT)の文字アニメ(imp-char)をこの要素から取り除く。
+  // ★これをしないと：一括改善の分割JSがリロード毎に見出しのinnerHTMLを作り直し、私のfxa_chを毎回消す＝アニメが付かない。
+  //   data-imp-split を外すと分割JSがこの見出しを対象外にする→私のアニメが残る。imp-char/imp-lineはプレーン文字に戻す。
+  function fxStripImpLetters(el){
+    if(!el||!el.querySelector) return;
+    // 一括改善は見出しごとに"作り直しJS"を持つ（探し方が imp-title / [data-imp-split] 等バラバラで、
+    // 正規表現では塞ぎ切れない）。→ 標的になるクラスを外せば、どの作り直しJSもこの見出しを掴めなくなる
+    //   ＝私のアニメが残る。見た目は主要なテキストstyleをインライン化して保つ。
+    var isTitle=false, cls=el.classList;
+    if(cls){ [].slice.call(cls).forEach(function(c){ if(c.indexOf('imp-title')===0) isTitle=true; }); }
+    if(isTitle){
+      try{ var cs=getComputedStyle(el);
+        ['font-size','font-weight','font-family','line-height','letter-spacing','color','text-align','font-style','text-transform','white-space'].forEach(function(p){
+          if(!el.style.getPropertyValue(p)) el.style.setProperty(p, cs.getPropertyValue(p));
+        });
+      }catch(_){}
+      [].slice.call(cls).forEach(function(c){ if(c.indexOf('imp-title')===0) el.classList.remove(c); });
+    }
+    if(el.removeAttribute) el.removeAttribute('data-imp-split');
+    var sp;
+    while(sp=el.querySelector('.imp-line,.imp-char')){ sp.replaceWith(document.createTextNode(sp.textContent||'')); }
+    try{ el.normalize(); }catch(_){}
+  }
+  // 文字系プレビュー（stagger/typewriter/wave）
+  function playChar(el,a){
+    if(el.__fxHTML==null) el.__fxHTML=el.innerHTML;
+    fxUnsplit(el);  // 既に割れていても一旦プレーンに戻してから割り直す
+    var spans=splitChars(el);
+    if(!spans.length){ el.innerHTML=el.__fxHTML; el.__fxHTML=null; if(msg)msg.textContent='⚠ ここには文字が無いので文字アニメは使えません。画像には「ふわっと出現」「ズームイン」「ぼやけて出現」などを選んでください'; return; }
+    var stag=fxParam(a,'stag')||45, dur=fxParam(a,'dur')||1600, dist=fxParam(a,'dist')||16, amp=fxParam(a,'amp')||10, start=null;
+    function frame(ts){
+      if(start===null)start=ts; var tt=ts-start;
+      for(var i=0;i<spans.length;i++){ var sp=spans[i];
+        if(a.loop){ var ph=(tt/dur*2*Math.PI)-(i*0.5); sp.style.transform='translateY('+(Math.sin(ph)*amp)+'px)'; }
+        else if(a.type){ sp.style.opacity=(tt>i*stag)?1:0; }
+        else { var lt=tt-i*stag, q=lt<=0?0:Math.min(1,lt/500); q=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2; sp.style.opacity=q; sp.style.transform='translateY('+(dist*(1-q))+'px)'; }
+      }
+      var done=a.loop?false:(tt>spans.length*stag+(a.type?80:520));
+      if(!done){ el.__ceRAF=requestAnimationFrame(frame); }
+      else { el.__ceRAF=null; el.innerHTML=el.__fxHTML; el.__fxHTML=null; }
     }
     el.__ceRAF=requestAnimationFrame(frame);
-    if(msg) msg.textContent='▶ 再生「'+k+'」（もう一度で再生・別要素選択で停止）';
+  }
+  function playAnim(el,k){
+    if(!el){ if(msg)msg.textContent='⚠ 要素が選ばれていません（もう一度右クリックで選んでください）'; return; }
+    var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ 未対応の動き：'+k; return; }
+    stopAnim(el);
+    var base=el.getAttribute('data-cebt')||'';  // 元の変形(回転など)は保つ
+    if(msg) msg.textContent='▶ 再生「'+a.b+'」（スライダーで調整→「付ける」で確定）';
+    if(a.g==='char'){ playChar(el,a); return; }
+    var dur=fxParam(a,'dur')||800, start=null;  // a.dは説明文なので使わない（速さスライダー無しは800msに）
+    function frame(ts){
+      if(start===null) start=ts;
+      var p=(ts-start)/dur, o=1, tf='';
+      if(a.g==='loop'){
+        var pp=p%1, tri=pp<.5?pp*2:2-pp*2;  // 0→1→0
+        if(a.dir==='ps'){ tf='scale('+(1+(fxParam(a,'amp')/100)*tri)+')'; }
+        else if(a.dir==='fy'){ tf='translateY('+(-fxParam(a,'amp')*tri)+'px)'; }
+        else if(a.dir==='by'){ var bp=pp<.3?pp/.3:(pp<.6?1-(pp-.3)/.3:(pp<.8?(pp-.6)/.2*.4:(1-(pp-.8)/.2)*.4)); tf='translateY('+(-fxParam(a,'amp')*Math.max(0,bp))+'px)'; }
+        else if(a.glow){ var g=Math.round(4+18*tri); el.style.setProperty('text-shadow','0 0 '+g+'px currentColor'+(tri>.35?(',0 0 '+Math.round(g*1.7)+'px currentColor'):''),'important'); el.style.setProperty('filter','brightness('+(1+.18*tri)+')','important'); }
+      } else {
+        var q=Math.min(1,p); q=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2;  // easeInOut
+        o=q;
+        if(a.dir==='y'){ tf='translateY('+(fxParam(a,'dist')*(1-q))+'px)'; }
+        else if(a.dir==='xl'){ tf='translateX('+(-fxParam(a,'dist')*(1-q))+'px)'; }
+        else if(a.dir==='xr'){ tf='translateX('+(fxParam(a,'dist')*(1-q))+'px)'; }
+        else if(a.dir==='s'){ var sc=fxParam(a,'scale')/100; tf='scale('+(sc+(1-sc)*q)+')'; }
+        else if(a.dir==='bl'){ el.style.setProperty('filter','blur('+(fxParam(a,'blur')*(1-q))+'px)','important'); }
+        else if(a.dir==='ry'){ tf='perspective(800px) rotateY('+(fxParam(a,'deg')*(1-q))+'deg)'; }
+        else if(a.dir==='clip'){ tf='translateY('+(fxParam(a,'dist')*(1-q))+'px)'; }  // せり上がり＝下からスッと上へ＋フェード（clip-pathは使わない＝半分で止まらない）
+      }
+      if(!a.glow){ el.style.setProperty('opacity',o,'important'); }
+      if(tf) el.style.setProperty('transform',tf+' '+base,'important');
+      if(a.g==='loop' || p<1){ el.__ceRAF=requestAnimationFrame(frame); }
+      else { el.__ceRAF=null; clearPreviewStyle(el); }
+    }
+    el.__ceRAF=requestAnimationFrame(frame);
+  }
+  // ===== 焼き込み（AIなし・無料）：永続CSS/JSをHTMLへ注入し、要素にクラス＋CSS変数を付ける =====
+  // 命名は "fxa" 系（#__ce を含めない）＝保存時の掃除(cleanHtml)で消されず、そのまま残る。
+  var FX_CSS='html.fxa-on .fxa_pre{opacity:0;transition:opacity var(--fxa-dur,.8s) ease,transform var(--fxa-dur,.8s) ease,filter var(--fxa-dur,.8s) ease,clip-path var(--fxa-dur,.8s) ease}'
+    +'html.fxa-on .fxa_pre.fxa_y{transform:translateY(var(--fxa-dist,28px))}'
+    +'html.fxa-on .fxa_pre.fxa_xl{transform:translateX(calc(-1*var(--fxa-dist,48px)))}'
+    +'html.fxa-on .fxa_pre.fxa_xr{transform:translateX(var(--fxa-dist,48px))}'
+    +'html.fxa-on .fxa_pre.fxa_s{transform:scale(var(--fxa-scale,.86))}'
+    +'html.fxa-on .fxa_pre.fxa_bl{filter:blur(var(--fxa-blur,14px))}'
+    +'html.fxa-on .fxa_pre.fxa_ry{transform:perspective(800px) rotateY(var(--fxa-deg,90deg))}'
+    +'html.fxa-on .fxa_pre.fxa_clip{transform:translateY(var(--fxa-dist,40px))}'
+    +'html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}'
+    +'html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}'
+    +'.fxa_ch{display:inline-block}'
+    +'html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,16px));transition:opacity .5s ease,transform .5s ease}'
+    +'html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,45ms))}'
+    +'html.fxa-on .fxa_tw .fxa_ch{opacity:0;transition:opacity .05s linear}'
+    +'html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}'
+    +'@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}'
+    +'@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}'
+    +'@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}'
+    +'@keyframes fxa_glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}'
+    +'@keyframes fxa_wave{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,10px)))}}'
+    +'.fxa_lp_pulse{animation:fxa_pulse var(--fxa-dur,1.4s) ease-in-out infinite}'
+    +'.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}'
+    +'.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}'
+    +'.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}'
+    +'.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}';
+  // スクロールで画面に入ったら .fxa_in を付けて再生。JS無効なら全部表示（消えない保険）。"__ce"を含めない＝保存で残る。
+  var FX_RUN='(function(){var d=document,h=d.documentElement;'
+    +'if(!d.querySelector(".fxa_pre")){return;}h.classList.add("fxa-on");'
+    +'function pre(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}'
+    +'function vh(){return window.innerHeight||h.clientHeight;}'
+    +'function show(){pre().forEach(function(el){var r=el.getBoundingClientRect();if(r.bottom>0&&r.top<vh()*0.96)el.classList.add("fxa_in");});}'
+    +'function start(){show();'
+    +'if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add("fxa_in");io.unobserve(en.target);}});},{threshold:0.12,rootMargin:"0px 0px -6% 0px"});pre().forEach(function(el){io.observe(el);});}'
+    +'var t;window.addEventListener("scroll",function(){clearTimeout(t);t=setTimeout(show,80);},{passive:true});'
+    +'setTimeout(show,1200);}'
+    +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",start);else start();})();';
+  function ensureFxAssets(){
+    // ★既存カンプには古い版の fxa-css/fxa-run が焼き込まれている。スキップせず毎回「最新版」に入れ替える
+    //   ＝既存ファイルを編集しても、新しい（clipを使わない丈夫な）動きに更新される。
+    var o1=document.getElementById('fxa-css'); if(o1) o1.remove();
+    var o2=document.getElementById('fxa-run'); if(o2) o2.remove();
+    var st=document.createElement('style'); st.id='fxa-css'; st.textContent=FX_CSS; (document.head||document.documentElement).appendChild(st);
+    var sc=document.createElement('script'); sc.id='fxa-run'; sc.textContent=FX_RUN; (document.body||document.documentElement).appendChild(sc);
+  }
+  // 既存カンプを開いた瞬間にも、焼き込み済みの古い定義を最新版へ差し替える（clip撤廃などの修正を既存にも反映）
+  if(document.querySelector('.fxa_pre,.fxa_wave,.fxa_ch,[class*="fxa_lp_"]')) ensureFxAssets();
+  function fxClearClasses(el){
+    [].slice.call(el.classList).forEach(function(c){ if(c.indexOf('fxa_')===0 && c!=='fxa_ch') el.classList.remove(c); });
+    ['--fxa-dur','--fxa-dist','--fxa-scale','--fxa-blur','--fxa-deg','--fxa-amp','--fxa-stag'].forEach(function(p){ el.style.removeProperty(p); });
+  }
+  function _fxDist(el,a){ el.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
+  function applyBake(el,k){
+    var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ まず動きを選んでください'; return; }
+    ensureFxAssets();
+    stopAnim(el); clearPreviewStyle(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);  // 2回目以降も必ずプレーン文字から＋一括改善の文字アニメを外す（上書き消え防止）
+    // ★ドラッグ/拡大で付いた transition:none / animation:none を外す。これが残ると出現もループも一瞬で終わって「動かない」に見える。
+    el.style.removeProperty('transition'); el.style.removeProperty('animation');
+    el.style.setProperty('--fxa-dur', (fxParam(a,'dur')||800)+'ms');  // a.dは説明文なので使わない
+    if(a.g==='loop'){
+      if(a.dir==='ps'){ el.style.setProperty('--fxa-amp', (fxParam(a,'amp')/100)); el.classList.add('fxa_lp_pulse'); }
+      else if(a.dir==='fy'){ el.style.setProperty('--fxa-amp', fxParam(a,'amp')+'px'); el.classList.add('fxa_lp_float'); }
+      else if(a.dir==='by'){ el.style.setProperty('--fxa-amp', fxParam(a,'amp')+'px'); el.classList.add('fxa_lp_bounce'); }
+      else if(a.glow){ el.classList.add('fxa_lp_glow'); }
+    } else if(a.g==='char'){
+      var spans=splitChars(el); spans.forEach(function(sp,i){ sp.style.setProperty('--i', i); });  // 上でfxUnsplit済み＝常にプレーンから割る
+      if(!spans.length){ el.style.removeProperty('--fxa-dur'); if(msg)msg.textContent='⚠ ここには文字が無いので文字アニメは付けられません。画像には「ふわっと出現」「ズームイン」「ぼやけて出現」などを選んでください'; return; }
+      if(a.loop){ el.style.setProperty('--fxa-amp', fxParam(a,'amp')+'px'); el.classList.add('fxa_wave'); }
+      else {
+        el.classList.add('fxa_pre'); el.classList.add(a.type?'fxa_tw':'fxa_cpre');
+        el.style.setProperty('--fxa-stag', fxParam(a,'stag')+'ms');
+        if(!a.type) el.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px');
+        el.classList.add('fxa_in');  // 編集中はすぐ見えるように（保存時にfxa_inは外す＝再生に戻る）
+      }
+    } else {
+      el.classList.add('fxa_pre');
+      if(a.dir==='y'){ el.classList.add('fxa_y'); _fxDist(el,a); }
+      else if(a.dir==='xl'){ el.classList.add('fxa_xl'); _fxDist(el,a); }
+      else if(a.dir==='xr'){ el.classList.add('fxa_xr'); _fxDist(el,a); }
+      else if(a.dir==='s'){ el.classList.add('fxa_s'); el.style.setProperty('--fxa-scale', (fxParam(a,'scale')/100)); }
+      else if(a.dir==='bl'){ el.classList.add('fxa_bl'); el.style.setProperty('--fxa-blur', fxParam(a,'blur')+'px'); }
+      else if(a.dir==='ry'){ el.classList.add('fxa_ry'); el.style.setProperty('--fxa-deg', fxParam(a,'deg')+'deg'); }
+      else if(a.dir==='clip'){ el.classList.add('fxa_clip'); _fxDist(el,a); }
+      el.classList.add('fxa_in');
+    }
+    markDirty();
+    if(msg) msg.textContent='✅ 付けました。ヘッダの「💾 変更を保存」で残ります（スクロールで再生）';
+  }
+  // アニメ選択：ハイライト＋スライダー表示＋即プレビュー
+  function selectFx(k, btn){
+    var a=fxDef(k); if(!a) return;
+    curAnim=k; curP={}; a.sl.forEach(function(s){ curP[s.k]=s.def; });
+    if(curMenu){ [].slice.call(curMenu.querySelectorAll('#__fx_grid button')).forEach(function(b){ b.classList.remove('on'); }); }
+    if(btn) btn.classList.add('on');
+    var sl=document.getElementById('__fx_sl');
+    if(sl){
+      sl.innerHTML=a.sl.map(function(s){ return '<label>'+esc(s.l)+'<span>'+curP[s.k]+(s.u||'px')+'</span><input type="range" data-k="'+s.k+'" min="'+s.min+'" max="'+s.max+'" step="'+(s.step||1)+'" value="'+curP[s.k]+'"></label>'; }).join('');
+      sl.oninput=function(e){ var inp2=e.target.closest('input'); if(!inp2) return; var kk=inp2.getAttribute('data-k'); curP[kk]=+inp2.value; var sd=null; for(var i=0;i<a.sl.length;i++){ if(a.sl[i].k===kk) sd=a.sl[i]; } var lb=inp2.parentNode.querySelector('span'); if(lb) lb.textContent=inp2.value+((sd&&sd.u)||'px'); playAnim(curEl,curAnim); };
+    }
+    var ctl=document.getElementById('__fx_ctl'); if(ctl) ctl.style.display='block';
+    playAnim(curEl,k);
   }
   function resetPos(el){
     el.style.removeProperty('transform'); el.style.removeProperty('transform-origin'); el.style.removeProperty('animation'); el.style.removeProperty('transition');
+    if(el.getAttribute('data-cew')!=null){ // 画像サイズを変えていたら、それも元に戻す（元からの幅指定は触らない）
+      el.style.removeProperty('width'); el.style.removeProperty('height'); el.style.removeProperty('object-fit'); el.style.removeProperty('max-width');
+    }
     el.removeAttribute('data-cetx'); el.removeAttribute('data-cety'); el.removeAttribute('data-cesx'); el.removeAttribute('data-cesy'); el.removeAttribute('data-cero'); el.removeAttribute('data-cebt');
+    el.removeAttribute('data-cew'); el.removeAttribute('data-ceh');
     markDirty();
   }
   // ドラッグで動かす：対象要素に直接 mousedown を付ける（確実に掴める）
@@ -1589,6 +2019,8 @@ _EDIT_BAR = """
     // プレビュー用アニメ(__ceax_*)は一時的なものなので保存に残さない（クラス・インライン両方）
     [].slice.call(doc.querySelectorAll('[class*="__ceax_"]')).forEach(function(n){ [].slice.call(n.classList).forEach(function(cl){ if(cl.indexOf('__ceax_')===0) n.classList.remove(cl); }); });
     [].slice.call(doc.querySelectorAll('[style*="__ceax"]')).forEach(function(n){ n.style.removeProperty('animation'); });
+    // 焼き込みアニメの一時「表示中」クラス(fxa_in)は外す＝保存版はスクロールで再生に戻す（付けた設定fxa_pre等は残す）
+    [].slice.call(doc.querySelectorAll('.fxa_in')).forEach(function(n){ n.classList.remove('fxa_in'); });
     [].slice.call(doc.querySelectorAll('script')).forEach(function(s){ if(/__ce/.test(s.textContent)) s.remove(); });
     [].slice.call(doc.querySelectorAll('style')).forEach(function(s){ if(/#__ce/.test(s.textContent)) s.remove(); });
     return '<!doctype html>\\n'+doc.outerHTML;
@@ -1664,7 +2096,10 @@ _EDIT_BAR = """
         +(imgEl?'<button class="go2" id="__ce_cmbg" style="background:#0b6bcb;margin-bottom:6px">🎨 この画像の背後に画像を敷く（水彩など）</button>':'')
         +'<div class="cap" style="margin:0 0 8px">画像はこれが確実です（差し替えは一瞬）</div>'
       : '';
-    var agh=PRESETS.map(function(p,i){return '<button class="ag2" data-i="'+i+'"><b>'+esc(p.b)+'</b><span>'+esc(p.d)+'</span></button>';}).join('');
+    // 右クリックのAIセクションは「無料の焼き込みで出来ないもの」だけに絞る（背景装飾=bg / AI専用=ai）。
+    // 単純な出現/ループ系は上の「動きを選ぶ→付ける」に一本化したのでここには出さない。
+    var aiList=PRESETS.filter(function(p){return p.bg||p.ai;});
+    var agh=aiList.map(function(p,i){return '<button class="ag2" data-i="'+i+'"><b>'+esc(p.b)+'</b><span>'+esc(p.d)+'</span></button>';}).join('');
     var m=document.createElement('div'); m.id='__ce_cm';
     m.innerHTML='<div class="h"><span class="t">'+esc(d)+'</span><span class="c" id="__ce_cmx">✕</span></div>'
       +'<div class="bd2">'+swapH
@@ -1679,9 +2114,10 @@ _EDIT_BAR = """
       +'<button data-ro="-6">⟲ 左に回す</button><button data-ro="6">⟳ 右に回す</button></div>'
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 ドラッグで動かす（押して開始/終了）</button>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
-      +'<div class="cap">▶ 動きを試す（その場で再生・AIなし）</div>'
-      +'<div class="__ce_anim">'+ANIMS.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
-      +'<div class="cap">🎬 この要素に付ける（AIが本組み込み）</div>'+agh
+      +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
+      +'<div class="__ce_anim" id="__fx_grid">'+FX.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
+      +'<div class="__fx_ctl" id="__fx_ctl" style="display:none"><div id="__fx_sl"></div><button class="go2" id="__fx_apply" style="background:#1a7f37;margin-top:2px">✅ この動きを付ける（無料・保存で残る）</button></div>'
+      +'<div class="cap">🎨 背景・特殊（AIが本組み込み・数円）</div>'+agh
       +'<div class="cap" style="margin-top:8px">✍ この要素に自分で指示</div>'
       +'<input id="__ce_cmin" placeholder="例：もっと大きく赤く"><button class="go2" id="__ce_cmgo">この要素を直す</button>'
       +'<button class="go2" style="background:#4b2ea8" id="__ce_cmsg">💡 この要素の改善案</button>'
@@ -1712,13 +2148,20 @@ _EDIT_BAR = """
       var nb=ev.target.closest('.__ce_nudge button');
       if(nb){ if(nb.getAttribute('data-rst')) resetPos(curEl); else nudge(curEl, +nb.getAttribute('data-nx'), +nb.getAttribute('data-ny')); return; }
       var sb=ev.target.closest('.__ce_size button');
-      if(sb){ if(sb.hasAttribute('data-ro')) rotateBy(curEl, +sb.getAttribute('data-ro')); else scaleBy(curEl, +sb.getAttribute('data-sx'), +sb.getAttribute('data-sy')); return; }
-      var ak=ev.target.closest('.__ce_anim button');
-      if(ak){ playAnim(curEl, ak.getAttribute('data-ak')); return; }
+      if(sb){
+        if(sb.hasAttribute('data-ro')) rotateBy(curEl, +sb.getAttribute('data-ro'));
+        else if(curEl.tagName==='IMG') sizeImg(curEl, +sb.getAttribute('data-sx'), +sb.getAttribute('data-sy'));  // 画像は歪まない方式で
+        else scaleBy(curEl, +sb.getAttribute('data-sx'), +sb.getAttribute('data-sy'));
+        return;
+      }
+      var ak=ev.target.closest('#__fx_grid button');
+      if(ak){ selectFx(ak.getAttribute('data-ak'), ak); return; }
+      var apl=ev.target.closest('#__fx_apply');
+      if(apl){ if(!curAnim){ msg.textContent='まず上から動きを選んでください'; return; } applyBake(curEl, curAnim); return; }
       var dg=ev.target.closest('#__ce_cmdrag');
       if(dg){ toggleDrag(curEl, dg); return; }
       var ag=ev.target.closest('.ag2');
-      if(ag){ var pp=PRESETS[+ag.dataset.i];
+      if(ag){ var pp=aiList[+ag.dataset.i];
         if(pp.bg){
           if(imgEl){
             // 画像を右クリック時：セクション全体でなく「画像の周り」だけに装飾を置く
@@ -1774,25 +2217,79 @@ _EDIT_BAR = """
 _SERVE_SAFETY = """
 <script>
 (function(){
+  var h=document.documentElement;
+  /* 焼き込みアニメ(fxa)の表示保険：今見えている(=画面内/上部の)ものは即 .fxa_in を付けて確実に出す。
+     残り(下)はスクロールで出す。opacityもclip-pathも .fxa_in で一括で表示に戻るので、clipで消えるのも直る。 */
+  function pre(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
+  function vh(){ return window.innerHeight||h.clientHeight; }
+  function fxaShow(){ pre().forEach(function(el){ var r=el.getBoundingClientRect(); if(r.bottom>0 && r.top<vh()*0.96) el.classList.add('fxa_in'); }); }
+  function fxaStart(){
+    if(document.querySelector('.fxa_pre')) h.classList.add('fxa-on');
+    fxaShow();
+    if('IntersectionObserver' in window){
+      var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('fxa_in'); io.unobserve(en.target); } }); }, {threshold:0.12, rootMargin:'0px 0px -6% 0px'});
+      pre().forEach(function(el){ io.observe(el); });
+    }
+    var t; window.addEventListener('scroll', function(){ clearTimeout(t); t=setTimeout(fxaShow,80); }, {passive:true});
+    setTimeout(fxaShow,1200); setTimeout(fxaShow,3500);
+  }
+  /* 従来の保険：透明/非表示のまま残った要素を強制表示（fxaは上のfxaShowが担当するので触らない）。 */
   function sweep(){
     var all=document.querySelectorAll('body *');
     for(var i=0;i<all.length;i++){
       var e=all[i];
       if(e.closest('#__ce')||e.closest('#__ce_cm')||e.closest('#__ce_pk')||e.closest('#__ce_toast')) continue;
+      if(e.classList&&(e.classList.contains('__cl_pre')||e.classList.contains('__cl_kid')||e.classList.contains('fxa_pre'))) continue; /* クローン/焼き込みのスクロール出現は自前の保険があるので触らない */
       var cs=getComputedStyle(e);
       if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
       if(cs.visibility==='hidden'){ e.style.setProperty('visibility','visible','important'); }
+      var cp=cs.clipPath||cs.webkitClipPath||'';  /* clip-pathで切り取られて消えている(fxa以外)ものも復活 */
+      if(cp && cp!=='none' && /100%|inset\\(1/.test(cp)){ e.style.setProperty('clip-path','none','important'); e.style.setProperty('-webkit-clip-path','none','important'); }
     }
   }
-  function run(){ setTimeout(sweep, 2200); }
+  function run(){ fxaStart(); setTimeout(sweep, 2200); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run); else run();
 })();
 </script>
 """
 
 
+_LETTER_SPLIT_RE = re.compile(r"(\w+)\.innerHTML\.split\(")
+# `var title = X.querySelector(...); if(title){` … の入口を捕まえる（分割の始まり）
+_LETTER_GUARD_RE = re.compile(
+    r"(var\s+(\w+)\s*=\s*\w+\.querySelector\([^;]*\);\s*)if\s*\(\s*\2\s*\)\s*\{"
+)
+
+
+def _guard_letter_splitters(html: str) -> str:
+    """一括改善(GPT)が作る『見出しを1文字ずつspanに分割するJS』の事故を無害化する。
+
+    その手のJSは `X.innerHTML.split(...)` で自分の出力を読み直して作り直すため、再読込のたびに
+    (1) `&nbsp;`(実体参照)を「&nbsp;」という文字列として再分割して文字化けし、
+    (2) その要素に後から付けた別アニメ(私のfxa_ch等)を毎回作り直しで消してしまう。
+
+    対策は2段構え（どちらも既存ファイルを配信時に自己修復する）：
+    ① 分割の入口 `if(title){` を「まだ分割していない時だけ」に変える。
+       ＝ 既に .imp-char や .fxa_ch があるなら作り直さない → 文字化けも、私のアニメ消しも起きない。
+       見出し本体の色/遅延/is-visible演出は既にHTMLに焼けているので、作り直さなくても動く。
+    ② 万一①をすり抜けて作り直しが走っても、既に分割済みなら innerHTML でなく textContent から読む
+       （textContentは実体参照デコード済み＝空白U+00A0なので文字化けしない）。
+    分割していない普通のスクリプトは .imp-char を持たないので挙動は変わらない（安全）。
+    """
+    html = _LETTER_GUARD_RE.sub(
+        lambda m: f"{m.group(1)}if({m.group(2)} && !{m.group(2)}.querySelector('.imp-char,.fxa_ch'))" + "{",
+        html,
+    )
+    html = _LETTER_SPLIT_RE.sub(
+        lambda m: f"({m.group(1)}.querySelector('.imp-char')?{m.group(1)}.textContent:{m.group(1)}.innerHTML).split(",
+        html,
+    )
+    return html
+
+
 def _inject_edit_bar(html: str, filename: str) -> str:
     """カンプHTMLの末尾に編集バーを差し込む（</body>直前）。あわせて保険を注入。"""
+    html = _guard_letter_splitters(html)  # 文字化けする文字分割JSを無害化（既存ファイルも自己修復）
     bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename)).replace(
         "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider))
     low = html.lower()
@@ -1806,8 +2303,11 @@ def _inject_edit_bar(html: str, filename: str) -> str:
 def camp_file(filename: str):
     """生成したカンプHTMLを返す（編集バー付き＝見ながらその場で直せる）。"""
     path = config.CAMP_DIR / filename
-    if not path.exists() or path.suffix != ".html":
+    if not path.exists() or not path.is_file():
         abort(404)
+    if path.suffix != ".html":
+        # クローンの素材（<名前>_files/画像・フォント等）はそのまま返す
+        return send_file(path)
     html = _inject_edit_bar(path.read_text(encoding="utf-8"), filename)
     return Response(html, mimetype="text/html")
 

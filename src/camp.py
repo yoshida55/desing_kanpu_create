@@ -667,6 +667,31 @@ def set_camp_name(filename: str, name: str, fav: bool = True) -> dict:
     return meta.get(filename, {})
 
 
+def save_favorite(html: str, name: str) -> dict:
+    """現在の完成形HTML（見た目＋焼き込んだ動き）を『お気に入り』として
+    新ファイル fav_<時刻>.html にスナップショット保存する。
+
+    元カンプは汚さず複製で残すので、あとで一覧から選べば丸ごと再現できる
+    （動き・配色・画像差し替え・スクロール発火アニメも全部そのまま）。
+    """
+    if not html or len(html) < 200 or "</html>" not in html.lower():
+        raise ValueError("HTMLが空か壊れています（保存中止）")
+    config.CAMP_DIR.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    fn = f"fav_{ts}.html"
+    p = config.CAMP_DIR / fn
+    i = 1
+    while p.exists():  # 同じ秒に連続保存しても衝突しないように連番を足す
+        fn = f"fav_{ts}_{i}.html"
+        p = config.CAMP_DIR / fn
+        i += 1
+    p.write_text(html, encoding="utf-8")
+    meta = load_camp_names()
+    meta[fn] = {"name": (name or "").strip()[:60] or "お気に入り", "fav": True, "snap": True}
+    save_camp_names(meta)
+    return {"file": fn, "name": meta[fn]["name"]}
+
+
 def list_uploads() -> list[dict]:
     """アップロード済み画像の一覧（file, url, caption）。"""
     meta = load_uploads_meta()
@@ -789,6 +814,242 @@ def swap_image(filename: str, index: int, new_src: str) -> dict:
     out.write_text(new_html, encoding="utf-8")
     log.info("画像差し替え(AI不使用): %s img[%d] → %s", filename, index, new_src)
     return {"file": out.name, "swapped_index": index}
+
+
+# 一括改善（Before→After営業デモ用）の共通方針。全セクションに同じ方向性を与えて統一感を出す
+_IMPROVE_INSTRUCTION = (
+    "このセクションの見た目を、現代的で洗練された印象に**上書きで**ブラッシュアップしてください。\n"
+    "- HTMLは原則そのまま返す（文章・リンク・画像URL・構造・class名を維持）。"
+    "変えていいのはルート<section>に目印class「imp」を足すことだけ\n"
+    "- 見た目の変更は、セクション内に追加する <style> の**上書きCSSだけ**で行う\n"
+    "- 上書きの方向：余白を広めに、行間ゆったり、モダンなタイポグラフィ、"
+    "角丸＋ソフトシャドウ、上品な配色（彩度を抑えたアクセント1色）、ボタンは今風のフラット＋ホバー\n"
+    "- 古臭い要素（ベタ塗りの原色・小さい文字・詰まった行間・立体ボタン・濃い枠線）を重点的に直す\n"
+    "- ★重要：元サイトの巨大CSSが生きているので、セレクタは「section.imp .元class名」の形で"
+    "**必ず勝つ具体度**で書き、効かない恐れがある所は !important を付ける"
+)
+
+# スクショが渡せるAI（Claude/GPT）用の大胆モード：見た目が見えているので構造ごと任せる
+_IMPROVE_BOLD_INSTRUCTION = (
+    "添付スクショが現在の見た目。これを**プロがフルリニューアルしたレベル**で作り直してください。\n"
+    "- 文章・リンク・画像URLは**そのまま全部使う**（増やさない・減らさない・要約しない）\n"
+    "- HTML構造は自由に組み直してよい。ただし**元のclass名は使わず**、新しいclass名（接頭辞 imp- ）で書く\n"
+    "  （元サイトの巨大CSSが生きているため。imp- なら影響を受けない）\n"
+    "- CSSは <style> でセクション内に完結。レイアウトはグリッド/カードなど現代的に\n"
+    "- **アニメーションを必ず入れる（誰が見ても動いてると分かる強さで）**：\n"
+    "  - 出現演出：見出しは1文字ずつ順に出す(spanに分割) or 60px以上のスライドイン。"
+    "画像は scale(1.15)→1 のズームしながらフェードイン。要素ごとに0.15秒ずつの時間差\n"
+    "  - 常時アニメ：背景グラデーションがゆっくり流れる(background-position移動) や、"
+    "大きめの装飾図形が30px以上の振れ幅でゆっくり浮遊するなど、**画面のどこかが常に動いている**こと\n"
+    "  - ホバー演出：カードは浮き上がり(translateY(-8px)+影拡大)、ボタンは色とサイズが変化\n"
+    "  - 数字があればカウントアップ(<script>で0から実数まで)\n"
+    "  - ❌ 2〜3pxの微妙な浮遊・0.2秒で終わる控えめフェードだけ＝不合格。"
+    "営業デモで「おっ、動いてる」と声が出るレベルにする\n"
+    "  - 出現はIntersectionObserverの小さな<script>をセクション内に入れてよい"
+    "（クラス付与でopacity/transformをtransitionさせる方式）\n"
+    "  - ★出現アニメには必ず「3秒後に強制表示」の保険を入れる（真っ白事故防止）\n"
+    "  - ★★見出しを1文字ずつに分割する時は【冪等（何回読み込んでも壊れない）】が絶対条件：\n"
+    "    最善は**分割済みの<span>を最初からHTMLに直接書き出す**こと（JSで作り直さない）。空白は<span>&nbsp;</span>と直接書く。\n"
+    "    どうしてもJSで分割するなら、先頭に必ず `if(el.querySelector('.imp-char'))return;` のガードを入れる。\n"
+    "    ❌ `el.innerHTML` を読んで作り直す方式は**禁止**（再読込で &nbsp; が「&nbsp;」という文字列に化ける）。"
+    "テキストは el.textContent から取り、el.innerHTML への代入は1回だけにする\n"
+    "- Before→Afterの営業デモ用なので、**一目で「別物に良くなった」と分かる**変化量を出すこと"
+)
+
+# 1セクションがこれより大きい場合はAIに送らずスキップ（コスト暴発・上限超え防止）
+_IMPROVE_MAX_SECTION = 60_000
+# ページ全体CSSは参考として先頭だけ渡す（クローンのCSSは1MB級になるため）
+_IMPROVE_MAX_STYLE = 12_000
+
+
+def _shoot_sections(filename: str, indices: list[int]) -> dict[int, Path]:
+    """カンプの指定セクションのスクショを撮る（改善AIに「現在の見た目」を見せる用）。
+
+    出現アニメで透明のままだと真っ白に写るので、強制表示してから撮る。
+    失敗したセクションは黙って飛ばす（テキストのみで改善を続行できる）。
+    """
+    from playwright.sync_api import sync_playwright
+
+    path = config.CAMP_DIR / filename
+    shots_dir = config.CAMP_DIR / "_improve_shots"
+    shots_dir.mkdir(parents=True, exist_ok=True)
+    out: dict[int, Path] = {}
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page(viewport={"width": 1440, "height": 900})
+            page.goto(path.resolve().as_uri())
+            page.wait_for_timeout(1200)
+            page.evaluate(
+                """() => {
+                  document.querySelectorAll('body *').forEach((e) => {
+                    const cs = getComputedStyle(e);
+                    if (parseFloat(cs.opacity) === 0) { e.style.setProperty('opacity','1','important'); e.style.transform='none'; }
+                    if (cs.visibility === 'hidden') e.style.setProperty('visibility','visible','important');
+                  });
+                }"""
+            )
+            page.wait_for_timeout(300)
+            secs = page.query_selector_all("section")
+            # 入れ子は外側だけ数える（_SEC_RE の数え方に合わせる近似）
+            tops = [s for s in secs if not s.evaluate("(el) => !!el.parentElement.closest('section')")]
+            for i in indices:
+                if i >= len(tops):
+                    continue
+                try:
+                    tops[i].scroll_into_view_if_needed()
+                    page.wait_for_timeout(200)
+                    shot = shots_dir / f"sec_{i}.png"
+                    tops[i].screenshot(path=str(shot))
+                    out[i] = shot
+                except Exception as exc:  # noqa: BLE001
+                    log.debug("improve: セクション%dのスクショ失敗（テキストのみで続行）: %s", i, exc)
+            browser.close()
+    except Exception as exc:  # noqa: BLE001
+        log.warning("improve: スクショ撮影に失敗（全てテキストのみで続行）: %s", exc)
+    return out
+
+
+def improve_all(filename: str, limit: int = 0, targets: list[int] | None = None,
+                hint: str = "", ref_id: str = "", progress=None) -> dict:
+    """セクションを順に「今風」へ一括改善し、別ファイル（After版）に保存する。
+
+    limit > 0 なら最初の limit セクションだけ。targets（0始まりの番号リスト）を渡すと
+    その番号だけ改善（例 [1,4]＝2番目と5番目）。両方無指定なら全部。
+    hint はデザインの方向性（例「高級ホテルのように」「ポップで元気に」）。指示に追記される。
+    ref_id を渡すと、その登録サイトを「手本」として画像＋トークンでAIに見せる（Claude/GPT時のみ）。
+    ＝言葉より画像の手本が効く（カンプ生成で実証済みの決定打）。
+    Claude/GPTのときは各セクションのスクショを撮って見せる＝見た目の判断が具体的になる。
+    失敗したセクションは元のまま残して続行する（全滅しない）。
+    返り値: {"file": 新ファイル名, "total": 対象数, "improved": 成功数, "skipped": スキップ数}
+    """
+    def say(msg: str) -> None:
+        log.info("improve: %s", msg)
+        if progress:
+            progress(msg)
+
+    html = (config.CAMP_DIR / filename).read_text(encoding="utf-8")
+    real_total = len(list(_SEC_RE.finditer(html)))
+    if real_total == 0:
+        raise ValueError("<section> が見つかりません（このページは一括改善に対応できません）")
+    if targets:
+        indices = sorted({i for i in targets if 0 <= i < real_total})
+    else:
+        n = min(real_total, limit) if limit and limit > 0 else real_total
+        indices = list(range(n))
+    if not indices:
+        raise ValueError("対象セクションがありません（番号を確認してください）")
+    total = len(indices)
+
+    # Claude/GPTは画像が見える → 現在の見た目を撮って渡す（DeepSeek/Geminiはテキストのみ）
+    provider = config.CONFIG.htmlgen.edit_provider
+    shots: dict[int, Path] = {}
+    if provider in ("anthropic", "openai"):
+        say("セクションのスクショを撮影中…（AIに見た目を見せる）")
+        shots = _shoot_sections(filename, indices)
+
+    # 手本サイト（目指す雰囲気）：画像＋トークンで見せる＝言葉より効く
+    ref_blocks: list = []
+    ref_note = ""
+    if ref_id and provider in ("anthropic", "openai"):
+        with db.connect() as conn:
+            ref_row = db.get_site(conn, ref_id)
+        if ref_row and ref_row["firstview_path"]:
+            token_txt = ""
+            if ref_row["design_tokens"]:
+                try:
+                    token_txt = "\n実際のデザイントークン:\n" + tokens_mod.tokens_to_prompt(
+                        json.loads(ref_row["design_tokens"]))
+                except Exception:  # noqa: BLE001
+                    token_txt = ""
+            ref_img = _ref_image_block(config.PROJECT_ROOT / ref_row["firstview_path"])
+            if ref_img:
+                ref_blocks = [
+                    {"type": "text", "text": (
+                        f"# 手本サイト（目指す雰囲気）: {ref_row['url']}\n"
+                        "↓次の画像がその手本。配色・余白・質感・タイポ・装飾の雰囲気を、この手本に強く寄せること。\n"
+                        f"雰囲気: {ref_row['vibe_description'] or '(雰囲気文なし)'}{token_txt}\n"
+                        "※手本の文章・ロゴ・写真はコピーしない（見た目の方向だけ参照）"
+                    )},
+                    ref_img,
+                ]
+                ref_note = "※画像は複数ある：先の画像＝手本サイト、最後の画像＝このセクションの現在の見た目。\n\n"
+                say(f"手本サイトを添付: {ref_row['url']}")
+
+    config.CAMP_DIR.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out = config.CAMP_DIR / f"camp_{ts}_improved.html"
+    out.write_text(_finalize_html(html), encoding="utf-8")  # まず元の複製（途中経過も見られる）
+
+    improved = 0
+    skipped = 0
+    for step, i in enumerate(indices):
+        # 差し替えのたびに位置がズレるので、毎回探し直す
+        matches = list(_SEC_RE.finditer(html))
+        if i >= len(matches):
+            break
+        m = matches[i]
+        section_html = m.group(0)
+        labels = list_camp_sections(html)
+        label = labels[i]["label"] if i < len(labels) else f"セクション{i + 1}"
+        say(f"{step + 1}/{total}: {label}")
+        if len(section_html) > _IMPROVE_MAX_SECTION:
+            log.info("improve: セクション%dは大きすぎるのでスキップ（%d文字）", i, len(section_html))
+            skipped += 1
+            continue
+        hint_txt = f"\n\n# デザインの方向性（ユーザー指定・最優先で反映）\n{hint}" if hint else ""
+        content: list = []
+        if i in shots:
+            img_block = _ref_image_block(shots[i], max_w=1000, max_h=1400)
+            if img_block:
+                content.append(img_block)
+        if content:  # スクショあり＝大胆モード（構造ごと組み直し＋アニメ盛り込み）
+            if ref_blocks:
+                content = list(ref_blocks) + content
+            body = (
+                f"指定セクションをフルリニューアルしてください。\n{ref_note}\n"
+                f"# 直す対象セクション（この中身＝文章・画像を全部使う）\n{section_html}\n\n"
+                f"# 依頼\n{_IMPROVE_BOLD_INSTRUCTION}{hint_txt}\n\n"
+                "# 出力ルール\n"
+                "- 新しいセクションHTML一式だけ返す（<section class=\"imp-...\">…</section>）\n"
+                "- CSSと、アニメ用の小さな<script>はセクション内に入れて完結させる\n"
+                "- 返答は HTML だけ。説明やマークダウンの前置きは書かない"
+            )
+        else:  # テキストのみ（DeepSeek/Gemini）＝見た目が見えないので安全な上書きCSS方式
+            style_m = re.search(r"<style\b[^>]*>.*?</style>", html, flags=re.DOTALL | re.IGNORECASE)
+            style_ctx = style_m.group(0)[:_IMPROVE_MAX_STYLE] if style_m else "(なし)"
+            body = (
+                "指定セクションだけを依頼どおり直してください。ページ全体との統一感を保つ。\n\n"
+                f"# ページ全体のCSS（参考・長い場合は先頭のみ）\n{style_ctx}\n\n"
+                f"# 直す対象セクション（このHTMLだけを直す）\n{section_html}\n\n"
+                f"# 依頼\n{_IMPROVE_INSTRUCTION}{hint_txt}\n\n"
+                "# 出力ルール\n"
+                "- 元のセクションHTMLをそのまま返し、ルートに class「imp」を足し、"
+                "先頭か末尾に上書き用の <style> を1つ入れる（<section>…</section> 一式）\n"
+                "- 中身のHTML構造・class名・文章・画像URLは変えない（見た目はCSSだけで変える）\n"
+                "- 返答は HTML だけ。説明やマークダウンの前置きは書かない"
+            )
+        content.append({"type": "text", "text": body})
+        try:
+            raw, _used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
+            new_section = _strip_fragment(raw)
+            if "<" not in new_section:  # 返事がHTMLじゃない＝失敗扱い
+                raise ValueError("HTMLが返ってきませんでした")
+            html = html[: m.start()] + new_section + html[m.end():]
+            improved += 1
+            out.write_text(_finalize_html(html), encoding="utf-8")  # 1つ終わるごとに保存
+        except Exception as exc:  # noqa: BLE001
+            log.warning("improve: セクション%dの改善に失敗（元のまま続行）: %s", i, exc)
+            skipped += 1
+
+    out.write_text(_finalize_html(html), encoding="utf-8")
+    for pth in shots.values():  # スクショの後片付け
+        try:
+            pth.unlink()
+        except Exception:  # noqa: BLE001
+            pass
+    log.info("一括改善 完了: %s → %s（成功%d/スキップ%d/全%d）", filename, out.name, improved, skipped, total)
+    return {"file": out.name, "total": total, "improved": improved, "skipped": skipped}
 
 
 def edit_camp_section(filename: str, section_index: int, instruction: str) -> dict:
