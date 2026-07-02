@@ -2252,7 +2252,10 @@ _SERVE_SAFETY = """
     for(var i=0;i<all.length;i++){
       var e=all[i];
       if(e.closest('#__ce')||e.closest('#__ce_cm')||e.closest('#__ce_pk')||e.closest('#__ce_toast')) continue;
-      if(e.classList&&(e.classList.contains('__cl_pre')||e.classList.contains('__cl_kid')||e.classList.contains('fxa_pre'))) continue; /* クローン/焼き込みのスクロール出現は自前の保険があるので触らない */
+      /* fxaの焼き込みアニメ(要素・その中の文字span・ラッパー含む)は監視が担当するので、掃除は一切触らない。
+         ★特に .fxa_ch(1文字span)を強制表示すると、下部のタイプライター/一文字ずつが「出た状態で固定」され再生されない。 */
+      if(e.closest('.fxa_pre')||e.closest('.fxa_wrap')) continue;
+      if(e.classList&&(e.classList.contains('__cl_pre')||e.classList.contains('__cl_kid'))) continue; /* クローンのスクロール出現は自前の保険があるので触らない */
       var cs=getComputedStyle(e);
       if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
       if(cs.visibility==='hidden'){ e.style.setProperty('visibility','visible','important'); }
@@ -2301,6 +2304,7 @@ def _guard_letter_splitters(html: str) -> str:
 
 
 _FXA_RUN_RE = re.compile(r'<script id="fxa-run">.*?</script>', re.DOTALL)
+_SAFE_BLOCK_RE = re.compile(re.escape(camp._SAFE_START) + r".*?" + re.escape(camp._SAFE_END), re.DOTALL)
 
 
 def _inject_edit_bar(html: str, filename: str) -> str:
@@ -2309,6 +2313,10 @@ def _inject_edit_bar(html: str, filename: str) -> str:
     # 焼き込み済みの古い再生スクリプト(fxa-run)を除去。古い版は時間トリガー/scrollリスナーで「動くムラ」を出すため、
     # 配信時に消して、編集バー側が最新版(スクロールで1回だけ再生)を注入し直す＝既存ファイルも安定する。
     html = _FXA_RUN_RE.sub("", html)
+    # 焼き込み済みの「全部見える保険」(_REVIEW_FALLBACK)を最新版に差し替える。
+    # 古い版は2.5秒後にfxaの文字span(fxa_ch)まで強制表示し、タイプライター等が"出た状態で固定"される不具合があった。
+    # 最新版はfxa要素を除外する→既存ファイルもこの差し替えで直る。
+    html = _SAFE_BLOCK_RE.sub(lambda m: camp._REVIEW_FALLBACK, html)
     bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename)).replace(
         "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider))
     low = html.lower()

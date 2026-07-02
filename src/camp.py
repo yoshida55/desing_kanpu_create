@@ -88,7 +88,9 @@ _REVIEW_FALLBACK = _SAFE_START + """
     setTimeout(function(){
       var all=document.querySelectorAll('body *');
       for(var i=0;i<all.length;i++){
-        var e=all[i], cs=getComputedStyle(e);
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
         if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
         if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
       }
