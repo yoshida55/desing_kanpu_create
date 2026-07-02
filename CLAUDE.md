@@ -56,6 +56,25 @@
   `content[0].text` 決め打ちで落ちていた → `_anthropic_text(msg)` で **type=='text' のブロックだけ結合**（`vibe.py`も同様）。
 - **Geminiの説明文混入**：`_strip_fragment` を強化（```フェンス除去＋最初の`<`〜最後の`>`だけ採用）。
 
+### ⑥ AIなしの直接編集＝見ながら手で調整（2026-07-02 後半で大幅追加）
+LLMを介さず、右クリックした要素を**その場で直接いじる**系を `_EDIT_BAR` に増設。速い・無料・確実。
+- **右クリックで即ドラッグON**（`setDragOn`）＝基本は移動。掴んで動かせる。解除は「✋ドラッグ中」ボタン。
+- **位置**＝矢印ナッジ／ドラッグ、**大きさ**＝拡大縮小＋横だけ/縦だけ（`scaleX/scaleY`）、**角度**＝左右回転（`rotateBy`）。
+  - すべて `transform` を要素の inline style に `!important` で当てる（`applyTf`）。元の変形(回転など)は `data-cebt` に退避。
+    ★CSSクラス由来の斜め配置は `getComputedStyle` の matrix を拾って保持（動かすと真っ直ぐになる不具合を防止）。
+- **保存は1ボタンに統一**：動かすとヘッダの保存ボタンが「💾 変更を保存」に変化（`markDirty`）。
+  - ★重要：保存はサーバーで元ファイルを読み直さず、**ブラウザの現DOMから編集UIを除いて丸ごと保存**（`cleanHtml`→`/api/save_camp_html`）。
+    だから位置・角度・画像差替が一括で焼き込まれ「保存しても戻る」が起きない。`data-cetx`等が焼ければ保存成功の証拠。
+- **画像差し替えもブラウザ側**（`openPicker`→`saveLayout`）：他の編集ごと保存＝角度が戻らない。
+  - 重なり画像は**右クリック座標に重なる候補を集めて選ばせる**（`elementsFromPoint`＋座標に矩形が重なる要素の走査で `pointer-events:none` の装飾も拾う）。**`<img>` も背景画像(`background-image`)も対象**（`pickWhichImg`／cand=`{el,type:'img'|'bg',url}`）。
+  - ⚠ **疑似要素(`::before/::after`)の装飾・gradientは掴めない**（DOMに実体が無い）。→ 変えたいならAI指示、または「div要素に作り替えて」と依頼。
+- **▶ 動きプレビュー**（`playAnim`／8種・保存しない）。
+  - ★地雷：**CSSアニメも Web Animations(`el.animate`)もこの環境では効かなかった**（一瞬で終わる/無反応）。→ **`requestAnimationFrame`で毎フレーム手動描画**に落として確実化（`ANDEF`）。ループ系はメニュー閉じ/別要素選択で停止（`stopAnim`）。
+- **メニュー(`#__ce_cm`)自体もドラッグ移動**でき、位置を **localStorage に記憶**（`lastMenuPos`）→再読込しても同じ場所に出る。
+- **✨ このセクションをおしゃれに**（`STYLE_INS`）＝AIが中身を保ったまま一括ブラッシュアップ。使うAIは**編集バーのドロップダウンで即切替**（`#__ce_ai`→`/api/settings`の`edit_provider`）。おしゃれ化は見た目判断なので Claude/GPT 推奨。
+- **接続テストは修正エンジンも検証**（`_test_all`が生成＋修正(edit_provider)＋Geminiを並べる）。
+- **履歴**は開いたら先頭（最新）が見える位置へスクロール（`loadCampHistory`）。
+
 ---
 
 ## 1. 目的・背景（なぜ作るのか）
