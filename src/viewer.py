@@ -1755,7 +1755,7 @@ _EDIT_BAR = """
   // プレビューで当てた一時styleを消し、確定状態（位置など）に戻す
   function clearPreviewStyle(el){
     if(!el) return;
-    ['opacity','filter','clip-path','text-shadow'].forEach(function(p){ el.style.removeProperty(p); });
+    ['opacity','filter','clip-path','text-shadow','animation'].forEach(function(p){ el.style.removeProperty(p); });
     if(el.getAttribute('data-cetx')!=null){ applyTf(el); } else { el.style.removeProperty('transform'); }
   }
   function stopAnim(el){
@@ -1800,7 +1800,7 @@ _EDIT_BAR = """
     if(cls){ [].slice.call(cls).forEach(function(c){ if(c.indexOf('imp-title')===0) isTitle=true; }); }
     if(isTitle){
       try{ var cs=getComputedStyle(el);
-        ['font-size','font-weight','font-family','line-height','letter-spacing','color','text-align','font-style','text-transform','white-space'].forEach(function(p){
+        ['font-size','font-weight','font-family','line-height','letter-spacing','color','text-align','font-style','text-transform','white-space','margin','max-width'].forEach(function(p){
           if(!el.style.getPropertyValue(p)) el.style.setProperty(p, cs.getPropertyValue(p));
         });
       }catch(_){}
@@ -1835,6 +1835,7 @@ _EDIT_BAR = """
     if(!el){ if(msg)msg.textContent='⚠ 要素が選ばれていません（もう一度右クリックで選んでください）'; return; }
     var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ 未対応の動き：'+k; return; }
     stopAnim(el);
+    el.style.setProperty('animation','none','important');  // プレビュー中は要素自身のCSSアニメを止める（RAFのtransformが上書きされないように）
     var base=el.getAttribute('data-cebt')||'';  // 元の変形(回転など)は保つ
     if(msg) msg.textContent='▶ 再生「'+a.b+'」（スライダーで調整→「付ける」で確定）';
     if(a.g==='char'){ playChar(el,a); return; }
@@ -1881,8 +1882,8 @@ _EDIT_BAR = """
     +'.fxa_ch{display:inline-block}'
     +'html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,16px));transition:opacity .5s ease,transform .5s ease}'
     +'html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,45ms))}'
-    +'html.fxa-on .fxa_tw .fxa_ch{opacity:0;transition:opacity .05s linear}'
-    +'html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}'
+    +'html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}'
+    +'html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}'
     +'@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}'
     +'@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}'
     +'@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}'
@@ -1894,34 +1895,44 @@ _EDIT_BAR = """
     +'.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}'
     +'.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}';
   // スクロールで画面に入ったら .fxa_in を付けて再生。JS無効なら全部表示（消えない保険）。"__ce"を含めない＝保存で残る。
+  // ★時間トリガー(setTimeout)は使わない＝「スクロールで画面に入った時に1回だけ再生」に統一。
+  //   IntersectionObserverだけで判定→発火したらunobserve（1回きり）。上部の要素は監視開始時に即発火＝読み込みで再生。
   var FX_RUN='(function(){var d=document,h=d.documentElement;'
     +'if(!d.querySelector(".fxa_pre")){return;}h.classList.add("fxa-on");'
-    +'function pre(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}'
-    +'function vh(){return window.innerHeight||h.clientHeight;}'
-    +'function show(){pre().forEach(function(el){var r=el.getBoundingClientRect();if(r.bottom>0&&r.top<vh()*0.96)el.classList.add("fxa_in");});}'
-    +'function start(){show();'
-    +'if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add("fxa_in");io.unobserve(en.target);}});},{threshold:0.12,rootMargin:"0px 0px -6% 0px"});pre().forEach(function(el){io.observe(el);});}'
-    +'var t;window.addEventListener("scroll",function(){clearTimeout(t);t=setTimeout(show,80);},{passive:true});'
-    +'setTimeout(show,1200);}'
-    +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",start);else start();})();';
-  function ensureFxAssets(){
-    // ★既存カンプには古い版の fxa-css/fxa-run が焼き込まれている。スキップせず毎回「最新版」に入れ替える
-    //   ＝既存ファイルを編集しても、新しい（clipを使わない丈夫な）動きに更新される。
-    var o1=document.getElementById('fxa-css'); if(o1) o1.remove();
-    var o2=document.getElementById('fxa-run'); if(o2) o2.remove();
-    var st=document.createElement('style'); st.id='fxa-css'; st.textContent=FX_CSS; (document.head||document.documentElement).appendChild(st);
-    var sc=document.createElement('script'); sc.id='fxa-run'; sc.textContent=FX_RUN; (document.body||document.documentElement).appendChild(sc);
-  }
-  // 既存カンプを開いた瞬間にも、焼き込み済みの古い定義を最新版へ差し替える（clip撤廃などの修正を既存にも反映）
-  if(document.querySelector('.fxa_pre,.fxa_wave,.fxa_ch,[class*="fxa_lp_"]')) ensureFxAssets();
+    +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}'
+    +'if(!("IntersectionObserver" in window)){all().forEach(function(el){el.classList.add("fxa_in");});return;}'
+    +'var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add("fxa_in");io.unobserve(en.target);}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});'
+    +'function obs(){all().forEach(function(el){io.observe(el);});}'
+    +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",obs);else obs();})();';
+  // CSSは「消して足す」でなく内容だけ差し替える（一瞬スタイルが消えるチラつき・前のアニメへの干渉を防ぐ）
+  function _fxInjCss(){ var st=document.getElementById('fxa-css'); if(st){ if(st.textContent!==FX_CSS) st.textContent=FX_CSS; return; } st=document.createElement('style'); st.id='fxa-css'; st.textContent=FX_CSS; (document.head||document.documentElement).appendChild(st); }
+  // runは「無ければ足すだけ」＝既にあれば再実行しない（毎回の焼き込みで再実行→重複observer→前のアニメが乱れるのを防ぐ）
+  function _fxInjRun(){ if(document.getElementById('fxa-run')) return; var sc=document.createElement('script'); sc.id='fxa-run'; sc.textContent=FX_RUN; (document.body||document.documentElement).appendChild(sc); }
+  function ensureFxAssets(){ _fxInjCss(); _fxInjRun(); }  // applyBakeから毎回呼ばれても副作用が無い
+  // 既存カンプを開いた瞬間に1回だけ：焼き込み済みの古いrunを最新版へ入れ替える（clip撤廃などを既存にも反映）
+  if(document.querySelector('.fxa_pre,.fxa_wave,.fxa_ch,[class*="fxa_lp_"]')){ var _or=document.getElementById('fxa-run'); if(_or) _or.remove(); ensureFxAssets(); }
   function fxClearClasses(el){
     [].slice.call(el.classList).forEach(function(c){ if(c.indexOf('fxa_')===0 && c!=='fxa_ch') el.classList.remove(c); });
     ['--fxa-dur','--fxa-dist','--fxa-scale','--fxa-blur','--fxa-deg','--fxa-amp','--fxa-stag'].forEach(function(p){ el.style.removeProperty(p); });
   }
   function _fxDist(el,a){ el.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
+  // 出現アニメを要素に直接かけると、その要素自身のCSSアニメ（ボタンのループ鼓動など）がtransformを毎フレーム
+  // 上書きして「せり上がり等の動きが出ない」。→ そういう要素だけラッパーで包み、ラッパー側で出現させる
+  // （中の要素は自分のアニメ・ホバーをそのまま保てる）。
+  function fxUnwrap(el){
+    var w=el&&el.parentElement;
+    if(w&&w.classList&&w.classList.contains('fxa_wrap')){ w.parentNode.insertBefore(el,w); w.remove(); }
+  }
+  function fxWrap(el){
+    var w=document.createElement('span'); w.className='fxa_wrap';
+    var disp=''; try{ disp=getComputedStyle(el).display; }catch(_){}
+    w.style.display=(disp&&disp.indexOf('inline')===0)?'inline-block':'block';
+    el.parentNode.insertBefore(w,el); w.appendChild(el); return w;
+  }
   function applyBake(el,k){
     var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ まず動きを選んでください'; return; }
     ensureFxAssets();
+    fxUnwrap(el);  // 既存の出現ラッパーがあれば解除して素の要素に戻す（付け直し対応）
     stopAnim(el); clearPreviewStyle(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);  // 2回目以降も必ずプレーン文字から＋一括改善の文字アニメを外す（上書き消え防止）
     // ★ドラッグ/拡大で付いた transition:none / animation:none を外す。これが残ると出現もループも一瞬で終わって「動かない」に見える。
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
@@ -1942,15 +1953,21 @@ _EDIT_BAR = """
         el.classList.add('fxa_in');  // 編集中はすぐ見えるように（保存時にfxa_inは外す＝再生に戻る）
       }
     } else {
-      el.classList.add('fxa_pre');
-      if(a.dir==='y'){ el.classList.add('fxa_y'); _fxDist(el,a); }
-      else if(a.dir==='xl'){ el.classList.add('fxa_xl'); _fxDist(el,a); }
-      else if(a.dir==='xr'){ el.classList.add('fxa_xr'); _fxDist(el,a); }
-      else if(a.dir==='s'){ el.classList.add('fxa_s'); el.style.setProperty('--fxa-scale', (fxParam(a,'scale')/100)); }
-      else if(a.dir==='bl'){ el.classList.add('fxa_bl'); el.style.setProperty('--fxa-blur', fxParam(a,'blur')+'px'); }
-      else if(a.dir==='ry'){ el.classList.add('fxa_ry'); el.style.setProperty('--fxa-deg', fxParam(a,'deg')+'deg'); }
-      else if(a.dir==='clip'){ el.classList.add('fxa_clip'); _fxDist(el,a); }
-      el.classList.add('fxa_in');
+      // 出現(in)：要素自身にCSSアニメ(ボタンのループ等)がある時だけラッパーで包み、それに出現をかける
+      // （transformの奪い合いを回避＝せり上がり等がちゃんと動く。中の要素は自分のアニメ・ホバーを保つ）。
+      var host=el, an='none';
+      try{ an=getComputedStyle(el).animationName||'none'; }catch(_){}
+      if(an!=='none'){ host=fxWrap(el); }
+      host.style.setProperty('--fxa-dur', (fxParam(a,'dur')||800)+'ms');
+      host.classList.add('fxa_pre');
+      if(a.dir==='y'){ host.classList.add('fxa_y'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
+      else if(a.dir==='xl'){ host.classList.add('fxa_xl'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
+      else if(a.dir==='xr'){ host.classList.add('fxa_xr'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
+      else if(a.dir==='s'){ host.classList.add('fxa_s'); host.style.setProperty('--fxa-scale', (fxParam(a,'scale')/100)); }
+      else if(a.dir==='bl'){ host.classList.add('fxa_bl'); host.style.setProperty('--fxa-blur', fxParam(a,'blur')+'px'); }
+      else if(a.dir==='ry'){ host.classList.add('fxa_ry'); host.style.setProperty('--fxa-deg', fxParam(a,'deg')+'deg'); }
+      else if(a.dir==='clip'){ host.classList.add('fxa_clip'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
+      host.classList.add('fxa_in');
     }
     markDirty();
     if(msg) msg.textContent='✅ 付けました。ヘッダの「💾 変更を保存」で残ります（スクロールで再生）';
@@ -2218,22 +2235,18 @@ _SERVE_SAFETY = """
 <script>
 (function(){
   var h=document.documentElement;
-  /* 焼き込みアニメ(fxa)の表示保険：今見えている(=画面内/上部の)ものは即 .fxa_in を付けて確実に出す。
-     残り(下)はスクロールで出す。opacityもclip-pathも .fxa_in で一括で表示に戻るので、clipで消えるのも直る。 */
-  function pre(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
-  function vh(){ return window.innerHeight||h.clientHeight; }
-  function fxaShow(){ pre().forEach(function(el){ var r=el.getBoundingClientRect(); if(r.bottom>0 && r.top<vh()*0.96) el.classList.add('fxa_in'); }); }
+  /* 焼き込みアニメ(fxa)の表示：スクロールで画面に入った時に1回だけ .fxa_in を付けて再生する。
+     ★時間トリガー(setTimeout)は使わない＝「スクロール位置で判断」に統一（動く時/動かない時のムラを無くす）。
+     上部の要素は監視開始時に即発火＝読み込みで再生。opacityもclip-pathも .fxa_in で表示に戻る。 */
   function fxaStart(){
-    if(document.querySelector('.fxa_pre')) h.classList.add('fxa-on');
-    fxaShow();
-    if('IntersectionObserver' in window){
-      var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('fxa_in'); io.unobserve(en.target); } }); }, {threshold:0.12, rootMargin:'0px 0px -6% 0px'});
-      pre().forEach(function(el){ io.observe(el); });
-    }
-    var t; window.addEventListener('scroll', function(){ clearTimeout(t); t=setTimeout(fxaShow,80); }, {passive:true});
-    setTimeout(fxaShow,1200); setTimeout(fxaShow,3500);
+    if(!document.querySelector('.fxa_pre')) return;
+    h.classList.add('fxa-on');
+    function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
+    if(!('IntersectionObserver' in window)){ all().forEach(function(el){ el.classList.add('fxa_in'); }); return; }
+    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('fxa_in'); io.unobserve(en.target); } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
+    all().forEach(function(el){ io.observe(el); });
   }
-  /* 従来の保険：透明/非表示のまま残った要素を強制表示（fxaは上のfxaShowが担当するので触らない）。 */
+  /* 従来の保険：透明/非表示のまま残った要素を強制表示（fxaは上の監視(IntersectionObserver)が担当するので触らない）。 */
   function sweep(){
     var all=document.querySelectorAll('body *');
     for(var i=0;i<all.length;i++){
@@ -2287,9 +2300,15 @@ def _guard_letter_splitters(html: str) -> str:
     return html
 
 
+_FXA_RUN_RE = re.compile(r'<script id="fxa-run">.*?</script>', re.DOTALL)
+
+
 def _inject_edit_bar(html: str, filename: str) -> str:
     """カンプHTMLの末尾に編集バーを差し込む（</body>直前）。あわせて保険を注入。"""
     html = _guard_letter_splitters(html)  # 文字化けする文字分割JSを無害化（既存ファイルも自己修復）
+    # 焼き込み済みの古い再生スクリプト(fxa-run)を除去。古い版は時間トリガー/scrollリスナーで「動くムラ」を出すため、
+    # 配信時に消して、編集バー側が最新版(スクロールで1回だけ再生)を注入し直す＝既存ファイルも安定する。
+    html = _FXA_RUN_RE.sub("", html)
     bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename)).replace(
         "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider))
     low = html.lower()

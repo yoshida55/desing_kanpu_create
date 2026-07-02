@@ -848,11 +848,10 @@ _IMPROVE_BOLD_INSTRUCTION = (
     "  - 出現はIntersectionObserverの小さな<script>をセクション内に入れてよい"
     "（クラス付与でopacity/transformをtransitionさせる方式）\n"
     "  - ★出現アニメには必ず「3秒後に強制表示」の保険を入れる（真っ白事故防止）\n"
-    "  - ★★見出しを1文字ずつに分割する時は【冪等（何回読み込んでも壊れない）】が絶対条件：\n"
-    "    最善は**分割済みの<span>を最初からHTMLに直接書き出す**こと（JSで作り直さない）。空白は<span>&nbsp;</span>と直接書く。\n"
-    "    どうしてもJSで分割するなら、先頭に必ず `if(el.querySelector('.imp-char'))return;` のガードを入れる。\n"
-    "    ❌ `el.innerHTML` を読んで作り直す方式は**禁止**（再読込で &nbsp; が「&nbsp;」という文字列に化ける）。"
-    "テキストは el.textContent から取り、el.innerHTML への代入は1回だけにする\n"
+    "  - ★★見出しを1文字ずつに分割する時は【分割済みの<span>を最初からHTMLに直接書き出す】こと。空白は<span>&nbsp;</span>と直接書く。\n"
+    "    ❌ JSで見出しの innerHTML を組み立て直すのは**全面禁止**（`el.innerHTML=...` や `el.innerHTML=''`＋appendも含む）。\n"
+    "       理由：そのJSは毎回リロードで再実行され、(1)&nbsp;が「&nbsp;」という文字に化ける (2)後から足した別のアニメを消す、という事故を起こす。\n"
+    "    出現の発火(opacityやtransformのtransition開始)だけをJS(IntersectionObserver)でやるのはOK。ただし中身(innerHTML)は絶対に作り直さない。\n"
     "- Before→Afterの営業デモ用なので、**一目で「別物に良くなった」と分かる**変化量を出すこと"
 )
 
