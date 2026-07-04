@@ -1517,6 +1517,9 @@ _EDIT_BAR = """
     <div class="lbl plain">🎨 一括改善の手本（ストックの登録サイトに寄せる）</div>
     <select id="__ce_ref"><option value="">なし（AIおまかせ）</option></select>
     <button class="im" id="__ce_improve" style="background:#7c3aed;color:#fff">🚀 ページ全体を今風に（一括改善）</button>
+    <div class="lbl plain">🎬 オープニング演出（開いた瞬間に幕→フェードで本体へ・AIなし）</div>
+    <button class="im" id="__ce_op_add" style="background:#0b6bcb;color:#fff">🎬 フェードのオープニングを付ける</button>
+    <button class="im" id="__ce_op_edit" style="background:#eaf2fd;color:#0b4e8a;border:1px solid #bcd8f7">👁 オープニングを出す／隠す（ロゴ・文字は右クリックで差し替え）</button>
     <div class="lbl plain">⭐ セクションのお気に入り（①で選んだセクションが対象・AIなし）</div>
     <button class="im" id="__ce_fav" style="background:#e8a300;color:#fff">⭐ このセクションをお気に入り</button>
     <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
@@ -1679,6 +1682,47 @@ _EDIT_BAR = """
   }
   sec.addEventListener('change', highlightSelSec);
   // ⭐ このセクションをお気に入り（自己完結HTMLを部品として保存＝AIなし）
+  // 🎬 オープニング演出（プリローダー）：開いた瞬間に全画面の幕→ロゴ/文字→フェードで本体へ。
+  // 幕(#__op_screen)と再生JS(#__op_run)は「中身」として焼き込む＝保存すれば単体でも動く。
+  // 幕の中のロゴ・文字は普通のimg/spanなので、右クリックで差し替え・編集できる。
+  var PH_LOGO="data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="#e6f0fe" stroke="#0b6bcb" stroke-width="4"/><text x="60" y="76" font-size="48" text-anchor="middle" fill="#0b6bcb" font-family="sans-serif">◎</text></svg>');
+  function _opTitle(){ return (document.title||'').trim() || (document.querySelector('h1')?(document.querySelector('h1').textContent||'').trim():'') || 'Your Site'; }
+  function _opLogoSrc(){
+    var im=document.querySelector('header img,.header img,.logo img,[class*="logo"] img,[id*="logo"] img,[id*="header"] img');
+    if(im && (im.currentSrc||im.src)) return im.currentSrc||im.src;
+    return PH_LOGO;
+  }
+  function addOpening(){
+    var old=document.getElementById('__op_screen'); if(old) old.remove();
+    var oldjs=document.getElementById('__op_run'); if(oldjs) oldjs.remove();
+    var sc=document.createElement('div'); sc.id='__op_screen';
+    sc.setAttribute('style','position:fixed;inset:0;z-index:2147480000;display:flex;align-items:center;justify-content:center;background:radial-gradient(60% 60% at 35% 40%,#eafff6 0%,#eef4ff 55%,#ffffff 100%)');
+    sc.setAttribute('data-paused','1'); /* 付けた直後は編集できるよう止めておく */
+    var inner=document.createElement('div');
+    inner.setAttribute('style','display:flex;align-items:center;gap:20px');
+    inner.innerHTML='<img id="__op_logo" src="'+_opLogoSrc()+'" alt="ロゴ" style="height:72px;width:auto">'
+      +'<span id="__op_title" style="font-size:44px;font-weight:800;letter-spacing:.02em;color:#2b3a4a;font-family:system-ui,sans-serif">'+esc(_opTitle())+'</span>';
+    sc.appendChild(inner);
+    document.body.appendChild(sc);
+    // 焼き込み用の再生スクリプト（保存版・単体表示で動く。編集バーがある時は自動退場だけさせて本体を触れるように）
+    var js=document.createElement('script'); js.id='__op_run';
+    js.textContent="(function(){var s=document.getElementById('__op_screen');if(!s)return;if(s.getAttribute('data-paused')==='1')return;s.style.transition='opacity .6s ease';s.style.opacity='0';requestAnimationFrame(function(){requestAnimationFrame(function(){s.style.opacity='1';});});setTimeout(function(){if(s.getAttribute('data-paused')==='1')return;s.style.opacity='0';setTimeout(function(){s.style.display='none';},650);},1800);})();";
+    document.body.appendChild(js);
+    markDirty();
+    msg.textContent='オープニングを付けました。ロゴ/文字を右クリックで差し替え→「💾 保存」で確定。本体を触るときは「👁 出す／隠す」で一旦隠せます';
+  }
+  // 幕の表示/非表示を切り替え（編集用）。出す時は data-paused=1 で止めて右クリック編集できるように。
+  function toggleOpening(){
+    var s=document.getElementById('__op_screen');
+    if(!s){ msg.textContent='先に「🎬 フェードのオープニングを付ける」を押してください'; return; }
+    var hidden=(s.style.display==='none'||getComputedStyle(s).display==='none'||parseFloat(getComputedStyle(s).opacity)===0);
+    if(hidden){ s.setAttribute('data-paused','1'); s.style.display='flex'; s.style.opacity='1'; msg.textContent='オープニングを表示中（ロゴ/文字を右クリックで差し替え）。もう一度押すと隠せます'; }
+    else { s.style.display='none'; msg.textContent='オープニングを隠しました（保存版では開いた時に自動で流れます）'; }
+  }
+  var opAddBtn=document.getElementById('__ce_op_add');
+  if(opAddBtn) opAddBtn.addEventListener('click',addOpening);
+  var opEditBtn=document.getElementById('__ce_op_edit');
+  if(opEditBtn) opEditBtn.addEventListener('click',toggleOpening);
   var favBtn=document.getElementById('__ce_fav');
   if(favBtn) favBtn.addEventListener('click',function(){
     var el=curSecEl();
@@ -1890,6 +1934,12 @@ _EDIT_BAR = """
         // 背景画像でも<img>でも、ブラウザ側で差し替えて位置・角度ごと保存（角度が戻らない）
         if(cand.type==='bg'){
           cand.el.style.setProperty('background-image','url("'+url+'")','important');
+          // 画像を持たない要素に新しく入れる時は、要素いっぱいに綺麗に写るよう cover 表示にする
+          if(cand.fresh){
+            cand.el.style.setProperty('background-size','cover','important');
+            cand.el.style.setProperty('background-position','center','important');
+            cand.el.style.setProperty('background-repeat','no-repeat','important');
+          }
         } else {
           cand.el.src=url; cand.el.removeAttribute('srcset');
           var pic=cand.el.closest?cand.el.closest('picture'):null;
@@ -1971,6 +2021,15 @@ _EDIT_BAR = """
     el.style.setProperty('font-size', (cur*factor).toFixed(1)+'px', 'important');
     markDirty();
   }
+  // 行間（ラインハイト）を変える。delta=0.15で広く/-0.15で狭く/reset=trueで元に戻す。単位なし比率で入れる。
+  function _lineHeight(el, delta, reset){
+    if(reset){ el.style.removeProperty('line-height'); markDirty(); return; }
+    var cs=getComputedStyle(el), fs=parseFloat(cs.fontSize)||16, lh=parseFloat(cs.lineHeight);
+    var cur=isNaN(lh)?1.5:(lh/fs);          // 今の行間を「文字サイズの何倍か」で取得
+    var next=Math.max(0.8, cur+delta);      // 詰めすぎ防止に下限0.8
+    el.style.setProperty('line-height', next.toFixed(2), 'important');
+    markDirty();
+  }
   // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
@@ -1993,6 +2052,8 @@ _EDIT_BAR = """
       +'<div style="border-top:1px solid #eee;margin:14px 0 0"></div>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:12px 0 6px">🔡 文字の大きさ</div>'
       +'<div style="display:flex;gap:6px"><button class="go2" data-fs="1.1" style="background:#0b6bcb;margin:0;flex:1">＋ 大きく</button><button class="go2" data-fs="0.9" style="background:#0b6bcb;margin:0;flex:1">－ 小さく</button><button class="go2" data-fs="0" style="background:#888;margin:0">⟲</button></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">↕ 行間（ラインハイト）</div>'
+      +'<div style="display:flex;gap:6px"><button class="go2" data-lh="0.15" style="background:#0b6bcb;margin:0;flex:1">＋ 広く</button><button class="go2" data-lh="-0.15" style="background:#0b6bcb;margin:0;flex:1">－ 狭く</button><button class="go2" data-lhr="1" style="background:#888;margin:0">⟲</button></div>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🅰 フォント</div>'
       +'<select id="__ce_brff" style="width:100%;font-size:13px;padding:9px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit">'+opts+'</select>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🎨 文字の色</div>'
@@ -2012,6 +2073,9 @@ _EDIT_BAR = """
       }
       var fsb=e.target.closest('button[data-fs]');
       if(fsb){ _fontSize(el, +fsb.getAttribute('data-fs')); return; }
+      var lhb=e.target.closest('button[data-lh]');
+      if(lhb){ _lineHeight(el, +lhb.getAttribute('data-lh')); return; }
+      if(e.target.closest('button[data-lhr]')){ _lineHeight(el, 0, true); return; }
       if(e.target.id==='__ce_brcolr'){ el.style.removeProperty('color'); markDirty(); return; }
     });
     document.getElementById('__ce_brff').addEventListener('change',function(){
@@ -2116,6 +2180,9 @@ _EDIT_BAR = """
   }
   // ===== 動きプレビュー（RAFで毎フレーム手動描画＝この環境で確実）＋ 無料の焼き込み =====
   var curAnim=null, curP={};  // いまプレビュー中のアニメkと、その調整値
+  // アニメごとに「前回いじった調整値」を記憶（再読込しても覚える＝次からのデフォルトにする）
+  var _fxLast={}; try{ _fxLast=JSON.parse(localStorage.getItem('__ce_fxlast')||'{}')||{}; }catch(_){ _fxLast={}; }
+  function _fxSaveLast(){ try{ localStorage.setItem('__ce_fxlast', JSON.stringify(_fxLast)); }catch(_){} }
   function fxDef(k){ for(var i=0;i<FX.length;i++){ if(FX[i].k===k) return FX[i]; } return null; }
   function fxParam(a,key){ if(curP[key]!=null) return curP[key]; for(var i=0;i<a.sl.length;i++){ if(a.sl[i].k===key) return a.sl[i].def; } return 0; }
   // プレビューで当てた一時styleを消し、確定状態（位置など）に戻す
@@ -2346,13 +2413,15 @@ _EDIT_BAR = """
   // アニメ選択：ハイライト＋スライダー表示＋即プレビュー
   function selectFx(k, btn){
     var a=fxDef(k); if(!a) return;
-    curAnim=k; curP={}; a.sl.forEach(function(s){ curP[s.k]=s.def; });
+    curAnim=k; curP={};
+    var _saved=_fxLast[k]||{};  // 前回この動きでいじった値があればそれを初期値に、無ければ元のデフォルト
+    a.sl.forEach(function(s){ curP[s.k]=(_saved[s.k]!=null?_saved[s.k]:s.def); });
     if(curMenu){ [].slice.call(curMenu.querySelectorAll('#__fx_grid button')).forEach(function(b){ b.classList.remove('on'); }); }
     if(btn) btn.classList.add('on');
     var sl=document.getElementById('__fx_sl');
     if(sl){
       sl.innerHTML=a.sl.map(function(s){ return '<label>'+esc(s.l)+'<span>'+curP[s.k]+(s.u||'px')+'</span><input type="range" data-k="'+s.k+'" min="'+s.min+'" max="'+s.max+'" step="'+(s.step||1)+'" value="'+curP[s.k]+'"></label>'; }).join('');
-      sl.oninput=function(e){ var inp2=e.target.closest('input'); if(!inp2) return; var kk=inp2.getAttribute('data-k'); curP[kk]=+inp2.value; var sd=null; for(var i=0;i<a.sl.length;i++){ if(a.sl[i].k===kk) sd=a.sl[i]; } var lb=inp2.parentNode.querySelector('span'); if(lb) lb.textContent=inp2.value+((sd&&sd.u)||'px'); playAnim(curEl,curAnim); };
+      sl.oninput=function(e){ var inp2=e.target.closest('input'); if(!inp2) return; var kk=inp2.getAttribute('data-k'); curP[kk]=+inp2.value; if(!_fxLast[curAnim]) _fxLast[curAnim]={}; _fxLast[curAnim][kk]=+inp2.value; _fxSaveLast(); var sd=null; for(var i=0;i<a.sl.length;i++){ if(a.sl[i].k===kk) sd=a.sl[i]; } var lb=inp2.parentNode.querySelector('span'); if(lb) lb.textContent=inp2.value+((sd&&sd.u)||'px'); playAnim(curEl,curAnim); };
     }
     var ctl=document.getElementById('__fx_ctl'); if(ctl) ctl.style.display='block';
     playAnim(curEl,k);
@@ -2454,6 +2523,9 @@ _EDIT_BAR = """
     [].slice.call(doc.querySelectorAll('[style*="__ceax"]')).forEach(function(n){ n.style.removeProperty('animation'); });
     // 焼き込みアニメの一時「表示中」クラス(fxa_in)は外す＝保存版はスクロールで再生に戻す（付けた設定fxa_pre等は残す）
     [].slice.call(doc.querySelectorAll('.fxa_in')).forEach(function(n){ n.classList.remove('fxa_in'); });
+    // オープニングの幕：編集用に「止めて表示」していた状態(data-paused/インライン)を解除＝保存版は開いた時に自動再生に戻す
+    var _op=doc.querySelector('#__op_screen');
+    if(_op){ _op.removeAttribute('data-paused'); _op.style.removeProperty('display'); _op.style.removeProperty('opacity'); _op.style.removeProperty('transition'); }
     [].slice.call(doc.querySelectorAll('script')).forEach(function(s){ if(/__ce/.test(s.textContent)) s.remove(); });
     [].slice.call(doc.querySelectorAll('style')).forEach(function(s){ if(/#__ce/.test(s.textContent)) s.remove(); });
     return '<!doctype html>\\n'+doc.outerHTML;
@@ -2490,11 +2562,36 @@ _EDIT_BAR = """
     }
     return cur||el;
   }
+  // 「透明で中身のない膜（フェード用オーバーレイ等）」か判定。
+  // 文字も画像も背景画像も持たず、背景色も透明/半透明なら＝下を触りたいのに邪魔する膜。
+  function _seeThrough(el){
+    if(!el||el===document.body||el.nodeType!==1) return false;
+    if((el.textContent||'').trim()!=='') return false;                 // 中に文字がある＝本物の入れ物
+    if(el.querySelector && el.querySelector('img,video,svg,picture,input,button,canvas,select,textarea')) return false;
+    var s; try{ s=getComputedStyle(el); }catch(_){ return false; }
+    if(s.backgroundImage && s.backgroundImage!=='none') return false;  // 背景画像を持つ＝本物
+    var m=(s.backgroundColor||'').match(/rgba?\\(([^)]+)\\)/);          // 不透明な色帯はデザイン部品なので残す
+    if(m){ var p=m[1].split(',').map(function(x){return parseFloat(x);}); var a=p.length>3?p[3]:1; if(a>=0.95) return false; }
+    return true;
+  }
+  // 右クリック地点で、膜を貫通して「実体のある要素」まで潜る（膜が何枚重なっていてもOK）。
+  function _descendOverlay(el, x, y){
+    if(!_seeThrough(el)) return el;
+    var under=document.elementsFromPoint(x, y);
+    for(var i=0;i<under.length;i++){
+      var c=under[i];
+      if(c.closest('#__ce')||c.closest('#__ce_cm')||c.closest('#__ce_pk')) continue;
+      var pc=pickTarget(c);
+      if(!_seeThrough(pc)) return pc;   // 実体のある要素が見つかったらそこを選ぶ
+    }
+    return el;                           // 全部が膜なら元のまま（膜自体を消せるように）
+  }
   // capture:true＝キャプチャ段階で先取りする。忠実クローン(元JS保持)の中に元サイト自前の
   // 右クリック禁止スクリプトが残っていても、こちらを優先させて確実にメニューを開く。
   document.addEventListener('contextmenu',function(e){
     var el=pickTarget(e.target);
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
+    el=_descendOverlay(el, e.clientX, e.clientY);  // 透明な膜は貫通して下の実体を掴む
     e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation(); closeMenu();
     curEl=el; el.classList.add('__ce_sel');
     var sIdx=secIndexOf(el), d=descEl(el);
@@ -2526,11 +2623,13 @@ _EDIT_BAR = """
       var fb=(el.tagName==='IMG')?[el]:(el.querySelectorAll?[].slice.call(el.querySelectorAll('img')):[]);
       fb.forEach(function(im){cands.push({el:im,type:'img',url:im.currentSrc||im.src});});
     }
-    var swapH = cands.length
+    var swapH = (cands.length
       ? '<button class="go2" id="__ce_cmswap" style="background:#1a7f37;margin-bottom:6px">🖼 この画像を差し替え（AIなし・一瞬）</button>'
         +(imgEl?'<button class="go2" id="__ce_cmbg" style="background:#0b6bcb;margin-bottom:6px">🎨 この画像の背後に画像を敷く（水彩など）</button>':'')
         +'<div class="cap" style="margin:0 0 8px">画像はこれが確実です（差し替えは一瞬）</div>'
-      : '';
+      : '')
+      // 画像を持たない要素（空のカード等）にも、その要素の背景として画像を入れられる（AIなし）
+      + '<button class="go2" id="__ce_cmsetbg" style="background:#0b6bcb;margin-bottom:8px">🖼 この要素に画像を入れる（背景に設定・AIなし）</button>';
     // 右クリックのAIセクションは「無料の焼き込みで出来ないもの」だけに絞る（背景装飾=bg / AI専用=ai）。
     // 単純な出現/ループ系は上の「動きを選ぶ→付ける」に一本化したのでここには出さない。
     var aiList=PRESETS.filter(function(p){return p.bg||p.ai;});
@@ -2633,6 +2732,10 @@ _EDIT_BAR = """
     var bgBtn=m.querySelector('#__ce_cmbg');
     if(bgBtn){ bgBtn.addEventListener('click',function(){
       var ie=imgEl, si=sIdx; closeMenu(); openBgPicker(ie, si);
+    }); }
+    var setbgBtn=m.querySelector('#__ce_cmsetbg');
+    if(setbgBtn){ setbgBtn.addEventListener('click',function(){
+      var target=curEl; closeMenu(); openPicker({el:target, type:'bg', fresh:true});  // 選んだ要素そのものの背景に画像を入れる
     }); }
     m.querySelector('#__ce_cmgo').addEventListener('click',function(){
       var v=m.querySelector('#__ce_cmin').value.trim(); if(v) editElement(curEl, v);
