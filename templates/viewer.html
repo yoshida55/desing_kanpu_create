@@ -371,7 +371,13 @@
       border-radius: 1rem; padding: 0.6rem 1.4rem; cursor: pointer;
     }
     .camp_hist_toggle:hover { background: #e4e4e4; }
-    .camp_hist_list { margin-top: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    /* 履歴は2列：左＝お気に入り／右＝保存した新しい順。縦が長くならないよう各列で独立スクロール */
+    .camp_hist_list { margin-top: 0.8rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    .hist_col { display: flex; flex-direction: column; gap: 0.5rem; max-height: 62vh; overflow-y: auto; }
+    .hist_col_h {
+      font-size: 1.2rem; font-weight: 700; color: #666; padding: 0.3rem 0.2rem 0.5rem;
+      border-bottom: 1px solid #eee; position: sticky; top: 0; background: #fff; z-index: 1;
+    }
     .hist_row.is_fav { background: #fff7ee; border-radius: 8px; }
     .hist_row.is_fav .h_title { color: #b8530a; font-weight: 700; }
     .h_name { background: #f2f2f4; border: 1px solid #ddd; border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
@@ -1719,7 +1725,8 @@
       catch (e) { campHistList.innerHTML = "<div class='hist_empty'>取得に失敗しました</div>"; return; }
       const camps = data.camps || [];
       if (!camps.length) { campHistList.innerHTML = "<div class='hist_empty'>まだ生成したカンプがありません</div>"; return; }
-      campHistList.innerHTML = camps.map((c) => {
+      // 1行分のHTML（左右どちらの列でも同じ見た目）
+      const rowHtml = (c) => {
         const d = new Date(c.mtime * 1000);
         const ds = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
         const isClone = /^clone_/.test(c.file);
@@ -1727,11 +1734,20 @@
         const label = c.name ? ("⭐ " + _esc(c.name)) : title;
         const favCls = c.fav ? " is_fav" : "";
         return `<div class="hist_row${favCls}"><span class="h_title" title="${_esc(c.name || c.title || c.file)}">${label}</span><span class="h_date">${ds}</span><button class="h_name" data-file="${c.file}" data-name="${_esc(c.name || "")}" title="名前を付けて保存">✎ 名前</button><a href="/camp/${c.file}" target="campview" rel="noopener">開く</a><button class="h_del" data-file="${c.file}" title="削除">🗑</button></div>`;
-      }).join("");
-      // 履歴を開いたら、新しい順の先頭（＝一番上）が見えるようにスクロールする
-      campHistList.scrollTop = 0;
+      };
+      // 左＝お気に入り、右＝それ以外を新しい順（APIが既にfav先頭・mtime降順で返す）
+      const favs = camps.filter((c) => c.fav);
+      const rest = camps.filter((c) => !c.fav);
+      const colHtml = (title, list) =>
+        `<div class="hist_col"><div class="hist_col_h">${title}</div>` +
+        (list.length ? list.map(rowHtml).join("") : "<div class='hist_empty'>まだありません</div>") +
+        `</div>`;
+      campHistList.innerHTML = colHtml("⭐ お気に入り", favs) + colHtml("🕘 保存した順（新しい順）", rest);
       try { campHistToggle.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {}
     }
+    // 起動時は履歴画面をデフォルトで開いておく（下までスクロールしなくても2列で一覧できる）
+    campHistList.hidden = false;
+    loadCampHistory();
     campHistList.addEventListener("click", async (e) => {
       const nameBtn = e.target.closest(".h_name");
       if (nameBtn) {

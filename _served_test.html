@@ -1,1393 +1,1612 @@
-"""
-ローカルビューア（仕様 4.5 Phase 2）。
-
-ねらい：モデルを常駐させ、検索ボックスで言葉を変えながら何度も探せるようにする。
-CLI都度起動だと毎回モデル読込の数秒を待つが、ビューアなら2回目以降が一瞬。
-
-提供するもの：
-- GET  /                … 検索ページ（HTML）
-- GET  /api/search      … text→image 検索（JSON）
-- GET  /api/similar     … 登録済みサイトに似たもの（image→image・モデル不要）
-- GET  /api/sites       … 登録済み一覧（初期表示用）
-- GET  /img/<id>/<which>… スクショ画像(firstview/fullpage)を返す
-"""
-
-from __future__ import annotations
-
-import json as _json
-import re
-import threading
-import uuid
-from pathlib import Path
-
-from flask import Flask, Response, abort, jsonify, request, send_file
-
-from . import anim, assets, camp, clone, config, db, embed, ingest, motion, search, vibe
-from .model import DesignEmbedder
-from .utils import get_logger
-
-log = get_logger("viewer")
-
-app = Flask(__name__, template_folder=str(config.TEMPLATE_DIR))
-
-# モデルは1つだけ作って常駐させる（プロセスが生きている間ずっと使い回す）
-_EMBEDDER = DesignEmbedder()
-
-
-@app.before_request
-def _log_request():
-    """届いたリクエストを記録（ブラウザからのPOSTが本当に届いてるか診断用）。"""
-    from flask import request as _rq
-    log.info("REQ %s %s", _rq.method, _rq.path)
-
-# 登録ジョブの状態（同時に走らせるのは1つだけ）。
-# 撮影は1件あたり数秒かかるので、HTTPは即返してここを進捗ポーリングで読む。
-_JOB: dict = {"state": "idle"}
-_JOB_LOCK = threading.Lock()
-
-
-# 録画中のサイトID（同時に録るのは1つ）。フロントはこれを見て「録画中…」を出す。
-_RECORDING: dict = {"site_id": None}
-_REC_LOCK = threading.Lock()
-
-# 雰囲気の言語化ジョブ（単体でも一括でも、まとめて1つのバッチとして扱う）
-_DESC_JOB: dict = {"running": False, "done": 0, "total": 0, "current": ""}
-_DESC_LOCK = threading.Lock()
-
-# カンプ生成ジョブ（複数同時OK）。job_id -> {state, phase, brief, ...result}。
-# 生成は時間がかかるので非同期＋ポーリング。並行して2〜数本まわせる。
-_CAMP_JOBS: dict = {}
-_CAMP_LOCK = threading.Lock()
-_CAMP_MAX = 4  # 同時に走らせる上限（メモリ/APIレート保護）
-
-# 画像抜き出し中のサイトID（同時に1つ）
-_EXTRACTING: dict = {"site_id": None}
-_EXT_LOCK = threading.Lock()
-
-# アニメ抜き出し中のサイトID（同時に1つ）
-_ANIM_EXTRACTING: dict = {"site_id": None}
-_ANIM_LOCK = threading.Lock()
-
-# 録画から動きを読み取り中のサイトID（同時に1つ）
-_MOTION_RUNNING: dict = {"site_id": None, "error": None}
-_MOTION_LOCK = threading.Lock()
-
-# 忠実クローン中の状態（同時に1つ・実ページを開くので重い）
-_CLONING: dict = {"site_id": None, "phase": "", "file": None, "error": None}
-_CLONE_LOCK = threading.Lock()
-
-# 一括改善（Before→After）中の状態（同時に1つ・LLMを何度も呼ぶ）
-_IMPROVING: dict = {"file": None, "phase": "", "result": None, "error": None}
-_IMPROVE_LOCK = threading.Lock()
-
-
-def _swatches(design_tokens_json) -> list[str]:
-    """デザイントークンから、カードに出す代表色（CSS色文字列）を数個取り出す。"""
-    if not design_tokens_json:
-        return []
-    try:
-        import json as _json
-        t = _json.loads(design_tokens_json)
-    except Exception:
-        return []
-    out = []
-    for c in (t.get("accent", []) + t.get("bg", [])):
-        # 透明・ほぼ白は飛ばして、目立つ色を優先
-        if "rgba" in c and c.strip().endswith(", 0)"):
-            continue
-        if c not in out:
-            out.append(c)
-        if len(out) >= 5:
-            break
-    return out
-
-
-def _site_extra(site_id: str) -> dict:
-    """カード表示に足す情報（録画・ライブラリ・雰囲気文・配色）を返す。"""
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        return {"has_video": False, "libs": [], "vibe": "", "swatches": []}
-    has_video = bool(row["animation_video_path"]) and (
-        config.PROJECT_ROOT / row["animation_video_path"]
-    ).exists()
-    libs = [s.strip() for s in (row["animation_libs"] or "").split(",") if s.strip()]
-    return {
-        "has_video": has_video,
-        "libs": libs,
-        "vibe": row["vibe_description"] or "",
-        "swatches": _swatches(row["design_tokens"]),
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js fxa-on" style="--accent: #b7d2c4; --accent-soft: #f5f9f7;"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就労継続支援B型事業所 るぽ</title>
+  <meta name="description" content="就労継続支援B型事業所「るぽ」のホームページ。やさしく、自分らしく、安心して働ける場所をご紹介します。">
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#fff;
+      --bg-soft:#f6f6f6;
+      --text:#404040;
+      --text-strong:#363636;
+      --accent:#5f8773;
+      --accent-soft:#b7d2c4;
+      --white:#fff;
+      --shadow:4px 4px 32px rgba(173, 179, 176, .3);
+      --radius:12px;
+      --pill:9999px;
+      --container:1440px;
+      --line:rgba(0,0,0,.08);
+      --muted:rgba(64,64,64,.72);
     }
 
-
-def _hits_payload(hits) -> list[dict]:
-    """検索結果を、画像URL付きの dict 配列にしてフロントへ渡す。"""
-    payload = []
-    for h in hits:
-        d = h.to_dict()
-        # 画像は専用ルート経由で配る（パスを直接さらさない）
-        d["img"] = f"/img/{h.site_id}/firstview"
-        d.update(_site_extra(h.site_id))  # has_video / libs
-        payload.append(d)
-    return payload
-
-
-@app.route("/")
-def index():
-    """検索ページを返す。"""
-    return (config.TEMPLATE_DIR / "viewer.html").read_text(encoding="utf-8")
-
-
-@app.route("/api/search")
-def api_search():
-    """text→image 検索。?q=クエリ&top=件数"""
-    query = (request.args.get("q") or "").strip()
-    top = request.args.get("top", type=int) or config.CONFIG.search.top_n
-    if not query:
-        return jsonify({"query": "", "hits": []})
-    hits = search.search_by_text(query, top_n=top, embedder=_EMBEDDER)
-    return jsonify({"query": query, "hits": _hits_payload(hits)})
-
-
-@app.route("/api/similar")
-def api_similar():
-    """登録済みサイトに似たもの。?id=サイトID&top=件数（モデル不要で速い）"""
-    site_id = (request.args.get("id") or "").strip()
-    top = request.args.get("top", type=int) or config.CONFIG.search.top_n
-    if not site_id:
-        return jsonify({"hits": []})
-    hits = search.search_similar_to_site(site_id, top_n=top)
-    return jsonify({"site_id": site_id, "hits": _hits_payload(hits)})
-
-
-def _run_register_job(urls: list[str], force: bool) -> None:
-    """バックグラウンドで1件ずつ撮影→最後にまとめて埋め込み。進捗は _JOB に書く。"""
-    saved = skipped = failed = 0
-    total = len(urls)
-    try:
-        # ── 撮影フェーズ（重い。1件ずつ進捗を更新する）──
-        for i, url in enumerate(urls, start=1):
-            with _JOB_LOCK:
-                _JOB.update(phase="capture", done=i - 1, current=url)
-            try:
-                result = ingest.capture_one(url, force=force)
-                if result is None:
-                    skipped += 1
-                else:
-                    saved += 1
-            except Exception as exc:  # noqa: BLE001
-                failed += 1
-                log.error("撮影失敗: %s (%s)", url, exc)
-            with _JOB_LOCK:
-                _JOB.update(done=i, saved=saved, skipped=skipped, failed=failed)
-
-        # ── 埋め込みフェーズ（常駐モデルで未埋め込みをまとめて処理）──
-        with _JOB_LOCK:
-            _JOB.update(phase="embed", current="")
-        embed_summary = embed.embed_all(force=False, embedder=_EMBEDDER)
-
-        msg = (
-            f"完了：保存{saved} / スキップ{skipped} / 失敗{failed} ／ "
-            f"ベクトル化 {embed_summary['embedded']}件"
-        )
-        with _JOB_LOCK:
-            _JOB.update(state="done", phase="done", message=msg,
-                        embedded=embed_summary["embedded"])
-        log.info("登録ジョブ完了: %s", msg)
-    except Exception as exc:  # noqa: BLE001
-        log.exception("登録ジョブが落ちました")
-        with _JOB_LOCK:
-            _JOB.update(state="error", message=f"エラー: {exc}")
-
-
-@app.route("/api/register", methods=["POST"])
-def api_register():
-    """URLの登録を開始する（非同期）。即 job_id を返し、撮影は裏で進める。
-
-    入力（JSON）: { "urls": "1行1URLのテキスト", "force": false }
-    出力（JSON）: { ok, job_id, total }
-    進捗は GET /api/register/status で見る。
-    """
-    data = request.get_json(silent=True) or {}
-    raw = (data.get("urls") or "").strip()
-    force = bool(data.get("force"))
-    if not raw:
-        return jsonify({"ok": False, "message": "URLを入力してください"}), 400
-
-    urls = [
-        ln.strip()
-        for ln in raw.replace(",", "\n").splitlines()
-        if ln.strip() and not ln.strip().startswith("#")
-    ]
-    if not urls:
-        return jsonify({"ok": False, "message": "有効なURLがありません"}), 400
-
-    # 同時に走らせるのは1ジョブだけ（多重起動を防ぐ）
-    with _JOB_LOCK:
-        if _JOB.get("state") == "running":
-            return jsonify({"ok": False, "message": "別の登録が進行中です"}), 409
-        job_id = uuid.uuid4().hex[:8]
-        _JOB.clear()
-        _JOB.update(
-            state="running", phase="capture", job_id=job_id,
-            total=len(urls), done=0, current="",
-            saved=0, skipped=0, failed=0, embedded=0, message="",
-        )
-
-    log.info("登録ジョブ開始 [%s]: %d 件", job_id, len(urls))
-    threading.Thread(target=_run_register_job, args=(urls, force), daemon=True).start()
-    return jsonify({"ok": True, "job_id": job_id, "total": len(urls)})
-
-
-@app.route("/api/register/status")
-def api_register_status():
-    """登録ジョブの進捗を返す。フロントが定期的に読む。"""
-    with _JOB_LOCK:
-        return jsonify(dict(_JOB))
-
-
-@app.route("/api/delete", methods=["POST"])
-def api_delete():
-    """登録済みサイトを削除する。入力（JSON）: { "id": "サイトID" }
-
-    DBの行を消し、保存していたスクショ画像(firstview/fullpage)も消す。
-    """
-    data = request.get_json(silent=True) or {}
-    site_id = (data.get("id") or "").strip()
-    if not site_id:
-        return jsonify({"ok": False, "message": "IDがありません"}), 400
-
-    with db.connect() as conn:
-        paths = db.delete_site(conn, site_id)
-    if paths is None:
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-
-    # スクショ画像・録画の後始末（消えていても気にしない）
-    for key in ("firstview_path", "fullpage_path", "animation_video_path"):
-        rel = paths.get(key)
-        if not rel:
-            continue
-        f = config.PROJECT_ROOT / rel
-        try:
-            if f.exists():
-                f.unlink()
-        except OSError as exc:
-            log.warning("画像削除に失敗（続行）: %s (%s)", f, exc)
-
-    # 抜き出し画像フォルダごと後始末
-    adir = config.ASSET_DIR / site_id
-    if adir.exists():
-        try:
-            import shutil
-            shutil.rmtree(adir)
-        except OSError as exc:
-            log.warning("抜き出し画像の削除に失敗（続行）: %s (%s)", adir, exc)
-
-    log.info("削除しました: %s", paths.get("url"))
-    return jsonify({"ok": True, "message": f"削除しました: {paths.get('url')}"})
-
-
-@app.route("/api/settings", methods=["GET"])
-def api_settings_get():
-    """現在の設定を返す（APIキー本体は出さず、設定済みか否かだけ）。"""
-    h = config.CONFIG.htmlgen
-    v = config.CONFIG.vibe
-    return jsonify(
-        {
-            "provider": h.provider,
-            "edit_provider": h.edit_provider,
-            "openai_model": h.openai_model,
-            "anthropic_model": v.model,
-            "openai_set": h.openai_enabled,
-            "anthropic_set": v.enabled,
-            "gemini_model": config.CONFIG.gemini.model,
-            "gemini_set": config.CONFIG.gemini.enabled,
-            "deepseek_model": config.CONFIG.deepseek.model,
-            "deepseek_set": config.CONFIG.deepseek.enabled,
-            "zai_model": config.CONFIG.zai.model,
-            "zai_set": config.CONFIG.zai.enabled,
-        }
-    )
-
-
-def _test_deepseek(deepseek_key: str = "") -> tuple[bool, str]:
-    """DeepSeek（OpenAI互換）の接続を確かめる。"""
-    dcfg = config.CONFIG.deepseek
-    key = (deepseek_key or "").strip() or dcfg.api_key
-    if not key or "ここに" in key:
-        return False, "DeepSeekキーが未入力です"
-    try:
-        from openai import OpenAI
-        OpenAI(api_key=key, base_url=dcfg.base_url, timeout=30.0).chat.completions.create(
-            model=dcfg.model, max_tokens=5,
-            messages=[{"role": "user", "content": "ok"}],
-        )
-        return True, f"DeepSeek（{dcfg.model}）接続OK"
-    except Exception as exc:  # noqa: BLE001
-        return False, "DeepSeek接続NG：" + str(exc)[:120]
-
-
-def _test_zai(zai_key: str = "") -> tuple[bool, str]:
-    """GLM（Z.ai・OpenAI互換）の接続を確かめる。"""
-    zcfg = config.CONFIG.zai
-    key = (zai_key or "").strip() or zcfg.api_key
-    if not key or "ここに" in key:
-        return False, "GLM(Z.ai)キーが未入力です"
-    try:
-        from openai import OpenAI
-        OpenAI(api_key=key, base_url=zcfg.base_url, timeout=30.0).chat.completions.create(
-            model=zcfg.model, max_tokens=5,
-            messages=[{"role": "user", "content": "ok"}],
-        )
-        return True, f"GLM（{zcfg.model}）接続OK"
-    except Exception as exc:  # noqa: BLE001
-        return False, "GLM接続NG：" + str(exc)[:120]
-
-
-def _test_key(provider: str, openai_key: str = "", anthropic_key: str = "", deepseek_key: str = "", zai_key: str = "") -> tuple[bool, str]:
-    """キーが実際に使えるか、ごく短いAPI呼び出しで確かめる。
-
-    入力欄のキー(openai_key/anthropic_key)が渡されれば、保存前でもそれをテストする。
-    渡されなければ保存済み(.env)のキーをテストする。
-    """
-    try:
-        if provider == "openai":
-            h = config.CONFIG.htmlgen
-            key = (openai_key or "").strip() or h.openai_api_key
-            if not key.startswith("sk-") or "ここに" in key:
-                return False, "OpenAIキーが未入力です"
-            from openai import OpenAI
-            OpenAI(api_key=key).chat.completions.create(
-                model=h.openai_model,
-                max_completion_tokens=5,
-                messages=[{"role": "user", "content": "ok"}],
-            )
-            return True, f"OpenAI（{h.openai_model}）接続OK"
-        elif provider == "gemini":
-            g = _test_gemini()
-            if g is None:
-                return False, "Geminiキーが未入力です"
-            return g
-        elif provider == "deepseek":
-            return _test_deepseek(deepseek_key)
-        elif provider == "zai":
-            return _test_zai(zai_key)
-        else:
-            v = config.CONFIG.vibe
-            key = (anthropic_key or "").strip() or v.api_key
-            if not key.startswith("sk-ant-"):
-                return False, "Anthropicキーが未入力です"
-            from anthropic import Anthropic
-            Anthropic(api_key=key).messages.create(
-                model=v.model, max_tokens=5,
-                messages=[{"role": "user", "content": "ok"}],
-            )
-            return True, "Claude 接続OK"
-    except Exception as exc:  # noqa: BLE001
-        return False, str(exc)[:160]
-
-
-def _test_gemini(gemini_key: str = "") -> Optional[tuple[bool, str]]:
-    """Geminiの接続を確かめる（説明づけ用）。未設定なら None を返す（テスト対象外）。"""
-    gcfg = config.CONFIG.gemini
-    key = (gemini_key or "").strip() or gcfg.api_key
-    if not key or "ここに" in key:
-        return None
-    try:
-        import urllib.request
-
-        url = (
-            f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{gcfg.model}:generateContent?key={key}"
-        )
-        body = {"contents": [{"parts": [{"text": "ok"}]}]}
-        req = urllib.request.Request(
-            url, data=_json.dumps(body).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            resp.read()
-        return True, f"Gemini（{gcfg.model}）接続OK"
-    except Exception as exc:  # noqa: BLE001
-        return False, "Gemini接続NG：" + str(exc)[:100]
-
-
-def _test_all(provider: str, openai_key: str = "", anthropic_key: str = "", gemini_key: str = "", deepseek_key: str = "", zai_key: str = "") -> tuple[bool, str]:
-    """生成エンジン＋修正エンジン（DeepSeek/GLM等）＋説明づけ（Gemini）をまとめてテストしメッセージを組む。"""
-    ok, msg = _test_key(provider, openai_key, anthropic_key, deepseek_key, zai_key)
-    parts = [("✅ " if ok else "⚠ ") + "生成: " + msg]
-    # 修正エンジンが生成と別なら、それも確認する（例：生成=GPT／修正=DeepSeek）
-    edit_provider = config.CONFIG.htmlgen.edit_provider
-    if edit_provider and edit_provider != provider:
-        eok, emsg = _test_key(edit_provider, openai_key, anthropic_key, deepseek_key, zai_key)
-        parts.append(("✅ " if eok else "⚠ ") + "修正: " + emsg)
-        ok = ok and eok
-    g = _test_gemini(gemini_key)
-    if g is not None:
-        parts.append(("✅ " if g[0] else "⚠ ") + g[1])
-        ok = ok and g[0]
-    return ok, " ／ ".join(parts)
-
-
-def _provider_ready(provider: str) -> bool:
-    """そのプロバイダのキーが入っていて使える状態か。"""
-    if provider == "openai":
-        return config.CONFIG.htmlgen.openai_enabled
-    if provider == "gemini":
-        return config.CONFIG.gemini.enabled
-    if provider == "deepseek":
-        return config.CONFIG.deepseek.enabled
-    if provider == "zai":
-        return config.CONFIG.zai.enabled
-    return config.CONFIG.vibe.enabled
-
-
-def _gen_ready() -> bool:
-    """カンプ生成エンジンが使えるか。"""
-    return _provider_ready(config.CONFIG.htmlgen.provider)
-
-
-def _edit_ready() -> bool:
-    """カンプ修正エンジンが使えるか。"""
-    return _provider_ready(config.CONFIG.htmlgen.edit_provider)
-
-
-@app.route("/api/test_key", methods=["POST"])
-def api_test_key():
-    """選択中エンジン＋Geminiのキーで接続テストする（入力欄のキーがあればそれを使う）。"""
-    data = request.get_json(silent=True) or {}
-    provider = data.get("provider") or config.CONFIG.htmlgen.provider
-    ok, msg = _test_all(
-        provider,
-        data.get("openai_api_key", ""),
-        data.get("anthropic_api_key", ""),
-        data.get("gemini_api_key", ""),
-        data.get("deepseek_api_key", ""),
-        data.get("zai_api_key", ""),
-    )
-    return jsonify({"ok": ok, "message": msg})
-
-
-@app.route("/api/settings", methods=["POST"])
-def api_settings_post():
-    """設定画面からの保存。.env に書き込み、即反映する（キー本体は空なら据え置き）。"""
-    data = request.get_json(silent=True) or {}
-    updates = {}
-    if data.get("provider") in ("anthropic", "openai", "gemini", "deepseek", "zai"):
-        updates["DESIGN_STOCK_HTML_PROVIDER"] = data["provider"]
-    if data.get("edit_provider") in ("anthropic", "openai", "gemini", "deepseek", "zai"):
-        updates["DESIGN_STOCK_EDIT_PROVIDER"] = data["edit_provider"]
-    if (data.get("openai_model") or "").strip():
-        updates["DESIGN_STOCK_OPENAI_MODEL"] = data["openai_model"].strip()
-    if (data.get("anthropic_model") or "").strip():
-        updates["DESIGN_STOCK_VIBE_MODEL"] = data["anthropic_model"].strip()
-    if (data.get("gemini_model") or "").strip():
-        updates["DESIGN_STOCK_GEMINI_MODEL"] = data["gemini_model"].strip()
-    if (data.get("gemini_api_key") or "").strip():
-        updates["GEMINI_API_KEY"] = data["gemini_api_key"].strip()
-    if (data.get("deepseek_model") or "").strip():
-        updates["DESIGN_STOCK_DEEPSEEK_MODEL"] = data["deepseek_model"].strip()
-    if (data.get("deepseek_api_key") or "").strip():
-        updates["DEEPSEEK_API_KEY"] = data["deepseek_api_key"].strip()
-    if (data.get("zai_model") or "").strip():
-        updates["DESIGN_STOCK_ZAI_MODEL"] = data["zai_model"].strip()
-    if (data.get("zai_api_key") or "").strip():
-        updates["ZAI_API_KEY"] = data["zai_api_key"].strip()
-    if (data.get("openai_api_key") or "").strip():
-        updates["OPENAI_API_KEY"] = data["openai_api_key"].strip()
-    if (data.get("anthropic_api_key") or "").strip():
-        updates["ANTHROPIC_API_KEY"] = data["anthropic_api_key"].strip()
-
-    config.update_env_file(updates)
-    config.reload()
-    h = config.CONFIG.htmlgen
-    v = config.CONFIG.vibe
-    # 保存した後、生成エンジン＋Geminiのキーで接続テスト（正しいか即わかる）
-    key_ok, key_msg = _test_all(h.provider)
-    return jsonify(
-        {
-            "ok": True,
-            "provider": h.provider,
-            "openai_model": h.openai_model,
-            "anthropic_model": v.model,
-            "openai_set": h.openai_enabled,
-            "anthropic_set": v.enabled,
-            "gemini_model": config.CONFIG.gemini.model,
-            "gemini_set": config.CONFIG.gemini.enabled,
-            "deepseek_model": config.CONFIG.deepseek.model,
-            "deepseek_set": config.CONFIG.deepseek.enabled,
-            "key_ok": key_ok,
-            "message": "保存しました。" + key_msg,
-        }
-    )
-
-
-@app.route("/api/site/<site_id>")
-def api_site(site_id: str):
-    """1サイトの詳細（全体・動画・トークン・ライブラリ・雰囲気）をまとめて返す。"""
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        abort(404)
-    tokens = {}
-    if row["design_tokens"]:
-        try:
-            tokens = _json.loads(row["design_tokens"])
-        except Exception:
-            tokens = {}
-    has_video = bool(row["animation_video_path"]) and (
-        config.PROJECT_ROOT / row["animation_video_path"]
-    ).exists()
-    return jsonify(
-        {
-            "site_id": row["id"],
-            "url": row["url"],
-            "captured_at": row["captured_at"],
-            "libs": [s.strip() for s in (row["animation_libs"] or "").split(",") if s.strip()],
-            "vibe": row["vibe_description"] or "",
-            "has_video": has_video,
-            "firstview": f"/img/{row['id']}/firstview",
-            "fullpage": f"/img/{row['id']}/fullpage",
-            "video": f"/video/{row['id']}",
-            "tokens": tokens,
-            # 抜き出した画像（/assets/<id>/<file> のURL一覧）と、抜き出し中かどうか
-            "assets": [
-                f"/assets/{site_id}/{Path(p).name}" for p in assets.list_assets(site_id)
-            ],
-            "extracting": _EXTRACTING.get("site_id") == site_id,
-            # 抜き出したアニメ素材（@keyframes/transition/Lottie）と、抜き出し中かどうか
-            "anim": _anim_payload(row, site_id),
-            "anim_extracting": _ANIM_EXTRACTING.get("site_id") == site_id,
-            # 録画からAIが読み取った「動きの仕様書」と、読み取り中かどうか
-            "motion": _motion_payload(row),
-            "motion_reading": _MOTION_RUNNING.get("site_id") == site_id,
-            "motion_error": _MOTION_RUNNING.get("error") if _MOTION_RUNNING.get("site_id") == site_id else None,
-        }
-    )
-
-
-def _motion_payload(row) -> dict:
-    """DBの motion_spec(JSON) を画面が使う形にして返す（無ければ空）。"""
-    if not row["motion_spec"]:
-        return {}
-    try:
-        return _json.loads(row["motion_spec"])
-    except Exception:  # noqa: BLE001
-        return {}
-
-
-def _anim_payload(row, site_id: str) -> dict:
-    """DBの animation_snippets(JSON) を、画面が使いやすい形にして返す。"""
-    snippets = {}
-    if row["animation_snippets"]:
-        try:
-            snippets = _json.loads(row["animation_snippets"])
-        except Exception:  # noqa: BLE001
-            snippets = {}
-    return {
-        "keyframes": snippets.get("keyframes", []),
-        "transitions": snippets.get("transitions", []),
-        "animations": snippets.get("animations", []),
-        # 保存済みLottieは配信URL(/anim/<id>/<file>)に直して返す
-        "lottie": [
-            f"/anim/{site_id}/{Path(p).name}" for p in anim.list_lottie(site_id)
-        ],
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro",メイリオ,Meiryo,verdana,Osaka,"ＭＳ Ｐゴシック","MS PGothic",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 12% 82%, rgba(183, 210, 196, .95) 0, rgba(183, 210, 196, .55) 12%, transparent 26%),
+        radial-gradient(circle at 87% 14%, rgba(95, 135, 115, .08) 0, rgba(95, 135, 115, .04) 18%, transparent 34%),
+        linear-gradient(180deg, #fff 0%, #fff 55%, #fcfbfb 100%);
+      overflow-x:hidden;
+    }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    .container{
+      width:min(calc(100% - 48px), var(--container));
+      margin:0 auto;
+      position:relative;
+      z-index:2;
     }
 
+    .site-bg-ring,
+    .site-bg-ring2,
+    .site-bg-ring3{
+      position:fixed;
+      border:6px solid rgba(64,64,64,.12);
+      border-radius:50%;
+      pointer-events:none;
+      z-index:0;
+    }
+    .site-bg-ring{width:420px;height:420px;right:-120px;top:-40px}
+    .site-bg-ring2{width:360px;height:360px;left:-180px;top:48%}
+    .site-bg-ring3{width:300px;height:300px;right:-140px;bottom:10%}
+
+    .floating-dot{
+      position:absolute;
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      opacity:.85;
+      box-shadow:0 0 0 8px rgba(95, 135, 115, .06);
+      animation:floatY 7s ease-in-out infinite;
+    }
+    .floating-dot.gray{
+      background:#d9d9d9;
+      box-shadow:0 0 0 8px rgba(0,0,0,.03);
+    }
+    .floating-dot.soft{
+      background:var(--accent-soft);
+    }
+
+    .site-header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(0,0,0,.06);
+      animation:header_fade_in .8s ease both;
+    }
+    .header-inner{
+      width:min(calc(100% - 40px), var(--container));
+      margin:0 auto;
+      height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:700;
+      color:var(--text-strong);
+      letter-spacing:.02em;
+    }
+    .logo-mark{
+      width:36px;height:36px;border-radius:50%;
+      background:
+        radial-gradient(circle at 35% 35%, #fff 0 16%, transparent 17% 100%),
+        linear-gradient(135deg, #80a891 0%, #5f8773 55%, #466756 100%);
+      position:relative;
+      box-shadow:0 8px 24px rgba(95, 135, 115, .22);
+      flex:0 0 auto;
+    }
+    .logo small{
+      display:block;
+      font-size:11px;
+      font-weight:500;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .header-nav{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .header-nav a{
+      font-size:13px;
+      padding:10px 14px;
+      border-radius:var(--pill);
+      color:var(--text);
+      transition:background .2s ease,color .2s ease,transform .25s ease;
+    }
+    .header-nav a:hover{background:var(--accent-soft);color:var(--accent);transform:translateY(-1px)}
+    .header-cta{
+      padding:12px 18px !important;
+      background:linear-gradient(135deg, #79a289 0%, #5f8773 100%);
+      color:#fff !important;
+      box-shadow:0 12px 24px rgba(95, 135, 115, .18);
+    }
+
+    .subnav{
+      border-top:1px solid rgba(0,0,0,.04);
+      border-bottom:1px solid rgba(0,0,0,.04);
+      background:#fff;
+    }
+    .subnav-inner{
+      width:min(calc(100% - 40px), var(--container));
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:0;
+    }
+    .subnav a{
+      padding:14px 8px;
+      text-align:center;
+      font-size:12px;
+      border-right:1px solid rgba(0,0,0,.05);
+      color:var(--muted);
+    }
+    .subnav a:first-child{border-left:1px solid rgba(0,0,0,.05)}
+    .subnav a:hover{color:var(--accent);background:linear-gradient(180deg, #fff 0%, #fff8f8 100%)}
+
+    section{
+      position:relative;
+      min-height:100vh;
+      padding:10vh 0;
+      overflow:hidden;
+    }
+
+    .eyebrow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:14px;
+      color:var(--accent);
+      margin-bottom:18px;
+      letter-spacing:.04em;
+    }
+    .eyebrow::before{
+      content:"";
+      width:8px;height:8px;border-radius:50%;
+      background:var(--accent);
+      display:inline-block;
+    }
+    .heading-xl{
+      font-size:clamp(36px,6vw,86px);
+      line-height:1.02;
+      letter-spacing:-.02em;
+      color:var(--text-strong);
+      font-weight:800;
+      margin:0 0 22px;
+    }
+    .heading-lg{
+      font-size:clamp(30px,4vw,56px);
+      line-height:1.2;
+      margin:0 0 18px;
+      font-weight:800;
+      color:var(--text-strong);
+    }
+    .heading-md{
+      font-size:clamp(24px,3vw,40px);
+      line-height:1.3;
+      margin:0 0 18px;
+      font-weight:800;
+      color:var(--text-strong);
+    }
+    .lead{
+      font-size:16px;
+      line-height:2;
+      color:var(--muted);
+      max-width:42em;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      min-height:52px;
+      padding:0 22px;
+      border-radius:var(--pill);
+      background:linear-gradient(135deg, #80a790 0%, #5f8773 100%);
+      color:#fff;
+      font-weight:700;
+      font-size:14px;
+      border:none;
+      box-shadow:0 10px 28px rgba(95, 135, 115, .18);
+      transition:transform .25s ease, box-shadow .25s ease, filter .25s ease;
+    }
+    .btn:hover{transform:translateY(-3px);box-shadow:0 18px 32px rgba(95, 135, 115, .24);filter:saturate(1.03)}
+    .btn .arrow{
+      width:28px;height:28px;border-radius:50%;
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.16);
+      font-size:15px;
+    }
+    .btn.secondary{
+      background:#fff;
+      color:var(--accent);
+      border:1px solid rgba(95, 135, 115, .18);
+      box-shadow:none;
+    }
+
+    .hero{
+      padding-top:5vh;
+      min-height:calc(100vh - 120px);
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      align-items:center;
+      gap:32px;
+      min-height:78vh;
+    }
+    .hero-copy{
+      position:relative;
+      padding-left:20px;
+      animation:opening_logo_in 1.05s ease-out both;
+    }
+    .hero-copy::before{
+      content:"";
+      position:absolute;
+      left:0;top:6px;bottom:6px;width:4px;
+      background:linear-gradient(180deg, var(--accent-soft), var(--accent));
+      border-radius:999px;
+    }
+    .hero-copy .small{
+      font-size:15px;
+      color:var(--muted);
+      margin-bottom:14px;
+      display:block;
+    }
+    .hero-actions{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-top:28px;
+    }
+
+    .hero-visual{
+      position:relative;
+      min-height:620px;
+      animation:opening_bird_in 1.6s cubic-bezier(.16,1,.3,1) both;
+    }
+    .hero-glow{
+      position:absolute;inset:20px 10px auto auto;
+      width:72%;height:76%;
+      border-radius:46% 54% 48% 52% / 36% 36% 64% 64%;
+      background:
+        linear-gradient(135deg, rgba(168, 207, 201, .75) 0%, rgba(158, 202, 159, .42) 34%, rgba(108,99,255,.14) 76%, rgba(255,255,255,0) 100%);
+      filter:blur(2px);
+      opacity:.95;
+      animation:opening_wash_in 1.8s cubic-bezier(.16,1,.3,1) both;
+    }
+    .hero-card-main{
+      position:absolute;
+      right:5%; top:12%;
+      width:72%;
+      aspect-ratio:1.08/1;
+      border-radius:28px;
+      transform:rotate(-6deg);
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      background:
+        linear-gradient(135deg, #b7d2c4 0%, #fff 38%, #f2f7ff 100%);
+    }
+    .hero-card-main img{width:100%;height:100%;object-fit:cover}
+    .hero-card-small{
+      position:absolute;
+      left:0; top:42%;
+      width:48%;
+      aspect-ratio:1.02/1;
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      transform:rotate(7deg);
+      background:linear-gradient(135deg, #b7d2c4, #fff);
+    }
+    .hero-card-small img{width:100%;height:100%;object-fit:cover}
+    .hero-float{
+      position:absolute;
+      right:0; bottom:7%;
+      width:180px;height:180px;
+      border-radius:32px;
+      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(183, 210, 196, .78));
+      box-shadow:var(--shadow);
+      display:grid;place-items:center;
+      transform:translateY(0);
+      animation:floatY 5.8s ease-in-out infinite;
+    }
+    .hero-float .stack{
+      width:74px;height:74px;position:relative;
+    }
+    .hero-float .stack span{
+      position:absolute;border-radius:14px;
+      background:linear-gradient(135deg,#b7d2c4,#5f8773);
+      box-shadow:0 8px 24px rgba(95, 135, 115, .2);
+    }
+    .hero-float .stack span:nth-child(1){width:42px;height:42px;right:0;top:8px}
+    .hero-float .stack span:nth-child(2){width:42px;height:42px;left:8px;bottom:6px;opacity:.7}
+    .hero-float .stack span:nth-child(3){width:14px;height:14px;border-radius:50%;right:-20px;bottom:0;background:#9bc1ab}
+
+    .message-section .message-grid{
+      display:grid;
+      grid-template-columns:1fr 1.02fr;
+      gap:48px;
+      align-items:center;
+      min-height:78vh;
+    }
+    .scroll-side{
+      position:absolute;
+      left:18px;top:18%;
+      writing-mode:vertical-rl;
+      font-size:11px;
+      color:rgba(95, 135, 115, .65);
+      letter-spacing:.16em;
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+    .scroll-side::after{
+      content:"";
+      width:14px;height:14px;border-radius:50%;
+      border:2px solid rgba(95, 135, 115, .25);
+      box-shadow:0 22px 0 -3px rgba(95, 135, 115, .15), 0 44px 0 -6px rgba(95, 135, 115, .1);
+    }
+
+    .cityline{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:240px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(183, 210, 196, .24) 100%);
+      pointer-events:none;
+    }
+    .cityline svg{
+      position:absolute;left:0;bottom:0;width:100%;height:100%;
+    }
+
+    .message-cards{
+      position:relative;
+      height:520px;
+    }
+    .message-card{
+      position:absolute;
+      width:290px;
+      border-radius:26px;
+      background:linear-gradient(180deg,#fff 0%, #fff7f7 100%);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      transition:transform .3s ease, box-shadow .3s ease;
+    }
+    .message-card:hover{transform:translateY(-8px);box-shadow:0 18px 42px rgba(173, 179, 176, .38)}
+    .message-card:nth-child(1){left:14%;top:15%}
+    .message-card:nth-child(2){right:0;top:2%}
+    .message-card .thumb{
+      aspect-ratio:1.08/1;
+      background:linear-gradient(135deg,#b7d2c4,#fff);
+    }
+    .message-card .thumb img{width:100%;height:100%;object-fit:cover}
+    .message-card .meta{
+      padding:20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .message-card h3{
+      margin:0;
+      font-size:18px;
+      color:var(--text-strong);
+      line-height:1.5;
+    }
+    .round-link{
+      flex:0 0 auto;
+      width:44px;height:44px;border-radius:50%;
+      background:linear-gradient(135deg,#80a790,#5f8773);
+      color:#fff;
+      display:grid;place-items:center;
+      box-shadow:0 10px 20px rgba(95, 135, 115, .18);
+    }
+
+    .features-top{
+      text-align:center;
+      margin-bottom:42px;
+    }
+    .feature-bubbles{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:28px;
+      margin-top:48px;
+    }
+    .bubble{
+      text-align:center;
+    }
+    .bubble-badge{
+      display:inline-block;
+      padding:10px 18px;
+      background:#fff;
+      border-radius:var(--pill);
+      box-shadow:0 8px 20px rgba(173, 179, 176, .16);
+      font-size:12px;
+      color:var(--accent);
+      margin-bottom:-18px;
+      position:relative;
+      z-index:2;
+    }
+    .bubble-visual{
+      width:min(100%, 320px);
+      margin:0 auto 22px;
+      aspect-ratio:1/1;
+      border-radius:34px;
+      background:
+        radial-gradient(circle at 24% 18%, rgba(255,255,255,.92) 0 18%, transparent 19%),
+        linear-gradient(180deg,#fef6f7 0%, #eef6fb 100%);
+      box-shadow:var(--shadow);
+      padding:20px;
+      overflow:hidden;
+    }
+    .bubble-visual img{width:100%;height:100%;object-fit:cover;border-radius:24px}
+    .bubble h3{
+      margin:0 0 14px;
+      font-size:30px;
+      line-height:1.4;
+      color:var(--accent);
+      font-weight:800;
+    }
+    .bubble p{
+      margin:0 auto;
+      max-width:26em;
+      line-height:1.9;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .center-btn{
+      text-align:center;
+      margin-top:34px;
+    }
+
+    .gallery{
+      min-height:auto;
+      padding:4vh 0 8vh;
+    }
+    .gallery-row{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:22px;
+    }
+    .gallery-item{
+      border-radius:14px;
+      overflow:hidden;
+      background:linear-gradient(135deg,#b7d2c4,#f4f7fb);
+      aspect-ratio:1.22/1;
+      box-shadow:0 10px 24px rgba(0,0,0,.05);
+    }
+    .gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .8s ease}
+    .gallery-item:hover img{transform:scale(1.05)}
+
+    .welfare-section{
+      background:linear-gradient(180deg, #fff 0%, #fbfbfb 100%);
+    }
+    .welfare-grid{
+      display:grid;
+      grid-template-columns:.9fr 1.1fr;
+      gap:38px;
+      align-items:center;
+      min-height:78vh;
+    }
+    .welfare-left{
+      position:relative;
+      padding:56px 44px;
+      border-radius:50px;
+      background:
+        radial-gradient(circle at 26% 22%, rgba(183, 210, 196, .95) 0, rgba(183, 210, 196, .78) 28%, rgba(255,255,255,.9) 56%, rgba(255,255,255,.75) 100%);
+      overflow:hidden;
+    }
+    .welfare-left::before{
+      content:"";
+      position:absolute;inset:14px;
+      border:4px solid rgba(64,64,64,.08);
+      border-radius:50px;
+      pointer-events:none;
+    }
+    .welfare-illust{
+      width:100%;
+      aspect-ratio:1/1;
+      border-radius:28px;
+      overflow:hidden;
+      background:linear-gradient(135deg,#b7d2c4,#fff);
+      margin:22px 0 24px;
+    }
+    .welfare-illust img{width:100%;height:100%;object-fit:cover}
+    .welfare-right{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+    }
+    .benefit{
+      background:#fff;
+      border-radius:16px;
+      padding:26px 18px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,.04);
+      min-height:160px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      transition:transform .25s ease, box-shadow .25s ease;
+    }
+    .benefit:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,0,0,.08)}
+    .benefit-icon{
+      width:62px;height:62px;border-radius:50%;
+      margin:0 auto 14px;
+      background:linear-gradient(180deg,#fff,#b7d2c4);
+      display:grid;place-items:center;
+      font-size:28px;
+      box-shadow:inset 0 -8px 20px rgba(95, 135, 115, .08);
+    }
+    .benefit h4{
+      margin:0;
+      font-size:15px;
+      line-height:1.6;
+      color:var(--text-strong);
+    }
+
+    .interview-section{
+      background:#fff;
+    }
+    .interview-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:24px;
+      margin-bottom:36px;
+    }
+    .interview-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:22px;
+    }
+    .interview-card{
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow:0 8px 24px rgba(0,0,0,.05);
+      transition:transform .28s ease, box-shadow .28s ease;
+    }
+    .interview-card:hover{transform:translateY(-6px);box-shadow:0 18px 34px rgba(0,0,0,.09)}
+    .interview-thumb{
+      aspect-ratio:1.45/1;
+      background:linear-gradient(135deg,#b7d2c4,#eef5fb);
+    }
+    .interview-thumb img{width:100%;height:100%;object-fit:cover}
+    .interview-body{
+      padding:18px 18px 24px;
+      border-bottom:3px solid rgba(95, 135, 115, .22);
+    }
+    .tag{
+      display:inline-block;
+      color:var(--accent);
+      font-size:12px;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+    .interview-title{
+      margin:0 0 12px;
+      font-size:20px;
+      line-height:1.55;
+      color:var(--text-strong);
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .interview-title .mini-arrow{
+      flex:0 0 auto;
+      width:34px;height:34px;border-radius:50%;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#80a790,#5f8773);
+      color:#fff;
+      font-size:14px;
+      margin-top:2px;
+    }
+    .interview-meta{
+      font-size:12px;
+      color:rgba(64,64,64,.58);
+      line-height:1.7;
+    }
+
+    .footer-top{
+      min-height:auto;
+      padding:8vh 0 0;
+    }
+    .footer-brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:28px;
+    }
+    .footer-panels{
+      display:grid;
+      grid-template-columns:1.05fr 1fr 1fr 1fr;
+      gap:12px;
+      margin-bottom:26px;
+    }
+    .footer-panel{
+      border-radius:16px;
+      padding:28px 22px;
+      min-height:108px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      box-shadow:0 8px 24px rgba(0,0,0,.04);
+      position:relative;
+      overflow:hidden;
+    }
+    .footer-panel.pale{background:linear-gradient(135deg,#b7d2c4,#fbeff0);color:rgba(64,64,64,.5)}
+    .footer-panel.red{background:linear-gradient(135deg,#6c947f,#5f8773);color:#fff}
+    .footer-panel h4{margin:0;font-size:18px}
+    .footer-panel small{display:block;font-size:12px;opacity:.8;margin-top:6px}
+    .footer-panel .plus{
+      width:34px;height:34px;border-radius:50%;
+      display:grid;place-items:center;
+      border:1px solid currentColor;
+      font-size:18px;
+      flex:0 0 auto;
+    }
+
+    .footer-links{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:18px;
+      margin-bottom:24px;
+    }
+    .footer-col{
+      background:#fff;
+      border-radius:16px;
+      padding:24px 22px;
+      box-shadow:0 8px 24px rgba(0,0,0,.04);
+    }
+    .footer-col h5{
+      margin:0 0 16px;
+      font-size:14px;
+      color:var(--text-strong);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .footer-col h5::before{
+      content:"●";
+      font-size:10px;
+      color:var(--accent);
+    }
+    .footer-col ul{list-style:none;padding:0;margin:0}
+    .footer-col li{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:8px 0;
+      font-size:13px;
+      color:var(--muted);
+      border-bottom:1px dashed rgba(0,0,0,.05);
+    }
+    .footer-col li:last-child{border-bottom:none}
+
+    .footer-bottom{
+      background:linear-gradient(180deg,#5d8672,#496d5b);
+      color:#fff;
+      min-height:auto;
+      padding:14px 0;
+      font-size:11px;
+    }
+    .footer-bottom-inner{
+      width:min(calc(100% - 40px), var(--container));
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(36px);
+      transition:opacity .9s ease, transform .9s cubic-bezier(.16,1,.3,1);
+    }
+    html.js .reveal.show{
+      opacity:1;
+      transform:none;
+    }
+    html.js .reveal[data-delay="1"]{transition-delay:.08s}
+    html.js .reveal[data-delay="2"]{transition-delay:.16s}
+    html.js .reveal[data-delay="3"]{transition-delay:.24s}
+    html.js .reveal[data-delay="4"]{transition-delay:.32s}
+    html.js .reveal[data-delay="5"]{transition-delay:.40s}
+
+    @keyframes header_fade_in{
+      0%{opacity:0;transform:translateY(-4rem)}
+      100%{opacity:1;transform:none}
+    }
+    @keyframes opening_wash_in{
+      0%{opacity:0;transform:scale(.3) rotate(-8deg)}
+      55%{opacity:.82}
+      100%{opacity:.55;transform:scale(1.35) rotate(3deg)}
+    }
+    @keyframes opening_bird_in{
+      0%{opacity:0;filter:blur(.8rem);transform:translate(-8rem,-3rem) rotate(-10deg) scale(.75)}
+      60%{opacity:1;filter:blur(0)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes opening_logo_in{
+      0%{opacity:0;filter:blur(1rem);transform:translateY(1.5rem) scale(.94)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes floatY{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-12px)}
+    }
+
+    @media (max-width: 1100px){
+      .hero-grid,
+      .message-section .message-grid,
+      .welfare-grid{grid-template-columns:1fr}
+      .hero-visual{min-height:520px}
+      .message-cards{height:420px}
+      .message-card:nth-child(1){left:0;top:10%}
+      .message-card:nth-child(2){right:4%;top:0}
+      .feature-bubbles,
+      .gallery-row,
+      .interview-grid{grid-template-columns:1fr 1fr}
+      .welfare-right{grid-template-columns:repeat(2,1fr)}
+      .footer-panels{grid-template-columns:1fr 1fr}
+      .footer-links{grid-template-columns:1fr}
+      .subnav-inner{grid-template-columns:repeat(3,1fr)}
+    }
+
+    @media (max-width: 768px){
+      section{min-height:auto;padding:72px 0}
+      .header-inner{height:auto;padding:14px 0;align-items:flex-start;flex-direction:column}
+      .header-nav{gap:6px}
+      .subnav-inner{grid-template-columns:1fr 1fr}
+      .hero-grid{min-height:auto}
+      .hero-copy{padding-left:16px}
+      .hero-visual{min-height:420px}
+      .hero-card-main{width:76%;right:4%}
+      .hero-card-small{width:44%;top:48%}
+      .hero-float{width:130px;height:130px}
+      .scroll-side{display:none}
+      .message-cards{height:auto;display:grid;gap:18px}
+      .message-card{position:relative;width:100%;left:auto !important;right:auto !important;top:auto !important}
+      .feature-bubbles,
+      .gallery-row,
+      .interview-grid,
+      .welfare-right,
+      .footer-panels{grid-template-columns:1fr}
+      .interview-head{flex-direction:column;align-items:flex-start}
+      .footer-bottom-inner{flex-direction:column}
+      .site-bg-ring,.site-bg-ring2,.site-bg-ring3{display:none}
+      .container{width:min(calc(100% - 28px), var(--container))}
+    }
+  </style>
+<style id="fxa-css">html.fxa-on .fxa_pre{opacity:0;transition:opacity var(--fxa-dur,.8s) ease,transform var(--fxa-dur,.8s) ease,filter var(--fxa-dur,.8s) ease,clip-path var(--fxa-dur,.8s) ease}html.fxa-on .fxa_pre.fxa_y{transform:translateY(var(--fxa-dist,28px))}html.fxa-on .fxa_pre.fxa_xl{transform:translateX(calc(-1*var(--fxa-dist,48px)))}html.fxa-on .fxa_pre.fxa_xr{transform:translateX(var(--fxa-dist,48px))}html.fxa-on .fxa_pre.fxa_s{transform:scale(var(--fxa-scale,.86))}html.fxa-on .fxa_pre.fxa_bl{filter:blur(var(--fxa-blur,14px))}html.fxa-on .fxa_pre.fxa_ry{transform:perspective(800px) rotateY(var(--fxa-deg,90deg))}html.fxa-on .fxa_pre.fxa_clip{transform:translateY(var(--fxa-dist,40px))}html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}.fxa_ch{display:inline-block}html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,16px));transition:opacity .5s ease,transform .5s ease}html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,45ms))}html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}@keyframes fxa_glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}@keyframes fxa_wave{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,10px)))}}.fxa_lp_pulse{animation:fxa_pulse var(--fxa-dur,1.4s) ease-in-out infinite}.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}</style></head>
+<body style=""><div class="site-bg-ring" style=""></div><div class="site-bg-ring2" style=""></div><div class="site-bg-ring3" style=""></div><header class="site-header" style="opacity: 1 !important; transform: none;">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="るぽ ホーム">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>
+          るぽ
+          <small>就労継続支援B型事業所</small>
+        </span>
+      </a>
+      <nav class="header-nav">
+        <a href="#message">るぽについて</a>
+        <a href="#works">お仕事・活動</a>
+        <a href="#support">支援体制</a>
+        <a href="#interview">利用者さまの声</a>
+        <a href="#contact" class="header-cta">見学・相談予約</a>
+      </nav>
+    </div>
+    <div class="subnav">
+      <div class="subnav-inner">
+        <a href="#message">採用トップ</a>
+        <a href="#works">働き方・活動</a>
+        <a href="#interview">ご利用インタビュー</a>
+        <a href="#support">支援制度</a>
+        <a href="#about">るぽについて</a>
+      </div>
+    </div>
+  </header><main>
+    <section class="hero" id="about" style="cursor: move;">
+      <div class="container hero-grid" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="0" data-cety="0">
+        <div class="hero-copy" style="opacity: 1 !important; transform: none;">
+          <span class="small">やさしく、ゆっくり、自分らしく。</span>
+          <h1 class="heading-xl fxa_pre fxa_cpre" style="cursor: move; font-size: 84.2px !important; translate: -23px 26px !important; rotate: 0deg !important; scale: 0.908909 0.9998 !important; transform-origin: center center !important; font-family: &quot;Hiragino Maru Gothic ProN&quot;, &quot;Rounded Mplus 1c&quot;, sans-serif !important; line-height: 1.47 !important; --fxa-dur: 800ms; --fxa-stag: 53ms; --fxa-dist: 40px;" data-cebt="" data-cesx="0.9089091000000001" data-cesy="0.9998000100000003" data-cetx="-23" data-cety="26"><span class="fxa_ch" style="display: inline-block; --i: 0; opacity: 1 !important; transform: none;">楽</span><span class="fxa_ch" style="display: inline-block; --i: 1; opacity: 1 !important; transform: none;">し</span><span class="fxa_ch" style="display: inline-block; --i: 2; opacity: 1 !important; transform: none;">さ</span><span class="fxa_ch" style="display: inline-block; --i: 3; opacity: 1 !important; transform: none;">を</span><span class="fxa_ch" style="display: inline-block; --i: 4; opacity: 1 !important; transform: none;">仕</span><span class="fxa_ch" style="display: inline-block; --i: 5; opacity: 1 !important; transform: none;">事</span><span class="fxa_ch" style="display: inline-block; --i: 6; opacity: 1 !important; transform: none;">に</span><span class="fxa_ch" style="display: inline-block; --i: 7; opacity: 1 !important; transform: none;">、</span><br><span class="fxa_ch" style="display: inline-block; --i: 8; opacity: 1 !important; transform: none;">生</span><span class="fxa_ch" style="display: inline-block; --i: 9; opacity: 1 !important; transform: none;">き</span><span class="fxa_ch" style="display: inline-block; --i: 10; opacity: 1 !important; transform: none;">生</span><span class="fxa_ch" style="display: inline-block; --i: 11; opacity: 1 !important; transform: none;">き</span><span class="fxa_ch" style="display: inline-block; --i: 12; opacity: 1 !important; transform: none;">と</span><span class="fxa_ch" style="display: inline-block; --i: 13; opacity: 1 !important; transform: none;">し</span><span class="fxa_ch" style="display: inline-block; --i: 14; opacity: 1 !important; transform: none;">た</span><span class="fxa_ch" style="display: inline-block; --i: 15; opacity: 1 !important; transform: none;">自</span><span class="fxa_ch" style="display: inline-block; --i: 16; opacity: 1 !important; transform: none;">分</span><span class="fxa_ch" style="display: inline-block; --i: 17; opacity: 1 !important; transform: none;">を</span><span class="fxa_ch" style="display: inline-block; --i: 18; opacity: 1 !important; transform: none;">見</span><span class="fxa_ch" style="display: inline-block; --i: 19; opacity: 1 !important; transform: none;">つ</span><span class="fxa_ch" style="display: inline-block; --i: 20; opacity: 1 !important; transform: none;">け</span><span class="fxa_ch" style="display: inline-block; --i: 21; opacity: 1 !important; transform: none;">よ</span><span class="fxa_ch" style="display: inline-block; --i: 22; opacity: 1 !important; transform: none;">う</span><span class="fxa_ch" style="display: inline-block; --i: 23; opacity: 1 !important; transform: none;">。</span></h1>
+          <p class="lead" style="translate: 0px 60px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="0" data-cety="60">
+            るぽは、はじめの一歩に不安がある方も、少しずつ自信をつけながら通える就労継続支援B型事業所です。
+            落ち着いた空間と丁寧なサポートで、「しっかりしている人」も「まだ自信が持てない人」も、
+            自分に合ったペースで働く楽しさを見つけられます。
+          </p>
+          <div class="hero-actions">
+            <a href="#contact" class="btn" style="translate: 6px 62px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(1, 0, 0, 1, 0, -3) !important;" data-cebt="matrix(1, 0, 0, 1, 0, -3)" data-cetx="6" data-cety="62"><span>見学を予約する</span><span class="arrow">→</span></a>
+            <a href="#works" class="btn secondary" data-cebt="matrix(1, 0, 0, 1, 0, -3)" data-cetx="28" data-cety="62" style="translate: 28px 62px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(1, 0, 0, 1, 0, -3) !important;"><span>活動内容を見る</span></a>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true" style="opacity: 1 !important; transform: none;">
+          <div class="hero-glow" style="opacity: 1 !important; transform: none;"></div>
+
+          <div class="hero-card-main" style="translate: 40px -113px !important; rotate: 0deg !important; scale: 0.826281 !important; transform-origin: center center !important; transform: matrix(0.994522, -0.104528, 0.104528, 0.994522, 0, 0) !important; background-image: url(&quot;http://127.0.0.1:5000/uploads/up_598a02d7d4.png&quot;) !important; background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; width: 605px !important; max-width: none !important;" data-cebt="matrix(0.994522, -0.104528, 0.104528, 0.994522, 0, 0)" data-cetx="40" data-cety="-113" data-cesx="0.826281" data-cesy="0.826281">
+            <img src="http://127.0.0.1:5000/uploads/up_598a02d7d4.png" alt="青空を背景に微笑む女性" width="760" height="700" onerror="this.style.display='none'" style="display: none;">
+          </div>
+
+          <div class="hero-card-small" style="">
+            <img src="http://127.0.0.1:5000/uploads/up_5af5bf188f.png" alt="オフィスを案内するスタッフ" width="440" height="420" onerror="this.style.display='none'">
+          </div>
+
+          <div class="hero-float">
+            <div class="stack">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+
+          <span class="floating-dot" style="left:8%; top:8%; animation-delay:.5s;"></span>
+          <span class="floating-dot gray" style="left:18%; bottom:14%; width:14px;height:14px; animation-delay:1.2s;"></span>
+          <span class="floating-dot soft" style="right:24%; top:8%; width:8px;height:8px; animation-delay:2s;"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="message-section" id="message" data-cebt="" data-cetx="0" data-cety="0" style="cursor: move; translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+      <div class="scroll-side">Scroll</div>
+      <div class="cityline" aria-hidden="true" style="">
+        <svg viewBox="0 0 1440 260" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="cityGrad" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#f7c3c8"></stop>
+              <stop offset="55%" stop-color="#d94f5c"></stop>
+              <stop offset="100%" stop-color="#ba2c2f"></stop>
+            </linearGradient>
+            <linearGradient id="cityFade" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="rgba(255,255,255,0)"></stop>
+              <stop offset="100%" stop-color="rgba(255,255,255,.14)"></stop>
+            </linearGradient>
+          </defs>
+          <g opacity=".95">
+            <rect x="0" y="170" width="170" height="90" fill="url(#cityGrad)" opacity=".28"></rect>
+            <rect x="135" y="142" width="110" height="118" fill="url(#cityGrad)" opacity=".35"></rect>
+            <rect x="218" y="120" width="140" height="140" fill="url(#cityGrad)" opacity=".72"></rect>
+            <rect x="334" y="156" width="100" height="104" fill="url(#cityGrad)" opacity=".56"></rect>
+            <rect x="414" y="98" width="168" height="162" fill="url(#cityGrad)" opacity=".84"></rect>
+            <rect x="560" y="138" width="118" height="122" fill="url(#cityGrad)" opacity=".64"></rect>
+            <rect x="642" y="82" width="176" height="178" fill="url(#cityGrad)" opacity=".95"></rect>
+            <rect x="802" y="126" width="120" height="134" fill="url(#cityGrad)" opacity=".72"></rect>
+            <rect x="890" y="104" width="170" height="156" fill="url(#cityGrad)" opacity=".9"></rect>
+            <rect x="1040" y="148" width="94" height="112" fill="url(#cityGrad)" opacity=".6"></rect>
+            <rect x="1118" y="74" width="188" height="186" fill="url(#cityGrad)" opacity=".98"></rect>
+            <rect x="1290" y="118" width="130" height="142" fill="url(#cityGrad)" opacity=".7"></rect>
+            <path d="M0 250 C 180 210, 260 160, 360 120 C 470 75, 580 96, 700 70 C 840 40, 930 60, 1040 24 C 1140 -10, 1280 20, 1440 6 L1440 260 L0 260 Z" fill="url(#cityFade)" opacity=".18"></path>
+          </g>
+          <g fill="#fff" opacity=".22">
+            <rect x="245" y="136" width="8" height="10"></rect><rect x="263" y="136" width="8" height="10"></rect><rect x="281" y="136" width="8" height="10"></rect>
+            <rect x="245" y="156" width="8" height="10"></rect><rect x="263" y="156" width="8" height="10"></rect><rect x="281" y="156" width="8" height="10"></rect>
+            <rect x="668" y="106" width="8" height="10"></rect><rect x="686" y="106" width="8" height="10"></rect><rect x="704" y="106" width="8" height="10"></rect><rect x="722" y="106" width="8" height="10"></rect>
+            <rect x="668" y="126" width="8" height="10"></rect><rect x="686" y="126" width="8" height="10"></rect><rect x="704" y="126" width="8" height="10"></rect><rect x="722" y="126" width="8" height="10"></rect>
+            <rect x="1150" y="102" width="8" height="10"></rect><rect x="1168" y="102" width="8" height="10"></rect><rect x="1186" y="102" width="8" height="10"></rect><rect x="1204" y="102" width="8" height="10"></rect>
+            <rect x="1150" y="122" width="8" height="10"></rect><rect x="1168" y="122" width="8" height="10"></rect><rect x="1186" y="122" width="8" height="10"></rect><rect x="1204" y="122" width="8" height="10"></rect>
+          </g>
+          <g>
+            <circle cx="1240" cy="238" r="22" fill="#42bf96"></circle>
+            <circle cx="1180" cy="242" r="18" fill="#55d1a4"></circle>
+            <circle cx="106" cy="230" r="18" fill="#bfd8f0"></circle>
+          </g>
+        </svg>
+      </div>
+
+      <div class="container message-grid">
+        <div class="reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="eyebrow">Message</div>
+          <p style="color:var(--accent);font-size:14px;margin:0 0 8px;">スキルを磨きながらお試しませんか</p>
+          <h2 class="heading-lg fxa_pre fxa_xl" style="cursor: move; --fxa-dur: 897ms; --fxa-dist: 159px; opacity: 1 !important;">
+            事務サービスのプロとして<br>
+            共に働く仲間を募集しています
+          </h2>
+          <p class="lead">
+            るぽでは、軽作業・PC入力・封入作業・検品・ものづくりなど、
+            一人ひとりの得意や体調に合わせたお仕事をご用意しています。<br>
+            毎日完璧でなくて大丈夫。安心して通えること、少しでも前に進めることを大切にしながら、
+            「働けた」という実感を積み重ねていきます。
+          </p>
+        </div>
+
+        <div class="message-cards">
+          <article class="message-card reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="thumb" style="cursor: move;">
+              <img src="http://127.0.0.1:5000/uploads/up_7baf91717c.png" alt="相談に応じる女性スタッフ" width="520" height="500" onerror="this.style.display='none'">
+            </div>
+            <div class="meta">
+              <h3>気軽に話せる<br>相談体制</h3>
+              <span class="round-link">→</span>
+            </div>
+          </article>
+
+          <article class="message-card reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="協力して梱包するスタッフ" width="520" height="500" onerror="this.style.display='none'">
+            </div>
+            <div class="meta">
+              <h3>人が育つ<br>キャリア支援</h3>
+              <span class="round-link">→</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="works" class="" style="">
+      <div class="container">
+        <div class="features-top reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="eyebrow" style="justify-content: center;">働く環境 <span style="font-size:11px;color:#b8a8a8;margin-left:4px;">Work Environment</span></div>
+          <h2 class="heading-md fxa_pre fxa_cpre" style="cursor: move; --fxa-dur: 800ms; --fxa-stag: 53ms; --fxa-dist: 40px;">
+            <span class="fxa_ch" style="display: inline-block; --i: 0; opacity: 1 !important; transform: none;">る</span><span class="fxa_ch" style="display: inline-block; --i: 1; opacity: 1 !important; transform: none;">ぽ</span><span class="fxa_ch" style="display: inline-block; --i: 2; opacity: 1 !important; transform: none;">は</span><span class="fxa_ch" style="display: inline-block; --i: 3; opacity: 1 !important; transform: none;">ラ</span><span class="fxa_ch" style="display: inline-block; --i: 4; opacity: 1 !important; transform: none;">イ</span><span class="fxa_ch" style="display: inline-block; --i: 5; opacity: 1 !important; transform: none;">フ</span><span class="fxa_ch" style="display: inline-block; --i: 6; opacity: 1 !important; transform: none;">ス</span><span class="fxa_ch" style="display: inline-block; --i: 7; opacity: 1 !important; transform: none;">テ</span><span class="fxa_ch" style="display: inline-block; --i: 8; opacity: 1 !important; transform: none;">ー</span><span class="fxa_ch" style="display: inline-block; --i: 9; opacity: 1 !important; transform: none;">ジ</span><span class="fxa_ch" style="display: inline-block; --i: 10; opacity: 1 !important; transform: none;">の</span><span class="fxa_ch" style="display: inline-block; --i: 11; opacity: 1 !important; transform: none;">変</span><span class="fxa_ch" style="display: inline-block; --i: 12; opacity: 1 !important; transform: none;">化</span><span class="fxa_ch" style="display: inline-block; --i: 13; opacity: 1 !important; transform: none;">に</span><span class="fxa_ch" style="display: inline-block; --i: 14; opacity: 1 !important; transform: none;">あ</span><span class="fxa_ch" style="display: inline-block; --i: 15; opacity: 1 !important; transform: none;">わ</span><span class="fxa_ch" style="display: inline-block; --i: 16; opacity: 1 !important; transform: none;">せ</span><span class="fxa_ch" style="display: inline-block; --i: 17; opacity: 1 !important; transform: none;">て</span><br>
+            <span class="fxa_ch" style="display: inline-block; --i: 18; opacity: 1 !important; transform: none;">安</span><span class="fxa_ch" style="display: inline-block; --i: 19; opacity: 1 !important; transform: none;">心</span><span class="fxa_ch" style="display: inline-block; --i: 20; opacity: 1 !important; transform: none;">し</span><span class="fxa_ch" style="display: inline-block; --i: 21; opacity: 1 !important; transform: none;">て</span><span class="fxa_ch" style="display: inline-block; --i: 22; opacity: 1 !important; transform: none;">長</span><span class="fxa_ch" style="display: inline-block; --i: 23; opacity: 1 !important; transform: none;">く</span><span class="fxa_ch" style="display: inline-block; --i: 24; opacity: 1 !important; transform: none;">通</span><span class="fxa_ch" style="display: inline-block; --i: 25; opacity: 1 !important; transform: none;">え</span><span class="fxa_ch" style="display: inline-block; --i: 26; opacity: 1 !important; transform: none;">る</span><span class="fxa_ch" style="display: inline-block; --i: 27; opacity: 1 !important; transform: none;">場</span><span class="fxa_ch" style="display: inline-block; --i: 28; opacity: 1 !important; transform: none;">所</span><span class="fxa_ch" style="display: inline-block; --i: 29; opacity: 1 !important; transform: none;">で</span><span class="fxa_ch" style="display: inline-block; --i: 30; opacity: 1 !important; transform: none;">す</span>
+          </h2>
+        </div>
+
+        <div class="feature-bubbles">
+          <div class="bubble reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="bubble-badge">見学の方の95%が安心と回答</div>
+            <div class="bubble-visual">
+              <img src="http://127.0.0.1:5000/uploads/up_7beb56fdd8.png" alt="パソコンで相談し合う風景" width="320" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>多数の女性が<br>活躍中！</h3>
+            <p>
+              女性でも通いやすい穏やかな雰囲気で、スタッフとの距離も近く、
+              安心して相談しながら活動を続けられます。
+            </p>
+          </div>
+
+          <div class="bubble reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="bubble-badge">必要な学び・スキルは通いながら身につけます</div>
+            <div class="bubble-visual">
+              <img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="ノートPCで作業する手元" width="320" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>経験や知識は<br>不要</h3>
+            <p>
+              入力作業から制作、封入、軽作業まで、いま出来ることから無理なくスタート。
+              支援員が丁寧にフォローします。
+            </p>
+          </div>
+
+          <div class="bubble reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="bubble-badge">ライフステージの変化にも対応</div>
+            <div class="bubble-visual">
+              <img src="http://127.0.0.1:5000/uploads/up_cc6c33e328.png" alt="休憩時間の風景" width="320" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>充実した<br>育児・介護制度</h3>
+            <p>
+              通所時間の相談や体調面への配慮、家庭との両立も見据えた支援体制で、
+              長く安心して続けられる環境です。
+            </p>
+          </div>
+        </div>
+
+        <div class="center-btn reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a href="#contact" class="btn"><span>働く環境を見る</span><span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery">
+      <div class="container">
+        <div class="gallery-row">
+          <div class="gallery-item reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="事業所の入口" width="420" height="320" onerror="this.style.display='none'">
+          </div>
+          <div class="gallery-item reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" alt="明るいオフィス空間" width="420" height="320" onerror="this.style.display='none'">
+          </div>
+          <div class="gallery-item reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" alt="明るいオフィスで働く人々" width="420" height="320" onerror="this.style.display='none'">
+          </div>
+          <div class="gallery-item reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="オフィスのコーヒーとクッキー" width="420" height="320" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="welfare-section" id="support">
+      <div class="container welfare-grid">
+        <div class="welfare-left reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter fxa_pre fxa_xl" style="cursor: move; --fxa-dur: 897ms; --fxa-dist: 159px;">
+          <div class="eyebrow">福利厚生・社内制度 <span style="font-size:11px;color:#b8a8a8;margin-left:4px;">Comfort &amp; Support</span></div>
+          <h2 class="heading-md" style="width: 623px !important; max-width: none !important; translate: -18px 3px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="-18" data-cety="3">
+            休日・体調配慮をはじめとした<br>
+            福利厚生が充実！
+          </h2>
+          <div class="welfare-illust" style="cursor: move; background-image: url(&quot;http://127.0.0.1:5000/uploads/up_612cac1589.jpg&quot;) !important; background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; translate: 0px -1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="0" data-cety="-1">
+            <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="相談員と話す女性" width="520" height="520" onerror="this.style.display='none'">
+          </div>
+          <a href="#contact" class="btn"><span>相談窓口・利用案内</span><span class="arrow">→</span></a>
+        </div>
+
+        <div class="welfare-right">
+          <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="benefit-icon">📅</div>
+            <h4>年末年始休所</h4>
+          </div>
+          <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="benefit-icon">🎉</div>
+            <h4>アニバーサリー休暇</h4>
+          </div>
+          <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="benefit-icon">🩺</div>
+            <h4>生理休暇</h4>
+          </div>
+          
+          
+          <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="">
+            <div class="benefit-icon">🛏️</div>
+            <h4>介護休業・介護休暇</h4>
+          </div>
+          <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="">
+            <div class="benefit-icon">⏰</div>
+            <h4>ノー残業デー</h4>
+          </div>
+          <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="benefit-icon">📘</div>
+            <h4>資格取得補助</h4>
+          </div>
+          <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="5" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="benefit-icon">🚑</div>
+            <h4>定期健康相談</h4>
+          </div>
+        </div>
+      </div>
+
+      <span class="floating-dot soft" style="right:8%; bottom:18%; width:140px;height:140px;border-radius:34px;background:linear-gradient(135deg,#d9eef7,#b7d2c4);box-shadow:none;animation:none;"></span>
+    </section>
+
+    <section class="interview-section" id="interview">
+      <div class="container">
+        <div class="interview-head reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>
+            <div class="eyebrow">利用者インタビュー</div>
+            <h2 class="heading-md fxa_pre fxa_s" style="cursor: move; --fxa-dur: 800ms; --fxa-scale: 0.86; opacity: 1 !important;">
+              るぽで過ごす皆さんの<br>
+              働き方をご紹介
+            </h2>
+          </div>
+          <a href="#contact" class="btn"><span>インタビュー一覧</span><span class="arrow">→</span></a>
+        </div>
+
+        <div class="interview-grid">
+          <article class="interview-card reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="interview-thumb fxa_pre fxa_xl" style="cursor: move; --fxa-dur: 897ms; --fxa-dist: 159px; opacity: 1 !important;">
+              <img src="http://127.0.0.1:5000/uploads/up_04b676c6fb.jpg" alt="スタッフたち" width="520" height="360" onerror="this.style.display='none'">
+            </div>
+            <div class="interview-body">
+              <span class="tag">ご利用者</span>
+              <h3 class="interview-title">
+                <span>キャリアや将来への不安をクロストークで共有できた時間</span>
+                <span class="mini-arrow">→</span>
+              </h3>
+              <div class="interview-meta">
+                20代 / 週4日通所<br>
+                パソコン入力・軽作業 / 利用歴1年2か月
+              </div>
+            </div>
+          </article>
+
+          <article class="interview-card reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="interview-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="面談風景" width="520" height="360" onerror="this.style.display='none'">
+            </div>
+            <div class="interview-body">
+              <span class="tag">ご利用者</span>
+              <h3 class="interview-title">
+                <span>安定した通所を通じて、新しい挑戦への自信がついた</span>
+                <span class="mini-arrow">→</span>
+              </h3>
+              <div class="interview-meta">
+                30代 / 週5日通所<br>
+                封入・検品・事務補助 / 利用歴2年3か月
+              </div>
+            </div>
+          </article>
+
+          <article class="interview-card reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="interview-thumb fxa_pre fxa_xr" style="cursor: move; --fxa-dur: 976ms; --fxa-dist: 149px; opacity: 1 !important;">
+              <img src="http://127.0.0.1:5000/uploads/up_685785ec90.jpg" alt="働く女性" width="520" height="360" onerror="this.style.display='none'">
+            </div>
+            <div class="interview-body">
+              <span class="tag">ご利用者</span>
+              <h3 class="interview-title">
+                <span>組織の継続のなかに「成長のために」がある場所</span>
+                <span class="mini-arrow">→</span>
+              </h3>
+              <div class="interview-meta">
+                20代 / 週3日通所<br>
+                ハンドメイド制作・梱包 / 利用歴8か月
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="footer-top" id="contact">
+      <div class="container">
+        <div class="footer-brand reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a href="#" class="logo" aria-label="るぽ ホーム">
+            <span class="logo-mark" aria-hidden="true"></span>
+            <span>
+              るぽ
+              <small>就労継続支援B型事業所 採用サイト</small>
+            </span>
+          </a>
+        </div>
+
+        <div class="footer-panels">
+          <div class="footer-panel pale reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div>
+              <h4>新卒採用</h4>
+            </div>
+          </div>
+          <div class="footer-panel red reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div>
+              <h4>キャリア採用</h4>
+            </div>
+            <span class="plus">○</span>
+          </div>
+          <div class="footer-panel red reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div>
+              <h4>アルムナイ・ネットワーク</h4>
+            </div>
+            <span class="plus">○</span>
+          </div>
+          <div class="footer-panel red reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div>
+              <h4>パートタイマー採用</h4>
+              <small>相談員・作業サポート募集</small>
+            </div>
+            <span class="plus">○</span>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <div class="footer-col reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h5>働き方・制度</h5>
+            <ul>
+              <li><span>働く環境</span><span>＋</span></li>
+              <li><span>気になる人物像</span><span>＋</span></li>
+              <li><span>人材育成・キャリアパス</span><span>＋</span></li>
+              <li><span>福利厚生・社内制度</span><span>＋</span></li>
+              <li><span>アルムナイ・ネットワーク</span><span>＋</span></li>
+            </ul>
+          </div>
+
+          <div class="footer-col reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h5>ご利用インタビュー</h5>
+            <ul>
+              <li><span>利用者インタビュー</span><span>＋</span></li>
+              <li><span>キャリア支援者の座談会</span><span>＋</span></li>
+              <li><span>安心して通える理由を詳しく</span><span>＋</span></li>
+              <li><span>現場での1日の流れ</span><span>＋</span></li>
+            </ul>
+          </div>
+
+          <div class="footer-col reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h5>るぽについて</h5>
+            <ul>
+              <li><span>会社概要</span><span>□</span></li>
+              <li><span>アクセス</span><span>□</span></li>
+              <li><span>支援方針</span><span>□</span></li>
+              <li><span>プライバシーポリシー</span><span>□</span></li>
+              <li><span>個別における個人情報の取り扱い</span><span>□</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <div>るぽについて ｜ 個人情報保護方針 ｜ サイトマップ</div>
+        <div>copyright © 2026 Reposu Support Service All Rights Reserved.</div>
+      </div>
+    </footer>
+  </main><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+  
+  
+  
+
+  
+
+  
+
+  <script>
+    (() => {
+      const targets = document.querySelectorAll('.reveal');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+      targets.forEach(el => io.observe(el));
+
+      const cards = document.querySelectorAll('.message-card, .interview-card, .benefit, .gallery-item, .bubble');
+      cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          if (window.innerWidth <= 768) return;
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width;
+          const y = (e.clientY - r.top) / r.height;
+          const rx = (0.5 - y) * 4;
+          const ry = (x - 0.5) * 4;
+          card.style.transform = `translateY(-4px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = '';
+        });
+      });
+    })();
+  </script>
 
-def _run_anim_job(site_id: str, url: str) -> None:
-    """バックグラウンドでアニメ素材を抜き出し、DBに保存する。"""
-    try:
-        snippets = anim.extract_animations(url)
-        with db.connect() as conn:
-            db.update_anim_snippets(conn, site_id, _json.dumps(snippets, ensure_ascii=False))
-    except Exception:  # noqa: BLE001
-        log.exception("アニメ抜き出しに失敗: %s", url)
-    finally:
-        with _ANIM_LOCK:
-            _ANIM_EXTRACTING["site_id"] = None
-
-
-@app.route("/api/extract_anim", methods=["POST"])
-def api_extract_anim():
-    """指定サイトのアニメ素材(@keyframes/transition/Lottie)を抜き出す（非同期）。"""
-    data = request.get_json(silent=True) or {}
-    site_id = (data.get("id") or "").strip()
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-    with _ANIM_LOCK:
-        if _ANIM_EXTRACTING.get("site_id") is not None:
-            return jsonify({"ok": False, "message": "別のアニメ抜き出しが進行中です"}), 409
-        _ANIM_EXTRACTING["site_id"] = site_id
-    log.info("アニメ抜き出しジョブ開始: %s", row["url"])
-    threading.Thread(target=_run_anim_job, args=(site_id, row["url"]), daemon=True).start()
-    return jsonify({"ok": True, "site_id": site_id})
-
-
-def _run_motion_job(site_id: str) -> None:
-    """バックグラウンドで録画からAIに動きを読み取らせ、motion_spec に保存する。"""
-    try:
-        motion.describe_motion(site_id)
-        with _MOTION_LOCK:
-            _MOTION_RUNNING["error"] = None
-    except Exception as exc:  # noqa: BLE001
-        log.exception("動きの読み取りに失敗: %s", site_id)
-        with _MOTION_LOCK:
-            _MOTION_RUNNING["error"] = str(exc)
-    finally:
-        with _MOTION_LOCK:
-            _MOTION_RUNNING["site_id"] = None
-
-
-@app.route("/api/read_motion", methods=["POST"])
-def api_read_motion():
-    """指定サイトの録画からAIが動きを読み取る（非同期）。録画が必要。"""
-    data = request.get_json(silent=True) or {}
-    site_id = (data.get("id") or "").strip()
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-    has_video = bool(row["animation_video_path"]) and (
-        config.PROJECT_ROOT / row["animation_video_path"]
-    ).exists()
-    if not has_video:
-        return jsonify({"ok": False, "message": "先に『🎬動き』で録画してください"}), 400
-    with _MOTION_LOCK:
-        if _MOTION_RUNNING.get("site_id") is not None:
-            return jsonify({"ok": False, "message": "別の読み取りが進行中です"}), 409
-        _MOTION_RUNNING["site_id"] = site_id
-        _MOTION_RUNNING["error"] = None
-    log.info("動きの読み取りジョブ開始: %s", row["url"])
-    threading.Thread(target=_run_motion_job, args=(site_id,), daemon=True).start()
-    return jsonify({"ok": True, "site_id": site_id})
-
-
-@app.route("/anim/<site_id>/<path:filename>")
-def anim_file(site_id: str, filename: str):
-    """抜き出したLottie JSONを返す。"""
-    path = config.ANIM_DIR / site_id / filename
-    if not path.exists() or not path.is_file():
-        abort(404)
-    return send_file(path, mimetype="application/json")
-
-
-def _run_extract_job(site_id: str, url: str) -> None:
-    """バックグラウンドで画像を抜き出す。"""
-    try:
-        assets.extract_images(url)
-    except Exception:  # noqa: BLE001
-        log.exception("画像抜き出しに失敗: %s", url)
-    finally:
-        with _EXT_LOCK:
-            _EXTRACTING["site_id"] = None
-
-
-@app.route("/api/extract_images", methods=["POST"])
-def api_extract_images():
-    """指定サイトの画像を抜き出す（非同期・実ページを開く）。"""
-    data = request.get_json(silent=True) or {}
-    site_id = (data.get("id") or "").strip()
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-    with _EXT_LOCK:
-        if _EXTRACTING.get("site_id") is not None:
-            return jsonify({"ok": False, "message": "別の抜き出しが進行中です"}), 409
-        _EXTRACTING["site_id"] = site_id
-    log.info("画像抜き出しジョブ開始: %s", row["url"])
-    threading.Thread(target=_run_extract_job, args=(site_id, row["url"]), daemon=True).start()
-    return jsonify({"ok": True, "site_id": site_id})
-
-
-def _run_clone_job(site_id: str, url: str, keep_js: bool, use_extracted: bool) -> None:
-    """バックグラウンドで忠実クローンを作る。"""
-    def prog(msg: str) -> None:
-        _CLONING["phase"] = msg
-
-    try:
-        result = clone.clone_site(url, keep_js=keep_js, use_extracted=use_extracted, progress=prog)
-        with _CLONE_LOCK:
-            _CLONING["file"] = result["file"]
-            _CLONING["phase"] = f"完了（素材 {result['assets']} 件）"
-    except Exception as exc:  # noqa: BLE001
-        log.exception("クローンジョブが落ちました: %s", url)
-        with _CLONE_LOCK:
-            _CLONING["error"] = str(exc)
-    finally:
-        with _CLONE_LOCK:
-            _CLONING["site_id"] = None
-
-
-@app.route("/api/clone_site", methods=["POST"])
-def api_clone_site():
-    """登録サイトを忠実クローンする（非同期・AI不使用・DOMごと吸い出し）。
-
-    use_extracted=true のときは「🖼画像を抜き出す」で保存済みの画像をそのまま使う
-    （未抜き出しなら400で先に抜き出すよう案内する）。
-    """
-    data = request.get_json(silent=True) or {}
-    site_id = (data.get("id") or "").strip()
-    keep_js = bool(data.get("keep_js"))
-    use_extracted = bool(data.get("use_extracted"))
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-    if use_extracted and not assets.list_assets(site_id):
-        return jsonify({"ok": False, "message": "先に『🖼画像を抜き出す』で画像を抜き出してください"}), 400
-    with _CLONE_LOCK:
-        if _CLONING.get("site_id") is not None:
-            return jsonify({"ok": False, "message": "別のクローンが進行中です"}), 409
-        _CLONING.update({"site_id": site_id, "phase": "開始しています…", "file": None, "error": None})
-    log.info("クローンジョブ開始: %s (keep_js=%s, use_extracted=%s)", row["url"], keep_js, use_extracted)
-    threading.Thread(target=_run_clone_job, args=(site_id, row["url"], keep_js, use_extracted), daemon=True).start()
-    return jsonify({"ok": True, "site_id": site_id})
-
-
-@app.route("/api/clone_site/status")
-def api_clone_site_status():
-    """クローンの進捗（phase）と完成ファイル名を返す。"""
-    with _CLONE_LOCK:
-        return jsonify(dict(_CLONING))
-
-
-def _run_improve_job(filename: str, limit: int, targets: list | None, hint: str, ref_id: str) -> None:
-    """バックグラウンドで全セクション一括改善を回す。"""
-    def prog(msg: str) -> None:
-        _IMPROVING["phase"] = msg
-
-    try:
-        result = camp.improve_all(filename, limit=limit, targets=targets, hint=hint,
-                                  ref_id=ref_id, progress=prog)
-        with _IMPROVE_LOCK:
-            _IMPROVING["result"] = result
-            _IMPROVING["phase"] = f"完了（{result['improved']}/{result['total']}セクション改善）"
-    except Exception as exc:  # noqa: BLE001
-        log.exception("一括改善ジョブが落ちました: %s", filename)
-        with _IMPROVE_LOCK:
-            _IMPROVING["error"] = str(exc)
-    finally:
-        with _IMPROVE_LOCK:
-            _IMPROVING["file"] = None
-
-
-@app.route("/api/improve_camp", methods=["POST"])
-def api_improve_camp():
-    """カンプ/クローンの全セクションを一括で今風に改善（非同期・営業のAfter版づくり）。"""
-    if not _edit_ready():
-        return jsonify({"ok": False, "message": "修正エンジンのAPIキーが未設定です（⚙設定を確認）"}), 400
-    data = request.get_json(silent=True) or {}
-    fn = (data.get("file") or "").strip()
-    try:
-        limit = int(data.get("limit", 0) or 0)  # 0=全部、N=最初のNセクションだけ
-    except Exception:  # noqa: BLE001
-        limit = 0
-    # sections=[1,4] のような0始まり番号リスト（指定があれば limit より優先）
-    targets = None
-    raw_secs = data.get("sections")
-    if isinstance(raw_secs, list):
-        targets = [int(x) for x in raw_secs if isinstance(x, (int, float)) and int(x) >= 0] or None
-    if not fn or not (config.CAMP_DIR / fn).exists():
-        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
-    with _IMPROVE_LOCK:
-        if _IMPROVING.get("file") is not None:
-            return jsonify({"ok": False, "message": "別の一括改善が進行中です"}), 409
-        _IMPROVING.update({"file": fn, "phase": "開始しています…", "result": None, "error": None})
-    hint = (data.get("hint") or "").strip()[:500]
-    ref_id = (data.get("ref_id") or "").strip()
-    log.info("一括改善ジョブ開始: %s (limit=%d, sections=%s, hint=%s, ref=%s)", fn, limit, targets, hint, ref_id)
-    threading.Thread(target=_run_improve_job, args=(fn, limit, targets, hint, ref_id), daemon=True).start()
-    return jsonify({"ok": True})
-
-
-@app.route("/api/improve_camp/status")
-def api_improve_camp_status():
-    """一括改善の進捗（phase）と結果を返す。"""
-    with _IMPROVE_LOCK:
-        return jsonify(dict(_IMPROVING))
-
-
-@app.route("/assets/<site_id>/<path:filename>")
-def asset_file(site_id: str, filename: str):
-    """抜き出した画像を返す。"""
-    path = config.ASSET_DIR / site_id / filename
-    if not path.exists() or not path.is_file():
-        abort(404)
-    return send_file(path)
-
-
-@app.route("/api/sites")
-def api_sites():
-    """登録済みの全サイト（初期表示用）。新しい撮影順で返す。"""
-    with db.connect() as conn:
-        rows = db.iter_sites_with_embedding(conn)
-    rows = sorted(rows, key=lambda r: r["captured_at"], reverse=True)
-    rec_id = _RECORDING.get("site_id")
-    desc_cur = _DESC_JOB.get("current")
-    hits = [
-        {
-            "rank": i + 1,
-            "score": None,
-            "url": r["url"],
-            "captured_at": r["captured_at"],
-            "site_id": r["id"],
-            "img": f"/img/{r['id']}/firstview",
-            "has_video": bool(r["animation_video_path"])
-            and (config.PROJECT_ROOT / r["animation_video_path"]).exists(),
-            "libs": [s.strip() for s in (r["animation_libs"] or "").split(",") if s.strip()],
-            "vibe": r["vibe_description"] or "",
-            "swatches": _swatches(r["design_tokens"]),
-            "recording": r["id"] == rec_id,
-            "describing": r["id"] == desc_cur,
-        }
-        for i, r in enumerate(rows)
-    ]
-    return jsonify({"hits": hits, "describe": dict(_DESC_JOB)})
-
-
-def _run_record_job(site_id: str, url: str) -> None:
-    """バックグラウンドでスクロール録画を撮る。"""
-    try:
-        ingest.capture_animation(url)
-    except Exception:  # noqa: BLE001
-        log.exception("録画ジョブが落ちました: %s", url)
-    finally:
-        with _REC_LOCK:
-            _RECORDING["site_id"] = None
-
-
-@app.route("/api/record_animation", methods=["POST"])
-def api_record_animation():
-    """指定サイトのスクロール録画を開始する（非同期・実ブラウザが一瞬開く）。"""
-    data = request.get_json(silent=True) or {}
-    site_id = (data.get("id") or "").strip()
-    if not site_id:
-        return jsonify({"ok": False, "message": "IDがありません"}), 400
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-
-    with _REC_LOCK:
-        if _RECORDING.get("site_id") is not None:
-            return jsonify({"ok": False, "message": "別の録画が進行中です"}), 409
-        _RECORDING["site_id"] = site_id
-
-    log.info("録画ジョブ開始: %s", row["url"])
-    threading.Thread(
-        target=_run_record_job, args=(site_id, row["url"]), daemon=True
-    ).start()
-    return jsonify({"ok": True, "site_id": site_id})
-
-
-def _run_describe_batch(site_ids: list[str]) -> None:
-    """バックグラウンドで複数サイトを順に言語化（常駐モデルを使い回す）。"""
-    with _DESC_LOCK:
-        _DESC_JOB.update(running=True, done=0, total=len(site_ids), current="")
-    try:
-        for sid in site_ids:
-            with _DESC_LOCK:
-                _DESC_JOB["current"] = sid
-            try:
-                vibe.describe_one(sid, embedder=_EMBEDDER)
-            except Exception:  # noqa: BLE001
-                log.exception("言語化に失敗（続行）: %s", sid)
-            with _DESC_LOCK:
-                _DESC_JOB["done"] += 1
-    finally:
-        with _DESC_LOCK:
-            _DESC_JOB.update(running=False, current="")
-
-
-def _start_describe(site_ids: list[str]):
-    """言語化バッチを開始する。進行中なら None を返す。"""
-    with _DESC_LOCK:
-        if _DESC_JOB["running"]:
-            return None
-        _DESC_JOB.update(running=True, done=0, total=len(site_ids), current="")
-    threading.Thread(target=_run_describe_batch, args=(site_ids,), daemon=True).start()
-    return len(site_ids)
-
-
-@app.route("/api/describe", methods=["POST"])
-def api_describe():
-    """指定サイト1件の雰囲気を言語化する（Gemini優先、無ければClaude・非同期）。"""
-    if not (config.CONFIG.gemini.enabled or config.CONFIG.vibe.enabled):
-        return jsonify({"ok": False, "message": "Gemini または Anthropic のキーが未設定です（.env を確認）"}), 400
-    data = request.get_json(silent=True) or {}
-    site_id = (data.get("id") or "").strip()
-    if not site_id:
-        return jsonify({"ok": False, "message": "IDがありません"}), 400
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-    if _start_describe([site_id]) is None:
-        return jsonify({"ok": False, "message": "別の言語化が進行中です"}), 409
-    log.info("言語化開始(単体): %s", row["url"])
-    return jsonify({"ok": True, "site_id": site_id})
-
-
-@app.route("/api/describe_all", methods=["POST"])
-def api_describe_all():
-    """未処理サイトをまとめて裏で言語化する（Gemini優先・その間も検索などは使える）。"""
-    if not (config.CONFIG.gemini.enabled or config.CONFIG.vibe.enabled):
-        return jsonify({"ok": False, "message": "Gemini または Anthropic のキーが未設定です（.env を確認）"}), 400
-    with db.connect() as conn:
-        targets = [r["id"] for r in db.iter_sites_needing_vibe(conn)]
-    if not targets:
-        return jsonify({"ok": True, "total": 0, "message": "未処理のサイトはありません"})
-    if _start_describe(targets) is None:
-        return jsonify({"ok": False, "message": "別の言語化が進行中です"}), 409
-    log.info("言語化開始(一括): %d 件", len(targets))
-    return jsonify({"ok": True, "total": len(targets)})
-
-
-def _camp_set(job_id: str, **kw) -> None:
-    """指定ジョブの状態を更新する（フロントが表示する）。"""
-    with _CAMP_LOCK:
-        j = _CAMP_JOBS.setdefault(job_id, {})
-        j.update(kw)
-
-
-def _run_camp_job(job_id: str, brief: str, base_site_id: str, anim_ref_id: str = "") -> None:
-    """バックグラウンドでカンプを生成（参考選び＋Claude/GPT）。複数同時に走ってよい。
-
-    use_model=False：参考選びにSigLIPを使わない（モデルを読まない）。
-    base_site_id があれば、そのサイトのトークンが無いときは先に抽出してから生成する。
-    anim_ref_id があれば、そのサイトのアニメ素材が無いときは先に抽出してから生成する
-    （mix & match：Aの見た目にBの動き）。
-    各段階を そのジョブの 'phase' に書くので、フロントで進捗が見える。
-    """
-    try:
-        _camp_set(job_id, phase="参考サイトを準備しています…")
-        if base_site_id:
-            from . import tokens as _tokens
-            with db.connect() as conn:
-                row = db.get_site(conn, base_site_id)
-            if row and not row["design_tokens"]:
-                _camp_set(job_id, phase="手本サイトのデザイントークンを抽出中…")
-                try:
-                    _tokens.extract_and_store(row["url"])
-                except Exception:
-                    log.exception("トークン抽出に失敗（続行）")
-        if anim_ref_id:
-            with db.connect() as conn:
-                brow = db.get_site(conn, anim_ref_id)
-            if brow and not brow["animation_snippets"]:
-                _camp_set(job_id, phase="アニメ参照サイトの動きを抽出中…")
-                try:
-                    snip = anim.extract_animations(brow["url"])
-                    with db.connect() as conn:
-                        db.update_anim_snippets(conn, anim_ref_id, _json.dumps(snip, ensure_ascii=False))
-                except Exception:
-                    log.exception("アニメ抽出に失敗（続行）")
-        prov = {"openai": "GPT", "gemini": "Gemini", "deepseek": "DeepSeek"}.get(
-            config.CONFIG.htmlgen.provider, "Claude")
-        _camp_set(job_id, phase=f"{prov}がHTMLを書いています…（一番長い段階・2分前後）")
-        result = camp.generate_camp(
-            brief, use_model=False,
-            base_site_id=base_site_id or None,
-            anim_ref_id=anim_ref_id or None,
-        )
-        _camp_set(job_id, state="done", **result)
-    except Exception as exc:  # noqa: BLE001
-        log.exception("カンプ生成に失敗")
-        _camp_set(job_id, state="error", message=str(exc))
-
-
-@app.route("/api/generate_camp", methods=["POST"])
-def api_generate_camp():
-    """ブリーフからカンプを生成する（非同期・複数同時OK）。進捗は /api/generate_camp/status。
-
-    base_id を渡すと配色・字組みを強く寄せる。anim_id で動きの種類を寄せる（mix & match）。
-    返り値の job_id で、そのジョブの進捗を追える。
-    """
-    if not _gen_ready():
-        return jsonify({"ok": False, "message": "生成エンジンのAPIキーが未設定です（⚙設定を確認）"}), 400
-    data = request.get_json(silent=True) or {}
-    brief = (data.get("brief") or "").strip()
-    base_site_id = (data.get("base_id") or "").strip()
-    anim_ref_id = (data.get("anim_id") or "").strip()
-    if not brief:
-        return jsonify({"ok": False, "message": "作りたいサイトの説明を入力してください"}), 400
-    with _CAMP_LOCK:
-        running = sum(1 for j in _CAMP_JOBS.values() if j.get("state") == "running")
-        if running >= _CAMP_MAX:
-            return jsonify(
-                {"ok": False, "message": f"同時生成は最大{_CAMP_MAX}件までです（少し待って）"}
-            ), 429
-        job_id = uuid.uuid4().hex
-        _CAMP_JOBS[job_id] = {"state": "running", "brief": brief, "phase": "開始しています…"}
-    log.info("カンプ生成ジョブ開始[%s]: %s (base=%s, anim=%s)", job_id[:6], brief, base_site_id, anim_ref_id)
-    threading.Thread(
-        target=_run_camp_job, args=(job_id, brief, base_site_id, anim_ref_id), daemon=True
-    ).start()
-    return jsonify({"ok": True, "job_id": job_id})
-
-
-@app.route("/api/generate_camp/status")
-def api_generate_camp_status():
-    """全カンプ生成ジョブの状態を返す（複数同時進行を1回で取得）。"""
-    with _CAMP_LOCK:
-        return jsonify({"jobs": {k: dict(v) for k, v in _CAMP_JOBS.items()}})
-
-
-@app.route("/api/camp_suggest", methods=["POST"])
-def api_camp_suggest():
-    """カンプを見てAIが改善案を複数出す（同期。ユーザーは選ぶだけ）。"""
-    if not _edit_ready():
-        return jsonify({"ok": False, "message": "修正エンジンのAPIキーが未設定です（⚙設定を確認）"}), 400
-    data = request.get_json(silent=True) or {}
-    fn = (data.get("file") or "").strip()
-    try:
-        section = int(data.get("section", -1))
-    except Exception:  # noqa: BLE001
-        section = -1
-    if not fn or not (config.CAMP_DIR / fn).exists():
-        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
-    try:
-        suggestions = camp.suggest_edits(fn, section=section)
-    except Exception as exc:  # noqa: BLE001
-        log.exception("改善案の生成に失敗")
-        return jsonify({"ok": False, "message": str(exc)}), 500
-    return jsonify({"ok": True, "suggestions": suggestions})
-
-
-@app.route("/api/swap_image", methods=["POST"])
-def api_swap_image():
-    """カンプ内の画像を、アップロード画像に手で差し替える（AI不使用・無料・一瞬）。"""
-    data = request.get_json(silent=True) or {}
-    fn = (data.get("file") or "").strip()
-    src = (data.get("src") or "").strip()
-    try:
-        index = int(data.get("index", -1))
-    except Exception:  # noqa: BLE001
-        index = -1
-    if not fn or not (config.CAMP_DIR / fn).exists():
-        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
-    try:
-        result = camp.swap_image(fn, index, src)
-    except Exception as exc:  # noqa: BLE001
-        return jsonify({"ok": False, "message": str(exc)}), 400
-    return jsonify({"ok": True, **result})
-
-
-def _run_edit_job(job_id: str, fn: str, section: int, instruction: str) -> None:
-    """バックグラウンドでカンプを部分編集する（生成ジョブ一覧に相乗り）。"""
-    try:
-        _ep = config.CONFIG.htmlgen.edit_provider
-        prov = {"openai": "GPT", "gemini": "Gemini", "deepseek": "DeepSeek"}.get(_ep, "Claude")
-        scope = "全体" if section is None or section < 0 else f"セクション{section + 1}"
-        _camp_set(job_id, phase=f"{prov}が{scope}を直しています…")
-        result = camp.edit_camp_section(fn, section, instruction)
-        _camp_set(job_id, state="done", **result)
-    except Exception as exc:  # noqa: BLE001
-        log.exception("部分編集に失敗")
-        _camp_set(job_id, state="error", message=str(exc))
-
-
-@app.route("/api/edit_camp", methods=["POST"])
-def api_edit_camp():
-    """既存カンプを、指示（または改善案）で直して新バージョンを作る（非同期・複数OK）。"""
-    if not _edit_ready():
-        return jsonify({"ok": False, "message": "修正エンジンのAPIキーが未設定です（⚙設定を確認）"}), 400
-    data = request.get_json(silent=True) or {}
-    fn = (data.get("file") or "").strip()
-    instruction = (data.get("instruction") or "").strip()
-    try:
-        section = int(data.get("section", -1))
-    except Exception:  # noqa: BLE001
-        section = -1
-    if not fn or not (config.CAMP_DIR / fn).exists():
-        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
-    if not instruction:
-        return jsonify({"ok": False, "message": "修正指示を入れてください"}), 400
-    with _CAMP_LOCK:
-        running = sum(1 for j in _CAMP_JOBS.values() if j.get("state") == "running")
-        if running >= _CAMP_MAX:
-            return jsonify({"ok": False, "message": f"同時処理は最大{_CAMP_MAX}件までです（少し待って）"}), 429
-        job_id = uuid.uuid4().hex
-        _CAMP_JOBS[job_id] = {"state": "running", "brief": f"部分編集: {instruction[:24]}", "phase": "開始しています…"}
-    log.info("部分編集ジョブ開始[%s]: %s section=%s / %s", job_id[:6], fn, section, instruction)
-    threading.Thread(
-        target=_run_edit_job, args=(job_id, fn, section, instruction), daemon=True
-    ).start()
-    return jsonify({"ok": True, "job_id": job_id})
-
-
-# ── ユーザー自前画像のアップロード（AIが説明を付けてカンプに使う）──────────────
-_UP_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-_CAP_LOCK = threading.Lock()
-_CAP_RUNNING = {"on": False}
-
-
-def _safe_upload_name(orig: str) -> str:
-    ext = Path(orig or "").suffix.lower()
-    if ext not in _UP_EXTS:
-        ext = ".jpg"
-    return "up_" + uuid.uuid4().hex[:10] + ext
-
-
-def _caption_worker() -> None:
-    """説明が未設定のアップロード画像に、AIで1行キャプションを付ける（裏で順次）。"""
-    try:
-        while True:
-            target = None
-            for u in camp.list_uploads():
-                if not u["caption"]:
-                    target = u
-                    break
-            if target is None:
-                return
-            cap = camp.caption_image(config.UPLOAD_DIR / target["file"]) or "(説明なし)"
-            meta = camp.load_uploads_meta()
-            meta[target["file"]] = cap
-            camp.save_uploads_meta(meta)
-    finally:
-        with _CAP_LOCK:
-            _CAP_RUNNING["on"] = False
-
-
-def _start_captioning() -> None:
-    with _CAP_LOCK:
-        if _CAP_RUNNING["on"]:
-            return
-        _CAP_RUNNING["on"] = True
-    threading.Thread(target=_caption_worker, daemon=True).start()
-
-
-@app.route("/uploads/<path:filename>")
-def uploaded_file(filename: str):
-    """アップロードした自前画像を返す。"""
-    path = config.UPLOAD_DIR / filename
-    if not path.exists() or not path.is_file():
-        abort(404)
-    return send_file(path)
-
-
-@app.route("/api/uploads")
-def api_uploads():
-    """アップロード画像の一覧（説明つき）。"""
-    return jsonify({"uploads": camp.list_uploads(), "captioning": _CAP_RUNNING["on"]})
-
-
-@app.route("/api/upload", methods=["POST"])
-def api_upload():
-    """画像を1〜複数アップロード → 保存 → 裏でAIが説明を付ける。"""
-    files = request.files.getlist("images")
-    if not files:
-        return jsonify({"ok": False, "message": "画像がありません"}), 400
-    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    saved = 0
-    for f in files:
-        if not f or not f.filename:
-            continue
-        if Path(f.filename).suffix.lower() not in _UP_EXTS:
-            continue
-        f.save(str(config.UPLOAD_DIR / _safe_upload_name(f.filename)))
-        saved += 1
-    _start_captioning()
-    log.info("画像アップロード: %d 枚", saved)
-    return jsonify({"ok": True, "saved": saved, "uploads": camp.list_uploads()})
-
-
-@app.route("/api/import_folder", methods=["POST"])
-def api_import_folder():
-    """PC上のフォルダを指定して、中の画像をごっそり取り込む（ローカルツール用）。"""
-    data = request.get_json(silent=True) or {}
-    folder = (data.get("path") or "").strip().strip('"')
-    src = Path(folder)
-    if not folder or not src.exists() or not src.is_dir():
-        return jsonify({"ok": False, "message": "フォルダが見つかりません"}), 404
-    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    import shutil
-    saved = 0
-    for p in sorted(src.iterdir()):
-        if p.is_file() and p.suffix.lower() in _UP_EXTS:
-            try:
-                shutil.copy2(p, config.UPLOAD_DIR / _safe_upload_name(p.name))
-                saved += 1
-            except Exception:  # noqa: BLE001
-                continue
-    _start_captioning()
-    log.info("フォルダ取り込み: %s → %d 枚", folder, saved)
-    return jsonify({"ok": True, "saved": saved, "uploads": camp.list_uploads()})
-
-
-@app.route("/api/upload_delete", methods=["POST"])
-def api_upload_delete():
-    """アップロード画像を1件削除する。"""
-    data = request.get_json(silent=True) or {}
-    fn = (data.get("file") or "").strip()
-    p = config.UPLOAD_DIR / fn
-    if not fn or p.parent != config.UPLOAD_DIR or not p.exists():
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-    try:
-        p.unlink()
-    except Exception as exc:  # noqa: BLE001
-        return jsonify({"ok": False, "message": str(exc)}), 500
-    meta = camp.load_uploads_meta()
-    meta.pop(fn, None)
-    camp.save_uploads_meta(meta)
-    return jsonify({"ok": True})
-
-
-@app.route("/api/camps")
-def api_camps():
-    """保存済みカンプの一覧（履歴）。名前付き（お気に入り）を先頭に、あとは新しい順。"""
-    names = camp.load_camp_names()
-    items = []
-    # 生成カンプ(camp_*)＋お気に入りスナップショット(fav_*)＋忠実クローン(clone_*)を拾う
-    globbed = (
-        list(config.CAMP_DIR.glob("camp_*.html"))
-        + list(config.CAMP_DIR.glob("fav_*.html"))
-        + list(config.CAMP_DIR.glob("clone_*.html"))
-    )
-    for p in sorted(globbed):
-        try:
-            head = p.read_text(encoding="utf-8", errors="ignore")[:2000]
-        except Exception:  # noqa: BLE001
-            head = ""
-        m = re.search(r"<title>(.*?)</title>", head, flags=re.IGNORECASE | re.DOTALL)
-        title = (re.sub(r"\s+", " ", m.group(1)).strip() if m else "")[:60]
-        st = p.stat()
-        info = names.get(p.name, {})
-        items.append({
-            "file": p.name, "title": title, "mtime": st.st_mtime, "size": st.st_size,
-            "name": info.get("name", ""), "fav": bool(info.get("fav")),
-        })
-    # お気に入り（名前付き）を上に、その中と外はそれぞれ新しい順
-    items.sort(key=lambda x: (0 if x["fav"] else 1, -x["mtime"]))
-    return jsonify({"camps": items})
-
-
-@app.route("/api/camp_name", methods=["POST"])
-def api_camp_name():
-    """カンプに名前を付けて保存する（お気に入り登録）。名前が空なら登録解除。"""
-    data = request.get_json(silent=True) or {}
-    fn = (data.get("file") or "").strip()
-    name = (data.get("name") or "").strip()
-    p = config.CAMP_DIR / fn
-    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
-        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
-    info = camp.set_camp_name(fn, name)
-    return jsonify({"ok": True, "name": info.get("name", ""), "fav": bool(info.get("fav"))})
-
-
-@app.route("/api/save_favorite", methods=["POST"])
-def api_save_favorite():
-    """現在の完成形DOM（見た目＋焼き込んだ動き）を『お気に入り』として複製保存する。
-    クライアントが編集UIを除いたHTML全体（cleanHtml）＋名前を送ってくる。"""
-    data = request.get_json(silent=True) or {}
-    html = data.get("html") or ""
-    name = (data.get("name") or "").strip()
-    try:
-        info = camp.save_favorite(html, name)
-    except ValueError as exc:
-        return jsonify({"ok": False, "message": str(exc)}), 400
-    except Exception as exc:  # noqa: BLE001
-        return jsonify({"ok": False, "message": str(exc)}), 500
-    return jsonify({"ok": True, "file": info["file"], "name": info["name"]})
-
-
-@app.route("/api/camp_delete", methods=["POST"])
-def api_camp_delete():
-    """保存済みカンプを1件削除する（履歴の掃除用）。"""
-    data = request.get_json(silent=True) or {}
-    fn = (data.get("file") or "").strip()
-    p = config.CAMP_DIR / fn
-    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-    try:
-        p.unlink()
-        # クローンの素材フォルダ（<名前>_files）も一緒に消す
-        files_dir = config.CAMP_DIR / f"{p.stem}_files"
-        if files_dir.is_dir():
-            import shutil
-            shutil.rmtree(files_dir, ignore_errors=True)
-    except Exception as exc:  # noqa: BLE001
-        return jsonify({"ok": False, "message": str(exc)}), 500
-    return jsonify({"ok": True})
-
-
-@app.route("/api/save_camp_html", methods=["POST"])
-def api_save_camp_html():
-    """ドラッグ/矢印での位置調整をHTMLに焼き込む（LLM不使用・その場保存）。
-
-    クライアントが編集UI（#__ce系）を除いたHTML全体を送ってくる。念のため
-    最低限の妥当性（htmlタグがある・空でない）を見てから上書き保存する。
-    """
-    data = request.get_json(silent=True) or {}
-    fn = (data.get("file") or "").strip()
-    html = data.get("html") or ""
-    p = config.CAMP_DIR / fn
-    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
-        return jsonify({"ok": False, "message": "ファイルが見つかりません"}), 404
-    if len(html) < 200 or "</html>" not in html.lower():
-        return jsonify({"ok": False, "message": "HTMLが空か壊れています（保存中止）"}), 400
-    try:
-        p.write_text(html, encoding="utf-8")
-    except Exception as exc:  # noqa: BLE001
-        return jsonify({"ok": False, "message": str(exc)}), 500
-    return jsonify({"ok": True, "file": fn})
-
-
-@app.route("/api/camp_sections")
-def api_camp_sections():
-    """カンプのセクション一覧（編集バーのドロップダウン用）。"""
-    fn = (request.args.get("file") or "").strip()
-    if not fn or not (config.CAMP_DIR / fn).exists():
-        return jsonify({"ok": False, "sections": []}), 404
-    html = (config.CAMP_DIR / fn).read_text(encoding="utf-8")
-    return jsonify({"ok": True, "sections": camp.list_camp_sections(html)})
-
-
-@app.route("/api/edit_element", methods=["POST"])
-def api_edit_element():
-    """右クリックした『その要素1つだけ』をAIで直す（他は触らない）。DOM側で差し替える。"""
-    data = request.get_json(silent=True) or {}
-    try:
-        new_html = camp.edit_element(
-            data.get("html", ""), data.get("css", ""), data.get("instruction", "")
-        )
-    except Exception as exc:  # noqa: BLE001
-        return jsonify({"ok": False, "message": str(exc)}), 400
-    return jsonify({"ok": True, "html": new_html})
-
-
-@app.route("/api/section_fav/save", methods=["POST"])
-def api_section_fav_save():
-    """セクション1つを『お気に入り部品』として保存する（AIなし）。"""
-    data = request.get_json(silent=True) or {}
-    try:
-        entry = camp.save_section_fav(
-            data.get("html", ""), data.get("headcss", ""), data.get("name", "")
-        )
-    except Exception as exc:  # noqa: BLE001
-        return jsonify({"ok": False, "message": str(exc)}), 400
-    return jsonify({"ok": True, "fav": entry})
-
-
-@app.route("/api/section_fav/list")
-def api_section_fav_list():
-    """保存済みセクション部品を、プレビュー用HTML/CSS付きで返す。"""
-    return jsonify({"ok": True, "favs": camp.list_section_favs()})
-
-
-@app.route("/api/section_fav/delete", methods=["POST"])
-def api_section_fav_delete():
-    data = request.get_json(silent=True) or {}
-    camp.delete_section_fav((data.get("id") or "").strip())
-    return jsonify({"ok": True})
-
-
-# カンプ画面の隅に出す編集バー（ツール経由で開いた時だけ注入。保存ファイルは汚さない）
-_EDIT_BAR = """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script id="fxa-run">(function(){var d=document,h=d.documentElement;if(!d.querySelector(".fxa_pre")){return;}h.classList.add("fxa-on");[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}if(!("IntersectionObserver" in window)){all().forEach(function(el){el.classList.add("fxa_in");});return;}var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){t.classList.add("fxa_in");});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",obs);else obs();})();</script>
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+<script>
+(function(){
+  var h=document.documentElement;
+  /* 焼き込みアニメ(fxa)の表示：スクロールで画面に入った時に1回だけ .fxa_in を付けて再生する。
+     ★時間トリガー(setTimeout)は使わない＝「スクロール位置で判断」に統一（動く時/動かない時のムラを無くす）。
+     上部の要素は監視開始時に即発火＝読み込みで再生。opacityもclip-pathも .fxa_in で表示に戻る。 */
+  function fxaStart(){
+    if(!document.querySelector('.fxa_pre')) return;
+    h.classList.add('fxa-on');
+    function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
+    if(!('IntersectionObserver' in window)){ all().forEach(function(el){ el.classList.add('fxa_in'); }); return; }
+    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('fxa_in'); io.unobserve(en.target); } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
+    all().forEach(function(el){ io.observe(el); });
+  }
+  /* 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）を判定。
+     ここに含まれる要素は「本来ずっと隠れているもの」なので、保険で強制表示しない
+     （＝クローンでMENUのメガメニューが開いた状態で残る不具合を防ぐ）。 */
+  function _inHiddenOverlay(e){
+    var n=e;
+    while(n && n!==document.body){
+      var s=getComputedStyle(n);
+      if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+      n=n.parentElement;
+    }
+    return false;
+  }
+  /* 従来の保険：透明/非表示のまま残った要素を強制表示（fxaは上の監視(IntersectionObserver)が担当するので触らない）。 */
+  function sweep(){
+    var all=document.querySelectorAll('body *');
+    for(var i=0;i<all.length;i++){
+      var e=all[i];
+      if(e.closest('#__ce')||e.closest('#__ce_cm')||e.closest('#__ce_pk')||e.closest('#__ce_toast')) continue;
+      /* fxaの焼き込みアニメ(要素・その中の文字span・ラッパー含む)は監視が担当するので、掃除は一切触らない。
+         ★特に .fxa_ch(1文字span)を強制表示すると、下部のタイプライター/一文字ずつが「出た状態で固定」され再生されない。 */
+      if(e.closest('.fxa_pre')||e.closest('.fxa_wrap')) continue;
+      if(e.classList&&(e.classList.contains('__cl_pre')||e.classList.contains('__cl_kid'))) continue; /* クローンのスクロール出現は自前の保険があるので触らない */
+      var cs=getComputedStyle(e);
+      var hidden=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+      if(hidden && _inHiddenOverlay(e)) continue; /* MENU等「開いたら出す」隠しメニューは無理に表示しない */
+      if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+      if(cs.visibility==='hidden'){ e.style.setProperty('visibility','visible','important'); }
+      var cp=cs.clipPath||cs.webkitClipPath||'';  /* clip-pathで切り取られて消えている(fxa以外)ものも復活 */
+      if(cp && cp!=='none' && /100%|inset\(1/.test(cp)){ e.style.setProperty('clip-path','none','important'); e.style.setProperty('-webkit-clip-path','none','important'); }
+    }
+  }
+  function run(){ fxaStart(); setTimeout(sweep, 2200); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
+</script>
+
 <style>
 #__ce{position:fixed;right:20px;top:20px;z-index:2147483000;width:480px;max-width:94vw;background:#fff;border:1px solid #e3e3e8;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.32);font-family:system-ui,-apple-system,sans-serif;color:#1d1d1f}
 #__ce *{box-sizing:border-box}
@@ -1531,7 +1750,7 @@ _EDIT_BAR = """
 </div>
 <script>
 (function(){
-  var FILE=%FILE_JSON%;
+  var FILE="camp_20260704_222914_improved.html";
   var box=document.getElementById('__ce');
   var sec=document.getElementById('__ce_sec'),inp=document.getElementById('__ce_in'),
       sg=document.getElementById('__ce_sg'),go=document.getElementById('__ce_go'),
@@ -1539,7 +1758,7 @@ _EDIT_BAR = """
   // 修正・おしゃれに使うAIエンジンを、その場で切り替え（設定画面に行かず即反映）
   var aiSel=document.getElementById('__ce_ai');
   if(aiSel){
-    aiSel.value=%EDIT_PROVIDER_JSON%;
+    aiSel.value="anthropic";
     aiSel.addEventListener('change',function(){
       var nm=aiSel.options[aiSel.selectedIndex].text;
       fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edit_provider:aiSel.value})})
@@ -1561,7 +1780,7 @@ _EDIT_BAR = """
   // <html>のインラインstyleに当てるので :root より優先され、var(--accent)を使う全要素が即変わる＆保存で残る。
   (function(){
     var baseInp=document.getElementById('__ce_base'), baseVar=null, baseOrig=null;
-    function _hexOf(c){ c=(c||'').trim(); if(c.charAt(0)==='#'){ return c.length===4?('#'+c[1]+c[1]+c[2]+c[2]+c[3]+c[3]):c.slice(0,7); } var m=c.match(/\\d+/g); if(!m||m.length<3) return '#000000'; return '#'+m.slice(0,3).map(function(x){return ('0'+(+x).toString(16)).slice(-2);}).join(''); }
+    function _hexOf(c){ c=(c||'').trim(); if(c.charAt(0)==='#'){ return c.length===4?('#'+c[1]+c[1]+c[2]+c[2]+c[3]+c[3]):c.slice(0,7); } var m=c.match(/\d+/g); if(!m||m.length<3) return '#000000'; return '#'+m.slice(0,3).map(function(x){return ('0'+(+x).toString(16)).slice(-2);}).join(''); }
     function _lighten(hex, amt){ var h=_hexOf(hex).slice(1); var r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); r=Math.round(r+(255-r)*amt); g=Math.round(g+(255-g)*amt); b=Math.round(b+(255-b)*amt); return '#'+[r,g,b].map(function(x){return ('0'+x.toString(16)).slice(-2);}).join(''); }
     var NAMES=['--accent','--brand','--primary','--main','--theme','--key','--color-primary','--color-accent','--accent-color','--primary-color'];
     var SOFT=['-soft','-light','-lighter','-bg','-pale'];
@@ -1574,7 +1793,7 @@ _EDIT_BAR = """
     function _r2hsl(r,g,b){ r/=255;g/=255;b/=255; var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2; if(mx===mn){h=s=0;} else { var d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); if(mx===r)h=(g-b)/d+(g<b?6:0); else if(mx===g)h=(b-r)/d+2; else h=(r-g)/d+4; h*=60; } return [h,s,l]; }
     function _hsl2r(h,s,l){ h=(((h%360)+360)%360)/360; var r,g,b; if(s===0){r=g=b=l;} else { function q(p,q2,t){ if(t<0)t+=1; if(t>1)t-=1; if(t<1/6)return p+(q2-p)*6*t; if(t<1/2)return q2; if(t<2/3)return p+(q2-p)*(2/3-t)*6; return p; } var qq=l<0.5?l*(1+s):l+s-l*s, pp=2*l-qq; r=q(pp,qq,h+1/3); g=q(pp,qq,h); b=q(pp,qq,h-1/3); } return [Math.round(r*255),Math.round(g*255),Math.round(b*255)]; }
     function _toHex(r,g,b){ return '#'+[r,g,b].map(function(x){return ('0'+Math.max(0,Math.min(255,x|0)).toString(16)).slice(-2);}).join(''); }
-    function _parse(tok){ tok=tok.trim(); if(tok.charAt(0)==='#'){ var rr=_h2r(tok); return {r:rr[0],g:rr[1],b:rr[2],a:null,fmt:'hex'}; } var m=tok.match(/rgba?\\(([^)]*)\\)/i); if(!m) return null; var p=m[1].split(',').map(function(x){return x.trim();}); if(p.length<3) return null; return {r:parseFloat(p[0]),g:parseFloat(p[1]),b:parseFloat(p[2]),a:(p.length>3?p[3]:null),fmt:(p.length>3?'rgba':'rgb')}; }
+    function _parse(tok){ tok=tok.trim(); if(tok.charAt(0)==='#'){ var rr=_h2r(tok); return {r:rr[0],g:rr[1],b:rr[2],a:null,fmt:'hex'}; } var m=tok.match(/rgba?\(([^)]*)\)/i); if(!m) return null; var p=m[1].split(',').map(function(x){return x.trim();}); if(p.length<3) return null; return {r:parseFloat(p[0]),g:parseFloat(p[1]),b:parseFloat(p[2]),a:(p.length>3?p[3]:null),fmt:(p.length>3?'rgba':'rgb')}; }
     function _fmtC(r,g,b,a,fmt){ if(fmt==='hex') return _toHex(r,g,b); if(fmt==='rgba') return 'rgba('+r+', '+g+', '+b+', '+a+')'; return 'rgb('+r+', '+g+', '+b+')'; }
     // 元のCSS/inlineを丸ごとキャッシュ（毎回ここから塗り直す＝リアルタイム＆連続変更OK）。編集UIは除く。
     var _sCache=[], _iCache=[];
@@ -1582,12 +1801,12 @@ _EDIT_BAR = """
     [].forEach.call(document.querySelectorAll('[style]'), function(el){ if(el.id && el.id.indexOf('__ce')===0) return; if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return; _iCache.push({el:el, orig:el.getAttribute('style')}); });
     // SVGの色は fill= / stop-color= などの「属性」で塗られている＝styleとは別。これも拾って塗り替える。
     var _aCache=[]; ['fill','stroke','stop-color','flood-color','lighting-color','color'].forEach(function(attr){
-      [].forEach.call(document.querySelectorAll('['+attr+']'), function(el){ if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return; var v=el.getAttribute(attr); if(v && /#[0-9a-fA-F]{3,8}|rgba?\\(/.test(v)) _aCache.push({el:el, attr:attr, orig:v}); });
+      [].forEach.call(document.querySelectorAll('['+attr+']'), function(el){ if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return; var v=el.getAttribute(attr); if(v && /#[0-9a-fA-F]{3,8}|rgba?\(/.test(v)) _aCache.push({el:el, attr:attr, orig:v}); });
     });
     // 元テキストから色トークンを頻度付きで集める（無彩色=グレー/黒/白は除外＝文字色を守る）
     var _allTok=(function(){
-      var text=_sCache.map(function(s){return s.orig;}).join('\\n')+'\\n'+_iCache.map(function(s){return s.orig;}).join('\\n')+'\\n'+_aCache.map(function(s){return s.orig;}).join('\\n');
-      var freq={}; (text.match(/#[0-9a-fA-F]{3,8}|rgba?\\([^)]*\\)/gi)||[]).forEach(function(t){ freq[t]=(freq[t]||0)+1; });
+      var text=_sCache.map(function(s){return s.orig;}).join('\n')+'\n'+_iCache.map(function(s){return s.orig;}).join('\n')+'\n'+_aCache.map(function(s){return s.orig;}).join('\n');
+      var freq={}; (text.match(/#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)/gi)||[]).forEach(function(t){ freq[t]=(freq[t]||0)+1; });
       var out=[]; Object.keys(freq).forEach(function(tok){ var c=_parse(tok); if(!c) return; var hsl=_r2hsl(c.r,c.g,c.b); if(hsl[1]<0.12||hsl[2]<0.06||hsl[2]>0.96) return; out.push({tok:tok,c:c,hsl:hsl,n:freq[tok]}); });
       return out;
     })();
@@ -1637,7 +1856,7 @@ _EDIT_BAR = """
       (d.hits||[]).forEach(function(h){
         var o=document.createElement('option');
         o.value=h.site_id;
-        var u=h.url.replace(/^https?:\\/\\//,'').replace(/\\/$/,'');
+        var u=h.url.replace(/^https?:\/\//,'').replace(/\/$/,'');
         o.textContent=u.length>42?u.slice(0,42)+'…':u;
         refSel.appendChild(o);
       });
@@ -1647,7 +1866,7 @@ _EDIT_BAR = """
   var impBtn=document.getElementById('__ce_improve');
   if(impBtn){
     impBtn.addEventListener('click',function(){
-      var v=prompt('どのセクションを改善しますか？\\n空欄 or 0 = 全部（目安20〜50円・数分）\\n数字1つ（例 3）= 最初の3セクションだけ\\nカンマ区切り（例 2,5）= その番号のセクションだけ。1つだけなら「5,」\\n※Claude/GPT選択時はスクショ付きで渡します（見た目判断が正確）','');
+      var v=prompt('どのセクションを改善しますか？\n空欄 or 0 = 全部（目安20〜50円・数分）\n数字1つ（例 3）= 最初の3セクションだけ\nカンマ区切り（例 2,5）= その番号のセクションだけ。1つだけなら「5,」\n※Claude/GPT選択時はスクショ付きで渡します（見た目判断が正確）','');
       if(v===null) return;  // キャンセル
       v=(v||'').trim();
       var lim=0, targets=null;
@@ -1656,7 +1875,7 @@ _EDIT_BAR = """
                  .filter(function(n){return n>=1;}).map(function(n){return n-1;});
         if(!targets.length){ msg.textContent='セクション番号が読めませんでした'; return; }
       } else { lim=parseInt(v,10)||0; }
-      var hint=prompt('デザインの方向性があれば一言で（空欄OK）\\n例：高級ホテルのように上品に／ポップで元気に／黒基調でスタイリッシュに／アニメ多めで動きのあるページに','');
+      var hint=prompt('デザインの方向性があれば一言で（空欄OK）\n例：高級ホテルのように上品に／ポップで元気に／黒基調でスタイリッシュに／アニメ多めで動きのあるページに','');
       if(hint===null) return;  // キャンセル
       impBtn.disabled=true; impBtn.textContent='🚀 今の状態を保存中…';
       flushThen(function(){ impBtn.textContent='🚀 一括改善中…';
@@ -1716,11 +1935,11 @@ _EDIT_BAR = """
   }
   // 親カンプのhead内<style>を集める（プレビューで見た目を近づける用）
   function headCss(){
-    return [].slice.call(document.head.querySelectorAll('style')).map(function(s){return s.textContent||'';}).join('\\n');
+    return [].slice.call(document.head.querySelectorAll('style')).map(function(s){return s.textContent||'';}).join('\n');
   }
   // head内のCSSから使われている色/フォント等の変数名(--xxx)を集め、実際の値を返す
   function collectRootVars(){
-    var names={}, re=/(--[\\w-]+)\\s*:/g, m;
+    var names={}, re=/(--[\w-]+)\s*:/g, m;
     [].slice.call(document.head.querySelectorAll('style')).forEach(function(s){
       var t=s.textContent||''; while((m=re.exec(t))){ names[m[1]]=1; }
     });
@@ -1803,8 +2022,8 @@ _EDIT_BAR = """
   if(favBtn) favBtn.addEventListener('click',function(){
     var el=curSecEl();
     if(!el){ msg.textContent='まず①「どこを直す？」で保存したいセクションを選んでください（ページ全体は不可）'; return; }
-    var label=((sec.options[sec.selectedIndex]||{}).text||'セクション').replace(/^[0-9]+\\.\\s*/,'');
-    var name=window.prompt('このセクションを「部品」として保存します。別のカンプの同じ枠にAIなしで入れ替えできます。\\n名前をどうぞ：', label);
+    var label=((sec.options[sec.selectedIndex]||{}).text||'セクション').replace(/^[0-9]+\.\s*/,'');
+    var name=window.prompt('このセクションを「部品」として保存します。別のカンプの同じ枠にAIなしで入れ替えできます。\n名前をどうぞ：', label);
     if(name===null) return;
     favBtn.disabled=true; var old=favBtn.textContent; favBtn.textContent='保存中…';
     fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el).outerHTML,headcss:headCss(),name:name})})
@@ -1928,7 +2147,7 @@ _EDIT_BAR = """
     if(!instruction){msg.textContent='指示が空です';return;}
     // ページ全体(-1)は"全文を書き直す"＝高い(数十円)・遅い。特定箇所なら安い(数円)。
     if(Number(section)<0){
-      if(!confirm('⚠ これは「ページ全体を書き直す」修正です。\\n時間がかかり、料金も高め（数十円〜）になります。\\n\\n特定の場所だけ直すなら【キャンセル】して、\\n・①で直すセクションを選ぶ か\\n・直したい所を右クリック\\nすると安く（数円）速く直せます。\\n\\nこのままページ全体を直しますか？')) { msg.textContent='キャンセルしました（①でセクションを選ぶと安いです）'; return; }
+      if(!confirm('⚠ これは「ページ全体を書き直す」修正です。\n時間がかかり、料金も高め（数十円〜）になります。\n\n特定の場所だけ直すなら【キャンセル】して、\n・①で直すセクションを選ぶ か\n・直したい所を右クリック\nすると安く（数円）速く直せます。\n\nこのままページ全体を直しますか？')) { msg.textContent='キャンセルしました（①でセクションを選ぶと安いです）'; return; }
     }
     busy(true); msg.textContent='今の状態を保存中…'; showToast('AIが直しています…（十数秒〜）'); markSectionBusy(section);
     // ★AIに渡す前に、今の見た目（移動・手修正・焼き込みアニメ）をディスクへ保存する。
@@ -2068,7 +2287,7 @@ _EDIT_BAR = """
   // 要素を丸ごと消す（AIなし・即反映）。ドラッグ中なら解除してから消す。保存するまでは確定しない。
   function removeEl(el){
     if(!el||el===document.body){ msg.textContent='これは消せません'; return; }
-    if(!confirm('この要素を消しますか？\\n\\n「'+descEl(el)+'」\\n※保存すると元に戻せません（保存前ならページ再読込でキャンセルできます）')) return;
+    if(!confirm('この要素を消しますか？\n\n「'+descEl(el)+'」\n※保存すると元に戻せません（保存前ならページ再読込でキャンセルできます）')) return;
     if(dragEl===el){ dragEl.removeEventListener('mousedown',_dDown,true); dragEl=null; }
     closeMenu();
     el.remove();
@@ -2087,7 +2306,7 @@ _EDIT_BAR = """
   }
   // rgb(...)/rgba(...) を #rrggbb に変換（カラーピッカーの初期値用）
   function _rgbToHex(c){
-    var m=(c||'').match(/\\d+/g); if(!m||m.length<3) return '#000000';
+    var m=(c||'').match(/\d+/g); if(!m||m.length<3) return '#000000';
     return '#'+m.slice(0,3).map(function(x){return ('0'+(+x).toString(16)).slice(-2);}).join('');
   }
   // 文字の大きさを倍率で変える（factor=0でリセット）。歪まないよう font-size を直接いじる。
@@ -2109,7 +2328,7 @@ _EDIT_BAR = """
   // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
-    var cur=(el.innerText||el.textContent||'').replace(/\\u200b/g,'');
+    var cur=(el.innerText||el.textContent||'').replace(/\u200b/g,'');
     var FONTS=[
       ['','（フォントはそのまま）'],
       ["'Yu Gothic','Hiragino Kaku Gothic ProN',Meiryo,sans-serif",'ゴシック（標準）'],
@@ -2142,7 +2361,7 @@ _EDIT_BAR = """
       if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
       if(e.target.id==='__ce_brapply'){
         stopAnim(el);
-        el.innerHTML=esc(ta.value).replace(/\\n/g,'<br>');
+        el.innerHTML=esc(ta.value).replace(/\n/g,'<br>');
         markDirty();
         msg.textContent='改行を反映しました。「💾 保存」で確定できます';
         return;
@@ -2322,13 +2541,13 @@ _EDIT_BAR = """
     var spans=[], texts=[], w=document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), t;
     while(t=w.nextNode()){
       if(t.parentNode&&t.parentNode.classList&&t.parentNode.classList.contains('fxa_ch')) continue;  // 既に包まれた文字は二重に包まない
-      if(t.nodeValue && t.nodeValue.replace(/\\s/g,'').length) texts.push(t);
+      if(t.nodeValue && t.nodeValue.replace(/\s/g,'').length) texts.push(t);
     }
     texts.forEach(function(tn){
       var frag=document.createDocumentFragment(), s=tn.nodeValue;
       for(var i=0;i<s.length;i++){
         var ch=s[i];
-        if(/\\s/.test(ch)){ frag.appendChild(document.createTextNode(ch)); continue; }
+        if(/\s/.test(ch)){ frag.appendChild(document.createTextNode(ch)); continue; }
         var sp=document.createElement('span'); sp.className='fxa_ch'; sp.textContent=ch; sp.style.display='inline-block';
         spans.push(sp); frag.appendChild(sp);
       }
@@ -2648,7 +2867,7 @@ _EDIT_BAR = """
     if(_op){ _op.removeAttribute('data-paused'); _op.style.removeProperty('display'); _op.style.removeProperty('opacity'); _op.style.removeProperty('transition'); }
     [].slice.call(doc.querySelectorAll('script')).forEach(function(s){ if(/__ce/.test(s.textContent)) s.remove(); });
     [].slice.call(doc.querySelectorAll('style')).forEach(function(s){ if(/#__ce/.test(s.textContent)) s.remove(); });
-    return '<!doctype html>\\n'+doc.outerHTML;
+    return '<!doctype html>\n'+doc.outerHTML;
   }
   function saveLayout(){
     var b=document.getElementById('__ce_save'); if(b) b.textContent='保存中…';
@@ -2660,8 +2879,8 @@ _EDIT_BAR = """
   }
   function descEl(el){
     var tag=el.tagName.toLowerCase();
-    var cls=(typeof el.className==='string'&&el.className.trim())?'.'+el.className.trim().split(/\\s+/).slice(0,2).join('.'):'';
-    var txt=(el.textContent||'').trim().replace(/\\s+/g,' ').slice(0,36);
+    var cls=(typeof el.className==='string'&&el.className.trim())?'.'+el.className.trim().split(/\s+/).slice(0,2).join('.'):'';
+    var txt=(el.textContent||'').trim().replace(/\s+/g,' ').slice(0,36);
     var ex='';
     if(tag==='img'){ ex=' 画像['+((el.getAttribute('alt')||'')||((el.getAttribute('src')||'').split('/').pop()))+']'; }
     return tag+cls+(txt?('「'+txt+'」'):'')+ex;
@@ -2690,7 +2909,7 @@ _EDIT_BAR = """
     if(el.querySelector && el.querySelector('img,video,svg,picture,input,button,canvas,select,textarea')) return false;
     var s; try{ s=getComputedStyle(el); }catch(_){ return false; }
     if(s.backgroundImage && s.backgroundImage!=='none') return false;  // 背景画像を持つ＝本物
-    var m=(s.backgroundColor||'').match(/rgba?\\(([^)]+)\\)/);          // 不透明な色帯はデザイン部品なので残す
+    var m=(s.backgroundColor||'').match(/rgba?\(([^)]+)\)/);          // 不透明な色帯はデザイン部品なので残す
     if(m){ var p=m[1].split(',').map(function(x){return parseFloat(x);}); var a=p.length>3?p[3]:1; if(a>=0.95) return false; }
     return true;
   }
@@ -2722,7 +2941,7 @@ _EDIT_BAR = """
     function _has(n){ return cands.some(function(c){return c.el===n;}); }
     function _addBg(n){
       var bg=''; try{ bg=getComputedStyle(n).backgroundImage; }catch(_){}
-      var mm=bg&&bg.match(/url\\(["']?(.*?)["']?\\)/);
+      var mm=bg&&bg.match(/url\(["']?(.*?)["']?\)/);
       if(mm && mm[1] && mm[1].indexOf('data:')!==0 && !_has(n)){ cands.push({el:n,type:'bg',url:mm[1]}); }
     }
     document.elementsFromPoint(e.clientX, e.clientY).forEach(function(n){
@@ -2886,172 +3105,4 @@ _EDIT_BAR = """
   _lastSnap=snapContent(); updUndoBtn();
 })();
 </script>
-"""
-
-
-# 配信時の保険：クラス名に関係なく、透明・非表示のまま残った要素を必ず表示する。
-# これで「古い壊れたカンプ（出現アニメで真っ黒に消えたもの）」も、見た瞬間に直る。
-_SERVE_SAFETY = """
-<script>
-(function(){
-  var h=document.documentElement;
-  /* 焼き込みアニメ(fxa)の表示：スクロールで画面に入った時に1回だけ .fxa_in を付けて再生する。
-     ★時間トリガー(setTimeout)は使わない＝「スクロール位置で判断」に統一（動く時/動かない時のムラを無くす）。
-     上部の要素は監視開始時に即発火＝読み込みで再生。opacityもclip-pathも .fxa_in で表示に戻る。 */
-  function fxaStart(){
-    if(!document.querySelector('.fxa_pre')) return;
-    h.classList.add('fxa-on');
-    function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
-    if(!('IntersectionObserver' in window)){ all().forEach(function(el){ el.classList.add('fxa_in'); }); return; }
-    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('fxa_in'); io.unobserve(en.target); } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
-    all().forEach(function(el){ io.observe(el); });
-  }
-  /* 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）を判定。
-     ここに含まれる要素は「本来ずっと隠れているもの」なので、保険で強制表示しない
-     （＝クローンでMENUのメガメニューが開いた状態で残る不具合を防ぐ）。 */
-  function _inHiddenOverlay(e){
-    var n=e;
-    while(n && n!==document.body){
-      var s=getComputedStyle(n);
-      if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
-      n=n.parentElement;
-    }
-    return false;
-  }
-  /* 従来の保険：透明/非表示のまま残った要素を強制表示（fxaは上の監視(IntersectionObserver)が担当するので触らない）。 */
-  function sweep(){
-    var all=document.querySelectorAll('body *');
-    for(var i=0;i<all.length;i++){
-      var e=all[i];
-      if(e.closest('#__ce')||e.closest('#__ce_cm')||e.closest('#__ce_pk')||e.closest('#__ce_toast')) continue;
-      /* fxaの焼き込みアニメ(要素・その中の文字span・ラッパー含む)は監視が担当するので、掃除は一切触らない。
-         ★特に .fxa_ch(1文字span)を強制表示すると、下部のタイプライター/一文字ずつが「出た状態で固定」され再生されない。 */
-      if(e.closest('.fxa_pre')||e.closest('.fxa_wrap')) continue;
-      if(e.classList&&(e.classList.contains('__cl_pre')||e.classList.contains('__cl_kid'))) continue; /* クローンのスクロール出現は自前の保険があるので触らない */
-      var cs=getComputedStyle(e);
-      var hidden=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
-      if(hidden && _inHiddenOverlay(e)) continue; /* MENU等「開いたら出す」隠しメニューは無理に表示しない */
-      if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
-      if(cs.visibility==='hidden'){ e.style.setProperty('visibility','visible','important'); }
-      var cp=cs.clipPath||cs.webkitClipPath||'';  /* clip-pathで切り取られて消えている(fxa以外)ものも復活 */
-      if(cp && cp!=='none' && /100%|inset\\(1/.test(cp)){ e.style.setProperty('clip-path','none','important'); e.style.setProperty('-webkit-clip-path','none','important'); }
-    }
-  }
-  function run(){ fxaStart(); setTimeout(sweep, 2200); }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run); else run();
-})();
-</script>
-"""
-
-
-_LETTER_SPLIT_RE = re.compile(r"(\w+)\.innerHTML\.split\(")
-# `var title = X.querySelector(...); if(title){` … の入口を捕まえる（分割の始まり）
-_LETTER_GUARD_RE = re.compile(
-    r"(var\s+(\w+)\s*=\s*\w+\.querySelector\([^;]*\);\s*)if\s*\(\s*\2\s*\)\s*\{"
-)
-
-
-def _guard_letter_splitters(html: str) -> str:
-    """一括改善(GPT)が作る『見出しを1文字ずつspanに分割するJS』の事故を無害化する。
-
-    その手のJSは `X.innerHTML.split(...)` で自分の出力を読み直して作り直すため、再読込のたびに
-    (1) `&nbsp;`(実体参照)を「&nbsp;」という文字列として再分割して文字化けし、
-    (2) その要素に後から付けた別アニメ(私のfxa_ch等)を毎回作り直しで消してしまう。
-
-    対策は2段構え（どちらも既存ファイルを配信時に自己修復する）：
-    ① 分割の入口 `if(title){` を「まだ分割していない時だけ」に変える。
-       ＝ 既に .imp-char や .fxa_ch があるなら作り直さない → 文字化けも、私のアニメ消しも起きない。
-       見出し本体の色/遅延/is-visible演出は既にHTMLに焼けているので、作り直さなくても動く。
-    ② 万一①をすり抜けて作り直しが走っても、既に分割済みなら innerHTML でなく textContent から読む
-       （textContentは実体参照デコード済み＝空白U+00A0なので文字化けしない）。
-    分割していない普通のスクリプトは .imp-char を持たないので挙動は変わらない（安全）。
-    """
-    html = _LETTER_GUARD_RE.sub(
-        lambda m: f"{m.group(1)}if({m.group(2)} && !{m.group(2)}.querySelector('.imp-char,.fxa_ch'))" + "{",
-        html,
-    )
-    html = _LETTER_SPLIT_RE.sub(
-        lambda m: f"({m.group(1)}.querySelector('.imp-char')?{m.group(1)}.textContent:{m.group(1)}.innerHTML).split(",
-        html,
-    )
-    return html
-
-
-_FXA_RUN_RE = re.compile(r'<script id="fxa-run">.*?</script>', re.DOTALL)
-_SAFE_BLOCK_RE = re.compile(re.escape(camp._SAFE_START) + r".*?" + re.escape(camp._SAFE_END), re.DOTALL)
-
-
-def _inject_edit_bar(html: str, filename: str) -> str:
-    """カンプHTMLの末尾に編集バーを差し込む（</body>直前）。あわせて保険を注入。"""
-    html = _guard_letter_splitters(html)  # 文字化けする文字分割JSを無害化（既存ファイルも自己修復）
-    # 焼き込み済みの古い再生スクリプト(fxa-run)を除去。古い版は時間トリガー/scrollリスナーで「動くムラ」を出すため、
-    # 配信時に消して、編集バー側が最新版(スクロールで1回だけ再生)を注入し直す＝既存ファイルも安定する。
-    html = _FXA_RUN_RE.sub("", html)
-    # 焼き込み済みの「全部見える保険」(_REVIEW_FALLBACK)を最新版に差し替える。
-    # 古い版は2.5秒後にfxaの文字span(fxa_ch)まで強制表示し、タイプライター等が"出た状態で固定"される不具合があった。
-    # 最新版はfxa要素を除外する→既存ファイルもこの差し替えで直る。
-    html = _SAFE_BLOCK_RE.sub(lambda m: camp._REVIEW_FALLBACK, html)
-    bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename)).replace(
-        "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider))
-    low = html.lower()
-    if "</body>" in low:
-        i = low.rfind("</body>")
-        return html[:i] + bar + html[i:]
-    return html + bar
-
-
-@app.route("/camp/<path:filename>")
-def camp_file(filename: str):
-    """生成したカンプHTMLを返す（編集バー付き＝見ながらその場で直せる）。"""
-    path = config.CAMP_DIR / filename
-    if not path.exists() or not path.is_file():
-        abort(404)
-    if path.suffix != ".html":
-        # クローンの素材（<名前>_files/画像・フォント等）はそのまま返す
-        return send_file(path)
-    html = _inject_edit_bar(path.read_text(encoding="utf-8"), filename)
-    return Response(html, mimetype="text/html")
-
-
-@app.route("/img/<site_id>/<which>")
-def img(site_id: str, which: str):
-    """スクショ画像を返す。which は firstview / fullpage。"""
-    column = "firstview_path" if which != "fullpage" else "fullpage_path"
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row or not row[column]:
-        abort(404)
-    path = config.PROJECT_ROOT / row[column]
-    if not path.exists():
-        abort(404)
-    return send_file(path)
-
-
-@app.route("/video/<site_id>")
-def video(site_id: str):
-    """スクロール録画(webm)を返す。"""
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row or not row["animation_video_path"]:
-        abort(404)
-    path = config.PROJECT_ROOT / row["animation_video_path"]
-    if not path.exists():
-        abort(404)
-    return send_file(path, mimetype="video/webm")
-
-
-def serve(host: str = "127.0.0.1", port: int = 5000, preload: bool = True) -> None:
-    """ビューアを起動する。preload=True で起動時にモデルを読み込んでおく。"""
-    db.init_db()
-    if preload:
-        log.info("モデルを先読みします（起動後の初回検索を速くするため）…")
-        _EMBEDDER.load()
-    log.info("ビューア起動: http://%s:%d  （Ctrl+C で停止）", host, port)
-    # Flask開発サーバは POST + keep-alive で接続が切れて「Failed to fetch」になりやすい。
-    # 頑丈な waitress（本番品質のWSGIサーバ）で配信する。複数スレッドで並行処理もOK。
-    try:
-        from waitress import serve as waitress_serve
-        waitress_serve(app, host=host, port=port, threads=8, channel_timeout=300)
-    except ImportError:
-        log.warning("waitress が無いので開発サーバで起動します")
-        app.run(host=host, port=port, debug=False, use_reloader=False, threaded=True)
+</body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>
