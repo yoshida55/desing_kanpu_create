@@ -304,6 +304,8 @@ def api_settings_get():
             "gemini_set": config.CONFIG.gemini.enabled,
             "deepseek_model": config.CONFIG.deepseek.model,
             "deepseek_set": config.CONFIG.deepseek.enabled,
+            "zai_model": config.CONFIG.zai.model,
+            "zai_set": config.CONFIG.zai.enabled,
         }
     )
 
@@ -325,7 +327,24 @@ def _test_deepseek(deepseek_key: str = "") -> tuple[bool, str]:
         return False, "DeepSeek接続NG：" + str(exc)[:120]
 
 
-def _test_key(provider: str, openai_key: str = "", anthropic_key: str = "", deepseek_key: str = "") -> tuple[bool, str]:
+def _test_zai(zai_key: str = "") -> tuple[bool, str]:
+    """GLM（Z.ai・OpenAI互換）の接続を確かめる。"""
+    zcfg = config.CONFIG.zai
+    key = (zai_key or "").strip() or zcfg.api_key
+    if not key or "ここに" in key:
+        return False, "GLM(Z.ai)キーが未入力です"
+    try:
+        from openai import OpenAI
+        OpenAI(api_key=key, base_url=zcfg.base_url, timeout=30.0).chat.completions.create(
+            model=zcfg.model, max_tokens=5,
+            messages=[{"role": "user", "content": "ok"}],
+        )
+        return True, f"GLM（{zcfg.model}）接続OK"
+    except Exception as exc:  # noqa: BLE001
+        return False, "GLM接続NG：" + str(exc)[:120]
+
+
+def _test_key(provider: str, openai_key: str = "", anthropic_key: str = "", deepseek_key: str = "", zai_key: str = "") -> tuple[bool, str]:
     """キーが実際に使えるか、ごく短いAPI呼び出しで確かめる。
 
     入力欄のキー(openai_key/anthropic_key)が渡されれば、保存前でもそれをテストする。
@@ -351,6 +370,8 @@ def _test_key(provider: str, openai_key: str = "", anthropic_key: str = "", deep
             return g
         elif provider == "deepseek":
             return _test_deepseek(deepseek_key)
+        elif provider == "zai":
+            return _test_zai(zai_key)
         else:
             v = config.CONFIG.vibe
             key = (anthropic_key or "").strip() or v.api_key
@@ -391,14 +412,14 @@ def _test_gemini(gemini_key: str = "") -> Optional[tuple[bool, str]]:
         return False, "Gemini接続NG：" + str(exc)[:100]
 
 
-def _test_all(provider: str, openai_key: str = "", anthropic_key: str = "", gemini_key: str = "", deepseek_key: str = "") -> tuple[bool, str]:
-    """生成エンジン＋修正エンジン（DeepSeek等）＋説明づけ（Gemini）をまとめてテストしメッセージを組む。"""
-    ok, msg = _test_key(provider, openai_key, anthropic_key, deepseek_key)
+def _test_all(provider: str, openai_key: str = "", anthropic_key: str = "", gemini_key: str = "", deepseek_key: str = "", zai_key: str = "") -> tuple[bool, str]:
+    """生成エンジン＋修正エンジン（DeepSeek/GLM等）＋説明づけ（Gemini）をまとめてテストしメッセージを組む。"""
+    ok, msg = _test_key(provider, openai_key, anthropic_key, deepseek_key, zai_key)
     parts = [("✅ " if ok else "⚠ ") + "生成: " + msg]
     # 修正エンジンが生成と別なら、それも確認する（例：生成=GPT／修正=DeepSeek）
     edit_provider = config.CONFIG.htmlgen.edit_provider
     if edit_provider and edit_provider != provider:
-        eok, emsg = _test_key(edit_provider, openai_key, anthropic_key, deepseek_key)
+        eok, emsg = _test_key(edit_provider, openai_key, anthropic_key, deepseek_key, zai_key)
         parts.append(("✅ " if eok else "⚠ ") + "修正: " + emsg)
         ok = ok and eok
     g = _test_gemini(gemini_key)
@@ -416,6 +437,8 @@ def _provider_ready(provider: str) -> bool:
         return config.CONFIG.gemini.enabled
     if provider == "deepseek":
         return config.CONFIG.deepseek.enabled
+    if provider == "zai":
+        return config.CONFIG.zai.enabled
     return config.CONFIG.vibe.enabled
 
 
@@ -440,6 +463,7 @@ def api_test_key():
         data.get("anthropic_api_key", ""),
         data.get("gemini_api_key", ""),
         data.get("deepseek_api_key", ""),
+        data.get("zai_api_key", ""),
     )
     return jsonify({"ok": ok, "message": msg})
 
@@ -449,9 +473,9 @@ def api_settings_post():
     """設定画面からの保存。.env に書き込み、即反映する（キー本体は空なら据え置き）。"""
     data = request.get_json(silent=True) or {}
     updates = {}
-    if data.get("provider") in ("anthropic", "openai", "gemini", "deepseek"):
+    if data.get("provider") in ("anthropic", "openai", "gemini", "deepseek", "zai"):
         updates["DESIGN_STOCK_HTML_PROVIDER"] = data["provider"]
-    if data.get("edit_provider") in ("anthropic", "openai", "gemini", "deepseek"):
+    if data.get("edit_provider") in ("anthropic", "openai", "gemini", "deepseek", "zai"):
         updates["DESIGN_STOCK_EDIT_PROVIDER"] = data["edit_provider"]
     if (data.get("openai_model") or "").strip():
         updates["DESIGN_STOCK_OPENAI_MODEL"] = data["openai_model"].strip()
@@ -465,6 +489,10 @@ def api_settings_post():
         updates["DESIGN_STOCK_DEEPSEEK_MODEL"] = data["deepseek_model"].strip()
     if (data.get("deepseek_api_key") or "").strip():
         updates["DEEPSEEK_API_KEY"] = data["deepseek_api_key"].strip()
+    if (data.get("zai_model") or "").strip():
+        updates["DESIGN_STOCK_ZAI_MODEL"] = data["zai_model"].strip()
+    if (data.get("zai_api_key") or "").strip():
+        updates["ZAI_API_KEY"] = data["zai_api_key"].strip()
     if (data.get("openai_api_key") or "").strip():
         updates["OPENAI_API_KEY"] = data["openai_api_key"].strip()
     if (data.get("anthropic_api_key") or "").strip():
@@ -675,13 +703,13 @@ def api_extract_images():
     return jsonify({"ok": True, "site_id": site_id})
 
 
-def _run_clone_job(site_id: str, url: str, keep_js: bool) -> None:
+def _run_clone_job(site_id: str, url: str, keep_js: bool, use_extracted: bool) -> None:
     """バックグラウンドで忠実クローンを作る。"""
     def prog(msg: str) -> None:
         _CLONING["phase"] = msg
 
     try:
-        result = clone.clone_site(url, keep_js=keep_js, progress=prog)
+        result = clone.clone_site(url, keep_js=keep_js, use_extracted=use_extracted, progress=prog)
         with _CLONE_LOCK:
             _CLONING["file"] = result["file"]
             _CLONING["phase"] = f"完了（素材 {result['assets']} 件）"
@@ -696,20 +724,27 @@ def _run_clone_job(site_id: str, url: str, keep_js: bool) -> None:
 
 @app.route("/api/clone_site", methods=["POST"])
 def api_clone_site():
-    """登録サイトを忠実クローンする（非同期・AI不使用・DOMごと吸い出し）。"""
+    """登録サイトを忠実クローンする（非同期・AI不使用・DOMごと吸い出し）。
+
+    use_extracted=true のときは「🖼画像を抜き出す」で保存済みの画像をそのまま使う
+    （未抜き出しなら400で先に抜き出すよう案内する）。
+    """
     data = request.get_json(silent=True) or {}
     site_id = (data.get("id") or "").strip()
     keep_js = bool(data.get("keep_js"))
+    use_extracted = bool(data.get("use_extracted"))
     with db.connect() as conn:
         row = db.get_site(conn, site_id)
     if not row:
         return jsonify({"ok": False, "message": "見つかりません"}), 404
+    if use_extracted and not assets.list_assets(site_id):
+        return jsonify({"ok": False, "message": "先に『🖼画像を抜き出す』で画像を抜き出してください"}), 400
     with _CLONE_LOCK:
         if _CLONING.get("site_id") is not None:
             return jsonify({"ok": False, "message": "別のクローンが進行中です"}), 409
         _CLONING.update({"site_id": site_id, "phase": "開始しています…", "file": None, "error": None})
-    log.info("クローンジョブ開始: %s (keep_js=%s)", row["url"], keep_js)
-    threading.Thread(target=_run_clone_job, args=(site_id, row["url"], keep_js), daemon=True).start()
+    log.info("クローンジョブ開始: %s (keep_js=%s, use_extracted=%s)", row["url"], keep_js, use_extracted)
+    threading.Thread(target=_run_clone_job, args=(site_id, row["url"], keep_js, use_extracted), daemon=True).start()
     return jsonify({"ok": True, "site_id": site_id})
 
 
@@ -951,7 +986,8 @@ def _run_camp_job(job_id: str, brief: str, base_site_id: str, anim_ref_id: str =
                         db.update_anim_snippets(conn, anim_ref_id, _json.dumps(snip, ensure_ascii=False))
                 except Exception:
                     log.exception("アニメ抽出に失敗（続行）")
-        prov = "GPT" if config.CONFIG.htmlgen.provider == "openai" else "Claude"
+        prov = {"openai": "GPT", "gemini": "Gemini", "deepseek": "DeepSeek"}.get(
+            config.CONFIG.htmlgen.provider, "Claude")
         _camp_set(job_id, phase=f"{prov}がHTMLを書いています…（一番長い段階・2分前後）")
         result = camp.generate_camp(
             brief, use_model=False,
@@ -1206,8 +1242,13 @@ def api_camps():
     """保存済みカンプの一覧（履歴）。名前付き（お気に入り）を先頭に、あとは新しい順。"""
     names = camp.load_camp_names()
     items = []
-    # 生成カンプ(camp_*)＋お気に入りスナップショット(fav_*)の両方を拾う
-    for p in sorted(list(config.CAMP_DIR.glob("camp_*.html")) + list(config.CAMP_DIR.glob("fav_*.html"))):
+    # 生成カンプ(camp_*)＋お気に入りスナップショット(fav_*)＋忠実クローン(clone_*)を拾う
+    globbed = (
+        list(config.CAMP_DIR.glob("camp_*.html"))
+        + list(config.CAMP_DIR.glob("fav_*.html"))
+        + list(config.CAMP_DIR.glob("clone_*.html"))
+    )
+    for p in sorted(globbed):
         try:
             head = p.read_text(encoding="utf-8", errors="ignore")[:2000]
         except Exception:  # noqa: BLE001
@@ -1458,10 +1499,11 @@ _EDIT_BAR = """
 @keyframes __ce_busypulse{0%,100%{outline-color:#7c3aed}50%{outline-color:#d3bef7}}
 </style>
 <div id="__ce" class="min">
-  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">▲ ひらく</span></div>
+  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span class="x" id="__ce_homeh" style="background:#2b6cb0" title="ツール（ホーム）に戻る">🏠 ホーム</span><span class="sv" id="__ce_undo" style="background:#555;opacity:.4" title="ひとつ前に戻す">⟲ 戻す</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">▲ ひらく</span></div>
   <div class="bd">
+    <button class="im" id="__ce_home" style="background:#eef2f7;color:#1d1d1f;border:1px solid #d6deea;font-weight:700">🏠 ツール（ホーム）に戻る</button>
     <div class="lbl plain">🤖 修正・おしゃれに使うAI（モデルは⚙設定で）</div>
-    <select id="__ce_ai"><option value="anthropic">Claude</option><option value="openai">GPT</option><option value="deepseek">DeepSeek（激安）</option><option value="gemini">Gemini</option></select>
+    <select id="__ce_ai"><option value="anthropic">Claude</option><option value="openai">GPT</option><option value="gemini">Gemini</option><option value="deepseek">DeepSeek（激安）</option><option value="zai">GLM（Z.ai・激安）</option></select>
     <div class="lbl plain">① 範囲を選ぶ（全体／セクション）</div>
     <select id="__ce_sec"><option value="-1">ページ全体</option></select>
     <div class="lbl">🎬 アニメ・背景装飾を付ける（選んだ所に適用）</div>
@@ -1499,6 +1541,16 @@ _EDIT_BAR = """
         .catch(function(){ msg.textContent='AIの切替に失敗しました'; });
     });
   }
+  // 🏠 ツール（ホーム）に戻る＝このタブをツール本体に切り替える（タブを増やさない）
+  function goHome(ev){
+    if(ev) ev.stopPropagation();  // ヘッダの開閉トグルと競合させない
+    if(_dirty && !confirm('保存していない変更があります。ホームに戻ると消えます。よろしいですか？')) return;
+    location.href='/';
+  }
+  var homeBtn=document.getElementById('__ce_home');
+  if(homeBtn) homeBtn.addEventListener('click',goHome);
+  var homeH=document.getElementById('__ce_homeh');  // ヘッダ側＝畳んでいても常に押せる
+  if(homeH) homeH.addEventListener('click',goHome);
   // 🎨 手本サイトのドロップダウンをストックから埋める（改善の方向性を画像で見せる用）
   var refSel=document.getElementById('__ce_ref');
   if(refSel){
@@ -1549,7 +1601,7 @@ _EDIT_BAR = """
   // ヘッダを掴んでウィンドウ自体を移動できる（クリックでの開閉と両立：動いた時だけトグルを抑制）
   var hd=document.getElementById('__ce_hd'), hDrag=false, hMoved=false, hSX=0,hSY=0,hL=0,hT=0;
   hd.addEventListener('mousedown',function(e){
-    if(e.target.closest('#__ce_save')) return;  // 保存ボタンは除外
+    if(e.target.closest('#__ce_save')||e.target.closest('#__ce_undo')||e.target.closest('#__ce_homeh')) return;  // 保存・戻す・ホームボタンは除外
     var r=box.getBoundingClientRect();
     hDrag=true; hMoved=false; hSX=e.clientX; hSY=e.clientY; hL=r.left; hT=r.top;
     box.style.right='auto'; box.style.bottom='auto'; box.style.left=hL+'px'; box.style.top=hT+'px';
@@ -1573,6 +1625,8 @@ _EDIT_BAR = """
     ev.stopPropagation();  // ヘッダのトグル(開閉)と競合させない
     saveLayout();
   });
+  var undoBtn=document.getElementById('__ce_undo');
+  if(undoBtn) undoBtn.addEventListener('click',function(ev){ ev.stopPropagation(); undoStep(); });
   var esc=function(s){return String(s||'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});};
   // ①のドロップダウン(sec)で選ばれたセクション要素を返す（ページ全体=-1ならnull）
   function curSecEl(){
@@ -1885,25 +1939,88 @@ _EDIT_BAR = """
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
   function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} curAnim=null; curP={}; }
-  // ↵ 改行を自分で決める：今の文を入力欄に出し、Enterで改行→適用（AIなし）。1文字アニメは外れる。
+  // 要素を丸ごと消す（AIなし・即反映）。ドラッグ中なら解除してから消す。保存するまでは確定しない。
+  function removeEl(el){
+    if(!el||el===document.body){ msg.textContent='これは消せません'; return; }
+    if(!confirm('この要素を消しますか？\\n\\n「'+descEl(el)+'」\\n※保存すると元に戻せません（保存前ならページ再読込でキャンセルできます）')) return;
+    if(dragEl===el){ dragEl.removeEventListener('mousedown',_dDown,true); dragEl=null; }
+    closeMenu();
+    el.remove();
+    markDirty();
+    msg.textContent='要素を消しました（保存で確定）';
+  }
+  // 背景・枠・影を消す（AIなし）。透過画像の下から出てきた「箱」の装飾を一発で消す用。
+  function stripDeco(el){
+    if(!el){ msg.textContent='対象がありません'; return; }
+    el.style.setProperty('background','transparent','important');
+    el.style.setProperty('background-image','none','important');
+    el.style.setProperty('box-shadow','none','important');
+    el.style.setProperty('border','none','important');
+    closeMenu(); markDirty();
+    msg.textContent='背景・枠・影を消しました（保存で確定）。まだ枠が残るなら、少し外側の箱を右クリックして同じ操作を';
+  }
+  // rgb(...)/rgba(...) を #rrggbb に変換（カラーピッカーの初期値用）
+  function _rgbToHex(c){
+    var m=(c||'').match(/\\d+/g); if(!m||m.length<3) return '#000000';
+    return '#'+m.slice(0,3).map(function(x){return ('0'+(+x).toString(16)).slice(-2);}).join('');
+  }
+  // 文字の大きさを倍率で変える（factor=0でリセット）。歪まないよう font-size を直接いじる。
+  function _fontSize(el, factor){
+    if(!factor){ el.style.removeProperty('font-size'); markDirty(); return; }
+    var cur=parseFloat(getComputedStyle(el).fontSize)||16;
+    el.style.setProperty('font-size', (cur*factor).toFixed(1)+'px', 'important');
+    markDirty();
+  }
+  // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
     var cur=(el.innerText||el.textContent||'').replace(/\\u200b/g,'');
+    var FONTS=[
+      ['','（フォントはそのまま）'],
+      ["'Yu Gothic','Hiragino Kaku Gothic ProN',Meiryo,sans-serif",'ゴシック（標準）'],
+      ["'Yu Mincho','Hiragino Mincho ProN',serif",'明朝（上品）'],
+      ["'Hiragino Maru Gothic ProN','Rounded Mplus 1c',sans-serif",'丸ゴシック（やわらか）'],
+      ["Georgia,'Times New Roman',serif",'英字セリフ'],
+      ["Helvetica,Arial,sans-serif",'英字サンセリフ'],
+      ["'Courier New',monospace",'等幅（コード風）']
+    ];
+    var opts=FONTS.map(function(f){return '<option value="'+f[0].replace(/"/g,'&quot;')+'">'+f[1]+'</option>';}).join('');
     var ov=document.createElement('div'); ov.id='__ce_pk';
-    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>↵ 改行を自分で決める</h4>'
-      +'<div style="font-size:12px;color:#888;margin-bottom:8px">改行したい所で Enter を押して、「適用」を押してください（AIなし・一瞬）。※1文字ずつの動きは外れます</div>'
-      +'<textarea id="__ce_brta" style="width:100%;height:150px;font-size:15px;padding:10px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
-      +'<button class="go2" id="__ce_brapply" style="background:#1a7f37;margin-top:8px">✅ この改行で適用</button></div>';
+    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>✏ 文字を編集（AIなし・即反映）</h4>'
+      +'<div style="font-size:12px;color:#888;margin-bottom:8px">改行したい所で Enter を押して「改行を反映」。大きさ・フォント・色はその場で反映します。※1文字ずつの動きは外れます</div>'
+      +'<textarea id="__ce_brta" style="width:100%;height:120px;font-size:15px;padding:10px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
+      +'<button class="go2" id="__ce_brapply" style="background:#1a7f37;margin-top:8px">✅ 改行を反映</button>'
+      +'<div style="border-top:1px solid #eee;margin:14px 0 0"></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:12px 0 6px">🔡 文字の大きさ</div>'
+      +'<div style="display:flex;gap:6px"><button class="go2" data-fs="1.1" style="background:#0b6bcb;margin:0;flex:1">＋ 大きく</button><button class="go2" data-fs="0.9" style="background:#0b6bcb;margin:0;flex:1">－ 小さく</button><button class="go2" data-fs="0" style="background:#888;margin:0">⟲</button></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🅰 フォント</div>'
+      +'<select id="__ce_brff" style="width:100%;font-size:13px;padding:9px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit">'+opts+'</select>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🎨 文字の色</div>'
+      +'<div style="display:flex;gap:8px;align-items:center"><input type="color" id="__ce_brcol" style="width:54px;height:38px;padding:2px;border:1px solid #d0d0d5;border-radius:8px;cursor:pointer"><button class="go2" id="__ce_brcolr" style="background:#888;margin:0;flex:1">⟲ 色を元に戻す</button></div>'
+      +'</div>';
     document.body.appendChild(ov);
     var ta=document.getElementById('__ce_brta'); ta.value=cur; ta.focus();
+    try{ document.getElementById('__ce_brcol').value=_rgbToHex(getComputedStyle(el).color); }catch(_){}
     ov.addEventListener('click',function(e){
       if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
       if(e.target.id==='__ce_brapply'){
         stopAnim(el);
         el.innerHTML=esc(ta.value).replace(/\\n/g,'<br>');
-        ov.remove(); markDirty();
+        markDirty();
         msg.textContent='改行を反映しました。「💾 保存」で確定できます';
+        return;
       }
+      var fsb=e.target.closest('button[data-fs]');
+      if(fsb){ _fontSize(el, +fsb.getAttribute('data-fs')); return; }
+      if(e.target.id==='__ce_brcolr'){ el.style.removeProperty('color'); markDirty(); return; }
+    });
+    document.getElementById('__ce_brff').addEventListener('change',function(){
+      if(this.value) el.style.setProperty('font-family', this.value, 'important');
+      else el.style.removeProperty('font-family');
+      markDirty();
+    });
+    document.getElementById('__ce_brcol').addEventListener('input',function(){
+      el.style.setProperty('color', this.value, 'important'); markDirty();
     });
   }
   // その要素1つだけをAIで直す（他は一切触らない）。結果をDOMでその要素だけ差し替える。
@@ -1917,7 +2034,7 @@ _EDIT_BAR = """
       if(!d.ok){ msg.textContent='失敗：'+(d.message||''); return; }
       try{ target.outerHTML=d.html; }catch(_){ msg.textContent='反映に失敗しました'; return; }
       closeMenu(); markDirty();
-      msg.textContent='✅ この要素だけ直しました。「💾 保存」で確定できます';
+      msg.textContent='✅ 直しました。残すには『💾 変更を保存』を押してください（押さずに更新すると消えます）';
     }).catch(function(){ busy(false); hideToast(); msg.textContent='通信エラー'; });
   }
   // ===== 位置の直接調整（AIなし・transformで即反映）=====
@@ -1943,7 +2060,9 @@ _EDIT_BAR = """
     el.style.setProperty('scale', sx+' '+sy, 'important');
     el.style.setProperty('transform-origin','center','important');
     var cebt=el.getAttribute('data-cebt')||'';
-    if(cebt){ el.style.setProperty('transform', cebt, 'important'); }  // 元の変形(あれば)だけtransformに残す
+    // 元の変形があればtransformに残す。無ければtransformは必ず消す
+    // （消さないとプレビュー等で付いた一時的なtransformが残り、出現アニメを固定してしまう）。
+    if(cebt){ el.style.setProperty('transform', cebt, 'important'); } else { el.style.removeProperty('transform'); }
     markDirty();
   }
   // 移動・拡大・回転で位置を動かした要素か？（動かしていたらアニメはラッパーに当てる）
@@ -1984,6 +2103,15 @@ _EDIT_BAR = """
     var cur=parseFloat(el.style.minHeight); if(!(cur>0)) cur=el.getBoundingClientRect().height||el.offsetHeight||0;
     var h=Math.max(40, cur+delta);
     el.style.setProperty('min-height',Math.round(h)+'px','important');
+    markDirty();
+  }
+  // 横の幅(width)を増減。scaleと違い中身は歪まず、横に広がる/狭まる。
+  function adjustWidth(el,delta){
+    if(!el) return;
+    var cur=parseFloat(el.style.width); if(!(cur>0)) cur=el.getBoundingClientRect().width||el.offsetWidth||0;
+    var w=Math.max(40, cur+delta);
+    el.style.setProperty('width',Math.round(w)+'px','important');
+    el.style.setProperty('max-width','none','important');  // 元CSSのmax-width:100%等に負けないように
     markDirty();
   }
   // ===== 動きプレビュー（RAFで毎フレーム手動描画＝この環境で確実）＋ 無料の焼き込み =====
@@ -2040,7 +2168,7 @@ _EDIT_BAR = """
     if(cls){ [].slice.call(cls).forEach(function(c){ if(c.indexOf('imp-title')===0) isTitle=true; }); }
     if(isTitle){
       try{ var cs=getComputedStyle(el);
-        ['font-size','font-weight','font-family','line-height','letter-spacing','color','text-align','font-style','text-transform','white-space','margin','max-width'].forEach(function(p){
+        ['font-size','font-weight','font-family','line-height','letter-spacing','color','text-align','font-style','text-transform','white-space','margin','max-width','writing-mode','text-orientation','height','min-height','padding','align-items','justify-content'].forEach(function(p){
           if(!el.style.getPropertyValue(p)) el.style.setProperty(p, cs.getPropertyValue(p));
         });
       }catch(_){}
@@ -2139,10 +2267,11 @@ _EDIT_BAR = """
   //   IntersectionObserverだけで判定→発火したらunobserve（1回きり）。上部の要素は監視開始時に即発火＝読み込みで再生。
   var FX_RUN='(function(){var d=document,h=d.documentElement;'
     +'if(!d.querySelector(".fxa_pre")){return;}h.classList.add("fxa-on");'
+    +'[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});'  // 自動修復：出現アニメ要素に焼き込まれた古いtransform(プレビュー残骸)を消す＝過去に固まった分も開くだけで直る
     +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}'
     +'if(!("IntersectionObserver" in window)){all().forEach(function(el){el.classList.add("fxa_in");});return;}'
-    +'var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add("fxa_in");io.unobserve(en.target);}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});'
-    +'function obs(){all().forEach(function(el){io.observe(el);});}'
+    +'var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){t.classList.add("fxa_in");});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});'
+    +'function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}'  // 初回描画(fxa_pre隠れ状態)を1フレーム待ってから監視開始＝上部要素も一瞬で終わらずスライドする
     +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",obs);else obs();})();';
   // CSSは「消して足す」でなく内容だけ差し替える（一瞬スタイルが消えるチラつき・前のアニメへの干渉を防ぐ）
   function _fxInjCss(){ var st=document.getElementById('fxa-css'); if(st){ if(st.textContent!==FX_CSS) st.textContent=FX_CSS; return; } st=document.createElement('style'); st.id='fxa-css'; st.textContent=FX_CSS; (document.head||document.documentElement).appendChild(st); }
@@ -2234,6 +2363,7 @@ _EDIT_BAR = """
     if(el.getAttribute('data-cew')!=null){ // 画像サイズを変えていたら、それも元に戻す（元からの幅指定は触らない）
       el.style.removeProperty('width'); el.style.removeProperty('height'); el.style.removeProperty('object-fit'); el.style.removeProperty('max-width');
     }
+    el.style.removeProperty('min-height'); el.style.removeProperty('width'); el.style.removeProperty('max-width');  // 縦の余白・横幅の増減も戻す
     el.removeAttribute('data-cetx'); el.removeAttribute('data-cety'); el.removeAttribute('data-cesx'); el.removeAttribute('data-cesy'); el.removeAttribute('data-cero'); el.removeAttribute('data-cebt');
     el.removeAttribute('data-cew'); el.removeAttribute('data-ceh');
     markDirty();
@@ -2246,7 +2376,7 @@ _EDIT_BAR = """
     document.body.style.userSelect='none'; e.preventDefault(); e.stopPropagation();
   }
   document.addEventListener('mousemove',function(e){ if(dActive&&dragEl) setPos(dragEl, dOX+(e.clientX-dSX), dOY+(e.clientY-dSY)); },true);
-  document.addEventListener('mouseup',function(){ if(dActive){ dActive=false; document.body.style.userSelect=''; } },true);
+  document.addEventListener('mouseup',function(){ if(dActive){ dActive=false; document.body.style.userSelect=''; pushUndo(); } },true);
   function toggleDrag(el,btn){
     if(dragEl===el){ // 同じ要素をもう一度押したら終了
       el.removeEventListener('mousedown',_dDown,true); el.style.cursor=''; dragEl=null;
@@ -2263,12 +2393,55 @@ _EDIT_BAR = """
     dragEl=el; el.style.cursor='move'; el.addEventListener('mousedown',_dDown,true);
     if(btn) btn.textContent='✋ ドラッグ中（もう一度押すと解除）';
   }
+  // ===== ⟲ ひとつ戻す（AIなしの直接編集＋AI修正を1手ずつ取り消す）=====
+  // 本文（ヘッダ/セクション/フッタ等）だけを丸ごとスナップショットして積む。
+  // 編集UI(#__ce*)や<script>/<style>は触らない＝復元してもツール自身は壊れない。
+  var _undoStack=[], _lastSnap=null;
+  function _isContent(n){
+    if(n.nodeType!==1) return false;
+    if(n.id && n.id.indexOf('__ce')===0) return false;
+    if(n.tagName==='SCRIPT'||n.tagName==='STYLE') return false;
+    return true;
+  }
+  function _contentNodes(){ return [].slice.call(document.body.children).filter(_isContent); }
+  function snapContent(){ return _contentNodes().map(function(n){ return n.outerHTML; }).join(''); }
+  function updUndoBtn(){ var u=document.getElementById('__ce_undo'); if(u) u.style.opacity=_undoStack.length?'1':'.4'; }
+  // 変更後に呼ぶ：直前の状態(_lastSnap)を積んで、現在を新しい基準にする（実質変化なしなら積まない）
+  function pushUndo(){
+    var cur=snapContent();
+    if(cur===_lastSnap) return;
+    if(_lastSnap!==null){ _undoStack.push(_lastSnap); if(_undoStack.length>25) _undoStack.shift(); }
+    _lastSnap=cur; updUndoBtn();
+  }
+  function _restoreContent(html){
+    _contentNodes().forEach(function(n){ n.remove(); });
+    var tpl=document.createElement('template'); tpl.innerHTML=html;
+    document.body.insertBefore(tpl.content, document.body.firstChild);
+    // 復元で opacity:0 等のまま隠れる本文が出ないよう強制表示（保険・_SERVE_SAFETYと同じ考え）
+    [].slice.call(document.body.querySelectorAll('*')).forEach(function(e){
+      if(e.id && e.id.indexOf('__ce')===0) return;
+      var cs; try{ cs=getComputedStyle(e); }catch(_){ return; }
+      if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; }
+      if(cs.visibility==='hidden'){ e.style.setProperty('visibility','visible','important'); }
+    });
+  }
+  function undoStep(){
+    if(!_undoStack.length){ msg.textContent='これ以上戻せません'; return; }
+    closeMenu();
+    if(dragEl){ dragEl=null; dActive=false; }  // 復元で対象要素が入れ替わるため掴み状態は解除
+    _restoreContent(_undoStack.pop());
+    _lastSnap=snapContent();
+    _dirty=true; var b=document.getElementById('__ce_save'); if(b){ b.textContent='💾 変更を保存'; b.classList.add('saved'); }
+    updUndoBtn();
+    msg.textContent='ひとつ前に戻しました（さらに戻せます／保存で確定）';
+  }
   // 位置/大きさを変えたら、ヘッダの保存ボタンを「💾 変更を保存」に変えて緑で目立たせる（ボタンは1つに統一）
   var _dirty=false;
   function markDirty(){
     _dirty=true;
     var b=document.getElementById('__ce_save');
     if(b){ b.textContent='💾 変更を保存'; b.classList.add('saved'); }
+    if(!dActive) pushUndo();  // ドラッグ中は積まず、離した時(mouseup)に1回だけ積む
   }
   function cleanHtml(){
     var doc=document.documentElement.cloneNode(true);
@@ -2317,10 +2490,12 @@ _EDIT_BAR = """
     }
     return cur||el;
   }
+  // capture:true＝キャプチャ段階で先取りする。忠実クローン(元JS保持)の中に元サイト自前の
+  // 右クリック禁止スクリプトが残っていても、こちらを優先させて確実にメニューを開く。
   document.addEventListener('contextmenu',function(e){
     var el=pickTarget(e.target);
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
-    e.preventDefault(); closeMenu();
+    e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation(); closeMenu();
     curEl=el; el.classList.add('__ce_sel');
     var sIdx=secIndexOf(el), d=descEl(el);
     // 画像なら「AIなしの即差し替え」を最優先で出す（画像のAI指示は不安定なため）
@@ -2372,10 +2547,12 @@ _EDIT_BAR = """
       +'<button data-sx="1.1" data-sy="1">⇔ 横に長く</button><button data-sx="0.909" data-sy="1">⇔ 横を縮め</button>'
       +'<button data-sx="1" data-sy="1.1">⇕ 縦に長く</button><button data-sx="1" data-sy="0.909">⇕ 縦を縮め</button>'
       +'<button data-ro="-6">⟲ 左に回す</button><button data-ro="6">⟳ 右に回す</button></div>'
-      +'<div class="cap">⬍ 縦の高さ・余白（セクションを高く/低く・AIなし・歪まない）</div>'
+      +'<div class="cap">⬍ 縦の高さ・余白（高く/低く・AIなし・歪まない）</div>'
       +'<div class="__ce_size"><button data-mh="80">＋ 高く（余白を足す）</button><button data-mh="-80">－ 低く</button></div>'
+      +'<div class="cap">⬌ 横の幅（広く/狭く・AIなし・歪まない）</div>'
+      +'<div class="__ce_size"><button data-mw="80">＋ 横に広く</button><button data-mw="-80">－ 横を狭く</button></div>'
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 ドラッグで動かす（押して開始/終了）</button>'
-      +'<button class="go2" id="__ce_cmbr" style="background:#0b6bcb;margin-bottom:8px">↵ 改行を自分で決める（AIなし）</button>'
+      +'<button class="go2" id="__ce_cmbr" style="background:#0b6bcb;margin-bottom:8px">✏ 文字を編集（改行・大きさ・フォント・色／AIなし）</button>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
       +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
       +'<div class="__ce_anim" id="__fx_grid">'+FX.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
@@ -2384,7 +2561,11 @@ _EDIT_BAR = """
       +'<div class="cap" style="margin-top:8px">✍ この要素に自分で指示</div>'
       +'<input id="__ce_cmin" placeholder="例：もっと大きく赤く"><button class="go2" id="__ce_cmgo">この要素を直す</button>'
       +'<button class="go2" style="background:#4b2ea8" id="__ce_cmsg">💡 この要素の改善案</button>'
-      +'<div class="chips" id="__ce_cmchips"></div></div>';
+      +'<div class="chips" id="__ce_cmchips"></div>'
+      +'<div class="cap" style="margin-top:10px">🚫 背景・枠・影を消す（透過画像の下の箱／AIなし）</div>'
+      +'<button class="go2" id="__ce_cmnobg" style="background:#0b6bcb;margin-bottom:8px">🚫 この要素の背景・枠・影を消す</button>'
+      +'<div class="cap">🗑 いらない要素を消す（AIなし・即反映）</div>'
+      +'<button class="go2" id="__ce_cmdel" style="background:#c0392b">🗑 この要素を消す</button></div>';
     document.body.appendChild(m);
     var mw=290, mh=Math.min(window.innerHeight*0.72, m.offsetHeight||420);
     if(lastMenuPos){  // 前回ドラッグで動かした場所があれば、そこに出す（邪魔にならない位置を覚える）
@@ -2412,6 +2593,8 @@ _EDIT_BAR = """
       if(nb){ if(nb.getAttribute('data-rst')) resetPos(curEl); else nudge(curEl, +nb.getAttribute('data-nx'), +nb.getAttribute('data-ny')); return; }
       var mhb=ev.target.closest('button[data-mh]');  // 高さ(min-height)の増減＝スケールと違い歪まない
       if(mhb){ adjustMinH(curEl, +mhb.getAttribute('data-mh')); return; }
+      var mwb=ev.target.closest('button[data-mw]');  // 幅(width)の増減＝歪まない横伸ばし
+      if(mwb){ adjustWidth(curEl, +mwb.getAttribute('data-mw')); return; }
       var sb=ev.target.closest('.__ce_size button');
       if(sb){
         if(sb.hasAttribute('data-ro')) rotateBy(curEl, +sb.getAttribute('data-ro'));
@@ -2467,13 +2650,17 @@ _EDIT_BAR = """
         m.querySelector('#__ce_cmchips').innerHTML=(dd.suggestions||[]).map(function(s){return '<button class="chip" data-ins="'+esc(s.instruction)+'">'+esc(s.label)+'</button>';}).join('');
       }).catch(function(){b.disabled=false;b.textContent='💡 この要素の改善案';});
     });
+    m.querySelector('#__ce_cmnobg').addEventListener('click',function(){ stripDeco(curEl); });
+    m.querySelector('#__ce_cmdel').addEventListener('click',function(){ removeEl(curEl); });
     // 基本は「移動」なので、右クリックした瞬間からドラッグで動かせる状態にする
     setDragOn(el, m.querySelector('#__ce_cmdrag'));
-  });
+  }, true);
   // メニュー外をクリックしたら閉じる＆選択マーカー(青点線)も消す（枠が残らないように）
   document.addEventListener('click',function(e){ if((curMenu||curEl) && !e.target.closest('#__ce_cm')) closeMenu(); }, true);
   // 保険：読み込み時に、万一残っている選択マーカーのクラスを全部剥がす
   [].slice.call(document.querySelectorAll('.__ce_sel,.__ce_hl')).forEach(function(x){ x.classList.remove('__ce_sel','__ce_hl'); });
+  // ⟲戻すの基準＝今の本文を最初のスナップショットに（これ以前には戻せない＝読込直後の状態）
+  _lastSnap=snapContent(); updUndoBtn();
 })();
 </script>
 """
@@ -2496,6 +2683,18 @@ _SERVE_SAFETY = """
     var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('fxa_in'); io.unobserve(en.target); } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
     all().forEach(function(el){ io.observe(el); });
   }
+  /* 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）を判定。
+     ここに含まれる要素は「本来ずっと隠れているもの」なので、保険で強制表示しない
+     （＝クローンでMENUのメガメニューが開いた状態で残る不具合を防ぐ）。 */
+  function _inHiddenOverlay(e){
+    var n=e;
+    while(n && n!==document.body){
+      var s=getComputedStyle(n);
+      if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+      n=n.parentElement;
+    }
+    return false;
+  }
   /* 従来の保険：透明/非表示のまま残った要素を強制表示（fxaは上の監視(IntersectionObserver)が担当するので触らない）。 */
   function sweep(){
     var all=document.querySelectorAll('body *');
@@ -2507,6 +2706,8 @@ _SERVE_SAFETY = """
       if(e.closest('.fxa_pre')||e.closest('.fxa_wrap')) continue;
       if(e.classList&&(e.classList.contains('__cl_pre')||e.classList.contains('__cl_kid'))) continue; /* クローンのスクロール出現は自前の保険があるので触らない */
       var cs=getComputedStyle(e);
+      var hidden=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+      if(hidden && _inHiddenOverlay(e)) continue; /* MENU等「開いたら出す」隠しメニューは無理に表示しない */
       if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
       if(cs.visibility==='hidden'){ e.style.setProperty('visibility','visible','important'); }
       var cp=cs.clipPath||cs.webkitClipPath||'';  /* clip-pathで切り取られて消えている(fxa以外)ものも復活 */

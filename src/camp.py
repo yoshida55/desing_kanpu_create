@@ -264,6 +264,30 @@ def _call_deepseek(system: str, content: list) -> str:
     return resp.choices[0].message.content or ""
 
 
+def _call_zai(system: str, content: list) -> str:
+    """GLM（Zhipu / Z.ai・OpenAI互換）でHTMLを生成。
+
+    ★実測確認済み：glm-5.2 のAPIは画像非対応（画像を送るとエラー400）。よってテキストのみ送る。
+      画像対応のGLM-V系モデルを使うなら、ここを画像込み(_to_openai_content)に変える。
+    """
+    from openai import OpenAI
+
+    zcfg = config.CONFIG.zai
+    client = OpenAI(
+        api_key=zcfg.api_key, base_url=zcfg.base_url, timeout=180.0, max_retries=1
+    )
+    text = "\n\n".join(b["text"] for b in content if b.get("type") == "text")
+    resp = client.chat.completions.create(
+        model=zcfg.model,
+        max_tokens=16000,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": text},
+        ],
+    )
+    return resp.choices[0].message.content or ""
+
+
 def _call_llm(system: str, content: list, provider: str | None = None) -> tuple[str, str]:
     """指定プロバイダでHTMLを生成。返り値は (本文, 使ったモデル表示)。
 
@@ -284,6 +308,10 @@ def _call_llm(system: str, content: list, provider: str | None = None) -> tuple[
         if not config.CONFIG.deepseek.enabled:
             raise RuntimeError("DEEPSEEK_API_KEY が未設定です（.env を確認）")
         return _call_deepseek(system, content), f"deepseek:{config.CONFIG.deepseek.model}"
+    if provider == "zai":
+        if not config.CONFIG.zai.enabled:
+            raise RuntimeError("ZAI_API_KEY が未設定です（.env を確認）")
+        return _call_zai(system, content), f"zai:{config.CONFIG.zai.model}"
     if not config.CONFIG.vibe.enabled:
         raise RuntimeError("ANTHROPIC_API_KEY が未設定です（.env を確認）")
     return _call_anthropic(system, content), f"anthropic:{config.CONFIG.vibe.model}"

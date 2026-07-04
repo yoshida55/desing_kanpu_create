@@ -163,6 +163,27 @@ class DeepSeekConfig:
 
 
 @dataclass(frozen=True)
+class ZaiConfig:
+    """GLM（Zhipu / Z.ai）。OpenAI互換APIなので base_url 差し替えで使う。
+
+    最新は glm-5.2（フラグシップ）。テキスト生成/修正向け（画像は送らない前提）。
+    """
+
+    api_key: str = field(default_factory=lambda: os.environ.get("ZAI_API_KEY", ""))
+    model: str = field(
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_ZAI_MODEL", "glm-5.2")
+    )
+    base_url: str = field(
+        default_factory=lambda: os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/paas/v4/")
+    )
+
+    @property
+    def enabled(self) -> bool:
+        key = self.api_key.strip()
+        return bool(key) and "ここに" not in key
+
+
+@dataclass(frozen=True)
 class SearchConfig:
     """検索の既定値。"""
 
@@ -178,6 +199,7 @@ class AppConfig:
     htmlgen: HtmlGenConfig = field(default_factory=HtmlGenConfig)
     gemini: GeminiConfig = field(default_factory=GeminiConfig)
     deepseek: DeepSeekConfig = field(default_factory=DeepSeekConfig)
+    zai: ZaiConfig = field(default_factory=ZaiConfig)
 
 
 # どこからでも import して使う共有インスタンス

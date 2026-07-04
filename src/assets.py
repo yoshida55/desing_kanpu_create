@@ -97,6 +97,21 @@ def list_assets(site_id: str) -> list[str]:
     return [str(f.relative_to(config.PROJECT_ROOT)) for f in files]
 
 
+def load_manifest(site_id: str) -> dict[str, str]:
+    """抜き出し済み画像の {元URL: 保存ファイル名} 対応表を読む（無ければ空）。
+
+    忠実クローンが「抽出済みの画像をそのまま使う」ときに、
+    どのURLがどのファイルに対応するかを引くために使う。
+    """
+    path = assets_dir(site_id) / "manifest.json"
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def extract_images(url: str, max_count: int = 60) -> dict:
     """ライブページから画像を集めてDLし、data/assets/<id>/ に保存。"""
     cfg = config.CONFIG.capture
@@ -108,6 +123,7 @@ def extract_images(url: str, max_count: int = 60) -> dict:
     log.info("画像の抜き出し開始: %s", norm_url)
     urls: list[str] = []
     saved = 0
+    manifest: dict[str, str] = {}
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=cfg.headless)
         context = browser.new_context(
@@ -159,7 +175,10 @@ def extract_images(url: str, max_count: int = 60) -> dict:
                 if h in seen_hash:  # 中身が同じ画像は1枚に
                     continue
                 seen_hash.add(h)
-                (out_dir / f"img_{saved:03d}.{ext}").write_bytes(data)
+                name = f"img_{saved:03d}.{ext}"
+                (out_dir / name).write_bytes(data)
+                if not u.startswith("data:"):  # data:URIはURL対応が無いのでmanifest不要
+                    manifest[u] = name
                 saved += 1
             except Exception:  # noqa: BLE001
                 continue
@@ -167,5 +186,8 @@ def extract_images(url: str, max_count: int = 60) -> dict:
         context.close()
         browser.close()
 
+    (out_dir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     log.info("画像の抜き出し完了: %d 枚保存 / 候補 %d", saved, len(urls))
     return {"saved": saved, "candidates": len(urls)}

@@ -15,13 +15,14 @@ from __future__ import annotations
 import hashlib
 import re
 import time
+from pathlib import Path
 from typing import Callable, Optional
 from urllib.parse import urljoin
 
 from playwright.sync_api import sync_playwright
 
-from . import config, ingest
-from .utils import get_logger, normalize_url, url_to_slug
+from . import assets, config, ingest
+from .utils import get_logger, normalize_url, url_to_id, url_to_slug
 
 log = get_logger("clone")
 
@@ -132,6 +133,10 @@ _JS_STRIP = """
     ' link[rel="preload"], link[rel="modulepreload"], link[rel="prefetch"],' +
     ' meta[http-equiv="Content-Security-Policy"]';
   document.querySelectorAll(sel).forEach((el) => el.remove());
+  // 右クリック禁止・選択禁止（属性方式）を外す＝編集バーの右クリックメニューが確実に開けるように
+  document.querySelectorAll('[oncontextmenu],[onselectstart],[ondragstart]').forEach((el) => {
+    el.removeAttribute('oncontextmenu'); el.removeAttribute('onselectstart'); el.removeAttribute('ondragstart');
+  });
   if (keepJs) {
     document.querySelectorAll("script[src]").forEach((s) => s.setAttribute("src", s.src));
   } else {
@@ -218,11 +223,24 @@ _REVEAL_SCRIPT = """
 _KEEPJS_SAFETY = """
 <script id="__clone_safety">
 (function(){
+  /* 押した時だけ出す隠しメニュー/オーバーレイ(fixed/absoluteで隠されている)は
+     本来ずっと隠れているものなので、保険で強制表示しない(MENUが開いた状態で残るのを防ぐ)。 */
+  function inHiddenOverlay(e){
+    var n=e;
+    while(n && n!==document.body){
+      var s=getComputedStyle(n);
+      if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+      n=n.parentElement;
+    }
+    return false;
+  }
   function sweep(){
     var all = document.querySelectorAll("body *");
     for (var i = 0; i < all.length; i++) {
       var e = all[i];
       var cs = getComputedStyle(e);
+      var hidden = (parseFloat(cs.opacity) === 0) || (cs.visibility === "hidden");
+      if (hidden && inHiddenOverlay(e)) continue;
       if (parseFloat(cs.opacity) === 0) {
         e.style.setProperty("opacity", "1", "important");
         e.style.transform = "none";
@@ -245,13 +263,28 @@ def _ext_for(url: str, content_type: str) -> str:
 
 
 def _download_assets(context, urls: list[str], assets_dir, dirname: str,
-                     progress: Optional[Callable[[str], None]] = None) -> dict[str, str]:
-    """URL群をダウンロードして {絶対URL: 相対パス} を返す。失敗は黙って飛ばす。"""
+                     progress: Optional[Callable[[str], None]] = None,
+                     preloaded: Optional[dict[str, Path]] = None) -> dict[str, str]:
+    """URL群をダウンロードして {絶対URL: 相対パス} を返す。失敗は黙って飛ばす。
+
+    preloaded に該当URLがあれば、ネット取得せず既存ファイルをそのままコピーする
+    （「抽出済み画像で再現」モード＝二重取得を避け、既に手元にある画像を使う）。
+    """
     mapping: dict[str, str] = {}
     total = min(len(urls), _MAX_ASSETS)
     for i, url in enumerate(urls[:_MAX_ASSETS]):
         if progress and i % 10 == 0:
             progress(f"素材をダウンロード中 {i}/{total}")
+        pre = preloaded.get(url) if preloaded else None
+        if pre is not None:
+            try:
+                body = pre.read_bytes()
+                name = hashlib.sha1(url.encode("utf-8")).hexdigest()[:12] + pre.suffix
+                (assets_dir / name).write_bytes(body)
+                mapping[url] = f"{dirname}/{name}"
+                continue
+            except Exception as exc:  # noqa: BLE001
+                log.debug("抽出済み画像の読込に失敗、通常DLへ切替: %s (%s)", url, exc)
         try:
             res = context.request.get(url, timeout=20_000)
             if res.status != 200:
@@ -268,12 +301,14 @@ def _download_assets(context, urls: list[str], assets_dir, dirname: str,
     return mapping
 
 
-def clone_site(url: str, keep_js: bool = False,
+def clone_site(url: str, keep_js: bool = False, use_extracted: bool = False,
                progress: Optional[Callable[[str], None]] = None) -> dict:
     """実サイトを忠実クローンして data/camps に保存する。
 
     keep_js=True なら元サイトの <script> を残す＝本物のアニメが動く可能性がある。
     ただし壊れる（真っ白・エラー）サイトもあるので保険スクリプト付き。
+    use_extracted=True なら、事前に「🖼画像を抜き出す」で保存済みの画像を
+    ネット再取得せずそのまま使う（一致しないURLは通常どおりその場でDLする）。
     返り値: {"file": ファイル名, "assets": 保存した素材数}
     """
     def say(msg: str) -> None:
@@ -284,6 +319,18 @@ def clone_site(url: str, keep_js: bool = False,
     cfg = config.CONFIG.capture
     norm_url = normalize_url(url)
     slug = url_to_slug(norm_url)
+
+    preloaded: dict[str, Path] = {}
+    if use_extracted:
+        site_id = url_to_id(norm_url)
+        manifest = assets.load_manifest(site_id)
+        adir = assets.assets_dir(site_id)
+        for au, fname in manifest.items():
+            p = adir / fname
+            if p.exists():
+                preloaded[au] = p
+        say(f"抽出済み画像 {len(preloaded)} 件を再利用します")
+
     ts = time.strftime("%Y%m%d_%H%M%S")
     suffix = "_js" if keep_js else ""
     out_name = f"clone_{slug}_{ts}{suffix}.html"
@@ -347,7 +394,7 @@ def clone_site(url: str, keep_js: bool = False,
                 seen.add(au)
                 asset_urls.append(au)
         say(f"素材をダウンロード中（{min(len(asset_urls), _MAX_ASSETS)}件）…")
-        mapping = _download_assets(context, asset_urls, assets_dir, files_dirname, progress)
+        mapping = _download_assets(context, asset_urls, assets_dir, files_dirname, progress, preloaded)
 
         context.close()
         browser.close()

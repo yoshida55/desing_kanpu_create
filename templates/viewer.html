@@ -1004,6 +1004,7 @@
         <label class="set_radio"><input type="radio" name="provider" value="openai"> GPT (OpenAI)</label>
         <label class="set_radio"><input type="radio" name="provider" value="gemini"> Gemini（無料枠）</label>
         <label class="set_radio"><input type="radio" name="provider" value="deepseek"> DeepSeek（激安）</label>
+        <label class="set_radio"><input type="radio" name="provider" value="zai"> GLM（Z.ai）</label>
       </div>
       <div class="set_row">
         <span class="set_label">カンプ修正エンジン<br><small style="color:#999">生成後の手直し</small></span>
@@ -1011,6 +1012,7 @@
         <label class="set_radio"><input type="radio" name="edit_provider" value="openai"> GPT (OpenAI)</label>
         <label class="set_radio"><input type="radio" name="edit_provider" value="gemini"> Gemini（無料枠）</label>
         <label class="set_radio"><input type="radio" name="edit_provider" value="deepseek"> DeepSeek（激安）</label>
+        <label class="set_radio"><input type="radio" name="edit_provider" value="zai"> GLM（Z.ai）</label>
       </div>
       <div class="set_row">
         <span class="set_label">Claudeモデル</span>
@@ -1051,10 +1053,23 @@
         <span class="set_state" id="set_deepseek_state"></span>
       </div>
       <div class="set_row set_row_sep">
+        <span class="set_label">GLMモデル<br><small style="color:#999">Zhipu/Z.ai・OpenAI互換・安い</small></span>
+        <select class="set_input set_input_s" id="set_zai_model">
+          <option value="glm-5.2">GLM-5.2（最新・高性能）⭐</option>
+          <option value="glm-4.6">GLM-4.6（安定・実績）</option>
+        </select>
+      </div>
+      <div class="set_row">
+        <span class="set_label">GLM(Z.ai) APIキー</span>
+        <input class="set_input" id="set_zai_key" type="password" placeholder="（空欄なら変更しない）">
+        <span class="set_state" id="set_zai_state"></span>
+      </div>
+      <div class="set_row set_row_sep">
         <span class="set_label">AIの説明づけ（Gemini）<br><small style="color:#999">サイトの雰囲気・画像の説明</small></span>
         <select class="set_input set_input_s" id="set_gemini_model">
           <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite（安い・推奨）</option>
           <option value="gemini-3.1-flash">Gemini 3.1 Flash（高品質）</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash（安い・安定版）</option>
         </select>
       </div>
       <div class="set_row">
@@ -1223,6 +1238,7 @@
           <div class="detail_actions">
             <button class="detail_base" id="detail_base">🎨 これをベースに生成</button>
             <button class="detail_base" id="detail_clone" style="background:#0b6e4f">📋 忠実クローン（AIなし）</button>
+            <button class="detail_base" id="detail_clone_assets" style="background:#6d28d9" title="先に「🖼画像を抜き出す」が必要です">🖼 抽出画像で忠実に再現</button>
           </div>
         </div>
       </div>
@@ -1398,10 +1414,17 @@
     }
 
     // 設定パネル：プロバイダ・APIキーを .env に保存
+    // 設定・カンプ生成・登録のパネルは同時に1つだけ開く（どれか開いたら他は閉じる）
+    function closeToolPanels(keepSel) {
+      ["#set_panel", "#camp_panel", "#add_panel"].forEach((sel) => {
+        if (sel !== keepSel) { const el = document.querySelector(sel); if (el) el.classList.remove("is_open"); }
+      });
+    }
     const setToggle = document.querySelector("#set_toggle");
     const setPanel = document.querySelector("#set_panel");
     const setMsg = document.querySelector("#set_msg");
     setToggle.addEventListener("click", () => {
+      closeToolPanels("#set_panel");
       setPanel.classList.toggle("is_open");
       if (setPanel.classList.contains("is_open")) loadSettings();
     });
@@ -1413,6 +1436,10 @@
       if (s.anthropic_model) document.querySelector("#set_anthropic_model").value = s.anthropic_model;
       if (s.gemini_model) document.querySelector("#set_gemini_model").value = s.gemini_model;
       if (s.deepseek_model) document.querySelector("#set_deepseek_model").value = s.deepseek_model;
+      if (s.zai_model) document.querySelector("#set_zai_model").value = s.zai_model;
+      const zKey = document.querySelector("#set_zai_key");
+      zKey.placeholder = s.zai_set ? "●●●●●●●●  保存済み（変える時だけ入力）" : "（未設定）";
+      document.querySelector("#set_zai_state").textContent = s.zai_set ? "設定済み ✓" : "未設定";
       const gKey = document.querySelector("#set_gemini_key");
       gKey.placeholder = s.gemini_set ? "●●●●●●●●  保存済み（変える時だけ入力）" : "AIza... （未設定）";
       document.querySelector("#set_gemini_state").textContent = s.gemini_set ? "設定済み ✓" : "未設定";
@@ -1443,6 +1470,7 @@
             anthropic_api_key: document.querySelector("#set_anthropic_key").value,
             gemini_api_key: document.querySelector("#set_gemini_key").value,
             deepseek_api_key: document.querySelector("#set_deepseek_key").value,
+            zai_api_key: document.querySelector("#set_zai_key").value,
           }),
         });
         const d = await res.json();
@@ -1455,7 +1483,7 @@
     });
 
     // エンジン(プロバイダ)はラジオを変えた瞬間に自動保存（保存ボタンを押し忘れる事故を防ぐ）
-    const provLabel = (v) => (v === "openai" ? "GPT" : v === "gemini" ? "Gemini" : v === "deepseek" ? "DeepSeek" : "Claude");
+    const provLabel = (v) => (v === "openai" ? "GPT" : v === "gemini" ? "Gemini" : v === "deepseek" ? "DeepSeek" : v === "zai" ? "GLM" : "Claude");
     document.querySelectorAll('input[name="provider"]').forEach((r) => {
       r.addEventListener("change", async () => {
         if (!r.checked) return;
@@ -1491,7 +1519,8 @@
     [["#set_anthropic_model", "anthropic_model", "Claude"],
      ["#set_openai_model", "openai_model", "GPT"],
      ["#set_gemini_model", "gemini_model", "Gemini"],
-     ["#set_deepseek_model", "deepseek_model", "DeepSeek"]].forEach((t) => {
+     ["#set_deepseek_model", "deepseek_model", "DeepSeek"],
+     ["#set_zai_model", "zai_model", "GLM"]].forEach((t) => {
       const elm = document.querySelector(t[0]);
       if (!elm) return;
       elm.addEventListener("change", async () => {
@@ -1522,6 +1551,8 @@
         anthropic_api_key: document.querySelector("#set_anthropic_key").value,
         deepseek_model: document.querySelector("#set_deepseek_model").value,
         deepseek_api_key: document.querySelector("#set_deepseek_key").value,
+        zai_model: document.querySelector("#set_zai_model").value,
+        zai_api_key: document.querySelector("#set_zai_key").value,
       };
       const saveBtn = document.querySelector("#set_save");
       saveBtn.disabled = true;
@@ -1552,6 +1583,7 @@
     const campBtn = document.querySelector("#camp_button");
     const campState = document.querySelector("#camp_state");
     campToggle.addEventListener("click", () => {
+      closeToolPanels("#camp_panel");
       campPanel.classList.toggle("is_open");
       if (campPanel.classList.contains("is_open")) campInput.focus();
     });
@@ -1690,10 +1722,11 @@
       campHistList.innerHTML = camps.map((c) => {
         const d = new Date(c.mtime * 1000);
         const ds = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-        const title = _esc(c.title || c.file);
+        const isClone = /^clone_/.test(c.file);
+        const title = (isClone ? "📋 " : "") + _esc(c.title || c.file);
         const label = c.name ? ("⭐ " + _esc(c.name)) : title;
         const favCls = c.fav ? " is_fav" : "";
-        return `<div class="hist_row${favCls}"><span class="h_title" title="${_esc(c.name || c.title || c.file)}">${label}</span><span class="h_date">${ds}</span><button class="h_name" data-file="${c.file}" data-name="${_esc(c.name || "")}" title="名前を付けて保存">✎ 名前</button><a href="/camp/${c.file}" target="_blank" rel="noopener">開く</a><button class="h_del" data-file="${c.file}" title="削除">🗑</button></div>`;
+        return `<div class="hist_row${favCls}"><span class="h_title" title="${_esc(c.name || c.title || c.file)}">${label}</span><span class="h_date">${ds}</span><button class="h_name" data-file="${c.file}" data-name="${_esc(c.name || "")}" title="名前を付けて保存">✎ 名前</button><a href="/camp/${c.file}" target="campview" rel="noopener">開く</a><button class="h_del" data-file="${c.file}" title="削除">🗑</button></div>`;
       }).join("");
       // 履歴を開いたら、新しい順の先頭（＝一番上）が見えるようにスクロールする
       campHistList.scrollTop = 0;
@@ -1745,7 +1778,7 @@
         let el = document.getElementById("cj_" + id);
         // 完了したジョブはカードを残さない（自動でカンプを開く＋履歴に入る）。進行中とエラーだけ表示。
         if (j.state === "done") {
-          if (!_campOpened[id]) { _campOpened[id] = 1; window.open("/camp/" + j.file, "_blank"); loadCampHistory(); }
+          if (!_campOpened[id]) { _campOpened[id] = 1; window.open("/camp/" + j.file, "campview"); loadCampHistory(); }
           if (el) el.remove();
           delete _campLocal[id];
           return;
@@ -1970,6 +2003,7 @@
       document.querySelector("#detail_extract").dataset.id = id;
       document.querySelector("#detail_read_motion").dataset.id = id;
       document.querySelector("#detail_clone").dataset.id = id;
+      document.querySelector("#detail_clone_assets").dataset.id = id;
       detailOverlay.classList.add("is_open");
     }
     // 録画からAIが読み取った「動きメモ」を描画（見て分かる解説＋AIに真似させる指示）
@@ -2030,6 +2064,8 @@
         : "<span style='color:#999;font-size:1.3rem'>まだ抜き出していません</span>";
       if (d.extracting) { btn.disabled = true; btn.textContent = "抜き出し中…（十数秒）"; }
       else { btn.disabled = false; btn.textContent = (d.assets || []).length ? "🖼 もう一度抜き出す" : "🖼 画像を抜き出す"; }
+      const cbtn = document.querySelector("#detail_clone_assets");
+      cbtn.disabled = !(d.assets || []).length;
     }
     // 「画像を抜き出す」：実ページから収集 → 完了したらギャラリー更新
     document.querySelector("#detail_extract").addEventListener("click", async (e) => {
@@ -2067,7 +2103,29 @@
         if (d.site_id) { btn.textContent = "クローン中… " + (d.phase || ""); setTimeout(wait, 1500); return; }
         btn.disabled = false; btn.textContent = "📋 忠実クローン（AIなし）";
         if (d.error) { status.textContent = "クローン失敗: " + d.error; return; }
-        if (d.file) { status.textContent = "クローン完了！新しいタブで開きます"; window.open("/camp/" + encodeURIComponent(d.file), "_blank"); }
+        if (d.file) { status.textContent = "クローン完了！カンプ用タブで開きます"; window.open("/camp/" + encodeURIComponent(d.file), "campview"); }
+      };
+      setTimeout(wait, 1500);
+    });
+    // 「抽出画像で忠実に再現」：DOM・CSSは通常どおり実ページから吸い出すが、
+    // 画像は「🖼画像を抜き出す」で保存済みの分をネット再取得せずそのまま使う
+    document.querySelector("#detail_clone_assets").addEventListener("click", async (e) => {
+      const id = e.currentTarget.dataset.id;
+      const btn = e.currentTarget;
+      const keepJs = confirm("元サイトのJS（本物のアニメ）も残しますか？\n\nOK = 残す（GSAP等の演出が動く可能性あり。ただし壊れて表示が乱れるサイトもある）\nキャンセル = 残さない（安全。代わりにスクロール出現アニメを自動注入）");
+      btn.disabled = true; btn.textContent = "クローン中…";
+      const res = await fetch("/api/clone_site", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, keep_js: keepJs, use_extracted: true }),
+      });
+      const data = await res.json();
+      if (!data.ok) { btn.disabled = false; btn.textContent = "🖼 抽出画像で忠実に再現"; status.textContent = data.message; return; }
+      const wait = async () => {
+        const d = await fetch("/api/clone_site/status").then((r) => r.json());
+        if (d.site_id) { btn.textContent = "クローン中… " + (d.phase || ""); setTimeout(wait, 1500); return; }
+        btn.disabled = false; btn.textContent = "🖼 抽出画像で忠実に再現";
+        if (d.error) { status.textContent = "クローン失敗: " + d.error; return; }
+        if (d.file) { status.textContent = "クローン完了！カンプ用タブで開きます"; window.open("/camp/" + encodeURIComponent(d.file), "campview"); }
       };
       setTimeout(wait, 1500);
     });
@@ -2241,6 +2299,7 @@
     const addState  = document.querySelector("#add_state");
 
     addToggle.addEventListener("click", () => {
+      closeToolPanels("#add_panel");
       addPanel.classList.toggle("is_open");
       if (addPanel.classList.contains("is_open")) addInput.focus();
     });
