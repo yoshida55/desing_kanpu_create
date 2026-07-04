@@ -22,7 +22,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, assets, camp, clone, config, db, embed, export_split, ingest, motion, search, vibe
+from . import anim, assets, camp, clone, config, db, embed, export_split, ingest, motion, search, style_check, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -1334,6 +1334,22 @@ def api_export_split():
     return jsonify(result)
 
 
+@app.route("/api/style_check", methods=["POST"])
+def api_style_check():
+    """カンプを Vision AI で採点（有名サイト基準）。同期・十数〜数十秒かかる。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    try:
+        result = style_check.style_check(fn, data.get("provider"))
+    except Exception as exc:  # noqa: BLE001
+        log.exception("おしゃれ度チェックに失敗: %s", fn)
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify(result), (200 if result.get("ok") else 400)
+
+
 @app.route("/exports/<path:filename>")
 def export_file(filename: str):
     """分割エクスポートした zip をダウンロードさせる。"""
@@ -1533,6 +1549,13 @@ _EDIT_BAR = """
     <div class="lbl plain">🎨 ベース色（テーマ色・AIなし・ページ全体に反映）</div>
     <div class="row" style="align-items:center"><input type="color" id="__ce_base" style="width:54px;height:38px;padding:2px;border:1px solid #d0d0d5;border-radius:9px;cursor:pointer;flex:none"><button class="im" id="__ce_baser" style="background:#f2f2f4;color:#1d1d1f;border:1px solid #ddd;flex:1;margin:0">⟲ 元の色に戻す</button></div>
     <div class="msg" id="__ce_basemsg" style="min-height:0;margin-top:2px"></div>
+    <div class="lbl plain">🚫 背景の飾りを消す（わっか/ぼかし等・クリックで消せない装飾）</div>
+    <button class="im" id="__ce_nodeco" style="background:#f2f2f4;color:#1d1d1f;border:1px solid #ddd">🚫 背景の飾り（わっか等）を消す</button>
+    <div class="lbl plain">➕ 文字を追加（AIなし・ドラッグで置く→右クリックで編集）</div>
+    <button class="im" id="__ce_addtext" style="background:#0b6bcb;color:#fff">➕ 文字を追加</button>
+    <div class="lbl plain">🧹 全体を規則化（余白・見出しを一律に揃える・AIなし＝一貫性UP）</div>
+    <button class="im" id="__ce_normalize" style="background:#0b6e4f;color:#fff">🧹 余白・見出しを一律に揃える</button>
+    <button class="im" id="__ce_btncolor" style="background:#0b6e4f;color:#fff">🎨 全ボタンをテーマ色に統一</button>
     <div class="lbl plain">🤖 修正・おしゃれに使うAI（モデルは⚙設定で）</div>
     <select id="__ce_ai"><option value="anthropic">Claude</option><option value="openai">GPT</option><option value="gemini">Gemini</option><option value="deepseek">DeepSeek（激安）</option><option value="zai">GLM（Z.ai・激安）</option></select>
     <div class="lbl plain">① 範囲を選ぶ（全体／セクション）</div>
@@ -1554,6 +1577,9 @@ _EDIT_BAR = """
     <div class="lbl plain">⭐ セクションのお気に入り（①で選んだセクションが対象・AIなし）</div>
     <button class="im" id="__ce_fav" style="background:#e8a300;color:#fff">⭐ このセクションをお気に入り</button>
     <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
+    <div class="lbl plain">🎨 おしゃれ度チェック（AIが有名サイト基準で採点＋改善点）</div>
+    <button class="im" id="__ce_stylecheck" style="background:#c026a6;color:#fff">🎨 おしゃれ度をチェック</button>
+    <button class="im" id="__ce_autopolish" style="background:#7c3aed;color:#fff">🎯 チェックして自動で磨く（採点→改善を一括・AI）</button>
     <div class="lbl plain">📦 納品用に書き出す（HTML/CSS/JS＋画像を分割・AIなし）</div>
     <button class="im" id="__ce_export" style="background:#0b6e4f;color:#fff">📦 分割エクスポート（zipで保存）</button>
     <div class="msg" id="__ce_msg">💡 直したい所を<b>右クリック</b>すると、その要素に直接アニメ・指示が出せます</div>
@@ -1587,6 +1613,126 @@ _EDIT_BAR = """
   if(homeBtn) homeBtn.addEventListener('click',goHome);
   var homeH=document.getElementById('__ce_homeh');  // ヘッダ側＝畳んでいても常に押せる
   if(homeH) homeH.addEventListener('click',goHome);
+  // 🚫 背景の飾り（わっか/ぼかし等）を消す：pointer-events:none で右クリックできない浮遊装飾をまとめて除去。
+  var nodecoBtn=document.getElementById('__ce_nodeco');
+  if(nodecoBtn) nodecoBtn.addEventListener('click',function(){
+    var removed=0;
+    [].slice.call(document.querySelectorAll('body *')).forEach(function(el){
+      if(el.id && el.id.indexOf('__ce')===0) return;
+      if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return;
+      var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
+      if(cs.pointerEvents!=='none') return;                        // クリックで消せない装飾だけを対象
+      if((el.textContent||'').trim()!=='') return;                 // 文字を含むものは飾りではない
+      if(el.querySelector && el.querySelector('img,video,svg,picture,canvas,input,button,a')) return;  // 中身のあるものは除外
+      var pos=cs.position; if(pos!=='fixed' && pos!=='absolute') return;  // 背景に浮く配置だけ
+      var isShape=(cs.borderRadius && cs.borderRadius!=='0px')||(cs.backgroundImage && cs.backgroundImage!=='none')||(cs.borderStyle && cs.borderStyle!=='none' && parseFloat(cs.borderWidth)>0)||(cs.filter && cs.filter!=='none');
+      if(!isShape) return;                                         // 円/ぼかし/グラデ等の"形のある飾り"だけ
+      el.remove(); removed++;
+    });
+    markDirty();
+    msg.textContent = removed ? ('背景の飾りを '+removed+' 個消しました（「💾 保存」で確定・「⟲ 戻す」で復活）') : '消せる背景の飾りは見つかりませんでした（別の作り方かもしれません）';
+  });
+  // ➕ 文字を追加：新しい文字要素を今見えている位置に置く→すぐドラッグで移動できる。内容は右クリック→文字を編集で。
+  var addTextBtn=document.getElementById('__ce_addtext');
+  if(addTextBtn) addTextBtn.addEventListener('click',function(){
+    var d=document.createElement('div');
+    d.textContent='ここに文字';
+    var x=Math.round((window.scrollX||window.pageXOffset||0)+window.innerWidth*0.30);
+    var y=Math.round((window.scrollY||window.pageYOffset||0)+window.innerHeight*0.32);
+    // 画面座標に絶対配置。読みやすい既定（太字・濃いグレー）。z-indexは編集UIより下・本文より上くらい。
+    d.setAttribute('style','position:absolute;left:'+x+'px;top:'+y+'px;z-index:60;font-size:32px;font-weight:700;color:#333;font-family:inherit;line-height:1.4;padding:4px 8px;cursor:move;white-space:nowrap');
+    document.body.appendChild(d);
+    markDirty();
+    try{ d.scrollIntoView({block:'center'}); }catch(_){}
+    if(typeof setDragOn==='function'){ if(typeof curEl!=='undefined' && curEl) curEl.classList.remove('__ce_sel'); d.classList.add('__ce_sel'); setDragOn(d); }  // すぐ動かせる状態に
+    msg.textContent='文字を追加しました。ドラッグで置く→右クリック→「✏ 文字を編集」で内容・色・大きさを変更（💾保存で確定）';
+  });
+  // 🧹 全体を規則化：セクション余白を一律・主要見出しのサイズと行間を一律にそろえる（AIなし・一貫性UP）。
+  // AI一括改善が「シンプルすぎ」になりがちな一貫性(余白/見出し)を、機械的に確実にそろえる用。
+  var normBtn=document.getElementById('__ce_normalize');
+  if(normBtn) normBtn.addEventListener('click',function(){
+    if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・セクションの上下余白 100px／左右も最低限を確保\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
+    function _skip(el){ return el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')); }
+    // カード等の小見出し・小さい文字は対象外（そこまで大きく/広くすると崩れるため）
+    function _inCard(el){ var n=el; while(n && n!==document.body){ var c=(n.className&&n.className.toString())||''; if(/card|item|bubble|benefit|badge|chip|tag|nav|menu|footer|col/i.test(c)) return true; n=n.parentElement; } return false; }
+    var secN=0, hN=0, pN=0;
+    [].forEach.call(document.querySelectorAll('section'),function(s){
+      if(_skip(s)) return;
+      s.style.setProperty('padding-top','100px','important');
+      s.style.setProperty('padding-bottom','100px','important');
+      s.style.setProperty('margin-top','0','important');
+      s.style.setProperty('margin-bottom','0','important');
+      // 左右は「今が狭い時だけ」最低限を確保（既にゆとりがある中央寄せは詰めない）
+      try{ var cs=getComputedStyle(s); if(parseFloat(cs.paddingLeft)<24){ s.style.setProperty('padding-left','24px','important'); s.style.setProperty('padding-right','24px','important'); } }catch(_){}
+      secN++;
+    });
+    // 見出し：サイズ＋太さも一律（H1=太字700／H2・H3=セミボールド600）
+    [['h1',64,700],['h2',40,600],['h3',26,600]].forEach(function(t){
+      [].forEach.call(document.querySelectorAll(t[0]),function(h){
+        if(_skip(h)||_inCard(h)) return;
+        h.style.setProperty('font-size',t[1]+'px','important');
+        h.style.setProperty('font-weight',t[2],'important');
+        h.style.setProperty('line-height','1.4','important');
+        h.style.setProperty('margin-bottom','0.6em','important');
+        hN++;
+      });
+    });
+    // 本文(p)の行間を1.8に＝Apple/Vercel的な"呼吸感"。カード内の小さい注記等は除外。
+    [].forEach.call(document.querySelectorAll('p'),function(pp){
+      if(_skip(pp)||_inCard(pp)) return;
+      var fs=16; try{ fs=parseFloat(getComputedStyle(pp).fontSize)||16; }catch(_){}
+      if(fs<12) return;  // ごく小さい注記は触らない
+      pp.style.setProperty('line-height','1.8','important');
+      pN++;
+    });
+    // 影を1種類に統一＝バラバラなshadowでデザインシステムが崩れる問題を解消。
+    var STD_SHADOW='0 4px 16px rgba(0,0,0,.08)', shN=0;
+    [].forEach.call(document.querySelectorAll('body *'),function(el){
+      if(el.id && el.id.indexOf('__ce')===0) return;
+      if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return;
+      var bs=''; try{ bs=getComputedStyle(el).boxShadow; }catch(_){ return; }
+      if(bs && bs!=='none'){ el.style.setProperty('box-shadow',STD_SHADOW,'important'); shN++; }
+    });
+    markDirty();
+    msg.textContent='規則化：余白 '+secN+'／見出し '+hN+'／本文行間 '+pN+'／影 '+shN+' 箇所をそろえました（💾保存で確定・⟲で戻せる）';
+  });
+  // 🎨 全ボタンをテーマ色に統一：CTAの色バラつき（ブランド感の弱さ）をAIなしで一発解消。
+  // 主要ボタン＝テーマ色で塗り／secondary系＝同色の枠線、に統一する。
+  var btnColBtn=document.getElementById('__ce_btncolor');
+  if(btnColBtn) btnColBtn.addEventListener('click',function(){
+    // テーマ色：まず --accent、無ければ一番よく使われているボタン背景色を採用
+    var accent=(getComputedStyle(document.documentElement).getPropertyValue('--accent')||'').trim();
+    if(!accent){
+      var freq={};
+      [].forEach.call(document.querySelectorAll('a.btn,button,.btn,.cta,.button'),function(el){ var bg=getComputedStyle(el).backgroundColor||''; if(bg && !/rgba?\\(0, 0, 0, 0\\)|transparent/.test(bg)){ freq[bg]=(freq[bg]||0)+1; } });
+      var best=null,bn=0; Object.keys(freq).forEach(function(k){ if(freq[k]>bn){bn=freq[k];best=k;} });
+      accent=best||'#1a7f37';
+    }
+    var els=document.querySelectorAll('a.btn,a.button,a[class*="btn"],a[class*="cta"],button,.btn,.cta,.button');
+    var n=0, seen=[];
+    [].forEach.call(els,function(el){
+      if(el.id && el.id.indexOf('__ce')===0) return;
+      if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return;
+      if(seen.indexOf(el)>-1) return; seen.push(el);
+      var c=(el.className&&el.className.toString())||'';
+      if(/secondary|outline|ghost|line|sub/i.test(c)){   // サブボタン＝同色の枠線に
+        el.style.setProperty('background','transparent','important');
+        el.style.setProperty('background-image','none','important');
+        el.style.setProperty('color',accent,'important');
+        el.style.setProperty('-webkit-text-fill-color',accent,'important');
+        el.style.setProperty('border','2px solid '+accent,'important');
+      } else {                                            // 主要ボタン＝テーマ色で塗り
+        el.style.setProperty('background',accent,'important');
+        el.style.setProperty('background-image','none','important');
+        el.style.setProperty('color','#fff','important');
+        el.style.setProperty('-webkit-text-fill-color','#fff','important');
+        el.style.setProperty('border','none','important');
+      }
+      n++;
+    });
+    markDirty();
+    msg.textContent = n ? ('ボタンを '+n+' 個テーマ色に統一しました（主要=塗り／sub=枠線・💾保存で確定・⟲で戻せる）') : 'ボタンが見つかりませんでした（.btn等のクラスが無いのかも）';
+  });
   // 🎨 ベース色（テーマ色）をAIなしで一括変更：生成HTMLの :root にある色変数(--accent等)を上書きする。
   // <html>のインラインstyleに当てるので :root より優先され、var(--accent)を使う全要素が即変わる＆保存で残る。
   (function(){
@@ -1842,6 +1988,70 @@ _EDIT_BAR = """
       favBtn.disabled=false; favBtn.textContent=old;
       msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'):('保存失敗：'+(d.message||''));
     }).catch(function(){ favBtn.disabled=false; favBtn.textContent=old; msg.textContent='通信エラー'; });
+  });
+  // 🎨 おしゃれ度チェック：現DOMを保存→AIが有名サイト基準で採点＋改善点。結果はモーダル表示。
+  function _scBar(label, n){
+    var pct=Math.max(0,Math.min(100,(+n||0)*10)), col=n>=8?'#1a7f37':(n>=6?'#b8860b':'#c0392b');
+    return '<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="width:92px;font-size:12px;color:#555">'+label+'</span><span style="flex:1;height:8px;background:#eee;border-radius:5px;overflow:hidden"><span style="display:block;height:100%;width:'+pct+'%;background:'+col+'"></span></span><b style="width:34px;text-align:right;font-size:12.5px;color:'+col+'">'+(n!=null?n:'-')+'</b></div>';
+  }
+  function showStyleResult(d){
+    var ov=document.createElement('div'); ov.id='__ce_pk';
+    var sc=d.scores||{};
+    // fixesが配列でない形（AIがオブジェクトや文字列で返す）でも落ちないよう正規化
+    var _fx=Array.isArray(d.fixes)?d.fixes:(d.fixes&&typeof d.fixes==='object'?Object.keys(d.fixes).map(function(k){return d.fixes[k];}):[]);
+    var fixes=_fx.map(function(f,i){ if(f&&typeof f!=='object') f={title:''+f}; f=f||{}; return '<div style="border:1px solid #eee;border-radius:8px;padding:9px 11px;margin-bottom:7px"><b style="font-size:13px;color:#1d1d1f">'+(i+1)+'. '+esc(f.title||f.fix||f.name||'')+'</b>'+(f.why?'<div style="font-size:12px;color:#888;margin-top:3px">👀 '+esc(f.why)+'</div>':'')+(f.how?'<div style="font-size:12.5px;color:#1d1d1f;margin-top:3px">🎯 '+esc(f.how)+'</div>':'')+'</div>'; }).join('');
+    var ov100=d.overall!=null?d.overall:'-';
+    ov.innerHTML='<div class="bx" style="max-width:560px"><span class="cl" id="__ce_pkx">×</span>'
+      +'<h4>🎨 おしゃれ度チェック（有名サイト基準）</h4>'
+      +'<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px"><span style="font-size:34px;font-weight:800;color:#c026a6">'+ov100+'</span><span style="font-size:14px;color:#888">/ 10（10=有名サイト級）</span></div>'
+      +(d.summary?'<div style="font-size:12.5px;color:#444;background:#faf5fb;border:1px solid #f0dcf0;border-radius:8px;padding:9px 11px;margin-bottom:10px">'+esc(d.summary)+'</div>':'')
+      +_scBar('余白',sc.whitespace)+_scBar('字組み',sc.typography)+_scBar('配色',sc.color)+_scBar('視覚的階層',sc.hierarchy)+_scBar('一貫性',sc.consistency)+_scBar('画像/あしらい',sc.imagery)
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:12px 0 6px">🔧 効果の大きい改善点</div>'+fixes
+      +'<div style="font-size:11px;color:#aaa;margin-top:8px">採点：'+esc(d.model||'')+'</div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){ if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx') ov.remove(); });
+  }
+  var scBtn=document.getElementById('__ce_stylecheck');
+  if(scBtn) scBtn.addEventListener('click',function(){
+    scBtn.disabled=true; var old=scBtn.textContent; scBtn.textContent='保存して採点中…（十数〜数十秒）';
+    showToast('AIが有名サイト基準で採点中…（十数〜数十秒）');
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
+    .then(function(){ return fetch('/api/style_check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})}); })
+    .then(function(r){return r.json();}).then(function(d){
+      hideToast(); scBtn.disabled=false; scBtn.textContent=old;
+      if(!d.ok){ msg.textContent='採点できませんでした：'+(d.message||''); return; }
+      try{ showStyleResult(d); msg.textContent='おしゃれ度：'+ (d.overall!=null?d.overall:'-') +'/10。改善点を表示しました'; }
+      catch(e){ msg.textContent='採点は出ました（総合 '+(d.overall!=null?d.overall:'-')+'/10）が、表示でエラー：'+(e&&e.message||e); }
+    }).catch(function(err){ hideToast(); scBtn.disabled=false; scBtn.textContent=old; msg.textContent='採点でエラー：'+(err&&err.message||'通信エラー'); });
+  });
+  // 🎯 チェックして自動で磨く：採点→AIの改善点を"指示"に変換→既存の一括改善に流す（1回）。
+  var apBtn=document.getElementById('__ce_autopolish');
+  if(apBtn) apBtn.addEventListener('click',function(){
+    if(!confirm('AIが「採点 → 改善点 → 自動でページ全体を磨く」を1回実行します。\\n\\n・Vision採点＋ページ全体の改善でAIを使います（目安：数十〜100円）\\n・見た目判断なのでAIはClaude/GPT推奨（DeepSeekは崩れやすい）\\n・仕上がりが気に入らなければ元の版はそのまま残ります\\n\\n実行しますか？')) return;
+    apBtn.disabled=true; var old=apBtn.textContent; apBtn.textContent='① 保存して採点中…';
+    showToast('① AIが採点中…（十数秒）');
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
+    .then(function(){ return fetch('/api/style_check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})}); })
+    .then(function(r){return r.json();}).then(function(sc){
+      if(!sc.ok){ throw new Error(sc.message||'採点に失敗'); }
+      // AIの改善点をそのまま"指示"に変換して一括改善へ
+      var hint='次の改善点をページ全体に反映し、見た目の質を有名サイト級に近づける（文言・画像・レイアウト構成は変えない）：\\n'
+        + (sc.fixes||[]).map(function(f,i){ return (i+1)+'. '+(f.title||'')+'：'+(f.how||''); }).join('\\n');
+      apBtn.textContent='② 改善点を反映中…（数分）';
+      showToast('② 採点 '+(sc.overall!=null?sc.overall:'-')+'/10 → 改善点を自動で反映中…（数分）');
+      return fetch('/api/improve_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,limit:0,sections:null,hint:hint,ref_id:(refSel?refSel.value:'')})});
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(!d.ok){ throw new Error(d.message||'改善を開始できませんでした'); }
+      var poll=function(){
+        fetch('/api/improve_camp/status').then(function(r){return r.json();}).then(function(s){
+          if(s.file){ apBtn.textContent='② '+(s.phase||'改善中…'); setTimeout(poll,2000); return; }
+          hideToast(); apBtn.disabled=false; apBtn.textContent=old;
+          if(s.error){ msg.textContent='自動ブラッシュアップ失敗: '+s.error; return; }
+          if(s.result&&s.result.file){ msg.textContent='磨き上がりました！After版を開きます（開いたら🎨で再採点してみてください）'; location.href='/camp/'+encodeURIComponent(s.result.file); }
+        }).catch(function(){ setTimeout(poll,3000); });
+      };
+      setTimeout(poll,2000);
+    }).catch(function(err){ hideToast(); apBtn.disabled=false; apBtn.textContent=old; msg.textContent='失敗：'+(err&&err.message||'通信エラー'); });
   });
   // 📦 納品用に分割エクスポート（保存済みファイルを HTML/CSS/JS＋images に分けてzip）。
   // まず現DOMを保存してから分割（今の編集を反映）。zipは自動ダウンロード。
@@ -2110,7 +2320,9 @@ _EDIT_BAR = """
   // ===== 右クリックで、その要素に直接アニメ/指示/改善案を出す =====
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
-  function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} curAnim=null; curP={}; }
+  function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} curAnim=null; curP={};
+    // メニューを閉じたらドラッグ移動モードも解除＝文字をドラッグで「選択」できるようにする（部分色付けと両立）
+    if(typeof dragEl!=='undefined' && dragEl){ try{ dragEl.removeEventListener('mousedown',_dDown,true); dragEl.style.cursor=''; }catch(_){} dragEl=null; } }
   // 要素を丸ごと消す（AIなし・即反映）。ドラッグ中なら解除してから消す。保存するまでは確定しない。
   function removeEl(el){
     if(!el||el===document.body){ msg.textContent='これは消せません'; return; }
@@ -2231,20 +2443,41 @@ _EDIT_BAR = """
   }
   // ===== 文章の一部だけ色を変える：ドラッグで文字を選ぶ→小さな色ボタンが出る（AIなし）=====
   (function(){
-    var pop=null, curSpan=null, savedRange=null;
-    function hidePop(){ if(pop){ pop.remove(); pop=null; } curSpan=null; savedRange=null; }
+    var pop=null, curSpan=null, savedRange=null, curHl=null;
+    function hidePop(){ if(pop){ pop.remove(); pop=null; } curSpan=null; savedRange=null; curHl=null; }
     function inUI(node){ var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')); }
+    // 選んだ範囲に色を当てる。中に色付きの子span（1文字ずつの.fxa_ch等の!important）があると
+    // 囲むだけでは負けるので、子孫の色も全部この色で上書きする。
+    function _forceColor(root, color){
+      root.style.setProperty('color',color,'important'); root.style.setProperty('-webkit-text-fill-color',color,'important');
+      [].forEach.call(root.querySelectorAll('*'), function(sp){ sp.style.setProperty('color',color,'important'); sp.style.setProperty('-webkit-text-fill-color',color,'important'); });
+    }
     function paint(color){
-      if(curSpan){ curSpan.style.setProperty('color',color,'important'); curSpan.style.setProperty('-webkit-text-fill-color',color,'important'); markDirty(); return; }
+      if(curSpan){ _forceColor(curSpan,color); markDirty(); return; }
       if(!savedRange) return;
       try{
         var span=document.createElement('span');
-        span.style.setProperty('color',color,'important'); span.style.setProperty('-webkit-text-fill-color',color,'important');
         try{ savedRange.surroundContents(span); }
         catch(_){ var frag=savedRange.extractContents(); span.appendChild(frag); savedRange.insertNode(span); }
+        _forceColor(span,color);
         curSpan=span; markDirty();
         if(msg) msg.textContent='選んだ文字だけ色を変えました（保存で確定）';
       }catch(err){ if(msg) msg.textContent='この範囲は色を変えられませんでした（別々の要素にまたがっています）'; }
+    }
+    // 🖍 蛍光ペン：選択文字を .fxa_hl で囲む→スクロールで線が伸びる（保存版でも自動再生）。
+    function highlight(color){
+      if(curHl){ curHl.style.setProperty('--hlc',color); markDirty(); return; }
+      if(!savedRange) return;
+      try{
+        var span=document.createElement('span'); span.className='fxa_hl';
+        span.style.setProperty('--hlc',color);
+        try{ savedRange.surroundContents(span); }
+        catch(_){ var frag=savedRange.extractContents(); span.appendChild(frag); savedRange.insertNode(span); }
+        if(typeof ensureFxAssets==='function') ensureFxAssets();  // アニメCSS/監視JSを注入（保存版で動く）
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ span.classList.add('fxa_in'); }); });  // 今すぐ線を引く（プレビュー）
+        curHl=span; markDirty();
+        if(msg) msg.textContent='マーカーを引きました（スクロールで線がスーッと伸びます・保存で確定）';
+      }catch(err){ if(msg) msg.textContent='この範囲はマーカーを引けませんでした（別々の要素にまたがっています）'; }
     }
     document.addEventListener('mouseup', function(e){
       if(inUI(e.target)) return;  // 編集UI上の操作は無視
@@ -2257,12 +2490,16 @@ _EDIT_BAR = """
         hidePop(); savedRange=rng.cloneRange();
         pop=document.createElement('div'); pop.id='__ce_selc';
         pop.style.cssText='position:fixed;z-index:2147483004;background:#1d1d1f;color:#fff;border-radius:10px;padding:6px 9px;box-shadow:0 10px 30px rgba(0,0,0,.42);font-family:system-ui,sans-serif;font-size:12px;display:flex;align-items:center;gap:7px';
-        pop.innerHTML='<span>選んだ文字の色</span><input type="color" id="__ce_selcol" style="width:36px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer"><button id="__ce_selx" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer">×</button>';
+        pop.innerHTML='<span style="opacity:.85">文字色</span><input type="color" id="__ce_selcol" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer">'
+          +'<span style="opacity:.45">｜</span><span style="opacity:.85">🖍</span><input type="color" id="__ce_selhlc" value="#ffe66d" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="マーカーの色"><button id="__ce_selhl" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="蛍光ペンを引く">引く</button>'
+          +'<button id="__ce_selx" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer">×</button>';
         document.body.appendChild(pop);
-        pop.style.left=Math.max(8,Math.min(r.left, window.innerWidth-200))+'px';
+        pop.style.left=Math.max(8,Math.min(r.left, window.innerWidth-320))+'px';
         pop.style.top=Math.max(8, r.top-42)+'px';
         pop.querySelector('#__ce_selx').addEventListener('click', hidePop);
         pop.querySelector('#__ce_selcol').addEventListener('input', function(){ paint(this.value); });
+        pop.querySelector('#__ce_selhl').addEventListener('click', function(){ highlight(pop.querySelector('#__ce_selhlc').value); });
+        pop.querySelector('#__ce_selhlc').addEventListener('input', function(){ if(curHl) highlight(this.value); });
       }, 10);
     }, true);
     document.addEventListener('scroll', hidePop, true);
@@ -2494,14 +2731,17 @@ _EDIT_BAR = """
     +'.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}'
     +'.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}'
     +'.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}'
-    +'.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}';
+    +'.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}'
+    // 🖍 蛍光ペン：文字の下側だけ帯状に塗り、スクロールで左→右にスーッと伸びる（背景の伸縮アニメ）
+    +'.fxa_hl{background-image:linear-gradient(transparent 60%,var(--hlc,#ffe66d) 60%,var(--hlc,#ffe66d) 92%,transparent 92%);background-repeat:no-repeat;background-size:0% 100%;transition:background-size .7s cubic-bezier(.16,1,.3,1);padding:0 .06em;-webkit-box-decoration-break:clone;box-decoration-break:clone}'
+    +'.fxa_hl.fxa_in{background-size:100% 100%}';
   // スクロールで画面に入ったら .fxa_in を付けて再生。JS無効なら全部表示（消えない保険）。"__ce"を含めない＝保存で残る。
   // ★時間トリガー(setTimeout)は使わない＝「スクロールで画面に入った時に1回だけ再生」に統一。
   //   IntersectionObserverだけで判定→発火したらunobserve（1回きり）。上部の要素は監視開始時に即発火＝読み込みで再生。
   var FX_RUN='(function(){var d=document,h=d.documentElement;'
-    +'if(!d.querySelector(".fxa_pre")){return;}h.classList.add("fxa-on");'
+    +'if(!d.querySelector(".fxa_pre,.fxa_hl")){return;}h.classList.add("fxa-on");'
     +'[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});'  // 自動修復：出現アニメ要素に焼き込まれた古いtransform(プレビュー残骸)を消す＝過去に固まった分も開くだけで直る
-    +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}'
+    +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in)"));}'
     +'if(!("IntersectionObserver" in window)){all().forEach(function(el){el.classList.add("fxa_in");});return;}'
     +'var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){t.classList.add("fxa_in");});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});'
     +'function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}'  // 初回描画(fxa_pre隠れ状態)を1フレーム待ってから監視開始＝上部要素も一瞬で終わらずスライドする
@@ -2605,7 +2845,21 @@ _EDIT_BAR = """
   }
   // ドラッグで動かす：対象要素に直接 mousedown を付ける（確実に掴める）
   var dragEl=null, dActive=false, dSX=0,dSY=0,dOX=0,dOY=0;
+  // ページ全体の器（body/main/html/section/header/footer）や画面いっぱいの要素は動かさせない。
+  // ＝誤って掴むとページ全体がズレて巨大な余白になる事故を防ぐ。
+  function _undraggable(el){
+    if(!el||el===document.body||el===document.documentElement) return true;
+    var tag=el.tagName;
+    if(tag==='BODY'||tag==='HTML'||tag==='MAIN') return true;  // ページの根っこだけ禁止
+    // 「ページ全体をくるむ器」（画面いっぱい かつ 中に section/header/footer/main を含む）も禁止
+    try{
+      var r=el.getBoundingClientRect();
+      if(r.width>=window.innerWidth*0.9 && r.height>=window.innerHeight*0.9 && el.querySelector && el.querySelector('section,header,footer,main')) return true;
+    }catch(_){}
+    return false;  // セクション単体・見出し・画像・カード等は動かせる
+  }
   function _dDown(e){
+    if(_undraggable(dragEl)){ return; }  // 器は動かさない（保険）
     dActive=true; dSX=e.clientX; dSY=e.clientY;
     dOX=+dragEl.getAttribute('data-cetx')||0; dOY=+dragEl.getAttribute('data-cety')||0;
     document.body.style.userSelect='none'; e.preventDefault(); e.stopPropagation();
@@ -2613,6 +2867,7 @@ _EDIT_BAR = """
   document.addEventListener('mousemove',function(e){ if(dActive&&dragEl) setPos(dragEl, dOX+(e.clientX-dSX), dOY+(e.clientY-dSY)); },true);
   document.addEventListener('mouseup',function(){ if(dActive){ dActive=false; document.body.style.userSelect=''; pushUndo(); } },true);
   function toggleDrag(el,btn){
+    if(_undraggable(el)){ if(msg) msg.textContent='これはページ全体の器なので動かせません（中の要素を選んでください）'; return; }
     if(dragEl===el){ // 同じ要素をもう一度押したら終了
       el.removeEventListener('mousedown',_dDown,true); el.style.cursor=''; dragEl=null;
       if(btn) btn.textContent='🖱 ドラッグで動かす（押して開始/終了）'; msg.textContent=''; return;
@@ -2624,6 +2879,7 @@ _EDIT_BAR = """
   }
   // 右クリック直後に呼ぶ：確実にドラッグON（トグルではない）
   function setDragOn(el,btn){
+    if(_undraggable(el)){ if(msg) msg.textContent='これはページ全体の器なので動かせません（中の見出し・画像・カードを選んでください）'; return; }
     if(dragEl && dragEl!==el){ dragEl.removeEventListener('mousedown',_dDown,true); dragEl.style.cursor=''; }
     dragEl=el; el.style.cursor='move'; el.addEventListener('mousedown',_dDown,true);
     if(btn) btn.textContent='✋ ドラッグ中（もう一度押すと解除）';
@@ -2818,6 +3074,8 @@ _EDIT_BAR = """
       +'<div class="__ce_size"><button data-mw="80">＋ 横に広く</button><button data-mw="-80">－ 横を狭く</button></div>'
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 ドラッグで動かす（押して開始/終了）</button>'
       +'<button class="go2" id="__ce_cmbr" style="background:#0b6bcb;margin-bottom:8px">✏ 文字を編集（改行・大きさ・フォント・色／AIなし）</button>'
+      +'<button class="go2" id="__ce_cmhl" style="background:#eab308;color:#1d1d1f;margin-bottom:4px">🖍 この文字にマーカー（スクロールで線が伸びる）</button>'
+      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="#ffe66d" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> ／ 文字を選んでから引くと「一部だけ」引けます</div>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
       +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
       +'<div class="__ce_anim" id="__fx_grid">'+FX.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
@@ -2910,6 +3168,27 @@ _EDIT_BAR = """
     if(stBtn) stBtn.addEventListener('click',function(){ applyEl(sIdx, STYLE_INS); });
     var brBtn=m.querySelector('#__ce_cmbr');
     if(brBtn) brBtn.addEventListener('click',function(){ openBreakEditor(curEl); });
+    // 🖍 この文字にマーカー：選択がいらない版。右クリックした要素の中身を .fxa_hl で丸ごと囲む
+    //   →スクロールで線がスーッと伸びる（保存版でも再生）。※選択できない箇所でも確実に引ける。
+    function hlWhole(el,color){
+      if(!el) return;
+      // 既に丸ごとマーカー済みなら色だけ更新
+      if(el.children.length===1 && el.firstChild && el.firstChild.classList && el.firstChild.classList.contains('fxa_hl')){
+        el.firstChild.style.setProperty('--hlc',color); markDirty();
+        if(msg) msg.textContent='マーカーの色を変えました（保存で確定）'; return;
+      }
+      var span=document.createElement('span'); span.className='fxa_hl'; span.style.setProperty('--hlc',color);
+      while(el.firstChild){ span.appendChild(el.firstChild); }
+      el.appendChild(span);
+      if(typeof ensureFxAssets==='function') ensureFxAssets();  // アニメCSS/監視JSを注入
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ span.classList.add('fxa_in'); }); });  // 今すぐ線を引く（プレビュー）
+      markDirty();
+      if(msg) msg.textContent='マーカーを引きました（スクロールで線が伸びます・保存で確定／⟲戻すで取り消し）';
+    }
+    var hlB=m.querySelector('#__ce_cmhl');
+    if(hlB) hlB.addEventListener('click',function(){ hlWhole(curEl, m.querySelector('#__ce_cmhlc').value); });
+    var hlC=m.querySelector('#__ce_cmhlc');
+    if(hlC) hlC.addEventListener('input',function(){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',this.value); markDirty(); } });
     m.querySelector('#__ce_cmsg').addEventListener('click',function(){
       var b=m.querySelector('#__ce_cmsg'); b.disabled=true; b.textContent='考え中…';
       fetch('/api/camp_suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:sIdx})})
