@@ -22,6 +22,7 @@ SCREENSHOT_DIR = DATA_DIR / "screenshots"
 VIDEO_DIR = DATA_DIR / "videos"  # スクロール録画(アニメ参照用)
 ASSET_DIR = DATA_DIR / "assets"  # サイトから抜き出した画像
 ANIM_DIR = DATA_DIR / "anim"  # サイトから抜き出したアニメ素材(Lottie JSON等)
+MOTION_DIR = DATA_DIR / "motion"  # 録画から抜いたフレーム(AIが動きを読み取る用)
 UPLOAD_DIR = DATA_DIR / "uploads"  # ユーザーがアップロードした自前画像（カンプに使う）
 CAMP_DIR = DATA_DIR / "camps"  # 生成したカンプHTML
 DB_PATH = DATA_DIR / "design_stock.sqlite"
@@ -56,8 +57,8 @@ class CaptureConfig:
     # 幅は1280（PCレイアウト維持）、高さを縦長にして"Webページらしい縦長"の録画にする
     video_w: int = 1280
     video_h: int = 1600
-    video_scroll_steps: int = 12      # 上から下まで何回に分けてスクロールするか
-    video_step_pause_ms: int = 700    # 1ステップごとの間（アニメが見える間）
+    video_scroll_steps: int = 16      # 上から下まで何回に分けてスクロールするか（多い=ゆっくり滑らか）
+    video_step_pause_ms: int = 1000   # 1ステップごとの間（長い=アニメが見える。録画時間も伸びる）
 
 
 @dataclass(frozen=True)
@@ -226,4 +227,5 @@ def ensure_dirs() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
     ANIM_DIR.mkdir(parents=True, exist_ok=True)
+    MOTION_DIR.mkdir(parents=True, exist_ok=True)
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)

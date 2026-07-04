@@ -63,6 +63,7 @@ def connect(db_path: Optional[Path] = None) -> Iterator[sqlite3.Connection]:
 _MIGRATIONS = {
     "vibe_embedding": "BLOB",  # 雰囲気描写文のSigLIPテキストベクトル(float32)
     "design_tokens": "TEXT",   # 配色・フォント・余白等のデザイントークン(JSON)
+    "motion_spec": "TEXT",     # 録画からAIが読み取った「動きの仕様書」(JSON)
 }
 
 
@@ -207,6 +208,13 @@ def update_anim_snippets(
     """
     conn.execute(
         "UPDATE site SET animation_snippets = ? WHERE id = ?", (snippets_json, site_id)
+    )
+
+
+def update_motion(conn: sqlite3.Connection, site_id: str, spec_json: str) -> None:
+    """録画からAIが読み取った「動きの仕様書」(JSON文字列)を記録する。"""
+    conn.execute(
+        "UPDATE site SET motion_spec = ? WHERE id = ?", (spec_json, site_id)
     )
 
 

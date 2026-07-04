@@ -27,41 +27,43 @@
       background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid #e0e0e0;
-      padding: 1rem 2.4rem; /* ギャラリーを広く見せるため上下を詰める */
+      padding: 0.7rem 2rem; /* ギャラリーを広く見せるため上下をさらに詰める */
     }
-    /* 検索ボックスと件数指定を横並びにする親 */
+    /* 検索ボックス＋件数＋主要ボタンを1行に並べる親 */
     .search_inner {
       display: flex; /* 入力欄とボタンを1行に */
-      gap: 1.2rem;
+      gap: 0.7rem;
       align-items: center;
-      max-width: 90rem;
+      flex-wrap: wrap; /* 狭い画面では自動で折り返す */
+      max-width: 120rem;
       margin: 0 auto;
     }
     .search_input {
       flex: 1;
-      font-size: 1.7rem;
-      padding: 1.2rem 1.6rem;
+      min-width: 24rem;
+      font-size: 1.5rem;
+      padding: 0.9rem 1.4rem;
       border: 1px solid #d0d0d5;
-      border-radius: 1rem;
+      border-radius: 0.9rem;
       outline: none;
     }
     .search_input:focus { border-color: #0066cc; }
     .search_top {
-      width: 7rem;
-      font-size: 1.5rem;
-      padding: 1.2rem 0.8rem;
+      width: 6rem;
+      font-size: 1.4rem;
+      padding: 0.9rem 0.6rem;
       border: 1px solid #d0d0d5;
-      border-radius: 1rem;
+      border-radius: 0.9rem;
       text-align: center;
     }
     .search_button {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: #ffffff;
       background: #0066cc;
       border: none;
-      border-radius: 1rem;
-      padding: 1.2rem 2.4rem;
+      border-radius: 0.9rem;
+      padding: 0.9rem 1.8rem;
       cursor: pointer;
     }
     .search_button:hover { background: #0055aa; }
@@ -83,10 +85,11 @@
       margin: 0.8rem auto 0;
     }
     .tool_btn {
-      font-size: 1.3rem;
+      font-size: 1.35rem;
       font-weight: 700;
-      border-radius: 1rem;
-      padding: 0.6rem 1.4rem;
+      border-radius: 0.9rem;
+      padding: 0.9rem 1.4rem;
+      white-space: nowrap;
       cursor: pointer;
     }
     .tool_set  { color: #444;    background: #eee;     border: 1px solid #ddd; }
@@ -216,25 +219,78 @@
     .cu_del:hover { background: #d0021b; }
     .cu_empty { color: #999; font-size: 1.2rem; grid-column: 1/-1; }
     /* mix & match：ベース／アニメ参照のセレクト */
-    .camp_mix { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+    .camp_mix { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
     .camp_lbl { flex: 1; min-width: 26rem; font-size: 1.25rem; color: #555; display: flex; flex-direction: column; gap: 0.4rem; }
     .camp_sel {
       font-size: 1.35rem; padding: 0.7rem 1rem; border: 1px solid #d0d0d5;
       border-radius: 0.8rem; background: #fff; cursor: pointer;
     }
+    /* ベース選択：サムネのグリッドから見た目で選ぶ */
+    .camp_base_trigger {
+      display: flex; align-items: center; gap: 0.8rem; width: 100%; text-align: left;
+      font-size: 1.35rem; padding: 0.6rem 1rem; border: 1px solid #d0d0d5;
+      border-radius: 0.8rem; background: #fff; cursor: pointer;
+    }
+    .camp_base_trigger:hover { border-color: #b8530a; }
+    .cbt_thumb {
+      width: 3.2rem; height: 3.2rem; flex: none; border-radius: 0.5rem; overflow: hidden;
+      background: #eef2f7 center / cover no-repeat;
+      display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+    }
+    .cbt_label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333; }
+    .cbt_caret { color: #999; }
+    .base_overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 120; padding: 2rem;
+    }
+    .base_overlay.is_open { display: flex; }
+    .base_modal {
+      background: #fff; border-radius: 1.4rem; width: 100%; max-width: 100rem; margin: auto;
+      max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .base_modal_head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 1.8rem; border-bottom: 1px solid #eee; font-size: 1.5rem; font-weight: 700;
+    }
+    .base_close {
+      border: none; background: #f2f2f4; width: 3.2rem; height: 3.2rem; border-radius: 50%;
+      font-size: 1.8rem; cursor: pointer; line-height: 1;
+    }
+    .base_grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+      gap: 1.2rem; padding: 1.6rem 1.8rem; overflow: auto;
+    }
+    .base_card {
+      border: 1px solid #e2e2e6; border-radius: 1rem; overflow: hidden; cursor: pointer; background: #fff;
+      display: flex; flex-direction: column; transition: transform .15s, box-shadow .15s, border-color .15s;
+    }
+    .base_card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.12); border-color: #b8530a; }
+    .base_card.is_sel { border-color: #b8530a; box-shadow: 0 0 0 2px #b8530a inset; }
+    .base_card_thumb { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: #eef2f7; display: block; }
+    .base_card_rand {
+      width: 100%; aspect-ratio: 16 / 10; display: flex; align-items: center; justify-content: center;
+      font-size: 3.2rem; background: linear-gradient(135deg, #fef3e6, #fff);
+    }
+    .base_card_body { padding: 0.8rem 1rem 1rem; }
+    .base_card_name { font-size: 1.25rem; font-weight: 700; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .base_card_vibe {
+      font-size: 1.1rem; color: #888; line-height: 1.5; margin-top: 0.3rem;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .base_card_sw { display: flex; gap: 0.3rem; margin-top: 0.5rem; }
+    .base_card_sw span { width: 1.4rem; height: 1.4rem; border-radius: 0.3rem; border: 1px solid rgba(0,0,0,.1); }
     .camp_input {
       width: 100%;
-      min-height: 7rem;
+      min-height: 5rem;
       font-size: 1.4rem;
       font-family: inherit;
-      padding: 1.2rem 1.6rem;
+      padding: 0.9rem 1.4rem;
       border: 1px solid #d0d0d5;
-      border-radius: 1rem;
+      border-radius: 0.9rem;
       outline: none;
       resize: vertical;
     }
     .camp_input:focus { border-color: #b8530a; }
-    .camp_actions { display: flex; align-items: center; gap: 1.2rem; margin-top: 0.8rem; }
+    .camp_actions { display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap; }
     .camp_button {
       font-size: 1.5rem;
       font-weight: 700;
@@ -309,7 +365,7 @@
     }
     .sugg_chip:hover { background: #f0f0f2; border-color: #b8b8bf; }
     /* 生成したカンプの履歴 */
-    .camp_hist { margin-top: 1.2rem; }
+    .camp_hist { margin-top: 0.5rem; }
     .camp_hist_toggle {
       font-size: 1.3rem; color: #444; background: #eee; border: 1px solid #ddd;
       border-radius: 1rem; padding: 0.6rem 1.4rem; cursor: pointer;
@@ -717,6 +773,15 @@
     .detail_pane { overflow: auto; padding: 0 1.2rem 1.2rem; max-height: 78vh; }
     .detail_pane img { width: 100%; display: block; border-radius: 0.6rem; }
     .detail_pane video { width: 100%; display: block; border-radius: 0.6rem; background: #000; }
+    #detail_video_el { cursor: ew-resize; }  /* ホイールで前後にコマ送りできる合図 */
+    .vid_ctrl { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0 0.8rem; flex-wrap: wrap; }
+    .vid_ctrl_lbl { font-size: 1.2rem; color: #666; }
+    .vid_speed {
+      font-size: 1.2rem; color: #444; background: #f0f0f2; border: 1px solid #ddd;
+      border-radius: 0.6rem; padding: 0.35rem 0.9rem; cursor: pointer;
+    }
+    .vid_speed.is_on { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+    .vid_ctrl_hint { margin-left: auto; font-size: 1.15rem; color: #2b6cb0; }
     .detail_info { width: 100%; padding: 1.8rem 2.4rem; border-top: 1px solid #eee; }
     .detail_h { font-size: 1.25rem; color: #888; margin: 1.6rem 0 0.6rem; }
     .detail_h:first-child { margin-top: 0; }
@@ -753,6 +818,42 @@
     }
     .detail_extract:hover { background: #ffe9d6; }
     .detail_extract:disabled { color: #aaa; cursor: default; }
+    /* 動きの仕様書（録画からAIが読み取り） */
+    .detail_extract.is_motion { color: #7c3aed; background: #f3ecfe; border-color: #ddc9fb; }
+    .detail_extract.is_motion:hover { background: #e9ddfd; }
+    .detail_motion { margin-bottom: 0.8rem; font-size: 1.25rem; color: #444; line-height: 1.7; }
+    .detail_motion_sum { color: #2f2925; font-weight: 700; margin: 0 0 0.6rem; }
+    .detail_motion_item { padding: 0.5rem 0.7rem; margin-bottom: 0.4rem; background: #faf7ff;
+      border: 1px solid #ece2fb; border-radius: 0.6rem; }
+    .detail_motion_item b { color: #5b34b0; }
+    .detail_motion_hint { color: #999; }
+    /* 動画とメモの横並び（メモの行クリックで動画がその場面へ飛ぶ） */
+    .motion_split { display: flex; gap: 1.2rem; align-items: flex-start; }
+    .motion_video_col { flex: 1 1 56%; min-width: 0; text-align: center; }
+    /* 動画を画面いっぱいに大きく＋「この辺」枠のためのラッパ（動画にピッタリ合わせる） */
+    .motion_video_wrap { position: relative; display: inline-block; max-width: 100%; }
+    #detail_video_el { display: block; max-width: 100%; max-height: 78vh; background: #000; border-radius: 0.6rem; }
+    .motion_box {
+      position: absolute; border: 3px dashed #f2c811; border-radius: 8px;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.35), 0 0 14px rgba(242,200,17,.6);
+      pointer-events: none; transition: all .25s ease; z-index: 3;
+    }
+    .detail_motion_item { cursor: pointer; }
+    .detail_motion_item:hover { background: #f0e9fe; border-color: #d6c4fb; }
+    .detail_motion_item.is_cur { background: #ede4fe; border-color: #b48cf5; box-shadow: 0 0 0 1px #b48cf5 inset; }
+    .motion_clickhint { font-size: 1.1rem; color: #7c3aed; margin: 0 0 0.5rem; }
+    /* 録画タブ内の「動きメモ」パネル */
+    .motion_pane { flex: 1 1 44%; min-width: 0; max-height: 82vh; overflow: auto; text-align: left; }
+    @media (max-width: 900px) { .motion_split { flex-direction: column; } .motion_pane { max-height: none; } }
+    .motion_head { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.8rem; }
+    .motion_copy {
+      font-size: 1.25rem; color: #fff; background: #7c3aed; border: none;
+      border-radius: 0.9rem; padding: 0.7rem 1.4rem; cursor: pointer; font-weight: 700;
+    }
+    .motion_copy:hover { background: #6d28d9; }
+    .motion_terms { margin-top: 0.6rem; padding: 0.6rem 0.8rem; background: #f7f7fb;
+      border: 1px solid #e8e8ef; border-radius: 0.6rem; font-size: 1.2rem; line-height: 1.9; }
+    .motion_terms > b { color: #5b34b0; }
     /* 抜き出したアニメ素材（keyframes/transitionのコード片・Lottie） */
     .detail_anim { margin-bottom: 0.8rem; }
     .detail_anim_tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem; }
@@ -793,10 +894,18 @@
       background-color: #fff;
       background-size: cover; background-position: top center;
       border-radius: 0.6rem; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
-      animation-duration: 1.8s;
+      animation-duration: 3s;   /* ゆっくり見せる */
       animation-timing-function: ease-in-out;
       animation-iteration-count: infinite;
       animation-direction: alternate;
+      cursor: ns-resize;        /* ホイールで動かせる合図 */
+    }
+    /* マウスを乗せている間：自動ループを止めて、こちらが位置を操作する */
+    .anim_demo_box.scrub {
+      animation-iteration-count: 1;
+      animation-direction: normal;
+      animation-fill-mode: both;
+      animation-play-state: paused;
     }
     .anim_lottie_cell lottie-player { width: 100%; height: 12rem; }
     .anim_cell_name {
@@ -807,17 +916,11 @@
       color: #999; font-size: 1.35rem; line-height: 1.8em;
       padding: 3rem 2rem; text-align: center;
     }
-    /* 表示モード切替（サイト全体 / サンプル一覧） */
-    .anim_modebar { display: flex; gap: 0.6rem; margin-bottom: 1rem; }
-    .anim_mode {
-      font-size: 1.25rem; color: #444; background: #f0f0f2;
-      border: 1px solid #ddd; border-radius: 0.8rem; padding: 0.5rem 1.1rem; cursor: pointer;
-    }
-    .anim_mode.is_on { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
-    .anim_replay {
-      margin-left: auto; font-size: 1.25rem; color: #2b6cb0;
+    /* 動きサンプル一覧の使い方ヒント */
+    .anim_scrub_hint {
+      grid-column: 1 / -1; color: #2b6cb0; font-size: 1.25rem; line-height: 1.7em;
       background: #ebf3fb; border: 1px solid #cfe0f2; border-radius: 0.8rem;
-      padding: 0.5rem 1.1rem; cursor: pointer;
+      padding: 0.8rem 1.2rem; margin-bottom: 0.4rem;
     }
     .anim_replay:hover { background: #dcecfb; }
     /* サイト全体プレビュー：本物のサイトのように縦に繋げ、上から順に出現 */
@@ -878,6 +981,7 @@
 <body>
   <!-- 検索バー（上部固定）。Enter または ボタンで検索 -->
   <header class="search_bar">
+    <!-- 検索ボックスと主要ボタンを全部1行に（画面を広く・見やすく） -->
     <div class="search_inner">
       <input
         class="search_input"
@@ -887,14 +991,9 @@
         autofocus>
       <input class="search_top" type="number" id="top" value="24" min="1" max="100" title="表示件数">
       <button class="search_button" id="go">検索</button>
-    </div>
-    <p class="search_hint">言葉を変えて何度でも試せます。カードの「似てるのを探す」で芋づる式にたどれます。</p>
-
-    <!-- コンパクトなツールバー：主要トグルを1行にまとめてギャラリーを広く見せる -->
-    <div class="toolbar">
       <button class="tool_btn tool_set" id="set_toggle">⚙ 設定</button>
-      <button class="tool_btn tool_camp" id="camp_toggle">🎨 カンプを生成</button>
-      <button class="tool_btn tool_add" id="add_toggle">＋ サイトを登録</button>
+      <button class="tool_btn tool_camp" id="camp_toggle">🎨 カンプ生成</button>
+      <button class="tool_btn tool_add" id="add_toggle">＋ 登録</button>
     </div>
 
     <!-- 設定パネル（生成エンジン・APIキー・一括言語化。トグルで開く） -->
@@ -981,41 +1080,48 @@
       <!-- mix & match：ベースA(見た目)＋アニメ参照B(動き)を選ぶ -->
       <div class="camp_mix">
         <label class="camp_lbl">🎨 ベース（見た目・レイアウト）
-          <select class="camp_sel" id="camp_base"><option value="">おまかせ（ブリーフから自動選択）</option></select>
+          <select class="camp_sel" id="camp_base" hidden><option value="">おまかせ（ブリーフから自動選択）</option></select>
+          <button type="button" class="camp_base_trigger" id="camp_base_trigger">
+            <span class="cbt_thumb" id="cbt_thumb">🎲</span>
+            <span class="cbt_label" id="cbt_label">おまかせ（ブリーフから自動選択）</span>
+            <span class="cbt_caret">▾</span>
+          </button>
         </label>
         <label class="camp_lbl">🎞 アニメ参照（動きの種類）
-          <select class="camp_sel" id="camp_anim"><option value="">なし（標準のふわっと出現）</option></select>
+          <select class="camp_sel" id="camp_anim" hidden><option value="">なし（標準のふわっと出現）</option></select>
+          <button type="button" class="camp_base_trigger" id="camp_anim_trigger">
+            <span class="cbt_thumb" id="cat_thumb">✨</span>
+            <span class="cbt_label" id="cat_label">なし（標準のふわっと出現）</span>
+            <span class="cbt_caret">▾</span>
+          </button>
         </label>
       </div>
       <textarea
         class="camp_input"
         id="camp_input"
         placeholder="作りたいサイトを書く（例：製造業のコーポレートサイト。落ち着いた青系で信頼感。会社概要・製品・採用のセクション）　※生成は2分前後かかります"></textarea>
+      <!-- 生成する／自分の画像を使う／履歴 を1行に（下の一覧を広く見せる） -->
       <div class="camp_actions">
-        <button class="camp_button" id="camp_button">この内容でカンプを生成</button>
+        <button class="camp_button" id="camp_button">🎨 生成する</button>
+        <button class="camp_up_toggle" id="cu_toggle">🖼 自分の画像を使う</button>
         <span class="camp_state" id="camp_state"></span>
+        <button class="camp_hist_toggle" id="camp_hist_toggle" style="margin-left:auto">🗂 生成した履歴</button>
       </div>
-      <!-- 自分の画像（AIが生成に使う）：折りたたみで下に置く -->
-      <div class="camp_up">
-        <button class="camp_up_toggle" id="cu_toggle">🖼 自分の画像を追加（AIが生成で使う）</button>
-        <div class="camp_uploads" id="camp_uploads" hidden>
-          <div class="cu_actions">
-            <label class="cu_btn">＋ 画像を選ぶ<input type="file" id="cu_files" accept="image/*" multiple hidden></label>
-            <label class="cu_btn">📁 フォルダごと<input type="file" id="cu_folder" webkitdirectory multiple hidden></label>
-            <input class="cu_path" id="cu_path" placeholder="またはフォルダのパスを貼付（例 D:\写真\素材）">
-            <button class="cu_btn cu_go" id="cu_import">取り込む</button>
-            <span class="cu_state" id="cu_state"></span>
-          </div>
-          <div class="cu_grid" id="cu_grid"></div>
+      <!-- 自分の画像（AIが生成に使う）：開くと下に出る -->
+      <div class="camp_uploads" id="camp_uploads" hidden>
+        <div class="cu_actions">
+          <label class="cu_btn">＋ 画像を選ぶ<input type="file" id="cu_files" accept="image/*" multiple hidden></label>
+          <label class="cu_btn">📁 フォルダごと<input type="file" id="cu_folder" webkitdirectory multiple hidden></label>
+          <input class="cu_path" id="cu_path" placeholder="またはフォルダのパスを貼付（例 D:\写真\素材）">
+          <button class="cu_btn cu_go" id="cu_import">取り込む</button>
+          <span class="cu_state" id="cu_state"></span>
         </div>
+        <div class="cu_grid" id="cu_grid"></div>
       </div>
       <!-- 生成中/完了ジョブの一覧（複数同時進行を並べて表示） -->
       <div class="camp_jobs" id="camp_jobs"></div>
-      <!-- 保存済みカンプの履歴（いつでも開き直せる＝作り直し不要） -->
-      <div class="camp_hist">
-        <button class="camp_hist_toggle" id="camp_hist_toggle">🗂 生成したカンプの履歴</button>
-        <div class="camp_hist_list" id="camp_hist_list" hidden></div>
-      </div>
+      <!-- 保存済みカンプの履歴（開くと下に出る・いつでも開き直せる） -->
+      <div class="camp_hist_list" id="camp_hist_list" hidden></div>
     </div>
 
     <!-- 登録パネル：URLを入力して追加する（トグルで開く） -->
@@ -1034,6 +1140,28 @@
   <p class="result_status" id="status">登録済みのサイトを表示しています。</p>
   <main class="result_list" id="list"></main>
 
+  <!-- ベース選択：サムネのグリッドから見た目で選ぶ -->
+  <div class="base_overlay" id="base_overlay">
+    <div class="base_modal">
+      <div class="base_modal_head">
+        <span>🎨 ベースを選ぶ（見た目のもとにするサイト）</span>
+        <button class="base_close" id="base_close" title="閉じる">×</button>
+      </div>
+      <div class="base_grid" id="base_grid"></div>
+    </div>
+  </div>
+
+  <!-- アニメ参照：動きのもとにするサイトをサムネで選ぶ -->
+  <div class="base_overlay" id="anim_overlay">
+    <div class="base_modal">
+      <div class="base_modal_head">
+        <span>🎞 アニメ参照を選ぶ（動きのもとにするサイト）</span>
+        <button class="base_close" id="anim_close" title="閉じる">×</button>
+      </div>
+      <div class="base_grid" id="anim_grid"></div>
+    </div>
+  </div>
+
   <!-- 詳細ビュー（カードの画像クリックで開く・サンプルをしっかり見る画面） -->
   <div class="detail_overlay" id="detail_overlay">
     <div class="detail_modal">
@@ -1043,22 +1171,38 @@
         <span class="detail_date" id="detail_date"></span>
       </div>
       <div class="detail_body">
-        <!-- 左：全体ビジュアル（全体スクショ／録画を切替） -->
+        <!-- 左：全体ビジュアル（全体を見る／録画を切替） -->
         <div class="detail_visual">
           <div class="detail_tabs">
-            <button class="detail_tab is_on" data-tab="full">全体スクショ</button>
-            <button class="detail_tab" data-tab="video" id="detail_tab_video">録画</button>
-            <button class="detail_tab" data-tab="anim">🎞 アニメ再生</button>
-            <!-- アニメ再生時のモードボタンは、この右寄せスロットに入れる（縦を節約） -->
-            <div class="detail_modebar_slot" id="detail_modebar_slot"></div>
+            <button class="detail_tab is_on" data-tab="full">全体を見る</button>
+            <button class="detail_tab" data-tab="video" id="detail_tab_video">🎬 録画（動き）</button>
           </div>
           <div class="detail_pane" id="detail_pane_full"><img id="detail_full_img" alt="サイト全体"></div>
           <div class="detail_pane" id="detail_pane_video" hidden>
-            <video id="detail_video_el" controls loop muted playsinline></video>
-          </div>
-          <!-- 抜き出したアニメを「実際に動かして」見せる大枠 -->
-          <div class="detail_pane" id="detail_pane_anim" hidden>
-            <div class="detail_anim_stage" id="detail_anim_stage"></div>
+            <!-- 左：動画／右：AIメモ（横並び。メモの行クリックで動画がその場面へ飛ぶ） -->
+            <div class="motion_split">
+              <div class="motion_video_col">
+                <div class="vid_ctrl">
+                  <span class="vid_ctrl_lbl">速度</span>
+                  <button class="vid_speed" data-rate="0.25">0.25x</button>
+                  <button class="vid_speed is_on" data-rate="0.5">0.5x</button>
+                  <button class="vid_speed" data-rate="1">1x</button>
+                  <span class="vid_ctrl_hint">🖱 動画の上でホイール＝前後にコマ送り</span>
+                </div>
+                <div class="motion_video_wrap">
+                  <video id="detail_video_el" controls loop muted playsinline></video>
+                  <div class="motion_box" id="motion_box" hidden></div>
+                </div>
+              </div>
+              <!-- 録画の動きをAIが読み取り、見て分かるメモ＋AIに真似させる指示を出す -->
+              <div class="motion_pane">
+                <div class="motion_head">
+                  <button class="detail_extract is_motion" id="detail_read_motion">🎥 録画から動きを読み取る</button>
+                  <button class="motion_copy" id="motion_copy" hidden>📋 AIに真似させる指示をコピー</button>
+                </div>
+                <div class="detail_motion" id="detail_motion"></div>
+              </div>
+            </div>
           </div>
         </div>
         <!-- 右：参考情報（色・フォント・ライブラリ・雰囲気） -->
@@ -1076,14 +1220,6 @@
           <h4 class="detail_h">画像（このサイトから抜き出し）</h4>
           <div class="detail_assets" id="detail_assets"></div>
           <button class="detail_extract" id="detail_extract">🖼 画像を抜き出す</button>
-          <h4 class="detail_h">アニメーション（このサイトから抜き出し）</h4>
-          <div class="detail_anim" id="detail_anim"></div>
-          <button class="detail_extract is_anim" id="detail_extract_anim">🎞 アニメを抜き出す</button>
-          <!-- 抜き出し中の進捗（バー＋経過秒＋目安。終わりが見えるように） -->
-          <div class="anim_prog" id="anim_prog" hidden>
-            <div class="anim_prog_bar"><span id="anim_prog_fill"></span></div>
-            <div class="anim_prog_text" id="anim_prog_text"></div>
-          </div>
           <div class="detail_actions">
             <button class="detail_base" id="detail_base">🎨 これをベースに生成</button>
             <button class="detail_base" id="detail_clone" style="background:#0b6e4f">📋 忠実クローン（AIなし）</button>
@@ -1607,13 +1743,19 @@
         const start = _campLocal[id]?.start || Date.now();
         const sec = Math.floor((Date.now() - start) / 1000);
         let el = document.getElementById("cj_" + id);
+        // 完了したジョブはカードを残さない（自動でカンプを開く＋履歴に入る）。進行中とエラーだけ表示。
+        if (j.state === "done") {
+          if (!_campOpened[id]) { _campOpened[id] = 1; window.open("/camp/" + j.file, "_blank"); loadCampHistory(); }
+          if (el) el.remove();
+          delete _campLocal[id];
+          return;
+        }
         if (!el) { el = document.createElement("div"); el.id = "cj_" + id; campJobs.prepend(el); }
-        el.className = "camp_job" + (j.state === "done" ? " is_done" : j.state === "error" ? " is_err" : "");
-        // running は毎秒更新。done/error になったら一度だけ組み直す（以後は触らない）
+        el.className = "camp_job" + (j.state === "error" ? " is_err" : "");
+        // running は毎秒更新。error になったら一度だけ組み直す（以後は触らない）
         if (j.state === "running" || el.dataset.state !== j.state) {
           if (j.state !== "running") el.dataset.state = j.state;
           el.innerHTML = jobCardHtml(j, sec);
-          if (j.state === "done" && !_campOpened[id]) { _campOpened[id] = 1; window.open("/camp/" + j.file, "_blank"); }
         }
       });
     }
@@ -1681,7 +1823,76 @@
       const opts = (sites || []).map((s) => `<option value="${s.site_id}">${label(s)}</option>`).join("");
       baseSel.innerHTML = `<option value="">おまかせ（ブリーフから自動選択）</option>` + opts;
       animSel.innerHTML = `<option value="">なし（標準のふわっと出現）</option>` + opts;
+      window._campSites = sites || [];
+      basePicker.build(); basePicker.sync();
+      animPicker.build(); animPicker.sync();
     }
+
+    // サムネのカード選択を作る共通部品（ベース／アニメ参照で使い回す）
+    function createSitePicker(o) {
+      const shorten = (u) => String(u || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+      function build() {
+        const grid = document.querySelector(o.grid);
+        if (!grid) return;
+        const sites = window._campSites || [];
+        const none = `<div class="base_card" data-id=""><div class="base_card_rand">${o.noneIcon}</div><div class="base_card_body"><div class="base_card_name">${o.noneName}</div><div class="base_card_vibe">${o.noneDesc}</div></div></div>`;
+        const cards = sites.map((s) => {
+          const name = _esc(shorten(s.url));
+          const vibe = _esc((s.vibe || "").slice(0, 60));
+          const sw = (s.swatches && s.swatches.length)
+            ? `<div class="base_card_sw">${s.swatches.slice(0, 5).map((c) => `<span style="background:${c}"></span>`).join("")}</div>` : "";
+          const thumb = s.img ? `<img class="base_card_thumb" src="${s.img}" alt="" loading="lazy">` : `<div class="base_card_rand">🖼</div>`;
+          return `<div class="base_card" data-id="${s.site_id}">${thumb}<div class="base_card_body"><div class="base_card_name">${name}</div><div class="base_card_vibe">${vibe}</div>${sw}</div></div>`;
+        }).join("");
+        grid.innerHTML = none + cards;
+      }
+      function sync() {
+        const sel = document.querySelector(o.sel);
+        const thumb = document.querySelector(o.thumb);
+        const label = document.querySelector(o.label);
+        if (!sel || !thumb || !label) return;
+        const id = sel.value;
+        const site = (window._campSites || []).find((s) => s.site_id === id);
+        if (site) {
+          thumb.style.backgroundImage = site.img ? `url("${site.img}")` : "";
+          thumb.textContent = site.img ? "" : "🖼";
+          label.textContent = (sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].text) || site.url;
+        } else {
+          thumb.style.backgroundImage = "";
+          thumb.textContent = o.noneIcon;
+          label.textContent = o.noneLabel;
+        }
+        const grid = document.querySelector(o.grid);
+        if (grid) grid.querySelectorAll(".base_card").forEach((c) => c.classList.toggle("is_sel", (c.dataset.id || "") === id));
+      }
+      const trigger = document.querySelector(o.trigger);
+      const overlay = document.querySelector(o.overlay);
+      if (trigger && overlay) {
+        const close = () => overlay.classList.remove("is_open");
+        trigger.addEventListener("click", () => { build(); sync(); overlay.classList.add("is_open"); });
+        document.querySelector(o.close).addEventListener("click", close);
+        overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+        document.querySelector(o.grid).addEventListener("click", (e) => {
+          const card = e.target.closest(".base_card");
+          if (!card) return;
+          document.querySelector(o.sel).value = card.dataset.id || "";
+          sync();
+          close();
+        });
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+      }
+      return { build, sync };
+    }
+    const basePicker = createSitePicker({
+      sel: "#camp_base", thumb: "#cbt_thumb", label: "#cbt_label",
+      trigger: "#camp_base_trigger", overlay: "#base_overlay", grid: "#base_grid", close: "#base_close",
+      noneIcon: "🎲", noneName: "おまかせ", noneDesc: "ブリーフから自動で選びます", noneLabel: "おまかせ（ブリーフから自動選択）",
+    });
+    const animPicker = createSitePicker({
+      sel: "#camp_anim", thumb: "#cat_thumb", label: "#cat_label",
+      trigger: "#camp_anim_trigger", overlay: "#anim_overlay", grid: "#anim_grid", close: "#anim_close",
+      noneIcon: "✨", noneName: "なし", noneDesc: "標準のふわっと出現", noneLabel: "なし（標準のふわっと出現）",
+    });
 
     // イベント：ボタン・Enter・「似てる」ボタン（カードは動的生成なので親で受ける）
     goBtn.addEventListener("click", search);
@@ -1708,21 +1919,12 @@
       document.querySelectorAll(".detail_tab").forEach((b) => b.classList.toggle("is_on", b.dataset.tab === tab));
       document.querySelector("#detail_pane_full").hidden = tab !== "full";
       document.querySelector("#detail_pane_video").hidden = tab !== "video";
-      document.querySelector("#detail_pane_anim").hidden = tab !== "anim";
       const vel = document.querySelector("#detail_video_el");
       if (tab === "video") vel.play().catch(() => {}); else vel.pause();
-      // アニメタブを開いたら再生開始。離れたら止めて、右端のモードボタンも消す。
-      if (tab === "anim" && _currentDetail) renderAnimStage(_currentDetail);
-      else {
-        stopSitePreview();
-        const slot = document.querySelector("#detail_modebar_slot");
-        if (slot) slot.innerHTML = "";
-      }
     }
     function closeDetail() {
       detailOverlay.classList.remove("is_open");
       document.querySelector("#detail_video_el").pause();
-      stopSitePreview();  // 自動スクロール・動画を止める（CPU節約）
     }
     async function openDetail(id) {
       let d;
@@ -1735,9 +1937,18 @@
       document.querySelector("#detail_full_img").src = d.fullpage;
       const vtab = document.querySelector("#detail_tab_video");
       const vel = document.querySelector("#detail_video_el");
-      if (d.has_video) { vtab.style.display = ""; vel.src = d.video; } else { vtab.style.display = "none"; vel.removeAttribute("src"); }
-      // 動画があるサイトは「アニメ再生（動画）」を主役として最初に表示する
-      switchDetailTab(d.has_video ? "anim" : "full");
+      if (d.has_video) {
+        vtab.style.display = ""; vel.src = d.video;
+        // 既定は0.5x（ゆっくり見やすく）。読み込み時に反映＋ボタン表示も0.5xに合わせる
+        const setRate = () => {
+          const on = document.querySelector("#detail_pane_video .vid_speed.is_on");
+          vel.playbackRate = on ? parseFloat(on.dataset.rate) : 0.5;
+        };
+        vel.addEventListener("loadedmetadata", setRate, { once: true });
+        document.querySelector("#motion_box").hidden = true;  // 前サイトの枠を消す
+      } else { vtab.style.display = "none"; vel.removeAttribute("src"); }
+      // 録画があるサイトは「録画（動き）」を主役として最初に表示する
+      switchDetailTab(d.has_video ? "video" : "full");
       // 配色（重複・透明を除く）
       const t = d.tokens || {};
       const seen = new Set(), uniq = [];
@@ -1755,36 +1966,42 @@
       document.querySelector("#detail_vibe").textContent = d.vibe || "（未言語化）";
       document.querySelector("#detail_base").dataset.id = id;
       renderAssets(d);
-      renderAnim(d);
+      renderMotion(d);
       document.querySelector("#detail_extract").dataset.id = id;
-      document.querySelector("#detail_extract_anim").dataset.id = id;
+      document.querySelector("#detail_read_motion").dataset.id = id;
       document.querySelector("#detail_clone").dataset.id = id;
       detailOverlay.classList.add("is_open");
     }
-    // 抜き出したアニメ素材（keyframes/transition/Lottie）を描画
-    function renderAnim(d) {
-      const box = document.querySelector("#detail_anim");
-      const btn = document.querySelector("#detail_extract_anim");
-      const a = d.anim || {};
-      const kf = a.keyframes || [], tr = a.transitions || [], lot = a.lottie || [];
+    // 録画からAIが読み取った「動きメモ」を描画（見て分かる解説＋AIに真似させる指示）
+    let _motionReproduce = "";
+    function renderMotion(d) {
+      const box = document.querySelector("#detail_motion");
+      const btn = document.querySelector("#detail_read_motion");
+      const copyBtn = document.querySelector("#motion_copy");
+      const m = d.motion || {};
+      const items = m.items || [], terms = m.terms || [];
       const parts = [];
-      // 使える keyframes 名をタグで、本文をコード片で
-      if (kf.length) {
-        parts.push(`<div class="detail_anim_tags">${kf.map((k) => `<span class="detail_anim_tag">@${k.name}</span>`).join("")}</div>`);
-        parts.push(`<div class="detail_anim_code">${kf.slice(0, 6).map((k) => escapeHtml(k.css)).join("\n\n")}</div>`);
+      if (m.summary) parts.push(`<p class="detail_motion_sum">${escapeHtml(m.summary)}</p>`);
+      if (items.length) parts.push(`<p class="motion_clickhint">▶ 行をクリックすると動画がその場面へ飛びます</p>`);
+      const n = Math.min(items.length, 10);
+      items.slice(0, 10).forEach((it, idx) => {
+        const meta = [it.animation, it.trigger, it.duration, it.easing, (it.stagger ? "stagger:" + it.stagger : "")].filter(Boolean).map(escapeHtml).join(" / ");
+        const area = Array.isArray(it.area) && it.area.length === 4 ? ` data-area="${it.area.join(",")}"` : "";
+        parts.push(`<div class="detail_motion_item" data-mi="${idx}" data-mn="${n}"${area}><b>${escapeHtml(it.section || "")}</b> ${meta}${it.note ? "<br><span style='color:#888'>" + escapeHtml(it.note) + "</span>" : ""}</div>`);
+      });
+      if (terms.length) {
+        parts.push(`<div class="motion_terms"><b>専門用語メモ</b>${terms.slice(0, 10).map((t) => `<div>・<b>${escapeHtml(t.term)}</b>：${escapeHtml(t.meaning)}</div>`).join("")}</div>`);
       }
-      if (tr.length) {
-        parts.push(`<h4 class="detail_h" style="margin-top:.4rem">transition</h4>`);
-        parts.push(`<div class="detail_anim_code">${tr.map(escapeHtml).join("\n")}</div>`);
-      }
-      if (lot.length) {
-        parts.push(`<h4 class="detail_h" style="margin-top:.4rem">Lottie JSON</h4>`);
-        parts.push(`<div class="detail_anim_lottie">${lot.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">🎬 lottie_${i}.json</a>`).join("")}</div>`);
-      }
-      box.innerHTML = parts.length ? parts.join("") : "<span style='color:#999;font-size:1.3rem'>まだ抜き出していません</span>";
-      const has = kf.length || tr.length || lot.length;
-      if (d.anim_extracting) { btn.disabled = true; btn.textContent = "抜き出し中…（十数秒）"; }
-      else { btn.disabled = false; btn.textContent = has ? "🎞 もう一度抜き出す" : "🎞 アニメを抜き出す"; }
+      const hasSpec = !!(m.summary || items.length);
+      box.innerHTML = hasSpec ? parts.join("")
+        : (d.has_video
+            ? "<span class='detail_motion_hint'>まだ読み取っていません。上の「🎥 録画から動きを読み取る」を押すと、AIが動画を見て動きをメモします。動画を見ながら読むと分かりやすいです。</span>"
+            : "<span class='detail_motion_hint'>先にカードの「🎬動き」で録画すると、AIが動きを読み取れます。</span>");
+      _motionReproduce = m.reproduce || "";
+      if (copyBtn) copyBtn.hidden = !(_motionReproduce && hasSpec);
+      if (d.motion_reading) { btn.disabled = true; btn.textContent = "AIが動きを読み取り中…（30秒前後）"; }
+      else { btn.disabled = !d.has_video; btn.textContent = hasSpec ? "🎥 もう一度読み取る" : "🎥 録画から動きを読み取る"; }
+      if (d.motion_error) status.textContent = "動きの読み取りに失敗：" + d.motion_error;
     }
     // コード片をそのまま安全に表示するためのHTMLエスケープ
     function escapeHtml(s) {
@@ -1804,142 +2021,6 @@
       });
       return _lottieLoad;
     }
-    // 抽出した @keyframes をページに注入する（デモ箱が実際に動くようにするため）
-    function injectKeyframes(kf) {
-      let el = document.getElementById("anim_kf_style");
-      if (!el) { el = document.createElement("style"); el.id = "anim_kf_style"; document.head.appendChild(el); }
-      el.textContent = (kf || []).map((k) => k.css).join("\n");
-    }
-    // "入り"に使える keyframe を1つ選ぶ（サイト全体プレビューのreveal用）
-    function pickRevealKeyframe(kf) {
-      const pref = ["fadeup", "fadein", "slideup", "slidein", "reveal", "appear"];
-      for (const p of pref) {
-        const hit = (kf || []).find((k) => (k.name || "").toLowerCase().includes(p));
-        if (hit) return hit.name;
-      }
-      return (kf && kf[0]) ? kf[0].name : "anim_reveal_default";
-    }
-    // サンプル一覧（keyframeごとの小さな実サイト画像＋Lottie）
-    function buildAnimGrid(d, kf, lot) {
-      const preview = d.firstview || "";
-      const cells = [];
-      lot.forEach((u, i) => {
-        cells.push(`<div class="anim_cell anim_lottie_cell"><div class="anim_cell_stage"><lottie-player src="${u}" background="transparent" speed="1" loop autoplay></lottie-player></div><div class="anim_cell_name">lottie_${i}.json</div></div>`);
-      });
-      kf.forEach((k) => {
-        cells.push(`<div class="anim_cell"><div class="anim_cell_stage"><div class="anim_demo_box" style="animation-name:${k.name}; background-image:url('${preview}')"></div></div><div class="anim_cell_name">@${escapeHtml(k.name)}</div></div>`);
-      });
-      return `<div class="anim_stage_grid">${cells.join("")}</div>`;
-    }
-    // サイト全体プレビュー
-    let _panRAF = null;
-    function stopAutoPan() { if (_panRAF) { cancelAnimationFrame(_panRAF); _panRAF = null; } }
-    // 全体プレビューを止める（スクロール停止＋動画停止）
-    function stopSitePreview() {
-      stopAutoPan();
-      const v = document.querySelector("#anim_site video");
-      if (v) v.pause();
-    }
-    function sliceSitePreview() {
-      const box = document.querySelector("#anim_site");
-      if (!box) return;
-      const d = _currentDetail || {};
-      // ★本物のアニメは録画動画にしか無い。録画があればそれを再生（カードのホバーと同じ動き）。
-      if (d.has_video && d.video) {
-        stopAutoPan();
-        // controls付き＝バーでシーク・一時停止できる。さらにホイールで前後スクロール可。
-        box.innerHTML = `<div class="anim_note">🖱 マウスホイールで前後にスクロール／下のバーでも操作できます</div>`
-          + `<div class="anim_scroller anim_scroller_video"><video class="anim_video_el" src="${d.video}" muted loop autoplay playsinline controls></video></div>`;
-        const v = box.querySelector("video");
-        const scroller = box.querySelector(".anim_scroller");
-        if (v) {
-          // 枠を録画の実寸比に合わせる（縦長でも横長でも黒帯ゼロで表示）
-          v.addEventListener("loadedmetadata", () => {
-            if (v.videoWidth && v.videoHeight) {
-              v.parentElement.style.aspectRatio = v.videoWidth + " / " + v.videoHeight;
-            }
-          });
-          v.play().catch(() => {});
-          // マウスホイールで動画をシーク＝サイトを自分でスクロールする感覚
-          scroller.addEventListener("wheel", (ev) => {
-            if (!v.duration) return;
-            ev.preventDefault();
-            v.pause();
-            const step = (ev.deltaY / 100) * 0.4;  // 1ノッチ ≒ 0.4秒ぶん進む/戻る
-            v.currentTime = Math.max(0, Math.min(v.duration - 0.05, v.currentTime + step));
-          }, { passive: false });
-        }
-        return;
-      }
-      // 録画が無い場合：スクショを自動スクロール（写真なので本物のアニメは出ない＝録画を促す）
-      const url = box.dataset.full;
-      box.innerHTML = `<div class="anim_note">これは静止画（スクショ）の自動スクロールです。実際のフェードイン等の動きを見るには、カード右下の「🎬動き」で録画してください。</div>`
-        + `<div class="anim_scroller" id="anim_scroller"><img class="anim_scroll_img" id="anim_scroll_img" src="${url}" alt="サイト全体"></div>`;
-      const img = document.querySelector("#anim_scroll_img");
-      const begin = () => playSiteReveal();
-      if (img.complete && img.naturalHeight) begin();
-      else img.onload = begin;
-    }
-    // 自動スクロール（上→下→上をゆっくり繰り返す）。カードのホバーと同じ"動き"。
-    function playSiteReveal() {
-      stopAutoPan();
-      const win = document.querySelector("#anim_scroller");
-      const img = document.querySelector("#anim_scroll_img");
-      if (!win || !img) return;
-      const maxY = Math.max(0, img.clientHeight - win.clientHeight);
-      if (maxY < 5) return;  // スクロールする高さが無ければ何もしない
-      let y = 0, dir = 1, last = performance.now();
-      const speed = 90;  // px/秒（スクロールの速さ）
-      const loop = (now) => {
-        const dt = Math.min(0.05, (now - last) / 1000); last = now;
-        y += dir * speed * dt;
-        if (y >= maxY) { y = maxY; dir = -1; }   // 一番下で折り返す
-        else if (y <= 0) { y = 0; dir = 1; }     // 一番上で折り返す
-        img.style.transform = `translateY(${-y}px)`;
-        _panRAF = requestAnimationFrame(loop);
-      };
-      _panRAF = requestAnimationFrame(loop);
-    }
-    // 左の大枠で、抜き出したアニメを「実際に動かして」見せる
-    function renderAnimStage(d) {
-      const stage = document.querySelector("#detail_anim_stage");
-      if (!stage) return;
-      const a = d.anim || {};
-      const kf = a.keyframes || [], lot = a.lottie || [];
-      injectKeyframes(kf);
-      const rev = pickRevealKeyframe(kf);
-      // サンプル一覧は抽出物があれば描画、無ければ案内（動画プレビュー自体は常に出す）
-      const gridHtml = (kf.length || lot.length)
-        ? buildAnimGrid(d, kf, lot)
-        : `<div class="anim_stage_hint">CSSアニメ/Lottieはまだ抜き出していません。右の「🎞 アニメを抜き出す」で抽出できます。</div>`;
-      // モードボタンはタブ行の右端スロットへ（動画の縦を最大化）
-      const slot = document.querySelector("#detail_modebar_slot");
-      if (slot) {
-        slot.innerHTML = `
-          <button class="anim_mode is_on" data-mode="site">🖥 サイト全体で再生</button>
-          <button class="anim_mode" data-mode="grid">🔲 動きサンプル一覧</button>
-          <button class="anim_replay" id="anim_replay">▶ 最初から</button>`;
-      }
-      stage.innerHTML = `
-        <div class="anim_view" id="anim_view_site">
-          <div class="anim_site" id="anim_site" data-full="${d.fullpage}" data-rev="${rev}"></div>
-        </div>
-        <div class="anim_view" id="anim_view_grid" hidden>${gridHtml}</div>`;
-      if (lot.length) ensureLottie();
-      sliceSitePreview();  // カードのホバーと同じ「自動スクロールで動かす」を仕込む
-    }
-    // モード切替（サイト全体 / サンプル一覧）＋「最初から」。ボタンは .detail_visual 内にある
-    document.querySelector(".detail_visual").addEventListener("click", (e) => {
-      if (e.target.closest("#anim_replay")) { sliceSitePreview(); return; }
-      const btn = e.target.closest(".anim_mode");
-      if (!btn) return;
-      const mode = btn.dataset.mode;
-      document.querySelectorAll("#detail_modebar_slot .anim_mode").forEach((b) => b.classList.toggle("is_on", b === btn));
-      document.querySelector("#anim_view_site").hidden = mode !== "site";
-      document.querySelector("#anim_view_grid").hidden = mode !== "grid";
-      if (mode === "site") sliceSitePreview();  // サイトに戻したら再生（録画優先）
-      else stopSitePreview();                   // サンプル一覧では止める
-    });
     // 抜き出した画像のギャラリーを描画
     function renderAssets(d) {
       const box = document.querySelector("#detail_assets");
@@ -2021,37 +2102,76 @@
       setTimeout(() => { wrap.hidden = true; fill.style.width = "0%"; }, 1200);
     }
     // 「アニメを抜き出す」：実ページから @keyframes/transition/Lottie を収集 → 完了したら描画
-    document.querySelector("#detail_extract_anim").addEventListener("click", async (e) => {
+    // 🎥 録画から動きを読み取る（AIが動画のフレームを見て「動きの仕様書」を作る）
+    document.querySelector("#detail_read_motion").addEventListener("click", async (e) => {
       const id = e.currentTarget.dataset.id;
       const btn = e.currentTarget;
-      btn.disabled = true; btn.textContent = "抜き出し中…";
-      startAnimProgress();
-      const res = await fetch("/api/extract_anim", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      const data = await res.json();
-      if (!data.ok) {
-        finishAnimProgress(false);
-        btn.disabled = false; btn.textContent = "🎞 アニメを抜き出す"; status.textContent = data.message; return;
-      }
+      btn.disabled = true; btn.textContent = "AIが動きを読み取り中…（30秒前後）";
+      status.textContent = "録画からフレームを取り出し、AIが動きを読み取っています…";
+      let res, data;
+      try { res = await fetch("/api/read_motion", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) }); data = await res.json(); }
+      catch (err) { btn.disabled = false; btn.textContent = "🎥 録画から動きを読み取る"; status.textContent = "通信に失敗：" + err; return; }
+      if (!data.ok) { btn.disabled = false; btn.textContent = "🎥 録画から動きを読み取る"; status.textContent = data.message; return; }
       const wait = async () => {
         let d;
-        // 一時的な通信エラーで監視が止まらないよう、失敗しても再試行する
         try { d = await fetch("/api/site/" + id).then((r) => r.json()); }
         catch (err) { setTimeout(wait, 1500); return; }
-        if (d.anim_extracting) { setTimeout(wait, 1200); }
+        if (d.motion_reading) { setTimeout(wait, 1500); }
         else {
-          finishAnimProgress(true);
-          _currentDetail = d;         // 左のアニメ再生タブでも使えるよう更新
-          renderAnim(d);
-          renderAnimStage(d);         // 左の大枠を「実際に動く」状態へ更新
-          const a = d.anim || {};
-          status.textContent = `アニメを抜き出しました（keyframes ${(a.keyframes || []).length} / transition ${(a.transitions || []).length} / Lottie ${(a.lottie || []).length}）`;
+          _currentDetail = d;
+          renderMotion(d);
+          if (!d.motion_error) status.textContent = "動きの仕様書を作りました。生成時にこの動きへ寄せられます。";
         }
       };
-      setTimeout(wait, 1200);
+      setTimeout(wait, 1500);
     });
+    // 📋 AIに真似させる指示をコピー（別のAIに渡すとこの動きを再現できる）
+    document.querySelector("#motion_copy").addEventListener("click", async (e) => {
+      if (!_motionReproduce) return;
+      const b = e.currentTarget;
+      try {
+        await navigator.clipboard.writeText(_motionReproduce);
+        b.textContent = "✅ コピーしました";
+        setTimeout(() => { b.textContent = "📋 AIに真似させる指示をコピー"; }, 1500);
+      } catch (err) { status.textContent = "コピーできませんでした：" + err; }
+    });
+    // メモの行クリック＝動画をその場面へ飛ばす＋「この辺」枠を出す（位置は目安）
+    document.querySelector("#detail_motion").addEventListener("click", (e) => {
+      const el = e.target.closest(".detail_motion_item");
+      if (!el) return;
+      const i = +el.dataset.mi, n = +el.dataset.mn || 1;
+      const vel = document.querySelector("#detail_video_el");
+      document.querySelectorAll("#detail_motion .detail_motion_item").forEach((x) => x.classList.toggle("is_cur", x === el));
+      const seek = () => { vel.currentTime = Math.max(0, Math.min((vel.duration || 0) - 0.05, (i / n) * (vel.duration || 0))); vel.play().catch(() => {}); };
+      if (vel.duration) seek(); else vel.addEventListener("loadedmetadata", seek, { once: true });
+      // 「この辺で動く」枠を動画に重ねる
+      const box = document.querySelector("#motion_box");
+      const a = (el.dataset.area || "").split(",").map(Number);
+      if (a.length === 4 && a.every((v) => !isNaN(v))) {
+        box.style.left = (a[0] * 100) + "%"; box.style.top = (a[1] * 100) + "%";
+        box.style.width = (a[2] * 100) + "%"; box.style.height = (a[3] * 100) + "%";
+        box.hidden = false;
+      } else { box.hidden = true; }
+    });
+    // 録画（動画）の操作：スロー再生＋ホイールで前後にコマ送り（止めて何度でも見る）
+    (function wireVideoControls() {
+      const vel = document.querySelector("#detail_video_el");
+      const pane = document.querySelector("#detail_pane_video");
+      if (!vel || !pane) return;
+      pane.addEventListener("click", (e) => {
+        const b = e.target.closest(".vid_speed");
+        if (!b) return;
+        vel.playbackRate = parseFloat(b.dataset.rate);
+        pane.querySelectorAll(".vid_speed").forEach((x) => x.classList.toggle("is_on", x === b));
+      });
+      // 動画の上でホイール＝シーク（1ノッチ≒0.3秒ぶん進む/戻る）。止めて自分のペースで見られる。
+      vel.addEventListener("wheel", (e) => {
+        if (!vel.duration) return;
+        e.preventDefault();
+        vel.pause();
+        vel.currentTime = Math.max(0, Math.min(vel.duration - 0.05, vel.currentTime + (e.deltaY / 100) * 0.3));
+      }, { passive: false });
+    })();
     document.querySelector("#detail_close").addEventListener("click", closeDetail);
     detailOverlay.addEventListener("click", (e) => {
       if (e.target === detailOverlay) { closeDetail(); return; }
@@ -2069,7 +2189,7 @@
       // このサイトを「ベースA」に設定して mix & match パネルを開く
       campPanel.classList.add("is_open");
       const baseSel = document.querySelector("#camp_base");
-      if (baseSel) baseSel.value = siteId;
+      if (baseSel) { baseSel.value = siteId; basePicker.sync(); }
       window.scrollTo({ top: 0, behavior: "smooth" });
       campInput.focus();
       campState.textContent = "このサイトをベースにしました。必要なら『アニメ参照』を選び、作りたい内容を書いて「生成」を押してください。";

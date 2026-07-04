@@ -318,26 +318,37 @@ def _anim_ref_block(anim_ref_id: str) -> Optional[dict]:
     """
     with db.connect() as conn:
         row = db.get_site(conn, anim_ref_id)
-    if not row or not row["animation_snippets"]:
+    if not row:
         return None
-    try:
-        snippets = json.loads(row["animation_snippets"])
-    except Exception:  # noqa: BLE001
-        return None
+    snippets = {}
+    if row["animation_snippets"]:
+        try:
+            snippets = json.loads(row["animation_snippets"])
+        except Exception:  # noqa: BLE001
+            snippets = {}
     anim_txt = anim_mod.anim_to_prompt(snippets)
+    # 録画からAIが読み取った「動きの仕様書」があれば最優先（JSの動きも言葉で表せている）
+    motion_txt = ""
+    if row["motion_spec"]:
+        try:
+            from . import motion as motion_mod
+            motion_txt = motion_mod.motion_to_prompt(json.loads(row["motion_spec"]))
+        except Exception:  # noqa: BLE001
+            motion_txt = ""
     libs = row["animation_libs"] or "(検出なし)"
-    if not anim_txt and libs == "(検出なし)":
+    if not anim_txt and not motion_txt and libs == "(検出なし)":
         return None
-    return {
-        "type": "text",
-        "text": (
-            f"# アニメ参照B【動きの種類はこのサイトに寄せる】: {row['url']}\n"
-            f"下は参照Bから実際に抜き出したアニメ素材と使用ライブラリ。"
-            f"この“動きの傾向”をCSS/素のJSで**控えめに再現**する"
-            f"（コードの丸写しではなく、種類・速さ・向きの雰囲気を寄せる）。\n"
-            f"使用ライブラリ: {libs}\n{anim_txt}"
-        ),
-    }
+    parts = [
+        f"# アニメ参照B【動きの種類はこのサイトに寄せる】: {row['url']}",
+        "この“動きの傾向”をCSS/素のJSで**控えめに再現**する"
+        "（コードの丸写しではなく、種類・速さ・向きの雰囲気を寄せる）。",
+        f"使用ライブラリ: {libs}",
+    ]
+    if motion_txt:
+        parts.append("■録画から読み取った動きの仕様（最優先で寄せる）:\n" + motion_txt)
+    if anim_txt:
+        parts.append("■抜き出したCSSアニメ素材:\n" + anim_txt)
+    return {"type": "text", "text": "\n".join(parts)}
 
 
 def generate_camp(
@@ -396,6 +407,16 @@ def generate_camp(
                 )
             except Exception:
                 token_txt = ""
+        # 録画からAIが読み取った「動きの仕様書」があれば、動きも寄せる材料として渡す
+        motion_txt = ""
+        if row["motion_spec"]:
+            try:
+                from . import motion as motion_mod
+                mt = motion_mod.motion_to_prompt(json.loads(row["motion_spec"]))
+                if mt:
+                    motion_txt = "\n録画から読み取った動きの仕様（この動きに寄せる）:\n" + mt
+            except Exception:
+                motion_txt = ""
 
         if is_layout_source:
             # 全体スクショ（縦長）を渡してレイアウトの骨格を踏襲させる
@@ -406,11 +427,11 @@ def generate_camp(
                 f"# 参考{i}【★レイアウトの手本：この全体構成を忠実に踏襲する】: {row['url']}\n"
                 f"↓これはこのサイトの『全体スクショ』。セクションの並び・各セクションの構図"
                 f"（左右配置/グリッド列数/余白のリズム/情報の密度・強弱）を、できるだけ忠実に再現する。\n"
-                f"雰囲気: {vibe_txt}\nアニメのライブラリ: {libs}{token_txt}"
+                f"雰囲気: {vibe_txt}\nアニメのライブラリ: {libs}{token_txt}{motion_txt}"
             )
         else:
             img_block = _ref_image_block(config.PROJECT_ROOT / row["firstview_path"])
-            head = f"# 参考{i}（雰囲気の補助）: {row['url']}\n雰囲気: {vibe_txt}{token_txt}"
+            head = f"# 参考{i}（雰囲気の補助）: {row['url']}\n雰囲気: {vibe_txt}{token_txt}{motion_txt}"
 
         content.append({"type": "text", "text": head})
         if img_block:
@@ -692,6 +713,77 @@ def save_favorite(html: str, name: str) -> dict:
     meta[fn] = {"name": (name or "").strip()[:60] or "お気に入り", "fav": True, "snap": True}
     save_camp_names(meta)
     return {"file": fn, "name": meta[fn]["name"]}
+
+
+# ── セクション単位のお気に入り（部品として貯めて、AIなしで入れ替える）──────────
+# セクションHTMLは自己完結（自分用の<style>入り）なので、丸ごと保存→別カンプの同じ枠に
+# 貼るだけで入れ替えられる。css は「プレビュー表示用」の見た目補助（親カンプのhead style）。
+def _section_fav_dir() -> Path:
+    return config.DATA_DIR / "section_favs"
+
+
+def load_section_favs_meta() -> list:
+    p = _section_fav_dir() / "_index.json"
+    if p.exists():
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            return []
+    return []
+
+
+def _save_section_favs_meta(items: list) -> None:
+    d = _section_fav_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "_index.json").write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def save_section_fav(html: str, headcss: str, name: str) -> dict:
+    """セクションのHTML（自己完結）を部品として保存する。"""
+    if not html or "<section" not in html.lower():
+        raise ValueError("セクションのHTMLが取得できませんでした")
+    d = _section_fav_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    sid = datetime.now().strftime("sec_%Y%m%d_%H%M%S_%f")
+    (d / (sid + ".html")).write_text(html, encoding="utf-8")
+    if headcss:
+        (d / (sid + ".css")).write_text(headcss, encoding="utf-8")
+    entry = {
+        "id": sid,
+        "name": (name or "").strip()[:60] or "無名のセクション",
+        "created": datetime.now().isoformat(timespec="seconds"),
+    }
+    meta = load_section_favs_meta()
+    meta.insert(0, entry)  # 新しいものを先頭に
+    _save_section_favs_meta(meta)
+    return entry
+
+
+def list_section_favs() -> list:
+    """保存済みセクションを、プレビュー用HTML/CSS付きで新しい順に返す。"""
+    d = _section_fav_dir()
+    out = []
+    for e in load_section_favs_meta():
+        hp = d / (e.get("id", "") + ".html")
+        if not hp.exists():
+            continue
+        cp = d / (e.get("id", "") + ".css")
+        out.append({
+            **e,
+            "html": hp.read_text(encoding="utf-8"),
+            "css": cp.read_text(encoding="utf-8") if cp.exists() else "",
+        })
+    return out
+
+
+def delete_section_fav(sid: str) -> bool:
+    d = _section_fav_dir()
+    for ext in (".html", ".css"):
+        p = d / (sid + ext)
+        if p.exists():
+            p.unlink()
+    _save_section_favs_meta([e for e in load_section_favs_meta() if e.get("id") != sid])
+    return True
 
 
 def list_uploads() -> list[dict]:
@@ -1105,3 +1197,35 @@ def edit_camp_section(filename: str, section_index: int, instruction: str) -> di
     out.write_text(new_html, encoding="utf-8")
     log.info("カンプを部分編集: %s → %s (section=%s)", filename, out.name, section_index)
     return {"file": out.name, "model": used, "edited_section": -1 if whole else section_index}
+
+
+def edit_element(element_html: str, css: str, instruction: str) -> str:
+    """右クリックした『その要素1つだけ』を直して、新しい要素HTMLを返す（他は一切触らない）。
+
+    ページCSSは"参考"として読ませるだけで変更させない。見た目の変更はインラインstyleに寄せ、
+    共通クラス/CSSを書き換えさせない＝他の要素・他のセクションが崩れないようにする。
+    """
+    element_html = (element_html or "").strip()
+    instruction = (instruction or "").strip()
+    if not element_html:
+        raise ValueError("対象の要素が空です")
+    if not instruction:
+        raise ValueError("修正指示が空です")
+    content = [{"type": "text", "text": (
+        "1つのHTML要素だけを、依頼どおり直してください。指示に無い所は変えない。\n\n"
+        f"# 参考: ページのCSS（読むだけ・書き換えない）\n{(css or '(なし)')[:6000]}\n\n"
+        f"# 直す対象の要素（このHTMLだけを直す）\n{element_html}\n\n"
+        f"# 依頼\n{instruction}\n\n"
+        "# 出力ルール（厳守）\n"
+        "- この要素の新しいHTMLだけを返す（同じ種類のタグ1つ。外側にラッパーを足さない）\n"
+        "- 見た目の変更は基本インラインstyleで行う。ページ共通のクラス定義やCSSは書き換えない（＝他が崩れない）\n"
+        "- どうしてもCSSが要る時だけ、その要素の中だけで完結する<style>を入れる（共通クラスは触らない）\n"
+        "- 他の要素・レイアウト・他セクションには一切影響させない\n"
+        "- 元のインラインstyle（位置transform等）は、指示に関係しなければ保つ\n"
+        "- 返答はHTMLだけ。前置き・マークダウンは書かない"
+    )}]
+    raw, _used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
+    new_html = _strip_fragment(raw)
+    if not new_html or "<" not in new_html:
+        raise ValueError("AIから有効なHTMLが返りませんでした")
+    return new_html

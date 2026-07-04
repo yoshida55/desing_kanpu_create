@@ -22,7 +22,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, assets, camp, clone, config, db, embed, ingest, search, vibe
+from . import anim, assets, camp, clone, config, db, embed, ingest, motion, search, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -67,6 +67,10 @@ _EXT_LOCK = threading.Lock()
 # アニメ抜き出し中のサイトID（同時に1つ）
 _ANIM_EXTRACTING: dict = {"site_id": None}
 _ANIM_LOCK = threading.Lock()
+
+# 録画から動きを読み取り中のサイトID（同時に1つ）
+_MOTION_RUNNING: dict = {"site_id": None, "error": None}
+_MOTION_LOCK = threading.Lock()
 
 # 忠実クローン中の状態（同時に1つ・実ページを開くので重い）
 _CLONING: dict = {"site_id": None, "phase": "", "file": None, "error": None}
@@ -526,8 +530,22 @@ def api_site(site_id: str):
             # 抜き出したアニメ素材（@keyframes/transition/Lottie）と、抜き出し中かどうか
             "anim": _anim_payload(row, site_id),
             "anim_extracting": _ANIM_EXTRACTING.get("site_id") == site_id,
+            # 録画からAIが読み取った「動きの仕様書」と、読み取り中かどうか
+            "motion": _motion_payload(row),
+            "motion_reading": _MOTION_RUNNING.get("site_id") == site_id,
+            "motion_error": _MOTION_RUNNING.get("error") if _MOTION_RUNNING.get("site_id") == site_id else None,
         }
     )
+
+
+def _motion_payload(row) -> dict:
+    """DBの motion_spec(JSON) を画面が使う形にして返す（無ければ空）。"""
+    if not row["motion_spec"]:
+        return {}
+    try:
+        return _json.loads(row["motion_spec"])
+    except Exception:  # noqa: BLE001
+        return {}
 
 
 def _anim_payload(row, site_id: str) -> dict:
@@ -577,6 +595,45 @@ def api_extract_anim():
         _ANIM_EXTRACTING["site_id"] = site_id
     log.info("アニメ抜き出しジョブ開始: %s", row["url"])
     threading.Thread(target=_run_anim_job, args=(site_id, row["url"]), daemon=True).start()
+    return jsonify({"ok": True, "site_id": site_id})
+
+
+def _run_motion_job(site_id: str) -> None:
+    """バックグラウンドで録画からAIに動きを読み取らせ、motion_spec に保存する。"""
+    try:
+        motion.describe_motion(site_id)
+        with _MOTION_LOCK:
+            _MOTION_RUNNING["error"] = None
+    except Exception as exc:  # noqa: BLE001
+        log.exception("動きの読み取りに失敗: %s", site_id)
+        with _MOTION_LOCK:
+            _MOTION_RUNNING["error"] = str(exc)
+    finally:
+        with _MOTION_LOCK:
+            _MOTION_RUNNING["site_id"] = None
+
+
+@app.route("/api/read_motion", methods=["POST"])
+def api_read_motion():
+    """指定サイトの録画からAIが動きを読み取る（非同期）。録画が必要。"""
+    data = request.get_json(silent=True) or {}
+    site_id = (data.get("id") or "").strip()
+    with db.connect() as conn:
+        row = db.get_site(conn, site_id)
+    if not row:
+        return jsonify({"ok": False, "message": "見つかりません"}), 404
+    has_video = bool(row["animation_video_path"]) and (
+        config.PROJECT_ROOT / row["animation_video_path"]
+    ).exists()
+    if not has_video:
+        return jsonify({"ok": False, "message": "先に『🎬動き』で録画してください"}), 400
+    with _MOTION_LOCK:
+        if _MOTION_RUNNING.get("site_id") is not None:
+            return jsonify({"ok": False, "message": "別の読み取りが進行中です"}), 409
+        _MOTION_RUNNING["site_id"] = site_id
+        _MOTION_RUNNING["error"] = None
+    log.info("動きの読み取りジョブ開始: %s", row["url"])
+    threading.Thread(target=_run_motion_job, args=(site_id,), daemon=True).start()
     return jsonify({"ok": True, "site_id": site_id})
 
 
@@ -1249,10 +1306,49 @@ def api_camp_sections():
     return jsonify({"ok": True, "sections": camp.list_camp_sections(html)})
 
 
+@app.route("/api/edit_element", methods=["POST"])
+def api_edit_element():
+    """右クリックした『その要素1つだけ』をAIで直す（他は触らない）。DOM側で差し替える。"""
+    data = request.get_json(silent=True) or {}
+    try:
+        new_html = camp.edit_element(
+            data.get("html", ""), data.get("css", ""), data.get("instruction", "")
+        )
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(exc)}), 400
+    return jsonify({"ok": True, "html": new_html})
+
+
+@app.route("/api/section_fav/save", methods=["POST"])
+def api_section_fav_save():
+    """セクション1つを『お気に入り部品』として保存する（AIなし）。"""
+    data = request.get_json(silent=True) or {}
+    try:
+        entry = camp.save_section_fav(
+            data.get("html", ""), data.get("headcss", ""), data.get("name", "")
+        )
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(exc)}), 400
+    return jsonify({"ok": True, "fav": entry})
+
+
+@app.route("/api/section_fav/list")
+def api_section_fav_list():
+    """保存済みセクション部品を、プレビュー用HTML/CSS付きで返す。"""
+    return jsonify({"ok": True, "favs": camp.list_section_favs()})
+
+
+@app.route("/api/section_fav/delete", methods=["POST"])
+def api_section_fav_delete():
+    data = request.get_json(silent=True) or {}
+    camp.delete_section_fav((data.get("id") or "").strip())
+    return jsonify({"ok": True})
+
+
 # カンプ画面の隅に出す編集バー（ツール経由で開いた時だけ注入。保存ファイルは汚さない）
 _EDIT_BAR = """
 <style>
-#__ce{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:480px;max-width:94vw;background:#fff;border:1px solid #e3e3e8;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.32);font-family:system-ui,-apple-system,sans-serif;color:#1d1d1f}
+#__ce{position:fixed;right:20px;top:20px;z-index:2147483000;width:480px;max-width:94vw;background:#fff;border:1px solid #e3e3e8;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.32);font-family:system-ui,-apple-system,sans-serif;color:#1d1d1f}
 #__ce *{box-sizing:border-box}
 #__ce .hd{display:flex;align-items:center;gap:8px;background:#1d1d1f;color:#fff;padding:13px 16px;font-weight:700;font-size:15px;cursor:pointer;border-radius:16px 16px 0 0}
 #__ce .hd .t{flex:1}
@@ -1281,9 +1377,17 @@ _EDIT_BAR = """
 #__ce .ag b{display:block;font-size:13px;color:#1d1d1f;font-weight:700}
 #__ce .ag span{font-size:11px;color:#7a7a80;font-weight:400}
 .__ce_hl{outline:3px solid #ff8a00 !important;outline-offset:2px;cursor:pointer !important}
+.__ce_sechl{outline:3px solid #e8a300 !important;outline-offset:-3px;box-shadow:0 0 0 3px rgba(232,163,0,.2) inset !important}
 #__ce_pk{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
 #__ce_pk .bx{background:#fff;border-radius:12px;padding:16px;max-width:640px;width:92%;max-height:80vh;overflow:auto;font-family:system-ui,sans-serif}
 #__ce_pk h4{margin:0 0 12px;font-size:15px}
+#__ce_pk .secgr{display:grid;grid-template-columns:repeat(auto-fill,160px);gap:10px;justify-content:center}
+#__ce_pk .sit{position:relative;width:160px;border:1px solid #e2e2e6;border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
+#__ce_pk .sit:hover{border-color:#e8a300;box-shadow:0 6px 16px rgba(0,0,0,.18)}
+#__ce_pk .sit .pv{width:160px;height:101px;overflow:hidden;background:#fff;pointer-events:none}
+#__ce_pk .sit .pv iframe{width:1200px;height:760px;border:none;transform:scale(.1333);transform-origin:top left}
+#__ce_pk .sit .nm{font-size:11px;font-weight:700;color:#1d1d1f;padding:5px 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#__ce_pk .sit .del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:999px;width:20px;height:20px;cursor:pointer;font-size:12px;line-height:18px;padding:0}
 #__ce_pk .cl{float:right;cursor:pointer;font-size:18px;font-weight:700;color:#888}
 #__ce_pk .gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
 #__ce_pk .it{border:1px solid #eee;border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
@@ -1348,13 +1452,17 @@ _EDIT_BAR = """
 #__ce_toast .bar span{display:block;height:100%;width:35%;background:#ff9a3c;border-radius:4px;animation:__ce_flow 1.2s ease-in-out infinite}
 @keyframes __ce_flow{0%{margin-left:-35%}100%{margin-left:100%}}
 #__ce_toast .tx{font-size:14.5px;font-weight:700}
+/* 改善中のセクションを目立たせる（今どこを処理しているか一目で分かる） */
+.__ce_busy{position:relative !important;outline:4px solid #7c3aed !important;outline-offset:-4px;animation:__ce_busypulse 1.1s ease-in-out infinite}
+.__ce_busy::after{content:'✨ このセクションをAIが改善中…';position:absolute;top:12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:9px 18px;border-radius:999px;font-family:system-ui,sans-serif;font-size:15px;font-weight:700;box-shadow:0 10px 28px rgba(124,58,237,.45);z-index:2147483005;white-space:nowrap;pointer-events:none}
+@keyframes __ce_busypulse{0%,100%{outline-color:#7c3aed}50%{outline-color:#d3bef7}}
 </style>
-<div id="__ce">
-  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">✕ 閉じる</span></div>
+<div id="__ce" class="min">
+  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">▲ ひらく</span></div>
   <div class="bd">
     <div class="lbl plain">🤖 修正・おしゃれに使うAI（モデルは⚙設定で）</div>
     <select id="__ce_ai"><option value="anthropic">Claude</option><option value="openai">GPT</option><option value="deepseek">DeepSeek（激安）</option><option value="gemini">Gemini</option></select>
-    <div class="lbl plain">① どこを直す？</div>
+    <div class="lbl plain">① 範囲を選ぶ（全体／セクション）</div>
     <select id="__ce_sec"><option value="-1">ページ全体</option></select>
     <div class="lbl">🎬 アニメ・背景装飾を付ける（選んだ所に適用）</div>
     <div class="ags" id="__ce_ags"></div>
@@ -1367,9 +1475,9 @@ _EDIT_BAR = """
     <div class="lbl plain">🎨 一括改善の手本（ストックの登録サイトに寄せる）</div>
     <select id="__ce_ref"><option value="">なし（AIおまかせ）</option></select>
     <button class="im" id="__ce_improve" style="background:#7c3aed;color:#fff">🚀 ページ全体を今風に（一括改善）</button>
-    <div class="lbl plain">⭐ お気に入り（今の完成形を丸ごと残す→選ぶと再現）</div>
-    <button class="im" id="__ce_fav" style="background:#e8a300;color:#fff">⭐ お気に入りに保存（この完成形を残す）</button>
-    <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">★ お気に入り一覧（選ぶと再現）</button>
+    <div class="lbl plain">⭐ セクションのお気に入り（①で選んだセクションが対象・AIなし）</div>
+    <button class="im" id="__ce_fav" style="background:#e8a300;color:#fff">⭐ このセクションをお気に入り</button>
+    <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
     <div class="msg" id="__ce_msg">💡 直したい所を<b>右クリック</b>すると、その要素に直接アニメ・指示が出せます</div>
   </div>
 </div>
@@ -1466,37 +1574,101 @@ _EDIT_BAR = """
     saveLayout();
   });
   var esc=function(s){return String(s||'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});};
-  // ⭐ お気に入り＝いまの完成形（見た目＋焼き込んだ動き）を別ファイルに丸ごと保存。選ぶとそのまま再現。
+  // ①のドロップダウン(sec)で選ばれたセクション要素を返す（ページ全体=-1ならnull）
+  function curSecEl(){
+    var idx=Number(sec.value);
+    if(!(idx>=0)) return null;
+    var els=[].slice.call(document.querySelectorAll('section')).filter(function(x){return !x.closest('#__ce');});
+    return els[idx]||null;
+  }
+  // 親カンプのhead内<style>を集める（プレビューで見た目を近づける用）
+  function headCss(){
+    return [].slice.call(document.head.querySelectorAll('style')).map(function(s){return s.textContent||'';}).join('\\n');
+  }
+  // head内のCSSから使われている色/フォント等の変数名(--xxx)を集め、実際の値を返す
+  function collectRootVars(){
+    var names={}, re=/(--[\\w-]+)\\s*:/g, m;
+    [].slice.call(document.head.querySelectorAll('style')).forEach(function(s){
+      var t=s.textContent||''; while((m=re.exec(t))){ names[m[1]]=1; }
+    });
+    var cs=getComputedStyle(document.documentElement), out={};
+    Object.keys(names).forEach(function(n){ var v=cs.getPropertyValue(n); if(v&&v.trim()) out[n]=v.trim(); });
+    return out;
+  }
+  // 保存前にセクションを"素の状態"へ掃除＝編集で焼き込んだ位置・サイズ・一時クラスを外す。
+  // さらに色/フォント変数をセクション自身に埋め込み、貼り先のページに依存せず表示できるようにする。
+  function cleanSection(el){
+    var c=el.cloneNode(true);
+    var stripCls=['__ce_sel','__ce_hl','__ce_sechl','fxa_in'];
+    [].slice.call(c.querySelectorAll('*')).concat([c]).forEach(function(n){
+      if(n.classList){
+        stripCls.forEach(function(k){ n.classList.remove(k); });
+        [].slice.call(n.classList).forEach(function(cl){ if(cl.indexOf('__ceax_')===0) n.classList.remove(cl); });
+      }
+      var edited=false;
+      if(n.attributes){ [].slice.call(n.attributes).forEach(function(a){ if(a.name.indexOf('data-ce')===0){ edited=true; n.removeAttribute(a.name); } }); }
+      if(n.style){
+        ['animation','transition'].forEach(function(p){ n.style.removeProperty(p); });      // 一時アニメは常に除去
+        if(edited){ ['transform','transform-origin','width','height','max-width','object-fit','opacity','filter'].forEach(function(p){ n.style.removeProperty(p); }); }  // 編集で動かした要素だけサイズ・位置も戻す
+        var sv=n.getAttribute('style'); if(!sv||!sv.trim()) n.removeAttribute('style');
+      }
+    });
+    var vars=collectRootVars();
+    Object.keys(vars).forEach(function(k){ c.style.setProperty(k, vars[k]); });  // 色・フォントを自己完結させる
+    return c;
+  }
+  // ①で選んだセクションを画面で薄く光らせる＋そこへスクロール（どこが対象か一目で分かる）
+  function highlightSelSec(){
+    [].slice.call(document.querySelectorAll('.__ce_sechl')).forEach(function(x){x.classList.remove('__ce_sechl');});
+    var t=curSecEl();
+    if(t){ t.classList.add('__ce_sechl'); try{ t.scrollIntoView({behavior:'smooth',block:'start'}); }catch(_){} }
+  }
+  sec.addEventListener('change', highlightSelSec);
+  // ⭐ このセクションをお気に入り（自己完結HTMLを部品として保存＝AIなし）
   var favBtn=document.getElementById('__ce_fav');
   if(favBtn) favBtn.addEventListener('click',function(){
-    var cur=(document.title||'').trim();
-    var name=window.prompt('この完成形を「お気に入り」として丸ごと保存します（見た目＋動き＋スクロール発火ごと）。\\n★一覧からいつでも呼び出して再現・サンプルに使えます。\\n名前をどうぞ：', cur);
-    if(name===null) return;  // キャンセル
+    var el=curSecEl();
+    if(!el){ msg.textContent='まず①「どこを直す？」で保存したいセクションを選んでください（ページ全体は不可）'; return; }
+    var label=((sec.options[sec.selectedIndex]||{}).text||'セクション').replace(/^[0-9]+\\.\\s*/,'');
+    var name=window.prompt('このセクションを「部品」として保存します。別のカンプの同じ枠にAIなしで入れ替えできます。\\n名前をどうぞ：', label);
+    if(name===null) return;
     favBtn.disabled=true; var old=favBtn.textContent; favBtn.textContent='保存中…';
-    fetch('/api/save_favorite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanHtml(),name:name})})
+    fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el).outerHTML,headcss:headCss(),name:name})})
     .then(function(r){return r.json();}).then(function(d){
       favBtn.disabled=false; favBtn.textContent=old;
-      if(d.ok){ msg.textContent='⭐お気に入りに保存しました「'+(d.name||'')+'」。★一覧から呼び出せます'; }
-      else { msg.textContent='保存失敗：'+(d.message||''); }
+      msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'):('保存失敗：'+(d.message||''));
     }).catch(function(){ favBtn.disabled=false; favBtn.textContent=old; msg.textContent='通信エラー'; });
   });
-  // ★ お気に入り一覧＝貯めた完成形を選ぶと、そのカンプを開いて丸ごと再現（サンプル切替に使える）
+  // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
   var favListBtn=document.getElementById('__ce_favlist');
   if(favListBtn) favListBtn.addEventListener('click',function(){
-    fetch('/api/camps').then(function(r){return r.json();}).then(function(d){
-      var favs=(d.camps||[]).filter(function(c){return c.fav;});
+    var target=curSecEl();
+    if(!target){ msg.textContent='まず①「どこを直す？」で入れ替える先のセクションを選んでください'; return; }
+    fetch('/api/section_fav/list').then(function(r){return r.json();}).then(function(d){
+      var favs=d.favs||[];
       var items = favs.length
-        ? favs.map(function(c){ var cur=(c.file===FILE)?' （今開いている版）':''; return '<div class="it'+(c.file===FILE?' now':'')+'" data-file="'+c.file+'"><div class="nm">⭐ '+esc(c.name||c.file)+cur+'</div><div class="dt">'+esc(c.title||'')+'</div></div>'; }).join('')
-        : '<div style="color:#999;padding:8px">まだお気に入りがありません（上の「⭐お気に入りに保存」で貯まります）</div>';
+        ? favs.map(function(f){
+            // ★プレビューはJSを動かさないので、スクロール表示待ち(opacity:0)のままだと空に見える。
+            //   だからプレビュー内は全部見える状態に強制する（本物の入れ替え先はJSで正しく出るので無関係）。
+            var doc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:#fff}'+(f.css||'')+' *,*::before,*::after{opacity:1 !important;visibility:visible !important;filter:none !important;clip-path:none !important;animation:none !important;transition:none !important}</style></head><body>'+f.html+'</body></html>';
+            return '<div class="sit" data-id="'+f.id+'"><div class="pv"><iframe sandbox="allow-same-origin" srcdoc="'+esc(doc)+'"></iframe></div><div class="nm">'+esc(f.name||'')+'</div><button class="del" data-id="'+f.id+'" title="削除">×</button></div>';
+          }).join('')
+        : '<div style="color:#999;padding:8px">まだセクションのお気に入りがありません（⭐で保存できます）</div>';
       var ov=document.createElement('div'); ov.id='__ce_pk';
-      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>★ お気に入り一覧（クリックで開いて再現）</h4><div class="favgr">'+items+'</div></div>';
+      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🔀 入れ替えるセクションを選ぶ（クリックで差し替え）</h4><div class="secgr">'+items+'</div></div>';
       document.body.appendChild(ov);
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
-        var it=e.target.closest('.it'); if(!it) return;
-        var f=it.getAttribute('data-file'); if(f===FILE){ ov.remove(); return; }
-        if(_dirty && !confirm('保存していない変更があります。お気に入りを開くと、その変更は失われます。開きますか？')) return;
-        location.href='/camp/'+encodeURIComponent(f);
+        var del=e.target.closest('.del');
+        if(del){ e.stopPropagation(); var did=del.getAttribute('data-id');
+          fetch('/api/section_fav/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:did})}).then(function(){ var c=del.closest('.sit'); if(c) c.remove(); });
+          return; }
+        var it=e.target.closest('.sit'); if(!it) return;
+        var id=it.getAttribute('data-id');
+        var f=(favs||[]).filter(function(x){return x.id===id;})[0]; if(!f) return;
+        target.outerHTML=f.html;   // AIなしで丸ごと差し替え
+        ov.remove(); markDirty();
+        msg.textContent='🔀 セクションを入れ替えました。上の「💾 保存」で確定してください';
       });
     }).catch(function(){ msg.textContent='お気に入り一覧の取得に失敗しました'; });
   });
@@ -1567,22 +1739,33 @@ _EDIT_BAR = """
   }
   function setToast(t){ _toastPhase=t; }
   function hideToast(){ if(_toastT){clearInterval(_toastT);_toastT=null;} if(_toast){_toast.remove();_toast=null;} }
+  // 改善中のセクションを紫枠＋バッジで目立たせる（今どこを処理しているか分かるように）
+  var _busyEl=null;
+  function markSectionBusy(idx){
+    clearSectionBusy();
+    if(!(Number(idx)>=0)) return;
+    var els=[].slice.call(document.querySelectorAll('section')).filter(function(x){return !x.closest('#__ce');});
+    var el=els[Number(idx)]; if(!el) return;
+    _busyEl=el; el.classList.add('__ce_busy');
+    try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(_){}
+  }
+  function clearSectionBusy(){ if(_busyEl){ _busyEl.classList.remove('__ce_busy'); _busyEl=null; } }
   function submit(section,instruction){
     if(!instruction){msg.textContent='指示が空です';return;}
     // ページ全体(-1)は"全文を書き直す"＝高い(数十円)・遅い。特定箇所なら安い(数円)。
     if(Number(section)<0){
       if(!confirm('⚠ これは「ページ全体を書き直す」修正です。\\n時間がかかり、料金も高め（数十円〜）になります。\\n\\n特定の場所だけ直すなら【キャンセル】して、\\n・①で直すセクションを選ぶ か\\n・直したい所を右クリック\\nすると安く（数円）速く直せます。\\n\\nこのままページ全体を直しますか？')) { msg.textContent='キャンセルしました（①でセクションを選ぶと安いです）'; return; }
     }
-    busy(true); msg.textContent='今の状態を保存中…'; showToast('AIが直しています…（十数秒〜）');
+    busy(true); msg.textContent='今の状態を保存中…'; showToast('AIが直しています…（十数秒〜）'); markSectionBusy(section);
     // ★AIに渡す前に、今の見た目（移動・手修正・焼き込みアニメ）をディスクへ保存する。
     //   AIはファイルを読んで直すので、保存しないと「以前の状態」に対してかかり手修正が戻ってしまう。
     flushThen(function(){
       msg.textContent='生成中…';
       fetch('/api/edit_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:Number(section),instruction:instruction})})
       .then(function(r){return r.json();}).then(function(d){
-        if(!d.ok){msg.textContent='失敗：'+d.message;busy(false);hideToast();return;}
+        if(!d.ok){msg.textContent='失敗：'+d.message;busy(false);hideToast();clearSectionBusy();return;}
         poll(d.job_id);
-      }).catch(function(){msg.textContent='通信エラー';busy(false);hideToast();});
+      }).catch(function(){msg.textContent='通信エラー';busy(false);hideToast();clearSectionBusy();});
     });
   }
   // AIに渡す前に、今のDOM（移動・手修正・焼き込み）をディスクに保存してからcbを実行する（＝AIが「今」を見る）。
@@ -1601,7 +1784,7 @@ _EDIT_BAR = """
       if(!j){setTimeout(function(){poll(id);},1200);return;}
       if(j.state==='running'){msg.textContent=(j.phase||'生成中…');setToast(j.phase||'AIが直しています…');setTimeout(function(){poll(id);},1200);}
       else if(j.state==='done'){setToast('✅ できました。開きます…');msg.textContent='できました。開きます…';location.href='/camp/'+j.file;}
-      else{msg.textContent='失敗：'+(j.message||'');busy(false);hideToast();}
+      else{msg.textContent='失敗：'+(j.message||'');busy(false);hideToast();clearSectionBusy();}
     }).catch(function(){setTimeout(function(){poll(id);},1500);});
   }
   go.addEventListener('click',function(){submit(sec.value,inp.value.trim());});
@@ -1702,6 +1885,41 @@ _EDIT_BAR = """
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
   function closeMenu(){ if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} curAnim=null; curP={}; }
+  // ↵ 改行を自分で決める：今の文を入力欄に出し、Enterで改行→適用（AIなし）。1文字アニメは外れる。
+  function openBreakEditor(el){
+    if(!el){ msg.textContent='対象の要素がありません'; return; }
+    var cur=(el.innerText||el.textContent||'').replace(/\\u200b/g,'');
+    var ov=document.createElement('div'); ov.id='__ce_pk';
+    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>↵ 改行を自分で決める</h4>'
+      +'<div style="font-size:12px;color:#888;margin-bottom:8px">改行したい所で Enter を押して、「適用」を押してください（AIなし・一瞬）。※1文字ずつの動きは外れます</div>'
+      +'<textarea id="__ce_brta" style="width:100%;height:150px;font-size:15px;padding:10px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
+      +'<button class="go2" id="__ce_brapply" style="background:#1a7f37;margin-top:8px">✅ この改行で適用</button></div>';
+    document.body.appendChild(ov);
+    var ta=document.getElementById('__ce_brta'); ta.value=cur; ta.focus();
+    ov.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+      if(e.target.id==='__ce_brapply'){
+        stopAnim(el);
+        el.innerHTML=esc(ta.value).replace(/\\n/g,'<br>');
+        ov.remove(); markDirty();
+        msg.textContent='改行を反映しました。「💾 保存」で確定できます';
+      }
+    });
+  }
+  // その要素1つだけをAIで直す（他は一切触らない）。結果をDOMでその要素だけ差し替える。
+  function editElement(el, instruction){
+    if(!el){ msg.textContent='対象の要素がありません'; return; }
+    var target=el;
+    busy(true); showToast('この要素だけAIが直しています…（十数秒）');
+    fetch('/api/edit_element',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:target.outerHTML, css:headCss(), instruction:instruction})})
+    .then(function(r){return r.json();}).then(function(d){
+      busy(false); hideToast();
+      if(!d.ok){ msg.textContent='失敗：'+(d.message||''); return; }
+      try{ target.outerHTML=d.html; }catch(_){ msg.textContent='反映に失敗しました'; return; }
+      closeMenu(); markDirty();
+      msg.textContent='✅ この要素だけ直しました。「💾 保存」で確定できます';
+    }).catch(function(){ busy(false); hideToast(); msg.textContent='通信エラー'; });
+  }
   // ===== 位置の直接調整（AIなし・transformで即反映）=====
   // 要素を translate で浮かせて動かす。元のtransformは data-cebt に退避して壊さない。
   // 元のtransformを1度だけ退避（自前のtranslate/scaleが無い時だけ）
@@ -1718,11 +1936,23 @@ _EDIT_BAR = """
     var x=+el.getAttribute('data-cetx')||0, y=+el.getAttribute('data-cety')||0;
     var sx=+el.getAttribute('data-cesx')||1, sy=+el.getAttribute('data-cesy')||1;
     var ro=+el.getAttribute('data-cero')||0;
+    // 移動/回転/拡大は個別プロパティ(translate/rotate/scale)で当てる。
+    // これで transform を出現アニメ用に空けられ、移動とアニメが奪い合わず両立する（消えない・位置も残る）。
+    el.style.setProperty('translate', x+'px '+y+'px', 'important');
+    el.style.setProperty('rotate', ro+'deg', 'important');
+    el.style.setProperty('scale', sx+' '+sy, 'important');
     el.style.setProperty('transform-origin','center','important');
-    el.style.setProperty('transform','translate('+x+'px,'+y+'px) rotate('+ro+'deg) scale('+sx+','+sy+') '+(el.getAttribute('data-cebt')||''),'important');
-    el.style.setProperty('animation','none','important');
-    el.style.setProperty('transition','none','important');
+    var cebt=el.getAttribute('data-cebt')||'';
+    if(cebt){ el.style.setProperty('transform', cebt, 'important'); }  // 元の変形(あれば)だけtransformに残す
     markDirty();
+  }
+  // 移動・拡大・回転で位置を動かした要素か？（動かしていたらアニメはラッパーに当てる）
+  function isMoved(el){ return !!el && ['data-cetx','data-cety','data-cesx','data-cesy','data-cero'].some(function(a){ return (+el.getAttribute(a))||0; }); }
+  // 今の確定変形（移動＋回転＋拡大＋元の変形）をまとめた文字列。アニメの土台に使う。
+  function restTf(el){
+    var x=+el.getAttribute('data-cetx')||0, y=+el.getAttribute('data-cety')||0;
+    var sx=+el.getAttribute('data-cesx')||1, sy=+el.getAttribute('data-cesy')||1, ro=+el.getAttribute('data-cero')||0;
+    return 'translate('+x+'px,'+y+'px) rotate('+ro+'deg) scale('+sx+','+sy+') '+(el.getAttribute('data-cebt')||'');
   }
   function setPos(el,x,y){ _cebt(el); el.setAttribute('data-cetx',x); el.setAttribute('data-cety',y); applyTf(el); }
   function nudge(el,dx,dy){ setPos(el,(+el.getAttribute('data-cetx')||0)+dx,(+el.getAttribute('data-cety')||0)+dy); }
@@ -1748,6 +1978,14 @@ _EDIT_BAR = """
     el.style.setProperty('max-width','none','important');  // 元CSSのmax-width:100%等に負けないように
     markDirty();
   }
+  // 縦の高さ(min-height)を増減。scaleと違い中身は歪まず、余白だけ増減する（セクションを高く保つのに最適）。
+  function adjustMinH(el,delta){
+    if(!el) return;
+    var cur=parseFloat(el.style.minHeight); if(!(cur>0)) cur=el.getBoundingClientRect().height||el.offsetHeight||0;
+    var h=Math.max(40, cur+delta);
+    el.style.setProperty('min-height',Math.round(h)+'px','important');
+    markDirty();
+  }
   // ===== 動きプレビュー（RAFで毎フレーム手動描画＝この環境で確実）＋ 無料の焼き込み =====
   var curAnim=null, curP={};  // いまプレビュー中のアニメkと、その調整値
   function fxDef(k){ for(var i=0;i<FX.length;i++){ if(FX[i].k===k) return FX[i]; } return null; }
@@ -1756,7 +1994,9 @@ _EDIT_BAR = """
   function clearPreviewStyle(el){
     if(!el) return;
     ['opacity','filter','clip-path','text-shadow','animation'].forEach(function(p){ el.style.removeProperty(p); });
-    if(el.getAttribute('data-cetx')!=null){ applyTf(el); } else { el.style.removeProperty('transform'); }
+    // 位置・拡大・回転・退避のどれかが編集されていたら、その確定変形を戻す（拡大だけでも消えないように）
+    var edited=['data-cetx','data-cety','data-cesx','data-cesy','data-cero','data-cebt'].some(function(a){ return el.getAttribute(a)!=null; });
+    if(edited){ applyTf(el); } else { ['transform','translate','rotate','scale'].forEach(function(p){ el.style.removeProperty(p); }); }
   }
   function stopAnim(el){
     if(el&&el.__ceRAF){ cancelAnimationFrame(el.__ceRAF); el.__ceRAF=null; }
@@ -1836,7 +2076,7 @@ _EDIT_BAR = """
     var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ 未対応の動き：'+k; return; }
     stopAnim(el);
     el.style.setProperty('animation','none','important');  // プレビュー中は要素自身のCSSアニメを止める（RAFのtransformが上書きされないように）
-    var base=el.getAttribute('data-cebt')||'';  // 元の変形(回転など)は保つ
+    var base=el.getAttribute('data-cebt')||'';  // 元の変形(回転など)は保つ。移動はtranslate個別プロパティ側に乗るのでここには含めない
     if(msg) msg.textContent='▶ 再生「'+a.b+'」（スライダーで調整→「付ける」で確定）';
     if(a.g==='char'){ playChar(el,a); return; }
     var dur=fxParam(a,'dur')||800, start=null;  // a.dは説明文なので使わない（速さスライダー無しは800msに）
@@ -1957,6 +2197,8 @@ _EDIT_BAR = """
       // （transformの奪い合いを回避＝せり上がり等がちゃんと動く。中の要素は自分のアニメ・ホバーを保つ）。
       var host=el, an='none';
       try{ an=getComputedStyle(el).animationName||'none'; }catch(_){}
+      // 自分のCSSアニメ持ちだけラッパーに出現をかける（transformの奪い合い回避）。
+      // 移動は translate 個別プロパティに乗っているので、出現アニメ(transform)と両立＝移動要素もそのまま付けてOK。
       if(an!=='none'){ host=fxWrap(el); }
       host.style.setProperty('--fxa-dur', (fxParam(a,'dur')||800)+'ms');
       host.classList.add('fxa_pre');
@@ -1988,6 +2230,7 @@ _EDIT_BAR = """
   }
   function resetPos(el){
     el.style.removeProperty('transform'); el.style.removeProperty('transform-origin'); el.style.removeProperty('animation'); el.style.removeProperty('transition');
+    el.style.removeProperty('translate'); el.style.removeProperty('rotate'); el.style.removeProperty('scale');  // 個別プロパティ方式の移動も戻す
     if(el.getAttribute('data-cew')!=null){ // 画像サイズを変えていたら、それも元に戻す（元からの幅指定は触らない）
       el.style.removeProperty('width'); el.style.removeProperty('height'); el.style.removeProperty('object-fit'); el.style.removeProperty('max-width');
     }
@@ -2032,7 +2275,7 @@ _EDIT_BAR = """
     ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
-    [].slice.call(doc.querySelectorAll('.__ce_sel,.__ce_hl')).forEach(function(n){n.classList.remove('__ce_sel','__ce_hl');});
+    [].slice.call(doc.querySelectorAll('.__ce_sel,.__ce_hl,.__ce_sechl,.__ce_busy')).forEach(function(n){n.classList.remove('__ce_sel','__ce_hl','__ce_sechl','__ce_busy');});
     // プレビュー用アニメ(__ceax_*)は一時的なものなので保存に残さない（クラス・インライン両方）
     [].slice.call(doc.querySelectorAll('[class*="__ceax_"]')).forEach(function(n){ [].slice.call(n.classList).forEach(function(cl){ if(cl.indexOf('__ceax_')===0) n.classList.remove(cl); }); });
     [].slice.call(doc.querySelectorAll('[style*="__ceax"]')).forEach(function(n){ n.style.removeProperty('animation'); });
@@ -2129,7 +2372,10 @@ _EDIT_BAR = """
       +'<button data-sx="1.1" data-sy="1">⇔ 横に長く</button><button data-sx="0.909" data-sy="1">⇔ 横を縮め</button>'
       +'<button data-sx="1" data-sy="1.1">⇕ 縦に長く</button><button data-sx="1" data-sy="0.909">⇕ 縦を縮め</button>'
       +'<button data-ro="-6">⟲ 左に回す</button><button data-ro="6">⟳ 右に回す</button></div>'
+      +'<div class="cap">⬍ 縦の高さ・余白（セクションを高く/低く・AIなし・歪まない）</div>'
+      +'<div class="__ce_size"><button data-mh="80">＋ 高く（余白を足す）</button><button data-mh="-80">－ 低く</button></div>'
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 ドラッグで動かす（押して開始/終了）</button>'
+      +'<button class="go2" id="__ce_cmbr" style="background:#0b6bcb;margin-bottom:8px">↵ 改行を自分で決める（AIなし）</button>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
       +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
       +'<div class="__ce_anim" id="__fx_grid">'+FX.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
@@ -2164,6 +2410,8 @@ _EDIT_BAR = """
     m.querySelector('.bd2').addEventListener('click',function(ev){
       var nb=ev.target.closest('.__ce_nudge button');
       if(nb){ if(nb.getAttribute('data-rst')) resetPos(curEl); else nudge(curEl, +nb.getAttribute('data-nx'), +nb.getAttribute('data-ny')); return; }
+      var mhb=ev.target.closest('button[data-mh]');  // 高さ(min-height)の増減＝スケールと違い歪まない
+      if(mhb){ adjustMinH(curEl, +mhb.getAttribute('data-mh')); return; }
       var sb=ev.target.closest('.__ce_size button');
       if(sb){
         if(sb.hasAttribute('data-ro')) rotateBy(curEl, +sb.getAttribute('data-ro'));
@@ -2204,10 +2452,12 @@ _EDIT_BAR = """
       var ie=imgEl, si=sIdx; closeMenu(); openBgPicker(ie, si);
     }); }
     m.querySelector('#__ce_cmgo').addEventListener('click',function(){
-      var v=m.querySelector('#__ce_cmin').value.trim(); if(v) applyEl(sIdx, v+tail);
+      var v=m.querySelector('#__ce_cmin').value.trim(); if(v) editElement(curEl, v);
     });
     var stBtn=m.querySelector('#__ce_cmstyle');
     if(stBtn) stBtn.addEventListener('click',function(){ applyEl(sIdx, STYLE_INS); });
+    var brBtn=m.querySelector('#__ce_cmbr');
+    if(brBtn) brBtn.addEventListener('click',function(){ openBreakEditor(curEl); });
     m.querySelector('#__ce_cmsg').addEventListener('click',function(){
       var b=m.querySelector('#__ce_cmsg'); b.disabled=true; b.textContent='考え中…';
       fetch('/api/camp_suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:sIdx})})
