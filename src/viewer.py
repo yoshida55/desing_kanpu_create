@@ -22,7 +22,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, assets, camp, clone, config, db, embed, ingest, motion, search, vibe
+from . import anim, assets, camp, clone, config, db, embed, export_split, ingest, motion, search, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -1315,6 +1315,34 @@ def api_camp_delete():
     return jsonify({"ok": True})
 
 
+@app.route("/api/export_split", methods=["POST"])
+def api_export_split():
+    """カンプを納品用に HTML/CSS/JS＋images に分割し、zip 化して返す（AIなし・後処理）。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    try:
+        result = export_split.export_split(fn)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("分割エクスポートに失敗: %s", fn)
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    if not result.get("ok"):
+        return jsonify(result), 400
+    result["download"] = "/exports/" + result["zip"]
+    return jsonify(result)
+
+
+@app.route("/exports/<path:filename>")
+def export_file(filename: str):
+    """分割エクスポートした zip をダウンロードさせる。"""
+    path = export_split.EXPORT_DIR / filename
+    if not path.exists() or not path.is_file() or path.suffix != ".zip":
+        abort(404)
+    return send_file(path, as_attachment=True, download_name=filename)
+
+
 @app.route("/api/save_camp_html", methods=["POST"])
 def api_save_camp_html():
     """ドラッグ/矢印での位置調整をHTMLに焼き込む（LLM不使用・その場保存）。
@@ -1526,6 +1554,8 @@ _EDIT_BAR = """
     <div class="lbl plain">⭐ セクションのお気に入り（①で選んだセクションが対象・AIなし）</div>
     <button class="im" id="__ce_fav" style="background:#e8a300;color:#fff">⭐ このセクションをお気に入り</button>
     <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
+    <div class="lbl plain">📦 納品用に書き出す（HTML/CSS/JS＋画像を分割・AIなし）</div>
+    <button class="im" id="__ce_export" style="background:#0b6e4f;color:#fff">📦 分割エクスポート（zipで保存）</button>
     <div class="msg" id="__ce_msg">💡 直したい所を<b>右クリック</b>すると、その要素に直接アニメ・指示が出せます</div>
   </div>
 </div>
@@ -1812,6 +1842,22 @@ _EDIT_BAR = """
       favBtn.disabled=false; favBtn.textContent=old;
       msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'):('保存失敗：'+(d.message||''));
     }).catch(function(){ favBtn.disabled=false; favBtn.textContent=old; msg.textContent='通信エラー'; });
+  });
+  // 📦 納品用に分割エクスポート（保存済みファイルを HTML/CSS/JS＋images に分けてzip）。
+  // まず現DOMを保存してから分割（今の編集を反映）。zipは自動ダウンロード。
+  var exportBtn=document.getElementById('__ce_export');
+  if(exportBtn) exportBtn.addEventListener('click',function(){
+    exportBtn.disabled=true; var old=exportBtn.textContent; exportBtn.textContent='保存して書き出し中…';
+    // 未保存の編集を先に焼き込む（分割は保存済みファイルを読むため）
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
+    .then(function(){ return fetch('/api/export_split',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})}); })
+    .then(function(r){return r.json();}).then(function(d){
+      exportBtn.disabled=false; exportBtn.textContent=old;
+      if(!d.ok){ msg.textContent='書き出し失敗：'+(d.message||''); return; }
+      var miss=d.missing?('／画像 '+d.missing+'枚は取得できず（外部URL切れ等）'):'';
+      msg.textContent='📦 書き出し完了：画像 '+d.images+'枚'+miss+'。zipをダウンロードします';
+      var a=document.createElement('a'); a.href=d.download; a.download=''; document.body.appendChild(a); a.click(); a.remove();
+    }).catch(function(){ exportBtn.disabled=false; exportBtn.textContent=old; msg.textContent='通信エラー'; });
   });
   // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
   var favListBtn=document.getElementById('__ce_favlist');
