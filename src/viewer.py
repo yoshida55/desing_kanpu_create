@@ -2317,6 +2317,116 @@ _EDIT_BAR = """
       });
     }).catch(function(){msg.textContent='画像一覧の取得に失敗';});
   }
+  // 🌸 背景の飾り（やわらかグラデ）を「要素の後ろ」に敷く（AIなし・即反映）。
+  //   負のz-indexの装飾divを要素の先頭に入れる。isolationで後ろに逃げないよう囲む。
+  //   画像の周りの回る黒リング等は前面のまま＝飾りはその背後に入る。
+  var BG_SHAPES={   // 形（border-radius）の作り方
+    oval:  '50%',                                          // 丸型（楕円）
+    blob:  '62% 38% 55% 45% / 45% 55% 42% 58%',             // しずく型（不定形）
+    round: '40px',                                          // 角丸四角
+    square:'0'                                               // 四角
+  };
+  function bgTarget(el){
+    var t = el.tagName==='IMG' ? (el.parentElement||el) : el;   // imgには子を入れられないので親に敷く
+    return (!t||t===document.body) ? null : t;
+  }
+  // 対象に飾りdivが無ければ作る（既にあれば取得するだけ）。形・大きさの調整はこれを使い回す。
+  function ensureBackdrop(target){
+    if(getComputedStyle(target).position==='static') target.style.setProperty('position','relative');
+    target.style.setProperty('isolation','isolate');   // 負のz-indexが祖先の後ろへ抜けないよう囲む
+    // 角丸写真は親にoverflow:hiddenが付いていることが多く、それだとはみ出す飾りが見えない→強制で見えるようにする
+    target.style.setProperty('overflow','visible','important');
+    var bg=target.querySelector(':scope > .ce_bgdeco');
+    if(!bg){
+      bg=document.createElement('div'); bg.className='ce_bgdeco'; bg.setAttribute('aria-hidden','true');
+      bg.dataset.size='22'; bg.dataset.shape='oval';
+      bg.style.cssText='position:absolute;inset:-22%;z-index:-1;pointer-events:none;border-radius:'+BG_SHAPES.oval+';filter:blur(2px);background:radial-gradient(60% 55% at 50% 45%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%);';
+      target.insertBefore(bg, target.firstChild);   // 先頭＝一番後ろに置く
+    }
+    return bg;
+  }
+  function applyBackdrop(el, grad){
+    var target=bgTarget(el); if(!target){ msg.textContent='ここには敷けません（すぐ外側の箱を右クリックしてください）'; return; }
+    var bg=ensureBackdrop(target);
+    bg.style.background=grad;
+    markDirty();
+    msg.textContent='背景の飾りを要素の後ろに敷きました（保存で確定）。下の「形」「大きさ」でも調整できます';
+  }
+  function setBackdropShape(el, shape){
+    var target=bgTarget(el); if(!target) return;
+    var bg=ensureBackdrop(target);
+    bg.style.setProperty('border-radius', BG_SHAPES[shape]||BG_SHAPES.oval);
+    bg.dataset.shape=shape;
+    markDirty();
+  }
+  function setBackdropSize(el, delta){
+    var target=bgTarget(el); if(!target) return;
+    var bg=ensureBackdrop(target);
+    var cur=parseFloat(bg.dataset.size||'22');
+    var next=Math.max(5, Math.min(70, cur+delta));
+    bg.dataset.size=String(next);
+    bg.style.inset='-'+next+'%';
+    markDirty();
+  }
+  function removeBackdrop(el){
+    var target=bgTarget(el); if(!target) return;
+    var bg=target.querySelector(':scope > .ce_bgdeco');
+    if(bg) bg.remove();
+    markDirty();
+    msg.textContent='背景の飾りを消しました（保存で確定）';
+  }
+  function openGradPicker(el){
+    if(!el){ msg.textContent='対象がありません'; return; }
+    var GRADS=[
+     ['そら（水色）','radial-gradient(60% 55% at 50% 45%, #cdeafe 0%, #e8f4ff 45%, #eef1fb 100%)'],
+     ['みず×ミント','radial-gradient(50% 45% at 68% 28%, #bdf3ea 0%, rgba(189,243,234,0) 60%), radial-gradient(60% 55% at 38% 62%, #cfe6ff 0%, #eef2fb 75%)'],
+     ['さくら（桃）','radial-gradient(60% 55% at 50% 45%, #ffd9e6 0%, #ffe9f0 45%, #fbeef4 100%)'],
+     ['ゆうやけ（暖）','radial-gradient(55% 50% at 30% 30%, #ffe0c2 0%, rgba(255,224,194,0) 60%), radial-gradient(60% 55% at 70% 65%, #ffd0d6 0%, #fdeef0 75%)'],
+     ['ラベンダー','radial-gradient(60% 55% at 50% 45%, #e2d7ff 0%, #eee9ff 45%, #f3f0fb 100%)'],
+     ['やわらかグレー','radial-gradient(60% 55% at 50% 40%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%)']
+    ];
+    var SHAPE_H=[['oval','⬭ 丸型'],['blob','💧 しずく型'],['round','▢ 角丸四角'],['square','◻ 四角']];
+    var items=GRADS.map(function(g,i){return '<div class="it" data-i="'+i+'"><div style="height:80px;background:'+g[1]+'"></div><span>'+esc(g[0])+'</span></div>';}).join('');
+    var shapeH=SHAPE_H.map(function(s){return '<button class="go2" data-shape="'+s[0]+'" style="background:#0b6bcb;margin:0">'+s[1]+'</button>';}).join('');
+    var ov=document.createElement('div'); ov.id='__ce_pk';
+    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>背景の飾りを選ぶ（要素の後ろ・AIなし）</h4><div class="gr">'+items+'</div>'
+      +'<div class="cap" style="margin-top:12px">かたち</div>'
+      +'<div class="__ce_size" style="grid-template-columns:repeat(4,1fr)">'+shapeH+'</div>'
+      +'<div class="cap" style="margin-top:10px">大きさ</div>'
+      +'<div class="__ce_size"><button class="go2" id="__ce_bgsm" style="background:#888;margin:0">－ 小さく</button><button class="go2" id="__ce_bgbg" style="background:#888;margin:0">＋ 大きく</button></div>'
+      +'<button class="go2" id="__ce_bgrm" style="background:#c0392b">🚫 飾りを消す</button>'
+      +'</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+      var it=e.target.closest('.it');
+      if(it){ applyBackdrop(el, GRADS[+it.dataset.i][1]); return; }
+      var sb=e.target.closest('button[data-shape]');
+      if(sb){ setBackdropShape(el, sb.getAttribute('data-shape')); return; }
+      if(e.target.id==='__ce_bgsm'){ setBackdropSize(el, -6); return; }   // 小さく＝はみ出しを減らす
+      if(e.target.id==='__ce_bgbg'){ setBackdropSize(el, 6); return; }    // 大きく＝はみ出しを増やす
+      if(e.target.id==='__ce_bgrm'){ removeBackdrop(el); ov.remove(); return; }
+    });
+  }
+  // 🖼 写真を白フチで囲む（ポラロイド/カード風・AIなし・即反映）。右上だけ角丸を大きめに。
+  //   borderで白い台紙を作るので余計なラッパーは足さない。もう一度押すと外す。
+  function toggleWhiteFrame(el){
+    if(!el){ msg.textContent='対象がありません'; return; }
+    var t = el.tagName==='IMG' ? el : ((el.querySelector && el.querySelector('img')) || el);
+    if(t.getAttribute('data-ceframe')){
+      t.removeAttribute('data-ceframe');
+      ['background','border','border-radius','box-shadow','box-sizing'].forEach(function(p){t.style.removeProperty(p);});
+      markDirty(); msg.textContent='白フチを外しました（保存で確定）'; return;
+    }
+    t.setAttribute('data-ceframe','1');
+    t.style.setProperty('background','#fff','important');
+    t.style.setProperty('border','14px solid #fff','important');
+    t.style.setProperty('border-radius','8px 44px 8px 8px','important');   // 右上だけ角丸を大きめに
+    t.style.setProperty('box-shadow','0 12px 30px rgba(0,0,0,.15)','important');
+    t.style.setProperty('box-sizing','border-box','important');
+    markDirty();
+    msg.textContent='写真を白フチで囲みました（右上だけ角丸大きめ・保存で確定／もう一度押すと外す）';
+  }
   // ===== 右クリックで、その要素に直接アニメ/指示/改善案を出す =====
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
@@ -3051,7 +3161,9 @@ _EDIT_BAR = """
         +'<div class="cap" style="margin:0 0 8px">画像はこれが確実です（差し替えは一瞬）</div>'
       : '')
       // 画像を持たない要素（空のカード等）にも、その要素の背景として画像を入れられる（AIなし）
-      + '<button class="go2" id="__ce_cmsetbg" style="background:#0b6bcb;margin-bottom:8px">🖼 この要素に画像を入れる（背景に設定・AIなし）</button>';
+      + '<button class="go2" id="__ce_cmsetbg" style="background:#0b6bcb;margin-bottom:8px">🖼 この要素に画像を入れる（背景に設定・AIなし）</button>'
+      + '<button class="go2" id="__ce_cmframe" style="background:#1a7f37;margin-bottom:8px">🖼 写真を白フチで囲む（右上だけ角丸大きめ・AIなし）</button>'
+      + '<button class="go2" id="__ce_cmgrad" style="background:#c026a6;margin-bottom:8px">🌸 背景の飾りを敷く（要素の後ろ・グラデ・AIなし）</button>';
     // 右クリックのAIセクションは「無料の焼き込みで出来ないもの」だけに絞る（背景装飾=bg / AI専用=ai）。
     // 単純な出現/ループ系は上の「動きを選ぶ→付ける」に一本化したのでここには出さない。
     var aiList=PRESETS.filter(function(p){return p.bg||p.ai;});
@@ -3161,6 +3273,10 @@ _EDIT_BAR = """
     if(setbgBtn){ setbgBtn.addEventListener('click',function(){
       var target=curEl; closeMenu(); openPicker({el:target, type:'bg', fresh:true});  // 選んだ要素そのものの背景に画像を入れる
     }); }
+    var frBtn=m.querySelector('#__ce_cmframe');
+    if(frBtn){ frBtn.addEventListener('click',function(){ toggleWhiteFrame(curEl); }); }   // 写真を白フチで囲む
+    var grBtn=m.querySelector('#__ce_cmgrad');
+    if(grBtn){ grBtn.addEventListener('click',function(){ var t=curEl; closeMenu(); openGradPicker(t); }); }  // 背景の飾りを後ろに敷く
     m.querySelector('#__ce_cmgo').addEventListener('click',function(){
       var v=m.querySelector('#__ce_cmin').value.trim(); if(v) editElement(curEl, v);
     });
