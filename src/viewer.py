@@ -1498,7 +1498,7 @@ _EDIT_BAR = """
 #__ce_cm .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 #__ce_cm .chip{background:#f2f2f4;border:1px solid #ddd;border-radius:999px;padding:5px 9px;font-size:11.5px;cursor:pointer;color:#1d1d1f}
 .__ce_sel{outline:2px dashed #2b7fff !important;outline-offset:3px}
-html.__ce_altmode{cursor:move}
+html.__ce_altmode{cursor:text}
 #__ce_cm .__ce_nudge{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0 6px}
 #__ce_cm .__ce_nudge button{background:#eef3ff;border:1px solid #cfe0fb;border-radius:7px;padding:8px 0;font-size:14px;cursor:pointer;color:#1d1d1f;font-weight:700}
 #__ce_cm .__ce_nudge button:hover{background:#dceafe}
@@ -2721,6 +2721,47 @@ html.__ce_altmode{cursor:move}
     fxHlReplay(span); markDirty();
     if(msg) msg.textContent='マーカーが伸びる速さを変えました（保存で確定）';
   }
+  // 帯の上下位置（--hlt0/--hlt1をまとめてずらす。太さは維持）。delta%pt単位、0〜100%からはみ出ないように収める。
+  function fxHlPos(span, delta){
+    if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return; }
+    var t0=parseFloat(span.style.getPropertyValue('--hlt0'))||70;
+    var t1=parseFloat(span.style.getPropertyValue('--hlt1'))||92;
+    var th=t1-t0;
+    var nt0=Math.max(0,Math.min(100-th,t0+delta));
+    span.style.setProperty('--hlt0',nt0+'%'); span.style.setProperty('--hlt1',(nt0+th)+'%');
+    fxHlReplay(span); markDirty();
+    if(msg) msg.textContent='マーカーの位置を変えました（保存で確定）';
+  }
+  // マーカー色の履歴：使った色を新しい順に覚えておく（Excelの「最近使用した色」と同じ発想）。
+  //   ・直前に使った色がそのまま次回のデフォルトになる
+  //   ・過去に使った色は小さいスウォッチで並べて、クリック1つで選び直せる
+  var HL_COLOR_MAX=10;
+  function hlColorHistory(){ try{ return JSON.parse(localStorage.getItem('__ce_hlcolors')||'[]')||[]; }catch(_){ return []; } }
+  function hlPushColorHistory(c){
+    if(!c) return;
+    var list=hlColorHistory().filter(function(x){ return x.toLowerCase()!==c.toLowerCase(); });
+    list.unshift(c);
+    if(list.length>HL_COLOR_MAX) list=list.slice(0,HL_COLOR_MAX);
+    try{ localStorage.setItem('__ce_hlcolors', JSON.stringify(list)); }catch(_){}
+  }
+  function hlDefaultColor(){ var h=hlColorHistory(); return h.length?h[0]:'#ffe66d'; }
+  function hlSwatchesHtml(){
+    return hlColorHistory().map(function(c){
+      return '<button class="__ce_hlsw" data-c="'+c+'" title="'+c+'" style="width:17px;height:17px;padding:0;border:1px solid rgba(128,128,128,.55);border-radius:4px;cursor:pointer;background:'+c+'"></button>';
+    }).join('');
+  }
+  // スウォッチ（過去に使った色）をクリックしたら、その色を選び直せるようにする（選択ポップアップ／右クリックメニュー共通）。
+  function hlBindSwatches(swatchWrap, colorInput, onPick){
+    if(!swatchWrap) return;
+    [].slice.call(swatchWrap.querySelectorAll('.__ce_hlsw')).forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var c=this.getAttribute('data-c');
+        colorInput.value=c; hlPushColorHistory(c);
+        swatchWrap.innerHTML=hlSwatchesHtml(); hlBindSwatches(swatchWrap, colorInput, onPick);
+        if(onPick) onPick(c);
+      });
+    });
+  }
   // ===== 文章の一部だけ色を変える：ドラッグで文字を選ぶ→小さな色ボタンが出る（AIなし）=====
   (function(){
     var pop=null, curSpan=null, savedRange=null, curHl=null, curUdot=null;
@@ -2746,6 +2787,7 @@ html.__ce_altmode{cursor:move}
     }
     // 🖍 蛍光ペン：選択文字を .fxa_hl で囲む→スクロールで線が伸びる（保存版でも自動再生）。
     function highlight(color){
+      hlPushColorHistory(color);
       if(curHl){ curHl.style.setProperty('--hlc',color); markDirty(); return; }
       if(!savedRange) return;
       try{
@@ -2809,8 +2851,9 @@ html.__ce_altmode{cursor:move}
         pop=document.createElement('div'); pop.id='__ce_selc';
         pop.style.cssText='position:fixed;z-index:2147483004;background:#1d1d1f;color:#fff;border-radius:10px;padding:6px 9px;box-shadow:0 10px 30px rgba(0,0,0,.42);font-family:system-ui,sans-serif;font-size:12px;display:flex;flex-wrap:wrap;align-items:center;gap:7px;max-width:360px';
         pop.innerHTML='<span style="opacity:.85">文字色</span><input type="color" id="__ce_selcol" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer">'
-          +'<span style="opacity:.45">｜</span><span style="opacity:.85">🖍</span><input type="color" id="__ce_selhlc" value="#ffe66d" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="マーカーの色"><button id="__ce_selhl" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="蛍光ペンを引く">'+(curHl?'消す':'引く')+'</button>'
+          +'<span style="opacity:.45">｜</span><span style="opacity:.85">🖍</span><input type="color" id="__ce_selhlc" value="'+hlDefaultColor()+'" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="マーカーの色"><span id="__ce_selhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;max-width:90px">'+hlSwatchesHtml()+'</span><button id="__ce_selhl" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="蛍光ペンを引く">'+(curHl?'消す':'引く')+'</button>'
           +(curHl?'<span style="opacity:.85">太さ</span><button id="__ce_selhlthm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">－</button><button id="__ce_selhlthp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">＋</button>'
+            +'<span style="opacity:.85">位置</span><button id="__ce_selhlpu" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="上へ">▲</button><button id="__ce_selhlpd" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="下へ">▼</button>'
             +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>':'')
           +'<span style="opacity:.45">｜</span><span style="opacity:.85">〰</span><input type="color" id="__ce_seludc" value="#e07856" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="点線下線の色"><button id="__ce_seludb" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="点線の下線を引く">'+(curUdot?'消す':'下線')+'</button>'
           +'<button id="__ce_selx" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer">×</button>';
@@ -2820,6 +2863,8 @@ html.__ce_altmode{cursor:move}
         pop.querySelector('#__ce_selx').addEventListener('click', hidePop);
         var thm=pop.querySelector('#__ce_selhlthm'); if(thm) thm.addEventListener('click',function(){ fxHlThick(curHl,-6); });
         var thp=pop.querySelector('#__ce_selhlthp'); if(thp) thp.addEventListener('click',function(){ fxHlThick(curHl,6); });
+        var pum=pop.querySelector('#__ce_selhlpu'); if(pum) pum.addEventListener('click',function(){ fxHlPos(curHl,-4); });
+        var pud=pop.querySelector('#__ce_selhlpd'); if(pud) pud.addEventListener('click',function(){ fxHlPos(curHl,4); });
         var hdm=pop.querySelector('#__ce_selhldm'); if(hdm) hdm.addEventListener('click',function(){ fxHlSpeed(curHl,0.2); });
         var hdp=pop.querySelector('#__ce_selhldp'); if(hdp) hdp.addEventListener('click',function(){ fxHlSpeed(curHl,-0.2); });
         pop.querySelector('#__ce_selcol').addEventListener('input', function(){ paint(this.value); });
@@ -2831,14 +2876,18 @@ html.__ce_altmode{cursor:move}
             this.textContent='消す';
             this.insertAdjacentHTML('afterend',
               '<span style="opacity:.85">太さ</span><button id="__ce_selhlthm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">－</button><button id="__ce_selhlthp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">＋</button>'
+              +'<span style="opacity:.85">位置</span><button id="__ce_selhlpu" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="上へ">▲</button><button id="__ce_selhlpd" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="下へ">▼</button>'
               +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>');
             pop.querySelector('#__ce_selhlthm').addEventListener('click',function(){ fxHlThick(curHl,-6); });
             pop.querySelector('#__ce_selhlthp').addEventListener('click',function(){ fxHlThick(curHl,6); });
+            pop.querySelector('#__ce_selhlpu').addEventListener('click',function(){ fxHlPos(curHl,-4); });
+            pop.querySelector('#__ce_selhlpd').addEventListener('click',function(){ fxHlPos(curHl,4); });
             pop.querySelector('#__ce_selhldm').addEventListener('click',function(){ fxHlSpeed(curHl,0.2); });
             pop.querySelector('#__ce_selhldp').addEventListener('click',function(){ fxHlSpeed(curHl,-0.2); });
           }
         });
         pop.querySelector('#__ce_selhlc').addEventListener('input', function(){ if(curHl) highlight(this.value); });
+        hlBindSwatches(pop.querySelector('#__ce_selhlsw'), pop.querySelector('#__ce_selhlc'), function(c){ if(curHl) highlight(c); });
         pop.querySelector('#__ce_seludb').addEventListener('click', function(){ if(curUdot) removeUnderline(); else underline(pop.querySelector('#__ce_seludc').value); });
         pop.querySelector('#__ce_seludc').addEventListener('input', function(){ if(curUdot) underline(this.value); });
       }, 10);
@@ -3232,12 +3281,13 @@ html.__ce_altmode{cursor:move}
   }
   document.addEventListener('mousemove',function(e){ if(dActive&&dragEl) setPos(dragEl, dOX+(e.clientX-dSX), dOY+(e.clientY-dSY)); },true);
   document.addEventListener('mouseup',function(){ if(dActive){ dActive=false; document.body.style.userSelect=''; pushUndo(); } },true);
-  // ★Altキーを押しながらつかむと、ボタンを押さなくてもその場で即ドラッグできる
-  //   （毎回「掴んで動かす」を押す手間を無くすための近道。Alt無しの時は今まで通り文字選択が効く）。
+  // ★普通にクリックしてつかむと、ボタンを押さなくてもその場で即ドラッグできる（既定の動き）。
+  //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
+  //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
   function _inUI2(node){ var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')); }
   document.addEventListener('mousedown',function(e){
-    if(!e.altKey || _inUI2(e.target)) return;
+    if(e.altKey || e.button!==0 || _inUI2(e.target)) return;
     var el=pickTarget(e.target); if(!el||_undraggable(el)) return;
     _altEl=el; _altActive=true; _aSX=e.clientX; _aSY=e.clientY;
     _aOX=+el.getAttribute('data-cetx')||0; _aOY=+el.getAttribute('data-cety')||0;
@@ -3452,7 +3502,7 @@ html.__ce_altmode{cursor:move}
     var m=document.createElement('div'); m.id='__ce_cm';
     m.innerHTML='<div class="h"><span class="t">'+esc(d)+'</span><span class="c" id="__ce_cmx">✕</span></div>'
       +'<div class="bd2">'+swapH
-      +'<div class="cap">🖱 位置を動かす（AIなし・即反映）</div>'
+      +'<div class="cap">🖱 位置を動かす（AIなし・即反映・普通にドラッグでOK／文字を選ぶ時だけAlt+ドラッグ）</div>'
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 掴んで動かす（押してから要素をドラッグ）</button>'
       +'<div class="__ce_nudge"><span class="sp"></span><button data-nx="0" data-ny="-6">↑</button><span class="sp"></span>'
       +'<button data-nx="-6" data-ny="0">←</button><button data-rst="1">⟲</button><button data-nx="6" data-ny="0">→</button>'
@@ -3468,7 +3518,7 @@ html.__ce_altmode{cursor:move}
       +'<div class="__ce_size"><button data-mw="80">＋ 横に広く</button><button data-mw="-80">－ 横を狭く</button></div>'
       +'<button class="go2" id="__ce_cmbr" style="background:#0b6bcb;margin-bottom:8px">✏ 文字を編集（改行・大きさ・フォント・色／AIなし）</button>'
       +'<button class="go2" id="__ce_cmhl" style="background:#eab308;color:#1d1d1f;margin-bottom:4px">🖍 この文字にマーカー（スクロールで線が伸びる）</button>'
-      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="#ffe66d" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> 太さ<button id="__ce_cmhlthm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">－</button><button id="__ce_cmhlthp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">＋</button> 速さ<button id="__ce_cmhldm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="遅く">🐢</button><button id="__ce_cmhldp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="速く">🐇</button><br>／ 文字を選んでから引くと「一部だけ」引ける／<a href="#" id="__ce_cmhlrm" style="color:#0b6bcb">🚫 マーカーを消す</a></div>'
+      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="'+hlDefaultColor()+'" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><span id="__ce_cmhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle;margin-right:4px">'+hlSwatchesHtml()+'</span> 太さ<button id="__ce_cmhlthm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">－</button><button id="__ce_cmhlthp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">＋</button> 位置<button id="__ce_cmhlpu" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="上へ">▲</button><button id="__ce_cmhlpd" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="下へ">▼</button> 速さ<button id="__ce_cmhldm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="遅く">🐢</button><button id="__ce_cmhldp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="速く">🐇</button><br>／ 文字を選んでから引くと「一部だけ」引ける／<a href="#" id="__ce_cmhlrm" style="color:#0b6bcb">🚫 マーカーを消す</a></div>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
       +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
       +'<button class="go2" id="__ce_fxrm" style="background:#888;margin-bottom:6px">🚫 この要素の動きを消す</button>'
@@ -3591,6 +3641,7 @@ html.__ce_altmode{cursor:move}
     //   →スクロールで線がスーッと伸びる（保存版でも再生）。※選択できない箇所でも確実に引ける。
     function hlWhole(el,color){
       if(!el) return;
+      hlPushColorHistory(color);
       // 既に丸ごとマーカー済みなら色だけ更新
       if(el.children.length===1 && el.firstChild && el.firstChild.classList && el.firstChild.classList.contains('fxa_hl')){
         el.firstChild.style.setProperty('--hlc',color); markDirty();
@@ -3607,10 +3658,13 @@ html.__ce_altmode{cursor:move}
     var hlB=m.querySelector('#__ce_cmhl');
     if(hlB) hlB.addEventListener('click',function(){ hlWhole(curEl, m.querySelector('#__ce_cmhlc').value); });
     var hlC=m.querySelector('#__ce_cmhlc');
-    if(hlC) hlC.addEventListener('input',function(){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',this.value); markDirty(); } });
+    if(hlC) hlC.addEventListener('input',function(){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',this.value); markDirty(); hlPushColorHistory(this.value); } });
+    hlBindSwatches(m.querySelector('#__ce_cmhlsw'), m.querySelector('#__ce_cmhlc'), function(c){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',c); markDirty(); } });
     function _cmHlSpan(){ return curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); }
     var hlThm=m.querySelector('#__ce_cmhlthm'); if(hlThm) hlThm.addEventListener('click',function(){ fxHlThick(_cmHlSpan(),-6); });
     var hlThp=m.querySelector('#__ce_cmhlthp'); if(hlThp) hlThp.addEventListener('click',function(){ fxHlThick(_cmHlSpan(),6); });
+    var hlPu=m.querySelector('#__ce_cmhlpu'); if(hlPu) hlPu.addEventListener('click',function(){ fxHlPos(_cmHlSpan(),-4); });
+    var hlPd=m.querySelector('#__ce_cmhlpd'); if(hlPd) hlPd.addEventListener('click',function(){ fxHlPos(_cmHlSpan(),4); });
     var hlDm=m.querySelector('#__ce_cmhldm'); if(hlDm) hlDm.addEventListener('click',function(){ fxHlSpeed(_cmHlSpan(),0.2); });
     var hlDp=m.querySelector('#__ce_cmhldp'); if(hlDp) hlDp.addEventListener('click',function(){ fxHlSpeed(_cmHlSpan(),-0.2); });
     var hlRm=m.querySelector('#__ce_cmhlrm');
