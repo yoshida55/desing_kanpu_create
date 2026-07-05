@@ -1551,9 +1551,9 @@ _EDIT_BAR = """
     <div class="msg" id="__ce_basemsg" style="min-height:0;margin-top:2px"></div>
     <div class="lbl plain">🚫 背景の飾りを消す（わっか/ぼかし等・クリックで消せない装飾）</div>
     <button class="im" id="__ce_nodeco" style="background:#f2f2f4;color:#1d1d1f;border:1px solid #ddd">🚫 背景の飾り（わっか等）を消す</button>
-    <div class="lbl plain">➕ 文字を追加（AIなし・ドラッグで置く→右クリックで編集）</div>
-    <button class="im" id="__ce_addtext" style="background:#0b6bcb;color:#fff">➕ 文字を追加</button>
-    <div class="lbl plain">🧹 全体を規則化（余白・見出しを一律に揃える・AIなし＝一貫性UP）</div>
+    <div class="lbl plain">➕ 文字・画像を追加（AIなし・ドラッグで置く→右クリックで編集）</div>
+    <div class="row" style="gap:8px"><button class="im" id="__ce_addtext" style="background:#0b6bcb;color:#fff;flex:1;margin:0">➕ 文字を追加</button><button class="im" id="__ce_addimg" style="background:#0b6bcb;color:#fff;flex:1;margin:0">🖼 画像を追加</button></div>
+    <div class="lbl plain">🧹 全体を規則化（左右の余白・見出しを一律に揃える・明らかに違う余白は別扱い・AIなし＝一貫性UP）</div>
     <button class="im" id="__ce_normalize" style="background:#0b6e4f;color:#fff">🧹 余白・見出しを一律に揃える</button>
     <button class="im" id="__ce_btncolor" style="background:#0b6e4f;color:#fff">🎨 全ボタンをテーマ色に統一</button>
     <div class="lbl plain">🤖 修正・おしゃれに使うAI（モデルは⚙設定で）</div>
@@ -1647,25 +1647,85 @@ _EDIT_BAR = """
     if(typeof setDragOn==='function'){ if(typeof curEl!=='undefined' && curEl) curEl.classList.remove('__ce_sel'); d.classList.add('__ce_sel'); setDragOn(d); }  // すぐ動かせる状態に
     msg.textContent='文字を追加しました。ドラッグで置く→右クリック→「✏ 文字を編集」で内容・色・大きさを変更（💾保存で確定）';
   });
+  // 🖼 画像を追加：今の位置に画像要素を置く→すぐドラッグで移動できる（差し替え・サイズ調整は右クリックで）。
+  function insertImageEl(url, idx){
+    idx=idx||0;
+    var img=document.createElement('img'); img.src=url;
+    var x=Math.round((window.scrollX||window.pageXOffset||0)+window.innerWidth*0.30)+idx*24;
+    var y=Math.round((window.scrollY||window.pageYOffset||0)+window.innerHeight*0.32)+idx*24;
+    img.setAttribute('style','position:absolute;left:'+x+'px;top:'+y+'px;z-index:60;width:260px;height:auto;cursor:move');
+    document.body.appendChild(img);
+    markDirty();
+    if(idx===0){ try{ img.scrollIntoView({block:'center'}); }catch(_){} }
+    if(typeof setDragOn==='function'){ if(typeof curEl!=='undefined' && curEl) curEl.classList.remove('__ce_sel'); img.classList.add('__ce_sel'); setDragOn(img); }
+  }
+  function openAddImagePicker(){
+    fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
+      var ups=d.uploads||[];
+      var items = ups.length
+        ? ups.map(function(u){return '<div class="it" data-src="'+u.url+'"><img src="'+u.url+'"><span>'+esc(u.caption||u.file)+'</span></div>';}).join('')
+        : '<div style="color:#999">まだアップロード画像がありません。下から新しく追加できます</div>';
+      var ov=document.createElement('div'); ov.id='__ce_pk';
+      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🖼 画像を追加</h4>'
+        +'<label class="go2" style="display:block;text-align:center;background:#1a7f37;cursor:pointer;margin-bottom:10px">＋ 新しい画像をアップロード<input type="file" id="__ce_addimgfile" accept="image/*" multiple style="display:none"></label>'
+        +'<div class="gr">'+items+'</div></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click',function(e){
+        if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+        var it=e.target.closest('.it'); if(it){ ov.remove(); insertImageEl(it.dataset.src); msg.textContent='画像を追加しました。ドラッグで置く（💾保存で確定）'; }
+      });
+      document.getElementById('__ce_addimgfile').addEventListener('change',function(){
+        var files=this.files; if(!files||!files.length) return;
+        var before={}; ups.forEach(function(u){ before[u.file]=1; });
+        var fd=new FormData(); [].forEach.call(files,function(f){fd.append('images',f);});
+        msg.textContent='アップロード中…';
+        fetch('/api/upload',{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(dd){
+          if(!dd.ok){ msg.textContent='アップロード失敗：'+(dd.message||''); return; }
+          ov.remove();
+          var added=(dd.uploads||[]).filter(function(u){ return !before[u.file]; });
+          added.forEach(function(u,i){ insertImageEl(u.url, i); });
+          msg.textContent=(added.length||files.length)+'枚 画像を追加しました。ドラッグで置く（💾保存で確定）';
+        }).catch(function(){ msg.textContent='通信エラー'; });
+      });
+    }).catch(function(){msg.textContent='画像一覧の取得に失敗';});
+  }
+  var addImgBtn=document.getElementById('__ce_addimg');
+  if(addImgBtn) addImgBtn.addEventListener('click', openAddImagePicker);
   // 🧹 全体を規則化：セクション余白を一律・主要見出しのサイズと行間を一律にそろえる（AIなし・一貫性UP）。
   // AI一括改善が「シンプルすぎ」になりがちな一貫性(余白/見出し)を、機械的に確実にそろえる用。
   var normBtn=document.getElementById('__ce_normalize');
   if(normBtn) normBtn.addEventListener('click',function(){
-    if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・セクションの上下余白 100px／左右も最低限を確保\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
+    if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・セクションの上下余白 100px\\n・セクションの左右余白 → 多数派の値にそろえる（明らかに違うものはそのまま＝意図的な余白として残す）\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
     function _skip(el){ return el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')); }
     // カード等の小見出し・小さい文字は対象外（そこまで大きく/広くすると崩れるため）
     function _inCard(el){ var n=el; while(n && n!==document.body){ var c=(n.className&&n.className.toString())||''; if(/card|item|bubble|benefit|badge|chip|tag|nav|menu|footer|col/i.test(c)) return true; n=n.parentElement; } return false; }
     var secN=0, hN=0, pN=0;
+    var secEls=[], lrVals=[];
     [].forEach.call(document.querySelectorAll('section'),function(s){
       if(_skip(s)) return;
       s.style.setProperty('padding-top','100px','important');
       s.style.setProperty('padding-bottom','100px','important');
       s.style.setProperty('margin-top','0','important');
       s.style.setProperty('margin-bottom','0','important');
-      // 左右は「今が狭い時だけ」最低限を確保（既にゆとりがある中央寄せは詰めない）
-      try{ var cs=getComputedStyle(s); if(parseFloat(cs.paddingLeft)<24){ s.style.setProperty('padding-left','24px','important'); s.style.setProperty('padding-right','24px','important'); } }catch(_){}
+      secEls.push(s);
+      try{ lrVals.push(parseFloat(getComputedStyle(s).paddingLeft)||0); }catch(_){ lrVals.push(0); }
       secN++;
     });
+    // 左右の余白：フルブリード(0px)のヒーロー等が混ざるとバラバラに見えるので「多数派の値」にそろえる。
+    // ただし現在値が多数派とかけ離れているセクションは、意図した余白とみなして触らずに残す（別扱い）。
+    var lrN=0, lrSkip=0;
+    if(lrVals.length){
+      var sorted=lrVals.slice().sort(function(a,b){return a-b;});
+      var target=Math.max(24, Math.round(sorted[Math.floor(sorted.length/2)]));   // 中央値（最低24px）
+      var tol=Math.max(16, target*0.35);   // これ以上離れていたら「明らかに余白が違う」として除外
+      secEls.forEach(function(s,i){
+        if(Math.abs(lrVals[i]-target)<=tol){
+          s.style.setProperty('padding-left',target+'px','important');
+          s.style.setProperty('padding-right',target+'px','important');
+          lrN++;
+        } else { lrSkip++; }
+      });
+    }
     // 見出し：サイズ＋太さも一律（H1=太字700／H2・H3=セミボールド600）
     [['h1',64,700],['h2',40,600],['h3',26,600]].forEach(function(t){
       [].forEach.call(document.querySelectorAll(t[0]),function(h){
@@ -1694,7 +1754,7 @@ _EDIT_BAR = """
       if(bs && bs!=='none'){ el.style.setProperty('box-shadow',STD_SHADOW,'important'); shN++; }
     });
     markDirty();
-    msg.textContent='規則化：余白 '+secN+'／見出し '+hN+'／本文行間 '+pN+'／影 '+shN+' 箇所をそろえました（💾保存で確定・⟲で戻せる）';
+    msg.textContent='規則化：上下余白 '+secN+'／左右余白 '+lrN+'件そろえ・'+lrSkip+'件は別扱い／見出し '+hN+'／本文行間 '+pN+'／影 '+shN+' 箇所をそろえました（💾保存で確定・⟲で戻せる）';
   });
   // 🎨 全ボタンをテーマ色に統一：CTAの色バラつき（ブランド感の弱さ）をAIなしで一発解消。
   // 主要ボタン＝テーマ色で塗り／secondary系＝同色の枠線、に統一する。
@@ -2375,6 +2435,40 @@ _EDIT_BAR = """
     markDirty();
     msg.textContent='背景の飾りを消しました（保存で確定）';
   }
+  // ⭕ 輪郭だけのリング（塗りつぶし無し・ゆっくり回転）。背景の飾り(グラデ)とは別レイヤーで重ねて使える。
+  var RING_COLORS={
+    soft: 'rgba(255,255,255,.55)',    // 白っぽい・淡い
+    blue: 'rgba(120,150,200,.4)',     // 水色寄り
+    dark: 'rgba(40,40,45,.25)'        // 濃いめ
+  };
+  function ensureRingCss(){
+    if(document.getElementById('__ce_ringcss')) return;
+    var st=document.createElement('style'); st.id='__ce_ringcss';
+    // 回転はゆっくり(46秒/周)＝派手にならず「うっすらお洒落」程度に留める
+    st.textContent='@keyframes ce_ring_spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}'
+      +'.ce_ringdeco{animation:ce_ring_spin 46s linear infinite}';
+    document.head.appendChild(st);
+  }
+  function toggleRing(el, colorKey){
+    var target=bgTarget(el); if(!target){ msg.textContent='ここには追加できません'; return; }
+    var ring=target.querySelector(':scope > .ce_ringdeco');
+    if(ring && ring.dataset.ring===colorKey){ ring.remove(); markDirty(); msg.textContent='リングを消しました（保存で確定）'; return; }
+    if(getComputedStyle(target).position==='static') target.style.setProperty('position','relative');
+    target.style.setProperty('isolation','isolate');
+    target.style.setProperty('overflow','visible','important');
+    ensureRingCss();
+    if(!ring){
+      ring=document.createElement('div'); ring.className='ce_ringdeco'; ring.setAttribute('aria-hidden','true');
+      ring.style.cssText='position:absolute;inset:-9%;z-index:-1;pointer-events:none;border-radius:50%;';
+      target.insertBefore(ring, target.firstChild);
+    }
+    ring.dataset.ring=colorKey;
+    ring.style.borderColor=RING_COLORS[colorKey]||RING_COLORS.soft;
+    ring.style.borderStyle='solid';
+    ring.style.borderWidth='1px';
+    markDirty();
+    msg.textContent='輪郭だけのリングを重ねました（ゆっくり回転・保存で確定／同じ色をもう一度押すと外す）';
+  }
   function openGradPicker(el){
     if(!el){ msg.textContent='対象がありません'; return; }
     var GRADS=[
@@ -2395,6 +2489,12 @@ _EDIT_BAR = """
       +'<div class="cap" style="margin-top:10px">大きさ</div>'
       +'<div class="__ce_size"><button class="go2" id="__ce_bgsm" style="background:#888;margin:0">－ 小さく</button><button class="go2" id="__ce_bgbg" style="background:#888;margin:0">＋ 大きく</button></div>'
       +'<button class="go2" id="__ce_bgrm" style="background:#c0392b">🚫 飾りを消す</button>'
+      +'<div class="cap" style="margin-top:12px">⭕ 輪郭だけのリングを重ねる（ゆっくり回転・お洒落に・任意）</div>'
+      +'<div class="__ce_size" style="grid-template-columns:repeat(3,1fr)">'
+      +'<button class="go2" data-ring="soft" style="background:#555;margin:0">⭕ 淡い</button>'
+      +'<button class="go2" data-ring="blue" style="background:#555;margin:0">⭕ 水色</button>'
+      +'<button class="go2" data-ring="dark" style="background:#555;margin:0">⭕ 濃いめ</button></div>'
+      +'<div class="cap" style="margin:2px 0 8px">同じ色をもう一度押すとリングを外せます</div>'
       +'</div>';
     document.body.appendChild(ov);
     ov.addEventListener('click',function(e){
@@ -2406,6 +2506,8 @@ _EDIT_BAR = """
       if(e.target.id==='__ce_bgsm'){ setBackdropSize(el, -6); return; }   // 小さく＝はみ出しを減らす
       if(e.target.id==='__ce_bgbg'){ setBackdropSize(el, 6); return; }    // 大きく＝はみ出しを増やす
       if(e.target.id==='__ce_bgrm'){ removeBackdrop(el); ov.remove(); return; }
+      var rb=e.target.closest('button[data-ring]');
+      if(rb){ toggleRing(el, rb.getAttribute('data-ring')); return; }
     });
   }
   // 🖼 写真を白フチで囲む（ポラロイド/カード風・AIなし・即反映）。右上だけ角丸を大きめに。
@@ -2474,6 +2576,34 @@ _EDIT_BAR = """
     el.style.setProperty('line-height', next.toFixed(2), 'important');
     markDirty();
   }
+  // 〰 点線の下線（手描き風の演出）。もう一度押すと外す。色は指定した色で塗る。
+  function toggleUnderlineDots(el, color){
+    if(el.getAttribute('data-ceudot')){
+      el.removeAttribute('data-ceudot');
+      el.style.removeProperty('border-bottom');
+      el.style.removeProperty('padding-bottom');
+      markDirty(); msg.textContent='点線の下線を外しました（保存で確定）'; return;
+    }
+    el.setAttribute('data-ceudot','1');
+    el.style.setProperty('border-bottom','3px dotted '+color,'important');
+    el.style.setProperty('padding-bottom','0.15em','important');
+    markDirty();
+    msg.textContent='点線の下線をつけました（保存で確定／もう一度押すと外す）';
+  }
+  // 📜 縦書き（writing-mode）。もう一度押すと横書きに戻す。
+  function toggleVertical(el){
+    if(el.getAttribute('data-cevert')){
+      el.removeAttribute('data-cevert');
+      el.style.removeProperty('writing-mode');
+      el.style.removeProperty('text-orientation');
+      markDirty(); msg.textContent='横書きに戻しました（保存で確定）'; return;
+    }
+    el.setAttribute('data-cevert','1');
+    el.style.setProperty('writing-mode','vertical-rl','important');
+    el.style.setProperty('text-orientation','upright','important');
+    markDirty();
+    msg.textContent='縦書きにしました（保存で確定／もう一度押すと戻す）';
+  }
   // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
@@ -2502,10 +2632,15 @@ _EDIT_BAR = """
       +'<select id="__ce_brff" style="width:100%;font-size:13px;padding:9px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit">'+opts+'</select>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🎨 文字の色</div>'
       +'<div style="display:flex;gap:8px;align-items:center"><input type="color" id="__ce_brcol" style="width:54px;height:38px;padding:2px;border:1px solid #d0d0d5;border-radius:8px;cursor:pointer"><button class="go2" id="__ce_brcolr" style="background:#888;margin:0;flex:1">⟲ 色を元に戻す</button></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">〰 点線の下線（手描き風の演出）</div>'
+      +'<div style="display:flex;gap:8px;align-items:center"><input type="color" id="__ce_brudot" style="width:54px;height:38px;padding:2px;border:1px solid #d0d0d5;border-radius:8px;cursor:pointer"><button class="go2" id="__ce_brudotb" style="background:#0b6bcb;margin:0;flex:1">〰 下線をつける／外す</button></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">📜 縦書き</div>'
+      +'<button class="go2" id="__ce_brvert" style="background:#0b6bcb">📜 縦書きにする／戻す</button>'
       +'</div>';
     document.body.appendChild(ov);
     var ta=document.getElementById('__ce_brta'); ta.value=cur; ta.focus();
     try{ document.getElementById('__ce_brcol').value=_rgbToHex(getComputedStyle(el).color); }catch(_){}
+    try{ document.getElementById('__ce_brudot').value=_rgbToHex(getComputedStyle(el).color); }catch(_){}
     ov.addEventListener('click',function(e){
       if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
       if(e.target.id==='__ce_brapply'){
@@ -2521,6 +2656,8 @@ _EDIT_BAR = """
       if(lhb){ _lineHeight(el, +lhb.getAttribute('data-lh')); return; }
       if(e.target.closest('button[data-lhr]')){ _lineHeight(el, 0, true); return; }
       if(e.target.id==='__ce_brcolr'){ el.style.removeProperty('color'); el.style.removeProperty('-webkit-text-fill-color'); markDirty(); return; }
+      if(e.target.id==='__ce_brudotb'){ toggleUnderlineDots(el, document.getElementById('__ce_brudot').value); return; }
+      if(e.target.id==='__ce_brvert'){ toggleVertical(el); return; }
     });
     document.getElementById('__ce_brff').addEventListener('change',function(){
       if(this.value) el.style.setProperty('font-family', this.value, 'important');
@@ -2553,8 +2690,8 @@ _EDIT_BAR = """
   }
   // ===== 文章の一部だけ色を変える：ドラッグで文字を選ぶ→小さな色ボタンが出る（AIなし）=====
   (function(){
-    var pop=null, curSpan=null, savedRange=null, curHl=null;
-    function hidePop(){ if(pop){ pop.remove(); pop=null; } curSpan=null; savedRange=null; curHl=null; }
+    var pop=null, curSpan=null, savedRange=null, curHl=null, curUdot=null;
+    function hidePop(){ if(pop){ pop.remove(); pop=null; } curSpan=null; savedRange=null; curHl=null; curUdot=null; }
     function inUI(node){ var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')); }
     // 選んだ範囲に色を当てる。中に色付きの子span（1文字ずつの.fxa_ch等の!important）があると
     // 囲むだけでは負けるので、子孫の色も全部この色で上書きする。
@@ -2589,6 +2726,38 @@ _EDIT_BAR = """
         if(msg) msg.textContent='マーカーを引きました（スクロールで線がスーッと伸びます・保存で確定）';
       }catch(err){ if(msg) msg.textContent='この範囲はマーカーを引けませんでした（別々の要素にまたがっています）'; }
     }
+    // 〰 点線の下線：選択文字だけをspanで囲んでborder-bottom:dottedを当てる（AIなし・即反映）。
+    function underline(color){
+      if(curUdot){ curUdot.style.setProperty('border-bottom-color',color,'important'); markDirty(); return; }
+      if(!savedRange) return;
+      try{
+        var span=document.createElement('span'); span.className='ceud';
+        span.style.setProperty('border-bottom','3px dotted '+color,'important');
+        span.style.setProperty('padding-bottom','0.15em','important');
+        try{ savedRange.surroundContents(span); }
+        catch(_){ var frag=savedRange.extractContents(); span.appendChild(frag); savedRange.insertNode(span); }
+        curUdot=span; markDirty();
+        if(msg) msg.textContent='選んだ文字に点線の下線をつけました（保存で確定）';
+      }catch(err){ if(msg) msg.textContent='この範囲には下線をつけられませんでした（別々の要素にまたがっています）'; }
+    }
+    // 装飾span（マーカー/下線）を1つ、中身の文字はそのまま残して剥がす（AIなし・即反映）。
+    function _unwrap(span){
+      if(!span||!span.parentNode) return;
+      var parent=span.parentNode;
+      while(span.firstChild) parent.insertBefore(span.firstChild, span);
+      parent.removeChild(span);
+      markDirty();
+    }
+    function removeHl(){
+      if(!curHl){ if(msg) msg.textContent='ここにはマーカーがありません'; return; }
+      _unwrap(curHl); curHl=null; hidePop();
+      if(msg) msg.textContent='マーカーを消しました（保存で確定）';
+    }
+    function removeUnderline(){
+      if(!curUdot){ if(msg) msg.textContent='ここには下線がありません'; return; }
+      _unwrap(curUdot); curUdot=null; hidePop();
+      if(msg) msg.textContent='点線の下線を消しました（保存で確定）';
+    }
     document.addEventListener('mouseup', function(e){
       if(inUI(e.target)) return;  // 編集UI上の操作は無視
       setTimeout(function(){
@@ -2598,18 +2767,27 @@ _EDIT_BAR = """
         if(inUI(rng.commonAncestorContainer)){ hidePop(); return; }
         var r=rng.getBoundingClientRect(); if(!r.width&&!r.height){ hidePop(); return; }
         hidePop(); savedRange=rng.cloneRange();
+        // 選んだ範囲が既存のマーカー/下線spanの中（またはちょうどそのspan自体）なら、消せる状態にしておく
+        var ancEl=rng.commonAncestorContainer; ancEl=(ancEl.nodeType===1?ancEl:ancEl.parentElement);
+        if(ancEl && ancEl.closest){
+          var exHl=ancEl.closest('.fxa_hl'); if(exHl) curHl=exHl;
+          var exUd=ancEl.closest('.ceud'); if(exUd) curUdot=exUd;
+        }
         pop=document.createElement('div'); pop.id='__ce_selc';
         pop.style.cssText='position:fixed;z-index:2147483004;background:#1d1d1f;color:#fff;border-radius:10px;padding:6px 9px;box-shadow:0 10px 30px rgba(0,0,0,.42);font-family:system-ui,sans-serif;font-size:12px;display:flex;align-items:center;gap:7px';
         pop.innerHTML='<span style="opacity:.85">文字色</span><input type="color" id="__ce_selcol" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer">'
-          +'<span style="opacity:.45">｜</span><span style="opacity:.85">🖍</span><input type="color" id="__ce_selhlc" value="#ffe66d" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="マーカーの色"><button id="__ce_selhl" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="蛍光ペンを引く">引く</button>'
+          +'<span style="opacity:.45">｜</span><span style="opacity:.85">🖍</span><input type="color" id="__ce_selhlc" value="#ffe66d" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="マーカーの色"><button id="__ce_selhl" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="蛍光ペンを引く">'+(curHl?'消す':'引く')+'</button>'
+          +'<span style="opacity:.45">｜</span><span style="opacity:.85">〰</span><input type="color" id="__ce_seludc" value="#e07856" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="点線下線の色"><button id="__ce_seludb" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="点線の下線を引く">'+(curUdot?'消す':'下線')+'</button>'
           +'<button id="__ce_selx" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer">×</button>';
         document.body.appendChild(pop);
         pop.style.left=Math.max(8,Math.min(r.left, window.innerWidth-320))+'px';
         pop.style.top=Math.max(8, r.top-42)+'px';
         pop.querySelector('#__ce_selx').addEventListener('click', hidePop);
         pop.querySelector('#__ce_selcol').addEventListener('input', function(){ paint(this.value); });
-        pop.querySelector('#__ce_selhl').addEventListener('click', function(){ highlight(pop.querySelector('#__ce_selhlc').value); });
+        pop.querySelector('#__ce_selhl').addEventListener('click', function(){ if(curHl) removeHl(); else highlight(pop.querySelector('#__ce_selhlc').value); });
         pop.querySelector('#__ce_selhlc').addEventListener('input', function(){ if(curHl) highlight(this.value); });
+        pop.querySelector('#__ce_seludb').addEventListener('click', function(){ if(curUdot) removeUnderline(); else underline(pop.querySelector('#__ce_seludc').value); });
+        pop.querySelector('#__ce_seludc').addEventListener('input', function(){ if(curUdot) underline(this.value); });
       }, 10);
     }, true);
     document.addEventListener('scroll', hidePop, true);
@@ -3096,8 +3274,10 @@ _EDIT_BAR = """
   }
   // 「透明で中身のない膜（フェード用オーバーレイ等）」か判定。
   // 文字も画像も背景画像も持たず、背景色も透明/半透明なら＝下を触りたいのに邪魔する膜。
+  var _REAL_TAGS={IMG:1,VIDEO:1,SVG:1,PICTURE:1,CANVAS:1,INPUT:1,BUTTON:1,SELECT:1,TEXTAREA:1,IFRAME:1};
   function _seeThrough(el){
     if(!el||el===document.body||el.nodeType!==1) return false;
+    if(_REAL_TAGS[el.tagName]) return false;                           // 要素自身が画像/動画等の実体＝膜ではない
     if((el.textContent||'').trim()!=='') return false;                 // 中に文字がある＝本物の入れ物
     if(el.querySelector && el.querySelector('img,video,svg,picture,input,button,canvas,select,textarea')) return false;
     var s; try{ s=getComputedStyle(el); }catch(_){ return false; }
@@ -3187,7 +3367,7 @@ _EDIT_BAR = """
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 ドラッグで動かす（押して開始/終了）</button>'
       +'<button class="go2" id="__ce_cmbr" style="background:#0b6bcb;margin-bottom:8px">✏ 文字を編集（改行・大きさ・フォント・色／AIなし）</button>'
       +'<button class="go2" id="__ce_cmhl" style="background:#eab308;color:#1d1d1f;margin-bottom:4px">🖍 この文字にマーカー（スクロールで線が伸びる）</button>'
-      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="#ffe66d" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> ／ 文字を選んでから引くと「一部だけ」引けます</div>'
+      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="#ffe66d" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> ／ 文字を選んでから引くと「一部だけ」引ける／<a href="#" id="__ce_cmhlrm" style="color:#0b6bcb">🚫 マーカーを消す</a></div>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
       +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
       +'<div class="__ce_anim" id="__fx_grid">'+FX.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
@@ -3305,6 +3485,14 @@ _EDIT_BAR = """
     if(hlB) hlB.addEventListener('click',function(){ hlWhole(curEl, m.querySelector('#__ce_cmhlc').value); });
     var hlC=m.querySelector('#__ce_cmhlc');
     if(hlC) hlC.addEventListener('input',function(){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',this.value); markDirty(); } });
+    var hlRm=m.querySelector('#__ce_cmhlrm');
+    if(hlRm) hlRm.addEventListener('click',function(ev){
+      ev.preventDefault();
+      var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl');
+      if(!s){ msg.textContent='ここにはマーカーがありません'; return; }
+      var p=s.parentNode; while(s.firstChild) p.insertBefore(s.firstChild, s); p.removeChild(s);
+      markDirty(); msg.textContent='マーカーを消しました（保存で確定）';
+    });
     m.querySelector('#__ce_cmsg').addEventListener('click',function(){
       var b=m.querySelector('#__ce_cmsg'); b.disabled=true; b.textContent='考え中…';
       fetch('/api/camp_suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:sIdx})})
