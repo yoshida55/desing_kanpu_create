@@ -3149,8 +3149,8 @@ html.__ce_altmode{cursor:text}
     +'if(!d.querySelector(".fxa_pre,.fxa_hl")){return;}h.classList.add("fxa-on");'
     +'[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});'  // 自動修復：出現アニメ要素に焼き込まれた古いtransform(プレビュー残骸)を消す＝過去に固まった分も開くだけで直る
     // 🖍マーカーの帯を毎フレーム手動で描く（--hlw を0→100へ）。連打で二重に走らないよう世代番号(__hlGen)で古いループは自分で止める。
-    +'function sweepHl(el){var dur=parseFloat(el.style.getPropertyValue("--hldur"))||0.7;var gen=(el.__hlGen=(el.__hlGen||0)+1);var t0=null;'
-    +'function step(ts){if(el.__hlGen!==gen)return;if(t0===null)t0=ts;var p=Math.min(1,(ts-t0)/(dur*1000));var e=1-Math.pow(1-p,3);'
+    +'function sweepHl(el){var dur=parseFloat(el.style.getPropertyValue("--hldur"))||0.45;var gen=(el.__hlGen=(el.__hlGen||0)+1);var t0=null;'
+    +'function step(ts){if(el.__hlGen!==gen)return;if(t0===null)t0=ts;var p=Math.min(1,(ts-t0)/(dur*1000));var e=1+2.70158*Math.pow(p-1,3)+1.70158*Math.pow(p-1,2);'
     +'el.style.setProperty("--hlw",e*100);if(p<1)requestAnimationFrame(step);else el.classList.add("fxa_in");}'
     +'requestAnimationFrame(step);}'
     +'window.__fxaSweepHl=sweepHl;'
@@ -3727,12 +3727,18 @@ _SERVE_SAFETY = """
   function fxaStart(){
     if(!document.querySelector('.fxa_pre')) return;
     h.classList.add('fxa-on');
-    function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
-    if(!('IntersectionObserver' in window)){ all().forEach(function(el){ el.classList.add('fxa_in'); }); return; }
-    /* data-cedelay(手動の遅れ指定)が付いた要素は、FX_RUN側と同じ遅れを守ってから表示する。
-       ★これが無いと、ここ(保険)が先にfxa_inを付けてしまい、狙った「あとから出す」演出が無視されて即表示になる。 */
-    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ var t=en.target; io.unobserve(t); var cd=t.getAttribute('data-cedelay'); if(cd!=null){ setTimeout(function(){ t.classList.add('fxa_in'); }, +cd); } else { t.classList.add('fxa_in'); } } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
-    all().forEach(function(el){ io.observe(el); });
+    /* ★地雷（2026-07-06修正）：ここが自前でIntersectionObserverを持つと、_EDIT_BAR側が注入する
+       本家(FX_RUN・マーカーのsweepHl対応済み)と2つの監視が同時に同じ要素を見て競走することになり、
+       「ヘッダーが一瞬で終わって見えない／マーカーひいたタイミングでヘッダーがまた動く」ような
+       ムラ・二重再生の原因になっていた。_EDIT_BARは必ず一緒に注入され、読み込み時に必ずFX_RUNを
+       張り直すので、まずそちらに任せる＝ここでは少し待ってFX_RUNが無い時だけの保険にする。 */
+    setTimeout(function(){
+      if(document.getElementById('fxa-run')) return;  // 本家(FX_RUN)が動いている＝そちらに任せて何もしない
+      function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
+      if(!('IntersectionObserver' in window)){ all().forEach(function(el){ el.classList.add('fxa_in'); }); return; }
+      var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ var t=en.target; io.unobserve(t); var cd=t.getAttribute('data-cedelay'); if(cd!=null){ setTimeout(function(){ t.classList.add('fxa_in'); }, +cd); } else { t.classList.add('fxa_in'); } } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
+      all().forEach(function(el){ io.observe(el); });
+    }, 50);
   }
   /* 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）を判定。
      ここに含まれる要素は「本来ずっと隠れているもの」なので、保険で強制表示しない
