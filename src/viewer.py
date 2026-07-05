@@ -1637,6 +1637,20 @@ html.__ce_altmode{cursor:text}
     markDirty();
     msg.textContent = removed ? ('背景の飾りを '+removed+' 個消しました（「💾 保存」で確定・「⟲ 戻す」で復活）') : '消せる背景の飾りは見つかりませんでした（別の作り方かもしれません）';
   });
+  // 自由配置（文字/画像）の重なり順：固定/追従ヘッダーより低い値にする。
+  //   ★地雷：ここを本文より高い決め打ち値（旧:60）にすると、スクロール中にヘッダーの上へ来た瞬間
+  //   要素がヘッダーを覆って見える（サイトごとにヘッダーのz-indexは違うので決め打ちは危険）。
+  //   ページの実際のヘッダーを探し、それより必ず低い値にする（見つからなければ本文より上の無難な値）。
+  function _freeZIndex(){
+    try{
+      var hdr=document.querySelector('header,.site-header,[class*="header"]');
+      if(hdr){
+        var z=parseInt(getComputedStyle(hdr).zIndex,10);
+        if(!isNaN(z)) return Math.max(1, z-1);
+      }
+    }catch(_){}
+    return 5;
+  }
   // ➕ 文字を追加：新しい文字要素を今見えている位置に置く→すぐドラッグで移動できる。内容は右クリック→文字を編集で。
   var addTextBtn=document.getElementById('__ce_addtext');
   if(addTextBtn) addTextBtn.addEventListener('click',function(){
@@ -1644,8 +1658,8 @@ html.__ce_altmode{cursor:text}
     d.textContent='ここに文字';
     var x=Math.round((window.scrollX||window.pageXOffset||0)+window.innerWidth*0.30);
     var y=Math.round((window.scrollY||window.pageYOffset||0)+window.innerHeight*0.32);
-    // 画面座標に絶対配置。読みやすい既定（太字・濃いグレー）。z-indexは編集UIより下・本文より上くらい。
-    d.setAttribute('style','position:absolute;left:'+x+'px;top:'+y+'px;z-index:60;font-size:32px;font-weight:700;color:#333;font-family:inherit;line-height:1.4;padding:4px 8px;cursor:move;white-space:nowrap');
+    // 画面座標に絶対配置。読みやすい既定（太字・濃いグレー）。z-indexは編集UIより下・本文より上・ヘッダーより下。
+    d.setAttribute('style','position:absolute;left:'+x+'px;top:'+y+'px;z-index:'+_freeZIndex()+';font-size:32px;font-weight:700;color:#333;font-family:inherit;line-height:1.4;padding:4px 8px;cursor:move;white-space:nowrap');
     document.body.appendChild(d);
     markDirty();
     try{ d.scrollIntoView({block:'center'}); }catch(_){}
@@ -1658,7 +1672,7 @@ html.__ce_altmode{cursor:text}
     var img=document.createElement('img'); img.src=url;
     var x=Math.round((window.scrollX||window.pageXOffset||0)+window.innerWidth*0.30)+idx*24;
     var y=Math.round((window.scrollY||window.pageYOffset||0)+window.innerHeight*0.32)+idx*24;
-    img.setAttribute('style','position:absolute;left:'+x+'px;top:'+y+'px;z-index:60;width:260px;height:auto;cursor:move');
+    img.setAttribute('style','position:absolute;left:'+x+'px;top:'+y+'px;z-index:'+_freeZIndex()+';width:260px;height:auto;cursor:move');
     document.body.appendChild(img);
     markDirty();
     if(idx===0){ try{ img.scrollIntoView({block:'center'}); }catch(_){} }
@@ -2178,7 +2192,7 @@ html.__ce_altmode{cursor:text}
     {k:'blur',b:'ぼやけて出現',d:'ブラー→くっきり',g:'in',dir:'bl',sl:[{k:'blur',l:'ぼかし',min:2,max:40,def:14},{k:'dur',l:'速さ',min:200,max:2200,def:900,u:'ms'}]},
     {k:'flip',b:'3Dフリップ',d:'くるっと回転',g:'in',dir:'ry',sl:[{k:'deg',l:'回転角',min:20,max:180,def:90,u:'°'},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
     {k:'rise',b:'せり上がり',d:'下からスッと上へ',g:'in',dir:'clip',sl:[{k:'dist',l:'移動量',min:10,max:140,def:40},{k:'dur',l:'速さ',min:200,max:2200,def:900,u:'ms'}]},
-    {k:'stagger',b:'一文字ずつ',d:'文字が順に出現',g:'char',sl:[{k:'stag',l:'文字の間隔',min:15,max:150,def:45,u:'ms'},{k:'dist',l:'移動量',min:0,max:40,def:16}]},
+    {k:'stagger',b:'一文字ずつ',d:'文字が順に出現',g:'char',sl:[{k:'stag',l:'文字の間隔',min:15,max:150,def:32,u:'ms'},{k:'dist',l:'移動量',min:0,max:56,def:26},{k:'dur',l:'速さ',min:150,max:900,def:340,u:'ms'}]},
     {k:'typewriter',b:'タイプライター',d:'打ち込み風',g:'char',type:1,sl:[{k:'stag',l:'打つ速さ',min:20,max:200,def:60,u:'ms'}]},
     {k:'wave',b:'波打ち',d:'文字が波打つ(ループ)',g:'char',loop:1,sl:[{k:'amp',l:'ゆれ幅',min:4,max:30,def:10},{k:'dur',l:'速さ',min:800,max:3000,def:1600,u:'ms'}]},
     {k:'glow',b:'ネオングロー',d:'光る(ループ)',g:'loop',glow:1,sl:[{k:'dur',l:'速さ',min:600,max:3200,def:1800,u:'ms'}]},
@@ -2715,7 +2729,7 @@ html.__ce_altmode{cursor:text}
   // 伸びる速さ（--hldur・秒）。delta秒、0.2〜2.5秒の範囲。
   function fxHlSpeed(span, delta){
     if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return; }
-    var d=parseFloat(span.style.getPropertyValue('--hldur'))||0.7;
+    var d=parseFloat(span.style.getPropertyValue('--hldur'))||0.45;
     d=Math.max(0.2,Math.min(2.5,+(d+delta).toFixed(2)));
     span.style.setProperty('--hldur', d+'s');
     fxHlReplay(span); markDirty();
@@ -3045,15 +3059,15 @@ html.__ce_altmode{cursor:text}
     fxUnsplit(el);  // 既に割れていても一旦プレーンに戻してから割り直す
     var spans=splitChars(el);
     if(!spans.length){ el.innerHTML=el.__fxHTML; el.__fxHTML=null; if(msg)msg.textContent='⚠ ここには文字が無いので文字アニメは使えません。画像には「ふわっと出現」「ズームイン」「ぼやけて出現」などを選んでください'; return; }
-    var stag=fxParam(a,'stag')||45, dur=fxParam(a,'dur')||1600, dist=fxParam(a,'dist')||16, amp=fxParam(a,'amp')||10, start=null;
+    var stag=fxParam(a,'stag')||45, dur=fxParam(a,'dur')||(a.loop?1600:500), dist=fxParam(a,'dist')||16, amp=fxParam(a,'amp')||10, start=null;
     function frame(ts){
       if(start===null)start=ts; var tt=ts-start;
       for(var i=0;i<spans.length;i++){ var sp=spans[i];
         if(a.loop){ var ph=(tt/dur*2*Math.PI)-(i*0.5); sp.style.transform='translateY('+(Math.sin(ph)*amp)+'px)'; }
         else if(a.type){ sp.style.opacity=(tt>i*stag)?1:0; }
-        else { var lt=tt-i*stag, q=lt<=0?0:Math.min(1,lt/500); q=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2; sp.style.opacity=q; sp.style.transform='translateY('+(dist*(1-q))+'px)'; }
+        else { var lt=tt-i*stag, q=lt<=0?0:Math.min(1,lt/dur); q=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2; sp.style.opacity=q; sp.style.transform='translateY('+(dist*(1-q))+'px)'; }
       }
-      var done=a.loop?false:(tt>spans.length*stag+(a.type?80:520));
+      var done=a.loop?false:(tt>spans.length*stag+(a.type?80:dur+20));
       if(!done){ el.__ceRAF=requestAnimationFrame(frame); }
       else { el.__ceRAF=null; el.innerHTML=el.__fxHTML; el.__fxHTML=null; }
     }
@@ -3108,8 +3122,8 @@ html.__ce_altmode{cursor:text}
     +'html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}'
     +'html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}'
     +'.fxa_ch{display:inline-block}'
-    +'html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,16px));transition:opacity .5s ease,transform .5s ease}'
-    +'html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,45ms))}'
+    +'html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,26px));transition:opacity var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1),transform var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1)}'
+    +'html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,32ms))}'
     +'html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}'
     +'html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}'
     +'@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}'
