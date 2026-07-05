@@ -1506,6 +1506,10 @@ html.__ce_altmode{cursor:move}
 #__ce_cm .__ce_size{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:2px 0 8px}
 #__ce_cm .__ce_size button{background:#eef3ff;border:1px solid #cfe0fb;border-radius:7px;padding:8px 0;font-size:13px;cursor:pointer;color:#1d1d1f;font-weight:700}
 #__ce_cm .__ce_size button:hover{background:#dceafe}
+#__ce_cm .__ce_grp{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:2px 0 8px}
+#__ce_cm .__ce_grp button{background:#f2fbf5;border:1px solid #cfead6;border-radius:7px;padding:8px 0;font-size:12.5px;cursor:pointer;color:#1d1d1f;font-weight:700}
+#__ce_cm .__ce_grp button:hover{background:#dff3e4}
+#__ce_cm .__ce_grp button.on{outline:2px solid #1a7f37;background:#c9f1d6}
 #__ce_savebar{position:fixed;left:20px;bottom:20px;z-index:2147483003;background:#1a7f37;color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 12px 32px rgba(0,0,0,.3);font-family:system-ui,sans-serif;display:none}
 #__ce_savebar.show{display:block}
 #__ce_cm .__ce_anim{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
@@ -3088,7 +3092,13 @@ html.__ce_altmode{cursor:move}
     +'requestAnimationFrame(step);}'
     +'window.__fxaSweepHl=sweepHl;'
     +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in)"));}'
-    +'function reveal(el){ if(el.classList.contains("fxa_hl")) sweepHl(el); else el.classList.add("fxa_in"); }'
+    // 🔢グループ表示：data-cegrp="1/2/3"の要素は①→②→③の順にまとめて動く（グループ間0.3s・グループ内は0.15sずつ）
+    +'function groupDelay(el){var g=+el.getAttribute("data-cegrp")||0;if(!g)return 0;'
+    +'var mem=[].slice.call(d.querySelectorAll(\\'[data-cegrp="\\'+g+\\'"]\\'));var idx=mem.indexOf(el);'
+    +'return (g-1)*300+Math.max(0,idx)*150;}'
+    // data-cedelay="ミリ秒" を要素に直接付けると、グループ計算より優先してその通りの遅れで再生する（細かい手動演出用）
+    +'function reveal(el){ function go(){ if(el.classList.contains("fxa_hl")) sweepHl(el); else el.classList.add("fxa_in"); }'
+    +'var cd=el.getAttribute("data-cedelay"); var gd=cd!=null?+cd:groupDelay(el); if(gd>0) setTimeout(go,gd); else go(); }'
     +'if(!("IntersectionObserver" in window)){all().forEach(reveal);return;}'
     +'var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){reveal(t);});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});'
     +'function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}'  // 初回描画(fxa_pre隠れ状態)を1フレーム待ってから監視開始＝上部要素も一瞬で終わらずスライドする
@@ -3311,12 +3321,19 @@ html.__ce_altmode{cursor:move}
     ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
+    // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
+    // 編集UI以外の"見た目に無関係な"拡張機能の断片はここで丸ごと除去する。
+    [].slice.call(doc.querySelectorAll('[class*="glasp-extension"]')).forEach(function(n){ n.remove(); });
     [].slice.call(doc.querySelectorAll('.__ce_sel,.__ce_hl,.__ce_sechl,.__ce_busy')).forEach(function(n){n.classList.remove('__ce_sel','__ce_hl','__ce_sechl','__ce_busy');});
     // プレビュー用アニメ(__ceax_*)は一時的なものなので保存に残さない（クラス・インライン両方）
     [].slice.call(doc.querySelectorAll('[class*="__ceax_"]')).forEach(function(n){ [].slice.call(n.classList).forEach(function(cl){ if(cl.indexOf('__ceax_')===0) n.classList.remove(cl); }); });
     [].slice.call(doc.querySelectorAll('[style*="__ceax"]')).forEach(function(n){ n.style.removeProperty('animation'); });
     // 焼き込みアニメの一時「表示中」クラス(fxa_in)は外す＝保存版はスクロールで再生に戻す（付けた設定fxa_pre等は残す）
     [].slice.call(doc.querySelectorAll('.fxa_in')).forEach(function(n){ n.classList.remove('fxa_in'); });
+    // 🖍マーカーは--hlw(0〜100)で伸び具合を持っているので、fxa_inを外すだけでは戻らない。
+    // ★これを忘れると「再生し終わった状態(--hlw:100)」がそのまま保存され、次に開いた時に
+    //   アニメせず最初から引かれた状態になってしまう（実際に起きたバグ）。必ず0に戻す。
+    [].slice.call(doc.querySelectorAll('.fxa_hl')).forEach(function(n){ n.style.setProperty('--hlw',0); });
     // オープニングの幕：編集用に「止めて表示」していた状態(data-paused/インライン)を解除＝保存版は開いた時に自動再生に戻す
     var _op=doc.querySelector('#__op_screen');
     if(_op){ _op.removeAttribute('data-paused'); _op.style.removeProperty('display'); _op.style.removeProperty('opacity'); _op.style.removeProperty('transition'); }
@@ -3457,8 +3474,8 @@ html.__ce_altmode{cursor:move}
       +'<button class="go2" id="__ce_fxrm" style="background:#888;margin-bottom:6px">🚫 この要素の動きを消す</button>'
       +'<div class="__ce_anim" id="__fx_grid">'+FX.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
       +'<div class="__fx_ctl" id="__fx_ctl" style="display:none"><div id="__fx_sl"></div><button class="go2" id="__fx_apply" style="background:#1a7f37;margin-top:2px">✅ この動きを付ける（無料・保存で残る）</button></div>'
-      +'<div class="cap">🔢 グループでまとめて順番に表示（①→②→③の順で・グループ内は0.15s刻み）</div>'
-      +'<div class="__ce_size" id="__ce_grp"><button data-grp="1">① グループ1</button><button data-grp="2">② グループ2</button><button data-grp="3">③ グループ3</button><button data-grp="0" style="background:#f2f2f4">✕ グループ解除</button></div>'
+      +'<div class="cap">🔢 グループでまとめて順番に表示（①→②→③の順で・グループ内は0.15s刻み・動きを付けた要素が対象）</div>'
+      +'<div class="__ce_grp" id="__ce_grp"><button data-grp="1">① グループ1</button><button data-grp="2">② グループ2</button><button data-grp="3">③ グループ3</button><button data-grp="0" style="background:#f2f2f4">✕ 解除</button></div>'
       +'<div class="cap">🎨 背景・特殊（AIが本組み込み・数円）</div>'+agh
       +'<div class="cap" style="margin-top:8px">✍ この要素に自分で指示</div>'
       +'<input id="__ce_cmin" placeholder="例：もっと大きく赤く"><button class="go2" id="__ce_cmgo">この要素を直す</button>'
@@ -3469,6 +3486,9 @@ html.__ce_altmode{cursor:move}
       +'<div class="cap">🗑 いらない要素を消す（AIなし・即反映）</div>'
       +'<button class="go2" id="__ce_cmdel" style="background:#c0392b">🗑 この要素を消す</button></div>';
     document.body.appendChild(m);
+    // 既にグループに入っている要素なら、そのグループ番号のボタンを最初からON表示にする
+    var _curGrp=el.getAttribute('data-cegrp');
+    if(_curGrp){ var _gb=m.querySelector('#__ce_grp button[data-grp="'+_curGrp+'"]'); if(_gb) _gb.classList.add('on'); }
     var mw=290, mh=Math.min(window.innerHeight*0.72, m.offsetHeight||420);
     if(lastMenuPos){  // 前回ドラッグで動かした場所があれば、そこに出す（邪魔にならない位置を覚える）
       m.style.left=Math.max(0,Math.min(lastMenuPos.left, window.innerWidth-60))+'px';
@@ -3513,6 +3533,15 @@ html.__ce_altmode{cursor:move}
         removeBake(curEl); curAnim=null; curP={};
         [].slice.call(m.querySelectorAll('#__fx_grid button')).forEach(function(b){ b.classList.remove('on'); });
         var ctl=m.querySelector('#__fx_ctl'); if(ctl) ctl.style.display='none';
+        return;
+      }
+      var gb=ev.target.closest('#__ce_grp button');
+      if(gb){
+        var gv=gb.getAttribute('data-grp');
+        if(gv==='0'){ curEl.removeAttribute('data-cegrp'); if(msg) msg.textContent='グループを解除しました（保存で確定）'; }
+        else{ curEl.setAttribute('data-cegrp', gv); if(msg) msg.textContent='グループ'+gv+'に入れました（①→②→③の順で表示・保存で確定）'; }
+        [].slice.call(m.querySelectorAll('#__ce_grp button')).forEach(function(b){ b.classList.toggle('on', b===gb && gv!=='0'); });
+        markDirty();
         return;
       }
       var dg=ev.target.closest('#__ce_cmdrag');
@@ -3632,7 +3661,9 @@ _SERVE_SAFETY = """
     h.classList.add('fxa-on');
     function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
     if(!('IntersectionObserver' in window)){ all().forEach(function(el){ el.classList.add('fxa_in'); }); return; }
-    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('fxa_in'); io.unobserve(en.target); } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
+    /* data-cedelay(手動の遅れ指定)が付いた要素は、FX_RUN側と同じ遅れを守ってから表示する。
+       ★これが無いと、ここ(保険)が先にfxa_inを付けてしまい、狙った「あとから出す」演出が無視されて即表示になる。 */
+    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ var t=en.target; io.unobserve(t); var cd=t.getAttribute('data-cedelay'); if(cd!=null){ setTimeout(function(){ t.classList.add('fxa_in'); }, +cd); } else { t.classList.add('fxa_in'); } } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
     all().forEach(function(el){ io.observe(el); });
   }
   /* 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）を判定。
