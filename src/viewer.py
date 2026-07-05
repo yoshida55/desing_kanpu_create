@@ -3288,6 +3288,7 @@ html.__ce_altmode{cursor:text}
     return false;  // セクション単体・見出し・画像・カード等は動かせる
   }
   function _dDown(e){
+    if(e.altKey) return;  // ★地雷：ドラッグモードが固定でONの要素は、Altを押しても文字選択に譲らず飲み込んでしまっていた。ここで先に手放す。
     if(_undraggable(dragEl)){ return; }  // 器は動かさない（保険）
     dActive=true; dSX=e.clientX; dSY=e.clientY;
     dOX=+dragEl.getAttribute('data-cetx')||0; dOY=+dragEl.getAttribute('data-cety')||0;
@@ -3398,6 +3399,9 @@ html.__ce_altmode{cursor:text}
     // ★これを忘れると「再生し終わった状態(--hlw:100)」がそのまま保存され、次に開いた時に
     //   アニメせず最初から引かれた状態になってしまう（実際に起きたバグ）。必ず0に戻す。
     [].slice.call(doc.querySelectorAll('.fxa_hl')).forEach(function(n){ n.style.setProperty('--hlw',0); });
+    // ドラッグモード中だけの目印(cursor:move)は編集中の一時状態。保存に残ると次に開いた時も
+    // 十字カーソルのままになり、しかもAltを押しても文字選択に譲らず固まって見える不具合の元になる。
+    [].slice.call(doc.querySelectorAll('[style*="cursor: move"],[style*="cursor:move"]')).forEach(function(n){ n.style.removeProperty('cursor'); });
     // オープニングの幕：編集用に「止めて表示」していた状態(data-paused/インライン)を解除＝保存版は開いた時に自動再生に戻す
     var _op=doc.querySelector('#__op_screen');
     if(_op){ _op.removeAttribute('data-paused'); _op.style.removeProperty('display'); _op.style.removeProperty('opacity'); _op.style.removeProperty('transition'); }
