@@ -4,7 +4,6 @@ __pycache__/
 data/screenshots/
 data/videos/
 data/assets/
-data/camps/
 data/*.sqlite
 results.html
 .env

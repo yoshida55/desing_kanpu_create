@@ -433,8 +433,10 @@ FAQ・Voice・末尾の再CTA まで**10セクションの骨格が一致**。�
 ## 9.7 運用（家↔会社の同期・Git）
 
 - リポジトリ：`git@github.com:yoshida55/desing_kanpu_create.git`（SSH）。
-- **コードだけGitに上げる**。`venv/`・`data/`（screenshots/videos/assets/camps/sqlite）・`.env`は
-  `.gitignore`で除外（**.envにはAPIキーが入るので絶対に上げない**）。
+- **コードと生成カンプ(HTML)をGitに上げる**。`venv/`・`data/`のscreenshots/videos/assets/sqlite・
+  `.env`は`.gitignore`で除外（**.envにはAPIキーが入るので絶対に上げない**）。
+  ただし**`data/camps/`（生成カンプHTML）は2026-07-06以降Git管理に変更**＝軽いテキストで
+  単体完結なので、一斉バッチでそのまま家↔会社に共有される。
 - **同期は中央の「一斉バッチ」を使う**（プロジェクト個別バッチは作らない）：
   - `D:\99_AIソフト\85_bat(会社・家同期)\commit_all_実行.bat`（add→commit→push を全リポ一斉）
   - `D:\99_AIソフト\85_bat(会社・家同期)\pull_all.bat`（全リポ一斉 pull）
@@ -448,6 +450,7 @@ FAQ・Voice・末尾の再CTA まで**10セクションの骨格が一致**。�
   4. `起動.bat` で起動
 - ※ DB・スクショ・録画・抜き出し画像は同期されない（容量大のため）。サイトの再登録は各PCで行う
   （将来クラウド同期したくなったら、data を別ストレージに置く設計に変える）。
+  **カンプHTML(`data/camps/`)だけは例外で同期される**（軽い＋成果物として共有したいため）。
 
 ## 10. 作業するときの心得（このプロジェクト固有）
 
