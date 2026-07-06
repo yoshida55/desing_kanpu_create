@@ -31,6 +31,24 @@ from .utils import get_logger, normalize_url, url_to_id
 
 log = get_logger("anim")
 
+# Swiper/animate.css/AOS/Slick等が付属で持ち込む定番の汎用キーフレーム名（そのサイト独自ではない）。
+# 発見価値のある「独自アニメ」をライブラリ付属の"ノイズ"から見分けるための簡易判定。
+_GENERIC_KF_RE = re.compile(
+    r"^(fade(in|out)?|slide(in|out)?(left|right|up|down)?|zoom(in|out)?|bounce(in|out)?|"
+    r"rotate(in|out)?|flip(in|out)?|shake|pulse|spin|wobble|flash|tada|jello|heartbeat|hinge|"
+    r"lightspeed|swiper-|slick-|aos-|placeholder-|spinner-)",
+    re.IGNORECASE,
+)
+
+
+def is_generic_keyframe(name: str) -> bool:
+    """ライブラリ付属によくある汎用名か判定する（Swiper/animate.css/AOS等）。
+
+    True＝どのサイトにもありがちな定番エフェクト＝「発見」の価値が低い。
+    False＝そのサイト独自の名前＝mix&matchで見せる価値が高い。
+    """
+    return bool(_GENERIC_KF_RE.match((name or "").strip()))
+
 # ページ内の CSS アニメ（keyframes / transition / animation / Lottie）を集めるJS。
 # document.styleSheets を舐めて @keyframes を取り出す（同一オリジンなら cssRules が読める）。
 _COLLECT_JS = r"""
@@ -233,17 +251,24 @@ def extract_animations(url: str) -> dict:
         browser.close()
         _lap("ブラウザ終了", t)
 
+    # 独自(発見価値あり)を先頭に、ライブラリ付属の汎用エフェクトは後ろへ回す（安定ソート）。
+    keyframes = collected.get("keyframes", [])
+    for k in keyframes:
+        k["generic"] = is_generic_keyframe(k.get("name", ""))
+    keyframes.sort(key=lambda k: k["generic"])
+
     result = {
-        "keyframes": collected.get("keyframes", []),
+        "keyframes": keyframes,
         "transitions": collected.get("transitions", []),
         "animations": collected.get("animations", []),
         "lottie_saved": lottie_saved,
         "lottie_urls": collected.get("lottie", []),
     }
+    n_generic = sum(1 for k in keyframes if k["generic"])
     log.info(
-        "アニメの抜き出し完了(総%.1f秒): keyframes %d / transition %d / animation %d / lottie %d",
+        "アニメの抜き出し完了(総%.1f秒): keyframes %d(独自%d/汎用%d) / transition %d / animation %d / lottie %d",
         time.monotonic() - t_all,
-        len(result["keyframes"]), len(result["transitions"]),
+        len(result["keyframes"]), len(keyframes) - n_generic, n_generic, len(result["transitions"]),
         len(result["animations"]), len(lottie_saved),
     )
     return result
@@ -258,8 +283,12 @@ def anim_to_prompt(snippets: dict) -> str:
     if kf:
         names = ", ".join(k.get("name", "") for k in kf[:8] if k.get("name"))
         lines.append(f"- 使える @keyframes: {names}")
-        # 代表を数個そのまま渡す（AIがコピーして使えるように）
-        for k in kf[:4]:
+        # 代表を数個そのまま渡す（AIがコピーして使えるように）。
+        # ライブラリ付属の汎用エフェクト(fadeIn等)より、そのサイト独自のkeyframesを優先して見せる
+        # ＝限られた見本枠(4個)がSwiper等の付属品で埋まって"らしさ"が消えるのを防ぐ。
+        custom = [k for k in kf if not k.get("generic")]
+        show = custom if custom else kf
+        for k in show[:4]:
             css = (k.get("css") or "").replace("\n", " ")
             lines.append(f"  {css[:400]}")
     if snippets.get("transitions"):
