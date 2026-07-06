@@ -2488,6 +2488,64 @@ html.__ce_altmode{cursor:text}
     markDirty();
     msg.textContent='輪郭だけのリングを重ねました（ゆっくり回転・保存で確定／同じ色をもう一度押すと外す）';
   }
+  // 🖼 四角い縁取り線をずらして重ねる（塗りつぶし無し・回転しない・写真がもう1枚後ろにあるような奥行き）。
+  //   リングと違い角丸四角形で、位置を上下左右にずらして「奥にもう1枚ある」ように見せる。
+  var OUTLINE_COLORS={
+    soft: 'rgba(255,255,255,.7)',
+    blue: 'rgba(90,140,210,.55)',
+    dark: 'rgba(40,40,45,.35)'
+  };
+  // 画像がある場合は「親基準の%オフセット」だと親に余白がある時にズレて見える（斜めに見えない原因）ので、
+  // 画像そのものの実寸(offsetLeft/Top/Width/Height)を測って、そこから斜めにずらした位置に直接置く。
+  function _outlineImg(el){ return el.tagName==='IMG' ? el : (el.querySelector && el.querySelector('img')); }
+  function _positionOutline(ol, img, target, dir){
+    var shift=16, dx = dir==='tr'?shift:-shift, dy = dir==='tr'?-shift:shift;
+    if(img && img.parentElement===target){
+      ol.style.left=(img.offsetLeft+dx)+'px';
+      ol.style.top=(img.offsetTop+dy)+'px';
+      ol.style.width=img.offsetWidth+'px';
+      ol.style.height=img.offsetHeight+'px';
+      ol.style.right='auto'; ol.style.bottom='auto';
+    } else {
+      // 画像を持たない要素そのものを囲む場合は、要素自身基準で少し斜めにずらす
+      ol.style.left='auto'; ol.style.top='auto'; ol.style.width='auto'; ol.style.height='auto';
+      ol.style.inset = dir==='tr' ? '-16px -16px 16px 16px' : '16px 16px -16px -16px';
+    }
+  }
+  function toggleOutline(el, colorKey){
+    var img=_outlineImg(el);
+    var target = img ? (img.parentElement||el) : el;
+    if(!target || target===document.body){ msg.textContent='ここには追加できません'; return; }
+    var ol=target.querySelector(':scope > .ce_outlinedeco');
+    if(ol && ol.dataset.outline===colorKey){ ol.remove(); markDirty(); msg.textContent='縁取り線を消しました（保存で確定）'; return; }
+    if(getComputedStyle(target).position==='static') target.style.setProperty('position','relative');
+    target.style.setProperty('isolation','isolate');   // 負のz-indexが祖先の後ろへ抜けて隠れないよう囲む
+    target.style.setProperty('overflow','visible','important');
+    if(!ol){
+      ol=document.createElement('div'); ol.className='ce_outlinedeco'; ol.setAttribute('aria-hidden','true');
+      ol.dataset.dir='tr';
+      ol.style.cssText='position:absolute;z-index:-1;pointer-events:none;border-radius:32px;border-style:solid;border-width:2px;';
+      // 既にある背景ブロブ(ce_bgdeco)より後ろに置くと隠れて見えなくなる（同じz-index:-1同士はDOM順で後が上）。
+      // 写真(position:staticのimg)より必ず後ろに描画される点は変わらないので、末尾に足してブロブより手前に出す。
+      target.appendChild(ol);
+    }
+    _positionOutline(ol, img, target, ol.dataset.dir||'tr');
+    ol.dataset.outline=colorKey;
+    ol.style.borderColor=OUTLINE_COLORS[colorKey]||OUTLINE_COLORS.blue;
+    markDirty();
+    msg.textContent='縁取り線をずらして重ねました（保存で確定／同じ色をもう一度押すと外す／向きは↔で変更）';
+  }
+  function flipOutlineDir(el){
+    var img=_outlineImg(el);
+    var target = img ? (img.parentElement||el) : el;
+    var ol = target && target.querySelector(':scope > .ce_outlinedeco');
+    if(!ol){ msg.textContent='先に縁取り線の色を選んで追加してください'; return; }
+    var nd = ol.dataset.dir==='tr' ? 'bl' : 'tr';
+    ol.dataset.dir=nd;
+    _positionOutline(ol, img, target, nd);
+    markDirty();
+    msg.textContent='縁取り線の向きを変えました（保存で確定）';
+  }
   function openGradPicker(el){
     if(!el){ msg.textContent='対象がありません'; return; }
     var GRADS=[
@@ -2514,6 +2572,13 @@ html.__ce_altmode{cursor:text}
       +'<button class="go2" data-ring="blue" style="background:#555;margin:0">⭕ 水色</button>'
       +'<button class="go2" data-ring="dark" style="background:#555;margin:0">⭕ 濃いめ</button></div>'
       +'<div class="cap" style="margin:2px 0 8px">同じ色をもう一度押すとリングを外せます</div>'
+      +'<div class="cap" style="margin-top:12px">🖼 四角い縁取り線をずらして重ねる（写真の角丸なり・回転しない）</div>'
+      +'<div class="__ce_size" style="grid-template-columns:repeat(3,1fr)">'
+      +'<button class="go2" data-outline="soft" style="background:#555;margin:0">▢ 淡い</button>'
+      +'<button class="go2" data-outline="blue" style="background:#555;margin:0">▢ 水色</button>'
+      +'<button class="go2" data-outline="dark" style="background:#555;margin:0">▢ 濃いめ</button></div>'
+      +'<button class="go2" id="__ce_outdir" style="background:#888;margin-top:6px">↔ ずらす向きを変える</button>'
+      +'<div class="cap" style="margin:2px 0 8px">同じ色をもう一度押すと縁取り線を外せます</div>'
       +'</div>';
     document.body.appendChild(ov);
     ov.addEventListener('click',function(e){
@@ -2527,6 +2592,9 @@ html.__ce_altmode{cursor:text}
       if(e.target.id==='__ce_bgrm'){ removeBackdrop(el); ov.remove(); return; }
       var rb=e.target.closest('button[data-ring]');
       if(rb){ toggleRing(el, rb.getAttribute('data-ring')); return; }
+      var ob=e.target.closest('button[data-outline]');
+      if(ob){ toggleOutline(el, ob.getAttribute('data-outline')); return; }
+      if(e.target.id==='__ce_outdir'){ flipOutlineDir(el); return; }
     });
   }
   // 🖼 写真を白フチで囲む（ポラロイド/カード風・AIなし・即反映）。右上だけ角丸を大きめに。
@@ -2547,6 +2615,49 @@ html.__ce_altmode{cursor:text}
     t.style.setProperty('box-sizing','border-box','important');
     markDirty();
     msg.textContent='写真を白フチで囲みました（右上だけ角丸大きめ・保存で確定／もう一度押すと外す）';
+  }
+  // 💬 はみ出しキャプションカード：写真の角に、白いカードが少し外側へはみ出して重なる演出（AIなし・無料）。
+  //   bgTarget()で親を決め、そこに追加するのでラッパーdivは増やさない。文字はプレースホルダを置き、
+  //   中身の編集は既存の「✏文字を編集」、位置調整は既存のドラッグに任せる（もう一度押すと外せる）。
+  function addOverlapCaption(el){
+    var target=bgTarget(el);
+    if(!target){ msg.textContent='ここには追加できません（すぐ外側の箱を右クリックしてください）'; return; }
+    var card=target.querySelector(':scope > .ce_capcard');
+    if(card){ card.remove(); markDirty(); msg.textContent='はみ出しキャプションカードを外しました（保存で確定）'; return; }
+    if(getComputedStyle(target).position==='static') target.style.setProperty('position','relative');
+    target.style.setProperty('overflow','visible','important');
+    card=document.createElement('div'); card.className='ce_capcard';
+    card.style.cssText='position:absolute;right:-24px;bottom:-22px;z-index:2;max-width:64%;background:#fff;'
+      +'border-radius:16px;padding:14px 18px;box-shadow:0 12px 30px rgba(0,0,0,.16);font-family:inherit;';
+    card.innerHTML='<span style="display:inline-block;background:#eef3ff;color:#1a5fd6;font-size:11px;font-weight:700;'
+      +'border-radius:999px;padding:3px 10px;margin-bottom:6px">私たち</span>'
+      +'<p style="margin:0;font-size:14px;font-weight:700;line-height:1.5;color:#1d1d1f">ひとこと・キャッチコピー</p>'
+      +'<p style="margin:4px 0 0;font-size:11.5px;color:#888">署名・補足</p>';
+    target.appendChild(card);
+    markDirty();
+    msg.textContent='はみ出しキャプションカードを付けました。文字は「✏文字を編集」、位置はドラッグで調整→保存で確定（もう一度押すと外せる）';
+  }
+  // 🖼 写真を加工：白フチ／はみ出しカード／背景の飾り／背景に設定／水彩(AI) の入口をまとめた1つのボタン用ピッカー。
+  //   ボタンを増やさず、選択肢はこの中の一覧から選ぶ形にする。
+  function openPhotoDecoPicker(el, imgEl, sIdx){
+    if(!el){ msg.textContent='対象がありません'; return; }
+    var ov=document.createElement('div'); ov.id='__ce_pk';
+    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🖼 写真を加工（基本はAIなし・無料）</h4>'
+      +'<button class="go2" id="__ce_pdframe" style="background:#1a7f37;margin-bottom:8px">🖼 白フチで囲む（ポラロイド風）</button>'
+      +'<button class="go2" id="__ce_pdcap" style="background:#0b6bcb;margin-bottom:8px">💬 はみ出しキャプションカードを付ける</button>'
+      +'<button class="go2" id="__ce_pdgrad" style="background:#c026a6;margin-bottom:8px">🌸 背景の飾り（グラデ）を敷く</button>'
+      +'<button class="go2" id="__ce_pdsetbg" style="background:#0b6bcb;margin-bottom:8px">🖼 画像を背景に設定</button>'
+      +(imgEl?'<button class="go2" id="__ce_pdwater" style="background:#c026a6">🎨 背後に水彩画像を敷く（AI・数十円）</button>':'')
+      +'</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+      if(e.target.id==='__ce_pdframe'){ ov.remove(); toggleWhiteFrame(el); return; }
+      if(e.target.id==='__ce_pdcap'){ ov.remove(); addOverlapCaption(el); return; }
+      if(e.target.id==='__ce_pdgrad'){ ov.remove(); openGradPicker(el); return; }
+      if(e.target.id==='__ce_pdsetbg'){ ov.remove(); openPicker({el:el, type:'bg', fresh:true}); return; }
+      if(e.target.id==='__ce_pdwater'){ ov.remove(); openBgPicker(imgEl, sIdx); return; }
+    });
   }
   // ===== 右クリックで、その要素に直接アニメ/指示/改善案を出す =====
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
@@ -3506,13 +3617,10 @@ html.__ce_altmode{cursor:text}
     }
     var swapH = (cands.length
       ? '<button class="go2" id="__ce_cmswap" style="background:#1a7f37;margin-bottom:6px">🖼 この画像を差し替え（AIなし・一瞬）</button>'
-        +(imgEl?'<button class="go2" id="__ce_cmbg" style="background:#0b6bcb;margin-bottom:6px">🎨 この画像の背後に画像を敷く（水彩など）</button>':'')
         +'<div class="cap" style="margin:0 0 8px">画像はこれが確実です（差し替えは一瞬）</div>'
       : '')
-      // 画像を持たない要素（空のカード等）にも、その要素の背景として画像を入れられる（AIなし）
-      + '<button class="go2" id="__ce_cmsetbg" style="background:#0b6bcb;margin-bottom:8px">🖼 この要素に画像を入れる（背景に設定・AIなし）</button>'
-      + '<button class="go2" id="__ce_cmframe" style="background:#1a7f37;margin-bottom:8px">🖼 写真を白フチで囲む（右上だけ角丸大きめ・AIなし）</button>'
-      + '<button class="go2" id="__ce_cmgrad" style="background:#c026a6;margin-bottom:8px">🌸 背景の飾りを敷く（要素の後ろ・グラデ・AIなし）</button>';
+      // 白フチ／はみ出しカード／背景の飾り／背景に設定／水彩(AI) をまとめて1つの入口に統合（ボタン数を増やさない）
+      + '<button class="go2" id="__ce_cmdeco" style="background:#0b6bcb;margin-bottom:8px">🖼 写真を加工（フチ・カード・背景など）</button>';
     // 右クリックのAIセクションは「無料の焼き込みで出来ないもの」だけに絞る（背景装飾=bg / AI専用=ai）。
     // 単純な出現/ループ系は上の「動きを選ぶ→付ける」に一本化したのでここには出さない。
     var aiList=PRESETS.filter(function(p){return p.bg||p.ai;});
@@ -3636,18 +3744,10 @@ html.__ce_altmode{cursor:text}
       if(!cands.length){ alert('差し替えられる画像がありません'); return; }
       closeMenu(); openPicker(cands[0]);
     }); }
-    var bgBtn=m.querySelector('#__ce_cmbg');
-    if(bgBtn){ bgBtn.addEventListener('click',function(){
-      var ie=imgEl, si=sIdx; closeMenu(); openBgPicker(ie, si);
+    var decoBtn=m.querySelector('#__ce_cmdeco');
+    if(decoBtn){ decoBtn.addEventListener('click',function(){
+      var t=curEl, ie=imgEl, si=sIdx; closeMenu(); openPhotoDecoPicker(t, ie, si);
     }); }
-    var setbgBtn=m.querySelector('#__ce_cmsetbg');
-    if(setbgBtn){ setbgBtn.addEventListener('click',function(){
-      var target=curEl; closeMenu(); openPicker({el:target, type:'bg', fresh:true});  // 選んだ要素そのものの背景に画像を入れる
-    }); }
-    var frBtn=m.querySelector('#__ce_cmframe');
-    if(frBtn){ frBtn.addEventListener('click',function(){ toggleWhiteFrame(curEl); }); }   // 写真を白フチで囲む
-    var grBtn=m.querySelector('#__ce_cmgrad');
-    if(grBtn){ grBtn.addEventListener('click',function(){ var t=curEl; closeMenu(); openGradPicker(t); }); }  // 背景の飾りを後ろに敷く
     m.querySelector('#__ce_cmgo').addEventListener('click',function(){
       var v=m.querySelector('#__ce_cmin').value.trim(); if(v) editElement(curEl, v);
     });
