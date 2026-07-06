@@ -455,6 +455,27 @@
       font-size: 1.4rem;
       color: #6e6e73;
     }
+    /* 一覧の並び替え・絞り込みツールバー */
+    .list_tools {
+      max-width: 120rem;
+      margin: 0.8rem auto 0;
+      padding: 0 2.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1.2rem;
+      font-size: 1.3rem;
+      color: #444;
+    }
+    .list_tools label { display: flex; align-items: center; gap: 0.4rem; }
+    .list_tools select {
+      font-size: 1.3rem;
+      padding: 0.3rem 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 0.6rem;
+      background: #fff;
+    }
+    .list_tools_count { margin-left: auto; color: #999; }
     /* カードを並べる親（列数はあとで変えやすいよう手法は名前に入れない） */
     /* カードは小さめ＝一度にたくさん見渡せるようにする */
     .result_list {
@@ -1159,6 +1180,21 @@
   </header>
 
   <p class="result_status" id="status">登録済みのサイトを表示しています。</p>
+  <div class="list_tools">
+    <label>並び替え
+      <select id="sort_sel">
+        <option value="">そのまま（関連順）</option>
+        <option value="date_desc">撮影日：新しい順</option>
+        <option value="date_asc">撮影日：古い順</option>
+        <option value="url_asc">URL：名前順</option>
+      </select>
+    </label>
+    <label><input type="checkbox" id="filter_video"> 🎬動画ありのみ</label>
+    <label>ライブラリ
+      <select id="filter_lib"><option value="">すべて</option></select>
+    </label>
+    <span class="list_tools_count" id="list_tools_count"></span>
+  </div>
   <main class="result_list" id="list"></main>
 
   <!-- ベース選択：サムネのグリッドから見た目で選ぶ -->
@@ -1258,6 +1294,46 @@
     const goBtn  = document.querySelector("#go");
     const list   = document.querySelector("#list");
     const status = document.querySelector("#status");
+    const sortSel = document.querySelector("#sort_sel");
+    const filterVideo = document.querySelector("#filter_video");
+    const filterLib = document.querySelector("#filter_lib");
+    const listToolsCount = document.querySelector("#list_tools_count");
+
+    // 一覧の元データ（並び替え・絞り込みはこの配列に対してだけ行う＝取得し直さない）
+    let _rawHits = [];
+
+    // 取得した一覧を保持しつつ、現在の並び替え・絞り込み条件で描画する
+    function setHits(hits) {
+      _rawHits = hits || [];
+      populateLibFilter(_rawHits);
+      applyAndRender();
+    }
+
+    // 今の一覧に出てくるライブラリ名で、絞り込みセレクトの選択肢を作り直す
+    function populateLibFilter(hits) {
+      const libs = new Set();
+      hits.forEach((h) => (h.libs || []).forEach((l) => libs.add(l)));
+      const cur = filterLib.value;
+      filterLib.innerHTML = `<option value="">すべて</option>` +
+        [...libs].sort().map((l) => `<option value="${_esc(l)}">${_esc(l)}</option>`).join("");
+      if (libs.has(cur)) filterLib.value = cur;
+    }
+
+    // 並び替え・絞り込み条件を _rawHits に適用してから描画する
+    function applyAndRender() {
+      let hits = _rawHits.slice();
+      if (filterVideo.checked) hits = hits.filter((h) => h.has_video);
+      const libVal = filterLib.value;
+      if (libVal) hits = hits.filter((h) => (h.libs || []).includes(libVal));
+      const sortVal = sortSel.value;
+      if (sortVal === "date_desc") hits.sort((a, b) => (b.captured_at || "").localeCompare(a.captured_at || ""));
+      else if (sortVal === "date_asc") hits.sort((a, b) => (a.captured_at || "").localeCompare(b.captured_at || ""));
+      else if (sortVal === "url_asc") hits.sort((a, b) => (a.url || "").localeCompare(b.url || ""));
+      listToolsCount.textContent = hits.length === _rawHits.length
+        ? "" : `${_rawHits.length}件中 ${hits.length}件を表示`;
+      render(hits);
+    }
+    [sortSel, filterVideo, filterLib].forEach((el) => el.addEventListener("change", applyAndRender));
 
     // カード1枚分のHTMLを組み立てる
     function card(hit) {
@@ -1379,7 +1455,7 @@
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&top=${top}`);
       const data = await res.json();
       status.textContent = `「${data.query}」の検索結果：${data.hits.length} 件（スコアが高いほど雰囲気が近い）`;
-      render(data.hits);
+      setHits(data.hits);
     }
 
     // 似た検索（登録済みサイト起点・モデル不要で一瞬）
@@ -1389,7 +1465,7 @@
       const res = await fetch(`/api/similar?id=${encodeURIComponent(siteId)}&top=${top}`);
       const data = await res.json();
       status.textContent = `このサイトに似たデザイン：${data.hits.length} 件`;
-      render(data.hits);
+      setHits(data.hits);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1410,7 +1486,7 @@
       const d = s.describe || {};
       if (d.running) {
         descAllState.textContent = `言語化中 ${d.done}/${d.total}…（このまま検索などしてOK）`;
-        render(s.hits);
+        setHits(s.hits);
         setTimeout(pollDescribeAll, 1500);
       } else {
         descAllState.textContent = "全部の言語化が終わりました";
@@ -1854,7 +1930,7 @@
       const res = await fetch("/api/sites");
       const data = await res.json();
       status.textContent = `登録済み：${data.hits.length} 件（言葉で検索すると雰囲気の近い順に並びます）`;
-      render(data.hits);
+      setHits(data.hits);
       populateCampSelects(data.hits);  // mix & match のドロップダウンを埋める
     }
     // カンプ生成の「ベースA」「アニメ参照B」セレクトを、登録サイトで埋める
