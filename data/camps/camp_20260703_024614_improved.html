@@ -1,0 +1,1922 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js fxa-on"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>るあん | 就労継続支援B型</title>
+  <meta name="description" content="ふんわりと、自分らしく働ける。就労継続支援B型事業所「るあん」のランディングページです。">
+  <style>
+    :root{
+      --bg:#ffffff;
+      --beige:#dfbb94;
+      --beige-soft:rgba(223,187,148,.12);
+      --gray:#eeeeee;
+      --text:#000000;
+      --text-sub:#333333;
+      --accent:#db9281;
+      --line:rgba(0,0,0,.12);
+      --shadow:0 4px 16px rgba(0,0,0,.13);
+      --radius-lg:25px;
+      --radius-sm:4px;
+      --container:1320px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      background:var(--bg);
+      font-family:"Noto Sans JP",sans-serif;
+      line-height:1.75;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
+    ul{margin:0;padding:0;list-style:none}
+
+    .container{
+      width:min(var(--container), calc(100% - 80px));
+      margin-inline:auto;
+    }
+
+    .mincho{
+      font-family:YuMincho,"游明朝","ヒラギノ明朝 ProN W3","Hiragino Mincho ProN",HG明朝E,"ＭＳ Ｐ明朝","ＭＳ 明朝",serif;
+    }
+
+    .top-wrap{
+      background:
+        radial-gradient(circle at 85% 10%, rgba(255,255,255,.22), transparent 22%),
+        linear-gradient(135deg, #dfbb94 0%, #dfbb94 60%, #e6c6a6 100%);
+      position:relative;
+      overflow:hidden;
+    }
+    .top-wrap::after{
+      content:"";
+      position:absolute;
+      inset:auto -10% -120px auto;
+      width:540px;
+      height:540px;
+      background:conic-gradient(from 180deg, rgba(255,162,90,.0), rgba(255,160,80,.55), rgba(244,108,156,.45), rgba(134,169,255,.28), rgba(255,162,90,.0));
+      filter:blur(24px);
+      border-radius:50%;
+      transform:rotate(-12deg);
+      opacity:.55;
+      animation:spinSlow 20s linear infinite;
+      pointer-events:none;
+    }
+
+    header{
+      padding:22px 0 16px;
+      position:relative;
+      z-index:2;
+    }
+    .header-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+    }
+    .logo{
+      background:#fff;
+      border-radius:var(--radius-sm);
+      padding:10px 16px;
+      display:inline-flex;
+      align-items:center;
+      box-shadow:0 0 0 1px rgba(0,0,0,.04);
+      min-width:116px;
+    }
+    .logo-mark{
+      font-size:26px;
+      color:#c77f8b;
+      font-weight:700;
+      letter-spacing:.08em;
+      line-height:1;
+    }
+    .logo-sub{
+      font-size:10px;
+      color:#666;
+      margin-top:2px;
+      letter-spacing:.12em;
+    }
+    nav ul{
+      display:flex;
+      gap:30px;
+      color:#fff;
+      font-size:13px;
+      align-items:center;
+    }
+    nav a{
+      position:relative;
+      opacity:.95;
+    }
+    nav a::after{
+      content:"";
+      position:absolute;
+      left:0;bottom:-6px;
+      width:100%;height:1px;
+      background:rgba(255,255,255,.75);
+      transform:scaleX(0);
+      transform-origin:right;
+      transition:transform .35s ease;
+    }
+    nav a:hover::after{
+      transform:scaleX(1);
+      transform-origin:left;
+    }
+
+    .hero{
+      padding:14px 0 0;
+      position:relative;
+      z-index:1;
+    }
+    .hero-copy{
+      padding:30px 0 36px;
+      max-width:980px;
+    }
+    .hero-copy h1{
+      font-size:58px;
+      line-height:1.35;
+      font-weight:500;
+      margin:0 0 22px;
+      letter-spacing:.04em;
+    }
+    .hero-copy p{
+      max-width:930px;
+      font-size:21px;
+      line-height:1.95;
+      margin:0;
+      color:#202020;
+      font-weight:500;
+    }
+    .hero-visual{
+      width:min(1180px, calc(100% - 80px));
+      margin:0 auto;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.02)),
+        linear-gradient(135deg, #d7edf9 0%, #ffffff 40%, #f6efe9 100%);
+      overflow:hidden;
+      aspect-ratio: 16 / 7.2;
+      position:relative;
+    }
+    .hero-visual img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .hero-visual::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.10), transparent 35%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.03));
+      pointer-events:none;
+    }
+
+    .floating-mail{
+      position:fixed;
+      right:26px;
+      top:58%;
+      width:54px;height:54px;
+      border-radius:50%;
+      border:none;
+      background:linear-gradient(135deg, #e8a18f, var(--accent));
+      color:#fff;
+      box-shadow:var(--shadow);
+      display:grid;
+      place-items:center;
+      z-index:30;
+      transition:transform .3s cubic-bezier(.445,.05,.55,.95), box-shadow .3s;
+    }
+    .floating-mail:hover{
+      transform:translateY(-4px) scale(1.04);
+      box-shadow:0 10px 22px rgba(219,146,129,.32);
+    }
+    .floating-mail svg{width:24px;height:24px}
+
+    .spacer{
+      height:165px;
+    }
+
+    .intro-section{
+      padding:0 0 120px;
+    }
+    .intro-panel{
+      background:#faf8f4;
+      border:1px solid rgba(0,0,0,.04);
+      padding:56px 40px 40px;
+      position:relative;
+    }
+    .section-kicker{
+      text-align:center;
+      font-size:15px;
+      color:#444;
+      margin-bottom:12px;
+    }
+    .section-line{
+      width:84px;height:1px;background:#565656;
+      margin:0 auto 26px;
+    }
+    .section-title{
+      text-align:center;
+      font-size:46px;
+      font-weight:700;
+      line-height:1.35;
+      margin:0 0 42px;
+      color:#222;
+    }
+
+    .intro-band{
+      background:var(--beige);
+      padding:34px 38px 40px;
+      margin:0 -40px;
+    }
+    .intro-cards{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:34px;
+    }
+    .intro-card{
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.06);
+      transition:transform .4s cubic-bezier(.445,.05,.55,.95), box-shadow .4s cubic-bezier(.445,.05,.55,.95);
+    }
+    .intro-card:hover{
+      transform:translateY(-6px);
+      box-shadow:var(--shadow);
+    }
+    .intro-thumb{
+      background:linear-gradient(135deg, #d7edf9 0%, #fff 100%);
+      aspect-ratio: 1.9 / 1.08;
+      overflow:hidden;
+    }
+    .intro-thumb img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .intro-body{
+      padding:14px 16px 16px;
+    }
+    .intro-body h3{
+      margin:0 0 8px;
+      text-align:center;
+      font-size:31px;
+      line-height:1.35;
+      font-weight:700;
+    }
+    .intro-body p{
+      margin:0;
+      font-size:15px;
+      line-height:1.7;
+      color:#333;
+    }
+
+    .btn-wrap{
+      text-align:center;
+      margin-top:38px;
+    }
+    .btn{
+      display:inline-flex;
+      justify-content:center;
+      align-items:center;
+      min-width:186px;
+      height:54px;
+      padding:0 26px;
+      border-radius:999px;
+      background:linear-gradient(135deg, #e5a18f, var(--accent));
+      color:#fff;
+      font-size:15px;
+      box-shadow:0 6px 14px rgba(219,146,129,.18);
+      transition:all .3s cubic-bezier(.4,.4,0,1);
+    }
+    .btn:hover{
+      transform:translateY(-3px);
+      box-shadow:0 12px 24px rgba(219,146,129,.28);
+      filter:saturate(1.06);
+    }
+
+    .news-section{
+      padding:6px 0 140px;
+    }
+    .news-head{
+      margin-bottom:32px;
+    }
+    .news-label{
+      font-size:14px;
+      letter-spacing:.06em;
+      margin-bottom:14px;
+      color:#444;
+    }
+    .news-line{
+      width:110px;height:1px;background:#5e5e5e;
+    }
+    .news-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:18px;
+    }
+    .news-card{
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.08);
+      border:1px solid rgba(0,0,0,.04);
+      transition:transform .3s cubic-bezier(.445,.05,.55,.95), box-shadow .3s cubic-bezier(.445,.05,.55,.95);
+    }
+    .news-card:hover{
+      transform:translateY(-5px);
+      box-shadow:var(--shadow);
+    }
+    .news-thumb{
+      background:linear-gradient(135deg, #e6f1fa 0%, #f8eee7 100%);
+      aspect-ratio: 1.65 / 1;
+      overflow:hidden;
+    }
+    .news-thumb img{width:100%;height:100%;object-fit:cover}
+    .news-body{padding:14px 14px 12px}
+    .news-body p{
+      margin:0 0 8px;
+      font-size:14px;
+      line-height:1.75;
+      color:#333;
+      min-height:54px;
+    }
+    .news-date{
+      font-size:13px;
+      color:#444;
+    }
+
+    .contact-section{
+      background:var(--gray);
+      padding:58px 0 72px;
+      position:relative;
+    }
+    .contact-box{
+      background:#fff;
+      padding:44px 30px 36px;
+      position:relative;
+      max-width:1140px;
+      margin:0 auto;
+      text-align:center;
+    }
+    .contact-script{
+      position:absolute;
+      top:-26px;
+      left:12px;
+      font-size:72px;
+      color:rgba(0,0,0,.15);
+      font-style:italic;
+      font-family:Georgia,"Times New Roman",serif;
+      font-weight:400;
+      pointer-events:none;
+    }
+    .contact-box h2{
+      font-size:48px;
+      margin:0 0 10px;
+      line-height:1.4;
+      font-weight:700;
+    }
+    .contact-line{
+      width:150px;height:1px;background:#666;
+      margin:0 auto 20px;
+    }
+    .tel{
+      font-size:72px;
+      line-height:1.05;
+      font-weight:700;
+      margin:0 0 10px;
+      display:inline-block;
+      background:linear-gradient(180deg, transparent 68%, rgba(223,187,148,.55) 68%);
+      padding:0 .08em;
+    }
+    .tel-note{
+      margin:0 0 26px;
+      font-size:22px;
+      font-weight:700;
+      color:#333;
+    }
+    .mail-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      background:#fff;
+      color:#333;
+      border:1px solid rgba(0,0,0,.18);
+      padding:14px 26px;
+      box-shadow:0 1px 0 rgba(0,0,0,.08);
+      transition:all .3s cubic-bezier(.4,.4,0,1);
+    }
+    .mail-btn:hover{
+      transform:translateY(-3px);
+      box-shadow:var(--shadow);
+      border-color:rgba(219,146,129,.55);
+    }
+    .mail-btn svg{width:26px;height:26px}
+    .contact-small{
+      margin-top:12px;
+      font-size:13px;
+      color:#555;
+    }
+
+    footer{
+      background:var(--beige);
+      padding:56px 0 44px;
+      color:#fff;
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1fr;
+      gap:32px;
+      align-items:start;
+      min-height:290px;
+    }
+    .footer-address{
+      margin-top:18px;
+      font-size:14px;
+      line-height:2;
+      color:rgba(255,255,255,.95);
+    }
+    .footer-nav{
+      padding-top:38px;
+    }
+    .footer-nav li{
+      margin:12px 0;
+      font-size:15px;
+      color:rgba(255,255,255,.96);
+    }
+    .footer-nav a:hover{opacity:.8}
+
+    .footer-bottom{
+      text-align:center;
+      padding:28px 20px 24px;
+      background:#fff;
+    }
+    .insta{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:18px;
+      color:#cf5f98;
+    }
+    .insta svg{width:24px;height:24px}
+    .copyright{
+      color:#333;
+      font-size:13px;
+    }
+
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(28px);
+      transition:
+        opacity .8s cubic-bezier(.445,.05,.55,.95),
+        transform .8s cubic-bezier(.445,.05,.55,.95);
+    }
+    html.js .reveal.is-visible{
+      opacity:1;
+      transform:none;
+    }
+    html.js .hero-anim{
+      opacity:0;
+      transform:translateY(24px);
+      transition:
+        opacity .9s cubic-bezier(.445,.05,.55,.95),
+        transform .9s cubic-bezier(.445,.05,.55,.95);
+    }
+    html.js .hero-anim.is-visible{
+      opacity:1;
+      transform:none;
+    }
+    html.js .hero-image{
+      opacity:0;
+      transform:translateY(20px) scale(1.04);
+      transition:
+        opacity 1.1s cubic-bezier(.445,.05,.55,.95),
+        transform 1.1s cubic-bezier(.445,.05,.55,.95);
+    }
+    html.js .hero-image.is-visible{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+
+    .stagger-1{transition-delay:.08s!important}
+    .stagger-2{transition-delay:.16s!important}
+    .stagger-3{transition-delay:.24s!important}
+    .stagger-4{transition-delay:.32s!important}
+
+    @keyframes spinSlow{
+      0%{transform:rotate(0deg)}
+      100%{transform:rotate(1turn)}
+    }
+
+    @media (max-width: 1100px){
+      .hero-copy h1{font-size:48px}
+      .hero-copy p{font-size:18px}
+      .section-title{font-size:38px}
+      .intro-body h3{font-size:24px}
+      .tel{font-size:58px}
+    }
+
+    @media (max-width: 820px){
+      .container,
+      .hero-visual{width:min(calc(100% - 32px), var(--container))}
+      .header-row{flex-direction:column; align-items:flex-start}
+      nav ul{gap:18px; flex-wrap:wrap}
+      .hero-copy{padding:16px 0 26px}
+      .hero-copy h1{font-size:34px}
+      .hero-copy p{font-size:15px; line-height:1.9}
+      .spacer{height:90px}
+      .intro-panel{padding:42px 18px 24px}
+      .intro-band{margin:0 -18px; padding:22px 18px 24px}
+      .intro-cards,
+      .news-grid,
+      .footer-grid{grid-template-columns:1fr}
+      .section-title{font-size:31px; margin-bottom:28px}
+      .btn{min-width:170px}
+      .contact-box{padding:42px 16px 28px}
+      .contact-script{font-size:48px; top:-18px}
+      .contact-box h2{font-size:31px}
+      .tel{font-size:40px}
+      .tel-note{font-size:16px}
+      .floating-mail{right:14px; width:48px; height:48px}
+      footer{padding:40px 0 30px}
+      .footer-grid{min-height:auto}
+      .footer-nav{padding-top:0}
+    }
+  </style>
+<style id="fxa-css">html.fxa-on .fxa_pre{opacity:0;transition:opacity var(--fxa-dur,.8s) ease,transform var(--fxa-dur,.8s) ease,filter var(--fxa-dur,.8s) ease,clip-path var(--fxa-dur,.8s) ease}html.fxa-on .fxa_pre.fxa_y{transform:translateY(var(--fxa-dist,28px))}html.fxa-on .fxa_pre.fxa_xl{transform:translateX(calc(-1*var(--fxa-dist,48px)))}html.fxa-on .fxa_pre.fxa_xr{transform:translateX(var(--fxa-dist,48px))}html.fxa-on .fxa_pre.fxa_s{transform:scale(var(--fxa-scale,.86))}html.fxa-on .fxa_pre.fxa_bl{filter:blur(var(--fxa-blur,14px))}html.fxa-on .fxa_pre.fxa_ry{transform:perspective(800px) rotateY(var(--fxa-deg,90deg))}html.fxa-on .fxa_pre.fxa_clip{transform:translateY(var(--fxa-dist,40px))}html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}.fxa_ch{display:inline-block}html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,16px));transition:opacity .5s ease,transform .5s ease}html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,45ms))}html.fxa-on .fxa_tw .fxa_ch{opacity:0;transition:opacity .05s linear}html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}@keyframes fxa_glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}@keyframes fxa_wave{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,10px)))}}.fxa_lp_pulse{animation:fxa_pulse var(--fxa-dur,1.4s) ease-in-out infinite}.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}</style></head>
+<body style="">
+  <script>document.documentElement.classList.add('js');</script>
+
+  <div class="top-wrap">
+    <header>
+      <div class="container header-row">
+        <a href="#" class="logo reveal hero-anim is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+          <div>
+            <div class="logo-mark mincho">るあん</div>
+            <div class="logo-sub">就労継続支援B型事業所</div>
+          </div>
+        </a>
+        <nav class="reveal hero-anim is-visible stagger-1 in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+          <ul>
+            <li><a href="#top">トップ</a></li>
+            <li><a href="#about">「るあん」のご紹介</a></li>
+            <li><a href="#company">会社概要</a></li>
+            <li><a href="#news">お知らせ</a></li>
+            <li><a href="#contact">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <section class="imp-hero is-visible" id="top" aria-label="るあん ヒーローセクション">
+  <style>
+    .imp-hero{
+      --imp-bg:#ffffff;
+      --imp-bg-soft:#f6f6f6;
+      --imp-text:#404040;
+      --imp-text-strong:#363636;
+      --imp-accent:#ba2c2f;
+      --imp-accent-soft:#fce4e5;
+      --imp-shadow:4px 4px 32px rgba(187,165,165,.3);
+      --imp-radius:12px;
+      --imp-pill:9999px;
+      --imp-wrap:1440px;
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(252,228,229,.85) 0%, rgba(252,228,229,0) 24%),
+        radial-gradient(circle at 82% 18%, rgba(186,44,47,.08) 0%, rgba(186,44,47,0) 28%),
+        linear-gradient(120deg, #ffffff 0%, #f6f6f6 35%, #ffffff 68%, #fce4e5 100%);
+      background-size: 140% 140%;
+      animation: impBgFlow 16s ease-in-out infinite alternate;
+      padding: clamp(42px, 7vw, 96px) 0;
+      font-family:"Noto Sans JP","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro",メイリオ,Meiryo,verdana,Osaka,"ＭＳ Ｐゴシック","MS PGothic",sans-serif;
+      color:var(--imp-text);
+    }
+    .imp-hero *{box-sizing:border-box}
+    .imp-hero::before,
+    .imp-hero::after{
+      content:"";
+      position:absolute;
+      pointer-events:none;
+      z-index:0;
+    }
+    .imp-hero::before{
+      width:min(46vw,720px);
+      height:min(46vw,720px);
+      right:-8%;
+      top:-10%;
+      border:6px solid rgba(64,64,64,.16);
+      border-radius:50%;
+      animation: impFloatRing 13s ease-in-out infinite;
+    }
+    .imp-hero::after{
+      width:min(38vw,560px);
+      height:24px;
+      left:-6%;
+      bottom:11%;
+      background:linear-gradient(90deg, var(--imp-accent) 0%, #d94e53 58%, rgba(217,78,83,0) 100%);
+      border-radius:var(--imp-pill);
+      transform:rotate(-8deg);
+      opacity:.95;
+      animation: impRibbon 10s ease-in-out infinite alternate;
+    }
+    .imp-hero .imp-wrap{
+      width:min(calc(100% - 40px), var(--imp-wrap));
+      margin:0 auto;
+      position:relative;
+      z-index:1;
+    }
+    .imp-hero .imp-stage{
+      display:grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(420px, .98fr);
+      gap: clamp(28px, 4vw, 64px);
+      align-items:center;
+      position:relative;
+    }
+    .imp-hero .imp-copy{
+      position:relative;
+      padding: clamp(18px, 2vw, 30px) 0 clamp(22px, 2vw, 34px);
+      z-index:2;
+    }
+    .imp-hero .imp-copy::before{
+      content:"";
+      position:absolute;
+      left:-22px;
+      top:6px;
+      width:72px;
+      height:72px;
+      background:linear-gradient(135deg, rgba(252,228,229,.95), rgba(186,44,47,.18));
+      border-radius:18px;
+      transform:rotate(-14deg);
+      box-shadow:var(--imp-shadow);
+      animation: impFloatBlock 8.5s ease-in-out infinite;
+    }
+    .imp-hero .imp-copy::after{
+      content:"";
+      position:absolute;
+      left:28px;
+      bottom:-6px;
+      width:120px;
+      height:120px;
+      border-radius:28px;
+      background:linear-gradient(135deg, rgba(252,228,229,.45), rgba(252,228,229,0));
+      transform:rotate(18deg);
+      animation: impFloatBlock2 10s ease-in-out infinite;
+    }
+    .imp-hero .imp-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height:42px;
+      padding:10px 18px;
+      margin:0 0 20px;
+      border-radius:var(--imp-pill);
+      background:rgba(255,255,255,.82);
+      border:1px solid rgba(186,44,47,.16);
+      box-shadow:0 8px 24px rgba(187,165,165,.16);
+      color:var(--imp-accent);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.12em;
+      backdrop-filter: blur(8px);
+      opacity:0;
+      transform:translateY(60px);
+      transition:1s cubic-bezier(.2,.7,.2,1);
+      transition-delay:.05s;
+    }
+    .imp-hero .imp-kicker::before{
+      content:"";
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--imp-accent);
+      box-shadow:0 0 0 8px rgba(186,44,47,.10);
+      animation: impPulse 2.2s ease-out infinite;
+    }
+
+    .imp-hero .imp-title{
+      margin:0;
+      color:var(--imp-text-strong);
+      font-weight:700;
+      line-height:1.18;
+      letter-spacing:.03em;
+      font-size:clamp(34px, 5.6vw, 68px);
+    }
+    .imp-hero .imp-title .imp-line{
+      display:block;
+    }
+    .imp-hero .imp-title .imp-char{
+      display:inline-block;
+      opacity:0;
+      transform:translateY(70px) rotate(4deg) scale(.92);
+      filter:blur(4px);
+      transition:
+        opacity .85s cubic-bezier(.2,.7,.2,1),
+        transform .85s cubic-bezier(.2,.7,.2,1),
+        filter .85s cubic-bezier(.2,.7,.2,1),
+        color .35s ease;
+      will-change:transform,opacity;
+    }
+    .imp-hero .imp-title .imp-char.imp-ac{
+      color:var(--imp-accent);
+    }
+
+    .imp-hero .imp-body-card{
+      margin-top:26px;
+      max-width:720px;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(186,44,47,.10);
+      border-radius:24px;
+      padding:26px 24px;
+      box-shadow:var(--imp-shadow);
+      backdrop-filter: blur(10px);
+      opacity:0;
+      transform:translateY(70px);
+      transition:1s cubic-bezier(.2,.7,.2,1);
+      transition-delay:.3s;
+      position:relative;
+      overflow:hidden;
+    }
+    .imp-hero .imp-body-card::before{
+      content:"";
+      position:absolute;
+      inset:0 auto auto 0;
+      width:100%;
+      height:4px;
+      background:linear-gradient(90deg, var(--imp-accent), rgba(186,44,47,.18), transparent);
+    }
+    .imp-hero .imp-body-card:hover{
+      transform:translateY(-8px);
+      box-shadow:0 18px 44px rgba(187,165,165,.42);
+    }
+    .imp-hero .imp-body{
+      margin:0;
+      font-size:clamp(15px, 1.35vw, 18px);
+      line-height:2.05;
+      color:var(--imp-text);
+      letter-spacing:.02em;
+    }
+
+    .imp-hero .imp-visual{
+      position:relative;
+      min-height:clamp(360px, 46vw, 720px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:2;
+    }
+    .imp-hero .imp-visual::before{
+      content:"";
+      position:absolute;
+      width:82%;
+      height:86%;
+      border-radius:36px;
+      background:linear-gradient(160deg, rgba(255,255,255,.92), rgba(246,246,246,.8));
+      box-shadow:var(--imp-shadow);
+      transform:rotate(-6deg);
+      animation: impFrameBack 9s ease-in-out infinite;
+    }
+    .imp-hero .imp-visual::after{
+      content:"";
+      position:absolute;
+      right:4%;
+      top:14%;
+      width:92px;
+      height:92px;
+      border-radius:22px;
+      background:
+        linear-gradient(180deg, rgba(252,228,229,.98), rgba(233,112,117,.95));
+      box-shadow:0 16px 36px rgba(186,44,47,.22);
+      transform:translateY(0) rotate(0deg);
+      animation: impFloatIcon 7.5s ease-in-out infinite;
+    }
+    .imp-hero .imp-photo-card{
+      position:relative;
+      width:min(100%, 660px);
+      aspect-ratio: 1180 / 516;
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:var(--imp-shadow);
+      background:#fff;
+      transform:translateY(40px) scale(1.15);
+      opacity:0;
+      transition:
+        transform 1.25s cubic-bezier(.2,.7,.2,1),
+        opacity 1.25s cubic-bezier(.2,.7,.2,1),
+        box-shadow .4s ease;
+      transition-delay:.45s;
+      z-index:2;
+    }
+    .imp-hero .imp-photo-card:hover{
+      transform:translateY(-8px) scale(1.02);
+      box-shadow:0 22px 52px rgba(187,165,165,.46);
+    }
+    .imp-hero .imp-photo-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.24), rgba(255,255,255,0) 42%),
+        linear-gradient(180deg, rgba(186,44,47,.08), rgba(186,44,47,0) 28%);
+      z-index:1;
+      pointer-events:none;
+    }
+    .imp-hero .imp-photo{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transform:scale(1.08);
+      transition:transform 7s ease;
+    }
+    .imp-hero .imp-photo-card:hover .imp-photo{
+      transform:scale(1.14);
+    }
+
+    .imp-hero .imp-paper{
+      position:absolute;
+      display:block;
+      border-radius:14px;
+      box-shadow:var(--imp-shadow);
+      pointer-events:none;
+      z-index:1;
+    }
+    .imp-hero .imp-paper.-a{
+      left:2%;
+      bottom:18%;
+      width:92px;
+      height:92px;
+      background:linear-gradient(135deg, #ffb8bc, #d94e53);
+      transform:rotate(-24deg);
+      animation: impPaperA 11s ease-in-out infinite;
+    }
+    .imp-hero .imp-paper.-a::before{
+      content:"";
+      position:absolute;
+      inset:20px 18px auto auto;
+      width:54px;
+      height:54px;
+      background:rgba(255,255,255,.28);
+      border-radius:10px;
+    }
+    .imp-hero .imp-paper.-b{
+      right:-1%;
+      top:26%;
+      width:82px;
+      height:82px;
+      background:linear-gradient(135deg, #f7c4c8, #f08c92);
+      transform:rotate(8deg);
+      animation: impPaperB 9s ease-in-out infinite;
+    }
+    .imp-hero .imp-paper.-b::before,
+    .imp-hero .imp-paper.-b::after{
+      content:"";
+      position:absolute;
+      left:18px;
+      right:18px;
+      height:4px;
+      border-radius:999px;
+      background:rgba(255,255,255,.75);
+    }
+    .imp-hero .imp-paper.-b::before{ top:24px; box-shadow:0 14px 0 rgba(255,255,255,.75), 0 28px 0 rgba(255,255,255,.75);}
+    .imp-hero .imp-dot{
+      position:absolute;
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      background:linear-gradient(135deg, #e45c63, #ba2c2f);
+      right:5%;
+      bottom:14%;
+      box-shadow:0 10px 24px rgba(186,44,47,.24);
+      animation: impDot 6s ease-in-out infinite;
+      z-index:1;
+    }
+
+    .imp-hero .imp-scroll{
+      position:absolute;
+      left:0;
+      bottom:10px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      color:var(--imp-accent);
+      font-size:12px;
+      letter-spacing:.12em;
+      writing-mode:vertical-rl;
+      opacity:.78;
+      user-select:none;
+    }
+    .imp-hero .imp-scroll::after{
+      content:"";
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      border:1px solid rgba(64,64,64,.18);
+      writing-mode:initial;
+      display:block;
+      position:relative;
+      animation: impScroll 1.8s ease-in-out infinite;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(186,44,47,.85) 0 3px, transparent 4px);
+    }
+
+    .imp-hero.is-visible .imp-kicker,
+    .imp-hero.is-visible .imp-body-card{
+      opacity:1;
+      transform:translateY(0);
+    }
+    .imp-hero.is-visible .imp-photo-card{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+    .imp-hero.is-visible .imp-title .imp-char{
+      opacity:1;
+      transform:translateY(0) rotate(0) scale(1);
+      filter:blur(0);
+    }
+
+    @media (max-width: 1080px){
+      .imp-hero .imp-stage{
+        grid-template-columns:1fr;
+      }
+      .imp-hero .imp-copy{
+        order:1;
+      }
+      .imp-hero .imp-visual{
+        order:2;
+        min-height:clamp(300px, 70vw, 560px);
+      }
+      .imp-hero .imp-scroll{
+        display:none;
+      }
+    }
+    @media (max-width: 640px){
+      .imp-hero{
+        padding:34px 0 46px;
+      }
+      .imp-hero .imp-wrap{
+        width:min(calc(100% - 24px), var(--imp-wrap));
+      }
+      .imp-hero .imp-kicker{
+        font-size:11px;
+        padding:9px 14px;
+      }
+      .imp-hero .imp-body-card{
+        padding:20px 18px;
+        border-radius:20px;
+      }
+      .imp-hero .imp-photo-card{
+        border-radius:22px;
+      }
+      .imp-hero .imp-copy::before{
+        width:54px;height:54px;left:-8px;
+      }
+      .imp-hero .imp-visual::after{
+        width:68px;height:68px;border-radius:18px;
+      }
+      .imp-hero .imp-paper.-a{width:70px;height:70px}
+      .imp-hero .imp-paper.-b{width:64px;height:64px}
+    }
+
+    @keyframes impBgFlow{
+      0%{background-position:0% 50%}
+      100%{background-position:100% 50%}
+    }
+    @keyframes impFloatRing{
+      0%,100%{transform:translate(0,0) rotate(0deg)}
+      25%{transform:translate(-22px,20px) rotate(4deg)}
+      50%{transform:translate(18px,34px) rotate(-3deg)}
+      75%{transform:translate(-12px,10px) rotate(2deg)}
+    }
+    @keyframes impRibbon{
+      0%{transform:rotate(-8deg) translateX(0)}
+      100%{transform:rotate(-5deg) translateX(48px)}
+    }
+    @keyframes impFloatBlock{
+      0%,100%{transform:translate(0,0) rotate(-14deg)}
+      50%{transform:translate(18px,-32px) rotate(-3deg)}
+    }
+    @keyframes impFloatBlock2{
+      0%,100%{transform:translate(0,0) rotate(18deg)}
+      50%{transform:translate(-16px,24px) rotate(28deg)}
+    }
+    @keyframes impPulse{
+      0%{box-shadow:0 0 0 0 rgba(186,44,47,.22)}
+      70%{box-shadow:0 0 0 12px rgba(186,44,47,0)}
+      100%{box-shadow:0 0 0 0 rgba(186,44,47,0)}
+    }
+    @keyframes impFrameBack{
+      0%,100%{transform:rotate(-6deg) translateY(0)}
+      50%{transform:rotate(-2deg) translateY(24px)}
+    }
+    @keyframes impFloatIcon{
+      0%,100%{transform:translateY(0) rotate(0deg)}
+      50%{transform:translateY(-34px) rotate(8deg)}
+    }
+    @keyframes impPaperA{
+      0%,100%{transform:translate(0,0) rotate(-24deg)}
+      50%{transform:translate(34px,-24px) rotate(-8deg)}
+    }
+    @keyframes impPaperB{
+      0%,100%{transform:translate(0,0) rotate(8deg)}
+      50%{transform:translate(-30px,28px) rotate(16deg)}
+    }
+    @keyframes impDot{
+      0%,100%{transform:translate(0,0) scale(1)}
+      50%{transform:translate(-18px,-36px) scale(1.16)}
+    }
+    @keyframes impScroll{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(14px)}
+    }
+  </style>
+
+  <div class="imp-wrap">
+    <div class="imp-stage">
+      <div class="imp-copy">
+        <div class="imp-kicker imp-io" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="1" data-cety="-71" style="transform-origin: center center !important; transform: translate(1px, -71px) rotate(0deg) scale(1, 1) matrix(1, 0, 0, 1, 0, 0) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important;">LUAN SUPPORT STYLE</div>
+
+        <h1 class="imp-title imp-io fxa_pre fxa_cpre" data-cebt="" data-cetx="3" data-cety="-66" style="cursor: move; transform-origin: center center !important; transform: translate(3px, -66px) rotate(0deg) scale(1, 1) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important; --fxa-dur: 800ms; --fxa-stag: 67ms; --fxa-dist: 16px;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fxa_ch" style="display: inline-block; --i: 0;">あ</span><span class="fxa_ch" style="display: inline-block; --i: 1;">な</span><span class="fxa_ch" style="display: inline-block; --i: 2;">た</span><span class="fxa_ch" style="display: inline-block; --i: 3;">の</span><span class="fxa_ch" style="display: inline-block; --i: 4;">「</span><span class="fxa_ch" style="display: inline-block; --i: 5;">働</span><span class="fxa_ch" style="display: inline-block; --i: 6;">い</span><span class="fxa_ch" style="display: inline-block; --i: 7;">て</span><span class="fxa_ch" style="display: inline-block; --i: 8;">み</span><span class="fxa_ch" style="display: inline-block; --i: 9;">た</span><span class="fxa_ch" style="display: inline-block; --i: 10;">い</span><span class="fxa_ch" style="display: inline-block; --i: 11;">」</span><span class="fxa_ch" style="display: inline-block; --i: 12;">を</span><span class="fxa_ch" style="display: inline-block; --i: 13;">、</span><span class="fxa_ch" style="display: inline-block; --i: 14;">や</span><span class="fxa_ch" style="display: inline-block; --i: 15;">さ</span><span class="fxa_ch" style="display: inline-block; --i: 16;">し</span><span class="fxa_ch" style="display: inline-block; --i: 17;">く</span><span class="fxa_ch" style="display: inline-block; --i: 18;">、</span><span class="fxa_ch" style="display: inline-block; --i: 19;">し</span><span class="fxa_ch" style="display: inline-block; --i: 20;">っ</span><span class="fxa_ch" style="display: inline-block; --i: 21;">か</span><span class="fxa_ch" style="display: inline-block; --i: 22;">り</span><span class="fxa_ch" style="display: inline-block; --i: 23;">支</span><span class="fxa_ch" style="display: inline-block; --i: 24;">え</span><span class="fxa_ch" style="display: inline-block; --i: 25;">ま</span><span class="fxa_ch" style="display: inline-block; --i: 26;">す</span><span class="fxa_ch" style="display: inline-block; --i: 27;">。</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+
+        <div class="imp-body-card imp-io" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="-2" data-cety="-67" style="transform-origin: center center !important; transform: translate(-2px, -67px) rotate(0deg) scale(1, 1) matrix(1, 0, 0, 1, 0, 0) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important;">
+          <p class="imp-body" style="">
+            「るあん」は、一人ひとりの体調や気持ちに寄り添いながら、安心して働く経験を重ねられる就労継続支援B型事業所です。軽作業や梱包、手しごと、日々のコミュニケーションを通して、自分のペースで小さな自信を育てていける場所を目指しています。
+          </p>
+        </div>
+
+        <div class="imp-scroll">Scroll</div>
+      </div>
+
+      <div class="imp-visual" data-cebt="" data-cetx="-5" data-cety="-49" style="transform-origin: center center !important; transform: translate(-5px, -49px) rotate(0deg) scale(1, 1) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important;">
+        <span class="imp-paper -a" aria-hidden="true"></span>
+        <span class="imp-paper -b" aria-hidden="true"></span>
+        <span class="imp-dot" aria-hidden="true"></span>
+
+        <figure class="imp-photo-card imp-io">
+          <img class="imp-photo fxa_pre fxa_bl" src="http://127.0.0.1:5000/uploads/up_598a02d7d4.png" alt="事業所前でポーズをとるスタッフたち" width="1180" height="516" onerror="this.style.display='none'" style="cursor: move; transform-origin: center center !important; transform: translate(-131px, -19px) rotate(0deg) scale(1.1, 1) matrix(1.14, 0, 0, 1.14, 0, 0) !important; --fxa-dur: 900ms; --fxa-blur: 14px; animation: auto ease 0s 1 normal none running none !important; transition: none !important;" data-cebt="matrix(1.14, 0, 0, 1.14, 0, 0)" data-cetx="-131" data-cety="-19" data-cesx="1.1" data-cesy="1">
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var section = document.currentScript.closest('.imp-hero');
+      if(!section) return;
+
+      var title = section.querySelector('[data-imp-split]');
+      if(title && !title.querySelector('.imp-char,.fxa_ch')){
+        var raw = (title.querySelector('.imp-char')?title.textContent:title.innerHTML).split('<br>');
+        title.innerHTML = raw.map(function(line){
+          var text = line.replace(/<[^>]*>/g,'');
+          var chars = Array.from(text).map(function(ch){
+            var safe = ch === ' ' ? '&nbsp;' : ch;
+            var accent = /[「」働支]/.test(ch) ? ' imp-ac' : '';
+            return '<span class="imp-char'+accent+'">'+safe+'</span>';
+          }).join('');
+          return '<span class="imp-line">'+chars+'</span>';
+        }).join('');
+      }
+
+      var chars = section.querySelectorAll('.imp-title .imp-char');
+      chars.forEach(function(ch, i){
+        ch.style.transitionDelay = (0.12 + i * 0.05) + 's';
+      });
+
+      function show(){
+        section.classList.add('is-visible');
+      }
+
+      if('IntersectionObserver' in window){
+        var io = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              show();
+              io.disconnect();
+            }
+          });
+        }, {threshold:0.22});
+        io.observe(section);
+      }else{
+        show();
+      }
+
+      setTimeout(show, 3000);
+    })();
+  </script>
+</section>
+  </div>
+
+  <a class="floating-mail" href="#contact" aria-label="お問い合わせ">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M3 6.75A1.75 1.75 0 0 1 4.75 5h14.5A1.75 1.75 0 0 1 21 6.75v10.5A1.75 1.75 0 0 1 19.25 19H4.75A1.75 1.75 0 0 1 3 17.25V6.75Zm1.8-.25L12 11.88 19.2 6.5H4.8Zm14.7 10.84V8.27l-6.98 5.2a.9.9 0 0 1-1.04 0L4.5 8.27v9.07c0 .08.07.16.25.16h14.5c.18 0 .25-.08.25-.16Z"></path>
+    </svg>
+  </a>
+
+  <div class="spacer"></div>
+
+  <section class="imp-intro-section" id="about">
+  <style>
+    .imp-intro-section{
+      --imp-bg:#ffffff;
+      --imp-bg-soft:#f6f6f6;
+      --imp-text:#404040;
+      --imp-text-strong:#363636;
+      --imp-accent:#ba2c2f;
+      --imp-accent-soft:#fce4e5;
+      --imp-shadow:4px 4px 32px rgba(187,165,165,.3);
+      --imp-radius:12px;
+      --imp-pill:9999px;
+      --imp-wrap:1440px;
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 12% 20%, rgba(252,228,229,.85) 0, rgba(252,228,229,.45) 18%, rgba(255,255,255,0) 42%),
+        radial-gradient(circle at 88% 78%, rgba(252,228,229,.8) 0, rgba(252,228,229,.35) 16%, rgba(255,255,255,0) 40%),
+        linear-gradient(120deg, #ffffff 0%, #f6f6f6 45%, #ffffff 100%);
+      background-size: 140% 140%, 130% 130%, 200% 200%;
+      animation: impBgFlow 18s ease-in-out infinite alternate;
+      padding: clamp(64px, 9vw, 120px) 20px;
+      font-family:"Noto Sans JP","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro",メイリオ,Meiryo,verdana,Osaka,"ＭＳ Ｐゴシック","MS PGothic",sans-serif;
+      color:var(--imp-text);
+      isolation:isolate;
+    }
+    .imp-intro-section *{box-sizing:border-box;}
+    .imp-intro-section::before,
+    .imp-intro-section::after{
+      content:"";
+      position:absolute;
+      border-radius:50%;
+      pointer-events:none;
+      z-index:0;
+      filter:blur(.2px);
+    }
+    .imp-intro-section::before{
+      width:min(42vw,520px);
+      height:min(42vw,520px);
+      right:-10%;
+      top:6%;
+      border:14px solid rgba(186,44,47,.18);
+      animation:impFloatRing 13s ease-in-out infinite;
+    }
+    .imp-intro-section::after{
+      width:min(28vw,320px);
+      height:min(28vw,320px);
+      left:-8%;
+      bottom:8%;
+      background:linear-gradient(135deg, rgba(252,228,229,.85), rgba(186,44,47,.08));
+      clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      border-radius:24px;
+      transform:rotate(18deg);
+      animation:impFloatShape 11s ease-in-out infinite;
+      opacity:.7;
+    }
+
+    .imp-wrap{
+      position:relative;
+      z-index:1;
+      max-width:var(--imp-wrap);
+      margin:0 auto;
+    }
+
+    .imp-panel{
+      position:relative;
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(186,44,47,.08);
+      border-radius:32px;
+      padding:clamp(32px,4vw,56px);
+      box-shadow:var(--imp-shadow);
+      overflow:hidden;
+    }
+    .imp-panel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, rgba(252,228,229,.22), rgba(255,255,255,0) 34%),
+        linear-gradient(315deg, rgba(252,228,229,.16), rgba(255,255,255,0) 38%);
+      pointer-events:none;
+    }
+    .imp-panel::after{
+      content:"";
+      position:absolute;
+      left:-4%;
+      right:-4%;
+      top:calc(clamp(132px, 16vw, 180px));
+      height:1px;
+      background:linear-gradient(90deg, rgba(186,44,47,0), rgba(186,44,47,.28), rgba(186,44,47,0));
+      opacity:.8;
+    }
+
+    .imp-deco-book,
+    .imp-deco-card{
+      position:absolute;
+      pointer-events:none;
+      z-index:0;
+    }
+    .imp-deco-book{
+      right:6%;
+      top:58px;
+      width:120px;
+      height:100px;
+      animation:impBookFloat 9s ease-in-out infinite;
+    }
+    .imp-deco-book::before,
+    .imp-deco-book::after{
+      content:"";
+      position:absolute;
+      border-radius:8px;
+      box-shadow:0 18px 28px rgba(186,44,47,.14);
+    }
+    .imp-deco-book::before{
+      inset:0 18px 12px 0;
+      background:linear-gradient(180deg, #f8b9bf, #ef7f89);
+    }
+    .imp-deco-book::after{
+      inset:18px 0 0 38px;
+      background:linear-gradient(180deg, #e45e6a, #ba2c2f);
+      opacity:.9;
+    }
+
+    .imp-head{
+      position:relative;
+      z-index:1;
+      display:grid;
+      gap:14px;
+      justify-items:center;
+      text-align:center;
+      margin-bottom:clamp(34px,4vw,52px);
+    }
+    .imp-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      font-size:13px;
+      letter-spacing:.18em;
+      color:var(--imp-text);
+      text-transform:none;
+      opacity:.9;
+    }
+    .imp-kicker::before,
+    .imp-kicker::after{
+      content:"";
+      width:42px;
+      height:1px;
+      background:rgba(64,64,64,.35);
+    }
+    .imp-title{
+      margin:0;
+      color:var(--imp-text-strong);
+      font-size:clamp(30px,4.6vw,52px);
+      line-height:1.22;
+      font-weight:700;
+      letter-spacing:.04em;
+    }
+    .imp-title .imp-char{
+      display:inline-block;
+      opacity:0;
+      transform:translateY(68px) rotate(6deg) scale(.92);
+      filter:blur(4px);
+      transition:transform .9s cubic-bezier(.22,1,.36,1), opacity .9s ease, filter .9s ease;
+    }
+    .imp-inview .imp-title .imp-char{
+      opacity:1;
+      transform:translateY(0) rotate(0) scale(1);
+      filter:blur(0);
+    }
+
+    .imp-subline{
+      width:min(160px,32vw);
+      height:6px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(186,44,47,.1), rgba(186,44,47,.85), rgba(186,44,47,.1));
+      background-size:200% 100%;
+      animation:impLineFlow 4.5s linear infinite;
+    }
+
+    .imp-grid{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:clamp(18px,2vw,28px);
+      align-items:stretch;
+    }
+
+    .imp-card{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+      text-decoration:none;
+      color:inherit;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(246,246,246,.96));
+      border:1px solid rgba(186,44,47,.1);
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:0 10px 24px rgba(0,0,0,.04);
+      transition:
+        transform .45s cubic-bezier(.22,1,.36,1),
+        box-shadow .45s cubic-bezier(.22,1,.36,1),
+        border-color .35s ease,
+        background .35s ease;
+      opacity:0;
+      transform:translateY(72px);
+    }
+    .imp-card:hover{
+      transform:translateY(-10px);
+      box-shadow:0 24px 44px rgba(187,165,165,.38);
+      border-color:rgba(186,44,47,.28);
+      background:linear-gradient(180deg, rgba(255,255,255,1), rgba(252,228,229,.35));
+    }
+    .imp-card::before{
+      content:"";
+      position:absolute;
+      inset:auto -12% -55% auto;
+      width:180px;
+      height:180px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(252,228,229,.9), rgba(252,228,229,0) 68%);
+      opacity:0;
+      transition:opacity .45s ease;
+      pointer-events:none;
+    }
+    .imp-card:hover::before{opacity:1;}
+
+    .imp-inview .imp-card{
+      opacity:1;
+      transform:translateY(0);
+      transition:
+        opacity .9s ease,
+        transform .9s cubic-bezier(.22,1,.36,1),
+        box-shadow .45s cubic-bezier(.22,1,.36,1),
+        border-color .35s ease,
+        background .35s ease;
+    }
+    .imp-card:nth-child(1){transition-delay:.15s;}
+    .imp-card:nth-child(2){transition-delay:.3s;}
+    .imp-card:nth-child(3){transition-delay:.45s;}
+
+    .imp-thumb{
+      position:relative;
+      aspect-ratio: 16 / 10;
+      overflow:hidden;
+      background:#eee;
+    }
+    .imp-thumb::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.0) 40%, rgba(0,0,0,.12) 100%),
+        linear-gradient(120deg, rgba(255,255,255,.35), rgba(255,255,255,0) 34%);
+      pointer-events:none;
+    }
+    .imp-thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transform:scale(1.15);
+      opacity:0;
+      transition:transform 1.2s cubic-bezier(.22,1,.36,1), opacity 1.1s ease;
+    }
+    .imp-inview .imp-card:nth-child(1) .imp-thumb img{transition-delay:.22s;}
+    .imp-inview .imp-card:nth-child(2) .imp-thumb img{transition-delay:.37s;}
+    .imp-inview .imp-card:nth-child(3) .imp-thumb img{transition-delay:.52s;}
+    .imp-inview .imp-thumb img{
+      transform:scale(1);
+      opacity:1;
+    }
+
+    .imp-body{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      padding:24px 22px 22px;
+      flex:1;
+    }
+    .imp-body h3{
+      margin:0;
+      color:var(--imp-text-strong);
+      font-size:clamp(22px,2vw,34px);
+      line-height:1.3;
+      font-weight:700;
+      letter-spacing:.03em;
+    }
+    .imp-body p{
+      margin:0;
+      font-size:15px;
+      line-height:1.95;
+      color:var(--imp-text);
+    }
+
+    .imp-body::before{
+      content:"";
+      width:56px;
+      height:6px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(186,44,47,.95), rgba(252,228,229,.95));
+    }
+
+    .imp-cta{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:center;
+      margin-top:clamp(28px,4vw,42px);
+      opacity:0;
+      transform:translateY(68px);
+      transition:opacity .9s ease .6s, transform .9s cubic-bezier(.22,1,.36,1) .6s;
+    }
+    .imp-inview .imp-cta{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .imp-btn{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:220px;
+      min-height:62px;
+      padding:16px 34px;
+      border-radius:var(--imp-pill);
+      text-decoration:none;
+      color:#fff;
+      font-weight:700;
+      letter-spacing:.08em;
+      background:linear-gradient(135deg, #d56e78 0%, #ba2c2f 55%, #d94d5b 100%);
+      background-size:200% 200%;
+      box-shadow:0 14px 30px rgba(186,44,47,.28);
+      transition:
+        transform .35s cubic-bezier(.22,1,.36,1),
+        box-shadow .35s cubic-bezier(.22,1,.36,1),
+        filter .35s ease,
+        background-position .6s ease;
+      animation:impBtnPulse 3.4s ease-in-out infinite, impBtnFlow 6s linear infinite;
+    }
+    .imp-btn::before{
+      content:"";
+      position:absolute;
+      inset:2px;
+      border-radius:inherit;
+      background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0));
+      pointer-events:none;
+    }
+    .imp-btn:hover{
+      transform:translateY(-6px) scale(1.05);
+      box-shadow:0 22px 36px rgba(186,44,47,.36);
+      filter:saturate(1.08);
+      background-position:100% 50%;
+    }
+
+    @keyframes impBgFlow{
+      0%{background-position:0% 0%, 100% 100%, 0% 50%;}
+      50%{background-position:30% 20%, 70% 80%, 100% 50%;}
+      100%{background-position:10% 40%, 85% 60%, 0% 50%;}
+    }
+    @keyframes impFloatRing{
+      0%,100%{transform:translate3d(0,0,0) scale(1) rotate(0deg);}
+      25%{transform:translate3d(-24px,18px,0) scale(1.03) rotate(8deg);}
+      50%{transform:translate3d(12px,42px,0) scale(.98) rotate(15deg);}
+      75%{transform:translate3d(28px,10px,0) scale(1.04) rotate(6deg);}
+    }
+    @keyframes impFloatShape{
+      0%,100%{transform:translate3d(0,0,0) rotate(18deg);}
+      33%{transform:translate3d(26px,-20px,0) rotate(32deg);}
+      66%{transform:translate3d(54px,18px,0) rotate(4deg);}
+    }
+    @keyframes impBookFloat{
+      0%,100%{transform:translate3d(0,0,0) rotate(0deg);}
+      25%{transform:translate3d(12px,-16px,0) rotate(4deg);}
+      50%{transform:translate3d(-10px,18px,0) rotate(-4deg);}
+      75%{transform:translate3d(20px,4px,0) rotate(7deg);}
+    }
+    @keyframes impLineFlow{
+      0%{background-position:0% 50%;}
+      100%{background-position:200% 50%;}
+    }
+    @keyframes impBtnPulse{
+      0%,100%{transform:scale(1);}
+      50%{transform:scale(1.03);}
+    }
+    @keyframes impBtnFlow{
+      0%{background-position:0% 50%;}
+      100%{background-position:100% 50%;}
+    }
+
+    @media (max-width: 1024px){
+      .imp-grid{
+        grid-template-columns:1fr;
+      }
+      .imp-deco-book{
+        right:18px;
+        top:24px;
+        transform:scale(.82);
+      }
+      .imp-panel::after{
+        top:calc(clamp(132px, 24vw, 172px));
+      }
+    }
+
+    @media (max-width: 640px){
+      .imp-intro-section{
+        padding:56px 14px;
+      }
+      .imp-panel{
+        border-radius:24px;
+        padding:26px 18px 24px;
+      }
+      .imp-kicker::before,
+      .imp-kicker::after{
+        width:26px;
+      }
+      .imp-body{
+        padding:20px 18px 20px;
+      }
+      .imp-btn{
+        width:100%;
+        min-width:0;
+      }
+      .imp-deco-book{
+        width:90px;
+        height:76px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .imp-intro-section,
+      .imp-intro-section::before,
+      .imp-intro-section::after,
+      .imp-deco-book,
+      .imp-subline,
+      .imp-btn{
+        animation:none !important;
+      }
+      .imp-title .imp-char,
+      .imp-card,
+      .imp-thumb img,
+      .imp-cta{
+        transition:none !important;
+        opacity:1 !important;
+        transform:none !important;
+        filter:none !important;
+      }
+    }
+  </style>
+
+  <div class="imp-wrap">
+    <div class="imp-panel imp-watch imp-inview in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+      <div class="imp-deco-book" aria-hidden="true"></div>
+
+      <div class="imp-head">
+        <div class="imp-kicker imp-fadeup in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">ruan</div>
+        <div class="imp-subline imp-fadeup in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter"></div>
+        <h2 class="imp-title fxa_pre fxa_tw" aria-label="「るあん」のご紹介" style="cursor: move; --fxa-dur: 800ms; --fxa-stag: 93ms;"><span class="imp-char" style="transition-delay: 0s;">「</span><span class="imp-char" style="transition-delay: 0.07s;">る</span><span class="imp-char" style="transition-delay: 0.14s;">あ</span><span class="imp-char" style="transition-delay: 0.21s;">ん</span><span class="imp-char" style="transition-delay: 0.28s;">」</span><span class="imp-char" style="transition-delay: 0.35s;">の</span><span class="imp-char" style="transition-delay: 0.42s;">ご</span><span class="imp-char" style="transition-delay: 0.49s;">紹</span><span class="imp-char" style="transition-delay: 0.56s;">介</span></h2>
+      </div>
+
+      <div class="imp-grid">
+        <a href="#" class="imp-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="imp-thumb">
+            <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="作業内容" width="380" height="216" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          </div>
+          <div class="imp-body">
+            <h3>作業内容</h3>
+            <p>封入・梱包・検品・手芸小物づくりなど、無理なく取り組める作業をご紹介します。</p>
+          </div>
+        </a>
+
+        <a href="#" class="imp-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="imp-thumb">
+            <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="一日の流れ" width="380" height="216" onerror="this.style.display='none'" style="transform: none; animation: auto ease 0s 1 normal none running none !important; transform-origin: center center !important; transition: none !important;" class="" data-cebt="none" data-cetx="7" data-cety="42">
+          </div>
+          <div class="imp-body">
+            <h3>一日の流れ</h3>
+            <p>朝の通所から休憩、作業、振り返りまで。安心して過ごせる一日の流れをまとめました。</p>
+          </div>
+        </a>
+
+        <a href="#" class="imp-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="imp-thumb">
+            <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="見学案内" width="380" height="216" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          </div>
+          <div class="imp-body">
+            <h3>見学・体験受付中</h3>
+            <p>事業所の雰囲気やスタッフの様子を、まずは気軽に見に来ていただけます。</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="imp-cta" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a href="#contact" class="imp-btn">View More</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var section = document.currentScript.closest('.imp-intro-section');
+      if(!section) return;
+
+      var title = section.querySelector('.imp-title');
+      var titleText = '「るあん」のご紹介';
+      title.innerHTML = '';
+      Array.from(titleText).forEach(function(ch, i){
+        var span = document.createElement('span');
+        span.className = 'imp-char';
+        span.textContent = ch === ' ' ? '\u00A0' : ch;
+        span.style.transitionDelay = (i * 0.07) + 's';
+        title.appendChild(span);
+      });
+
+      var watch = section.querySelector('.imp-watch');
+      var show = function(){ watch.classList.add('imp-inview'); };
+
+      if('IntersectionObserver' in window){
+        var io = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              show();
+              io.disconnect();
+            }
+          });
+        }, {threshold:0.2});
+        io.observe(watch);
+      } else {
+        show();
+      }
+
+      setTimeout(show, 3000);
+    })();
+  </script>
+</section>
+
+  <section class="news-section" id="news">
+    <div class="container">
+      <div class="news-head reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="news-label">NEWS</div>
+        <div class="news-line"></div>
+      </div>
+
+      <div class="news-grid">
+        <a href="#" class="news-card reveal stagger-1 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="news-thumb">
+            <img src="http://127.0.0.1:5000/uploads/up_04b676c6fb.jpg" alt="スタッフ集合写真" width="420" height="255" onerror="this.style.display='none'">
+          </div>
+          <div class="news-body">
+            <p>新しい季節を迎え、スタッフ体制を整えながら見学・体験の受付を再開しました。</p>
+            <div class="news-date">2026/07/01</div>
+          </div>
+        </a>
+
+        <a href="#" class="news-card reveal stagger-2 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="news-thumb">
+            <img src="http://127.0.0.1:5000/uploads/up_033afbf0bd.jpg" alt="梱包作業の様子" width="420" height="255" onerror="this.style.display='none'">
+          </div>
+          <div class="news-body">
+            <p>今週は梱包作業を中心に、利用者さんそれぞれの得意を活かした取り組みを行いました。</p>
+            <div class="news-date">2026/06/24</div>
+          </div>
+        </a>
+
+        <a href="#" class="news-card reveal stagger-3 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="news-thumb">
+            <img src="http://127.0.0.1:5000/uploads/up_78c6a0d3e7.jpg" alt="手芸小物の検品風景" width="420" height="255" onerror="this.style.display='none'">
+          </div>
+          <div class="news-body">
+            <p>手芸小物の検品・袋詰め作業を丁寧に進めています。集中しやすい環境づくりも大切にしています。</p>
+            <div class="news-date">2026/06/12</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="btn-wrap reveal stagger-4 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="margin-top: 36px; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a href="#" class="btn">View More</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section" id="contact">
+    <div class="container">
+      <div class="contact-box reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="contact-script" style="">Contact</div>
+        <h2>ご相談はこちら</h2>
+        <div class="contact-line"></div>
+        <div class="tel">022-398-7350</div>
+        <p class="tel-note">平日のみ（土日祝休み）</p>
+
+        <a href="mailto:info@ruan-b.com" class="mail-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M3 6.75A1.75 1.75 0 0 1 4.75 5h14.5A1.75 1.75 0 0 1 21 6.75v10.5A1.75 1.75 0 0 1 19.25 19H4.75A1.75 1.75 0 0 1 3 17.25V6.75Zm1.8-.25L12 11.88 19.2 6.5H4.8Zm14.7 10.84V8.27l-6.98 5.2a.9.9 0 0 1-1.04 0L4.5 8.27v9.07c0 .08.07.16.25.16h14.5c.18 0 .25-.08.25-.16Z"></path>
+          </svg>
+          お問い合わせフォーム
+        </a>
+
+        <div class="contact-small">※ お電話またはメールフォームからご相談ください。</div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="company">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a href="#" class="logo" style="box-shadow:none;">
+            <div>
+              <div class="logo-mark mincho">るあん</div>
+              <div class="logo-sub">就労継続支援B型事業所</div>
+            </div>
+          </a>
+          <div class="footer-address">
+            〒989-3126<br>
+            宮城県仙台市青葉区栗生三丁目14番地2号 103<br><br>
+            見学・体験利用は事前予約制です。<br>
+            どうぞお気軽にお問い合わせください。
+          </div>
+        </div>
+
+        <ul class="footer-nav">
+          <li><a href="#top">・トップ</a></li>
+          <li><a href="#company">・会社案内</a></li>
+          <li><a href="#contact">・お問い合わせ</a></li>
+        </ul>
+
+        <ul class="footer-nav">
+          <li><a href="#about">・「るあん」のご紹介</a></li>
+          <li><a href="#news">・お知らせ</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <div class="footer-bottom">
+    <a href="#" class="insta" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M7.25 3h9.5A4.25 4.25 0 0 1 21 7.25v9.5A4.25 4.25 0 0 1 16.75 21h-9.5A4.25 4.25 0 0 1 3 16.75v-9.5A4.25 4.25 0 0 1 7.25 3Zm0 1.5A2.75 2.75 0 0 0 4.5 7.25v9.5a2.75 2.75 0 0 0 2.75 2.75h9.5a2.75 2.75 0 0 0 2.75-2.75v-9.5a2.75 2.75 0 0 0-2.75-2.75h-9.5Zm10.12 1.12a.88.88 0 1 1 0 1.76.88.88 0 0 1 0-1.76ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5Z"></path>
+      </svg>
+    </a>
+    <div class="copyright">©2026 株式会社Faste All Rights Reserved.</div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const targets = document.querySelectorAll('.reveal');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+
+      targets.forEach(el => io.observe(el));
+    });
+  </script>
+
+
+
+
+
+
+
+<div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i], cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><script id="fxa-run">(function(){var d=document,h=d.documentElement;if(!d.querySelector(".fxa_pre")){return;}h.classList.add("fxa-on");function pre(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}function vh(){return window.innerHeight||h.clientHeight;}function show(){pre().forEach(function(el){var r=el.getBoundingClientRect();if(r.bottom>0&&r.top<vh()*0.96)el.classList.add("fxa_in");});}function start(){show();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add("fxa_in");io.unobserve(en.target);}});},{threshold:0.12,rootMargin:"0px 0px -6% 0px"});pre().forEach(function(el){io.observe(el);});}var t;window.addEventListener("scroll",function(){clearTimeout(t);t=setTimeout(show,80);},{passive:true});setTimeout(show,1200);}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",start);else start();})();</script></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

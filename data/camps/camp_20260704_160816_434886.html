@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ja" class="js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>LinkWorks | 就労継続支援B型事業所</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html {
+      scroll-behavior: smooth;
+      background-color: #f4f6f9;
+    }
+    body {
+      font-family: "Helvetica Neue", "Arial", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      color: #2c3e4e;
+      background-color: #ffffff;
+      line-height: 1.8;
+      letter-spacing: 0.03em;
+      transition: opacity 0.4s ease;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 24px;
+      }
+    }
+
+    /* フォント・カラー定義 */
+    :root {
+      --blue-dark: #1a2a3a;
+      --blue-mid: #2c4b64;
+      --blue-light: #5b7f9e;
+      --blue-pale: #d4e0ec;
+      --gray-cool: #eef1f5;
+      --gray-border: #ccd6e0;
+      --accent-soft: #f0f4fa;
+    }
+
+    h1, h2, h3 {
+      font-weight: 400;
+      letter-spacing: 0.06em;
+    }
+    h2 {
+      font-size: 2.1rem;
+      margin-bottom: 1.5rem;
+      color: #1a2a3a;
+      font-weight: 300;
+      line-height: 1.4;
+    }
+    @media (max-width: 768px) {
+      h2 {
+        font-size: 1.8rem;
+      }
+    }
+    .en-title {
+      font-family: "Times New Roman", "serif";
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      color: #5b7f9e;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+
+    /* ボタン */
+    .btn {
+      display: inline-block;
+      border: 1px solid #2c4b64;
+      color: #2c4b64;
+      padding: 14px 38px;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      background: transparent;
+      transition: all 0.3s ease;
+      background-color: rgba(255,255,255,0.6);
+      backdrop-filter: blur(4px);
+      font-weight: 400;
+    }
+    .btn:hover {
+      background: #2c4b64;
+      color: white;
+      border-color: #2c4b64;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+    }
+    .btn-fill {
+      background: #2c4b64;
+      color: white;
+    }
+    .btn-fill:hover {
+      background: #1a2a3a;
+      border-color: #1a2a3a;
+    }
+
+    /* ヘッダー */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 50;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(200,210,225,0.3);
+      padding: 18px 0;
+      transition: background 0.3s;
+    }
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: "Times New Roman", serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.1em;
+      color: #1a2a3a;
+      font-weight: 400;
+      text-decoration: none;
+    }
+    .logo img {
+      height: 32px;
+      width: auto;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .nav {
+      display: flex;
+      gap: 32px;
+    }
+    .nav a {
+      text-decoration: none;
+      color: #2c4b64;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      font-weight: 400;
+      transition: opacity 0.2s;
+    }
+    .nav a:hover {
+      opacity: 0.6;
+    }
+    @media (max-width: 768px) {
+      .nav {
+        gap: 18px;
+        font-size: 0.7rem;
+      }
+    }
+
+    /* ヒーロー */
+    .hero {
+      padding: 140px 0 80px;
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      background: linear-gradient(180deg, #edf2f8 0%, #ffffff 100%);
+    }
+    .hero-text {
+      flex: 1 1 50%;
+    }
+    .hero-text h1 {
+      font-size: 2.8rem;
+      font-weight: 300;
+      line-height: 1.4;
+      color: #0f1c2b;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.04em;
+    }
+    .hero-text p {
+      font-size: 1rem;
+      color: #4a627a;
+      margin-bottom: 2.2rem;
+      max-width: 480px;
+    }
+    .hero-image {
+      flex: 1 1 50%;
+      position: relative;
+      background: linear-gradient(135deg, #d9e5f2, #b6cee5);
+      border-radius: 2px;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+    }
+    .hero-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    @media (max-width: 768px) {
+      .hero {
+        flex-direction: column;
+        padding: 120px 0 60px;
+        gap: 32px;
+      }
+      .hero-text h1 {
+        font-size: 2rem;
+      }
+    }
+
+    /* 横スクロールカードセクション */
+    .scroll-gallery {
+      padding: 80px 0;
+      background: #f8fafc;
+    }
+    .scroll-track {
+      display: flex;
+      gap: 28px;
+      overflow-x: auto;
+      padding: 8px 0 24px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .scroll-track::-webkit-scrollbar {
+      height: 4px;
+    }
+    .scroll-track::-webkit-scrollbar-thumb {
+      background: #ccd6e0;
+      border-radius: 4px;
+    }
+    .card {
+      flex: 0 0 320px;
+      scroll-snap-align: start;
+      background: white;
+      border: 1px solid #e8ecf2;
+      transition: transform 0.3s ease, box-shadow 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+    }
+    .card-img {
+      width: 100%;
+      height: 220px;
+      background: #dde5f0;
+      overflow: hidden;
+    }
+    .card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-body {
+      padding: 20px 18px 24px;
+    }
+    .card-body h3 {
+      font-size: 1.1rem;
+      font-weight: 400;
+      margin-bottom: 8px;
+      color: #1a2a3a;
+    }
+    .card-body p {
+      font-size: 0.85rem;
+      color: #5b7f9e;
+    }
+
+    /* 左右交互セクション */
+    .split-section {
+      padding: 90px 0;
+    }
+    .split-row {
+      display: flex;
+      align-items: center;
+      gap: 64px;
+      margin-bottom: 80px;
+    }
+    .split-row.reverse {
+      flex-direction: row-reverse;
+    }
+    .split-img {
+      flex: 1 1 48%;
+      background: #dce5f0;
+      aspect-ratio: 5/4;
+      overflow: hidden;
+      border-radius: 2px;
+    }
+    .split-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .split-content {
+      flex: 1 1 48%;
+    }
+    .split-content h2 {
+      margin-bottom: 1rem;
+    }
+    .split-content p {
+      color: #3f5a73;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    @media (max-width: 768px) {
+      .split-row, .split-row.reverse {
+        flex-direction: column;
+        gap: 28px;
+      }
+    }
+
+    /* 数字・グリッド */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      padding: 60px 0 80px;
+      border-top: 1px solid #e0e7f0;
+    }
+    .stat-item {
+      text-align: left;
+    }
+    .stat-number {
+      font-size: 2.6rem;
+      font-weight: 300;
+      color: #1a2a3a;
+      letter-spacing: 0.02em;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: #5b7f9e;
+      margin-top: 8px;
+    }
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+    }
+
+    /* 会社概要テキストセクション */
+    .about-text {
+      padding: 80px 0;
+      background: #f4f7fb;
+    }
+    .about-text .container {
+      max-width: 900px;
+    }
+    .about-text p {
+      font-size: 1rem;
+      color: #334b5e;
+      margin-bottom: 1.8rem;
+    }
+
+    /* コンタクト */
+    .contact-cta {
+      padding: 100px 0;
+      background: linear-gradient(180deg, #ffffff, #edf2f8);
+      text-align: center;
+    }
+    .contact-cta h2 {
+      margin-bottom: 1rem;
+    }
+    .contact-cta .btn {
+      margin-top: 24px;
+    }
+
+    /* フッター */
+    .footer {
+      background: #1a2a3a;
+      color: #cbd5e1;
+      padding: 48px 0;
+      font-size: 0.8rem;
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .footer a {
+      color: #cbd5e1;
+      text-decoration: none;
+      margin-right: 18px;
+    }
+
+    /* アニメーション制御 */
+    html.js .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    html.js .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+
+    /* 画像読込中背景 */
+    .img-bg {
+      background: #d9e3f0;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="#" class="logo">
+        <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorks" style="height:28px; vertical-align:middle;"> LinkWorks
+      </a>
+      <nav class="nav">
+        <a href="#">私たちについて</a>
+        <a href="#">支援内容</a>
+        <a href="#">実績</a>
+        <a href="#">採用情報</a>
+        <a href="#">お問い合わせ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ヒーロー -->
+    <section class="hero container">
+      <div class="hero-text fade-up">
+        <div class="en-title">Empowerment through work</div>
+        <h1>働くよろこびを、<br>ここから一緒に。</h1>
+        <p>LinkWorksは、一人ひとりのペースに寄り添う就労継続支援B型事業所です。クリエイティブな軽作業から事務サポートまで、あなたの「できる」を仕事に変えます。</p>
+        <a href="#" class="btn btn-fill">まずは見学・相談</a>
+      </div>
+      <div class="hero-image fade-up delay-1">
+        <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="明るい事業所のエントランス" onerror="this.style.display='none'">
+      </div>
+    </section>
+
+    <!-- 横スクロール：サービス一覧 -->
+    <section class="scroll-gallery">
+      <div class="container">
+        <div class="en-title fade-up">Our services</div>
+        <h2 class="fade-up delay-1">多様な仕事のかたち</h2>
+      </div>
+      <div class="scroll-track fade-up delay-2" style="padding-left:48px; padding-right:48px;">
+        <a href="#" class="card">
+          <div class="card-img img-bg"><img src="http://127.0.0.1:5000/uploads/up_ca0295279d.jpg" alt="アクセサリー検品" onerror="this.style.display='none'"></div>
+          <div class="card-body"><h3>軽作業・梱包</h3><p>アクセサリーや雑貨の検品・包装を丁寧に。</p></div>
+        </a>
+        <a href="#" class="card">
+          <div class="card-img img-bg"><img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="PC入力" onerror="this.style.display='none'"></div>
+          <div class="card-body"><h3>データ入力</h3><p>企業のバックオフィスを支える正確な事務。</p></div>
+        </a>
+        <a href="#" class="card">
+          <div class="card-img img-bg"><img src="http://127.0.0.1:5000/uploads/up_3a159df441.jpg" alt="手作りアクセサリー" onerror="this.style.display='none'"></div>
+          <div class="card-body"><h3>ものづくり</h3><p>ハンドメイド作品の制作・販売を通じて社会へ。</p></div>
+        </a>
+        <a href="#" class="card">
+          <div class="card-img img-bg"><img src="http://127.0.0.1:5000/uploads/up_5ec6d773f1.png" alt="PC相談" onerror="this.style.display='none'"></div>
+          <div class="card-body"><h3>ITサポート</h3><p>Web更新や画像加工などスキルを活かす。</p></div>
+        </a>
+        <a href="#" class="card">
+          <div class="card-img img-bg"><img src="http://127.0.0.1:5000/uploads/up_a18f5c2db4.png" alt="指導風景" onerror="this.style.display='none'"></div>
+          <div class="card-body"><h3>就労トレーニング</h3><p>ビジネスマナーやPCスキルを習得。</p></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 特徴：左右交互 -->
+    <section class="split-section container">
+      <div class="split-row fade-up">
+        <div class="split-img img-bg">
+          <img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" alt="明るいオフィス" onerror="this.style.display='none'">
+        </div>
+        <div class="split-content">
+          <div class="en-title">Environment</div>
+          <h2>清潔で明るい、<br>自分らしく働ける場</h2>
+          <p>大きな窓から光が差し込む開放的なオフィス。衛生管理を徹底し、一人ひとりが集中できるスペースを確保しています。リラックスできる休憩コーナーも完備。</p>
+          <a href="#" class="btn">施設を見る</a>
+        </div>
+      </div>
+      <div class="split-row reverse fade-up">
+        <div class="split-img img-bg">
+          <img src="http://127.0.0.1:5000/uploads/up_598a02d7d4.png" alt="談笑するスタッフ" onerror="this.style.display='none'">
+        </div>
+        <div class="split-content">
+          <div class="en-title">Support</div>
+          <h2>経験豊富なスタッフが<br>あなたの歩幅に寄り添います</h2>
+          <p>就労支援のプロフェッショナルが、体調や希望に合わせて仕事量を調整。困ったときはすぐに相談できる、温かなチームです。</p>
+          <a href="#" class="btn">スタッフ紹介</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 数字 -->
+    <div class="container stats-grid fade-up">
+      <div class="stat-item">
+        <div class="stat-number">128<span style="font-size:1.2rem;">名</span></div>
+        <div class="stat-label">登録利用者数（累計）</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">94<span style="font-size:1.2rem;">%</span></div>
+        <div class="stat-label">継続利用率</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">21<span style="font-size:1.2rem;">社</span></div>
+        <div class="stat-label">提携企業・委託元</div>
+      </div>
+    </div>
+
+    <!-- 会社概要テキスト -->
+    <section class="about-text">
+      <div class="container fade-up">
+        <div class="en-title">About linkworks</div>
+        <h2>「働きたい」を、<br>あきらめない社会へ。</h2>
+        <p>LinkWorksは2020年、仙台市に開設された就労継続支援B型事業所です。障害のある方々が、それぞれの個性やスキルを活かして働けるよう、軽作業・事務・クリエイティブ業務など多様な仕事を提供しています。</p>
+        <p>私たちが大切にしているのは、単に「作業をこなす」ことではなく、「自分が役に立っている」という実感を持っていただくこと。週1日・短時間からスタートできる柔軟さと、一般就労を視野に入れたステップアップ支援も強みです。</p>
+        <img src="http://127.0.0.1:5000/uploads/up_34dd3e19ee.png" alt="LinkWorksロゴウォール" style="max-width:200px; margin-top:24px; opacity:0.9;" onerror="this.style.display='none'">
+      </div>
+    </section>
+
+    <!-- コンタクト -->
+    <section class="contact-cta">
+      <div class="container fade-up">
+        <div class="en-title">Contact</div>
+        <h2>まずはお気軽にご相談ください</h2>
+        <p style="color:#4a627a; margin-bottom:8px;">見学・体験利用は随時受付中。お電話またはフォームからどうぞ。</p>
+        <a href="#" class="btn btn-fill">お問い合わせフォーム</a>
+        <p style="margin-top:20px; font-size:0.9rem; color:#5b7f9e;">TEL: 022-xxx-xxxx（平日9:00〜17:00）</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <p style="font-family:'Times New Roman',serif; font-size:1.2rem; margin-bottom:8px;">LinkWorks</p>
+        <p>〒980-xxxx 仙台市青葉区一番町x-x-x</p>
+        <p>就労継続支援B型事業所</p>
+      </div>
+      <div style="display:flex; gap:28px; align-items:flex-end;">
+        <a href="#">プライバシーポリシー</a>
+        <a href="#">サイトマップ</a>
+        <span>© LinkWorks</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.documentElement.classList.add('js');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // ヒーローは即時表示（読み込み時アニメ）
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.hero .fade-up').forEach(el => {
+        el.classList.add('visible');
+      });
+    });
+
+    // 簡易スムーススクロール (Lenisライク)
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (href === "#") return;
+        const target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

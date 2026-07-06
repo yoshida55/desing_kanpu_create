@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<script>document.documentElement.classList.add('js');</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>リンクワークス｜就労継続支援A型・企業向け業務パートナー</title>
+<meta name="description" content="リンクワークスは、一人ひとりのペースに寄り添いながら、企業品質の受託業務を担う就労継続支援A型事業所です。">
+<style>
+:root{
+  --ink:#0a2540;
+  --muted:#425466;
+  --soft:#f6f9fc;
+  --line:#e6ebf1;
+  --purple:#635bff;
+  --purple-dark:#3a2ee8;
+  --cyan:#00d4ff;
+  --pink:#ff4ecd;
+  --orange:#ff9f1c;
+  --green:#00c896;
+  --radius:10px;
+  --shadow:0 22px 60px rgba(50,50,93,.14),0 8px 24px rgba(0,0,0,.08);
+  --shadow-soft:0 12px 34px rgba(50,50,93,.12),0 3px 10px rgba(0,0,0,.06);
+  --max:1080px;
+  --gutter:24px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:#fff;
+  font-feature-settings:"palt";
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button,input,textarea{font:inherit}
+.container{
+  width:min(var(--max),calc(100% - var(--gutter)*2));
+  margin-inline:auto;
+}
+.header{
+  position:fixed;
+  z-index:20;
+  inset:0 0 auto 0;
+  height:64px;
+  display:flex;
+  align-items:center;
+  color:#0a2540;
+  background:rgba(255,255,255,.64);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(230,235,241,.45);
+}
+.nav{
+  width:min(1180px,calc(100% - 40px));
+  margin:auto;
+  display:flex;
+  align-items:center;
+  gap:28px;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-weight:800;
+  letter-spacing:-.04em;
+  font-size:18px;
+}
+.logo-mark{
+  width:25px;
+  height:25px;
+  border-radius:8px;
+  background:linear-gradient(135deg,var(--purple),var(--pink) 58%,var(--orange));
+  box-shadow:0 8px 18px rgba(99,91,255,.28);
+  position:relative;
+}
+.logo-mark:after{
+  content:"";
+  position:absolute;
+  inset:6px 5px 5px 7px;
+  border:2px solid #fff;
+  border-left-color:transparent;
+  border-radius:8px;
+  transform:rotate(-12deg);
+}
+.nav-links{
+  display:flex;
+  gap:22px;
+  align-items:center;
+  font-size:13px;
+  font-weight:700;
+  color:#253858;
+  flex:1;
+}
+.nav-links a{opacity:.92}
+.nav-links a:hover{color:var(--purple)}
+.nav-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-left:auto;
+}
+.nav-actions a{
+  font-size:13px;
+  font-weight:800;
+  padding:8px 13px;
+  border-radius:999px;
+}
+.nav-actions .login{color:#334}
+.nav-actions .primary{
+  color:#fff;
+  background:var(--purple);
+  box-shadow:0 7px 18px rgba(99,91,255,.28);
+}
+.nav-toggle{display:none}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:0;
+  border-radius:999px;
+  padding:10px 18px;
+  font-size:14px;
+  line-height:1;
+  font-weight:800;
+  cursor:pointer;
+  transition:transform .24s ease,box-shadow .24s ease,background .24s ease,color .24s ease;
+  white-space:nowrap;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn.primary{
+  color:#fff;
+  background:var(--purple);
+  box-shadow:0 9px 22px rgba(99,91,255,.28);
+}
+.btn.primary:hover{background:#4f46e8;box-shadow:0 14px 28px rgba(99,91,255,.32)}
+.btn.ghost{
+  color:var(--purple);
+  background:#fff;
+  box-shadow:inset 0 0 0 1px rgba(99,91,255,.18);
+}
+.btn.dark{
+  color:#fff;
+  background:#0a2540;
+}
+.btn.small{padding:8px 14px;font-size:13px}
+
+.hero{
+  position:relative;
+  min-height:710px;
+  padding:165px 0 72px;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;
+  top:-255px;
+  right:-120px;
+  width:760px;
+  height:610px;
+  transform:rotate(34deg);
+  transform-origin:center;
+  pointer-events:none;
+  filter:saturate(1.08);
+}
+.ribbon{
+  position:absolute;
+  border-radius:36px;
+  transform:skewX(-18deg);
+  box-shadow:0 24px 80px rgba(74,54,180,.16);
+}
+.ribbon.r1{
+  inset:80px 80px auto auto;
+  width:560px;height:98px;
+  background:linear-gradient(90deg,#ff9f1c,#ff4ecd 56%,#635bff);
+}
+.ribbon.r2{
+  inset:185px 0 auto auto;
+  width:650px;height:112px;
+  background:linear-gradient(90deg,#ffd166,#ff7b00 26%,#ff4ecd 68%,#00d4ff);
+}
+.ribbon.r3{
+  inset:300px 105px auto auto;
+  width:520px;height:130px;
+  background:linear-gradient(90deg,#5eead4,#00d4ff 22%,#635bff 54%,#ff4ecd);
+  opacity:.94;
+}
+.ribbon.r4{
+  inset:430px 0 auto auto;
+  width:410px;height:120px;
+  background:linear-gradient(90deg,#ff4ecd,#b65cff 55%,#635bff);
+  opacity:.92;
+}
+.hero-corner{
+  position:absolute;
+  right:-8px;
+  top:380px;
+  width:92px;
+  height:120px;
+  background:linear-gradient(180deg,#635bff,#8b5cf6);
+  transform:skewY(0deg);
+}
+.hero .container{
+  position:relative;
+  z-index:2;
+}
+.eyebrow{
+  color:var(--purple);
+  font-size:13px;
+  line-height:1.45;
+  font-weight:800;
+  letter-spacing:.01em;
+  margin:0 0 18px;
+}
+.hero-copy{
+  max-width:680px;
+}
+h1{
+  margin:0;
+  font-size:clamp(42px,6.2vw,76px);
+  line-height:.98;
+  letter-spacing:-.065em;
+  color:#0a2540;
+  font-weight:900;
+}
+.gradient-text{
+  background:linear-gradient(90deg,#635bff 0%,#ff4ecd 52%,#ff9f1c 105%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.hero-lead{
+  max-width:570px;
+  margin:24px 0 28px;
+  font-size:18px;
+  line-height:1.78;
+  color:#425466;
+  font-weight:600;
+}
+.hero-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hero-note{
+  margin-top:22px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#627282;
+  font-size:13px;
+  font-weight:700;
+}
+.hero-note span{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 0 6px rgba(0,200,150,.12);
+}
+
+.section-head{
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);
+  gap:68px;
+  align-items:start;
+  margin-bottom:36px;
+}
+.section-kicker{
+  color:var(--purple);
+  font-size:13px;
+  font-weight:900;
+  margin:0 0 14px;
+}
+.section-title{
+  margin:0;
+  font-size:clamp(26px,3.6vw,44px);
+  line-height:1.13;
+  letter-spacing:-.045em;
+  font-weight:900;
+}
+.section-text{
+  margin:4px 0 0;
+  color:#425466;
+  font-size:16px;
+  line-height:1.85;
+  font-weight:600;
+}
+
+.solutions{
+  padding:16px 0 106px;
+}
+.product-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:18px;
+}
+.work-card{
+  position:relative;
+  min-height:360px;
+  border-radius:4px;
+  background:linear-gradient(135deg,#fff,#f6f9fc);
+  border:1px solid #eef2f7;
+  overflow:hidden;
+  box-shadow:0 1px 0 rgba(10,37,64,.03);
+  transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease;
+}
+.work-card:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow-soft);
+  border-color:rgba(99,91,255,.18);
+}
+.work-card.large{grid-column:span 2;min-height:424px}
+.work-card.wide{grid-column:1 / -1;min-height:330px}
+.work-card.tall{min-height:424px}
+.card-content{
+  position:relative;
+  z-index:3;
+  padding:26px;
+}
+.card-label{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+}
+.card-label h3{
+  margin:0;
+  font-size:19px;
+  line-height:1.35;
+  letter-spacing:-.025em;
+}
+.card-label p{
+  margin:9px 0 0;
+  color:#627282;
+  font-size:13px;
+  line-height:1.65;
+  font-weight:650;
+}
+.plus{
+  flex:0 0 auto;
+  width:22px;height:22px;border-radius:50%;
+  display:grid;place-items:center;
+  color:var(--purple);
+  background:#f3f1ff;
+  font-weight:900;
+}
+.photo-wrap{
+  position:absolute;
+  background:linear-gradient(135deg,rgba(99,91,255,.18),rgba(255,78,205,.16));
+  overflow:hidden;
+}
+.photo-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.large .photo-wrap{
+  left:28px;
+  right:28px;
+  bottom:0;
+  height:255px;
+  border-radius:18px 18px 0 0;
+}
+.tall .photo-wrap{
+  left:28px;
+  right:28px;
+  bottom:28px;
+  height:235px;
+  border-radius:18px;
+}
+.small-photo .photo-wrap{
+  left:24px;
+  right:24px;
+  bottom:24px;
+  height:205px;
+  border-radius:18px;
+}
+.work-card:before{
+  content:"";
+  position:absolute;
+  inset:auto -20% -45% -10%;
+  height:72%;
+  background:radial-gradient(circle at 18% 70%,rgba(255,159,28,.24),transparent 32%),
+             radial-gradient(circle at 62% 55%,rgba(255,78,205,.26),transparent 35%),
+             radial-gradient(circle at 88% 48%,rgba(99,91,255,.24),transparent 32%);
+  filter:blur(2px);
+  z-index:1;
+}
+.mock-panel{
+  position:absolute;
+  z-index:4;
+  border-radius:16px;
+  background:rgba(255,255,255,.88);
+  box-shadow:var(--shadow-soft);
+  border:1px solid rgba(255,255,255,.7);
+  backdrop-filter:blur(12px);
+}
+.mock-phone{
+  left:54px;
+  bottom:36px;
+  width:128px;
+  height:228px;
+  padding:14px;
+  border:8px solid #101828;
+  border-radius:28px;
+  background:#fff;
+}
+.mock-phone .sum{
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-.04em;
+  margin-top:20px;
+}
+.mock-phone .mini{
+  margin-top:8px;
+  color:#627282;
+  font-size:11px;
+  line-height:1.4;
+}
+.mock-board{
+  right:44px;
+  bottom:38px;
+  width:380px;
+  min-height:210px;
+  padding:18px;
+}
+.mock-board .bar{
+  height:10px;border-radius:20px;background:#edf2f7;margin-bottom:12px;
+}
+.mock-board .bar:nth-child(1){width:54%;background:#0a2540}
+.mock-board .bar:nth-child(2){width:76%;background:#ff9f1c}
+.mock-board .bar:nth-child(3){width:62%;background:#635bff}
+.mock-board .task{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-top:1px solid #edf2f7;
+  color:#425466;font-size:12px;font-weight:750;
+}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--green)}
+.dot.p{background:var(--purple)}.dot.o{background:var(--orange)}
+.service-list{
+  position:absolute;
+  left:26px;
+  right:26px;
+  bottom:28px;
+  z-index:4;
+  display:grid;
+  gap:12px;
+}
+.service-item{
+  padding:15px;
+  border-radius:14px;
+  background:rgba(255,255,255,.86);
+  box-shadow:0 12px 28px rgba(50,50,93,.1);
+  color:#425466;
+  font-size:13px;
+  font-weight:800;
+}
+.service-item strong{display:block;color:#0a2540;font-size:18px;margin-bottom:4px}
+.wide-inner{
+  position:absolute;
+  inset:96px 28px 28px;
+  display:grid;
+  grid-template-columns:330px 1fr;
+  gap:24px;
+  z-index:4;
+  align-items:end;
+}
+.wide .photo-wrap{
+  position:relative;
+  inset:auto;
+  height:190px;
+  border-radius:20px;
+}
+.dashboard{
+  min-height:210px;
+  border-radius:16px;
+  background:rgba(255,255,255,.9);
+  box-shadow:var(--shadow);
+  padding:18px;
+  overflow:hidden;
+}
+.dashboard-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding-bottom:14px;
+  border-bottom:1px solid #edf2f7;
+  margin-bottom:10px;
+  font-size:13px;
+  font-weight:900;
+}
+.table-row{
+  display:grid;
+  grid-template-columns:1.2fr .8fr .7fr;
+  gap:12px;
+  padding:10px 0;
+  border-bottom:1px solid #f1f4f8;
+  color:#425466;
+  font-size:12px;
+  font-weight:750;
+}
+.table-row span:first-child{
+  display:flex;align-items:center;gap:8px;color:#0a2540;
+}
+.badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:999px;
+  padding:4px 8px;
+  background:#ecfdf7;
+  color:#008763;
+  font-size:11px;
+  font-weight:900;
+}
+
+.cta-band{
+  padding:24px 0 98px;
+}
+.cta-card{
+  position:relative;
+  overflow:hidden;
+  min-height:270px;
+  border-radius:2px;
+  background:
+    radial-gradient(circle at 86% 64%,rgba(99,91,255,.85),transparent 27%),
+    radial-gradient(circle at 74% 52%,rgba(255,78,205,.72),transparent 31%),
+    radial-gradient(circle at 92% 24%,rgba(255,159,28,.45),transparent 24%),
+    linear-gradient(115deg,#fff 0%,#fff 39%,#f6f9ff 52%,#f43fc7 100%);
+  padding:54px 60px;
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:46px;
+  align-items:center;
+}
+.cta-card h2{
+  margin:0 0 16px;
+  max-width:610px;
+  font-size:24px;
+  line-height:1.38;
+  letter-spacing:-.035em;
+}
+.cta-card p{
+  max-width:620px;
+  color:#425466;
+  line-height:1.8;
+  font-weight:650;
+  margin:0 0 22px;
+}
+.cta-note{
+  justify-self:end;
+  width:310px;
+  border-radius:8px;
+  background:#0a2540;
+  color:#fff;
+  padding:22px;
+  box-shadow:0 24px 55px rgba(10,37,64,.28);
+}
+.cta-note small{
+  display:block;
+  color:#a3b2c2;
+  font-weight:800;
+  margin-bottom:8px;
+}
+.cta-note strong{
+  display:block;
+  font-size:17px;
+  line-height:1.45;
+}
+.cta-note a{
+  display:inline-block;
+  margin-top:18px;
+  color:#7dd3fc;
+  font-size:13px;
+  font-weight:900;
+}
+
+.enterprise{
+  position:relative;
+  min-height:860px;
+  padding:154px 0 170px;
+  background:
+    linear-gradient(180deg,rgba(10,37,64,.28) 0%,rgba(10,37,64,.18) 26%,rgba(10,37,64,0) 45%),
+    radial-gradient(circle at 54% 94%,rgba(255,159,28,.50),transparent 19%),
+    radial-gradient(circle at 47% 80%,rgba(255,78,205,.48),transparent 27%),
+    radial-gradient(circle at 63% 74%,rgba(99,91,255,.50),transparent 34%),
+    linear-gradient(180deg,#bfc6d4 0%,#c8cce0 36%,#d7d8ef 100%);
+  overflow:hidden;
+}
+.enterprise:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(110deg,transparent 0 33%,rgba(255,255,255,.16) 33.4% 34%,transparent 34.4%),
+    linear-gradient(110deg,transparent 0 68%,rgba(255,255,255,.12) 68.4% 69.2%,transparent 69.6%);
+  opacity:.9;
+}
+.enterprise-inner{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:430px 1fr;
+  gap:96px;
+  align-items:start;
+}
+.enterprise .section-kicker{color:#fff;text-shadow:0 1px 18px rgba(10,37,64,.18)}
+.enterprise h2{
+  color:#fff;
+  text-shadow:0 8px 38px rgba(10,37,64,.18);
+}
+.enterprise p{
+  color:rgba(255,255,255,.88);
+}
+.enterprise-panel{
+  margin-top:14px;
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:18px;
+  box-shadow:0 26px 80px rgba(10,37,64,.18);
+  backdrop-filter:blur(16px);
+  padding:24px;
+}
+.enterprise-panel h3{
+  margin:0 0 16px;
+  font-size:17px;
+  letter-spacing:-.02em;
+}
+.flow{
+  display:grid;
+  gap:10px;
+}
+.flow div{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:14px;
+  border-radius:12px;
+  background:#fff;
+  color:#425466;
+  font-size:13px;
+  line-height:1.55;
+  font-weight:700;
+}
+.flow b{
+  color:var(--purple);
+  flex:0 0 auto;
+}
+.metrics{
+  margin-top:430px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+.metric{
+  padding:22px;
+  border-radius:16px;
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.7);
+  backdrop-filter:blur(12px);
+  box-shadow:0 14px 36px rgba(10,37,64,.12);
+}
+.metric strong{
+  display:block;
+  font-size:30px;
+  letter-spacing:-.05em;
+  color:#0a2540;
+}
+.metric span{
+  display:block;
+  margin-top:5px;
+  color:#425466;
+  font-size:12px;
+  line-height:1.5;
+  font-weight:800;
+}
+
+.stories{
+  padding:520px 0 260px;
+  background:#fff;
+}
+.story-head{
+  max-width:720px;
+  margin-bottom:34px;
+}
+.story-head h2{
+  margin:0;
+  font-size:clamp(28px,4vw,48px);
+  line-height:1.1;
+  letter-spacing:-.05em;
+}
+.story-head p{
+  margin:14px 0 0;
+  color:#627282;
+  font-size:15px;
+  line-height:1.85;
+  font-weight:650;
+}
+.story-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:20px;
+}
+.story-card{
+  transition:transform .28s ease;
+}
+.story-card:hover{transform:translateY(-5px)}
+.story-img{
+  aspect-ratio:1 / 1.22;
+  border-radius:3px;
+  overflow:hidden;
+  background:linear-gradient(135deg,var(--orange),var(--pink),var(--purple));
+  margin-bottom:15px;
+}
+.story-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.story-card:nth-child(1) .story-img{background:linear-gradient(135deg,#ff9f1c,#ff4ecd)}
+.story-card:nth-child(2) .story-img{background:linear-gradient(135deg,#123,#00d4ff)}
+.story-card:nth-child(3) .story-img{background:linear-gradient(135deg,#111,#635bff,#ff4ecd)}
+.story-card:nth-child(4) .story-img{background:linear-gradient(135deg,#050505,#00c896)}
+.story-card h3{
+  margin:0 0 8px;
+  font-size:15px;
+  letter-spacing:-.02em;
+}
+.story-card p{
+  margin:0;
+  color:#627282;
+  font-size:12px;
+  line-height:1.65;
+  font-weight:650;
+}
+.story-card a{
+  display:inline-block;
+  margin-top:10px;
+  color:var(--purple);
+  font-size:12px;
+  font-weight:900;
+}
+.footer{
+  border-top:1px solid #f0f3f7;
+  padding:48px 0 80px;
+  color:#627282;
+  font-size:13px;
+}
+.footer-inner{
+  display:flex;
+  justify-content:space-between;
+  gap:24px;
+  flex-wrap:wrap;
+}
+.footer b{color:#0a2540}
+
+html.js .reveal{
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1);
+  transition-delay:var(--delay,0ms);
+}
+html.js .reveal.is-visible{
+  opacity:1;
+  transform:none;
+}
+html.js .hero-copy .eyebrow,
+html.js .hero-copy h1,
+html.js .hero-copy .hero-lead,
+html.js .hero-copy .hero-actions,
+html.js .hero-copy .hero-note{
+  opacity:0;
+  transform:translateY(18px);
+  animation:heroIn .85s cubic-bezier(.22,1,.36,1) forwards;
+}
+html.js .hero-copy h1{animation-delay:.08s}
+html.js .hero-copy .hero-lead{animation-delay:.18s}
+html.js .hero-copy .hero-actions{animation-delay:.28s}
+html.js .hero-copy .hero-note{animation-delay:.38s}
+html.js .hero-bg{
+  opacity:0;
+  transform:rotate(34deg) translate(54px,-34px) scale(.96);
+  animation:artIn 1.15s cubic-bezier(.22,1,.36,1) .08s forwards;
+}
+@keyframes heroIn{to{opacity:1;transform:none}}
+@keyframes artIn{to{opacity:1;transform:rotate(34deg) translate(0,0) scale(1)}}
+
+@media (max-width:900px){
+  .nav-links,.nav-actions{display:none}
+  .nav-toggle{
+    display:block;
+    margin-left:auto;
+    border:0;
+    background:transparent;
+    color:#0a2540;
+    font-weight:900;
+  }
+  .hero{
+    min-height:690px;
+    padding-top:135px;
+  }
+  .hero-bg{
+    width:610px;
+    height:470px;
+    top:-220px;
+    right:-260px;
+    opacity:.9;
+  }
+  .section-head,
+  .enterprise-inner,
+  .cta-card{
+    grid-template-columns:1fr;
+    gap:28px;
+  }
+  .product-grid{grid-template-columns:1fr 1fr}
+  .work-card.large,.work-card.wide{grid-column:1 / -1}
+  .work-card.tall{min-height:360px}
+  .mock-board{
+    right:24px;
+    width:320px;
+  }
+  .wide-inner{grid-template-columns:1fr;inset:110px 24px 24px}
+  .wide .photo-wrap{display:none}
+  .cta-note{justify-self:start;width:min(100%,330px)}
+  .enterprise{min-height:auto}
+  .metrics{margin-top:120px;grid-template-columns:1fr}
+  .stories{padding-top:260px}
+  .story-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  :root{--gutter:18px}
+  .header{height:58px}
+  .nav{width:calc(100% - 28px)}
+  .hero{
+    min-height:620px;
+    padding:116px 0 54px;
+  }
+  h1{font-size:42px}
+  .hero-lead{font-size:16px}
+  .hero-bg{
+    top:-260px;
+    right:-360px;
+    transform:rotate(38deg);
+  }
+  html.js .hero-bg{animation:none;opacity:.82}
+  .section-head{margin-bottom:24px}
+  .product-grid{grid-template-columns:1fr}
+  .work-card.large,.work-card.wide{min-height:520px}
+  .work-card{min-height:430px}
+  .work-card.large,.work-card.wide,.work-card.tall{grid-column:auto}
+  .mock-phone{left:34px;width:112px;height:204px}
+  .mock-board{
+    left:112px;
+    right:18px;
+    width:auto;
+    bottom:42px;
+  }
+  .large .photo-wrap{height:280px}
+  .wide-inner{position:relative;inset:auto;padding:0 22px 22px}
+  .dashboard{min-height:240px}
+  .table-row{grid-template-columns:1fr .7fr}
+  .table-row span:nth-child(3){display:none}
+  .cta-card{padding:34px 24px}
+  .enterprise{padding:96px 0 120px}
+  .stories{padding:190px 0 150px}
+  .story-grid{grid-template-columns:1fr 1fr;gap:16px}
+  .story-card p{font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  html.js .reveal,
+  html.js .hero-copy .eyebrow,
+  html.js .hero-copy h1,
+  html.js .hero-copy .hero-lead,
+  html.js .hero-copy .hero-actions,
+  html.js .hero-copy .hero-note,
+  html.js .hero-bg{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <nav class="nav" aria-label="グローバルナビゲーション">
+    <a class="logo" href="#">
+      <span class="logo-mark" aria-hidden="true"></span>
+      <span>Link Works</span>
+    </a>
+    <div class="nav-links">
+      <a href="#support">利用を考えている方へ</a>
+      <a href="#business">企業の方へ</a>
+      <a href="#works">業務内容</a>
+      <a href="#quality">品質管理</a>
+      <a href="#contact">見学・相談</a>
+    </div>
+    <div class="nav-actions">
+      <a class="login" href="#contact">ログイン</a>
+      <a class="primary" href="#contact">見学を予約する</a>
+    </div>
+    <button class="nav-toggle" type="button">Menu</button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true">
+      <span class="ribbon r1"></span>
+      <span class="ribbon r2"></span>
+      <span class="ribbon r3"></span>
+      <span class="ribbon r4"></span>
+    </div>
+    <div class="hero-corner" aria-hidden="true"></div>
+    <div class="container">
+      <div class="hero-copy">
+        <p class="eyebrow">就労継続支援A型事業所 Link Works</p>
+        <h1>
+          あなたのペースで働く力を育て、<span class="gradient-text">企業品質の仕事</span>へつなぐ。
+        </h1>
+        <p class="hero-lead">
+          リンクワークスは、障がいや体調に不安がある方へ、安心して続けられる仕事と支援を届けるA型事業所です。
+          同時に、企業の皆さまには安定した業務体制と丁寧な品質管理で、信頼できるアウトソーシングを提供します。
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#contact">見学・体験を相談する →</a>
+          <a class="btn ghost" href="#business">企業向け資料を見る</a>
+        </div>
+        <div class="hero-note"><span></span>まずは「話を聞くだけ」でも大丈夫です。ご家族・支援者の同席も歓迎します。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="solutions" id="support">
+    <div class="container">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">働く不安をひとつずつ整理</p>
+          <h2 class="section-title">
+            利用者の安心と、企業の成果を両立する。<br>
+            柔軟な支援プラットフォーム。
+          </h2>
+        </div>
+        <p class="section-text">
+          生活リズム、得意な作業、体調の波、通院予定まで。リンクワークスでは一人ひとりの状態を見ながら、
+          無理なく続けられる業務設計を行います。企業案件は工程分解・ダブルチェック・納期管理を徹底し、
+          “福祉だから”ではなく“仕事として任せられる”品質を目指します。
+        </p>
+      </div>
+
+      <div class="product-grid" id="works">
+        <article class="work-card large reveal" style="--delay:0ms">
+          <div class="card-content">
+            <div class="card-label">
+              <div>
+                <h3>見学から定着までを、チームで伴走</h3>
+                <p>初回相談、体験利用、個別支援計画、日々の振り返りまで一貫してサポート。</p>
+              </div>
+              <span class="plus">＋</span>
+            </div>
+          </div>
+          <div class="photo-wrap">
+            <img src="https://loremflickr.com/900/560/office,teamwork?lock=1201" width="900" height="560" alt="チームで働くオフィスの様子">
+          </div>
+          <div class="mock-panel mock-phone" aria-hidden="true">
+            <div style="width:34px;height:5px;border-radius:99px;background:#d9e2ec;margin:auto"></div>
+            <div class="sum">86%</div>
+            <div class="mini">今週の出勤安定度<br>無理のないペースを確認</div>
+            <div style="margin-top:20px;height:8px;border-radius:99px;background:#edf2f7"></div>
+            <div style="margin-top:8px;height:8px;width:70%;border-radius:99px;background:#635bff"></div>
+          </div>
+          <div class="mock-panel mock-board" aria-hidden="true">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="task"><span class="dot"></span>午前：検品作業 120点 / 休憩調整あり</div>
+            <div class="task"><span class="dot p"></span>午後：データ入力 2名体制でチェック</div>
+            <div class="task"><span class="dot o"></span>支援員メモ：疲労サインを早めに共有</div>
+          </div>
+        </article>
+
+        <article class="work-card tall reveal" style="--delay:80ms">
+          <div class="card-content">
+            <div class="card-label">
+              <div>
+                <h3>企業案件を安定して運用</h3>
+                <p>作業手順書、進捗共有、検品記録を整え、継続依頼に応える体制を構築します。</p>
+              </div>
+              <span class="plus">＋</span>
+            </div>
+          </div>
+          <div class="service-list" aria-hidden="true">
+            <div class="service-item"><strong>短納期にも対応</strong>工程を分割し、支援員が全体を管理</div>
+            <div class="service-item"><strong>品質基準を明確化</strong>サンプル確認・二重検品・報告書提出</div>
+            <div class="service-item"><strong>継続改善</strong>ミス傾向を可視化し、手順をアップデート</div>
+          </div>
+        </article>
+
+        <article class="work-card small-photo reveal" style="--delay:0ms">
+          <div class="card-content">
+            <div class="card-label">
+              <div>
+                <h3>軽作業・封入・検品</h3>
+                <p>丁寧さが活きる作業を、落ち着いた環境で。</p>
+              </div>
+              <span class="plus">＋</span>
+            </div>
+          </div>
+          <div class="photo-wrap">
+            <img src="https://loremflickr.com/520/420/workshop,package?lock=1202" width="520" height="420" alt="軽作業の作業台">
+          </div>
+        </article>
+
+        <article class="work-card small-photo reveal" style="--delay:80ms">
+          <div class="card-content">
+            <div class="card-label">
+              <div>
+                <h3>データ入力・EC補助</h3>
+                <p>入力、画像整理、商品登録などを手順化して実施。</p>
+              </div>
+              <span class="plus">＋</span>
+            </div>
+          </div>
+          <div class="photo-wrap">
+            <img src="https://loremflickr.com/520/420/computer,office?lock=1203" width="520" height="420" alt="パソコン作業のデスク">
+          </div>
+        </article>
+
+        <article class="work-card small-photo reveal" style="--delay:160ms">
+          <div class="card-content">
+            <div class="card-label">
+              <div>
+                <h3>施設サポート・清掃</h3>
+                <p>決まった手順で、安心して取り組める現場業務。</p>
+              </div>
+              <span class="plus">＋</span>
+            </div>
+          </div>
+          <div class="photo-wrap">
+            <img src="https://loremflickr.com/520/420/cleaning,work?lock=1204" width="520" height="420" alt="清掃や施設サポートの道具">
+          </div>
+        </article>
+
+        <article class="work-card wide reveal" id="quality">
+          <div class="card-content">
+            <div class="card-label">
+              <div>
+                <h3>支援記録と品質管理を一体化</h3>
+                <p>利用者の体調・作業実績・企業案件の進捗を同じ目線で把握し、無理のない生産性を高めます。</p>
+              </div>
+              <span class="plus">＋</span>
+            </div>
+          </div>
+          <div class="wide-inner">
+            <div class="photo-wrap">
+              <img src="https://loremflickr.com/560/360/meeting,work?lock=1205" width="560" height="360" alt="打ち合わせの様子">
+            </div>
+            <div class="dashboard" aria-hidden="true">
+              <div class="dashboard-head">
+                <span>Link Works Operations</span>
+                <span class="badge">On schedule</span>
+              </div>
+              <div class="table-row"><span><span class="dot"></span>封入・ラベル貼り</span><span>進捗 92%</span><span>検品中</span></div>
+              <div class="table-row"><span><span class="dot p"></span>EC商品登録</span><span>進捗 68%</span><span>明日納品</span></div>
+              <div class="table-row"><span><span class="dot o"></span>データ照合</span><span>進捗 100%</span><span>報告済</span></div>
+              <div class="table-row"><span><span class="dot"></span>施設清掃</span><span>進捗 74%</span><span>巡回確認</span></div>
+              <div class="table-row"><span><span class="dot p"></span>個別面談</span><span>4件</span><span>支援記録更新</span></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band" id="contact">
+    <div class="container">
+      <div class="cta-card reveal">
+        <div>
+          <h2>「働きたいけれど不安」がある方へ。まずは、今の状況をそのまま聞かせてください。</h2>
+          <p>
+            週の通所日数、作業内容、体調面の配慮、一般就労への準備など、最初から完璧である必要はありません。
+            リンクワークスは、あなたに合う働き方を一緒に探します。
+          </p>
+          <a class="btn primary" href="mailto:info@example.com">見学・相談を申し込む</a>
+        </div>
+        <div class="cta-note">
+          <small>企業のご担当者さまへ</small>
+          <strong>外注先ではなく、品質改善まで伴走する業務パートナーとして。</strong>
+          <a href="#business">受託できる業務を見る →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="enterprise" id="business">
+    <div class="container enterprise-inner">
+      <div class="reveal">
+        <p class="section-kicker">For Business Partners</p>
+        <h2 class="section-title">業務を任せる先に、確かな管理体制と社会的価値を。</h2>
+        <p class="section-text">
+          リンクワークスでは、企業ごとの基準に合わせた作業設計を行い、支援員が品質・納期・コミュニケーションを統括します。
+          CSRや地域雇用への貢献だけでなく、日々の業務負荷を減らす実務的なパートナーとしてご活用ください。
+        </p>
+      </div>
+
+      <div class="enterprise-panel reveal" style="--delay:120ms">
+        <h3>ご相談から運用開始まで</h3>
+        <div class="flow">
+          <div><b>01</b><span>業務内容・数量・納期・品質基準をヒアリング。現場確認やサンプル作業も可能です。</span></div>
+          <div><b>02</b><span>工程分解、必要備品、チェック項目、担当体制を設計。小ロットから開始できます。</span></div>
+          <div><b>03</b><span>進捗共有と納品後レビューを実施。ミスや滞留の原因を分析し、継続改善します。</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container metrics reveal">
+      <div class="metric"><strong>2名〜</strong><span>支援員を含む複数名体制で案件を管理</span></div>
+      <div class="metric"><strong>W Check</strong><span>利用者作業後に職員検品を標準化</span></div>
+      <div class="metric"><strong>Small Start</strong><span>まずは試験運用・短期案件から相談可能</span></div>
+    </div>
+  </section>
+
+  <section class="stories">
+    <div class="container">
+      <div class="story-head reveal">
+        <p class="section-kicker">Link Works Stories</p>
+        <h2>できることが増える瞬間を、仕事の現場でつくる。</h2>
+        <p>
+          得意を活かした作業、企業との協働、一般就労に向けた準備。リンクワークスが大切にしている取り組みをご紹介します。
+        </p>
+      </div>
+
+      <div class="story-grid">
+        <article class="story-card reveal" style="--delay:0ms">
+          <div class="story-img">
+            <img src="https://loremflickr.com/480/590/craft,workshop?lock=1301" width="480" height="590" alt="手作業の仕事風景">
+          </div>
+          <h3>手順が見えると、安心して進められる。</h3>
+          <p>写真付きマニュアルと声かけで、初めての作業も少しずつ自信に。</p>
+          <a href="#">支援の工夫を見る →</a>
+        </article>
+
+        <article class="story-card reveal" style="--delay:80ms">
+          <div class="story-img">
+            <img src="https://loremflickr.com/480/590/office,keyboard?lock=1302" width="480" height="590" alt="オフィスでの入力作業">
+          </div>
+          <h3>入力業務を企業基準で整える。</h3>
+          <p>作業ログと確認ルールを用意し、納品前の不安を減らします。</p>
+          <a href="#">データ業務の例 →</a>
+        </article>
+
+        <article class="story-card reveal" style="--delay:160ms">
+          <div class="story-img">
+            <img src="https://loremflickr.com/480/590/team,meeting?lock=1303" width="480" height="590" alt="チームミーティング">
+          </div>
+          <h3>困った時に言える関係づくり。</h3>
+          <p>短い面談と日々の振り返りで、体調や不安を早めに共有します。</p>
+          <a href="#">定着支援について →</a>
+        </article>
+
+        <article class="story-card reveal" style="--delay:240ms">
+          <div class="story-img">
+            <img src="https://loremflickr.com/480/590/business,package?lock=1304" width="480" height="590" alt="企業向けの納品準備">
+          </div>
+          <h3>企業の「助かる」を、継続できる形に。</h3>
+          <p>スポット作業から定期案件まで、現場に合う外部化を設計します。</p>
+          <a href="#">企業連携を見る →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div><b>Link Works</b><br>就労継続支援事業所A型 リンクワークス</div>
+    <div>見学・業務委託のご相談：info@example.com<br>受付時間：平日 9:00〜17:00</div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const targets = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) {
+    targets.forEach(el => el.classList.add('is-visible'));
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  targets.forEach(el => observer.observe(el));
+})();
+</script>
+
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(!els.length) return;
+    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
+    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    setTimeout(function(){
+      els.forEach(function(e){
+        if(parseFloat(getComputedStyle(e).opacity)===0){
+          show(e); e.style.opacity='1'; e.style.transform='none';
+        }
+      });
+    }, 3500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+</body>
+</html>

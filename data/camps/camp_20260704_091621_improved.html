@@ -1,0 +1,1739 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就労継続支援B型 るりは | あなたらしく働ける場所</title>
+  <meta name="description" content="就労継続支援B型 るりは。自分のペースを大切に、軽作業やPC作業を通して安心して働ける居場所づくりを行っています。">
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --beige:#dfbb94;
+      --beige-soft:rgba(223,187,148,.12);
+      --gray:#eeeeee;
+      --text:#000000;
+      --text2:#333333;
+      --accent:#db9281;
+      --shadow:0 4px 16px rgba(0,0,0,.13);
+      --radius-lg:25px;
+      --radius-sm:4px;
+      --container:1320px;
+      --serif: YuMincho, "游明朝", "ヒラギノ明朝 ProN W3", "Hiragino Mincho ProN", HG明朝E, "ＭＳ Ｐ明朝", "ＭＳ 明朝", serif;
+      --sans: "Noto Sans JP", sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text2);
+      background:#fff;
+      line-height:1.8;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(var(--container), calc(100% - 80px)); margin:0 auto}
+    .section{padding:110px 0}
+    .muted{color:#666}
+    .center{text-align:center}
+
+    .site-header{
+      position:absolute;
+      inset:0 0 auto 0;
+      z-index:20;
+      padding:24px 0;
+      color:#fff;
+    }
+    .site-header .inner{
+      width:min(var(--container), calc(100% - 80px));
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:32px;
+    }
+    .logo{
+      background:#fff;
+      color:#7d4d50;
+      width:110px;
+      height:44px;
+      display:grid;
+      place-items:center;
+      border-radius:2px;
+      box-shadow:0 0 0 1px rgba(0,0,0,.03);
+      font-family:var(--serif);
+      line-height:1.1;
+      font-size:12px;
+      letter-spacing:.08em;
+      padding-top:2px;
+    }
+    .logo b{font-size:16px; color:#c86c84}
+    .nav{
+      display:flex;
+      gap:28px;
+      font-size:14px;
+      opacity:.95;
+    }
+    .nav a{
+      position:relative;
+      transition:color .3s cubic-bezier(.4,0,.2,1), opacity .3s cubic-bezier(.4,0,.2,1);
+    }
+    .nav a::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:-6px;
+      height:1px; background:rgba(255,255,255,.8);
+      transform:scaleX(0);
+      transform-origin:left;
+      transition:transform .5s cubic-bezier(.4,0,.2,1);
+    }
+    .nav a:hover::after{transform:scaleX(1)}
+
+    .hero{
+      position:relative;
+      background:var(--beige);
+      overflow:hidden;
+      padding-top:36px;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;
+      right:-10%;
+      top:-20%;
+      width:48vw;
+      height:48vw;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.45), rgba(255,255,255,0) 45%),
+        linear-gradient(135deg, rgba(255,165,95,.55), rgba(255,105,180,.28) 45%, rgba(120,180,255,.22) 80%, rgba(255,255,255,0) 100%);
+      filter:blur(18px);
+      border-radius:42% 58% 58% 42% / 42% 41% 59% 58%;
+      transform:rotate(-14deg);
+      animation:floatBlob 16s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    .hero-inner{
+      width:min(var(--container), calc(100% - 80px));
+      margin:0 auto;
+      min-height:760px;
+      position:relative;
+    }
+    .hero-copy{
+      position:relative;
+      z-index:2;
+      width:min(700px, 72%);
+      padding-top:130px;
+    }
+    .hero-title{
+      font-family:var(--serif);
+      font-size:56px;
+      line-height:1.5;
+      font-weight:400;
+      color:#111;
+      letter-spacing:.04em;
+      margin:0 0 26px;
+    }
+    .hero-text{
+      max-width:800px;
+      font-size:17px;
+      line-height:2;
+      color:#222;
+      margin:0;
+    }
+    .hero-visual{
+      position:relative;
+      margin-top:34px;
+      width:100%;
+      height:430px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.02)),
+        linear-gradient(90deg, rgba(255,255,255,.18), rgba(255,255,255,.04));
+      overflow:hidden;
+    }
+    .hero-visual-wrap{
+      position:absolute;
+      left:80px;
+      right:80px;
+      bottom:0;
+      height:430px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.05)),
+        var(--beige-soft);
+      overflow:hidden;
+    }
+    .hero-visual img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      transform:scale(1.02);
+    }
+
+    .floating-mail{
+      position:fixed;
+      right:26px;
+      top:52%;
+      z-index:40;
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      background:linear-gradient(135deg, #e6a28f, var(--accent));
+      color:#fff;
+      display:grid;
+      place-items:center;
+      box-shadow:var(--shadow);
+      transition:transform .5s ease, box-shadow .3s cubic-bezier(.4,0,.2,1), background-color .3s cubic-bezier(.4,0,.2,1);
+      font-size:24px;
+    }
+    .floating-mail:hover{
+      transform:translateY(-4px) scale(1.04);
+      box-shadow:0 10px 24px rgba(0,0,0,.18);
+    }
+
+    .section-card{
+      background:#fcfaf6;
+      padding:44px 40px 34px;
+      position:relative;
+      overflow:hidden;
+    }
+    .section-card::before{
+      content:"";
+      position:absolute;
+      left:0; right:0;
+      bottom:72px;
+      height:142px;
+      background:var(--beige);
+      z-index:0;
+    }
+    .eyebrow{
+      text-align:center;
+      font-size:13px;
+      color:#555;
+      margin-bottom:10px;
+    }
+    .divider{
+      width:72px;
+      height:1px;
+      background:#777;
+      margin:0 auto 24px;
+    }
+    .section-title{
+      position:relative;
+      z-index:1;
+      text-align:center;
+      font-size:44px;
+      line-height:1.4;
+      margin:0 0 40px;
+      color:#222;
+      font-weight:700;
+    }
+    .cards-3{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:30px;
+      margin-bottom:36px;
+    }
+    .feature-card{
+      background:#fff;
+      box-shadow:var(--shadow);
+      transition:transform .5s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1);
+    }
+    .feature-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 10px 24px rgba(0,0,0,.14);
+    }
+    .feature-card .thumb{
+      aspect-ratio: 5 / 3;
+      background:
+        linear-gradient(135deg, rgba(219,146,129,.25), rgba(223,187,148,.35));
+      overflow:hidden;
+    }
+    .feature-card .thumb img{
+      width:100%; height:100%; object-fit:cover;
+    }
+    .feature-card .body{
+      padding:14px 18px 16px;
+      background:#fff;
+    }
+    .feature-card h3{
+      margin:0 0 4px;
+      font-size:28px;
+      line-height:1.3;
+      color:#111;
+    }
+    .feature-card p{
+      margin:0;
+      font-size:14px;
+      line-height:1.8;
+      color:#444;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:176px;
+      height:50px;
+      padding:0 28px;
+      border-radius:999px;
+      background:linear-gradient(180deg, #e5a494, #db9281);
+      color:#fff;
+      font-size:15px;
+      box-shadow:0 4px 12px rgba(219,146,129,.28);
+      transition:transform .5s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1), opacity .3s cubic-bezier(.4,0,.2,1);
+    }
+    .btn:hover{
+      transform:translateY(-3px);
+      box-shadow:0 10px 22px rgba(219,146,129,.34);
+    }
+
+    .news-wrap{padding-top:70px}
+    .news-label{
+      font-size:14px;
+      letter-spacing:.08em;
+      margin-bottom:18px;
+      color:#666;
+    }
+    .news-divider{
+      width:62px;height:1px;background:#777;margin-bottom:28px;
+    }
+    .news-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:18px;
+      margin-bottom:36px;
+    }
+    .news-card{
+      background:#fff;
+      box-shadow:var(--shadow);
+      transition:transform .5s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1);
+    }
+    .news-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 10px 24px rgba(0,0,0,.14);
+    }
+    .news-card .thumb{
+      aspect-ratio: 16 / 8.8;
+      background:linear-gradient(135deg, rgba(223,187,148,.4), rgba(219,146,129,.28));
+      overflow:hidden;
+    }
+    .news-card .thumb img{width:100%;height:100%;object-fit:cover}
+    .news-card .body{padding:12px 12px 14px}
+    .news-card .title{
+      font-size:14px;
+      line-height:1.75;
+      min-height:50px;
+      color:#333;
+      margin-bottom:10px;
+    }
+    .news-card .date{
+      font-size:13px;
+      color:#555;
+    }
+
+    .contact-section{
+      background:var(--gray);
+      padding:82px 0 90px;
+      position:relative;
+    }
+    .contact-script{
+      position:absolute;
+      left:calc(50% - min(var(--container), calc(100% - 80px))/2 + 6px);
+      top:28px;
+      font-family:var(--serif);
+      font-style:italic;
+      font-size:58px;
+      line-height:1;
+      color:rgba(0,0,0,.16);
+      pointer-events:none;
+    }
+    .contact-box{
+      background:#fff;
+      padding:48px 20px 42px;
+      text-align:center;
+      width:min(1120px, calc(100% - 40px));
+      margin:0 auto;
+      box-shadow:0 0 0 1px rgba(0,0,0,.03);
+    }
+    .contact-box h2{
+      margin:0 0 10px;
+      font-size:22px;
+      color:#222;
+    }
+    .contact-line{
+      width:126px;height:1px;background:#888;margin:0 auto 18px;
+    }
+    .tel{
+      display:inline-block;
+      font-size:68px;
+      line-height:1;
+      font-weight:700;
+      color:#222;
+      letter-spacing:.02em;
+      background:linear-gradient(transparent 68%, rgba(223,187,148,.45) 0);
+      padding:0 8px 4px;
+      margin-bottom:8px;
+    }
+    .small-note{
+      font-size:14px;
+      color:#333;
+      margin-bottom:22px;
+    }
+    .contact-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-width:260px;
+      height:54px;
+      background:#fff;
+      border:1px solid #c7c7c7;
+      color:#333;
+      box-shadow:var(--shadow);
+      transition:transform .5s ease, box-shadow .3s cubic-bezier(.4,0,.2,1);
+    }
+    .contact-btn:hover{
+      transform:translateY(-4px);
+      box-shadow:0 10px 24px rgba(0,0,0,.14);
+    }
+    .contact-caption{
+      font-size:13px;
+      margin-top:12px;
+      color:#666;
+    }
+
+    .footer-main{
+      background:var(--beige);
+      padding:52px 0 130px;
+      color:#fffdf8;
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1fr;
+      gap:24px 64px;
+      align-items:start;
+    }
+    .footer-brand .logo{
+      margin-bottom:18px;
+      color:#7d4d50;
+    }
+    .footer-brand p{
+      margin:0;
+      font-size:14px;
+      line-height:2;
+      color:#fffaf2;
+    }
+    .footer-links{
+      display:grid;
+      gap:12px;
+      font-size:15px;
+    }
+    .footer-links a{
+      opacity:.96;
+      transition:opacity .3s cubic-bezier(.4,0,.2,1), transform .5s ease;
+    }
+    .footer-links a:hover{
+      opacity:1;
+      transform:translateX(4px);
+    }
+
+    .footer-bottom{
+      background:#fff;
+      text-align:center;
+      padding:28px 20px 34px;
+    }
+    .insta{
+      width:28px;height:28px;
+      margin:0 auto 18px;
+      color:#d85f9f;
+    }
+    .copyright{
+      font-size:13px;color:#444;
+    }
+
+    .scroll-indicator{
+      position:absolute;
+      left:40px;
+      bottom:26px;
+      width:26px;
+      height:70px;
+      z-index:3;
+      opacity:.85;
+    }
+    .scroll-indicator .circle{
+      position:absolute;
+      left:50%;
+      top:0;
+      width:26px;
+      height:26px;
+      border:1px solid rgba(255,255,255,.7);
+      border-radius:50%;
+      transform:translateX(-50%);
+      animation:scroll-circle-scale 3.2s ease infinite;
+    }
+    .scroll-indicator .bar{
+      position:absolute;
+      left:50%;
+      top:16px;
+      width:1px;
+      height:44px;
+      background:rgba(255,255,255,.65);
+      transform:translateX(-50%);
+      animation:scroll-bar-scale 3.2s ease infinite;
+    }
+    .scroll-indicator .dot{
+      position:absolute;
+      left:50%;
+      top:20px;
+      width:6px;
+      height:6px;
+      margin-left:-3px;
+      border-radius:50%;
+      background:#fff;
+      animation:scroll-dot-scale 3.2s ease infinite;
+    }
+
+    @keyframes floatBlob{
+      0%{transform:translate3d(0,0,0) rotate(-14deg) scale(1)}
+      100%{transform:translate3d(-20px,18px,0) rotate(-8deg) scale(1.06)}
+    }
+    @keyframes scroll-bar-scale{
+      0%{transform:translateX(-50%) scaleY(0); transform-origin:center top;}
+      15%{transform:translateX(-50%) scaleY(0); transform-origin:center top;}
+      40%{transform:translateX(-50%) scaleY(1); transform-origin:center top;}
+      70%{transform:translateX(-50%) scaleY(1); transform-origin:center bottom;}
+      85%{transform:translateX(-50%) scaleY(0); transform-origin:center bottom;}
+      100%{transform:translateX(-50%) scaleY(0); transform-origin:center bottom;}
+    }
+    @keyframes scroll-dot-scale{
+      0%,15%{transform:translateY(0) scale(0); opacity:0}
+      25%{transform:translateY(0) scale(1); opacity:1}
+      60%{transform:translateY(22px) scale(1); opacity:1}
+      85%,100%{transform:translateY(34px) scale(0); opacity:0}
+    }
+    @keyframes scroll-circle-scale{
+      0%,100%{transform:translateX(-50%) scale(1); opacity:.65}
+      50%{transform:translateX(-50%) scale(1.08); opacity:1}
+    }
+
+    .hero-title, .hero-text, .hero-visual-wrap{
+      opacity:1;
+      transform:none;
+    }
+    html.js .hero-title{
+      opacity:0; transform:translateY(22px);
+      animation:heroIn .9s .12s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    html.js .hero-text{
+      opacity:0; transform:translateY(22px);
+      animation:heroIn .9s .28s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    html.js .hero-visual-wrap{
+      opacity:0; transform:translateY(26px) scale(1.03);
+      animation:heroInZoom 1.1s .42s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    @keyframes heroIn{
+      to{opacity:1; transform:translateY(0)}
+    }
+    @keyframes heroInZoom{
+      to{opacity:1; transform:translateY(0) scale(1)}
+    }
+
+    .reveal{opacity:1; transform:none}
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(28px);
+      transition:opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
+    }
+    html.js .reveal.is-visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+    html.js .stagger > *{
+      opacity:0;
+      transform:translateY(28px);
+      transition:opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
+    }
+    html.js .stagger.is-visible > *:nth-child(1){transition-delay:.05s}
+    html.js .stagger.is-visible > *:nth-child(2){transition-delay:.14s}
+    html.js .stagger.is-visible > *:nth-child(3){transition-delay:.23s}
+    html.js .stagger.is-visible > *:nth-child(4){transition-delay:.32s}
+    html.js .stagger.is-visible > *{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    @media (max-width: 1100px){
+      .hero-title{font-size:46px}
+      .tel{font-size:52px}
+    }
+    @media (max-width: 900px){
+      .site-header{padding:18px 0}
+      .site-header .inner,
+      .container,
+      .hero-inner{width:min(var(--container), calc(100% - 40px))}
+      .nav{gap:16px;font-size:12px;flex-wrap:wrap;justify-content:flex-end}
+      .hero-inner{min-height:auto}
+      .hero-copy{width:100%;padding-top:110px}
+      .hero-title{font-size:36px}
+      .hero-text{font-size:15px}
+      .hero-visual-wrap{left:20px;right:20px;height:300px}
+      .hero-visual{height:300px}
+      .cards-3,.news-grid,.footer-grid{grid-template-columns:1fr}
+      .section{padding:80px 0}
+      .section-card{padding:34px 18px 24px}
+      .section-card::before{bottom:148px;height:240px}
+      .section-title{font-size:34px}
+      .contact-script{
+        left:20px;
+        font-size:46px;
+      }
+      .tel{font-size:40px}
+      .floating-mail{right:14px; width:52px; height:52px}
+    }
+  </style>
+</head>
+<body style="">
+  <header class="site-header">
+    <div class="inner">
+      <a href="#" class="logo" aria-label="るりは ホーム">
+        <span><b>るりは</b><br>就労継続支援B型</span>
+      </a>
+      <nav class="nav">
+        <a href="#top">トップ</a>
+        <a href="#about">「るりは」のご紹介</a>
+        <a href="#news">会社案内</a>
+        <a href="#contact">お知らせ</a>
+        <a href="#footer">お問い合わせ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero section imp" style="background: #f8f5f0; position: relative; overflow: hidden;">
+    <style>
+        /* ヒーローセクション全体のリセットとモダン化 */
+        section.imp.hero {
+            background: #f8f5f0 !important;
+            padding-top: 160px !important;
+            padding-bottom: 100px !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        /* 疑似要素で複数の抽象的なレイヤーを重ねる */
+        section.imp.hero::before {
+            content: "";
+            position: absolute;
+            top: -10%;
+            right: -5%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle at 30% 40%, rgba(176, 166, 149, 0.15) 0%, transparent 55%),
+                        radial-gradient(circle at 70% 60%, rgba(158, 136, 117, 0.1) 0%, transparent 50%),
+                        linear-gradient(135deg, rgba(203, 184, 157, 0.08) 0%, rgba(220, 207, 189, 0.12) 100%);
+            border-radius: 42% 58% 58% 42% / 42% 41% 59% 58%;
+            filter: blur(24px);
+            transform: rotate(-5deg);
+            pointer-events: none;
+            z-index: 0;
+        }
+        section.imp.hero::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(180, 170, 155, 0.15) 1px, transparent 1px);
+            background-size: 32px 32px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        /* コンテナをフレックスに */
+        section.imp .container.hero-grid {
+            display: flex !important;
+            align-items: center !important;
+            gap: 60px !important;
+            position: relative !important;
+            z-index: 2 !important;
+            transform: none !important; /* インラインのtranslateをリセット */
+            max-width: 1280px !important;
+            margin: 0 auto !important;
+            padding: 0 40px !important;
+        }
+        /* ビジュアルエリア */
+        section.imp .hero-anim-visual {
+            flex: 0 0 55% !important;
+            position: relative !important;
+            transform: none !important;
+        }
+        section.imp .hero-visual-wrap {
+            position: relative !important;
+            height: auto !important;
+            background: transparent !important;
+            transform: none !important;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        section.imp .hero-gallery {
+            display: flex !important;
+            gap: 12px !important;
+            justify-content: flex-end !important;
+            position: relative !important;
+            z-index: 2 !important;
+            transform: none !important;
+        }
+        section.imp .hero-frame {
+            width: 130px !important;
+            height: 150px !important;
+            border-radius: 20px !important;
+            overflow: hidden !important;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.05) !important;
+            background: #fff !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+            transform: none !important; /* インラインリセット */
+            flex-shrink: 0;
+        }
+        section.imp .hero-frame img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            max-width: 100% !important;
+            transform: none !important; /* インラインtranslateリセット */
+            transition: transform 0.5s ease !important;
+        }
+        section.imp .hero-frame:hover {
+            transform: translateY(-6px) !important;
+            box-shadow: 0 18px 36px rgba(0,0,0,0.12) !important;
+        }
+        section.imp .hero-frame:hover img {
+            transform: scale(1.03) !important;
+        }
+        section.imp .hero-main.bg-fill {
+            width: 100% !important;
+            border-radius: 28px !important;
+            overflow: hidden !important;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.04) !important;
+            background: #fff !important;
+            aspect-ratio: 16 / 9 !important;
+            position: relative !important;
+            z-index: 1 !important;
+            transform: none !important;
+        }
+        section.imp .hero-main.bg-fill img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            max-width: 100% !important;
+            transform: none !important;
+        }
+        /* テキストエリア */
+        section.imp .hero-copy.hero-anim-copy {
+            flex: 1 !important;
+            position: relative !important;
+            z-index: 3 !important;
+            transform: none !important;
+            padding-top: 0 !important;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        section.imp .hero-kicker {
+            font-size: 13px !important;
+            letter-spacing: 0.25em !important;
+            color: #8c7b6e !important;
+            text-transform: uppercase !important;
+            margin-bottom: 8px !important;
+            transform: none !important;
+            position: relative !important;
+        }
+        section.imp .hero-kicker::after {
+            content: "";
+            display: block;
+            width: 48px;
+            height: 1px;
+            background: #c0b0a0;
+            margin-top: 12px;
+        }
+        section.imp .hero-lead {
+            font-size: 1.4rem !important;
+            line-height: 2 !important;
+            color: #3a322b !important;
+            font-weight: 400 !important;
+            letter-spacing: 0.03em !important;
+            transform: none !important;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        section.imp .hero-meta {
+            display: flex !important;
+            gap: 24px !important;
+            margin: 16px 0 !important;
+            transform: none !important;
+            flex-wrap: wrap;
+        }
+        section.imp .hero-meta > div {
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.1em !important;
+            color: #6b5e53 !important;
+            background: rgba(245, 240, 235, 0.8) !important;
+            padding: 8px 16px !important;
+            border-radius: 30px !important;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            border: 1px solid rgba(200, 180, 160, 0.3);
+            transform: none !important;
+            line-height: 1.5;
+        }
+        section.imp .hero-side {
+            font-size: 2.8rem !important;
+            font-weight: 700 !important;
+            color: rgba(58, 50, 43, 0.09) !important;
+            line-height: 1.3 !important;
+            position: absolute !important;
+            right: 0 !important;
+            top: 50% !important;
+            transform: translateY(-50%) rotate(-90deg) !important;
+            transform-origin: center right;
+            white-space: nowrap;
+            letter-spacing: 0.08em;
+            z-index: 1;
+            pointer-events: none;
+        }
+        /* フローティングCTAボタン */
+        section.imp .floating-cta {
+            position: relative !important;
+            z-index: 3 !important;
+            margin-top: 40px !important;
+            display: flex !important;
+            justify-content: center !important;
+            transform: none !important;
+        }
+        section.imp .btn {
+            background: rgba(255,255,255,0.9) !important;
+            color: #5a4d42 !important;
+            border: 1px solid rgba(180, 165, 145, 0.6) !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.02) !important;
+            backdrop-filter: blur(12px);
+            border-radius: 40px !important;
+            padding: 14px 36px !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.04em !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.2) !important;
+            font-size: 1rem !important;
+            transform: none !important;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: auto;
+            height: auto;
+            background-image: none !important;
+        }
+        section.imp .btn:hover {
+            background: #fff !important;
+            border-color: #b0a090 !important;
+            box-shadow: 0 18px 34px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.04) !important;
+            transform: translateY(-3px) !important;
+            color: #2c241c !important;
+        }
+        section.imp .btn .arrow {
+            transition: transform 0.3s ease;
+            font-size: 1.2em;
+            line-height: 1;
+        }
+        section.imp .btn:hover .arrow {
+            transform: translateX(4px);
+        }
+        /* レスポンシブ調整 */
+        @media (max-width: 1024px) {
+            section.imp .container.hero-grid {
+                flex-direction: column !important;
+                gap: 40px !important;
+            }
+            section.imp .hero-anim-visual {
+                flex: 0 0 100% !important;
+                width: 100% !important;
+            }
+            section.imp .hero-gallery {
+                justify-content: center !important;
+                gap: 8px !important;
+            }
+            section.imp .hero-frame {
+                width: 100px !important;
+                height: 120px !important;
+            }
+            section.imp .hero-side {
+                font-size: 2rem !important;
+                right: -20px !important;
+            }
+            section.imp .hero-copy.hero-anim-copy {
+                text-align: center;
+                align-items: center;
+                padding: 0 20px;
+            }
+            section.imp .hero-kicker::after {
+                margin: 12px auto 0;
+            }
+        }
+        @media (max-width: 640px) {
+            section.imp.hero {
+                padding-top: 120px !important;
+                padding-bottom: 60px !important;
+            }
+            section.imp .hero-lead {
+                font-size: 1.1rem !important;
+                line-height: 1.8 !important;
+            }
+            section.imp .hero-meta {
+                gap: 12px !important;
+            }
+            section.imp .hero-side {
+                display: none !important;
+            }
+            section.imp .btn {
+                padding: 12px 28px !important;
+                font-size: 0.9rem !important;
+            }
+        }
+    </style>
+    <div class="container hero-grid" style="transform-origin: center center !important; transform: translate(-58px, 21px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;" data-cebt="" data-cetx="-58" data-cety="21">
+        <div class="hero-anim-visual">
+          <div class="hero-visual-wrap">
+            <div class="hero-gallery">
+              <div class="hero-frame" data-cebt="" data-cetx="-9" data-cety="1" style="transform-origin: center center !important; transform: translate(-9px, 1px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">
+                <img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" alt="並木道" width="420" height="440" onerror="this.style.display='none'" class="" data-cew="508.2000000000001" data-ceh="585.6400000000001" data-cebt="" data-cetx="20" data-cety="-171" style="width: 508px !important; height: 586px !important; object-fit: cover !important; max-width: none !important; transform-origin: center center !important; transform: translate(20px, -171px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">
+              </div>
+              <div class="hero-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="紙飛行機が舞う空" width="420" height="440" onerror="this.style.display='none'">
+              </div>
+              <div class="hero-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_39f3639774.png" alt="淡い青の背景" width="420" height="440" onerror="this.style.display='none'">
+              </div>
+            </div>
+            <div class="hero-main bg-fill">
+              <img src="http://127.0.0.1:5000/uploads/up_2ce42b270d.png" alt="オフィスで協働する男女" width="960" height="620" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-copy hero-anim-copy" data-cebt="" data-cetx="486" data-cety="230" style="transform-origin: center center !important; transform: translate(486px, 230px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">
+          <div class="" data-cebt="" data-cetx="755" data-cety="118" style="transform-origin: center center !important; transform: translate(755px, 118px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">
+            <div class="hero-kicker" data-cebt="" data-cetx="-538" data-cety="-134" style="transform-origin: center center !important; transform: translate(-538px, -134px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">WORK SUPPORT PLATFORM</div>
+            <div class="hero-lead" data-cebt="" data-cetx="-542" data-cety="-300" style="transform-origin: center center !important; transform: translate(-542px, -300px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">
+              相談から作業設計、現場支援まで。<br>
+              企業と人をやさしくつなぐ、<br>
+              新しい就労サポートのかたち。
+            </div>
+            <div class="hero-meta">
+              <div class="" style="transform-origin: center center !important; transform: translate(-537px, -203px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;" data-cebt="" data-cetx="-537" data-cety="-203">SUPPORT<br>CONSULTING</div>
+              <div class="" style="">WORK<br>DESIGN</div>
+              <div class="" style="">TEAM<br>CARE</div>
+            </div>
+          </div>
+          <div class="hero-side" style="">働きたい、を<br>前に進める。</div>
+        </div>
+      </div>
+      <div class="container floating-cta">
+        <a href="#about" class="btn" data-cebt="matrix(1, 0, 0, 1, 0, -3)" data-cetx="34" data-cety="66" style="cursor: move; transform-origin: center center !important; transform: translate(34px, 66px) rotate(0deg) scale(1, 1) matrix(1, 0, 0, 1, 0, -3) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">詳しく見る <span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <a href="#contact" class="floating-mail" aria-label="お問い合わせ">✉</a>
+
+    <section class="imp-about-section" id="about">
+  <style>
+    .imp-about-section{
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: clamp(56px, 7vw, 110px) 20px;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(244, 199, 174, .32), transparent 28%),
+        radial-gradient(circle at 88% 18%, rgba(232, 170, 150, .26), transparent 26%),
+        radial-gradient(circle at 72% 78%, rgba(214, 183, 141, .18), transparent 24%),
+        linear-gradient(125deg, #fbf8f3 0%, #fffdf9 28%, #f6ecdf 56%, #fffaf5 78%, #f2dfc5 100%);
+      background-size: 140% 140%;
+      animation: imp-bgFlow 16s ease-in-out infinite alternate;
+      color: #1f1a17;
+      font-family: inherit;
+    }
+    .imp-about-section *{ box-sizing: border-box; }
+
+    .imp-about-section::before,
+    .imp-about-section::after{
+      content:"";
+      position:absolute;
+      z-index:0;
+      pointer-events:none;
+      filter: blur(0.2px);
+    }
+    .imp-about-section::before{
+      width: 420px;
+      height: 420px;
+      top: -70px;
+      left: -90px;
+      border-radius: 56% 44% 65% 35% / 42% 44% 56% 58%;
+      background: linear-gradient(135deg, rgba(236,170,145,.25), rgba(232,193,144,.12));
+      animation: imp-floatA 11s ease-in-out infinite;
+    }
+    .imp-about-section::after{
+      width: 360px;
+      height: 360px;
+      right: -80px;
+      bottom: -60px;
+      border-radius: 38% 62% 48% 52% / 57% 43% 57% 43%;
+      background: linear-gradient(135deg, rgba(228,197,151,.22), rgba(230,153,136,.14));
+      animation: imp-floatB 13s ease-in-out infinite;
+    }
+
+    .imp-about-wrap{
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .imp-about-shell{
+      position: relative;
+      padding: clamp(26px, 4vw, 48px);
+      border-radius: 34px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(122, 88, 62, .08);
+      box-shadow:
+        0 25px 70px rgba(104, 71, 41, .10),
+        inset 0 1px 0 rgba(255,255,255,.8);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .imp-about-shell::before{
+      content:"";
+      position:absolute;
+      inset: 18px;
+      border-radius: 24px;
+      border: 1px solid rgba(177, 138, 105, .16);
+      pointer-events:none;
+    }
+
+    .imp-about-head{
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: clamp(20px, 3vw, 34px);
+      align-items: end;
+      margin-bottom: clamp(28px, 4vw, 42px);
+    }
+
+    .imp-about-kicker{
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      color: #8f6a52;
+      letter-spacing: .18em;
+      text-transform: lowercase;
+      font-size: 12px;
+    }
+    .imp-about-kicker::before,
+    .imp-about-kicker::after{
+      content:"";
+      display:block;
+      width: 42px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(143,106,82,.7), transparent);
+    }
+
+    .imp-about-title{
+      margin: 0;
+      line-height: 1.08;
+      font-size: clamp(34px, 5vw, 68px);
+      font-weight: 800;
+      letter-spacing: .02em;
+      color: #1d1815;
+    }
+
+    .imp-about-title .imp-char{
+      display:inline-block;
+      opacity: 0;
+      transform: translateY(66px) rotate(4deg) scale(.86);
+      filter: blur(6px);
+      transition:
+        opacity .8s cubic-bezier(.2,.7,.1,1),
+        transform .8s cubic-bezier(.2,.7,.1,1),
+        filter .8s cubic-bezier(.2,.7,.1,1);
+    }
+    .imp-about-shell.imp-on .imp-about-title .imp-char,
+    .imp-about-shell.imp-force .imp-about-title .imp-char{
+      opacity: 1;
+      transform: translateY(0) rotate(0) scale(1);
+      filter: blur(0);
+    }
+
+    .imp-about-title .imp-char:nth-child(1){transition-delay:.00s}
+    .imp-about-title .imp-char:nth-child(2){transition-delay:.05s}
+    .imp-about-title .imp-char:nth-child(3){transition-delay:.10s}
+    .imp-about-title .imp-char:nth-child(4){transition-delay:.15s}
+    .imp-about-title .imp-char:nth-child(5){transition-delay:.20s}
+    .imp-about-title .imp-char:nth-child(6){transition-delay:.25s}
+    .imp-about-title .imp-char:nth-child(7){transition-delay:.30s}
+    .imp-about-title .imp-char:nth-child(8){transition-delay:.35s}
+    .imp-about-title .imp-char:nth-child(9){transition-delay:.40s}
+    .imp-about-title .imp-char:nth-child(10){transition-delay:.45s}
+    .imp-about-title .imp-char:nth-child(11){transition-delay:.50s}
+
+    .imp-about-note{
+      position: relative;
+      padding: 24px 24px 24px 26px;
+      border-radius: 22px;
+      background:
+        linear-gradient(135deg, rgba(243, 226, 203, .72), rgba(255,255,255,.7));
+      border: 1px solid rgba(173, 132, 96, .14);
+      box-shadow: 0 16px 40px rgba(145, 112, 83, .10);
+      min-height: 126px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .imp-about-note::before{
+      content:"";
+      position:absolute;
+      inset:auto 16px 14px auto;
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(234,179,160,.35) 0%, rgba(234,179,160,0) 68%);
+      animation: imp-pulse 4s ease-in-out infinite;
+    }
+    .imp-about-note-inner{
+      position:relative;
+      z-index:1;
+      font-size: clamp(13px, 1.3vw, 16px);
+      line-height: 1.95;
+      color: #5c4a3d;
+      text-align: left;
+      max-width: 34ch;
+      opacity: 0;
+      transform: translateX(70px);
+      transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.1,1);
+      transition-delay: .45s;
+    }
+    .imp-about-shell.imp-on .imp-about-note-inner,
+    .imp-about-shell.imp-force .imp-about-note-inner{
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .imp-about-stage{
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: clamp(18px, 2.6vw, 28px);
+      align-items: stretch;
+    }
+
+    .imp-about-feature-main{
+      position: relative;
+      min-height: 580px;
+      border-radius: 30px;
+      overflow: hidden;
+      background: #f4ede4;
+      box-shadow: 0 24px 60px rgba(90, 64, 43, .13);
+      border: 1px solid rgba(145, 112, 83, .10);
+      opacity: 0;
+      transform: translateY(70px);
+      transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.1,1);
+      transition-delay: .18s;
+    }
+    .imp-about-shell.imp-on .imp-about-feature-main,
+    .imp-about-shell.imp-force .imp-about-feature-main{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-about-feature-main .imp-media{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+    }
+    .imp-about-feature-main .imp-media img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      transform: scale(1.15);
+      opacity: 0;
+      filter: saturate(.96) contrast(1.02);
+      transition: transform 1.15s cubic-bezier(.2,.7,.1,1), opacity 1s ease;
+    }
+    .imp-about-shell.imp-on .imp-about-feature-main .imp-media img,
+    .imp-about-shell.imp-force .imp-about-feature-main .imp-media img{
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .imp-about-feature-main .imp-overlay{
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(180deg, rgba(20,16,13,.04) 0%, rgba(20,16,13,.18) 38%, rgba(20,16,13,.82) 100%);
+    }
+
+    .imp-about-feature-main .imp-content{
+      position:absolute;
+      left: clamp(18px, 2vw, 28px);
+      right: clamp(18px, 2vw, 28px);
+      bottom: clamp(18px, 2vw, 26px);
+      z-index:2;
+      color:#fff;
+    }
+
+    .imp-label{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 12px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.22);
+      font-size: 12px;
+      letter-spacing: .14em;
+    }
+    .imp-label::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#ffd6c4;
+      box-shadow: 0 0 0 8px rgba(255,214,196,.15);
+      animation: imp-dot 2.2s ease-in-out infinite;
+    }
+
+    .imp-about-feature-main h3{
+      margin:0 0 10px;
+      font-size: clamp(28px, 3vw, 44px);
+      line-height:1.05;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+    .imp-about-feature-main p{
+      margin:0;
+      max-width: 34ch;
+      font-size: clamp(14px, 1.25vw, 17px);
+      line-height: 1.9;
+      color: rgba(255,255,255,.92);
+    }
+
+    .imp-about-side{
+      display:grid;
+      gap: clamp(18px, 2vw, 24px);
+    }
+
+    .imp-about-card{
+      position: relative;
+      min-height: 278px;
+      display:grid;
+      grid-template-columns: .95fr 1.05fr;
+      border-radius: 28px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255,255,255,.86), rgba(250,241,231,.92));
+      border: 1px solid rgba(152, 118, 84, .12);
+      box-shadow: 0 18px 48px rgba(104, 71, 41, .10);
+      transition:
+        transform .45s cubic-bezier(.2,.7,.1,1),
+        box-shadow .45s cubic-bezier(.2,.7,.1,1),
+        border-color .45s ease;
+      opacity: 0;
+      transform: translateY(70px);
+    }
+    .imp-about-card:nth-child(1){
+      transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.1,1), box-shadow .45s cubic-bezier(.2,.7,.1,1), border-color .45s ease;
+      transition-delay: .33s;
+    }
+    .imp-about-card:nth-child(2){
+      transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.1,1), box-shadow .45s cubic-bezier(.2,.7,.1,1), border-color .45s ease;
+      transition-delay: .48s;
+    }
+    .imp-about-shell.imp-on .imp-about-card,
+    .imp-about-shell.imp-force .imp-about-card{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-about-card:hover{
+      transform: translateY(-10px);
+      box-shadow: 0 28px 70px rgba(104, 71, 41, .18);
+      border-color: rgba(205, 144, 106, .22);
+    }
+
+    .imp-about-card .imp-media{
+      position: relative;
+      overflow:hidden;
+      min-height:100%;
+      background:#efe7dd;
+    }
+    .imp-about-card .imp-media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transform: scale(1.15);
+      opacity:0;
+      transition: transform 1.15s cubic-bezier(.2,.7,.1,1), opacity 1s ease;
+    }
+    .imp-about-shell.imp-on .imp-about-card .imp-media img,
+    .imp-about-shell.imp-force .imp-about-card .imp-media img{
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .imp-about-card .imp-body{
+      position: relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding: clamp(20px, 2.2vw, 28px);
+    }
+
+    .imp-about-card .imp-body::before{
+      content:"";
+      position:absolute;
+      top:18px;
+      right:18px;
+      width:54px;
+      height:54px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(240,190,168,.22), rgba(227,202,160,.10));
+      transform: rotate(12deg);
+      animation: imp-floatC 7s ease-in-out infinite;
+    }
+
+    .imp-about-card h3{
+      position:relative;
+      z-index:1;
+      margin:0 0 12px;
+      font-size: clamp(24px, 2.2vw, 34px);
+      line-height:1.06;
+      font-weight:800;
+      color:#1d1815;
+    }
+    .imp-about-card p{
+      position:relative;
+      z-index:1;
+      margin:0;
+      font-size: clamp(14px, 1.1vw, 16px);
+      line-height: 1.9;
+      color:#5f4d40;
+    }
+
+    .imp-about-actions{
+      display:flex;
+      justify-content:center;
+      margin-top: clamp(22px, 3vw, 32px);
+      opacity:0;
+      transform: translateY(60px);
+      transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.1,1);
+      transition-delay: .62s;
+    }
+    .imp-about-shell.imp-on .imp-about-actions,
+    .imp-about-shell.imp-force .imp-about-actions{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    .imp-about-btn{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      min-width: 230px;
+      padding: 18px 28px;
+      border-radius: 999px;
+      text-decoration:none;
+      color:#fff;
+      font-weight:700;
+      letter-spacing:.04em;
+      background: linear-gradient(135deg, #efad99 0%, #e59a8a 48%, #d88979 100%);
+      box-shadow:
+        0 18px 35px rgba(216, 137, 121, .35),
+        inset 0 1px 0 rgba(255,255,255,.35);
+      transition:
+        transform .35s cubic-bezier(.2,.7,.1,1),
+        box-shadow .35s cubic-bezier(.2,.7,.1,1),
+        filter .35s ease,
+        letter-spacing .35s ease;
+      overflow:hidden;
+    }
+    .imp-about-btn::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,.34) 50%, transparent 80%);
+      transform: translateX(-135%);
+      animation: imp-shine 3.2s ease-in-out infinite;
+    }
+    .imp-about-btn::after{
+      content:"→";
+      position:relative;
+      z-index:1;
+      font-size: 18px;
+      transition: transform .35s ease;
+    }
+    .imp-about-btn span{
+      position:relative;
+      z-index:1;
+    }
+    .imp-about-btn:hover{
+      transform: translateY(-8px) scale(1.06);
+      box-shadow:
+        0 26px 52px rgba(216, 137, 121, .45),
+        inset 0 1px 0 rgba(255,255,255,.4);
+      filter: saturate(1.08);
+      letter-spacing: .08em;
+    }
+    .imp-about-btn:hover::after{
+      transform: translateX(5px);
+    }
+
+    @keyframes imp-bgFlow{
+      0%{background-position:0% 50%}
+      100%{background-position:100% 50%}
+    }
+    @keyframes imp-floatA{
+      0%,100%{transform:translate(0,0) rotate(0deg)}
+      25%{transform:translate(34px,18px) rotate(5deg)}
+      50%{transform:translate(14px,44px) rotate(-4deg)}
+      75%{transform:translate(42px,-10px) rotate(7deg)}
+    }
+    @keyframes imp-floatB{
+      0%,100%{transform:translate(0,0) rotate(0deg)}
+      25%{transform:translate(-36px,-18px) rotate(-8deg)}
+      50%{transform:translate(-12px,-44px) rotate(6deg)}
+      75%{transform:translate(-42px,10px) rotate(-3deg)}
+    }
+    @keyframes imp-floatC{
+      0%,100%{transform:translateY(0) rotate(12deg)}
+      50%{transform:translateY(-32px) rotate(22deg)}
+    }
+    @keyframes imp-pulse{
+      0%,100%{transform:scale(.9);opacity:.55}
+      50%{transform:scale(1.22);opacity:1}
+    }
+    @keyframes imp-dot{
+      0%,100%{transform:scale(1)}
+      50%{transform:scale(1.6)}
+    }
+    @keyframes imp-shine{
+      0%{transform:translateX(-135%)}
+      55%{transform:translateX(-135%)}
+      100%{transform:translateX(135%)}
+    }
+
+    @media (max-width: 1080px){
+      .imp-about-head,
+      .imp-about-stage{
+        grid-template-columns: 1fr;
+      }
+      .imp-about-note{
+        min-height: auto;
+      }
+      .imp-about-feature-main{
+        min-height: 460px;
+      }
+    }
+
+    @media (max-width: 720px){
+      .imp-about-shell{
+        padding: 20px;
+        border-radius: 26px;
+      }
+      .imp-about-shell::before{
+        inset: 10px;
+        border-radius: 18px;
+      }
+      .imp-about-card{
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .imp-about-card .imp-media{
+        min-height: 220px;
+      }
+      .imp-about-feature-main{
+        min-height: 400px;
+      }
+      .imp-about-btn{
+        width: 100%;
+        max-width: 340px;
+      }
+    }
+  </style>
+
+  <div class="imp-about-wrap">
+    <div class="imp-about-shell imp-on imp-force" data-imp-observe="">
+      <div class="imp-about-head">
+        <div class="imp-about-head-main">
+          <div class="imp-about-kicker">ruriha</div>
+          <h2 class="imp-about-title" aria-label="「るりは」のご紹介">
+            <span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">「</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">る</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">り</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">は</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">」</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">&nbsp;</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">の</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">ご</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">紹</span><span class="imp-char" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">介</span>
+          </h2>
+        </div>
+        <div class="imp-about-note">
+          <div class="imp-about-note-inner" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">作業・一日の流れ・見学体験まで、気になるポイントを一目で見渡せる構成に再編集しました。</div>
+        </div>
+      </div>
+
+      <div class="imp-about-stage">
+        <article class="imp-about-feature-main" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="imp-media">
+            <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="作業室で協力して梱包するスタッフ" width="360" height="216" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          </div>
+          <div class="imp-overlay" style=""></div>
+          <div class="imp-content">
+            <div class="imp-label">FEATURE 01</div>
+            <h3>作業内容</h3>
+            <p>箱折り・封入・検品・梱包など、取り組みやすい作業を中心にご紹介します。</p>
+          </div>
+        </article>
+
+        <div class="imp-about-side">
+          <article class="imp-about-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="imp-media">
+              <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="明るいオフィスのコーヒーとクッキー" width="360" height="216" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            </div>
+            <div class="imp-body">
+              <h3>一日の流れ</h3>
+              <p>通所から作業、休憩、振り返りまで。無理なく過ごせる一日の流れをご案内します。</p>
+            </div>
+          </article>
+
+          <article class="imp-about-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="imp-media">
+              <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="就労支援事業所の明るい入口" width="360" height="216" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            </div>
+            <div class="imp-body">
+              <h3>見学・体験受付中</h3>
+              <p>事業所の雰囲気を知っていただけるよう、見学や体験利用のご相談を受け付けています。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="imp-about-actions" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a href="#contact" class="imp-about-btn"><span>View More</span></a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var section = document.currentScript.closest('.imp-about-section');
+      if(!section) return;
+      var target = section.querySelector('[data-imp-observe]');
+      if(!target) return;
+
+      var show = function(){
+        target.classList.add('imp-on');
+      };
+
+      if('IntersectionObserver' in window){
+        var io = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              show();
+              io.disconnect();
+            }
+          });
+        }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+        io.observe(target);
+      } else {
+        show();
+      }
+
+      setTimeout(function(){
+        target.classList.add('imp-force');
+      }, 3000);
+    })();
+  </script>
+</section>
+
+    <section class="section news-wrap" id="news">
+      <div class="container">
+        <div class="news-label reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">NEWS</div>
+        <div class="news-divider reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"></div>
+
+        <div class="news-grid stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="就労支援事業所前で明るくポーズ" width="410" height="226" onerror="this.style.display='none'">
+            </div>
+            <div class="body">
+              <div class="title">新しく見学週間をスタートしました。初めての方でも安心してお越しいただけます。</div>
+              <div class="date">2026/07/01</div>
+            </div>
+          </article>
+
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_033afbf0bd.jpg" alt="和やかに梱包作業をするスタッフ" width="410" height="226" onerror="this.style.display='none'">
+            </div>
+            <div class="body">
+              <div class="title">今月の作業紹介を更新しました。利用者さんが落ち着いて取り組める工程をご紹介しています。</div>
+              <div class="date">2026/06/24</div>
+            </div>
+          </article>
+
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_78c6a0d3e7.jpg" alt="手作業でヘアゴムなどの手芸小物を丁寧に検品・梱包する様子" width="410" height="226" onerror="this.style.display='none'">
+            </div>
+            <div class="body">
+              <div class="title">手芸小物の検品・梱包など、細かな作業にも一つひとつ丁寧に取り組んでいます。</div>
+              <div class="date">2026/06/12</div>
+            </div>
+          </article>
+        </div>
+
+        <div class="center reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a href="#footer" class="btn">View More</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+      <div class="contact-script" style="">Contact</div>
+      <div class="contact-box reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <h2>ご相談はこちら</h2>
+        <div class="contact-line"></div>
+        <div class="tel">022-398-7350</div>
+        <div class="small-note">平日のみ（土日祝休み）</div>
+        <a href="mailto:info@ruriha.jp" class="contact-btn">
+          <span style="font-size:22px">✉</span>
+          <span>お問い合わせフォーム</span>
+        </a>
+        <div class="contact-caption">※ お電話またはメールフォームからご相談ください。</div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer">
+    <div class="footer-main">
+      <div class="container footer-grid">
+        <div class="footer-brand reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a href="#" class="logo" aria-label="るりは ホーム">
+            <span><b>るりは</b><br>就労継続支援B型</span>
+          </a>
+          <p>
+            〒989-3126<br>
+            宮城県仙台市青葉区落合二丁目14番地2号 103
+          </p>
+        </div>
+
+        <div class="footer-links reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a href="#top">・トップ</a>
+          <a href="#news">・会社案内</a>
+          <a href="#contact">・お問い合わせ</a>
+        </div>
+
+        <div class="footer-links reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a href="#about">・「るりは」のご紹介</a>
+          <a href="#news">・お知らせ</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="insta" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"></rect>
+          <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"></circle>
+          <circle cx="17.5" cy="6.7" r="1.2" fill="currentColor"></circle>
+        </svg>
+      </div>
+      <div class="copyright">©2026 株式会社るりは All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    const revealTargets = document.querySelectorAll('.reveal, .stagger');
+
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {threshold: 0.16, rootMargin: '0px 0px -8% 0px'});
+
+    revealTargets.forEach(el => observer.observe(el));
+  </script>
+
+
+
+
+
+
+
+<div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

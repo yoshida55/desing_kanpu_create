@@ -1,0 +1,1468 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<script>document.documentElement.classList.add('js');</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ソラノワークス｜就労継続支援A型</title>
+<meta name="description" content="動き出す毎日に、やさしい伴走を。就労継続支援A型 ソラノワークスのランディングページです。">
+<style>
+:root{
+  --blue:#0071b9;
+  --blue-dark:#005c98;
+  --blue-soft:#b2d4ea;
+  --blue-pale:#eaf5fb;
+  --yellow:#f2e018;
+  --white:#fff;
+  --black:#333;
+  --gray:#fafafa;
+  --line:#c9e2f2;
+  --shadow:rgba(174,174,174,.1) 5px 5px 10px 0px;
+  --radius:8px;
+  --container:1440px;
+  --ease:cubic-bezier(.445,.05,.55,.95);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--black);
+  background:#fff;
+  font-family:"Times New Roman","Yu Mincho","Hiragino Mincho ProN",serif;
+  line-height:1.85;
+  letter-spacing:.04em;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+.site{
+  max-width:var(--container);
+  margin:0 auto;
+  overflow:hidden;
+  background:#fff;
+}
+.sans{font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+.header{
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  width:100%;
+  max-width:var(--container);
+  height:74px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 38px;
+  color:#fff;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:800;
+  letter-spacing:.02em;
+  font-size:20px;
+}
+.logo-mark{
+  width:27px;height:27px;
+  border-radius:8px;
+  background:#fff;
+  position:relative;
+  box-shadow:inset 0 -8px 0 rgba(0,113,185,.18);
+}
+.logo-mark:before,.logo-mark:after{
+  content:"";
+  position:absolute;
+  background:var(--blue);
+  border-radius:2px;
+}
+.logo-mark:before{width:14px;height:5px;left:6px;top:7px}
+.logo-mark:after{width:14px;height:5px;left:6px;top:15px}
+.nav{
+  display:flex;
+  align-items:center;
+  gap:26px;
+  font-size:12px;
+  font-weight:700;
+}
+.nav a{opacity:.95;transition:all .3s var(--ease)}
+.nav a:hover{opacity:1;transform:translateY(-2px)}
+.header-actions{display:flex;gap:8px;align-items:center}
+.btn-mini{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:66px;height:30px;padding:0 14px;border-radius:999px;
+  background:#fff;color:#073c60;font-size:11px;font-weight:800;
+}
+.btn-mini.yellow{background:var(--yellow);color:#113247}
+.hero{
+  background:var(--blue);
+  min-height:720px;
+  position:relative;
+  padding-top:92px;
+}
+.hero-inner{
+  position:relative;
+  height:560px;
+  padding:0 96px;
+}
+.window-row{
+  display:grid;
+  grid-template-columns:1fr 2.15fr 1fr;
+  gap:62px;
+  align-items:start;
+}
+.photo-window{
+  height:258px;
+  border:9px solid #fff;
+  border-radius:8px;
+  overflow:hidden;
+  background:var(--blue-soft);
+  box-shadow:var(--shadow);
+}
+.photo-window img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  filter:saturate(.88) contrast(.96);
+}
+.photo-window.left{transform:translateX(-55px)}
+.photo-window.right{transform:translateX(25px)}
+.hero-person{
+  position:absolute;
+  left:50%;
+  top:225px;
+  transform:translateX(-50%);
+  width:285px;
+  border-radius:22px;
+  overflow:hidden;
+  background:var(--blue-soft);
+  box-shadow:0 18px 35px rgba(0,62,101,.18);
+}
+.hero-person img{
+  width:100%;
+  aspect-ratio:4/5;
+  object-fit:cover;
+}
+.hero-title{
+  position:absolute;
+  right:50px;
+  top:82px;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  color:var(--blue);
+  font-weight:900;
+  font-size:38px;
+  line-height:1.05;
+  letter-spacing:.06em;
+  writing-mode:vertical-rl;
+}
+.hero-title span{
+  background:#fff;
+  padding:12px 7px;
+  box-shadow:var(--shadow);
+}
+.hero-title .dot{
+  color:#fff;
+  background:transparent;
+  padding:0;
+  text-shadow:0 0 0 #fff;
+}
+.hero-lower{
+  position:absolute;
+  left:0;right:0;bottom:-1px;
+  height:180px;
+  background:#fff;
+}
+.hero-sub{
+  position:absolute;
+  left:30px;
+  bottom:34px;
+  z-index:2;
+  display:grid;
+  grid-template-columns:72px 1fr;
+  gap:24px;
+  align-items:start;
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+}
+.hero-sub strong{
+  font-size:12px;
+  line-height:1.08;
+  font-weight:900;
+}
+.hero-sub p{
+  margin:0;
+  font-size:11px;
+  line-height:1.75;
+  font-weight:800;
+}
+.hero-cta{
+  position:absolute;
+  right:35px;
+  bottom:48px;
+  z-index:2;
+}
+.pill-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  min-height:48px;
+  padding:0 24px;
+  border-radius:999px;
+  background:var(--blue);
+  color:#fff;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:800;
+  font-size:13px;
+  box-shadow:var(--shadow);
+  transition:all .3s var(--ease);
+}
+.pill-btn:hover{transform:translateY(-3px);box-shadow:0 12px 22px rgba(0,113,185,.18)}
+.spin-icon{
+  width:23px;height:23px;border-radius:50%;
+  display:inline-grid;place-items:center;
+  background:#fff;color:var(--blue);
+  animation:loading-spin-36413753 9s linear infinite;
+}
+@keyframes loading-spin-36413753{0%{transform:rotate(0deg)}100%{transform:rotate(1turn)}}
+.section{
+  position:relative;
+  padding:130px 96px;
+}
+.sec-head{
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  color:var(--blue);
+}
+.sec-head .num{
+  font-size:10px;
+  display:block;
+  margin-bottom:5px;
+}
+.sec-head h2{
+  margin:0;
+  font-size:28px;
+  line-height:1;
+  letter-spacing:.02em;
+}
+.sec-head small{
+  display:block;
+  margin-top:7px;
+  font-size:11px;
+  font-weight:800;
+}
+.label-line{
+  position:absolute;
+  left:0;
+  top:124px;
+  width:58px;
+  height:1px;
+  background:var(--blue);
+  opacity:.45;
+}
+.about{
+  min-height:760px;
+  padding-top:110px;
+  padding-bottom:70px;
+}
+.about-grid{
+  display:grid;
+  grid-template-columns:170px minmax(420px,620px) 1fr;
+  gap:85px;
+  align-items:start;
+}
+.about-copy{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:19px;
+  line-height:2.18;
+  font-weight:800;
+  padding-top:88px;
+}
+.about-copy p{margin:0 0 40px}
+.vertical-catch{
+  justify-self:end;
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+  font-size:44px;
+  line-height:1.45;
+  writing-mode:vertical-rl;
+  letter-spacing:.08em;
+  margin-top:18px;
+}
+.more-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  border-radius:999px;background:var(--blue);color:#fff;
+  padding:8px 18px;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:800;font-size:12px;
+  transition:all .3s var(--ease);
+}
+.more-btn:hover{transform:translateY(-2px)}
+.cta-card{
+  position:relative;
+  width:min(1050px,86%);
+  margin:0 auto 95px;
+  background:var(--blue);
+  border-radius:14px;
+  color:#fff;
+  padding:34px 54px 42px;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  box-shadow:var(--shadow);
+}
+.cta-card .start{font-size:12px;font-weight:700;opacity:.9}
+.cta-card h3{margin:5px 0 24px;font-size:29px;line-height:1.35}
+.cta-box{
+  width:58%;
+  min-height:92px;
+  background:#fff;
+  border:5px solid #d9edf8;
+  border-radius:8px;
+  color:var(--blue);
+  display:grid;
+  place-items:center;
+  text-align:center;
+  font-weight:800;
+}
+.line-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-top:8px;
+  background:#00b900;color:#fff;border-radius:999px;
+  padding:9px 22px;font-weight:900;font-size:14px;
+  transition:all .3s var(--ease);
+}
+.line-btn:hover{transform:translateY(-2px) scale(1.02)}
+.cta-photo{
+  position:absolute;
+  right:35px;
+  bottom:-42px;
+  width:230px;
+  border-radius:16px;
+  overflow:hidden;
+  background:var(--blue-soft);
+  border:8px solid rgba(255,255,255,.65);
+}
+.cta-photo img{width:100%;aspect-ratio:4/5;object-fit:cover}
+.bubble{
+  position:absolute;
+  right:195px;
+  top:-36px;
+  width:136px;height:136px;
+  border-radius:50%;
+  background:var(--blue-soft);
+  color:var(--blue);
+  display:grid;place-items:center;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  font-weight:900;
+  padding:18px;
+}
+.service{
+  padding-top:125px;
+  padding-bottom:90px;
+}
+.service-top{
+  display:grid;
+  grid-template-columns:210px 1fr 170px;
+  gap:70px;
+  align-items:start;
+}
+.book-passport{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:25px;
+  line-height:1.15;
+  font-weight:900;
+  justify-self:end;
+}
+.service-list{
+  grid-column:1/4;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:68px;
+  margin-top:70px;
+}
+.service-item{
+  transition:all .4s var(--ease);
+}
+.service-item:hover{transform:translateY(-6px)}
+.service-img{
+  width:205px;
+  margin:0 auto 27px;
+  border-radius:8px;
+  overflow:hidden;
+  background:var(--blue-pale);
+  box-shadow:var(--shadow);
+}
+.service-img img{width:100%;aspect-ratio:1/1;object-fit:cover}
+.service-item h3{
+  margin:0 0 12px;
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:17px;
+  line-height:1.5;
+}
+.service-item p{font-size:13px;line-height:2;margin:0}
+.feature-band{
+  position:relative;
+  background:var(--blue-soft);
+  padding:120px 96px 155px;
+  margin-top:30px;
+  overflow:hidden;
+}
+.marquee{
+  position:absolute;
+  top:-38px;
+  left:0;
+  display:flex;
+  white-space:nowrap;
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:92px;
+  line-height:1;
+  font-weight:900;
+  opacity:1;
+  animation:marquee 20s linear infinite;
+}
+.marquee span{padding-right:42px}
+@keyframes marquee{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+.feature-intro{
+  max-width:800px;
+  margin:0 auto 70px;
+  text-align:center;
+}
+.feature-intro h2{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:20px;
+  letter-spacing:.12em;
+}
+.feature-intro p{font-size:14px;line-height:2.2}
+.feature-cards{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:92px;
+  max-width:940px;
+  margin:0 auto;
+}
+.feature-card{
+  background:#fff;
+  border-radius:16px;
+  min-height:440px;
+  padding:38px 42px 0;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  transition:all .35s var(--ease);
+}
+.feature-card:hover{transform:translateY(-5px)}
+.feature-card small{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+}
+.feature-card h3{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  margin:10px 0 12px;
+  font-size:21px;
+}
+.feature-card p{font-size:13px;line-height:2}
+.phone-photo{
+  width:72%;
+  margin:25px auto 0;
+  border-radius:22px 22px 0 0;
+  overflow:hidden;
+  background:var(--blue-pale);
+  border:8px solid #f8fbfd;
+  border-bottom:0;
+}
+.phone-photo img{width:100%;aspect-ratio:9/12;object-fit:cover}
+.center-badge{
+  position:absolute;
+  left:50%;
+  top:215px;
+  transform:translateX(-50%);
+  z-index:2;
+  width:118px;height:146px;
+  background:var(--blue);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  border-radius:4px;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+  font-size:13px;
+  box-shadow:0 14px 25px rgba(0,94,154,.22);
+}
+.white-wave{
+  position:absolute;
+  left:-5%;
+  right:-5%;
+  bottom:-62px;
+  height:150px;
+  background:#fff;
+  border-radius:50% 50% 0 0/55% 55% 0 0;
+}
+.flow{
+  padding-top:135px;
+  padding-bottom:135px;
+}
+.flow-grid{
+  display:grid;
+  grid-template-columns:210px 210px 1fr;
+  gap:55px;
+}
+.flow-catch{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+  font-size:31px;
+  line-height:1.55;
+  writing-mode:vertical-rl;
+  letter-spacing:.08em;
+  margin-top:130px;
+}
+.flow-steps{
+  padding-top:18px;
+}
+.flow-step{
+  display:grid;
+  grid-template-columns:160px 1fr;
+  gap:48px;
+  align-items:center;
+  margin-bottom:62px;
+}
+.flow-step:not(:last-child)::after{
+  content:"";
+  display:block;
+  grid-column:1/3;
+  width:42px;height:42px;
+  margin:12px 0 -22px 188px;
+  border-right:3px solid var(--blue-soft);
+  border-bottom:3px solid var(--blue-soft);
+  transform:rotate(45deg);
+  border-radius:5px;
+}
+.flow-img{
+  border-radius:12px;
+  background:var(--blue-pale);
+  overflow:hidden;
+}
+.flow-img img{width:100%;aspect-ratio:1/1;object-fit:cover}
+.flow-text small{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+}
+.flow-text h3{
+  margin:8px 0 10px;
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:19px;
+}
+.flow-text p{font-size:13px;line-height:2;margin:0}
+.plan{
+  background:#fff;
+  padding-top:135px;
+  padding-bottom:130px;
+}
+.plan-grid{
+  display:grid;
+  grid-template-columns:210px 170px 1fr;
+  gap:58px;
+  align-items:start;
+}
+.plan-catch{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+  font-size:31px;
+  line-height:1.6;
+  writing-mode:vertical-rl;
+  letter-spacing:.08em;
+  margin-top:80px;
+}
+.plan-main{padding-top:0}
+.plan-visual{
+  width:min(620px,100%);
+  margin:0 auto 75px;
+}
+.plan-photo{
+  width:360px;
+  margin:0 auto -10px;
+  border-radius:16px;
+  background:var(--blue-pale);
+  overflow:hidden;
+}
+.plan-photo img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.price-box{
+  background:#d9edf8;
+  border-radius:10px;
+  padding:26px 34px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:25px;
+  border-top:8px solid #9dbed4;
+}
+.price-box small{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+}
+.price{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:58px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.01em;
+}
+.price span{font-size:22px}
+.includes div{
+  background:#fff;
+  margin-bottom:8px;
+  padding:7px 12px;
+  color:#42677d;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:13px;
+  font-weight:800;
+}
+.schedule{
+  max-width:900px;
+  margin:0 auto;
+  border-top:1px solid var(--blue);
+}
+.schedule-title{
+  text-align:center;
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+  padding:22px 0;
+  border-bottom:1px solid var(--blue);
+}
+.schedule-block{
+  padding:46px 0 34px;
+  border-bottom:1px solid #d6e8f3;
+}
+.schedule-block small{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+}
+.schedule-block h3{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  margin:8px 0 12px;
+  font-size:19px;
+}
+.schedule-block p{font-size:13px;margin:0;line-height:2}
+.timeline{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:35px;
+  margin-top:30px;
+}
+.timeline-card{
+  background:#fff;
+  box-shadow:var(--shadow);
+  border:1px solid #eef6fb;
+  padding:28px;
+  min-height:220px;
+}
+.timeline-card b{
+  display:inline-block;
+  background:var(--blue);
+  color:#fff;
+  border-radius:6px;
+  padding:5px 12px;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  margin-bottom:18px;
+}
+.timeline-card li{font-size:13px;margin-bottom:10px}
+.faq{
+  background:var(--gray);
+  padding-top:135px;
+  padding-bottom:120px;
+}
+.faq::before{
+  content:"";
+  position:absolute;
+  top:-60px;left:-4%;right:-4%;
+  height:130px;
+  background:#fff;
+  border-radius:0 0 50% 50%/0 0 70% 70%;
+}
+.faq-grid{
+  display:grid;
+  grid-template-columns:190px 1fr;
+  gap:95px;
+}
+.faq-list{padding-top:30px}
+details{
+  background:#d7edf9;
+  border-radius:4px;
+  margin-bottom:14px;
+  transition:all .3s var(--ease);
+}
+details:hover{transform:translateY(-2px)}
+summary{
+  cursor:pointer;
+  list-style:none;
+  padding:16px 58px 16px 24px;
+  position:relative;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+  color:#113247;
+  font-size:14px;
+}
+summary::-webkit-details-marker{display:none}
+summary:before{
+  content:"Q";
+  display:inline-grid;place-items:center;
+  width:25px;height:25px;
+  border-radius:50%;
+  background:#fff;color:#6d8da0;
+  margin-right:12px;
+}
+summary:after{
+  content:"+";
+  position:absolute;
+  right:22px;top:50%;
+  transform:translateY(-50%);
+  font-size:26px;
+  font-weight:400;
+}
+details[open] summary:after{content:"−"}
+details p{
+  margin:0;
+  padding:0 28px 22px 62px;
+  font-size:13px;
+  line-height:2;
+}
+.faq-more{text-align:right;margin-top:30px}
+.voice{
+  background:#fff;
+  padding-top:100px;
+  padding-bottom:95px;
+}
+.voice-head{padding-left:96px}
+.voice-row{
+  display:flex;
+  gap:24px;
+  margin-top:60px;
+  padding:0 0 10px 0;
+  transform:translateX(-72px);
+}
+.voice-card{
+  flex:0 0 285px;
+  min-height:260px;
+  background:#fff;
+  border-radius:8px;
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
+  padding:30px 24px;
+  position:relative;
+  transition:all .35s var(--ease);
+}
+.voice-card:hover{transform:translateY(-6px)}
+.voice-card .vnum{
+  position:absolute;
+  right:18px;top:18px;
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-weight:900;
+  transform:rotate(-35deg);
+}
+.voice-avatar{
+  width:82px;height:82px;border-radius:50%;
+  overflow:hidden;background:var(--blue-pale);
+  margin-bottom:22px;
+}
+.voice-avatar img{width:100%;height:100%;object-fit:cover}
+.voice-card h3{
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:16px;
+  line-height:1.55;
+  margin:0 0 10px;
+}
+.voice-card p{font-size:12px;line-height:1.9;margin:0}
+.plus{
+  position:absolute;
+  right:14px;bottom:14px;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--blue);color:#fff;
+  display:grid;place-items:center;
+  font-family:Arial,sans-serif;
+}
+.slider-nav{
+  display:flex;justify-content:center;align-items:center;gap:28px;
+  margin-top:28px;
+  font-family:Arial,sans-serif;
+}
+.nav-circle{
+  width:44px;height:44px;border-radius:50%;
+  border:0;background:#073c60;color:#fff;
+  display:grid;place-items:center;
+  transition:all .3s var(--ease);
+}
+.nav-circle:hover{transform:translateY(-3px)}
+.final-cta{
+  padding:40px 0 95px;
+}
+.follow{
+  text-align:center;
+  padding:0 96px 110px;
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  color:var(--blue);
+}
+.follow h2{font-size:34px;margin:0 0 4px;line-height:1}
+.follow p{margin:0 0 22px;font-weight:900}
+.sns{
+  display:flex;justify-content:center;gap:12px;
+}
+.sns a{
+  width:42px;height:42px;border-radius:50%;
+  background:var(--blue);color:#fff;
+  display:grid;place-items:center;
+  font-weight:900;
+  transition:all .3s var(--ease);
+}
+.sns a:hover{transform:translateY(-3px) rotate(8deg)}
+.footer{
+  position:relative;
+  padding:55px 60px 28px;
+  color:var(--blue);
+  font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+}
+.footer-catch{
+  font-weight:900;
+  font-size:38px;
+  line-height:1.2;
+  margin-bottom:28px;
+}
+.footer-big{
+  font-size:96px;
+  line-height:.9;
+  font-weight:900;
+  letter-spacing:.02em;
+  white-space:nowrap;
+}
+.footer-links{
+  position:absolute;
+  right:60px;
+  top:74px;
+  display:flex;
+  gap:22px;
+  font-size:11px;
+  color:#333;
+  font-weight:700;
+}
+.copy{
+  text-align:right;
+  color:#9a9a9a;
+  font-size:10px;
+  margin-top:12px;
+}
+html.js .reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .8s var(--ease),transform .8s var(--ease);
+}
+html.js .reveal.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+html.js .stagger > *{
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .75s var(--ease),transform .75s var(--ease);
+}
+html.js .stagger.is-visible > *{
+  opacity:1;
+  transform:translateY(0);
+}
+html.js .stagger.is-visible > *:nth-child(2){transition-delay:.08s}
+html.js .stagger.is-visible > *:nth-child(3){transition-delay:.16s}
+html.js .stagger.is-visible > *:nth-child(4){transition-delay:.24s}
+html.js .hero .window-row{
+  animation:heroFade .9s var(--ease) both .12s;
+}
+html.js .hero-person{
+  animation:heroZoom .95s var(--ease) both .35s;
+}
+html.js .hero-title{
+  animation:heroSlide .8s var(--ease) both .55s;
+}
+@keyframes heroFade{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes heroZoom{
+  from{opacity:0;transform:translateX(-50%) scale(.94) translateY(18px)}
+  to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}
+}
+@keyframes heroSlide{
+  from{opacity:0;transform:translateX(16px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media (max-width:960px){
+  .header{height:auto;padding:18px 20px;align-items:flex-start}
+  .nav{display:none}
+  .logo{font-size:17px}
+  .hero{min-height:650px}
+  .hero-inner{height:520px;padding:0 20px}
+  .window-row{grid-template-columns:1fr 1fr;gap:16px}
+  .photo-window{height:175px;border-width:6px}
+  .photo-window.left{transform:none}
+  .photo-window.right{display:none}
+  .hero-person{width:230px;top:225px}
+  .hero-title{right:18px;top:235px;font-size:27px}
+  .hero-sub{left:20px;bottom:28px;grid-template-columns:1fr}
+  .hero-cta{right:20px;bottom:45px}
+  .section{padding-left:24px;padding-right:24px}
+  .about-grid,.service-top,.flow-grid,.plan-grid,.faq-grid{
+    grid-template-columns:1fr;
+    gap:28px;
+  }
+  .label-line{width:25px}
+  .about-copy{padding-top:20px;font-size:16px}
+  .vertical-catch,.flow-catch,.plan-catch{
+    writing-mode:horizontal-tb;
+    font-size:28px;
+    margin-top:0;
+    justify-self:start;
+  }
+  .cta-card{width:calc(100% - 32px);padding:28px 24px 150px}
+  .cta-box{width:100%}
+  .cta-photo{width:150px;right:18px}
+  .bubble{right:145px;width:105px;height:105px;font-size:10px}
+  .service-list{grid-column:auto;grid-template-columns:1fr;gap:42px;margin-top:20px}
+  .book-passport{justify-self:start}
+  .feature-band{padding:105px 24px 120px}
+  .marquee{font-size:54px}
+  .feature-cards{grid-template-columns:1fr;gap:28px}
+  .center-badge{display:none}
+  .flow-step{grid-template-columns:100px 1fr;gap:20px}
+  .flow-step:not(:last-child)::after{margin-left:112px}
+  .price-box,.timeline{grid-template-columns:1fr}
+  .voice-head{padding-left:24px}
+  .voice-row{transform:none;overflow-x:auto;padding:0 24px 12px}
+  .follow{padding-left:24px;padding-right:24px}
+  .footer{padding:45px 24px 24px}
+  .footer-catch{font-size:28px}
+  .footer-big{font-size:50px}
+  .footer-links{position:static;flex-wrap:wrap;margin-bottom:20px}
+}
+</style>
+</head>
+<body>
+<div class="site">
+  <header class="header">
+    <a href="#" class="logo">
+      <span class="logo-mark" aria-hidden="true"></span>
+      <span>ソラノワークス</span>
+    </a>
+    <nav class="nav" aria-label="主要メニュー">
+      <a href="#about">特徴</a>
+      <a href="#service">できる仕事</a>
+      <a href="#flow">ご利用の流れ</a>
+      <a href="#plan">工賃・支援</a>
+      <a href="#faq">よくある質問</a>
+      <a href="#voice">声</a>
+    </nav>
+    <div class="header-actions">
+      <a class="btn-mini" href="#faq">相談する</a>
+      <a class="btn-mini yellow" href="#entry">見学予約</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-label="メインビジュアル">
+      <div class="hero-inner">
+        <div class="window-row">
+          <div class="photo-window left">
+            <img src="https://loremflickr.com/520/320/office,workspace?lock=2101" width="520" height="320" alt="明るい作業室の写真">
+          </div>
+          <div class="photo-window center">
+            <img src="https://loremflickr.com/760/320/teamwork,office?lock=2102" width="760" height="320" alt="チームで仕事をする様子">
+          </div>
+          <div class="photo-window right">
+            <img src="https://loremflickr.com/520/320/cafe,work?lock=2103" width="520" height="320" alt="落ち着いた作業スペース">
+          </div>
+        </div>
+
+        <div class="hero-person">
+          <img src="https://loremflickr.com/420/520/person,working,desk?lock=2104" width="420" height="520" alt="集中して仕事に取り組む利用者">
+        </div>
+
+        <h1 class="hero-title">
+          <span>働くたび、</span>
+          <span>明日が動く。</span>
+        </h1>
+
+        <div class="hero-lower"></div>
+        <div class="hero-sub">
+          <strong>THE<br>WORK<br>COMPASS</strong>
+          <p>あなたのペースを<br>守りながら<br>社会へつながる場所</p>
+        </div>
+        <div class="hero-cta">
+          <a href="#entry" class="pill-btn"><span class="spin-icon">↗</span>見学・相談はこちら</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section about" id="about">
+      <span class="label-line"></span>
+      <div class="about-grid">
+        <div class="sec-head reveal">
+          <span class="num">[01]</span>
+          <h2>About</h2>
+          <small>ソラノワークスとは</small>
+        </div>
+
+        <div class="about-copy reveal">
+          <p>働くことは、誰かに合わせすぎることではなく。<br>
+          自分のリズムを知り、少しずつ外へ出ていくこと。</p>
+
+          <p>朝が不安な日も、集中が続かない日も、<br>
+          その日のあなたを置き去りにしない場所でありたい。</p>
+
+          <p>ソラノワークスは、就労継続支援A型の事業所です。<br>
+          Web更新、軽作業、事務補助、デザイン補助など、<br>
+          得意を見つけながら、実際の仕事に取り組みます。</p>
+
+          <p>動き出す毎日に、やさしい伴走を。<br>
+          あなたが「できた」と思える瞬間を、<br>
+          一緒に増やしていきます。</p>
+
+          <a class="more-btn" href="#service">もっと知る <span class="spin-icon">↗</span></a>
+        </div>
+
+        <div class="vertical-catch reveal">やさしく働き、前へ進もう。</div>
+      </div>
+    </section>
+
+    <section class="cta-card reveal" id="entry">
+      <div class="start">［ Start Sorano Works ］</div>
+      <h3>ソラノワークスで、はじめての一歩を。</h3>
+      <div class="cta-box">
+        <div>
+          まずは30分の見学から。ご家族・支援者同席も歓迎です。<br>
+          <a href="#" class="line-btn">LINEで見学予約する <span>↗</span></a>
+        </div>
+      </div>
+      <div class="bubble">不安なことも<br>そのまま<br>話してください</div>
+      <div class="cta-photo">
+        <img src="https://loremflickr.com/300/380/counseling,office?lock=2105" width="300" height="380" alt="相談しながら進める様子">
+      </div>
+    </section>
+
+    <section class="section service" id="service">
+      <span class="label-line"></span>
+      <div class="service-top">
+        <div class="sec-head reveal">
+          <span class="num">[02]</span>
+          <h2>Service</h2>
+          <small>お仕事と支援内容</small>
+        </div>
+        <div></div>
+        <div class="book-passport reveal">THE<br>WORK<br>COMPASS</div>
+
+        <div class="service-list stagger">
+          <article class="service-item">
+            <div class="service-img">
+              <img src="https://loremflickr.com/300/300/computer,desk?lock=2106" width="300" height="300" alt="パソコン作業の写真">
+            </div>
+            <h3>あなたに合わせた作業設計</h3>
+            <p>Web更新、入力作業、画像整理、発送準備などから、得意・体調・集中時間に合わせて仕事を組み立てます。</p>
+          </article>
+
+          <article class="service-item">
+            <div class="service-img">
+              <img src="https://loremflickr.com/300/300/training,workshop?lock=2107" width="300" height="300" alt="研修を受ける様子">
+            </div>
+            <h3>毎日届く、小さな達成感</h3>
+            <p>作業は細かく分け、スタッフが確認しながら進行。成功体験を積み重ね、次の挑戦につなげます。</p>
+          </article>
+
+          <article class="service-item">
+            <div class="service-img">
+              <img src="https://loremflickr.com/300/300/community,office?lock=2108" width="300" height="300" alt="穏やかなコミュニティの写真">
+            </div>
+            <h3>就職につながる記録と面談</h3>
+            <p>日々の体調、作業時間、得意な工程を記録。月1回の面談で、一般就労や次の目標を一緒に整理します。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-band">
+      <div class="marquee sans" aria-hidden="true">
+        <span>What is work compass ?</span><span>What is work compass ?</span><span>What is work compass ?</span>
+      </div>
+
+      <div class="feature-intro reveal">
+        <h2>［ ワークコンパスについて ］</h2>
+        <p>ソラノワークスでは、通所を「ただ出席する日」ではなく、あなたの状態と成長を見える化する旅のように捉えています。<br>
+        体調、作業、気づき、スタッフからのフィードバックを重ねながら、無理なく働く力を育てます。</p>
+      </div>
+
+      <div class="feature-cards stagger">
+        <article class="feature-card">
+          <small>Feature 01</small>
+          <h3>できたことの記録</h3>
+          <p>その日の作業内容、集中できた時間、助けを求められた場面を記録。小さな前進を見逃さない仕組みです。</p>
+          <div class="phone-photo">
+            <img src="https://loremflickr.com/360/480/notebook,work?lock=2109" width="360" height="480" alt="記録ノートの写真">
+          </div>
+        </article>
+
+        <div class="center-badge">SORANO<br>WORKS<br>COMPASS</div>
+
+        <article class="feature-card">
+          <small>Feature 02</small>
+          <h3>振り返り面談</h3>
+          <p>スタッフと一緒に、うまくいったこと・疲れやすい場面を確認。次の一週間を安心して始められるよう整えます。</p>
+          <div class="phone-photo">
+            <img src="https://loremflickr.com/360/480/meeting,office?lock=2110" width="360" height="480" alt="面談のイメージ写真">
+          </div>
+        </article>
+      </div>
+      <div class="white-wave"></div>
+    </section>
+
+    <section class="section flow" id="flow">
+      <span class="label-line"></span>
+      <div class="flow-grid">
+        <div class="sec-head reveal">
+          <span class="num">[03]</span>
+          <h2>Flow</h2>
+          <small>ご利用までの流れ</small>
+        </div>
+
+        <div class="flow-catch reveal">カルテに答えるだけであなたに合う働き方へ。</div>
+
+        <div class="flow-steps stagger">
+          <article class="flow-step">
+            <div class="flow-img">
+              <img src="https://loremflickr.com/240/240/form,desk?lock=2111" width="240" height="240" alt="相談フォームの写真">
+            </div>
+            <div class="flow-text">
+              <small>Flow 01</small>
+              <h3>見学予約・事前ヒアリング</h3>
+              <p>LINEまたはお電話でご連絡ください。通所への不安、働きたい時間、得意・苦手を簡単に伺います。</p>
+            </div>
+          </article>
+
+          <article class="flow-step">
+            <div class="flow-img">
+              <img src="https://loremflickr.com/240/240/counseling,people?lock=2112" width="240" height="240" alt="面談を行う写真">
+            </div>
+            <div class="flow-text">
+              <small>Flow 02</small>
+              <h3>見学・体験利用</h3>
+              <p>事業所の雰囲気や作業内容を確認。短い体験から始め、無理なく通えるかを一緒に見ます。</p>
+            </div>
+          </article>
+
+          <article class="flow-step">
+            <div class="flow-img">
+              <img src="https://loremflickr.com/240/240/workplace,office?lock=2113" width="240" height="240" alt="職場で作業する写真">
+            </div>
+            <div class="flow-text">
+              <small>Flow 03</small>
+              <h3>利用開始・個別支援スタート</h3>
+              <p>支援計画を作成し、あなたのペースで仕事を開始。スタッフが毎日の作業と体調をサポートします。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section plan" id="plan">
+      <span class="label-line"></span>
+      <div class="plan-grid">
+        <div class="sec-head reveal">
+          <span class="num">[04]</span>
+          <h2>Plan</h2>
+          <small>工賃・利用条件</small>
+        </div>
+
+        <div class="plan-catch reveal">工賃はあなたの働いた時間分。</div>
+
+        <div class="plan-main">
+          <div class="plan-visual reveal">
+            <div class="plan-photo">
+              <img src="https://loremflickr.com/520/320/payroll,office?lock=2114" width="520" height="320" alt="給与明細と作業机の写真">
+            </div>
+            <div class="price-box">
+              <div>
+                <small>Wage</small>
+                <div class="price">1,080<span>円〜/時</span></div>
+                <p style="margin:12px 0 0;font-size:12px;line-height:1.8;">最低賃金以上をお支払いします。勤務時間は体調に合わせて相談できます。</p>
+              </div>
+              <div class="includes">
+                <small>支援に含まれるもの</small>
+                <div>個別支援計画の作成</div>
+                <div>作業トレーニング</div>
+                <div>定期面談・体調確認</div>
+                <div>一般就労への準備</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="schedule reveal">
+            <div class="schedule-title">通所スケジュールについて</div>
+
+            <div class="schedule-block">
+              <small>Schedule 01</small>
+              <h3>通所日と時間の決め方</h3>
+              <p>週3日から相談可能です。午前だけ、午後からなど、生活リズムに合わせたスタートを大切にしています。慣れてきたら日数や時間を増やすこともできます。</p>
+            </div>
+
+            <div class="schedule-block">
+              <small>Schedule 02</small>
+              <h3>一日の流れについて</h3>
+              <p>無理なく集中できるよう、作業と休憩を細かく区切ります。体調が不安な日はスタッフへ早めに相談できます。</p>
+
+              <div class="timeline">
+                <div class="timeline-card">
+                  <b>例：午前から通所</b>
+                  <ul>
+                    <li>10:00　朝の確認・作業準備</li>
+                    <li>10:15　Web更新または軽作業</li>
+                    <li>12:00　休憩・振り返り</li>
+                    <li>13:00　希望により午後作業</li>
+                  </ul>
+                </div>
+                <div class="timeline-card">
+                  <b>例：午後から通所</b>
+                  <ul>
+                    <li>13:00　体調確認・作業選択</li>
+                    <li>13:15　入力作業・制作補助</li>
+                    <li>14:30　休憩</li>
+                    <li>15:30　記録・スタッフ面談</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <p style="font-size:12px;line-height:2;margin-top:22px;">※利用にはお住まいの自治体での受給者証が必要です。申請についてもスタッフが案内します。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <span class="label-line"></span>
+      <div class="faq-grid">
+        <div class="sec-head reveal">
+          <span class="num">[05]</span>
+          <h2>FAQ</h2>
+          <small>よくある質問</small>
+        </div>
+
+        <div class="faq-list stagger">
+          <details>
+            <summary>障害者手帳がなくても相談できますか？</summary>
+            <p>はい、まずはご相談ください。医師の診断や自治体の判断により利用できる場合があります。必要な手続きも一緒に確認します。</p>
+          </details>
+          <details>
+            <summary>どんな人が、どのような仕事をしていますか？</summary>
+            <p>精神障害、発達障害、身体障害など、さまざまな方が通所しています。Web更新、事務補助、軽作業、デザイン補助などを分担しています。</p>
+          </details>
+          <details>
+            <summary>毎日通えなくても大丈夫ですか？</summary>
+            <p>大丈夫です。週3日程度から始める方もいます。体調や生活リズムを見ながら、無理のない通所計画を作ります。</p>
+          </details>
+          <details>
+            <summary>人間関係が不安です。静かに作業できますか？</summary>
+            <p>作業席や休憩の取り方を調整できます。会話が多すぎない環境づくりと、困った時にスタッフへ相談できる体制を整えています。</p>
+          </details>
+          <details>
+            <summary>一般就労を目指すこともできますか？</summary>
+            <p>はい。日々の記録や面談をもとに、応募書類、面接練習、職場見学などの準備を段階的に行います。</p>
+          </details>
+
+          <div class="faq-more">
+            <a class="pill-btn" href="#entry">すべての質問を見る <span class="spin-icon">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="voice" id="voice">
+      <div class="voice-head sec-head reveal">
+        <span class="num">[06]</span>
+        <h2>Voice</h2>
+        <small>利用者さんの声</small>
+      </div>
+
+      <div class="voice-row stagger">
+        <article class="voice-card">
+          <span class="vnum">Voice 01</span>
+          <div class="voice-avatar">
+            <img src="https://loremflickr.com/120/120/portrait,person?lock=2115" width="120" height="120" alt="利用者の写真">
+          </div>
+          <h3>朝、外へ出る理由ができました</h3>
+          <p>最初は週3日から。スタッフさんが声をかけてくれるので、少しずつ生活のリズムが戻りました。</p>
+          <span class="plus">＋</span>
+        </article>
+
+        <article class="voice-card">
+          <span class="vnum">Voice 02</span>
+          <div class="voice-avatar">
+            <img src="https://loremflickr.com/120/120/person,smile?lock=2116" width="120" height="120" alt="利用者の写真">
+          </div>
+          <h3>パソコン作業に自信がついた</h3>
+          <p>入力や画像整理から始めて、今はWeb更新にも挑戦しています。できることが増えるのが嬉しいです。</p>
+          <span class="plus">＋</span>
+        </article>
+
+        <article class="voice-card">
+          <span class="vnum">Voice 03</span>
+          <div class="voice-avatar">
+            <img src="https://loremflickr.com/120/120/portrait,worker?lock=2117" width="120" height="120" alt="利用者の写真">
+          </div>
+          <h3>疲れた時に言えるようになった</h3>
+          <p>無理をする前に相談する練習をしています。働くための自分のペースが分かってきました。</p>
+          <span class="plus">＋</span>
+        </article>
+
+        <article class="voice-card">
+          <span class="vnum">Voice 04</span>
+          <div class="voice-avatar">
+            <img src="https://loremflickr.com/120/120/office,person?lock=2118" width="120" height="120" alt="利用者の写真">
+          </div>
+          <h3>新しい場所に少し慣れました</h3>
+          <p>見学の時から静かな雰囲気で安心できました。今は短時間でも続けられていることが自信です。</p>
+          <span class="plus">＋</span>
+        </article>
+
+        <article class="voice-card">
+          <span class="vnum">Voice 05</span>
+          <div class="voice-avatar">
+            <img src="https://loremflickr.com/120/120/team,person?lock=2119" width="120" height="120" alt="利用者の写真">
+          </div>
+          <h3>一般就労の準備が見えてきた</h3>
+          <p>面談で得意な作業を整理してもらい、次に目指す働き方が少し具体的になりました。</p>
+          <span class="plus">＋</span>
+        </article>
+      </div>
+
+      <div class="slider-nav">
+        <button class="nav-circle" type="button" aria-label="前へ">‹</button>
+        <span>Ⅱ</span>
+        <button class="nav-circle" type="button" aria-label="次へ">›</button>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="cta-card reveal">
+        <div class="start">［ Start Sorano Works ］</div>
+        <h3>見学は、うまく話せなくても大丈夫です。</h3>
+        <div class="cta-box">
+          <div>
+            支援者・ご家族からのご相談も受け付けています。<br>
+            <a href="#" class="line-btn">LINEで見学予約する <span>↗</span></a>
+          </div>
+        </div>
+        <div class="bubble">あなたの速度で<br>一緒に<br>始めましょう</div>
+        <div class="cta-photo">
+          <img src="https://loremflickr.com/300/380/support,work?lock=2120" width="300" height="380" alt="仕事をサポートする様子">
+        </div>
+      </div>
+    </section>
+
+    <section class="follow reveal">
+      <h2>Follow us</h2>
+      <p>SNSでも事業所の日常を発信中！</p>
+      <div class="sns">
+        <a href="#" aria-label="X">×</a>
+        <a href="#" aria-label="Instagram">◎</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <nav class="footer-links" aria-label="フッターメニュー">
+      <a href="#">運営会社</a>
+      <a href="#">利用規約</a>
+      <a href="#">プライバシーポリシー</a>
+      <a href="#">特定商取引法に基づく表記</a>
+    </nav>
+    <div class="footer-catch">働くたび、明日が動く</div>
+    <div class="footer-big">THE WORK COMPASS</div>
+    <div class="copy">© Sorano Works Studio, Inc.</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const targets = document.querySelectorAll('.reveal, .stagger');
+  if(!('IntersectionObserver' in window)){
+    targets.forEach(el => el.classList.add('is-visible'));
+    return;
+  }
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        io.unobserve(entry.target);
+      }
+    });
+  },{threshold:0.14, rootMargin:'0px 0px -8% 0px'});
+  targets.forEach(el=>io.observe(el));
+
+  const row = document.querySelector('.voice-row');
+  document.querySelectorAll('.slider-nav .nav-circle').forEach((btn,i)=>{
+    btn.addEventListener('click',()=>{
+      if(!row) return;
+      row.scrollBy({left:i===0 ? -310 : 310, behavior:'smooth'});
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(!els.length) return;
+    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
+    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    setTimeout(function(){
+      els.forEach(function(e){
+        if(parseFloat(getComputedStyle(e).opacity)===0){
+          show(e); e.style.opacity='1'; e.style.transform='none';
+        }
+      });
+    }, 3500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+</body>
+</html>

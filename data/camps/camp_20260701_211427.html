@@ -1,0 +1,1776 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<script>document.documentElement.classList.add('js');</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOOKS & BLOOM｜就労継続支援A型</title>
+<meta name="description" content="本とアニメの世界観で、あなたのペースに寄り添う就労継続支援A型事業所 BOOKS & BLOOM のランディングページです。">
+<style>
+  :root{
+    --blue:#0071b9;
+    --blue-dark:#005f9d;
+    --pale:#b2d4ea;
+    --pale2:#dff0fa;
+    --yellow:#f2e018;
+    --ink:#333333;
+    --white:#ffffff;
+    --soft:#fafafa;
+    --line:#c7e3f3;
+    --shadow:rgba(174,174,174,.1) 5px 5px 10px 0px;
+    --max:1440px;
+    --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","YuGothic","Noto Sans JP",Arial,sans-serif;
+    --serif:"Times New Roman","Yu Mincho","YuMincho","Hiragino Mincho ProN",serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    color:var(--ink);
+    background:var(--soft);
+    font-family:var(--serif);
+    line-height:1.9;
+    letter-spacing:.035em;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+  button,input{font:inherit}
+  .page{
+    width:100%;
+    max-width:var(--max);
+    margin:0 auto;
+    background:var(--soft);
+    overflow:hidden;
+  }
+
+  .site-header{
+    position:fixed;
+    z-index:50;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:var(--max);
+    height:74px;
+    background:var(--blue);
+    color:#fff;
+    font-family:var(--sans);
+  }
+  .header-inner{
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 34px;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:900;
+    letter-spacing:.02em;
+    font-size:20px;
+    white-space:nowrap;
+  }
+  .logo-mark{
+    width:24px;
+    height:24px;
+    border-radius:5px;
+    background:#fff;
+    position:relative;
+    box-shadow:inset 0 -7px 0 var(--pale);
+  }
+  .logo-mark:before{
+    content:"";
+    position:absolute;
+    left:7px;
+    top:4px;
+    width:2px;
+    height:16px;
+    background:var(--blue);
+    border-radius:2px;
+  }
+  .nav{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    font-size:12px;
+    font-weight:700;
+  }
+  .nav a{opacity:.95;transition:.25s}
+  .nav a:hover{opacity:1;transform:translateY(-1px)}
+  .header-actions{display:flex;align-items:center;gap:10px}
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:32px;
+    border-radius:999px;
+    padding:7px 17px;
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:800;
+    line-height:1;
+    transition:transform .25s ease,box-shadow .25s ease,background .25s ease;
+    white-space:nowrap;
+  }
+  .pill.login{background:#fff;color:var(--blue)}
+  .pill.entry{background:var(--yellow);color:#333}
+  .pill:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,.12)}
+  .hamb{display:none}
+
+  .hero{
+    padding-top:74px;
+    background:var(--blue);
+    min-height:525px;
+    position:relative;
+    color:#fff;
+  }
+  .hero-stage{
+    position:relative;
+    height:455px;
+    overflow:hidden;
+  }
+  .window-row{
+    position:absolute;
+    inset:62px auto auto 0;
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 2.15fr 1fr;
+    gap:68px;
+    align-items:start;
+  }
+  .window{
+    height:245px;
+    border:8px solid #fff;
+    border-radius:8px;
+    overflow:hidden;
+    background:var(--pale);
+    box-shadow:0 8px 0 rgba(255,255,255,.14);
+  }
+  .window img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    filter:saturate(.92) contrast(.95);
+  }
+  .window.left{transform:translateX(-55px)}
+  .window.center{height:278px}
+  .window.right{transform:translateX(55px)}
+  .hero-person{
+    position:absolute;
+    left:50%;
+    bottom:4px;
+    transform:translateX(-50%);
+    width:min(390px,35vw);
+    min-width:260px;
+    border-radius:26px;
+    overflow:hidden;
+    background:var(--pale);
+    box-shadow:0 25px 45px rgba(0,58,96,.18);
+  }
+  .hero-person img{
+    width:100%;
+    aspect-ratio:4/3;
+    object-fit:cover;
+  }
+  .hero-copy{
+    position:absolute;
+    right:55px;
+    top:58px;
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+    font-family:var(--sans);
+    color:var(--blue);
+  }
+  .hero-copy span{
+    writing-mode:vertical-rl;
+    text-orientation:mixed;
+    background:#fff;
+    padding:17px 9px;
+    font-size:38px;
+    line-height:1.05;
+    font-weight:900;
+    letter-spacing:.04em;
+  }
+  .hero-copy span:nth-child(2){margin-top:28px}
+  .hero-under{
+    position:relative;
+    height:126px;
+    background:var(--soft);
+  }
+  .passport-small{
+    position:absolute;
+    left:32px;
+    top:32px;
+    display:flex;
+    align-items:flex-start;
+    gap:42px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-weight:900;
+    font-size:11px;
+    line-height:1.15;
+    letter-spacing:.04em;
+  }
+  .passport-small em{
+    font-style:normal;
+    font-size:10px;
+    line-height:1.7;
+  }
+  .hero-cta{
+    position:absolute;
+    right:36px;
+    top:35px;
+    background:var(--blue);
+    color:#fff;
+    gap:8px;
+    min-width:180px;
+    box-shadow:var(--shadow);
+  }
+  .btn-arrow:after{
+    content:"→";
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;
+    height:22px;
+    margin-left:8px;
+    border-radius:50%;
+    background:rgba(255,255,255,.22);
+    line-height:1;
+    transition:.25s;
+  }
+  .btn-arrow:hover:after{transform:translateX(3px);background:#fff;color:var(--blue)}
+
+  section{
+    position:relative;
+  }
+  .section-label{
+    font-family:var(--sans);
+    color:var(--blue);
+    font-weight:900;
+    line-height:1.1;
+  }
+  .section-label .num{
+    display:block;
+    font-size:10px;
+    letter-spacing:.16em;
+    margin-bottom:7px;
+  }
+  .section-label .en{
+    display:block;
+    font-size:26px;
+    letter-spacing:.01em;
+  }
+  .section-label .ja{
+    display:block;
+    margin-top:6px;
+    font-size:10px;
+    letter-spacing:.08em;
+  }
+  .section-label:before{
+    content:"";
+    display:block;
+    width:55px;
+    height:1px;
+    background:var(--blue);
+    opacity:.48;
+    margin:0 0 18px -88px;
+  }
+
+  .about{
+    min-height:790px;
+    padding:92px 92px 70px;
+    background:var(--soft);
+  }
+  .about-grid{
+    display:grid;
+    grid-template-columns:180px minmax(420px,650px) 1fr;
+    gap:80px;
+    align-items:start;
+  }
+  .about-body{
+    padding-top:74px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-weight:800;
+    font-size:18px;
+    line-height:2.35;
+  }
+  .about-body p{margin:0 0 48px}
+  .about-vertical{
+    justify-self:end;
+    writing-mode:vertical-rl;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-weight:900;
+    font-size:43px;
+    line-height:1.35;
+    letter-spacing:.08em;
+    padding-top:10px;
+  }
+  .small-more{
+    display:inline-flex;
+    align-items:center;
+    min-height:34px;
+    padding:8px 18px;
+    border-radius:999px;
+    background:var(--blue);
+    color:#fff;
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:900;
+    line-height:1;
+    transition:.25s ease;
+  }
+  .small-more:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(0,113,185,.16)}
+
+  .wide-cta{
+    width:min(980px,calc(100% - 170px));
+    margin:0 auto;
+    background:var(--blue);
+    color:#fff;
+    border-radius:12px;
+    min-height:245px;
+    display:grid;
+    grid-template-columns:1fr 210px;
+    align-items:center;
+    padding:38px 42px 34px 56px;
+    position:relative;
+    box-shadow:var(--shadow);
+    font-family:var(--sans);
+  }
+  .wide-cta .start{
+    font-size:12px;
+    font-weight:700;
+    opacity:.9;
+    margin-bottom:8px;
+  }
+  .wide-cta h2{
+    margin:0 0 28px;
+    font-size:31px;
+    line-height:1.25;
+    letter-spacing:.02em;
+  }
+  .line-box{
+    background:#fff;
+    color:#333;
+    border:4px solid var(--pale);
+    border-radius:8px;
+    min-height:92px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:24px;
+    text-align:center;
+    font-weight:800;
+  }
+  .line-box small{display:block;font-size:13px;line-height:1.6}
+  .line-btn{
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    padding:12px 20px;
+    background:#00b900;
+    color:#fff;
+    font-size:14px;
+    line-height:1;
+    transition:.25s;
+    white-space:nowrap;
+  }
+  .line-btn:hover{transform:translateY(-2px);filter:brightness(1.04)}
+  .wide-cta-visual{
+    align-self:end;
+    position:relative;
+  }
+  .wide-cta-visual .bubble{
+    position:absolute;
+    right:0;
+    top:-62px;
+    width:122px;
+    height:122px;
+    border-radius:50%;
+    background:var(--pale);
+    color:var(--blue);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:11px;
+    font-weight:900;
+    line-height:1.6;
+  }
+  .wide-cta-visual .photo{
+    margin-top:40px;
+    border-radius:12px;
+    overflow:hidden;
+    background:var(--pale);
+  }
+  .wide-cta-visual img{
+    width:180px;
+    height:160px;
+    object-fit:cover;
+  }
+
+  .service{
+    padding:138px 92px 120px;
+    background:var(--soft);
+  }
+  .service-head{
+    display:grid;
+    grid-template-columns:220px 1fr 190px;
+    align-items:start;
+    margin-bottom:68px;
+  }
+  .book-title{
+    justify-self:end;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:25px;
+    line-height:1.3;
+    font-weight:900;
+    letter-spacing:.05em;
+  }
+  .service-list{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:86px;
+    padding:0 42px;
+  }
+  .service-item .img-wrap{
+    width:100%;
+    aspect-ratio:1.15/1;
+    background:var(--pale2);
+    border-radius:2px;
+    overflow:hidden;
+    margin-bottom:28px;
+  }
+  .service-item img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .service-item h3{
+    margin:0 0 12px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:17px;
+    line-height:1.45;
+    font-weight:900;
+  }
+  .service-item p{
+    margin:0;
+    font-size:13px;
+    line-height:2;
+    font-weight:600;
+  }
+
+  .passport{
+    background:var(--pale);
+    padding:108px 92px 0;
+    min-height:850px;
+    position:relative;
+  }
+  .passport:before{
+    content:"What is work book ?  What is work book ?";
+    position:absolute;
+    top:-60px;
+    left:-40px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:92px;
+    font-weight:900;
+    line-height:1;
+    white-space:nowrap;
+    letter-spacing:.01em;
+  }
+  .passport-inner{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    max-width:1020px;
+    margin:0 auto;
+  }
+  .passport h2{
+    margin:0 0 28px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:22px;
+    font-weight:900;
+    letter-spacing:.1em;
+  }
+  .passport p.lead{
+    max-width:780px;
+    margin:0 auto 78px;
+    font-size:14px;
+    font-weight:600;
+    line-height:2.15;
+  }
+  .feature-cards{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:92px;
+    align-items:end;
+  }
+  .feature-card{
+    background:#fff;
+    border-radius:14px;
+    min-height:460px;
+    padding:38px 38px 0;
+    text-align:left;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    transition:.28s ease;
+  }
+  .feature-card:hover{transform:translateY(-5px);box-shadow:0 16px 36px rgba(0,113,185,.13)}
+  .feature-card .tag{
+    display:block;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:900;
+    margin-bottom:12px;
+  }
+  .feature-card h3{
+    margin:0 0 13px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:19px;
+    line-height:1.45;
+  }
+  .feature-card p{margin:0 0 26px;font-size:13px;font-weight:600}
+  .feature-card .screen{
+    margin:0 auto;
+    width:72%;
+    border-radius:22px 22px 0 0;
+    overflow:hidden;
+    background:var(--pale2);
+  }
+  .feature-card img{
+    width:100%;
+    aspect-ratio:3/4;
+    object-fit:cover;
+  }
+  .book-float{
+    position:absolute;
+    left:50%;
+    top:455px;
+    transform:translateX(-50%);
+    width:118px;
+    height:150px;
+    border-radius:4px;
+    background:var(--blue);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:900;
+    box-shadow:0 14px 28px rgba(0,92,151,.16);
+    z-index:2;
+  }
+  .wave{
+    height:108px;
+    background:var(--soft);
+    margin:90px -92px 0;
+    border-radius:50% 50% 0 0 / 55% 55% 0 0;
+  }
+
+  .flow{
+    padding:130px 92px 118px;
+    background:var(--soft);
+  }
+  .flow-grid{
+    display:grid;
+    grid-template-columns:230px 230px 1fr;
+    gap:48px;
+    align-items:start;
+  }
+  .flow-vertical{
+    writing-mode:vertical-rl;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:31px;
+    line-height:1.4;
+    font-weight:900;
+    letter-spacing:.08em;
+    padding-top:140px;
+    justify-self:center;
+  }
+  .flow-steps{
+    padding-top:36px;
+  }
+  .flow-step{
+    display:grid;
+    grid-template-columns:180px 1fr;
+    gap:44px;
+    align-items:center;
+    margin-bottom:58px;
+    position:relative;
+  }
+  .flow-step:not(:last-child):after{
+    content:"↓";
+    position:absolute;
+    left:86px;
+    bottom:-44px;
+    color:var(--blue);
+    font-size:42px;
+    font-family:var(--sans);
+    opacity:.45;
+  }
+  .flow-step .pic{
+    border-radius:12px;
+    overflow:hidden;
+    background:var(--pale2);
+  }
+  .flow-step img{
+    width:180px;
+    height:160px;
+    object-fit:cover;
+  }
+  .flow-step .flow-no{
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:900;
+    margin-bottom:9px;
+  }
+  .flow-step h3{
+    margin:0 0 12px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:19px;
+    line-height:1.45;
+  }
+  .flow-step p{margin:0;font-size:13px;font-weight:600;line-height:2}
+
+  .plan{
+    padding:132px 92px 118px;
+    background:#fff;
+  }
+  .plan-top{
+    display:grid;
+    grid-template-columns:220px 170px 1fr;
+    gap:48px;
+    align-items:start;
+    margin-bottom:120px;
+  }
+  .plan-vertical{
+    writing-mode:vertical-rl;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:31px;
+    line-height:1.45;
+    font-weight:900;
+    letter-spacing:.08em;
+    padding-top:114px;
+  }
+  .plan-main{
+    padding-right:54px;
+  }
+  .plan-visual{
+    width:min(620px,100%);
+    margin:0 auto 20px;
+    background:linear-gradient(180deg,var(--pale2),#fff);
+    border-radius:16px;
+    overflow:hidden;
+  }
+  .plan-visual img{
+    width:100%;
+    aspect-ratio:16/8.2;
+    object-fit:cover;
+  }
+  .price-card{
+    width:min(650px,100%);
+    margin:0 auto;
+    background:#cfe7f6;
+    border-radius:7px;
+    border-top:10px solid #9fc5dd;
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:28px;
+    padding:28px 32px;
+    font-family:var(--sans);
+    color:var(--blue);
+  }
+  .price-card .label{font-size:13px;font-weight:900}
+  .price{
+    font-size:58px;
+    line-height:1;
+    font-weight:900;
+    letter-spacing:.01em;
+  }
+  .price small{font-size:23px}
+  .price-note{
+    margin-top:10px;
+    color:#333;
+    font-family:var(--serif);
+    font-size:13px;
+    font-weight:700;
+  }
+  .includes{
+    margin:0;
+    padding:0;
+    list-style:none;
+  }
+  .includes li{
+    background:#fff;
+    margin-bottom:7px;
+    padding:8px 12px;
+    color:#333;
+    font-size:13px;
+    font-weight:800;
+  }
+  .schedule{
+    max-width:880px;
+    margin:0 auto;
+    border-top:1px solid var(--blue);
+    padding-top:36px;
+  }
+  .schedule-title{
+    text-align:center;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-weight:900;
+    border-bottom:1px solid var(--blue);
+    padding-bottom:22px;
+    margin-bottom:48px;
+  }
+  .schedule-block{
+    margin-bottom:54px;
+  }
+  .schedule-block .sub{
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:900;
+    margin-bottom:9px;
+  }
+  .schedule-block h3{
+    margin:0 0 12px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:20px;
+  }
+  .schedule-block p{margin:0;font-size:13px;font-weight:600}
+  .schedule-diagram{
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:.9fr 1.1fr;
+    gap:34px;
+    align-items:stretch;
+  }
+  .calendar-box,.deadline-box{
+    background:#f7fbfe;
+    border-radius:8px;
+    padding:28px;
+    box-shadow:var(--shadow);
+  }
+  .calendar-row{
+    display:grid;
+    grid-template-columns:62px 1fr 1fr;
+    gap:14px;
+    align-items:center;
+    margin-bottom:22px;
+    font-family:var(--sans);
+    font-weight:900;
+    color:var(--blue);
+  }
+  .month{
+    width:48px;height:48px;border-radius:50%;
+    background:var(--pale);
+    display:grid;place-items:center;
+  }
+  .bar{
+    background:#fff;
+    border-left:6px solid var(--blue);
+    padding:10px;
+    color:#333;
+    font-size:12px;
+    min-height:52px;
+  }
+  .deadline-card{
+    background:#fff;
+    padding:22px;
+    margin-bottom:16px;
+    text-align:center;
+    font-family:var(--sans);
+    font-weight:800;
+  }
+  .deadline-card strong{
+    display:inline-block;
+    background:var(--blue);
+    color:#fff;
+    border-radius:4px;
+    padding:7px 14px;
+    margin-bottom:10px;
+  }
+
+  .faq{
+    padding:120px 92px 118px;
+    background:var(--soft);
+  }
+  .faq:before{
+    content:"";
+    position:absolute;
+    left:-10%;
+    top:-70px;
+    width:120%;
+    height:160px;
+    background:#fff;
+    border-radius:50% 50% 0 0 / 60% 60% 0 0;
+  }
+  .faq-grid{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:76px;
+    align-items:start;
+  }
+  .faq-list{
+    max-width:880px;
+    margin-top:42px;
+  }
+  details{
+    background:#d7edf9;
+    margin-bottom:14px;
+    border-radius:3px;
+    overflow:hidden;
+    transition:.25s ease;
+  }
+  details:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,113,185,.08)}
+  summary{
+    cursor:pointer;
+    list-style:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:18px 24px;
+    font-family:var(--sans);
+    color:#333;
+    font-size:14px;
+    font-weight:900;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary:before{
+    content:"Q";
+    flex:0 0 auto;
+    width:31px;
+    height:31px;
+    border-radius:50%;
+    background:#fff;
+    color:var(--blue);
+    display:grid;
+    place-items:center;
+  }
+  summary:after{
+    content:"+";
+    margin-left:auto;
+    font-size:24px;
+    font-weight:400;
+    color:#333;
+  }
+  details[open] summary:after{content:"−"}
+  details p{
+    margin:0;
+    padding:0 28px 22px 78px;
+    font-size:13px;
+    font-weight:600;
+    background:#eef8fd;
+  }
+  .faq-more{
+    margin-top:34px;
+    text-align:right;
+  }
+
+  .voice{
+    padding:0 0 105px;
+    background:var(--soft);
+  }
+  .voice-head{
+    padding:0 92px 54px;
+  }
+  .voice-track{
+    display:flex;
+    gap:22px;
+    width:max-content;
+    animation:softSlide 32s linear infinite;
+    padding:0 0 12px;
+  }
+  .voice-window{
+    overflow:hidden;
+  }
+  .voice-card{
+    flex:0 0 330px;
+    min-height:235px;
+    background:#fff;
+    box-shadow:var(--shadow);
+    border-radius:7px;
+    display:grid;
+    grid-template-columns:112px 1fr;
+    gap:18px;
+    padding:25px 22px;
+    position:relative;
+    transition:.28s ease;
+  }
+  .voice-card:hover{transform:translateY(-5px);box-shadow:0 18px 36px rgba(0,113,185,.12)}
+  .voice-card .avatar{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    overflow:hidden;
+    background:var(--pale2);
+    align-self:center;
+  }
+  .voice-card img{
+    width:100px;height:100px;object-fit:cover;
+  }
+  .voice-card .vol{
+    position:absolute;
+    right:18px;
+    top:18px;
+    writing-mode:vertical-rl;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:900;
+  }
+  .voice-card h3{
+    margin:78px 0 8px;
+    color:var(--blue);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.45;
+  }
+  .voice-card p{margin:0;font-size:12px;font-weight:600;line-height:1.8}
+  .plus{
+    position:absolute;
+    right:18px;
+    bottom:16px;
+    width:28px;height:28px;border-radius:50%;
+    background:var(--blue);
+    color:#fff;
+    display:grid;place-items:center;
+    font-family:var(--sans);
+  }
+  .voice-controls{
+    display:flex;
+    justify-content:center;
+    gap:28px;
+    align-items:center;
+    margin-top:35px;
+    font-family:var(--sans);
+    color:#0d2d46;
+  }
+  .ctrl{
+    width:42px;height:42px;border-radius:50%;
+    background:#0d2d46;color:#fff;
+    display:grid;place-items:center;
+  }
+  @keyframes softSlide{
+    from{transform:translateX(0)}
+    to{transform:translateX(-50%)}
+  }
+
+  .bottom-cta{
+    padding:0 0 92px;
+    background:var(--soft);
+  }
+  .follow{
+    text-align:center;
+    padding:0 92px 100px;
+    background:var(--soft);
+    color:var(--blue);
+    font-family:var(--sans);
+  }
+  .follow h2{
+    margin:0;
+    font-size:32px;
+    line-height:1.25;
+    font-weight:900;
+  }
+  .follow p{
+    margin:4px 0 20px;
+    color:var(--blue);
+    font-size:13px;
+    font-weight:900;
+  }
+  .sns{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+  }
+  .sns a{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--blue);
+    color:#fff;
+    display:grid;place-items:center;
+    font-weight:900;
+    transition:.25s;
+  }
+  .sns a:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(0,113,185,.18)}
+
+  .footer{
+    background:var(--soft);
+    padding:0 34px 34px;
+    color:var(--blue);
+    font-family:var(--sans);
+  }
+  .footer-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:30px;
+    margin-bottom:30px;
+  }
+  .footer-copy{
+    font-size:36px;
+    font-weight:900;
+    line-height:1.35;
+    letter-spacing:.04em;
+  }
+  .footer-links{
+    display:flex;
+    gap:24px;
+    color:#333;
+    font-size:11px;
+    font-weight:700;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .big-footer{
+    font-size:92px;
+    line-height:.9;
+    font-weight:900;
+    letter-spacing:.025em;
+    white-space:nowrap;
+  }
+
+  html.js .js-fade{
+    opacity:0;
+    transform:translateY(32px);
+    transition:opacity .85s ease,transform .85s cubic-bezier(.22,1,.36,1);
+  }
+  html.js .js-fade.is-visible{
+    opacity:1;
+    transform:translateY(0);
+  }
+  html.js .stagger > *{
+    opacity:0;
+    transform:translateY(28px);
+    transition:opacity .8s ease,transform .8s cubic-bezier(.22,1,.36,1);
+  }
+  html.js .stagger.is-visible > *{
+    opacity:1;
+    transform:translateY(0);
+  }
+  html.js .stagger.is-visible > *:nth-child(2){transition-delay:.12s}
+  html.js .stagger.is-visible > *:nth-child(3){transition-delay:.24s}
+  html.js .stagger.is-visible > *:nth-child(4){transition-delay:.36s}
+  html.js .hero .logo,
+  html.js .hero-copy span,
+  html.js .hero-person,
+  html.js .window{
+    animation:heroIn .9s cubic-bezier(.22,1,.36,1) both;
+  }
+  html.js .window.left{animation-delay:.05s}
+  html.js .window.center{animation-delay:.14s}
+  html.js .window.right{animation-delay:.22s}
+  html.js .hero-person{animation-delay:.32s}
+  html.js .hero-copy span:nth-child(1){animation-delay:.45s}
+  html.js .hero-copy span:nth-child(2){animation-delay:.55s}
+  @keyframes heroIn{
+    from{opacity:0;transform:translateY(26px) scale(.985)}
+    to{opacity:1}
+  }
+  html.js .hero-person{
+    animation-name:personIn;
+  }
+  @keyframes personIn{
+    from{opacity:0;transform:translateX(-50%) translateY(34px) scale(.96)}
+    to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+  }
+
+  @media (max-width:1100px){
+    .nav{display:none}
+    .hamb{
+      display:grid;
+      place-items:center;
+      width:40px;height:40px;border-radius:50%;
+      background:rgba(255,255,255,.14);
+      font-family:var(--sans);
+      font-weight:900;
+    }
+    .window-row{gap:28px}
+    .hero-copy{right:22px}
+    .hero-copy span{font-size:30px}
+    .about,.service,.passport,.flow,.plan,.faq{padding-left:42px;padding-right:42px}
+    .about-grid{grid-template-columns:150px 1fr 110px;gap:42px}
+    .about-body{font-size:16px}
+    .service-list{gap:34px;padding:0}
+    .passport:before{font-size:68px;top:-42px}
+    .flow-grid{grid-template-columns:170px 150px 1fr;gap:30px}
+    .plan-top{grid-template-columns:170px 120px 1fr;gap:30px}
+    .wide-cta{width:calc(100% - 84px)}
+  }
+
+  @media (max-width:760px){
+    body{line-height:1.8}
+    .site-header{height:64px}
+    .header-inner{padding:0 16px}
+    .logo{font-size:16px}
+    .header-actions .pill{display:none}
+    .hero{padding-top:64px;min-height:auto}
+    .hero-stage{height:570px}
+    .window-row{
+      inset:34px 16px auto 16px;
+      width:auto;
+      display:block;
+    }
+    .window{height:130px;border-width:5px;margin-bottom:12px}
+    .window.left,.window.right{transform:none}
+    .window.center{height:150px}
+    .hero-person{
+      width:78%;
+      bottom:20px;
+      min-width:0;
+    }
+    .hero-copy{
+      right:14px;
+      top:275px;
+      gap:8px;
+    }
+    .hero-copy span{
+      font-size:25px;
+      padding:12px 7px;
+    }
+    .hero-under{height:155px}
+    .passport-small{left:18px;top:26px;gap:18px}
+    .hero-cta{right:18px;top:88px;min-width:auto}
+    .about,.service,.passport,.flow,.plan,.faq{
+      padding-left:22px;
+      padding-right:22px;
+    }
+    .about{padding-top:70px;min-height:auto}
+    .about-grid{
+      display:block;
+    }
+    .section-label:before{margin-left:-28px;width:44px}
+    .about-body{
+      padding-top:40px;
+      font-size:15px;
+      line-height:2.15;
+    }
+    .about-body p{margin-bottom:34px}
+    .about-vertical{
+      writing-mode:horizontal-tb;
+      font-size:30px;
+      margin-top:38px;
+      text-align:right;
+    }
+    .wide-cta{
+      width:calc(100% - 28px);
+      grid-template-columns:1fr;
+      padding:30px 22px;
+      min-height:0;
+    }
+    .wide-cta h2{font-size:23px}
+    .line-box{display:block;padding:18px 12px}
+    .line-btn{margin-top:12px}
+    .wide-cta-visual{display:none}
+    .service{padding-top:86px}
+    .service-head{display:block;margin-bottom:38px}
+    .book-title{margin-top:30px;text-align:right}
+    .service-list{
+      display:block;
+    }
+    .service-item{margin-bottom:45px}
+    .passport{
+      padding-top:80px;
+      min-height:0;
+    }
+    .passport:before{font-size:46px;top:-28px}
+    .passport p.lead{text-align:left;margin-bottom:42px}
+    .feature-cards{grid-template-columns:1fr;gap:28px}
+    .feature-card{min-height:0}
+    .book-float{display:none}
+    .wave{height:70px;margin-left:-22px;margin-right:-22px}
+    .flow-grid{display:block}
+    .flow-vertical{
+      writing-mode:horizontal-tb;
+      padding-top:34px;
+      font-size:26px;
+    }
+    .flow-step{
+      grid-template-columns:105px 1fr;
+      gap:22px;
+    }
+    .flow-step img{width:105px;height:105px}
+    .flow-step:not(:last-child):after{left:45px}
+    .plan-top{display:block;margin-bottom:70px}
+    .plan-vertical{
+      writing-mode:horizontal-tb;
+      padding-top:30px;
+      font-size:26px;
+      margin-bottom:30px;
+    }
+    .plan-main{padding-right:0}
+    .price-card{grid-template-columns:1fr;padding:22px}
+    .price{font-size:44px}
+    .schedule-diagram{grid-template-columns:1fr}
+    .faq-grid{display:block}
+    summary{font-size:13px;padding:15px}
+    details p{padding:0 18px 20px 62px}
+    .voice-head{padding-left:22px;padding-right:22px}
+    .voice-card{flex-basis:290px}
+    .bottom-cta{padding-bottom:70px}
+    .follow{padding-left:22px;padding-right:22px}
+    .footer{padding-left:18px;padding-right:18px}
+    .footer-top{display:block}
+    .footer-copy{font-size:27px;margin-bottom:28px}
+    .footer-links{justify-content:flex-start}
+    .big-footer{font-size:48px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    .voice-track{animation:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="#">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>BOOKS & BLOOM</span>
+      </a>
+      <nav class="nav" aria-label="主要メニュー">
+        <a href="#about">特徴</a>
+        <a href="#service">支援内容</a>
+        <a href="#flow">利用までの流れ</a>
+        <a href="#plan">利用料金</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#voice">利用者の声</a>
+      </nav>
+      <div class="header-actions">
+        <a class="pill login" href="#faq">相談する</a>
+        <a class="pill entry" href="#contact">見学予約</a>
+        <span class="hamb" aria-hidden="true">☰</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-label="ファーストビュー">
+      <div class="hero-stage">
+        <div class="window-row">
+          <figure class="window left">
+            <img src="https://loremflickr.com/520/300/books,desk?lock=4101" width="520" height="300" alt="本が並ぶ明るい作業机">
+          </figure>
+          <figure class="window center">
+            <img src="https://loremflickr.com/820/360/library,reading?lock=4102" width="820" height="360" alt="読書と学びを感じるライブラリー">
+          </figure>
+          <figure class="window right">
+            <img src="https://loremflickr.com/520/300/notebook,books?lock=4103" width="520" height="300" alt="ノートと本のある穏やかな空間">
+          </figure>
+        </div>
+        <div class="hero-person">
+          <img src="https://loremflickr.com/520/390/anime,reading?lock=4104" width="520" height="390" alt="本を読むアニメ調のイメージ">
+        </div>
+        <h1 class="hero-copy" aria-label="読むように、働く。">
+          <span>働く、</span>
+          <span>物語を<br>ひらく。</span>
+        </h1>
+      </div>
+      <div class="hero-under">
+        <div class="passport-small">
+          <strong>THE<br>WORK<br>BOOK</strong>
+          <em>あなたの<br>ペースから<br>はじまる<br>就労支援</em>
+        </div>
+        <a class="pill hero-cta btn-arrow" href="#contact">見学予約はこちら</a>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <div class="about-grid">
+        <div class="section-label js-fade">
+          <span class="num">[ 01 ]</span>
+          <span class="en">About</span>
+          <span class="ja">BOOKS & BLOOMとは</span>
+        </div>
+        <div class="about-body js-fade">
+          <p>
+            働くことは、一冊の本をゆっくり読み進めることに似ています。<br>
+            すぐに結末へ急がなくても、今日の一行が、明日の自信になるから。
+          </p>
+          <p>
+            BOOKS & BLOOMは、アニメや本の制作まわりの軽作業、<br>
+            データ入力、梱包、デザイン補助などを通して、<br>
+            あなたに合った働き方を一緒に見つける就労継続支援A型事業所です。
+          </p>
+          <p>
+            体調の波、得意不得意、コミュニケーションの不安。<br>
+            そのどれも置き去りにせず、スタッフが毎日のページに寄り添います。
+          </p>
+          <p>
+            ほんの少し外へ出ること。机に向かうこと。誰かと挨拶すること。<br>
+            その小さな場面から、あなたの物語をひらいていきましょう。
+          </p>
+          <a class="small-more btn-arrow" href="#service">もっと見る</a>
+        </div>
+        <div class="about-vertical js-fade">自分のペースで、<br>働くページへ。</div>
+      </div>
+    </section>
+
+    <section class="js-fade" id="contact" aria-label="見学予約">
+      <div class="wide-cta">
+        <div>
+          <div class="start">［ Start BOOKS & BLOOM ］</div>
+          <h2>本のある作業室で、働く一歩をひらく。</h2>
+          <div class="line-box">
+            <small>見学・体験利用のご相談を受付中<br>あなたのペースをお聞かせください</small>
+            <a class="line-btn btn-arrow" href="#">LINEで見学予約する</a>
+          </div>
+        </div>
+        <div class="wide-cta-visual">
+          <div class="bubble">スタッフが<br>やさしく<br>ご案内します</div>
+          <div class="photo">
+            <img src="https://loremflickr.com/360/320/books,office?lock=4105" width="360" height="320" alt="本と作業スペースのイメージ">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="service" class="service">
+      <div class="service-head">
+        <div class="section-label js-fade">
+          <span class="num">[ 02 ]</span>
+          <span class="en">Service</span>
+          <span class="ja">支援内容</span>
+        </div>
+        <div></div>
+        <div class="book-title js-fade">THE<br>WORK<br>BOOK</div>
+      </div>
+
+      <div class="service-list stagger js-fade">
+        <article class="service-item">
+          <div class="img-wrap">
+            <img src="https://loremflickr.com/420/360/books,writing?lock=4106" width="420" height="360" alt="記録を書く作業">
+          </div>
+          <h3>あなた専用のワークカルテ</h3>
+          <p>得意な作業、疲れやすい時間、安心できる声かけを一冊のカルテのように整理。無理のない目標をスタッフと一緒に作ります。</p>
+        </article>
+        <article class="service-item">
+          <div class="img-wrap">
+            <img src="https://loremflickr.com/420/360/computer,desk?lock=4107" width="420" height="360" alt="パソコン作業のイメージ">
+          </div>
+          <h3>毎日届く、新たな作業との出会い</h3>
+          <p>データ入力、検品、梱包、POP作成補助など、集中しやすい作業を用意。アニメや本に関わる案件にも少しずつ挑戦できます。</p>
+        </article>
+        <article class="service-item">
+          <div class="img-wrap">
+            <img src="https://loremflickr.com/420/360/books,mail?lock=4108" width="420" height="360" alt="本と郵送物のイメージ">
+          </div>
+          <h3>パスポートに刻む、成長の記録</h3>
+          <p>出勤日数、できた作業、スタッフからのメモを月ごとに振り返り。自分では気づきにくい成長も、見える形で残していきます。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="passport">
+      <div class="passport-inner">
+        <h2 class="js-fade">［ ワークブックについて ］</h2>
+        <p class="lead js-fade">
+          BOOKS & BLOOMの「ワークブック」は、働く日々を記録する小さな相棒です。<br>
+          体調、作業内容、できたこと、次に試したいことをスタッフと共有しながら、あなたらしい働き方を育てていきます。
+          本を読み返すように自分の歩みを眺めることで、安心して次のページへ進めます。
+        </p>
+        <div class="book-float">WORK<br>BOOK</div>
+        <div class="feature-cards stagger js-fade">
+          <article class="feature-card">
+            <span class="tag">Feature 01</span>
+            <h3>ワークページの記録</h3>
+            <p>その日の作業、集中できた時間、困った場面をメモ。スタッフのコメントも添えて、次回の安心につなげます。</p>
+            <div class="screen">
+              <img src="https://loremflickr.com/360/480/notebook,planning?lock=4109" width="360" height="480" alt="ワークページの記録イメージ">
+            </div>
+          </article>
+          <article class="feature-card">
+            <span class="tag">Feature 02</span>
+            <h3>成長を振り返る</h3>
+            <p>週ごと・月ごとに達成したことを確認。小さな変化を見逃さず、面談や次の作業選びに活かします。</p>
+            <div class="screen">
+              <img src="https://loremflickr.com/360/480/books,calendar?lock=4110" width="360" height="480" alt="成長を振り返る記録イメージ">
+            </div>
+          </article>
+        </div>
+      </div>
+      <div class="wave" aria-hidden="true"></div>
+    </section>
+
+    <section id="flow" class="flow">
+      <div class="flow-grid">
+        <div class="section-label js-fade">
+          <span class="num">[ 03 ]</span>
+          <span class="en">Flow</span>
+          <span class="ja">ご利用までの流れ</span>
+        </div>
+        <div class="flow-vertical js-fade">カルテに答えるだけで<br>あなたに合う働き方へ。</div>
+        <div class="flow-steps stagger js-fade">
+          <article class="flow-step">
+            <div class="pic">
+              <img src="https://loremflickr.com/240/220/books,passport?lock=4111" width="240" height="220" alt="相談予約のイメージ">
+            </div>
+            <div>
+              <div class="flow-no">Flow 01</div>
+              <h3>見学予約 & ヒアリング</h3>
+              <p>LINEまたはフォームからご予約ください。体調や希望の働き方、不安なことをスタッフがやさしくお伺いします。</p>
+            </div>
+          </article>
+          <article class="flow-step">
+            <div class="pic">
+              <img src="https://loremflickr.com/240/220/office,writing?lock=4112" width="240" height="220" alt="体験利用のイメージ">
+            </div>
+            <div>
+              <div class="flow-no">Flow 02</div>
+              <h3>体験利用 & ワーク診断</h3>
+              <p>実際の作業を短時間から体験。集中しやすい作業、休憩の取り方、席の環境などを一緒に確認します。</p>
+            </div>
+          </article>
+          <article class="flow-step">
+            <div class="pic">
+              <img src="https://loremflickr.com/240/220/library,work?lock=4113" width="240" height="220" alt="利用開始のイメージ">
+            </div>
+            <div>
+              <div class="flow-no">Flow 03</div>
+              <h3>利用開始・あなたの本棚づくり</h3>
+              <p>市区町村での手続き後、雇用契約を結んでスタート。毎日の記録を重ねながら、自分らしい働き方を育てます。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="plan" class="plan">
+      <div class="plan-top">
+        <div class="section-label js-fade">
+          <span class="num">[ 04 ]</span>
+          <span class="en">Plan</span>
+          <span class="ja">利用料金</span>
+        </div>
+        <div class="plan-vertical js-fade">料金は<br>原則<br>かかりません</div>
+        <div class="plan-main js-fade">
+          <div class="plan-visual">
+            <img src="https://loremflickr.com/760/390/books,stationery?lock=4114" width="760" height="390" alt="本と文具のプランイメージ">
+          </div>
+          <div class="price-card">
+            <div>
+              <div class="label">Plan</div>
+              <div class="price">0<small>円</small></div>
+              <div class="price-note">多くの方が自己負担なく利用されています。</div>
+            </div>
+            <ul class="includes">
+              <li>就労支援プログラム</li>
+              <li>作業訓練・面談</li>
+              <li>ワークブック記録</li>
+              <li>就職準備サポート</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="schedule js-fade">
+        <div class="schedule-title">通所スケジュールについて</div>
+
+        <div class="schedule-block">
+          <div class="sub">Schedule 01</div>
+          <h3>通所ペースの相談について</h3>
+          <p>
+            週1日からの体験、短時間利用から相談できます。生活リズムや体調を確認しながら、
+            午前のみ・午後のみなど、無理のない形でスタートします。
+          </p>
+        </div>
+
+        <div class="schedule-block">
+          <div class="sub">Schedule 02</div>
+          <h3>お仕事サイクルについて</h3>
+          <p>
+            毎日の作業はスタッフが事前に準備し、当日の体調に合わせて調整します。
+            月末にはワークブックを見ながら振り返り面談を行います。
+          </p>
+
+          <div class="schedule-diagram">
+            <div class="calendar-box">
+              <div class="calendar-row">
+                <div class="month">1週</div>
+                <div class="bar">作業体験<br>短時間</div>
+                <div class="bar">記録</div>
+              </div>
+              <div class="calendar-row">
+                <div class="month">2週</div>
+                <div class="bar">作業選択</div>
+                <div class="bar">休憩調整</div>
+              </div>
+              <div class="calendar-row">
+                <div class="month">月末</div>
+                <div class="bar">振り返り</div>
+                <div class="bar">次月相談</div>
+              </div>
+            </div>
+            <div class="deadline-box">
+              <div class="deadline-card">
+                <strong>毎朝10:00まで</strong><br>
+                体調と来所予定をスタッフへ共有
+              </div>
+              <div class="deadline-card">
+                <strong>週1回</strong><br>
+                ワークブックを見ながらミニ面談
+              </div>
+              <div class="deadline-card">
+                <strong>月末</strong><br>
+                得意な作業・次の目標を整理
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="faq">
+      <div class="faq-grid">
+        <div class="section-label js-fade">
+          <span class="num">[ 05 ]</span>
+          <span class="en">FAQ</span>
+          <span class="ja">よくある質問</span>
+        </div>
+        <div class="faq-list js-fade">
+          <details>
+            <summary>就労継続支援A型を利用するには何が必要ですか？</summary>
+            <p>障害福祉サービス受給者証が必要です。申請方法はお住まいの自治体によって異なるため、見学時にスタッフが流れをご案内します。</p>
+          </details>
+          <details>
+            <summary>パソコンが苦手でも作業できますか？</summary>
+            <p>はい。検品、封入、整理、軽作業などから始められます。パソコン作業もタイピング練習からゆっくり取り組めます。</p>
+          </details>
+          <details>
+            <summary>アニメや本に詳しくなくても大丈夫ですか？</summary>
+            <p>もちろん大丈夫です。世界観はほんわり楽しめる雰囲気づくりのためのものです。作業は一人ひとりの得意に合わせて選びます。</p>
+          </details>
+          <details>
+            <summary>体調に波がある場合、休むことはできますか？</summary>
+            <p>事前連絡をいただければ調整できます。無理なく続けることを大切にし、通所ペースも面談で一緒に見直します。</p>
+          </details>
+          <details>
+            <summary>見学だけでも申し込めますか？</summary>
+            <p>はい。ご本人だけでなく、ご家族や支援者の方と一緒の見学も可能です。まずは雰囲気を見に来てください。</p>
+          </details>
+          <div class="faq-more">
+            <a class="small-more btn-arrow" href="#contact">すべての質問を見る</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="voice" class="voice">
+      <div class="voice-head">
+        <div class="section-label js-fade">
+          <span class="num">[ 06 ]</span>
+          <span class="en">Voice</span>
+          <span class="ja">利用者の声</span>
+        </div>
+      </div>
+      <div class="voice-window js-fade">
+        <div class="voice-track">
+          <article class="voice-card">
+            <div class="avatar"><img src="https://loremflickr.com/160/160/portrait,anime?lock=4115" width="160" height="160" alt="利用者イメージ"></div>
+            <div>
+              <div class="vol">ご利用者の声 01</div>
+              <h3>朝に出る理由ができました</h3>
+              <p>短い時間から始められて、少しずつ生活リズムが整いました。</p>
+            </div>
+            <span class="plus">＋</span>
+          </article>
+          <article class="voice-card">
+            <div class="avatar"><img src="https://loremflickr.com/160/160/person,smile?lock=4116" width="160" height="160" alt="利用者イメージ"></div>
+            <div>
+              <div class="vol">ご利用者の声 02</div>
+              <h3>本の整理作業が好きです</h3>
+              <p>静かな作業が多く、集中しやすい席を一緒に考えてもらえました。</p>
+            </div>
+            <span class="plus">＋</span>
+          </article>
+          <article class="voice-card">
+            <div class="avatar"><img src="https://loremflickr.com/160/160/portrait,glasses?lock=4117" width="160" height="160" alt="利用者イメージ"></div>
+            <div>
+              <div class="vol">ご利用者の声 03</div>
+              <h3>記録で自信が見えました</h3>
+              <p>できたことを書き残すので、面談の時に成長を実感できます。</p>
+            </div>
+            <span class="plus">＋</span>
+          </article>
+          <article class="voice-card">
+            <div class="avatar"><img src="https://loremflickr.com/160/160/face,anime?lock=4118" width="160" height="160" alt="利用者イメージ"></div>
+            <div>
+              <div class="vol">ご利用者の声 04</div>
+              <h3>新しい職場を考えられるように</h3>
+              <p>スタッフと相談しながら、次に挑戦したい仕事を探しています。</p>
+            </div>
+            <span class="plus">＋</span>
+          </article>
+          <article class="voice-card">
+            <div class="avatar"><img src="https://loremflickr.com/160/160/portrait,anime?lock=4115" width="160" height="160" alt="利用者イメージ"></div>
+            <div>
+              <div class="vol">ご利用者の声 01</div>
+              <h3>朝に出る理由ができました</h3>
+              <p>短い時間から始められて、少しずつ生活リズムが整いました。</p>
+            </div>
+            <span class="plus">＋</span>
+          </article>
+          <article class="voice-card">
+            <div class="avatar"><img src="https://loremflickr.com/160/160/person,smile?lock=4116" width="160" height="160" alt="利用者イメージ"></div>
+            <div>
+              <div class="vol">ご利用者の声 02</div>
+              <h3>本の整理作業が好きです</h3>
+              <p>静かな作業が多く、集中しやすい席を一緒に考えてもらえました。</p>
+            </div>
+            <span class="plus">＋</span>
+          </article>
+        </div>
+      </div>
+      <div class="voice-controls" aria-hidden="true">
+        <span class="ctrl">‹</span>
+        <span>Ⅱ</span>
+        <span class="ctrl">›</span>
+      </div>
+    </section>
+
+    <section class="bottom-cta js-fade">
+      <div class="wide-cta">
+        <div>
+          <div class="start">［ Start BOOKS & BLOOM ］</div>
+          <h2>あなたの物語に、働くページを。</h2>
+          <div class="line-box">
+            <small>見学・体験利用のご相談を受付中<br>まずは気になることだけでも大丈夫です</small>
+            <a class="line-btn btn-arrow" href="#">LINEで見学予約する</a>
+          </div>
+        </div>
+        <div class="wide-cta-visual">
+          <div class="bubble">一緒に<br>ゆっくり<br>始めよう</div>
+          <div class="photo">
+            <img src="https://loremflickr.com/360/320/library,desk?lock=4119" width="360" height="320" alt="あたたかな作業室のイメージ">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="follow js-fade">
+      <h2>Follow us</h2>
+      <p>SNSでも事業所の日々を発信中！</p>
+      <div class="sns">
+        <a href="#" aria-label="X">X</a>
+        <a href="#" aria-label="Instagram">◎</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-copy">読むように、働く。<br>あなたの本棚をひらく。</div>
+      <div class="footer-links">
+        <a href="#">運営会社</a>
+        <a href="#">利用規約</a>
+        <a href="#">プライバシーポリシー</a>
+        <a href="#">特定商取引法に基づく表記</a>
+      </div>
+    </div>
+    <div class="big-footer">THE WORK BOOK</div>
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    const targets = document.querySelectorAll('.js-fade, .stagger');
+    if(!('IntersectionObserver' in window)){
+      targets.forEach(el => el.classList.add('is-visible'));
+      return;
+    }
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    },{threshold:.13, rootMargin:'0px 0px -8% 0px'});
+    targets.forEach(el=>io.observe(el));
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
+      anchor.addEventListener('click', e=>{
+        const id = anchor.getAttribute('href');
+        if(id.length > 1){
+          const target = document.querySelector(id);
+          if(target){
+            e.preventDefault();
+            target.scrollIntoView({behavior:'smooth', block:'start'});
+          }
+        }
+      });
+    });
+
+    const cards = document.querySelectorAll('.voice-card, .service-item, .feature-card, .small-more, .pill');
+    cards.forEach(card=>{
+      card.addEventListener('pointermove', function(e){
+        if(window.matchMedia('(max-width: 760px)').matches) return;
+        const r = this.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5;
+        const y = (e.clientY - r.top) / r.height - .5;
+        this.style.transform = 'translateY(-3px) translate(' + (x*2).toFixed(2) + 'px,' + (y*2).toFixed(2) + 'px)';
+      });
+      card.addEventListener('pointerleave', function(){
+        this.style.transform = '';
+      });
+    });
+  })();
+</script>
+
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(!els.length) return;
+    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
+    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    setTimeout(function(){
+      els.forEach(function(e){
+        if(parseFloat(getComputedStyle(e).opacity)===0){
+          show(e); e.style.opacity='1'; e.style.transform='none';
+        }
+      });
+    }, 3500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+</body>
+</html>

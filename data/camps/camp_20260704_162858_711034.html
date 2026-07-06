@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkWorks - 就労継続支援B型</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg-light-blue: rgb(242, 251, 253);
+            --color-bg-light-gray: rgb(244, 244, 244);
+            --color-bg-white: rgb(255, 255, 255);
+            --color-text-dark: rgb(6, 27, 35);
+            --color-text-white: rgb(255, 255, 255);
+            --color-accent-blue: rgb(22, 94, 131);
+            --color-accent-light-gray: rgb(244, 244, 244);
+            --font-heading: "Zen Maru Gothic", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", 游ゴシック, YuGothic, Meiryo, "MS PGothic", sans-serif;
+            --font-body: "Zen Maru Gothic", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", 游ゴシック, YuGothic, Meiryo, "MS PGothic", sans-serif;
+            --border-radius-sm: 10px;
+            --border-radius-lg: 60px;
+            --max-width-content: 1180px;
+            --shadow-light: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+            --shadow-medium: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+        }
+
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--color-text-dark);
+            line-height: 1.6;
+            background-color: var(--color-bg-white);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--color-accent-blue);
+            transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        a:hover {
+            color: var(--color-text-dark);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            vertical-align: middle;
+            display: block;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: var(--max-width-content);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-16 { margin-bottom: 4rem; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: var(--color-accent-blue);
+            color: var(--color-text-white);
+            border: 1px solid var(--color-accent-blue);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            background-color: rgb(18, 75, 105); /* Darker blue */
+        }
+
+        .btn-secondary {
+            background-color: var(--color-bg-white);
+            color: var(--color-accent-blue);
+            border: 1px solid var(--color-accent-blue);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            background-color: var(--color-bg-light-blue);
+        }
+
+        .btn-line {
+            background-color: #00C300; /* LINE Green */
+            color: var(--color-text-white);
+            border: 1px solid #00C300;
+        }
+        .btn-line:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            background-color: #00a800; /* Darker LINE Green */
+        }
+
+        .btn-tel {
+            background-color: var(--color-bg-white);
+            color: var(--color-accent-blue);
+            border: 1px solid var(--color-accent-blue);
+        }
+        .btn-tel:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            background-color: var(--color-bg-light-blue);
+        }
+
+        .btn-contact {
+            background-color: var(--color-accent-blue);
+            color: var(--color-text-white);
+            border: 1px solid var(--color-accent-blue);
+        }
+        .btn-contact:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            background-color: rgb(18, 75, 105);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--color-text-dark);
+        }
+
+        h1 { font-size: 3.2rem; }
+        h2 { font-size: 2.5rem; }
+        h3 { font-size: 1.8rem; }
+        h4 { font-size: 1.4rem; }
+
+        /* Animations */
+        /* JSが無効な場合、初期非表示は適用しない */
+        html.js .animate-fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        html.js .animate-fade-in-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger for multiple elements */
+        html.js .animate-fade-in-up > *:nth-child(1) { transition-delay: 0s; }
+        html.js .animate-fade-in-up > *:nth-child(2) { transition-delay: 0.1s; }
+        html.js .animate-fade-in-up > *:nth-child(3) { transition-delay: 0.2s; }
+        html.js .animate-fade-in-up > *:nth-child(4) { transition-delay: 0.3s; }
+        html.js .animate-fade-in-up > *:nth-child(5) { transition-delay: 0.4s; }
+        html.js .animate-fade-in-up > *:nth-child(6) { transition-delay: 0.5s; }
+        html.js .animate-fade-in-up > *:nth-child(7) { transition-delay: 0.6s; }
+        html.js .animate-fade-in-up > *:nth-child(8) { transition-delay: 0.7s; }
+        html.js .animate-fade-in-up > *:nth-child(9) { transition-delay: 0.8s; }
+        html.js .animate-fade-in-up > *:nth-child(10) { transition-delay: 0.9s; }
+        html.js .animate-fade-in-up > *:nth-child(11) { transition-delay: 1.0s; }
+
+
+        @keyframes hero-slide-in-left {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes hero-slide-in-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes hero-fade-in-zoom {
+            from { opacity: 0; transform: scale(1.05); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Header */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 20px 0;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            display: flex;
+            align-items: center;
+        }
+        .header-logo img {
+            height: 40px; /* Adjust as needed */
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .nav-list {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-list a {
+            color: var(--color-text-dark);
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        .nav-list a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--color-accent-blue);
+            transition: width 0.3s ease;
+        }
+
+        .nav-list a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            background-color: var(--color-bg-light-blue); /* Fallback color */
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+            z-index: 1;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-bg-light-blue); /* Fallback for image */
+            overflow: hidden; /* Ensure wave stays within */
+        }
+
+        .hero-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: hero-fade-in-zoom 1.5s ease-out forwards;
+        }
+
+        .hero-wave {
+            position: absolute;
+            bottom: -5px; /* Adjust to hide bottom line */
+            left: 0;
+            width: 100%;
+            height: 150px; /* Height of the wave */
+            background: linear-gradient(to bottom, transparent, var(--color-bg-white)); /* Simulate wave fading to white */
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding-top: 80px; /* For header space */
+        }
+
+        .hero-text {
+            width: 50%;
+            padding-right: 40px;
+        }
+
+        .hero-text h1 {
+            font-size: 3.8rem;
+            margin-bottom: 20px;
+            animation: hero-slide-in-left 1s ease-out forwards;
+            opacity: 0; /* Initial state for JS animation */
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            animation: hero-slide-in-left 1s ease-out forwards 0.3s;
+            opacity: 0; /* Initial state for JS animation */
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            animation: hero-slide-in-up 1s ease-out forwards 0.6s;
+            opacity: 0; /* Initial state for JS animation */
+        }
+
+        .hero-badges {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 3;
+        }
+
+        .hero-badge {
+            background-color: var(--color-accent-blue);
+            color: var(--color-text-white);
+            padding: 10px 20px;
+            border-radius: var(--border-radius-lg);
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            display: inline-block;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hero-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Section 2: Intro Gallery */
+        .intro-gallery-section {
+            background-color: var(--color-bg-white);
+            padding: 100px 0;
+        }
+
+        .intro-gallery-section .container {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+        }
+
+        .intro-text-area {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .intro-text-area h2 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+        }
+
+        .intro-text-area p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .gallery-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 20px; /* Space for scrollbar */
+        }
+
+        .gallery-inner {
+            display: flex;
+            gap: 20px;
+            padding: 0 20px; /* Padding for the ends of the scroll */
+        }
+
+        .gallery-item {
+            flex-shrink: 0;
+            width: 300px; /* Fixed width for gallery items */
+            height: 200px;
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            background-color: var(--color-bg-light-blue); /* Fallback */
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Section 3: Services */
+        .services-section {
+            background-color: var(--color-bg-light-gray);
+            padding: 100px 0;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .service-card {
+            background-color: var(--color-bg-white);
+            border-radius: var(--border-radius-sm);
+            padding: 40px;
+            box-shadow: var(--shadow-light);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .service-card h3 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+        }
+        .service-card h3 span {
+            font-size: 1.2rem;
+            font-weight: 400;
+            display: block;
+            margin-bottom: 5px;
+            color: gray;
+        }
+
+        .service-card-image {
+            width: 100%;
+            height: 250px;
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            margin-bottom: 25px;
+            background-color: var(--color-bg-light-blue); /* Fallback */
+        }
+
+        .service-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .service-card ul {
+            list-style: disc;
+            padding-left: 20px;
+            margin-bottom: 30px;
+            color: var(--color-text-dark);
+            font-size: 1.05rem;
+        }
+        .service-card ul li {
+            margin-bottom: 8px;
+        }
+
+        /* Section 4: News */
+        .news-section {
+            background-color: var(--color-bg-white);
+            padding: 100px 0;
+        }
+
+        .news-section .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .news-section h2 {
+            margin-bottom: 50px;
+        }
+
+        .news-list {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        .news-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--color-bg-light-gray);
+        }
+
+        .news-item:first-child {
+            border-top: 1px solid var(--color-bg-light-gray);
+        }
+
+        .news-item-date {
+            font-size: 0.9rem;
+            color: gray;
+            margin-right: 30px;
+            flex-shrink: 0;
+            width: 100px; /* Fixed width for date */
+        }
+
+        .news-item-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--color-text-dark);
+        }
+        .news-item-title:hover {
+            color: var(--color-accent-blue);
+        }
+
+
+        /* Section 5: Instagram */
+        .instagram-section {
+            background-color: var(--color-bg-light-gray);
+            padding: 100px 0;
+        }
+
+        .instagram-section .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .instagram-section h2 {
+            margin-bottom: 50px;
+        }
+
+        .instagram-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns for desktop */
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .instagram-item {
+            aspect-ratio: 1 / 1;
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            background-color: var(--color-bg-light-blue); /* Fallback */
+        }
+
+        .instagram-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .instagram-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Section 6: CTA */
+        .cta-section {
+            background-color: var(--color-bg-white);
+            padding: 100px 0;
+        }
+
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .cta-content h2 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-content p {
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 20px;
+        }
+        .cta-buttons .btn {
+            min-width: 200px;
+        }
+
+
+        /* Footer */
+        .footer {
+            background-color: var(--color-text-dark); /* Dark background for footer */
+            color: var(--color-text-white);
+            padding: 80px 0 20px;
+            font-size: 0.9rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr; /* Adjust column widths as in reference */
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .footer-info .footer-logo {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-text-white);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .footer-info .footer-logo img {
+            height: 40px;
+            width: auto;
+            margin-right: 10px;
+            filter: brightness(0) invert(1); /* Make logo white for dark background */
+        }
+
+        .footer-info p {
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+
+        .footer-nav h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--color-text-white);
+        }
+
+        .footer-nav ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-nav a {
+            color: var(--color-text-white);
+            transition: color 0.3s ease;
+        }
+
+        .footer-nav a:hover {
+            color: var(--color-accent-blue);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            .hero-text { width: 60%; padding-right: 20px; }
+            .hero-badges { top: 90px; right: 10px; }
+            .services-grid { grid-template-columns: 1fr; }
+            .instagram-grid { grid-template-columns: repeat(3, 1fr); }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .footer-info { grid-column: span 2; }
+        }
+
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .nav-list {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            .hero {
+                height: auto;
+                min-height: 80vh;
+                padding: 120px 0 80px;
+            }
+            .hero-bg img {
+                object-position: 70% center; /* Adjust for mobile */
+            }
+            .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: center;
+                padding-top: 0;
+            }
+            .hero-text {
+                width: 100%;
+                padding-right: 0;
+                margin-bottom: 40px;
+                text-align: center;
+            }
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+            .hero-text p {
+                font-size: 1rem;
+            }
+            .hero-buttons {
+                justify-content: center;
+            }
+            .hero-badges {
+                position: static;
+                flex-direction: row;
+                justify-content: center;
+                margin-top: 30px;
+                width: 100%;
+            }
+            .intro-gallery-section, .services-section, .news-section, .instagram-section, .cta-section, .footer {
+                padding: 60px 0;
+            }
+            .intro-text-area h2, .cta-content h2 {
+                font-size: 2rem;
+            }
+            .gallery-item {
+                width: 250px;
+            }
+            .news-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .news-item-date {
+                margin-bottom: 5px;
+            }
+            .instagram-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .footer-info {
+                grid-column: span 1;
+            }
+            .footer-nav h4 {
+                margin-top: 30px;
+            }
+            .footer-nav ul {
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.8rem; }
+            .hero-text h1 { font-size: 2rem; }
+            .hero-buttons {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+            .gallery-item {
+                width: 200px;
+            }
+            .instagram-grid {
+                grid-template-columns: 1fr;
+            }
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        document.documentElement.classList.add('js');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hero section animations on load
+            const heroTextElements = document.querySelectorAll('.hero-text h1, .hero-text p');
+            heroTextElements.forEach(el => el.style.opacity = '1'); // Override initial opacity for JS animation
+            const heroButtons = document.querySelector('.hero-buttons');
+            if (heroButtons) heroButtons.style.opacity = '1';
+            const heroBgImg = document.querySelector('.hero-bg img');
+            if (heroBgImg) heroBgImg.style.opacity = '1';
+
+            // Scroll animations
+            const animateElements = document.querySelectorAll('.animate-fade-in-up');
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                rootMargin: '0px',
+                threshold: 0.1 // 10% of the element needs to be visible
+            });
+
+            animateElements.forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+
+    <header class="header">
+        <div class="container">
+            <a href="#" class="header-logo">
+                <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorks ロゴ" onerror="this.style.display='none'">
+                LinkWorks
+            </a>
+            <nav>
+                <ul class="nav-list">
+                    <li><a href="#">LinkWorksについて</a></li>
+                    <li><a href="#">サービス内容</a></li>
+                    <li><a href="#">利用者の声</a></li>
+                    <li><a href="#">アクセス</a></li>
+                    <li><a href="#">お知らせ</a></li>
+                    <li><a href="#" class="btn btn-primary">お問い合わせ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-bg">
+                <img src="http://127.0.0.1:5000/uploads/up_033afbf0bd.jpg" alt="和やかに梱包作業をするスタッフ" width="1920" height="1080" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                <div class="hero-wave"></div>
+            </div>
+            <div class="container hero-content">
+                <div class="hero-text">
+                    <h1>一人ひとりの「できる」を大切に。<br>未来へつながる、新しい働き方を。</h1>
+                    <p>LinkWorksは、就労継続支援B型事業所として、<br>あなたの個性とペースを尊重し、社会参加と自己実現をサポートします。</p>
+                    <div class="hero-buttons">
+                        <a href="#" class="btn btn-primary">LinkWorksについて</a>
+                        <a href="#" class="btn btn-secondary">利用開始までの流れ</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-badges">
+                <a href="#" class="hero-badge">見学申し込み</a>
+                <a href="#" class="hero-badge">お問い合わせ</a>
+            </div>
+        </section>
+
+        <section class="intro-gallery-section">
+            <div class="container animate-fade-in-up">
+                <div class="intro-text-area">
+                    <h2>誰もが安心して、自分らしく輝ける場所。</h2>
+                    <p>LinkWorksでは、利用者様一人ひとりが安心して作業に取り組めるよう、温かいサポート体制を整えています。日々の作業を通じて、自信を育み、新しい自分を発見できる機会を提供します。</p>
+                    <a href="#" class="btn btn-primary">サービス内容を見る</a>
+                </div>
+                <div class="gallery-wrapper">
+                    <div class="gallery-inner">
+                        <div class="gallery-item">
+                            <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="事業所の明るい入口" width="300" height="200" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                        </div>
+                        <div class="gallery-item">
+                            <img src="http://127.0.0.1:5000/uploads/up_033afbf0bd.jpg" alt="梱包作業" width="300" height="200" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                        </div>
+                        <div class="gallery-item">
+                            <img src="http://127.0.0.1:5000/uploads/up_1d421dabc8.png" alt="書類封入作業" width="300" height="200" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                        </div>
+                        <div class="gallery-item">
+                            <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="協力して梱包" width="300" height="200" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                        </div>
+                        <div class="gallery-item">
+                            <img src="http://127.0.0.1:5000/uploads/up_3a159df441.jpg" alt="手作りアクセサリー制作" width="300" height="200" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                        </div>
+                        <div class="gallery-item">
+                            <img src="http://127.0.0.1:5000/uploads/up_78c6a0d3e7.jpg" alt="手芸小物検品" width="300" height="200" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                        </div>
+                        <div class="gallery-item">
+                            <img src="http://127.0.0.1:5000/uploads/up_c10708cb7c.png" alt="丁寧な手作業" width="300" height="200" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                        </div>
+                        <div class="gallery-item">
+                            <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="スタッフ集合" width="300" height="200" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="services-section">
+            <div class="container services-grid animate-fade-in-up">
+                <div class="service-card">
+                    <h3><span>Support</span>あなたの「できる」を見つける</h3>
+                    <div class="service-card-image">
+                        <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="女性相談員との穏やかな面談風景" width="400" height="250" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <p>LinkWorksでは、利用者様一人ひとりの状況に合わせた個別支援計画を作成し、きめ細やかなサポートを提供します。あなたの「やりたい」を応援し、目標達成まで伴走します。</p>
+                    <ul>
+                        <li><small>個別支援計画の作成と定期的な見直し</small></li>
+                        <li><small>作業訓練を通じたスキルアップ支援</small></li>
+                        <li><small>就職活動に向けたサポート（希望者のみ）</small></li>
+                        <li><small>生活リズムの安定化支援</small></li>
+                    </ul>
+                    <a href="#" class="btn btn-secondary">利用を開始する</a>
+                </div>
+                <div class="service-card">
+                    <h3><span>Business</span>地域とつながる、社会貢献</h3>
+                    <div class="service-card-image">
+                        <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="作業室で協力して梱包するスタッフ" width="400" height="250" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <p>地域企業からの受託作業や、自主製品の開発・販売を通じて、社会とのつながりを実感できる機会を創出しています。働く喜びと社会貢献を実感できる環境です。</p>
+                    <ul>
+                        <li><small>企業からのデータ入力、梱包作業など</small></li>
+                        <li><small>自主製品（アクセサリー、雑貨など）の制作</small></li>
+                        <li><small>地域イベントへの参加・出店</small></li>
+                        <li><small>企業との連携による新たな仕事の創出</small></li>
+                    </ul>
+                    <a href="#" class="btn btn-secondary">仕事を見つける</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="news-section">
+            <div class="container animate-fade-in-up">
+                <h2>お知らせ</h2>
+                <div class="news-list">
+                    <a href="#" class="news-item">
+                        <span class="news-item-date">2023.10.26</span>
+                        <span class="news-item-title">新規事業所オープンのお知らせ</span>
+                    </a>
+                    <a href="#" class="news-item">
+                        <span class="news-item-date">2023.10.15</span>
+                        <span class="news-item-title">利用者様の声を追加しました</span>
+                    </a>
+                    <a href="#" class="news-item">
+                        <span class="news-item-date">2023.09.01</span>
+                        <span class="news-item-title">見学・体験会開催のお知らせ</span>
+                    </a>
+                    <a href="#" class="news-item">
+                        <span class="news-item-date">2023.08.20</span>
+                        <span class="news-item-title">Webサイトをリニューアルしました</span>
+                    </a>
+                </div>
+                <a href="#" class="btn btn-secondary">もっと見る</a>
+            </div>
+        </section>
+
+        <section class="instagram-section">
+            <div class="container animate-fade-in-up">
+                <h2>Instagram</h2>
+                <div class="instagram-grid">
+                    <div class="instagram-item">
+                        <img src="http://127.0.0.1:5000/uploads/up_3a159df441.jpg" alt="手作りアクセサリー制作" width="300" height="300" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <div class="instagram-item">
+                        <img src="http://127.0.0.1:5000/uploads/up_78c6a0d3e7.jpg" alt="手芸小物検品" width="300" height="300" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <div class="instagram-item">
+                        <img src="http://127.0.0.1:5000/uploads/up_033afbf0bd.jpg" alt="梱包作業" width="300" height="300" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <div class="instagram-item">
+                        <img src="http://127.0.0.1:5000/uploads/up_1d421dabc8.png" alt="書類封入作業" width="300" height="300" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <div class="instagram-item">
+                        <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="協力して梱包" width="300" height="300" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <div class="instagram-item">
+                        <img src="http://127.0.0.1:5000/uploads/up_c10708cb7c.png" alt="丁寧な手作業" width="300" height="300" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <div class="instagram-item">
+                        <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="スタッフ集合" width="300" height="300" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                    <div class="instagram-item">
+                        <img src="http://127.0.0.1:5000/uploads/up_d0a72e19ee.webp" alt="デスクの観葉植物" width="300" height="300" onerror="this.style.display='none'" style="background-color: var(--color-bg-light-blue);">
+                    </div>
+                </div>
+                <a href="#" class="btn btn-secondary">もっと見る</a>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container animate-fade-in-up">
+                <div class="cta-content">
+                    <h2>「できる」を見つけて、新しい一歩を。<br>お気軽にご相談ください。</h2>
+                    <p>LinkWorksでは、見学・体験を随時受け付けております。どんなことでもお気軽にお問い合わせください。</p>
+                    <div class="cta-buttons">
+                        <a href="#" class="btn btn-line">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M12.001 0C6.182 0 1.5 4.682 1.5 10.5c0 3.321 1.487 6.302 3.868 8.41L4 24l5.312-3.136c.55.086 1.109.136 1.689.136C17.818 21 22.5 16.318 22.5 10.5S17.818 0 12.001 0zM17.203 15.65h-1.687c-.201 0-.36-.16-.36-.36V9.06c0-.201.16-.36.36-.36h1.687c.201 0 .36.16.36.36v6.23c0 .2-.16.36-.36.36zm-4.321 0h-1.687c-.201 0-.36-.16-.36-.36V9.06c0-.201.16-.36.36-.36h1.687c.201 0 .36.16.36.36v6.23c0 .2-.16.36-.36.36zm-4.321 0H6.874c-.201 0-.36-.16-.36-.36V9.06c0-.201.16-.36.36-.36h1.687c.201 0 .36.16.36.36v6.23c0 .2-.16.36-.36.36z"/></svg>
+                            LINEで相談
+                        </a>
+                        <a href="tel:03-XXXX-XXXX" class="btn btn-tel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M20 15.5c-1.1 0-2.2-.2-3.2-.6-.5-.2-1.1-.1-1.5.3l-2.2 2.2c-2.8-1.5-5.1-3.8-6.6-6.6l2.2-2.2c.4-.4.5-1.0.3-1.5-.4-1.0-.6-2.1-.6-3.2 0-.6-.4-1-.1-1.3l-2.5-2.5c-.3-.3-.8-.5-1.3-.5-.7 0-1.4.3-1.9.8C1.5 5.5.9 8.2 2.7 10c1.8 1.8 4.5 2.8 7.3 2.8 2.8 0 5.5-1.0 7.3-2.8 1.8-1.8 2.4-4.5 1.9-7.3-.3-.5-.5-1.0-.5-1.7zm0 2c.5 0 1-.2 1.4-.6.4-.4.6-.9.6-1.4 0-.5-.2-1-.6-1.4-.4-.4-.9-.6-1.4-.6-.5 0-1 .2-1.4.6-.4.4-.6.9-.6 1.4 0 .5.2 1 .6 1.4.4.4.9.6 1.4.6z"/></svg>
+                            電話で相談
+                        </a>
+                        <a href="#" class="btn btn-contact">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            お問い合わせ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-info">
+                    <a href="#" class="footer-logo">
+                        <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorks ロゴ" onerror="this.style.display='none'" style="background-color: var(--color-text-dark);">
+                        LinkWorks
+                    </a>
+                    <p>〒000-0000 東京都〇〇区〇〇1-2-3</p>
+                    <p>TEL: 03-XXXX-XXXX</p>
+                    <p>営業時間: 月〜金 9:00〜17:00</p>
+                </div>
+                <div class="footer-nav">
+                    <h4>サービス</h4>
+                    <ul>
+                        <li><a href="#">LinkWorksについて</a></li>
+                        <li><a href="#">サービス内容</a></li>
+                        <li><a href="#">利用開始までの流れ</a></li>
+                        <li><a href="#">利用者の声</a></li>
+                    </ul>
+                </div>
+                <div class="footer-nav">
+                    <h4>サポート</h4>
+                    <ul>
+                        <li><a href="#">よくある質問</a></li>
+                        <li><a href="#">お知らせ</a></li>
+                        <li><a href="#">アクセス</a></li>
+                        <li><a href="#">お問い合わせ</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 LinkWorks All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkWorks 採用・見学案内</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --bg2:#f5f7fc;
+      --white:#ffffff;
+      --blue:#2547d8;
+      --blue2:#3d60f0;
+      --text:#151927;
+      --muted:rgba(21,25,39,.62);
+      --line:rgba(37,71,216,.12);
+      --shadow:0 16px 40px rgba(29,53,111,.07);
+      --radius:4px;
+      --pill:999px;
+      --container:1260px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family:"Noto Sans JP",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 8%, rgba(61,96,240,.10), transparent 28%),
+        radial-gradient(circle at 88% 28%, rgba(61,96,240,.10), transparent 18%),
+        linear-gradient(180deg,#eef3fb 0%, #f5f7fc 26%, #f6f8fd 58%, #f2f5fb 100%);
+      line-height:1.7;
+      letter-spacing:.02em;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(calc(100% - 40px), var(--container));margin:0 auto;position:relative}
+    .section{position:relative}
+    .eyebrow{
+      display:inline-block;
+      font-size:10px;
+      font-weight:700;
+      letter-spacing:.18em;
+      color:var(--blue);
+      margin-bottom:16px;
+      position:relative;
+      padding-left:18px;
+      text-transform:uppercase;
+    }
+    .eyebrow::before{
+      content:"";
+      position:absolute;
+      left:0;top:50%;
+      width:10px;height:1px;
+      background:var(--blue);
+      transform:translateY(-50%);
+    }
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;
+      background:var(--blue);
+      color:#fff;
+      padding:12px 20px;
+      border-radius:var(--pill);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.08em;
+      box-shadow:0 10px 24px rgba(37,71,216,.18);
+      transition:transform .3s ease, box-shadow .3s ease, background .2s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 18px 30px rgba(37,71,216,.24);background:var(--blue2)}
+    .btn-outline{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 16px;border:1px solid rgba(21,25,39,.12);
+      border-radius:var(--pill);font-size:12px;font-weight:700;
+      background:rgba(255,255,255,.76);backdrop-filter:blur(8px);
+      transition:transform .3s ease, box-shadow .3s ease, border-color .2s ease;
+    }
+    .btn-outline:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:rgba(37,71,216,.22)}
+    .site-header{
+      position:absolute;top:0;left:0;right:0;z-index:30;
+      padding:16px 0;
+    }
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:24px;
+    }
+    .nav-left,.nav-right{display:flex;align-items:center;gap:28px}
+    .nav-links{display:flex;gap:26px;font-size:11px;color:rgba(255,255,255,.9)}
+    .nav-links a{opacity:.9;transition:opacity .2s ease}
+    .nav-links a:hover{opacity:1}
+    .brand{
+      display:flex;align-items:center;gap:10px;
+      color:#fff;font-size:12px;font-weight:700;letter-spacing:.06em;
+    }
+    .brand img{height:18px;width:auto;filter:brightness(100)}
+    .hero{
+      min-height:720px;
+      position:relative;
+      overflow:hidden;
+      background:
+        linear-gradient(90deg, rgba(32,36,57,.65) 0%, rgba(32,36,57,.40) 24%, rgba(32,36,57,.08) 48%, rgba(255,255,255,0) 68%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+    }
+    .hero::before{
+      content:"";
+      position:absolute;inset:0;
+      background:
+        radial-gradient(circle at 18% 38%, rgba(255,255,255,.18), transparent 25%),
+        radial-gradient(circle at 78% 22%, rgba(61,96,240,.10), transparent 26%);
+      pointer-events:none;
+    }
+    .hero-media{
+      position:absolute;inset:0;
+      background:linear-gradient(120deg,#d7e6fb 0%, #eef4fd 45%, #ffffff 100%);
+    }
+    .hero-media img{
+      width:100%;height:100%;object-fit:cover;object-position:center;
+      mix-blend-mode:multiply;
+      opacity:.95;
+    }
+    .hero-inner{
+      position:relative;z-index:2;
+      min-height:720px;
+      display:grid;grid-template-columns: 1.02fr 1.18fr;
+      align-items:center;
+      gap:20px;
+    }
+    .hero-copy{
+      padding-top:76px;
+      color:#fff;
+      max-width:470px;
+    }
+    .hero-copy .mini{
+      display:flex;gap:10px;flex-wrap:wrap;
+      font-size:9px;letter-spacing:.16em;
+      margin-bottom:22px;
+      opacity:.9;
+    }
+    .hero-copy .mini span{
+      padding:4px 10px;border:1px solid rgba(255,255,255,.18);
+      border-radius:999px;background:rgba(255,255,255,.06);backdrop-filter:blur(6px);
+    }
+    .hero h1{
+      margin:0 0 18px;
+      font-size:62px;line-height:1.1;font-weight:300;letter-spacing:.01em;
+    }
+    .hero h1 strong{font-weight:700}
+    .hero h1 .accent{color:#74d7ff}
+    .hero p{
+      margin:0 0 28px;
+      font-size:13px;
+      color:rgba(255,255,255,.88);
+      max-width:390px;
+    }
+    .hero-visual{
+      align-self:end;
+      justify-self:end;
+      width:min(100%,720px);
+      position:relative;
+      padding-top:110px;
+    }
+    .hero-visual img{
+      width:100%;height:auto;
+      filter:drop-shadow(0 12px 40px rgba(29,53,111,.10));
+    }
+
+    .about{
+      padding:110px 0 60px;
+      background:
+        radial-gradient(circle at 28% 30%, rgba(61,96,240,.11), transparent 21%),
+        linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,0));
+    }
+    .ghost-title{
+      font-size:78px;font-weight:800;line-height:1;
+      letter-spacing:.04em;
+      color:rgba(61,96,240,.10);
+      margin:0 0 28px;
+    }
+    .about-grid{
+      display:grid;
+      grid-template-columns: 1.02fr .9fr;
+      gap:64px;
+      align-items:center;
+      margin-top:18px;
+    }
+    .photo-card{
+      position:relative;
+      padding:26px;
+      border-radius:34px;
+      background:linear-gradient(180deg,#ffffff 0%, #f6f8fd 100%);
+      box-shadow:var(--shadow);
+    }
+    .photo-card::before{
+      content:"";
+      position:absolute;
+      left:-26px;bottom:-18px;
+      width:180px;height:120px;
+      background:radial-gradient(circle at center, rgba(61,96,240,.18), transparent 68%);
+      filter:blur(14px);
+      pointer-events:none;
+    }
+    .photo-card .frame{
+      overflow:hidden;border-radius:24px;
+      background:linear-gradient(135deg,#dce9fd,#f2f6fd);
+      box-shadow:0 12px 36px rgba(29,53,111,.10);
+      aspect-ratio: 1.22 / 1;
+    }
+    .photo-card .frame img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .floating-note{
+      position:absolute;right:18px;bottom:10px;
+      background:#fff;border-radius:12px;padding:12px 14px;
+      box-shadow:var(--shadow);
+      display:flex;gap:10px;align-items:center;
+      min-width:170px;
+    }
+    .floating-note .dot{
+      width:34px;height:34px;border-radius:50%;
+      background:linear-gradient(135deg,#a8c2ff,#ffffff);
+      display:grid;place-items:center;color:var(--blue);font-size:14px;
+      flex:none;
+    }
+    .floating-note small{display:block;font-size:10px;color:var(--muted);line-height:1.4}
+    .about-copy h2{
+      font-size:42px;line-height:1.45;margin:0 0 18px;
+      font-weight:700;
+    }
+    .about-copy h2 .accent{color:#20c6b7}
+    .about-copy p{
+      margin:0 0 18px;
+      font-size:13px;color:var(--muted);max-width:450px;
+    }
+    .bullet-list{margin:22px 0 0;padding:0;list-style:none}
+    .bullet-list li{
+      font-size:12px;color:var(--muted);
+      padding:10px 0 10px 18px;position:relative;
+      border-bottom:1px solid rgba(21,25,39,.06);
+      max-width:420px;
+    }
+    .bullet-list li::before{
+      content:"";position:absolute;left:2px;top:19px;
+      width:5px;height:5px;border-radius:50%;background:var(--blue2);
+    }
+
+    .services{
+      padding:34px 0 150px;
+      position:relative;
+    }
+    .services-grid{
+      display:grid;grid-template-columns: 1fr 1fr;
+      gap:22px;align-items:stretch;
+    }
+    .service-panel,.image-panel{
+      border-radius:28px;
+      background:linear-gradient(180deg,#ffffff 0%, #f8faff 100%);
+      box-shadow:var(--shadow);
+      min-height:520px;
+      position:relative;
+      overflow:hidden;
+    }
+    .service-panel{
+      padding:42px 36px;
+    }
+    .service-panel h3{
+      margin:0 0 18px;font-size:34px;line-height:1.5;font-weight:700;
+      max-width:420px;
+    }
+    .service-panel h3 .accent{color:#10c7bb}
+    .service-panel p{
+      margin:0 0 28px;font-size:12px;color:var(--muted);max-width:420px
+    }
+    .service-card{
+      margin-top:26px;background:#fff;border:1px solid rgba(21,25,39,.06);
+      border-radius:6px;padding:24px 22px;box-shadow:0 10px 22px rgba(29,53,111,.04);
+      transition:transform .3s ease, box-shadow .3s ease;
+      max-width:470px;
+    }
+    .service-card:hover{transform:translateY(-3px);box-shadow:0 16px 30px rgba(29,53,111,.08)}
+    .service-card .no{
+      display:flex;align-items:baseline;gap:10px;margin-bottom:16px;
+      color:var(--blue);
+    }
+    .service-card .no b{font-size:40px;line-height:1}
+    .service-card .no span{font-size:10px;letter-spacing:.18em;font-weight:700}
+    .service-card h4{margin:0 0 10px;font-size:22px}
+    .service-card p{margin:0;font-size:12px;color:var(--muted)}
+    .image-panel{
+      background:linear-gradient(135deg,#dbe8fb 0%, #f7f9fe 40%, #ffffff 100%);
+    }
+    .image-panel img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .image-badge{
+      position:absolute;right:18px;bottom:18px;
+      padding:7px 12px;border-radius:999px;
+      background:rgba(255,255,255,.85);
+      font-size:10px;color:var(--muted);backdrop-filter:blur(8px);
+      border:1px solid rgba(21,25,39,.05);
+    }
+
+    .system{
+      padding:150px 0 60px;
+      min-height:780px;
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 18% 30%, rgba(61,96,240,.13), transparent 26%),
+        radial-gradient(circle at 82% 20%, rgba(61,96,240,.10), transparent 18%),
+        linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.08) 100%);
+    }
+    .system::before{
+      content:"";
+      position:absolute;left:50%;top:0;transform:translateX(-50%);
+      width:min(calc(100% - 40px), var(--container));height:100%;
+      background-image:
+        linear-gradient(rgba(37,71,216,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,71,216,.045) 1px, transparent 1px);
+      background-size:24px 24px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.4), transparent 78%);
+      pointer-events:none;
+    }
+    .system .ghost-title{
+      text-align:center;
+      margin-top:250px;
+      font-size:64px;
+      color:rgba(61,96,240,.08);
+    }
+    .system-line{
+      position:absolute;left:calc(50% - min(calc(100% - 40px), var(--container))/2 + 32px);top:250px;
+      width:1px;height:250px;background:linear-gradient(180deg, rgba(37,71,216,.16), rgba(37,71,216,0));
+    }
+    .system-divider{
+      width:min(calc(100% - 120px), 980px);
+      height:1px;background:linear-gradient(90deg, rgba(37,71,216,.2), rgba(32,198,183,.6), rgba(37,71,216,.2));
+      margin:220px auto 0;
+      position:relative;
+    }
+    .system-divider::after{
+      content:"";
+      position:absolute;right:-26px;top:-42px;
+      width:86px;height:86px;border-radius:50%;
+      border:1px solid rgba(37,71,216,.14);
+      background:radial-gradient(circle at center, rgba(61,96,240,.05), transparent 68%);
+    }
+
+    .wide-illustration{
+      padding:0 0 0;
+      background:transparent;
+    }
+    .wide-illustration .art{
+      width:100%;
+      aspect-ratio: 2.55 / 1;
+      background:linear-gradient(135deg,#dce9fb,#f7faff);
+      overflow:hidden;
+    }
+    .wide-illustration .art img{
+      width:100%;height:100%;object-fit:cover;
+    }
+
+    .footer-band{
+      height:220px;
+      background:linear-gradient(180deg, rgba(180,207,255,.16) 0%, rgba(145,181,241,.62) 100%);
+      border-top:1px solid rgba(37,71,216,.08);
+    }
+    footer{
+      background:#fff;
+      border-top:2px solid var(--blue);
+      padding:28px 0 24px;
+    }
+    .footer-grid{
+      display:grid;grid-template-columns:1.2fr .9fr .7fr;gap:60px;
+      align-items:start;
+    }
+    .footer-brand img{height:22px;width:auto}
+    .footer-brand p{
+      margin:14px 0 20px;font-size:11px;color:var(--muted);max-width:260px
+    }
+    .footer-col h5{
+      margin:0 0 14px;font-size:9px;letter-spacing:.18em;color:var(--blue)
+    }
+    .footer-col ul{list-style:none;margin:0;padding:0}
+    .footer-col li{
+      margin:0 0 12px;font-size:11px;color:var(--text)
+    }
+    .footer-col li small{display:block;color:var(--muted);font-size:10px;line-height:1.5}
+    .copyright{
+      margin-top:18px;padding-top:16px;
+      border-top:1px solid rgba(21,25,39,.06);
+      display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+      font-size:10px;color:rgba(21,25,39,.45)
+    }
+
+    @keyframes headerFadeIn{
+      0%{opacity:0;transform:translateY(-4rem)}
+      100%{opacity:1;transform:none}
+    }
+    @keyframes heroWashIn{
+      0%{opacity:0;transform:scale(.3) rotate(-8deg)}
+      55%{opacity:.82}
+      100%{opacity:.55;transform:scale(1.35) rotate(3deg)}
+    }
+    @keyframes heroVisualIn{
+      0%{opacity:0;filter:blur(.8rem);transform:translate(-4rem,-2rem) scale(.93)}
+      60%{opacity:1;filter:blur(0)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes heroTextIn{
+      0%{opacity:0;filter:blur(1rem);transform:translateY(1.5rem) scale(.98)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+
+    .site-header{animation:headerFadeIn 1s cubic-bezier(.16,1,.3,1) both .1s}
+    .hero-copy .mini,
+    .hero-copy h1,
+    .hero-copy p,
+    .hero-copy .btn{opacity:0;animation:heroTextIn 1.05s ease-out forwards}
+    .hero-copy h1{animation-delay:.22s}
+    .hero-copy p{animation-delay:.36s}
+    .hero-copy .btn{animation-delay:.48s}
+    .hero-copy .mini{animation-delay:.08s}
+    .hero-visual{opacity:0;animation:heroVisualIn 1.6s cubic-bezier(.16,1,.3,1) forwards .16s}
+
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(34px);
+      transition:opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
+    }
+    html.js .reveal.show{opacity:1;transform:none}
+    html.js .stagger>*{
+      opacity:0;transform:translateY(24px);
+      transition:opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
+    }
+    html.js .stagger.show>*:nth-child(1){transition-delay:.04s}
+    html.js .stagger.show>*:nth-child(2){transition-delay:.12s}
+    html.js .stagger.show>*:nth-child(3){transition-delay:.2s}
+    html.js .stagger.show>*:nth-child(4){transition-delay:.28s}
+    html.js .stagger.show>*:nth-child(5){transition-delay:.36s}
+    html.js .stagger.show>*{opacity:1;transform:none}
+
+    @media (max-width: 1100px){
+      .hero-inner,.about-grid,.services-grid,.footer-grid{grid-template-columns:1fr}
+      .hero{min-height:auto}
+      .hero-inner{min-height:auto;padding:120px 0 60px}
+      .hero-copy{max-width:none}
+      .hero h1{font-size:48px}
+      .hero-visual{padding-top:0;justify-self:center}
+      .ghost-title{font-size:56px}
+      .about-copy h2{font-size:34px}
+      .service-panel,.image-panel{min-height:auto}
+      .image-panel{aspect-ratio:1 / 1.05}
+      .system{min-height:620px;padding-top:120px}
+      .system .ghost-title{margin-top:160px;font-size:48px}
+      .system-divider{margin-top:140px}
+      .system-line{top:180px;height:180px}
+      .nav-links{display:none}
+    }
+    @media (max-width: 720px){
+      .container{width:min(calc(100% - 28px), var(--container))}
+      .hero h1{font-size:38px}
+      .hero-copy p{max-width:none}
+      .ghost-title{font-size:42px}
+      .about{padding-top:80px}
+      .photo-card{padding:16px;border-radius:24px}
+      .photo-card .frame{border-radius:18px}
+      .floating-note{position:static;margin-top:12px}
+      .about-grid{gap:30px}
+      .service-panel{padding:28px 22px}
+      .service-panel h3{font-size:28px}
+      .service-card .no b{font-size:30px}
+      .system .ghost-title{font-size:36px}
+      .footer-band{height:140px}
+    }
+  </style>
+</head>
+<body style="">
+  <script>document.documentElement.classList.add('js');</script>
+
+  <header class="site-header">
+    <div class="container nav">
+      <div class="nav-left">
+        <a href="#" class="brand">
+          <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorks" onerror="this.style.display='none'">
+        </a>
+        <nav class="nav-links">
+          <a href="#about">働く安心</a>
+          <a href="#services">仕事内容</a>
+          <a href="#support">支援体制</a>
+        </nav>
+      </div>
+      <div class="nav-right">
+        <a href="#entry" class="btn-outline">お問い合わせ</a>
+        <a href="#entry" class="btn">見学・相談へ</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero section">
+    <div class="hero-media">
+      <img src="http://127.0.0.1:5000/uploads/up_5f87cfafba.png" alt="面談風景" width="1600" height="900" onerror="this.style.display='none'">
+    </div>
+    <div class="container hero-inner" style="min-height: 880px !important;">
+      <div class="hero-copy">
+        <div class="mini">
+          <span>LINKWORKS RECRUIT SITE</span>
+          <span>見学・相談はいつでも受付中</span>
+        </div>
+        <h1 class="" style="width: 550px !important; max-width: none !important; translate: -4px -7px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(1, 0, 0, 1, 0, 0) !important;" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="-4" data-cety="-7">「<span class="accent">わくわく</span>」を、<br><strong>仕事にしよう。</strong></h1>
+        <p>一人ひとりの得意やペースに寄り添いながら、軽作業・事務補助・発送準備など、無理なく始められるお仕事をご案内します。</p>
+        <a href="#entry" class="btn">メッセージを送る</a>
+      </div>
+      <div class="hero-visual">
+        <img src="http://127.0.0.1:5000/uploads/up_80cda69a7a.png" alt="相談する二人" width="900" height="650" onerror="this.style.display='none'" class="" data-cebt="" data-cetx="332" data-cety="-300" data-cew="375.14999468643816" data-ceh="210.9866135529743" style="translate: 332px -300px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; width: 375px !important; height: 211px !important; object-fit: cover !important; max-width: none !important;">
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="about section">
+    <div class="container">
+      <h2 class="ghost-title reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">ABOUT US</h2>
+      <div class="about-grid">
+        <div class="photo-card reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; animation: auto ease 0s 1 normal none running none;">
+          <div class="frame">
+            <img src="http://127.0.0.1:5000/uploads/up_04b676c6fb.jpg" alt="店舗前に並ぶスタッフたち" width="720" height="590" onerror="this.style.display='none'">
+          </div>
+          <div class="floating-note">
+            <div class="dot">✦</div>
+            <div>
+              <small>見学歓迎・相談無料</small>
+              <small>あなたのペースで一歩ずつ。</small>
+            </div>
+          </div>
+        </div>
+        <div class="about-copy reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <span class="eyebrow">ABOUT LINKWORKS</span>
+          <h2>一人で抱えないで。<br>あなたの「得意」を<br><span class="accent">一緒に見つけましょう。</span></h2>
+          <p>「少しずつ働く感覚を取り戻したい」「人と話しながら自分に合う仕事を知りたい」そんな気持ちに、LinkWorksのスタッフが丁寧に寄り添います。</p>
+          <ul class="bullet-list stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+            <li style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">相談から見学、利用開始まで同じ担当者が継続してサポートします。</li>
+            <li style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">事務補助・封入・梱包・検品など、取り組みやすい業務を多数ご用意。</li>
+            <li style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">通所の頻度や時間は、体調や生活リズムに合わせて一緒に調整できます。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" class="services section" style="min-height: 1032px !important;">
+    <div class="container">
+      <div class="services-grid">
+        <div class="service-panel reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="min-height: 848px !important;">
+          <span class="eyebrow">SERVICES</span>
+          <h3 class="" style="">あなたの適性に合った仕事が、<br><span class="accent">きっとここにあります。</span></h3>
+          <p>袋詰めや梱包、発送準備、入力補助など、段階的にチャレンジできる仕事をご用意しています。</p>
+          <div class="service-card" style="">
+            <div class="no"><b>01</b><span>LIGHT WORK</span></div>
+            <h4>軽作業</h4>
+            <p>箱の組み立て、封入、仕分け、検品、ラベル貼りなど、落ち着いた環境で取り組める仕事です。スタッフが手順を丁寧にお伝えします。</p>
+          </div>
+        </div>
+        <div class="image-panel reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_1d421dabc8.png" alt="書類を封入する女性" width="720" height="900" onerror="this.style.display='none'">
+          <div class="image-badge">at light work space</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="support" class="system section" style="cursor: move;">
+    <div class="system-line"></div>
+    <div class="container" style="">
+      <h2 class="ghost-title reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">SUPPORT SYSTEM</h2>
+      <div class="system-divider reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"></div>
+    </div>
+  </section>
+
+  <section class="wide-illustration section">
+    <div class="art reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="オフィスを案内するスタッフ" width="1600" height="630" onerror="this.style.display='none'" class="" style="cursor: move;">
+    </div>
+  </section>
+
+  <div class="footer-band"></div>
+
+  <footer id="entry">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorks" onerror="this.style.display='none'">
+          <p>あなたに合った「働く」を、あなたといっしょに見つける。就労のはじめの一歩を、やさしく支える見学・相談窓口です。</p>
+          <a href="#" class="btn-outline">相談・見学はこちら ↗</a>
+        </div>
+        <div class="footer-col reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <h5>OFFICE</h5>
+          <ul>
+            <li>
+              仙台駅前センター
+              <small>宮城県仙台市青葉区中央1-8-00 LinkWorksビル 4F<br>月〜金 9:00 - 18:00 / 土日祝休</small>
+            </li>
+            <li>
+              長町サテライト
+              <small>宮城県仙台市太白区長町7-00-00 2F<br>見学は予約制で随時受付しています。</small>
+            </li>
+          </ul>
+        </div>
+        <div class="footer-col reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <h5>MENU</h5>
+          <ul>
+            <li><a href="#about">私たちについて</a></li>
+            <li><a href="#services">仕事内容</a></li>
+            <li><a href="#support">支援体制</a></li>
+            <li><a href="#entry">お問い合わせ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">
+        <span>©2026 LinkWorks Inc. All Rights Reserved.</span>
+        <span>プライバシーポリシー</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function(){
+      const targets = document.querySelectorAll('.reveal, .stagger');
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            entry.target.classList.add('show');
+            io.unobserve(entry.target);
+          }
+        });
+      },{threshold:.14, rootMargin:'0px 0px -8% 0px'});
+      targets.forEach(el=>io.observe(el));
+
+      const cards = document.querySelectorAll('.photo-card, .service-panel, .image-panel, .service-card');
+      cards.forEach(card=>{
+        card.addEventListener('mousemove', (e)=>{
+          if (window.innerWidth < 900) return;
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - .5;
+          const y = (e.clientY - r.top) / r.height - .5;
+          card.style.transform = `translateY(-2px) rotateX(${(-y*2.2).toFixed(2)}deg) rotateY(${(x*2.2).toFixed(2)}deg)`;
+        });
+        card.addEventListener('mouseleave', ()=>{
+          card.style.transform = '';
+        });
+      });
+    })();
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

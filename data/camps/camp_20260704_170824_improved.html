@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就労継続支援B型 みどりのアトリエ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --green:#8ac75a;
+      --green-deep:#75b64a;
+      --green-soft:#dff1c8;
+      --text:#333333;
+      --white:#ffffff;
+      --sky1:#eef8ff;
+      --sky2:#ffffff;
+      --line:#d7e9c7;
+      --card:rgba(255,255,255,.78);
+      --radius-xl:32px;
+      --radius-sm:2px;
+      --container:1080px;
+      --transition:opacity .3s ease, transform .3s ease, background-color .3s ease, box-shadow .3s ease;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Zen Maru Gothic",sans-serif;
+      color:var(--text);
+      background:#fff;
+      line-height:1.8;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(calc(100% - 40px), var(--container)); margin-inline:auto;}
+    .small{font-size:12px; letter-spacing:.08em}
+    .eyebrow{
+      color:var(--green);
+      font-weight:700;
+      letter-spacing:.14em;
+      font-size:14px;
+      margin-bottom:10px;
+      text-transform:uppercase;
+    }
+    .section-title{
+      font-size:clamp(30px,4vw,54px);
+      line-height:1.35;
+      font-weight:700;
+      color:var(--green);
+      margin:0;
+    }
+    .subnote{
+      font-size:13px;
+      color:#8ea28c;
+      margin-left:10px;
+      vertical-align:middle;
+      font-weight:400;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:44px;
+      padding:0 22px;
+      border-radius:999px;
+      background:var(--green);
+      color:#fff;
+      border:1px solid transparent;
+      font-size:14px;
+      font-weight:700;
+      transition:var(--transition);
+    }
+    .btn:hover{transform:translateY(-2px); background:var(--green-deep)}
+    .btn.outline{
+      background:#fff;
+      color:var(--green);
+      border-color:#cfe6bb;
+    }
+    .btn.outline:hover{background:#f8fff2}
+
+    .site-header{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(180deg,var(--sky1) 0%, #f7fbff 35%, #ffffff 100%);
+      padding-top:26px;
+    }
+    .site-header::before,
+    .site-header::after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      background:rgba(180,218,245,.38);
+      filter:blur(.2px);
+    }
+    .site-header::before{width:84px;height:28px;top:56px;left:18%;}
+    .site-header::after{width:96px;height:32px;top:110px;right:14%;}
+    .bird{
+      position:absolute;
+      width:34px;
+      opacity:.85;
+      animation:birdFloat 5s ease-in-out infinite;
+    }
+    .bird.b1{right:9%;top:135px}
+    .bird.b2{left:62%;top:205px;animation-delay:1s}
+    .bird.b3{right:38%;top:250px;animation-delay:2s}
+    @keyframes birdFloat{
+      0%,100%{transform:translateY(0) translateX(0)}
+      50%{transform:translateY(-10px) translateX(4px)}
+    }
+
+    .header-top{
+      display:flex;
+      align-items:flex-start;
+      gap:20px;
+      padding-bottom:12px;
+    }
+    .brand-mark{
+      width:86px;
+      flex:0 0 86px;
+      margin-top:2px;
+    }
+    .brand-mark img{width:100%;height:auto}
+    .brand-copy{flex:1}
+    .brand-title{
+      margin:0 0 8px;
+      font-size:clamp(28px,4vw,56px);
+      line-height:1.2;
+      font-weight:500;
+    }
+    .brand-title .accent{color:var(--green)}
+    .brand-desc{
+      margin:0;
+      font-size:14px;
+      max-width:760px;
+    }
+
+    .nav-wrap{
+      margin-top:12px;
+      background:rgba(255,255,255,.78);
+      border-radius:999px;
+      padding:16px 22px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      position:relative;
+      z-index:2;
+    }
+    .nav-logo{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:12px;
+      color:#6f8467;
+      white-space:nowrap;
+    }
+    .nav-logo img{
+      width:70px;height:auto;
+    }
+    .nav-links{
+      display:flex;
+      gap:24px;
+      font-size:13px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .menu-btn{
+      width:44px;height:44px;border-radius:999px;
+      background:var(--green); color:#fff; border:none; flex:0 0 44px;
+      display:grid;place-items:center; cursor:pointer; transition:var(--transition);
+    }
+    .menu-btn:hover{transform:translateY(-2px); background:var(--green-deep)}
+    .menu-btn span,.menu-btn span::before,.menu-btn span::after{
+      content:""; display:block; width:18px; height:2px; background:#fff; border-radius:2px; position:relative;
+    }
+    .menu-btn span::before{position:absolute; top:-6px}
+    .menu-btn span::after{position:absolute; top:6px}
+
+    .hero{
+      position:relative;
+      margin-top:26px;
+      padding:56px 0 132px;
+      overflow:hidden;
+    }
+    .hill-back,.hill-front{
+      position:absolute; left:-5%; width:110%;
+      background:linear-gradient(180deg,#d8ef93 0%, #bddd62 55%, #abd756 100%);
+      border-radius:50% 50% 0 0/20% 20% 0 0;
+    }
+    .hill-back{
+      bottom:78px; height:280px;
+      transform:rotate(-1deg);
+      opacity:.9;
+    }
+    .hill-front{
+      bottom:0; height:240px;
+      background:linear-gradient(180deg,#cae97b 0%, #b6dc59 70%, #a9d44e 100%);
+    }
+    .grass-dots{
+      position:absolute; inset:auto 0 32px 0; height:240px; pointer-events:none;
+      background:
+        radial-gradient(circle at 10% 60%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+        radial-gradient(circle at 24% 48%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+        radial-gradient(circle at 40% 65%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+        radial-gradient(circle at 58% 52%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+        radial-gradient(circle at 73% 68%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+        radial-gradient(circle at 88% 56%, rgba(255,255,255,.85) 0 2px, transparent 3px);
+      opacity:.8;
+    }
+
+    .scene{
+      position:relative;
+      z-index:2;
+      height:220px;
+      margin-bottom:30px;
+    }
+    .scene-item{
+      position:absolute;
+      bottom:18px;
+      animation:treeanime 2.8s ease-in-out infinite;
+      transform-origin:bottom center;
+    }
+    .scene-item:nth-child(2){animation-delay:.4s}
+    .scene-item:nth-child(3){animation-delay:.8s}
+    .scene-item:nth-child(4){animation-delay:1.2s}
+    .scene-item:nth-child(5){animation-delay:1.6s}
+    .scene-item:nth-child(6){animation-delay:2s}
+    .scene-item:nth-child(7){animation-delay:2.4s}
+    .scene-item:nth-child(8){animation-delay:1.1s}
+    .scene-item:nth-child(9){animation-delay:1.9s}
+    @keyframes treeanime{
+      0%,100%{transform:translateY(0) rotate(0deg)}
+      50%{transform:translateY(-3px) rotate(.6deg)}
+    }
+
+    .news-card{
+      position:relative;
+      z-index:3;
+      width:min(880px, calc(100% - 20px));
+      margin:0 auto;
+      background:rgba(255,255,255,.82);
+      backdrop-filter:blur(8px);
+      border-radius:28px;
+      padding:24px 28px;
+      border:1px solid rgba(215,233,199,.9);
+    }
+    .news-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:20px;
+      margin-bottom:18px;
+    }
+    .news-title{
+      margin:0;
+      color:var(--green);
+      font-size:36px;
+      letter-spacing:.08em;
+      line-height:1;
+    }
+    .news-title small{
+      color:#8ea28c;
+      font-size:12px;
+      margin-left:10px;
+      letter-spacing:.04em;
+    }
+    .news-list{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:18px;
+    }
+    .news-item{
+      border-top:1px solid #e7f1dd;
+      padding-top:10px;
+      min-width:0;
+      transition:var(--transition);
+    }
+    .news-item:hover{transform:translateY(-2px)}
+    .tag{
+      display:inline-block;
+      background:var(--green);
+      color:#fff;
+      font-size:11px;
+      border-radius:999px;
+      padding:3px 10px;
+      line-height:1.4;
+      margin-bottom:8px;
+    }
+    .news-date{font-size:11px;color:#79916f}
+    .news-text{
+      margin-top:4px;
+      font-size:13px;
+      line-height:1.7;
+    }
+
+    .concept{
+      background:#fff;
+      padding:92px 0 260px;
+      position:relative;
+    }
+    .concept-inner{width:min(calc(100% - 80px), 920px); margin:0 auto;}
+    .concept .section-title{
+      font-size:clamp(36px,5vw,60px);
+      line-height:1.6;
+      margin-top:18px;
+    }
+
+    .wave-green{
+      position:relative;
+      background:linear-gradient(180deg,#cde985 0%, #bfdc67 100%);
+      padding:130px 0 120px;
+      overflow:hidden;
+    }
+    .wave-green::before,
+    .wave-green::after{
+      content:"";
+      position:absolute; left:-5%; width:110%; background:#fff;
+      height:120px;
+    }
+    .wave-green::before{
+      top:-58px;
+      border-radius:0 0 50% 50% / 0 0 100% 100%;
+    }
+    .wave-green::after{
+      bottom:-58px;
+      border-radius:50% 50% 0 0 / 100% 100% 0 0;
+    }
+    .wave-texture{
+      position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.14), transparent 22%),
+        radial-gradient(circle at 75% 65%, rgba(255,255,255,.12), transparent 18%),
+        radial-gradient(circle at 55% 20%, rgba(255,255,255,.08), transparent 16%);
+      mix-blend-mode:soft-light;
+      pointer-events:none;
+    }
+
+    .big-panel{
+      position:relative;
+      z-index:2;
+      width:min(calc(100% - 80px), 920px);
+      margin:0 auto;
+      background:#fff;
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid rgba(215,233,199,.95);
+    }
+    .big-panel-top{
+      padding:52px 56px 24px;
+      min-height:250px;
+      background:linear-gradient(180deg,#ffffff 0%, #ffffff 100%);
+    }
+    .big-panel-top .eyebrow{opacity:.55}
+    .big-panel-top h3{
+      margin:0;
+      font-size:clamp(28px,4vw,46px);
+      color:var(--green);
+      line-height:1.5;
+    }
+    .big-panel-top p{
+      font-size:15px;
+      max-width:700px;
+      margin:18px 0 0;
+    }
+    .mini-tree-wrap{
+      position:relative;
+      height:360px;
+      background:linear-gradient(180deg,#ffffff 0%,#ffffff 56%, #8aca59 56%, #8aca59 100%);
+      overflow:hidden;
+    }
+    .mini-tree-wrap::before{
+      content:"";
+      position:absolute;
+      left:-5%; right:-5%; top:52%;
+      height:92px;
+      background:#fff;
+      border-radius:50%;
+    }
+    .flower{
+      position:absolute;
+      bottom:125px;
+      width:9px;height:9px;border-radius:50%;
+      background:#f28aaa;
+      box-shadow:0 0 0 3px rgba(255,255,255,.65);
+    }
+    .flower::after{
+      content:"";
+      position:absolute;
+      width:2px;height:16px;background:#78b94f;
+      left:50%; top:7px; transform:translateX(-50%);
+    }
+
+    .message-box{
+      width:min(calc(100% - 80px), 920px);
+      margin:84px auto 0;
+      min-height:150px;
+      border:1.5px solid #d4e8c5;
+      border-radius:24px;
+      background:linear-gradient(180deg,#fff 0%, #fcfffa 100%);
+      padding:34px 40px;
+      position:relative;
+      z-index:2;
+    }
+    .message-box h4{
+      margin:0 0 10px;
+      color:var(--green);
+      font-size:24px;
+    }
+    .message-box p{margin:0;font-size:14px;max-width:760px}
+
+    footer{
+      position:relative;
+      background:linear-gradient(180deg,#9dd35b 0%, #8ec84f 100%);
+      margin-top:78px;
+      color:#fff;
+      overflow:hidden;
+    }
+    .footer-topline{
+      position:relative;
+      height:78px;
+      background:#fff;
+    }
+    .footer-scene{
+      position:absolute;
+      left:0; right:0; bottom:-2px;
+      height:86px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      gap:32px;
+      pointer-events:none;
+    }
+    .footer-scene img{
+      height:72px;
+      width:auto;
+      animation:footanime 2.8s ease-in-out infinite;
+      transform-origin:bottom center;
+    }
+    .footer-scene img:nth-child(2){animation-delay:.4s}
+    .footer-scene img:nth-child(3){animation-delay:.8s}
+    .footer-scene img:nth-child(4){animation-delay:1.2s}
+    .footer-scene img:nth-child(5){animation-delay:1.6s}
+    .footer-scene img:nth-child(6){animation-delay:2s}
+    @keyframes footanime{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-4px)}
+    }
+
+    .footer-main{
+      padding:48px 0 54px;
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1fr 1fr;
+      gap:30px;
+      align-items:start;
+    }
+    .footer-brand h5{
+      margin:0 0 8px;
+      font-size:16px;
+      font-weight:700;
+    }
+    .footer-brand .name{
+      font-size:24px;
+      font-weight:700;
+      letter-spacing:.06em;
+      margin:4px 0 10px;
+    }
+    .footer-phone{
+      font-size:38px;
+      line-height:1.1;
+      font-weight:700;
+      letter-spacing:.04em;
+    }
+    .footer-note{font-size:12px; opacity:.92}
+    .footer-col h6{
+      margin:0 0 10px;
+      padding-bottom:8px;
+      border-bottom:1px solid rgba(255,255,255,.45);
+      font-size:14px;
+    }
+    .footer-col a{
+      display:block;
+      font-size:13px;
+      opacity:.98;
+      margin:7px 0;
+      transition:var(--transition);
+    }
+    .footer-col a:hover{transform:translateX(3px)}
+
+    .footer-bottom{
+      background:#fff;
+      color:#666;
+      padding:18px 0 20px;
+    }
+    .partners{
+      display:flex;
+      flex-wrap:wrap;
+      gap:24px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    .partner-badge{
+      display:flex; align-items:center; gap:10px;
+      font-size:12px;
+      color:#666;
+    }
+    .circle-logo{
+      width:44px;height:44px;border-radius:50%;
+      background:conic-gradient(#f36 0 25%, #f9c72f 0 50%, #4ea5ff 0 75%, #5cc36c 0 100%);
+    }
+    .copy{
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      font-size:10px;
+    }
+
+    .reveal{}
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(50px);
+    }
+    html.js .reveal.from-left{transform:translateX(-50px); opacity:0}
+    html.js .reveal.from-right{transform:translateX(50px); opacity:0}
+    html.js .reveal.scale{transform:scale(.96); opacity:0}
+    .reveal.is-visible{
+      opacity:1 !important;
+      transform:none !important;
+      transition:1.1s ease;
+    }
+    .delay-1{transition-delay:.08s !important}
+    .delay-2{transition-delay:.16s !important}
+    .delay-3{transition-delay:.24s !important}
+    .delay-4{transition-delay:.32s !important}
+    .delay-5{transition-delay:.4s !important}
+
+    .hero-animate-title{animation:fadeInDown 1s ease 1 both}
+    .hero-animate-sub{animation:text_anime_on 1s ease-out .2s 1 both}
+    .hero-animate-card{animation:fadeInUP 1.4s ease .35s 1 both}
+    .hero-animate-scene{animation:fadeInScale 1.1s ease .15s 1 both}
+
+    @keyframes fadeInDown{
+      0%{opacity:0; transform:translateY(-50px)}
+      100%{opacity:1; transform:translateY(0)}
+    }
+    @keyframes fadeInUP{
+      0%{opacity:0; transform:translateY(50px)}
+      100%{opacity:1; transform:translateY(0)}
+    }
+    @keyframes fadeInLeft{
+      0%{opacity:0; transform:translateX(-50px)}
+      100%{opacity:1; transform:translateX(0)}
+    }
+    @keyframes fadeInRight{
+      0%{opacity:0; transform:translateX(50px)}
+      100%{opacity:1; transform:translateX(0)}
+    }
+    @keyframes fadeInScale{
+      0%{opacity:0; transform:scale(.96)}
+      100%{opacity:1; transform:scale(1)}
+    }
+    @keyframes text_anime_on{
+      0%{opacity:0; transform:translateY(24px)}
+      100%{opacity:1; transform:translateY(0)}
+    }
+
+    @media (max-width: 960px){
+      .news-list{grid-template-columns:repeat(2,1fr)}
+      .footer-grid{grid-template-columns:1fr 1fr}
+      .brand-mark{width:72px;flex-basis:72px}
+      .big-panel-top{padding:38px 28px 18px}
+      .message-box{padding:28px 24px}
+      .nav-links{display:none}
+    }
+    @media (max-width: 640px){
+      .container{width:min(calc(100% - 24px), var(--container))}
+      .header-top{gap:14px}
+      .brand-title{font-size:34px}
+      .brand-desc{font-size:13px}
+      .nav-wrap{padding:12px 14px}
+      .nav-logo img{width:58px}
+      .hero{padding:32px 0 118px}
+      .scene{height:170px}
+      .scene-item img{max-height:78px}
+      .news-card{padding:18px 16px;border-radius:22px}
+      .news-title{font-size:28px}
+      .news-list{grid-template-columns:1fr}
+      .concept{padding:68px 0 180px}
+      .concept-inner{width:min(calc(100% - 32px), 920px)}
+      .big-panel,
+      .message-box{width:min(calc(100% - 32px), 920px)}
+      .mini-tree-wrap{height:280px}
+      .footer-grid{grid-template-columns:1fr}
+      .footer-phone{font-size:30px}
+      .partners{gap:12px}
+      .footer-scene{gap:14px}
+      .footer-scene img{height:52px}
+    }
+  </style>
+</head>
+<body style="">
+  <header class="site-header" data-cebt="" data-cetx="0" data-cety="-1" style="translate: 0px -1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+    <img class="bird b1" src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="" onerror="this.style.display='none'">
+    <img class="bird b2" src="http://127.0.0.1:5000/uploads/up_4f5b5e1e9a.png" alt="" onerror="this.style.display='none'">
+    <img class="bird b3" src="http://127.0.0.1:5000/uploads/up_5c480bccae.png" alt="" onerror="this.style.display='none'">
+
+    <div class="container">
+      <div class="header-top">
+        <div class="brand-mark hero-animate-scene in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+          <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="みどりのアトリエ ロゴモチーフ" width="86" height="86" onerror="this.style.display='none'">
+        </div>
+        <div class="brand-copy">
+          <h1 class="brand-title hero-animate-title in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">就労継続支援B型 <span class="accent">みどりのアトリエ</span></h1>
+          <p class="brand-desc hero-animate-sub in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+            ひとり一人のペースを大切にしながら、軽作業・PC作業・ものづくりを通して「働く自信」を育てる就労支援事業所です。<br>
+            見学や体験からでも大丈夫。安心して続けられる場所を、いっしょに見つけていきましょう。
+          </p>
+        </div>
+      </div>
+
+      <div class="nav-wrap reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-cebt="" data-cesx="1.2100000000000002" data-cesy="1.2100000000000002" data-cetx="-20" data-cety="30" style="translate: -20px 30px !important; rotate: 0deg !important; scale: 1.21 !important; transform-origin: center center !important;">
+        <div class="nav-logo">
+          <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="ロゴ" width="70" height="40" onerror="this.style.display='none'">
+          <span>就労継続支援B型<br>みどりのアトリエ</span>
+        </div>
+        <nav class="nav-links" aria-label="グローバルナビゲーション">
+          <a href="#top">TOP</a>
+          <a href="#about">みどりのアトリエとは</a>
+          <a href="#work">お仕事とサポート</a>
+          <a href="#flow">ご利用の流れ</a>
+          <a href="#contact">ご相談・お問い合わせ</a>
+        </nav>
+        <button class="menu-btn" aria-label="メニューを開く"><span></span></button>
+      </div>
+    </div>
+
+    <section class="hero" id="top">
+      <div class="hill-back"></div>
+      <div class="hill-front"></div>
+      <div class="grass-dots" style=""></div>
+
+      <div class="container">
+        <div class="scene hero-animate-scene in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" aria-hidden="true">
+          <div class="scene-item" style="left:2%; bottom:55px;">
+            <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="" width="76" height="92" onerror="this.style.display='none'" style="width:76px;height:92px;object-fit:contain;">
+          </div>
+          <div class="scene-item" style="left:16%; bottom:70px;">
+            <div style="width:90px;height:110px;background:linear-gradient(180deg,#84cc57 0%,#53a53d 100%);border-radius:52% 48% 45% 55% / 60% 58% 42% 40%;position:relative">
+              <div style="position:absolute;left:43px;bottom:-18px;width:10px;height:34px;background:#6b492e;border-radius:8px"></div>
+            </div>
+          </div>
+          <div class="scene-item" style="left:33%; bottom:60px;">
+            <img src="http://127.0.0.1:5000/uploads/up_785a85c0f8.png" alt="" width="54" height="86" onerror="this.style.display='none'" style="width: 72px !important; height: 114px !important; object-fit: cover !important; max-width: none !important;" class="" data-cew="71.87400000000002" data-ceh="114.46600000000002">
+          </div>
+          <div class="scene-item" style="left:48%; bottom:45px;">
+            <div style="width:94px;height:112px;position:relative">
+              <div style="position: absolute; inset: auto 17px 0px; height: 64px; background: rgb(255, 245, 234); border-radius: 8px 8px 10px 10px; border: 2px solid rgb(240, 214, 196); translate: -17px -5px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="" data-cebt="" data-cetx="-17" data-cety="-5"></div>
+              <div style="position: absolute; left: 0px; right: 0px; top: 0px; margin: auto; width: 0px; height: 0px; border-left: 47px solid transparent; border-right: 47px solid transparent; border-bottom: 48px solid rgb(244, 179, 176); translate: -22px -5px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="" data-cebt="" data-cetx="-22" data-cety="-5"></div>
+              <div style="position:absolute;left:38px;bottom:8px;width:18px;height:26px;background:#c98c5b;border-radius:10px 10px 2px 2px"></div>
+            </div>
+          </div>
+          <div class="scene-item" style="left:59%; bottom:52px;">
+            <img src="http://127.0.0.1:5000/uploads/up_eef377663d.png" alt="" width="60" height="86" onerror="this.style.display='none'" style="width: 80px !important; height: 114px !important; object-fit: cover !important; max-width: none !important;" class="" data-cew="79.86000000000001" data-ceh="114.46600000000002">
+          </div>
+          <div class="scene-item" style="left:70%; bottom:66px;">
+            <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="" width="84" height="104" onerror="this.style.display='none'" style="width:84px;height:104px;object-fit:contain;">
+          </div>
+          <div class="scene-item" style="left:86%; bottom:68px;">
+            <div style="width:48px;height:82px;position:relative">
+              <div style="position:absolute;left:20px;bottom:0;width:8px;height:34px;background:#6b492e;border-radius:8px"></div>
+              <div style="position:absolute;left:6px;top:0;width:36px;height:48px;background:linear-gradient(180deg,#91d767,#67b44a);border-radius:50% 50% 44% 44%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="news-card hero-animate-card in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+          <div class="news-head">
+            <h2 class="news-title">NEWS <small>お知らせ</small></h2>
+            <a href="#contact" class="btn outline">すべてをみる</a>
+          </div>
+          <div class="news-list">
+            <article class="news-item">
+              <span class="tag">見学会</span>
+              <div class="news-date">2026.04.13</div>
+              <div class="news-text">見学・体験会をスタート。初めての方もお気軽にお越しください。</div>
+            </article>
+            <article class="news-item">
+              <span class="tag">新着</span>
+              <div class="news-date">2026.04.05</div>
+              <div class="news-text">軽作業に加えて、名刺入力などPC業務の受け入れを開始しました。</div>
+            </article>
+            <article class="news-item">
+              <span class="tag">活動報告</span>
+              <div class="news-date">2026.03.31</div>
+              <div class="news-text">季節の小物づくりが好評です。手先の作業が好きな方にもおすすめです。</div>
+            </article>
+            <article class="news-item">
+              <span class="tag">お知らせ</span>
+              <div class="news-date">2026.03.18</div>
+              <div class="news-text">送迎・昼食・工賃についてのよくあるご質問を更新しました。</div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="concept imp" id="about" style="cursor: move;">
+  <div class="concept-inner">
+    <div class="eyebrow reveal delay-1 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">CONCEPT <span class="subnote">わたしたちの想い。</span></div>
+    <h2 class="section-title reveal delay-2 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="">だれひとり取り残さない<br>やさしく、前に進める働き方を</h2>
+  </div>
+  <style>
+    section.imp.concept {
+      background: linear-gradient(180deg, #fafdf8 0%, #f0f8ec 100%) !important;
+      padding: 180px 20px 200px !important;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    section.imp.concept::before {
+      content: "";
+      position: absolute;
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(138,199,90,0.10) 0%, rgba(255,255,255,0) 70%);
+      top: -15%; left: -15%;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    section.imp.concept::after {
+      content: "";
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(180,218,245,0.12) 0%, rgba(255,255,255,0) 70%);
+      bottom: -10%; right: -15%;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    section.imp .concept-inner {
+      position: relative;
+      z-index: 2;
+      width: min(calc(100% - 80px), 820px) !important;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.65) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 32px;
+      padding: 80px 60px !important;
+      box-shadow: 0 20px 50px rgba(138, 199, 90, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    section.imp .eyebrow {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 16px;
+      color: #6b9b4a !important;
+      font-size: 12px !important;
+      letter-spacing: 0.4em !important;
+      text-transform: uppercase;
+      margin-bottom: 36px !important;
+      font-weight: 600 !important;
+    }
+    section.imp .eyebrow::before,
+    section.imp .eyebrow::after {
+      content: "";
+      width: 40px;
+      height: 1px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    section.imp .eyebrow::before {
+      background: linear-gradient(90deg, transparent, #8ac75a);
+    }
+    section.imp .eyebrow::after {
+      background: linear-gradient(90deg, #8ac75a, transparent);
+    }
+
+    section.imp .eyebrow .subnote {
+      margin-left: 0 !important;
+      letter-spacing: 0.1em !important;
+      color: #8ea28c !important;
+      text-transform: none;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    section.imp .section-title {
+      font-size: clamp(28px, 4.2vw, 48px) !important;
+      line-height: 1.8 !important;
+      font-weight: 500 !important;
+      color: #2e3b28 !important;
+      margin: 0 !important;
+      letter-spacing: 0.05em !important;
+      text-shadow: none;
+    }
+
+    /* JS Insurance */
+    html.js section.imp .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    html.js section.imp .reveal.is-visible {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+    html.js section.imp .reveal.delay-1 { transition-delay: 0.1s; }
+    html.js section.imp .reveal.delay-2 { transition-delay: 0.3s; }
+
+    @media (max-width: 768px) {
+      section.imp .concept-inner {
+        padding: 60px 30px !important;
+      }
+    }
+  </style>
+</section>
+
+    <section class="wave-green" id="work">
+      <div class="wave-texture" style=""></div>
+      <div class="big-panel reveal scale is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="big-panel-top">
+          <div class="eyebrow reveal delay-1 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">WORK &amp; SUPPORT</div>
+          <h3 class="reveal delay-2 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">その日の体調や目標に合わせて、<br>できることを少しずつ増やしていく。</h3>
+          <p class="reveal delay-3 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            みどりのアトリエでは、梱包・封入・検品などの軽作業に加え、PC入力や手しごと制作など、
+            一人ひとりの得意や興味に合わせた作業をご用意しています。スタッフがそばで見守り、
+            無理のないペースで通所や作業の定着をサポートします。
+          </p>
+        </div>
+        <div class="mini-tree-wrap">
+          <div class="flower" style="left:22%"></div>
+          <div class="flower" style="left:27%"></div>
+          <div class="flower" style="left:32%"></div>
+          <div class="flower" style="left:36%"></div>
+          <div class="flower" style="left:61%"></div>
+          <div class="flower" style="left:66%"></div>
+          <div class="flower" style="left:71%"></div>
+          <div class="flower" style="left:76%"></div>
+
+          <div style="position:absolute;left:50%;top:94px;transform:translateX(-50%);width:min(76%,760px);display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:end;">
+            <div style="background:linear-gradient(135deg,#eaf6df 0%,#ffffff 100%);border-radius:22px;padding:18px;border:1px solid #e1efd5;min-height:220px;">
+              <div style="background:linear-gradient(135deg,#cce9b5 0%,#eff9e6 100%);border-radius:18px;overflow:hidden;aspect-ratio:4/3;">
+                <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="作業室で協力して梱包するスタッフ" width="640" height="480" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;">
+              </div>
+              <div style="font-size:13px;color:#67815e;margin-top:10px;">軽作業・梱包・封入など、集中しやすい工程を丁寧にサポート。</div>
+            </div>
+            <div style="display:grid;gap:18px;">
+              <div style="background:linear-gradient(135deg,#eaf6ff 0%,#ffffff 100%);border-radius:22px;padding:14px;border:1px solid #deebf5;">
+                <div style="background:linear-gradient(135deg,#dceeff 0%,#f5fbff 100%);border-radius:16px;overflow:hidden;aspect-ratio:4/3;">
+                  <img src="http://127.0.0.1:5000/uploads/up_06aa20751a.png" alt="相談に応じる女性スタッフ" width="480" height="360" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+              </div>
+              <div style="background:rgba(255,255,255,.86);border-radius:18px;padding:14px 16px;border:1px solid #e1efd5;font-size:13px;">
+                <strong style="display:block;color:var(--green);margin-bottom:4px;">相談しやすい環境</strong>
+                体調面・生活面の不安も気軽にご相談いただけます。
+              </div>
+            </div>
+          </div>
+
+          <div style="position:absolute;left:50%;bottom:106px;transform:translateX(-50%);">
+            <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="木のモチーフ" width="102" height="120" onerror="this.style.display='none'" style="width:102px;height:120px;object-fit:contain;filter:saturate(1.05)">
+          </div>
+        </div>
+      </div>
+
+      <div class="message-box reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <h4>こんな方におすすめです</h4>
+        <p>
+          生活リズムを整えたい方、まずは短時間から通いたい方、人との関わりに不安がある方、
+          自分に合う作業を見つけたい方へ。見学・体験・ご家族や支援機関からのご相談にも丁寧に対応します。
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="footer-topline">
+      <div class="footer-scene" aria-hidden="true" style="">
+        <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="" onerror="this.style.display='none'">
+        <div style="width:54px;height:78px;position:relative;animation:footanime 2.8s ease-in-out infinite .2s">
+          <div style="position:absolute;left:24px;bottom:0;width:8px;height:30px;background:#6b492e;border-radius:8px"></div>
+          <div style="position:absolute;left:4px;top:0;width:46px;height:52px;background:linear-gradient(180deg,#8dd361,#5ead45);border-radius:50%"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;animation:footanime 2.8s ease-in-out infinite .5s">
+          <div style="width: 18px; height: 34px; background: linear-gradient(rgb(79, 176, 88), rgb(42, 142, 80)); clip-path: none !important;"></div>
+          <div style="width: 18px; height: 42px; background: linear-gradient(rgb(82, 181, 106), rgb(42, 142, 80)); clip-path: none !important;"></div>
+        </div>
+        <div style="width:28px;height:58px;position:relative;animation:footanime 2.8s ease-in-out infinite .8s">
+          <div style="position:absolute;left:11px;bottom:0;width:6px;height:24px;background:#6b492e;border-radius:8px"></div>
+          <div style="position: absolute; left: 0px; top: 0px; width: 28px; height: 32px; background: linear-gradient(rgb(61, 163, 84), rgb(25, 126, 66)); clip-path: none !important;"></div>
+        </div>
+        <div style="width:72px;height:82px;position:relative;animation:footanime 2.8s ease-in-out infinite 1.1s">
+          <div style="position:absolute;inset:auto 14px 0 14px;height:44px;background:#fff5ea;border-radius:8px 8px 10px 10px;border:2px solid #f0d6c4"></div>
+          <div style="position:absolute;left:0;right:0;top:0;margin:auto;width:0;height:0;border-left:36px solid transparent;border-right:36px solid transparent;border-bottom:34px solid #f4b3b0"></div>
+        </div>
+        <div style="width:40px;height:70px;position:relative;animation:footanime 2.8s ease-in-out infinite 1.4s">
+          <div style="position:absolute;left:16px;bottom:0;width:8px;height:28px;background:#6b492e;border-radius:8px"></div>
+          <div style="position:absolute;left:4px;top:0;width:32px;height:40px;background:linear-gradient(180deg,#9ad96d,#69b34e);border-radius:52% 48% 44% 56%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-main">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand reveal from-left is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h5>特定非営利活動法人 みどりの会</h5>
+            <div class="name">就労継続支援B型 みどりのアトリエ</div>
+            <div>〒984-0000 宮城県仙台市若林区若葉町2-6-8</div>
+            <div class="footer-phone">022-427-7789</div>
+            <div class="footer-note">平日 9:30 - 17:00</div>
+          </div>
+
+          <div class="footer-col reveal delay-1 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h6>みどりのアトリエ</h6>
+            <a href="#top">・TOP</a>
+            <a href="#about">・みどりのアトリエとは</a>
+            <a href="#work">・お仕事と支援内容</a>
+            <a href="#contact">・お知らせ</a>
+            <a href="#contact">・お問い合わせ</a>
+          </div>
+
+          <div class="footer-col reveal delay-2 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h6>相談者の方へ</h6>
+            <a href="#contact">・見学を予約する</a>
+            <a href="#contact">・よくあるご質問</a>
+            <a href="#contact">・ご利用の流れ</a>
+            <a href="#contact">・ご相談フォーム</a>
+          </div>
+
+          <div class="footer-col reveal delay-3 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h6>支援者の方へ</h6>
+            <a href="#contact">・企業や団体の皆さまへ</a>
+            <a href="#contact">・ご寄付のお願い</a>
+            <a href="#contact">・地域連携について</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="partners">
+          <div class="partner-badge">
+            <div class="circle-logo"></div>
+            <span>地域共生支援ネットワーク</span>
+          </div>
+          <div class="partner-badge">
+            <div class="circle-logo" style="background:conic-gradient(#5cc36c 0 25%, #40c7d7 0 50%, #ffb648 0 75%, #ff7ca0 0 100%);"></div>
+            <span>宮城就労連携プラットフォーム</span>
+          </div>
+          <div class="partner-badge">
+            <div class="circle-logo" style="background:conic-gradient(#2f86ff 0 25%, #49c0f0 0 50%, #75d48b 0 75%, #8ac75a 0 100%);"></div>
+            <span>かながる地域サポート</span>
+          </div>
+        </div>
+        <div class="copy">
+          <span>特定非営利活動法人みどりの会　就労継続支援B型事業所 みどりのアトリエ</span>
+          <span>© 2026 MIDORI ATELIER. All Rights Reserved.</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach((entry)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:0.14, rootMargin:'0px 0px -40px 0px'});
+
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+  </script>
+
+
+
+
+
+
+
+<div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

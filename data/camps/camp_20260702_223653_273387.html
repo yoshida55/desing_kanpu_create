@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkWorks | 読むたび、進む仕事の旅へ。</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --blue:#0071b9;
+      --blue-soft:#b2d4ea;
+      --blue-pale:#e9f5ff;
+      --yellow:#f2e018;
+      --text:#333333;
+      --bg:#ffffff;
+      --bg-soft:#fafafa;
+      --shadow: 5px 5px 10px 0 rgba(174,174,174,.1);
+      --radius:8px;
+      --container:1440px;
+      --serif:"Times New Roman", serif;
+      --sans:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+    body{
+      font-family:var(--serif);
+      line-height:1.8;
+      overflow-x:hidden;
+      background:
+        radial-gradient(circle at 85% 8%, rgba(178,212,234,.28), transparent 20%),
+        linear-gradient(180deg,#fff 0%,#fff 28%,#fafafa 100%);
+    }
+    a{text-decoration:none;color:inherit}
+    img{max-width:100%;display:block}
+    .container{width:min(calc(100% - 32px),var(--container));margin:0 auto}
+    .en{font-family:var(--sans);letter-spacing:.06em}
+    .section{position:relative}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;
+      background:var(--blue);color:#fff;
+      border-radius:999px;padding:12px 20px;
+      font-family:var(--sans);font-size:13px;font-weight:700;
+      box-shadow:var(--shadow);
+      transition:.35s ease;
+      border:1px solid rgba(0,113,185,.18);
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(0,113,185,.18)}
+    .btn-outline{
+      background:#fff;color:var(--blue);border:1px solid rgba(0,113,185,.22)
+    }
+    .btn .arrow{font-size:14px;line-height:1}
+    .eyebrow{
+      color:var(--blue);font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.12em;
+      margin-bottom:10px;display:flex;align-items:center;gap:10px
+    }
+    .eyebrow:before{
+      content:"";display:block;width:22px;height:1px;background:var(--blue)
+    }
+    .title-jp{
+      color:var(--blue);font-family:var(--sans);font-size:38px;line-height:1.25;
+      letter-spacing:.02em;font-weight:800;margin:0
+    }
+    .small-copy{font-size:14px;color:#5b6f7f}
+    .card{
+      background:#fff;border-radius:var(--radius);box-shadow:var(--shadow)
+    }
+    .bg-fill{
+      background:linear-gradient(135deg,#dff2ff 0%, #b2d4ea 100%);
+    }
+
+    header{
+      position:sticky;top:0;z-index:30;
+      backdrop-filter:saturate(180%) blur(12px);
+      background:rgba(255,255,255,.88);
+      border-bottom:1px solid rgba(0,113,185,.08);
+    }
+    .header-inner{
+      height:70px;display:flex;align-items:center;justify-content:space-between;gap:24px
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;font-family:var(--sans);font-weight:800;color:var(--blue)
+    }
+    .brand img{
+      width:34px;height:34px;object-fit:contain;border-radius:50%;background:linear-gradient(135deg,#0071b9,#6cc3ff);padding:4px
+    }
+    nav{
+      display:flex;align-items:center;gap:22px;font-family:var(--sans);font-size:12px;color:#4b5a66
+    }
+    nav a{transition:.25s ease}
+    nav a:hover{color:var(--blue)}
+    .nav-cta{display:flex;gap:10px;align-items:center}
+
+    .hero{
+      padding:24px 0 54px;
+      position:relative;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;inset:0 0 auto 0;height:520px;
+      background:
+        linear-gradient(180deg, rgba(178,212,234,.22), rgba(255,255,255,0) 80%),
+        radial-gradient(circle at 15% 10%, rgba(178,212,234,.35), transparent 28%);
+      pointer-events:none;
+    }
+    .hero-grid{
+      display:grid;grid-template-columns:1.3fr .7fr;gap:36px;align-items:end;
+      position:relative
+    }
+    .hero-visual-wrap{position:relative}
+    .hero-gallery{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:-46px;
+    }
+    .hero-frame{
+      aspect-ratio:1/1.08;border-radius:10px;overflow:hidden;
+      background:linear-gradient(135deg,#8dc9ea,#d9f0ff);
+      box-shadow:var(--shadow);
+      border:3px solid #fff;
+    }
+    .hero-frame img{
+      width:100%;height:100%;object-fit:cover
+    }
+    .hero-main{
+      position:relative;margin:0 auto;width:min(720px,100%);
+      min-height:430px;
+      background:linear-gradient(180deg,#f7fbff 0%, #eef7fd 100%);
+      border-radius:18px;
+      overflow:hidden;
+      display:flex;align-items:flex-end;justify-content:center;
+    }
+    .hero-main img{
+      width:100%;height:100%;object-fit:cover
+    }
+    .hero-copy{
+      padding-top:32px;display:flex;justify-content:space-between;gap:18px;align-items:flex-start
+    }
+    .hero-side{
+      writing-mode:vertical-rl;
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:56px;
+      font-weight:800;
+      line-height:1.25;
+      letter-spacing:.04em;
+      padding-top:36px;
+      text-shadow:0 8px 24px rgba(255,255,255,.45);
+    }
+    .hero-meta{
+      display:flex;gap:28px;font-family:var(--sans);font-size:11px;color:var(--blue);margin-top:18px
+    }
+    .hero-kicker{
+      color:var(--blue);font-family:var(--sans);font-weight:800;letter-spacing:.18em;font-size:11px;margin-bottom:10px
+    }
+    .hero-lead{
+      font-family:var(--sans);font-size:22px;color:var(--text);line-height:1.7;max-width:420px;font-weight:700
+    }
+    .floating-cta{
+      display:flex;justify-content:flex-end;margin-top:12px
+    }
+
+    .about{
+      padding:84px 0 40px;
+    }
+    .about-grid{
+      display:grid;grid-template-columns:220px 1fr 220px;gap:34px;align-items:start
+    }
+    .about-text{
+      max-width:560px;font-size:15px;color:#35566f
+    }
+    .about-text p{margin:0 0 20px}
+    .about-side{
+      writing-mode:vertical-rl;
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:48px;
+      font-weight:700;
+      letter-spacing:.08em;
+      justify-self:end
+    }
+
+    .banner{
+      padding:28px 0 76px;
+    }
+    .banner-box{
+      position:relative;
+      background:var(--blue);
+      border-radius:10px;
+      padding:28px 34px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .banner-box:before{
+      content:"";
+      position:absolute;inset:auto -60px -70px auto;
+      width:240px;height:240px;border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,.28), transparent 60%);
+    }
+    .banner-content{
+      display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center
+    }
+    .banner-title{
+      color:#fff;font-family:var(--sans);font-size:28px;font-weight:800;line-height:1.4;margin:0 0 12px
+    }
+    .banner-form{
+      background:#fff;border-radius:10px;padding:18px;display:flex;gap:14px;align-items:center;justify-content:space-between;
+      min-height:92px
+    }
+    .banner-note{font-family:var(--sans);font-size:11px;color:#6e8190}
+    .badge{
+      display:inline-block;border-radius:999px;background:#19bf3f;color:#fff;padding:10px 18px;
+      font-family:var(--sans);font-size:12px;font-weight:800
+    }
+    .banner-illust{
+      display:flex;justify-content:flex-end;align-items:end;gap:8px
+    }
+    .banner-illust img{
+      width:180px;height:180px;object-fit:contain
+    }
+
+    .service{
+      padding:10px 0 60px;
+    }
+    .service-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:34px;margin-top:28px
+    }
+    .service-item{
+      position:relative;padding-top:6px
+    }
+    .service-item .iconbox{
+      height:170px;border-radius:16px;background:linear-gradient(135deg,#eff8ff,#d5ebf8);
+      display:flex;align-items:center;justify-content:center;margin-bottom:18px;overflow:hidden
+    }
+    .service-item .iconbox img{
+      width:140px;height:140px;object-fit:contain
+    }
+    .service-item h3{
+      font-family:var(--sans);color:var(--blue);font-size:20px;line-height:1.45;margin:0 0 10px
+    }
+    .service-item p{
+      font-size:13px;line-height:1.9;color:#486170;margin:0
+    }
+    .service-side-label{
+      position:absolute;right:0;top:0;font-family:var(--sans);font-size:12px;color:var(--blue);font-weight:700;letter-spacing:.18em;text-align:right
+    }
+
+    .passport{
+      position:relative;padding:44px 0 70px;background:linear-gradient(180deg,#bfe1f4 0%,#cbe8f8 100%);
+      overflow:hidden
+    }
+    .passport:before{
+      content:"What is LinkWorks passport ? What is LinkWorks passport ?";
+      position:absolute;left:-10px;top:4px;font-family:var(--sans);font-size:68px;font-weight:800;color:rgba(0,113,185,.85);
+      white-space:nowrap;letter-spacing:.01em
+    }
+    .passport-inner{position:relative;padding-top:104px}
+    .passport-head{
+      text-align:center;max-width:760px;margin:0 auto 34px
+    }
+    .passport-head .eyebrow{justify-content:center}
+    .passport-head .eyebrow:before{display:none}
+    .passport-cards{
+      display:grid;grid-template-columns:1fr 220px 1fr;gap:22px;align-items:center
+    }
+    .phone-card{
+      background:#fff;border-radius:10px;padding:20px;box-shadow:var(--shadow);min-height:410px
+    }
+    .phone-card h4{
+      margin:0 0 8px;font-family:var(--sans);font-size:18px;color:var(--blue)
+    }
+    .phone-wrap{
+      display:grid;grid-template-columns:80px 1fr 40px;gap:10px;align-items:end;margin-top:18px
+    }
+    .phone{
+      width:100%;max-width:220px;aspect-ratio:9/18;border:8px solid #e8edf1;border-radius:30px;background:linear-gradient(180deg,#f8fbfe,#ebf3f8);
+      overflow:hidden;justify-self:center
+    }
+    .phone img{width:100%;height:100%;object-fit:cover}
+    .vertical-mini{
+      writing-mode:vertical-rl;font-family:var(--sans);font-size:11px;color:#7d91a1
+    }
+    .passport-center{
+      display:flex;justify-content:center
+    }
+    .passport-book{
+      width:160px;height:220px;border-radius:10px;background:linear-gradient(180deg,#0071b9,#005891);
+      box-shadow:0 18px 30px rgba(0,113,185,.28);
+      color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;
+      font-family:var(--sans);font-weight:800;padding:18px;position:relative
+    }
+    .passport-book:after{
+      content:"";position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+      width:58px;height:6px;border-radius:999px;background:rgba(0,0,0,.08)
+    }
+    .wave-bottom{
+      position:absolute;left:0;right:0;bottom:-1px;height:95px;
+      background:
+        radial-gradient(90px 46px at 10% 0,#fff 98%,transparent 100%),
+        radial-gradient(120px 52px at 30% 0,#fff 98%,transparent 100%),
+        radial-gradient(120px 50px at 50% 0,#fff 98%,transparent 100%),
+        radial-gradient(120px 52px at 70% 0,#fff 98%,transparent 100%),
+        radial-gradient(120px 50px at 90% 0,#fff 98%,transparent 100%);
+      background-repeat:no-repeat;
+      background-size:20% 100%;
+      background-position:0 0,25% 0,50% 0,75% 0,100% 0;
+    }
+
+    .flow{
+      padding:86px 0 40px;
+      position:relative;
+    }
+    .flow-grid{
+      display:grid;grid-template-columns:170px 1fr;gap:30px;align-items:start
+    }
+    .flow-side{
+      writing-mode:vertical-rl;color:var(--blue);font-family:var(--sans);font-size:30px;font-weight:700;letter-spacing:.12em
+    }
+    .flow-steps{
+      display:grid;gap:28px;max-width:840px
+    }
+    .step{
+      display:grid;grid-template-columns:150px 1fr;gap:26px;align-items:center
+    }
+    .step-visual{
+      height:132px;border-radius:16px;background:linear-gradient(135deg,#edf7ff,#d5ebf8);
+      display:flex;align-items:center;justify-content:center;overflow:hidden
+    }
+    .step-visual img{
+      width:116px;height:116px;object-fit:contain
+    }
+    .step-copy .num{
+      font-family:var(--sans);font-size:12px;color:#6f8798;letter-spacing:.14em
+    }
+    .step-copy h4{
+      margin:4px 0 8px;font-family:var(--sans);font-size:20px;color:var(--blue)
+    }
+    .step-copy p{margin:0;font-size:13px;color:#496776}
+
+    .plan{
+      padding:58px 0 40px;
+      background:linear-gradient(180deg,#fff 0%,#fafafa 100%);
+    }
+    .plan-top{
+      display:grid;grid-template-columns:170px 1fr;gap:26px;align-items:start
+    }
+    .plan-side{
+      writing-mode:vertical-rl;color:var(--blue);font-family:var(--sans);font-size:31px;font-weight:700;letter-spacing:.12em
+    }
+    .plan-main{
+      display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center
+    }
+    .plan-visual{
+      min-height:290px;border-radius:18px;background:linear-gradient(135deg,#f0f8ff,#d5ebf8);
+      position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden
+    }
+    .plan-visual img{width:100%;height:100%;object-fit:cover}
+    .price-card{
+      max-width:420px;background:#eef7fd;border-radius:10px;padding:18px 18px 14px;border:1px solid rgba(0,113,185,.08);box-shadow:var(--shadow)
+    }
+    .price-main{
+      display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end
+    }
+    .price{
+      font-family:var(--sans);font-size:54px;color:var(--blue);font-weight:800;line-height:1
+    }
+    .price span{font-size:18px}
+    .spec{
+      background:#fff;border-radius:8px;padding:14px;font-size:12px;color:#4d6776
+    }
+    .plan-note{
+      margin-top:32px;padding-top:22px;border-top:1px solid rgba(0,113,185,.18);
+      max-width:920px
+    }
+    .plan-note h4{
+      margin:0 0 16px;font-family:var(--sans);font-size:18px;color:var(--blue)
+    }
+    .plan-note p{font-size:13px;color:#4e6a79;margin:0 0 16px}
+    .timeline{
+      margin-top:24px;display:grid;grid-template-columns:120px 1fr 220px;gap:18px;align-items:start
+    }
+    .timeline-left{
+      font-family:var(--sans);font-size:12px;color:#6d8494
+    }
+    .line{
+      position:relative;height:280px;margin:0 auto;width:2px;background:rgba(0,113,185,.25)
+    }
+    .dot{
+      position:absolute;left:50%;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;background:var(--blue);border:5px solid #d9eefb
+    }
+    .dot:nth-child(1){top:16px}.dot:nth-child(2){top:118px}.dot:nth-child(3){top:220px}
+    .line-labels{
+      display:grid;gap:30px
+    }
+    .line-item{
+      display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center
+    }
+    .line-item .mini{
+      height:58px;border-radius:8px;background:linear-gradient(135deg,#eaf6ff,#d4ebf8);display:flex;align-items:center;justify-content:center;overflow:hidden
+    }
+    .line-item .mini img{width:42px;height:42px;object-fit:contain}
+    .line-item p{margin:0;font-size:12px;color:#4e6877}
+    .estimate{
+      background:#0071b9;color:#fff;border-radius:10px;padding:18px;box-shadow:var(--shadow)
+    }
+    .estimate h5{margin:0 0 12px;font-family:var(--sans);font-size:18px}
+    .estimate p{margin:0 0 12px;font-size:12px;color:#e7f6ff}
+    .estimate .btn{background:#fff;color:var(--blue)}
+
+    .faq{
+      padding:64px 0 36px;position:relative
+    }
+    .faq-wrap{
+      display:grid;grid-template-columns:160px 1fr 110px;gap:22px;align-items:start
+    }
+    .faq-list{display:grid;gap:10px}
+    details.faq-item{
+      background:#eef7fd;border-radius:6px;padding:0 18px;overflow:hidden
+    }
+    details.faq-item summary{
+      list-style:none;cursor:pointer;padding:16px 28px 16px 0;position:relative;
+      font-family:var(--sans);font-size:14px;color:#335c77;font-weight:700
+    }
+    details.faq-item summary::-webkit-details-marker{display:none}
+    details.faq-item summary:after{
+      content:"＋";position:absolute;right:0;top:50%;transform:translateY(-50%);color:var(--blue);font-size:18px
+    }
+    details[open].faq-item summary:after{content:"−"}
+    .faq-answer{
+      padding:0 0 16px;font-size:13px;color:#547182
+    }
+    .faq-book{
+      width:86px;height:120px;background:linear-gradient(180deg,#0071b9,#2f8fca);
+      border-radius:8px;transform:rotate(9deg);justify-self:center;box-shadow:var(--shadow)
+    }
+
+    .voice{
+      padding:30px 0 38px;
+    }
+    .voice-track{
+      display:grid;grid-template-columns:repeat(5,1fr);gap:22px;margin-top:26px
+    }
+    .voice-card{
+      text-align:center;padding:0 8px
+    }
+    .voice-avatar{
+      width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 14px;
+      background:linear-gradient(135deg,#e8f6ff,#cfe7f7);border:5px solid #fff;box-shadow:var(--shadow)
+    }
+    .voice-avatar img{width:100%;height:100%;object-fit:cover}
+    .voice-card h4{
+      margin:0 0 8px;font-family:var(--sans);font-size:14px;color:var(--blue)
+    }
+    .voice-card p{
+      margin:0;font-size:12px;color:#5a7483;line-height:1.8
+    }
+    .dots{
+      margin-top:20px;display:flex;justify-content:center;gap:12px
+    }
+    .dots span{
+      width:10px;height:10px;border-radius:50%;background:#c7dceb
+    }
+    .dots span.active{background:var(--blue)}
+    .center-btn{display:flex;justify-content:flex-end;margin-top:16px}
+
+    .follow{
+      padding:10px 0 28px;text-align:center
+    }
+    .follow h3{
+      font-family:var(--sans);font-size:34px;color:var(--blue);margin:0 0 8px
+    }
+    .sns{
+      display:flex;justify-content:center;gap:10px
+    }
+    .sns a{
+      width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      background:var(--blue);color:#fff;font-family:var(--sans);font-weight:800;transition:.3s ease
+    }
+    .sns a:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+    footer{
+      padding:26px 0 60px
+    }
+    .footer-tag{
+      color:var(--blue);font-family:var(--sans);font-size:38px;font-weight:800;line-height:1.2;margin-top:18px
+    }
+    .footer-bottom{
+      display:flex;justify-content:space-between;gap:20px;align-items:center;font-family:var(--sans);font-size:11px;color:#6f8392;margin-top:8px
+    }
+
+    .reveal{}
+    html.js .reveal{opacity:0;transform:translateY(24px);transition:opacity .9s ease, transform .9s ease}
+    html.js .reveal.show{opacity:1;transform:none}
+    html.js .stagger > *{opacity:0;transform:translateY(22px);transition:opacity .8s ease, transform .8s ease}
+    html.js .stagger.show > *:nth-child(1){transition-delay:.05s}
+    html.js .stagger.show > *:nth-child(2){transition-delay:.15s}
+    html.js .stagger.show > *:nth-child(3){transition-delay:.25s}
+    html.js .stagger.show > *:nth-child(4){transition-delay:.35s}
+    html.js .stagger.show > *:nth-child(5){transition-delay:.45s}
+    html.js .stagger.show > *{opacity:1;transform:none}
+    .hero-anim-copy,.hero-anim-visual{opacity:0}
+    .loaded .hero-anim-copy{
+      animation:heroCopy .9s ease .15s forwards
+    }
+    .loaded .hero-anim-visual{
+      animation:heroVisual 1.2s ease .2s forwards
+    }
+    @keyframes heroCopy{
+      from{opacity:0;transform:translateY(24px)}
+      to{opacity:1;transform:none}
+    }
+    @keyframes heroVisual{
+      from{opacity:0;transform:translateY(20px) scale(.975)}
+      to{opacity:1;transform:none}
+    }
+
+    @media (max-width: 1100px){
+      nav{display:none}
+      .hero-grid,.about-grid,.banner-content,.passport-cards,.plan-main,.faq-wrap,.timeline,.flow-grid,.plan-top{
+        grid-template-columns:1fr
+      }
+      .hero-copy{flex-direction:column}
+      .hero-side,.about-side,.flow-side,.plan-side{
+        writing-mode:horizontal-tb;font-size:34px
+      }
+      .service-grid,.voice-track{grid-template-columns:1fr 1fr}
+      .center-btn,.floating-cta{justify-content:flex-start}
+      .passport:before{font-size:44px;top:14px}
+    }
+    @media (max-width: 720px){
+      .header-inner{height:62px}
+      .nav-cta .btn-outline{display:none}
+      .hero-gallery{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:-20px}
+      .hero-main{min-height:270px}
+      .hero-side{font-size:28px}
+      .hero-lead{font-size:18px}
+      .title-jp{font-size:30px}
+      .service-grid,.voice-track{grid-template-columns:1fr}
+      .step{grid-template-columns:1fr}
+      .banner-title{font-size:24px}
+      .passport-book{margin:0 auto}
+      .phone-card{min-height:auto}
+      .passport:before{font-size:30px}
+      .footer-tag{font-size:28px}
+      .footer-bottom{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <a class="brand" href="#">
+        <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorksロゴ" onerror="this.style.display='none'">
+        <span>リンクワークス</span>
+      </a>
+      <nav>
+        <a href="#about">私たちについて</a>
+        <a href="#service">サービス</a>
+        <a href="#flow">導入の流れ</a>
+        <a href="#plan">料金</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#voice">利用者の声</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-outline" href="#faq">資料請求</a>
+        <a class="btn" href="#plan">無料相談</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero section">
+      <div class="container hero-grid">
+        <div class="hero-anim-visual">
+          <div class="hero-visual-wrap">
+            <div class="hero-gallery">
+              <div class="hero-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" alt="並木道" width="420" height="440" onerror="this.style.display='none'">
+              </div>
+              <div class="hero-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="紙飛行機が舞う空" width="420" height="440" onerror="this.style.display='none'">
+              </div>
+              <div class="hero-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_39f3639774.png" alt="淡い青の背景" width="420" height="440" onerror="this.style.display='none'">
+              </div>
+            </div>
+            <div class="hero-main bg-fill">
+              <img src="http://127.0.0.1:5000/uploads/up_2ce42b270d.png" alt="オフィスで協働する男女" width="960" height="620" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-copy hero-anim-copy">
+          <div>
+            <div class="hero-kicker">WORK SUPPORT PLATFORM</div>
+            <div class="hero-lead">
+              相談から作業設計、現場支援まで。<br>
+              企業と人をやさしくつなぐ、<br>
+              新しい就労サポートのかたち。
+            </div>
+            <div class="hero-meta">
+              <div>SUPPORT<br>CONSULTING</div>
+              <div>WORK<br>DESIGN</div>
+              <div>TEAM<br>CARE</div>
+            </div>
+          </div>
+          <div class="hero-side">働きたい、を<br>前に進める。</div>
+        </div>
+      </div>
+      <div class="container floating-cta">
+        <a href="#about" class="btn">詳しく見る <span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="about section reveal" id="about">
+      <div class="container about-grid">
+        <div>
+          <div class="eyebrow">About</div>
+          <div class="small-copy en">LINKWORKS</div>
+        </div>
+        <div class="about-text">
+          <p>本を開くたびに旅に出るように、仕事にも新しい出会いと景色があります。</p>
+          <p>LinkWorksは、就労支援や業務受託、現場改善のノウハウをひとつにまとめ、<br>「自分らしく働きたい」「安心して任せたい」という双方の想いをつなぐ支援サービスです。</p>
+          <p>作業工程をわかりやすく設計し、相談しやすい窓口と、無理のない導入ステップをご用意。<br>企業にとっても、利用者にとっても、続けやすく、前向きな仕組みを育てます。</p>
+          <p>紙飛行機のように、軽やかに。<br>でも、着地点はしっかりと。<br>そんな仕事の旅を、私たちは支えます。</p>
+          <a class="btn btn-outline" href="#service">もっと知る <span class="arrow">→</span></a>
+        </div>
+        <div class="about-side">働く旅に、<br>出よう。</div>
+      </div>
+    </section>
+
+    <section class="banner section reveal">
+      <div class="container">
+        <div class="banner-box">
+          <div class="banner-content">
+            <div>
+              <h2 class="banner-title">LinkWorksで、<br>安心して働く準備を始める。</h2>
+              <div class="banner-form">
+                <div>
+                  <div class="banner-note">カンタン1分 / 相談無料 / オンライン対応</div>
+                  <div style="font-family:var(--sans);font-weight:800;color:var(--blue);font-size:20px;margin-top:4px">見学予約・資料請求はこちら</div>
+                </div>
+                <span class="badge">LINEで予約する</span>
+              </div>
+            </div>
+            <div class="banner-illust">
+              <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="紙飛行機" width="180" height="180" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="service section reveal" id="service">
+      <div class="container">
+        <div style="position:relative">
+          <div class="eyebrow">Service</div>
+          <div class="service-side-label">THE<br>WORK<br>PASSPORT</div>
+        </div>
+        <div class="service-grid stagger">
+          <article class="service-item">
+            <div class="iconbox">
+              <img src="http://127.0.0.1:5000/uploads/up_940e12aa9b.png" alt="診断イメージ" width="140" height="140" onerror="this.style.display='none'">
+            </div>
+            <h3>働き方の見える化診断</h3>
+            <p>相談内容や希望条件、作業特性を丁寧に整理し、最初の一歩をわかりやすく可視化します。企業には受け入れ準備の観点から、利用者には無理のない働き方の観点からご提案します。</p>
+          </article>
+          <article class="service-item">
+            <div class="iconbox">
+              <img src="http://127.0.0.1:5000/uploads/up_bc74a6f631.png" alt="業務設計イメージ" width="140" height="140" onerror="this.style.display='none'">
+            </div>
+            <h3>現場に合わせた業務設計</h3>
+            <p>梱包、封入、検品、事務補助などの業務を工程ごとに分解し、品質と継続性の両立をめざします。導入後も小さな改善を積み重ね、無理なく運用できる体制を整えます。</p>
+          </article>
+          <article class="service-item">
+            <div class="iconbox">
+              <img src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="伴走支援イメージ" width="140" height="140" onerror="this.style.display='none'">
+            </div>
+            <h3>スタート後の伴走サポート</h3>
+            <p>導入して終わりではなく、定着や業務拡大まで寄り添うのがLinkWorksの特長です。困りごとの相談窓口や進捗確認の仕組みを整え、安心感のある運用を支援します。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="passport section reveal">
+      <div class="passport-inner container">
+        <div class="passport-head">
+          <div class="eyebrow">「 LinkWorksパスポートについて 」</div>
+          <p class="small-copy">必要な手続きや連絡、進行状況の確認をひとつにまとめたサポートページです。<br>利用開始前の不安を減らし、導入後も情報が迷子にならないよう設計しています。</p>
+        </div>
+
+        <div class="passport-cards stagger">
+          <div class="phone-card">
+            <h4>Pattern 01<br>パートナー企業向け</h4>
+            <p class="small-copy">受け入れ準備、工程確認、連絡履歴まで一画面で。</p>
+            <div class="phone-wrap">
+              <div class="vertical-mini">STEP<br>CHECK</div>
+              <div class="phone bg-fill">
+                <img src="http://127.0.0.1:5000/uploads/up_41f03beb70.png" alt="Webページ画面" width="220" height="440" onerror="this.style.display='none'">
+              </div>
+              <div class="vertical-mini">EASY</div>
+            </div>
+          </div>
+
+          <div class="passport-center">
+            <div class="passport-book">LINKWORKS<br>PASSBOOK</div>
+          </div>
+
+          <div class="phone-card">
+            <h4>Pattern 02<br>利用者さん向け</h4>
+            <p class="small-copy">相談予約、見学日程、持ち物確認もスマホで完結。</p>
+            <div class="phone-wrap">
+              <div class="vertical-mini">MY<br>PAGE</div>
+              <div class="phone bg-fill">
+                <img src="http://127.0.0.1:5000/uploads/up_0795336787.png" alt="支援ページ画面" width="220" height="440" onerror="this.style.display='none'">
+              </div>
+              <div class="vertical-mini">SAFE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wave-bottom"></div>
+    </section>
+
+    <section class="flow section reveal" id="flow">
+      <div class="container flow-grid">
+        <div>
+          <div class="eyebrow">Flow</div>
+          <div class="flow-side">カンタンな<br>使い方で、<br>始めるだけ。</div>
+        </div>
+
+        <div class="flow-steps stagger">
+          <div class="step">
+            <div class="step-visual">
+              <img src="http://127.0.0.1:5000/uploads/up_d83a2a4e87.png" alt="申込イメージ" width="116" height="116" onerror="this.style.display='none'">
+            </div>
+            <div class="step-copy">
+              <div class="num">FLOW 01</div>
+              <h4>お問い合わせ・見学予約</h4>
+              <p>まずはフォームやLINEからご連絡ください。ご希望や現状を簡単にうかがい、見学・面談の日程を調整します。オンライン相談にも対応しています。</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-visual">
+              <img src="http://127.0.0.1:5000/uploads/up_84373df907.png" alt="ヒアリングイメージ" width="116" height="116" onerror="this.style.display='none'">
+            </div>
+            <div class="step-copy">
+              <div class="num">FLOW 02</div>
+              <h4>ヒアリングと業務整理</h4>
+              <p>企業側には業務内容や品質基準を、利用者側には働き方の希望や得意不得意を確認します。双方の視点を整理しながら、無理のない進め方をご提案します。</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-visual">
+              <img src="http://127.0.0.1:5000/uploads/up_f13f1ca00d.png" alt="運用開始イメージ" width="116" height="116" onerror="this.style.display='none'">
+            </div>
+            <div class="step-copy">
+              <div class="num">FLOW 03</div>
+              <h4>運用スタートと定着支援</h4>
+              <p>導入初期は特に丁寧にフォローし、作業手順や連絡体制を確認します。定着後も改善の相談を続けることで、安心して長く続けられる環境を整えていきます。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="plan section reveal" id="plan">
+      <div class="container">
+        <div class="plan-top">
+          <div>
+            <div class="eyebrow">Plan</div>
+            <div class="plan-side">料金は、<br>続けやすさを<br>第一に。</div>
+          </div>
+
+          <div class="plan-main">
+            <div class="plan-visual">
+              <img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" alt="明るいオフィス" width="720" height="520" onerror="this.style.display='none'">
+            </div>
+            <div>
+              <div class="price-card">
+                <div class="small-copy">スタートプラン / 月額</div>
+                <div class="price-main">
+                  <div>
+                    <div class="price">3,980<span>円〜</span></div>
+                    <div class="small-copy">相談窓口・初期設計・進行管理を含む</div>
+                  </div>
+                  <div class="spec">
+                    ・月1回の定例確認<br>
+                    ・見学調整サポート<br>
+                    ・導入時ガイド提供<br>
+                    ・チャット相談対応
+                  </div>
+                </div>
+              </div>
+
+              <div class="plan-note">
+                <h4>導入の流れとオンライン面談について</h4>
+                <p>初回の相談では、業務内容や利用希望の状況に応じて最適な進め方をご提案します。必要に応じて現場見学や試験運用も行い、スタート前の不安をできるだけ減らします。</p>
+                <p>オンライン面談は平日10:00〜18:00を中心に受付中。遠方の方や忙しい企業担当者様にも、無理なくご利用いただけます。</p>
+
+                <div class="timeline">
+                  <div class="timeline-left">
+                    STEP 01<br><br>
+                    STEP 02<br><br>
+                    STEP 03
+                  </div>
+                  <div class="line-labels">
+                    <div class="line-item">
+                      <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_be31fb9f7d.png" alt="相談" width="42" height="42" onerror="this.style.display='none'"></div>
+                      <p>お問い合わせ後、担当者よりご連絡し、面談日時を調整します。</p>
+                    </div>
+                    <div class="line-item">
+                      <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_b67073570c.png" alt="面談" width="42" height="42" onerror="this.style.display='none'"></div>
+                      <p>オンラインまたは訪問でヒアリングを行い、導入の条件を確認します。</p>
+                    </div>
+                    <div class="line-item">
+                      <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="開始" width="42" height="42" onerror="this.style.display='none'"></div>
+                      <p>初期設定後、運用開始。定着に向けて継続支援を行います。</p>
+                    </div>
+                  </div>
+                  <div style="position:relative">
+                    <div class="line">
+                      <span class="dot"></span>
+                      <span class="dot"></span>
+                      <span class="dot"></span>
+                    </div>
+                    <div class="estimate" style="margin-top:18px">
+                      <h5>最短1〜5日で<br>面談設定</h5>
+                      <p>急ぎのご相談にもできる限り対応します。まずはお気軽にお問い合わせください。</p>
+                      <a href="#faq" class="btn">お問い合わせ</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="faq section reveal" id="faq">
+      <div class="container faq-wrap">
+        <div>
+          <div class="eyebrow">FAQ</div>
+          <div class="small-copy en">QUESTION</div>
+        </div>
+
+        <div class="faq-list stagger">
+          <details class="faq-item">
+            <summary>障害福祉の知識がなくても導入できますか？</summary>
+            <div class="faq-answer">はい。制度の前提や進め方も含めて、担当者がわかりやすくご説明します。業務の切り出しから一緒に整理するため、初めての企業様でも安心です。</div>
+          </details>
+          <details class="faq-item">
+            <summary>どんな業務に対応していますか？</summary>
+            <div class="faq-answer">梱包、封入、検品、組立、データ入力、発送準備など、手順化しやすい業務を中心に幅広く対応しています。内容に応じてご提案可能です。</div>
+          </details>
+          <details class="faq-item">
+            <summary>利用者として相談したい場合、何から始めればいいですか？</summary>
+            <div class="faq-answer">まずは見学予約かオンライン相談をご利用ください。現在のお悩みや希望の働き方をうかがい、無理のない進め方をご案内します。</div>
+          </details>
+          <details class="faq-item">
+            <summary>地方からでもオンラインで進められますか？</summary>
+            <div class="faq-answer">はい。初回相談、打ち合わせ、進行確認の多くはオンライン対応可能です。必要に応じて訪問や現場確認も組み合わせます。</div>
+          </details>
+          <details class="faq-item">
+            <summary>導入後に業務量が増えた場合も相談できますか？</summary>
+            <div class="faq-answer">もちろんです。工程の見直しや体制調整を行い、無理なく拡張できるよう伴走支援します。</div>
+          </details>
+        </div>
+
+        <div class="faq-book"></div>
+      </div>
+      <div class="container center-btn">
+        <a href="#voice" class="btn">すべての質問を見る <span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="voice section reveal" id="voice">
+      <div class="container">
+        <div class="eyebrow">Voice</div>
+        <div class="voice-track stagger">
+          <article class="voice-card">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_7d4bd13c0b.png" alt="利用者の声1" width="96" height="96" onerror="this.style.display='none'">
+            </div>
+            <h4>相談しやすさが心強い</h4>
+            <p>「何を相談してよいかわからない状態からでも、丁寧に整理してもらえました。」<br>／ 利用希望者</p>
+          </article>
+          <article class="voice-card">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_845791e542.png" alt="利用者の声2" width="96" height="96" onerror="this.style.display='none'">
+            </div>
+            <h4>導入準備が明快だった</h4>
+            <p>「受け入れに必要な手順が見える化され、社内説明もしやすくなりました。」<br>／ 企業担当者</p>
+          </article>
+          <article class="voice-card">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_6823dd700c.png" alt="利用者の声3" width="96" height="96" onerror="this.style.display='none'">
+            </div>
+            <h4>無理なく続けられる</h4>
+            <p>「自分のペースに合わせて提案してくれるので、焦らず前に進めました。」<br>／ 利用者</p>
+          </article>
+          <article class="voice-card">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_d047f3036e.png" alt="利用者の声4" width="96" height="96" onerror="this.style.display='none'">
+            </div>
+            <h4>現場改善にも役立った</h4>
+            <p>「業務を分解して見直すことで、社内全体の流れまで整いました。」<br>／ 管理部門</p>
+          </article>
+          <article class="voice-card">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_a8223805df.png" alt="利用者の声5" width="96" height="96" onerror="this.style.display='none'">
+            </div>
+            <h4>伴走感があるサポート</h4>
+            <p>「始めたあとも相談できるので、安心して新しい取り組みに踏み出せます。」<br>／ 施設職員</p>
+          </article>
+        </div>
+        <div class="dots"><span></span><span class="active"></span><span></span></div>
+      </div>
+    </section>
+
+    <section class="banner section reveal">
+      <div class="container">
+        <div class="banner-box">
+          <div class="banner-content">
+            <div>
+              <h2 class="banner-title">LinkWorksで、<br>次の一歩をもっと軽やかに。</h2>
+              <div class="banner-form">
+                <div>
+                  <div class="banner-note">見学予約 / 資料請求 / 相談無料</div>
+                  <div style="font-family:var(--sans);font-weight:800;color:var(--blue);font-size:20px;margin-top:4px">今すぐ相談をはじめる</div>
+                </div>
+                <span class="badge">LINEで予約する</span>
+              </div>
+            </div>
+            <div class="banner-illust">
+              <img src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="青い小鳥" width="180" height="180" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="follow section reveal">
+      <div class="container">
+        <h3>Follow us !</h3>
+        <div class="small-copy" style="margin-bottom:12px">気軽に情報をチェック</div>
+        <div class="sns">
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="Instagram">◎</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="small-copy">読むたび、進む旅へ。働く人と仕事をつなぐサポートサイト</div>
+      <div class="footer-tag">THE WORK PASSPORT</div>
+      <div class="footer-bottom">
+        <div>© LinkWorks Inc.</div>
+        <div>会社概要　採用情報　プライバシーポリシー　お問い合わせ</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    window.addEventListener('load', () => {
+      document.body.classList.add('loaded');
+    });
+
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+          if(entry.target.classList.contains('stagger')){
+            entry.target.classList.add('show');
+          }
+          const staggerChildren = entry.target.querySelectorAll('.stagger');
+          staggerChildren.forEach(el => el.classList.add('show'));
+        }
+      });
+    },{threshold:.12, rootMargin:'0px 0px -8% 0px'});
+
+    document.querySelectorAll('.reveal, .stagger').forEach(el=>io.observe(el));
+
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        const id = a.getAttribute('href');
+        const target = document.querySelector(id);
+        if(target){
+          e.preventDefault();
+          target.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i], cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

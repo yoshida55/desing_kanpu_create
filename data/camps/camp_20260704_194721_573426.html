@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkWorks | つながる仕事、ひろがる可能性。</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --yellow: rgb(255,255,0);
+      --white: rgb(255,255,255);
+      --dark: rgb(6,23,31);
+      --light: rgb(237,243,247);
+      --red: rgb(227,2,0);
+      --shadow: 0 0 14.8454px rgba(0,0,0,.1);
+      --radius-sm: 2px;
+      --radius-md: 7.42268px;
+      --container: 1920px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family: "Times New Roman", serif;
+      color:#000;
+      background:#fff;
+      line-height:1.6;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    ul{list-style:none;margin:0;padding:0}
+    .container{max-width:var(--container);margin:0 auto}
+    .inner{width:min(1180px, calc(100% - 48px));margin:0 auto}
+    .serif{font-family:"Times New Roman", serif}
+    .gothic{
+      font-family: 游ゴシック, "Yu Gothic", 游ゴシック体, YuGothic, sans-serif;
+    }
+
+    .site-header{
+      background:#fff;
+      border-bottom:1px solid rgba(0,0,0,.08);
+      position:sticky; top:0; z-index:50;
+    }
+    .header-top{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 28px;
+      gap:20px;
+      min-height:72px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:18px;
+    }
+    .brand-mark{
+      color:var(--red);
+      font-weight:800;
+      font-size:40px;
+      line-height:1;
+      letter-spacing:-.04em;
+    }
+    .brand-copy{
+      font-size:12px;
+      color:#222;
+    }
+    .brand-name{
+      font-size:28px;
+      font-weight:700;
+      line-height:1.1;
+    }
+    .header-links,.header-nav{
+      display:flex; align-items:center; gap:24px;
+      font-size:13px;
+      color:#222;
+    }
+    .header-nav{
+      justify-content:center;
+      padding:10px 24px 14px;
+      border-top:1px solid rgba(0,0,0,.05);
+      flex-wrap:wrap;
+    }
+
+    .top-banner{
+      background:linear-gradient(90deg,#00386d 0%, #0052a1 50%, #00386d 100%);
+      color:#fff;
+      position:relative;
+      overflow:hidden;
+    }
+    .top-banner::before,.top-banner::after{
+      content:"";
+      position:absolute;
+      inset:auto;
+      width:280px;height:280px;
+      border:2px solid rgba(255,255,0,.18);
+      border-radius:50% 50% 40% 40%;
+      filter:blur(.2px);
+    }
+    .top-banner::before{left:7%;top:14px;transform:rotate(-10deg)}
+    .top-banner::after{right:12%;top:12px;transform:rotate(8deg)}
+    .top-banner-inner{
+      display:flex;justify-content:space-between;align-items:center;
+      gap:24px;padding:22px 32px;
+      min-height:152px;
+      position:relative;z-index:1;
+    }
+    .top-banner-copy small{
+      display:block;font-size:28px;font-weight:800;color:var(--yellow);
+      text-shadow:2px 2px 0 rgba(0,0,0,.35);
+      margin-bottom:6px;
+    }
+    .top-banner-copy h1{
+      margin:0;
+      font-size:72px;
+      line-height:1;
+      letter-spacing:-.03em;
+      font-weight:900;
+      text-shadow:3px 3px 0 rgba(0,0,0,.34);
+    }
+    .top-banner-logo{
+      text-align:center;
+      min-width:280px;
+    }
+    .top-banner-logo .wave{
+      font-size:52px;line-height:1;color:var(--yellow)
+    }
+    .top-banner-logo .name{
+      font-size:46px;font-weight:800;line-height:1.05;
+    }
+    .top-banner-logo .sub{
+      font-size:14px;opacity:.92
+    }
+
+    .hero{
+      background:
+        linear-gradient(90deg, rgba(255,255,0,1) 0 50%, rgba(220,255,120,.92) 50% 100%);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.25), transparent 25%),
+        radial-gradient(circle at 78% 20%, rgba(255,255,255,.16), transparent 18%),
+        radial-gradient(circle at 65% 70%, rgba(0,0,0,.05), transparent 22%);
+      pointer-events:none;
+    }
+    .hero-inner{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      align-items:end;
+      gap:30px;
+      min-height:760px;
+      padding:50px 32px 90px;
+      position:relative;
+      z-index:1;
+    }
+    .hero-left{
+      position:relative;
+      min-height:620px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding:40px 10px 0;
+    }
+    .hero-catch{
+      position:absolute;top:0;left:2%;
+      font-size:58px;font-weight:900;color:#d83a00;
+      transform:rotate(-10deg);
+      text-shadow:2px 2px 0 rgba(255,255,255,.35);
+    }
+    .hero-image-stack{
+      position:relative;
+      width:100%;
+      max-width:740px;
+      aspect-ratio: 1.15 / .9;
+    }
+    .hero-pack{
+      position:absolute;
+      background:linear-gradient(135deg, #fff9b8, #d2ff4e);
+      box-shadow:var(--shadow);
+      border-radius:16px;
+      overflow:hidden;
+      transform-origin:center;
+    }
+    .hero-pack img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .hero-pack.one{
+      left:2%;bottom:4%;width:52%;height:60%;
+      transform:rotate(-10deg);
+    }
+    .hero-pack.two{
+      right:10%;bottom:10%;width:48%;height:56%;
+      transform:rotate(7deg);
+    }
+    .hero-right{
+      display:flex;justify-content:center;align-items:center;
+      padding-right:20px;
+    }
+    .hero-card{
+      width:min(680px,100%);
+      background:#fff6df;
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:72px 62px;
+      position:relative;
+    }
+    .hero-card::before,.hero-card::after{
+      content:"";
+      position:absolute;
+      width:58px;height:58px;border-radius:50%;
+      background:radial-gradient(circle at 35% 30%, #7e4a23 0 25%, #4e2b15 40%, #f3c57b 42% 62%, transparent 63%);
+    }
+    .hero-card::before{top:-18px;left:48px;transform:rotate(-20deg)}
+    .hero-card::after{right:28px;bottom:-20px;transform:rotate(30deg)}
+    .hero-card h2{
+      margin:0 0 24px;
+      font-size:56px;line-height:1.35;font-weight:900;text-align:center;
+    }
+    .hero-card p{
+      margin:0 auto;
+      max-width:540px;
+      text-align:center;
+      font-size:18px;
+      color:#2c2c2c;
+    }
+
+    .cookie-bar{
+      position:absolute;
+      left:50%; transform:translateX(-50%);
+      bottom:12px;
+      width:min(1760px, calc(100% - 24px));
+      background:#fff;
+      border:1px solid rgba(0,0,0,.18);
+      box-shadow:0 2px 8px rgba(0,0,0,.08);
+      padding:14px 18px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:18px;
+      align-items:center;
+      z-index:6;
+    }
+    .cookie-bar p{margin:0;font-size:12px;line-height:1.6;color:#555}
+    .cookie-actions{display:flex;align-items:center;gap:10px}
+    .cookie-btn{
+      padding:12px 30px;
+      border-radius:2px;
+      border:none;
+      background:var(--red);
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      transition:opacity .4s ease, transform .3s ease, filter .3s ease;
+    }
+    .cookie-btn:hover{transform:translateY(-2px);filter:brightness(1.05)}
+    .cookie-close{
+      background:none;border:none;font-size:20px;cursor:pointer;padding:4px 8px
+    }
+
+    .quick-links{
+      padding:86px 0 34px;
+      background:#fff;
+    }
+    .quick-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:28px;
+      max-width:980px;
+      margin:0 auto;
+    }
+    .quick-card{
+      display:block;
+      background:#fff;
+      border-radius:14px;
+      transition:transform .4s ease, box-shadow .4s ease, filter .3s ease;
+    }
+    .quick-card:hover{transform:translateY(-6px);filter:saturate(1.05)}
+    .quick-thumb{
+      position:relative;
+      aspect-ratio: 1.28 / .8;
+      overflow:hidden;
+      border-radius:12px;
+      background:linear-gradient(135deg,#fff48b,#9de8ff);
+      box-shadow:var(--shadow);
+    }
+    .quick-thumb img{width:100%;height:100%;object-fit:cover}
+    .quick-label{
+      position:absolute;
+      top:10px;left:14px;
+      background:#fff6df;
+      border:2px solid #8d5e36;
+      border-radius:999px;
+      padding:8px 18px;
+      font-size:18px;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .gallery-cta{
+      text-align:center;
+      padding:18px 0 10px;
+    }
+    .pill-btn{
+      display:inline-block;
+      padding:16px 42px;
+      background:#fff6df;
+      border:2px solid #8d5e36;
+      border-radius:999px;
+      font-size:30px;
+      font-weight:800;
+      transition:transform .4s ease, box-shadow .4s ease, color .4s ease;
+    }
+    .pill-btn:hover{transform:translateY(-4px); box-shadow:var(--shadow); color:var(--red)}
+
+    .single-feature{
+      text-align:center;
+      padding:18px 0 52px;
+    }
+    .single-card{
+      width:min(430px, 100%);
+      margin:0 auto;
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      background:linear-gradient(135deg, var(--yellow), #9ef55b);
+      transition:transform .4s ease, box-shadow .4s ease;
+    }
+    .single-card:hover{transform:translateY(-6px)}
+    .single-card img{
+      width:100%;height:auto;aspect-ratio:1.1/.72;object-fit:cover;
+    }
+
+    .links-section{
+      padding:18px 0 120px;
+      background:#fff;
+    }
+    .section-title{
+      text-align:center;
+      margin:0 0 26px;
+      font-size:42px;
+      font-weight:900;
+      letter-spacing:.06em;
+    }
+    .links-grid{
+      max-width:1120px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px 18px;
+    }
+    .link-tile{
+      border-radius:10px;
+      overflow:hidden;
+      background:linear-gradient(135deg,#f7fbff,#e6f5ff 60%, #fff7a3);
+      box-shadow:0 0 0 1px rgba(0,0,0,.05), var(--shadow);
+      min-height:134px;
+      position:relative;
+      transition:transform .4s ease, box-shadow .4s ease, filter .3s ease;
+    }
+    .link-tile:hover{transform:translateY(-5px);box-shadow:0 10px 24px rgba(0,0,0,.12)}
+    .link-tile.dark{
+      background:linear-gradient(135deg,#0c1820,#1d2a32);
+      color:#fff;
+    }
+    .link-tile img{
+      width:100%;height:100%;object-fit:cover;aspect-ratio: 2.2 / .78;
+    }
+    .link-text{
+      position:absolute; inset:0;
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      text-align:center; padding:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+    }
+    .link-text .sm{font-size:12px;letter-spacing:.08em}
+    .link-text .lg{
+      font-size:26px;font-weight:900;line-height:1.15;
+    }
+
+    .floating-badge{
+      position:fixed;
+      right:20px; bottom:120px;
+      width:112px; height:112px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #ffff7d, #f2d900 70%);
+      border:4px solid #e4c300;
+      box-shadow:var(--shadow);
+      display:flex;align-items:center;justify-content:center;
+      text-align:center;
+      font-size:14px;
+      font-weight:800;
+      z-index:20;
+      animation:electionBadge 2s ease infinite;
+    }
+
+    .site-footer-top{
+      background:#eaf2f8;
+      padding:20px 24px;
+      border-top:1px solid rgba(0,0,0,.06);
+    }
+    .footer-social{
+      display:flex;justify-content:flex-end;align-items:center;gap:16px;
+      font-size:15px;
+    }
+    .sns{
+      width:34px;height:34px;border-radius:50%;
+      display:grid;place-items:center;
+      background:#fff;color:#0a2a4a;box-shadow:var(--shadow)
+    }
+    .site-footer-bottom{
+      background:var(--dark);
+      color:#fff;
+      border-top:6px solid var(--red);
+      padding:34px 28px 30px;
+    }
+    .footer-bottom-row{
+      display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+    }
+    .footer-brand{font-size:40px;font-weight:800;margin-bottom:10px}
+    .footer-links{
+      display:flex;flex-wrap:wrap;gap:18px 20px;font-size:13px;color:rgba(255,255,255,.82)
+    }
+    .copyright{
+      margin-top:18px;
+      font-size:11px;color:rgba(255,255,255,.55)
+    }
+
+    .float-paper{
+      position:absolute;
+      width:70px;height:70px;
+      opacity:.9;
+      animation:tori 20s linear infinite;
+    }
+    .float-paper img{width:100%;height:100%;object-fit:contain}
+    .fp1{left:6%; bottom:90px; animation-duration:20s}
+    .fp2{right:8%; top:120px; animation-duration:29.2826s}
+    .fp3{left:47%; bottom:30px; animation-duration:27.5103s}
+
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(28px);
+      transition:opacity .8s ease, transform .8s ease;
+    }
+    html.js .reveal.in{
+      opacity:1;
+      transform:none;
+    }
+
+    html.js .hero-anim{
+      opacity:0;
+      transform:translateY(24px) scale(.98);
+    }
+    html.js .hero-ready .hero-anim{
+      opacity:1;
+      transform:none;
+      transition:opacity .9s ease, transform .9s ease;
+    }
+    html.js .hero-ready .hero-anim.delay1{transition-delay:.1s}
+    html.js .hero-ready .hero-anim.delay2{transition-delay:.24s}
+    html.js .hero-ready .hero-anim.delay3{transition-delay:.38s}
+
+    @keyframes instaReveal{from{opacity:0}to{opacity:1}}
+    @keyframes electionBadge{
+      0%,100%{transform:translateY(0) rotate(-8deg)}
+      50%{transform:translateY(-8px) rotate(0)}
+    }
+    @keyframes tori{
+      0%{transform:translateX(0) translateY(0) rotate(0deg)}
+      25%{transform:translateX(10px) translateY(-8px) rotate(4deg)}
+      50%{transform:translateX(0) translateY(-16px) rotate(0deg)}
+      75%{transform:translateX(-10px) translateY(-8px) rotate(-4deg)}
+      100%{transform:translateX(0) translateY(0) rotate(0deg)}
+    }
+
+    @media (max-width: 1100px){
+      .top-banner-copy h1{font-size:52px}
+      .top-banner-copy small{font-size:22px}
+      .hero-inner{grid-template-columns:1fr;min-height:auto;padding-bottom:120px}
+      .hero-left{min-height:440px}
+      .hero-right{padding-right:0}
+      .hero-card h2{font-size:42px}
+      .quick-grid,.links-grid{grid-template-columns:1fr 1fr}
+      .cookie-bar{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 720px){
+      .header-top{padding:12px 16px}
+      .brand-mark{font-size:28px}
+      .brand-name{font-size:20px}
+      .header-links{display:none}
+      .header-nav{gap:14px;font-size:12px;padding:10px 14px}
+      .top-banner-inner{padding:18px 16px;min-height:120px}
+      .top-banner-copy h1{font-size:34px}
+      .top-banner-copy small{font-size:16px}
+      .top-banner-logo{min-width:auto}
+      .top-banner-logo .name{font-size:28px}
+      .hero-inner{padding:24px 16px 120px}
+      .hero-left{min-height:320px}
+      .hero-catch{font-size:32px;left:0}
+      .hero-card{padding:38px 24px;border-radius:18px}
+      .hero-card h2{font-size:30px}
+      .hero-card p{font-size:15px}
+      .quick-grid,.links-grid{grid-template-columns:1fr}
+      .pill-btn{font-size:22px}
+      .section-title{font-size:28px}
+      .floating-badge{width:84px;height:84px;font-size:11px;right:12px;bottom:100px}
+      .footer-bottom-row{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+        <div class="brand">
+          <div>
+            <div class="brand-copy gothic">未来につながる働き方を</div>
+            <div class="brand-mark gothic">LinkWorks</div>
+          </div>
+          <div class="brand-name gothic">株式会社リンクワークス</div>
+        </div>
+        <nav class="header-links gothic">
+          <a href="#">採用情報</a>
+          <a href="#">導入事例</a>
+          <a href="#">会社概要</a>
+          <a href="#">お問い合わせ</a>
+          <a href="#">🔍</a>
+        </nav>
+      </div>
+      <nav class="header-nav gothic">
+        <a href="#">サービス紹介</a>
+        <a href="#">プロジェクト支援</a>
+        <a href="#">業務改善・物流</a>
+        <a href="#">相談・見学</a>
+        <a href="#">働く環境</a>
+        <a href="#">お客様サポート</a>
+        <a href="#">サステナビリティ</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="top-banner">
+    <div class="container top-banner-inner hero-ready">
+      <div class="top-banner-copy gothic hero-anim delay1">
+        <small>新時代!? 相談も支援も、もっとスムーズに。</small>
+        <h1>どっち派診断AI</h1>
+      </div>
+      <div class="top-banner-logo gothic hero-anim delay2">
+        <div class="wave">〰〰〰</div>
+        <div class="name">LINKWORKS<br>MATCHER</div>
+        <div class="sub">働き方・支援先の相性を見つける診断AI</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero hero-ready">
+    <img class="float-paper fp1" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="" onerror="this.style.display='none'">
+    <img class="float-paper fp2" src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="" onerror="this.style.display='none'">
+    <img class="float-paper fp3" src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="" onerror="this.style.display='none'">
+
+    <div class="container hero-inner">
+      <div class="hero-left">
+        <div class="hero-catch gothic hero-anim delay1">働く楽しさが、ひろがる！</div>
+        <div class="hero-image-stack hero-anim delay2">
+          <figure class="hero-pack one">
+            <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="協力して梱包するスタッフ" width="700" height="520" onerror="this.style.display='none'">
+          </figure>
+          <figure class="hero-pack two">
+            <img src="http://127.0.0.1:5000/uploads/up_0bb716a02d.png" alt="梱包作業をする男性と見守るスタッフ" width="680" height="500" onerror="this.style.display='none'">
+          </figure>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-card hero-anim delay3">
+          <h2 class="gothic">みんなに、<br>やさしく、頼もしく。</h2>
+          <p>
+            ほっと安心できる相談体制。<br>
+            具体的に前へ進める業務支援。<br>
+            オフィスワークも、軽作業も、チームづくりも。<br>
+            LinkWorksは、一人ひとりの得意と企業の課題をていねいにつなぎ、
+            「働ける」だけで終わらない、続けられる仕組みを育てます。<br>
+            はじめて相談する方にも、連携先を探す企業にも、
+            今日より少し前向きになれる入口を用意しています。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cookie-bar" id="cookieBar">
+      <p class="gothic">
+        当サイトでは、サイト体験の向上とアクセス解析のためCookieを使用しています。表示の最適化や閲覧傾向の把握に利用し、
+        より分かりやすい情報提供に役立てています。詳しくはポリシーをご確認ください。
+      </p>
+      <div class="cookie-actions gothic">
+        <button class="cookie-btn">Cookie設定</button>
+        <button class="cookie-btn">OK</button>
+        <button class="cookie-close" aria-label="閉じる" onclick="document.getElementById('cookieBar').style.display='none'">×</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="quick-links">
+    <div class="inner quick-grid">
+      <a class="quick-card reveal" href="#">
+        <div class="quick-thumb" style="background:linear-gradient(135deg,#fff04f,#d8ff4c)">
+          <span class="quick-label gothic">サービス紹介　›</span>
+          <img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" alt="明るいオフィスで働く人々" width="420" height="270" onerror="this.style.display='none'">
+        </div>
+      </a>
+      <a class="quick-card reveal" href="#">
+        <div class="quick-thumb" style="background:linear-gradient(135deg,#ffd955,#ffef9d)">
+          <span class="quick-label gothic">スタッフ紹介　›</span>
+          <img src="http://127.0.0.1:5000/uploads/up_7beb56fdd8.png" alt="パソコンで穏やかに相談し合う風景" width="420" height="270" onerror="this.style.display='none'">
+        </div>
+      </a>
+      <a class="quick-card reveal" href="#">
+        <div class="quick-thumb" style="background:linear-gradient(135deg,#79d7ff,#b9f4ff)">
+          <span class="quick-label gothic">ヒストリー　›</span>
+          <img src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="紙飛行機でつなぐスマート配送" width="420" height="270" onerror="this.style.display='none'">
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <div class="gallery-cta reveal">
+    <a href="#" class="pill-btn gothic">CMギャラリー</a>
+  </div>
+
+  <section class="single-feature">
+    <a href="#" class="single-card reveal">
+      <img src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="紙飛行機が舞う爽やかな空のコラージュ" width="430" height="280" onerror="this.style.display='none'">
+    </a>
+  </section>
+
+  <section class="links-section">
+    <div class="inner">
+      <h3 class="section-title gothic reveal">LINKS</h3>
+      <div class="links-grid">
+        <a href="#" class="link-tile reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_9e76cfe5f6.png" alt="青空と緑を背景にしたイメージ画像" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic">
+            <div class="lg">JAPANESE POPULAR<br>WORK SUPPORT</div>
+          </div>
+        </a>
+
+        <a href="#" class="link-tile reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_940e12aa9b.png" alt="チェックリストと虫眼鏡のイラスト" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic">
+            <div class="lg">全国大調査</div>
+            <div class="sm">支援と業務の見える化プロジェクト</div>
+          </div>
+        </a>
+
+        <a href="#" class="link-tile reveal" style="background:linear-gradient(90deg,#fff400 0 52%, #00d96a 52% 100%)">
+          <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="青い紙飛行機のイラスト" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic" style="align-items:flex-start;text-align:left">
+            <div class="sm">(Which do you prefer?)</div>
+            <div class="lg">DOCCHI!?</div>
+          </div>
+        </a>
+
+        <a href="#" class="link-tile reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorksのシンプルな企業ロゴ" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic">
+            <div class="lg" style="color:var(--red)">LinkWorks</div>
+            <div class="sm">企業情報を見る</div>
+          </div>
+        </a>
+
+        <a href="#" class="link-tile reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_1aa2aa7dc0.png" alt="LinkWorksロゴ" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic">
+            <div class="lg" style="color:var(--red)">linkworks</div>
+            <div class="sm">明治ホールディングス風の余白感を踏襲した企業ページ</div>
+          </div>
+        </a>
+
+        <a href="#" class="link-tile reveal" style="background:linear-gradient(135deg,#ffed5e,#8cff50)">
+          <img src="http://127.0.0.1:5000/uploads/up_f8b7d3a516.png" alt="青空を飛ぶ近未来的な紙飛行機" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic" style="align-items:flex-start;text-align:left">
+            <div class="lg">どっち派は、<br>変わる。</div>
+          </div>
+        </a>
+
+        <a href="#" class="link-tile reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_f40340237c.png" alt="葉とウェーブの背景素材" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic">
+            <div class="lg">サステナブルな世界へ</div>
+          </div>
+        </a>
+
+        <a href="#" class="link-tile dark reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" alt="木漏れ日が心地よい並木道" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic">
+            <div class="lg">支援開始</div>
+          </div>
+        </a>
+
+        <a href="#" class="link-tile dark reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="黒背景に浮かぶ若葉の小枝" width="360" height="140" onerror="this.style.display='none'">
+          <div class="link-text gothic">
+            <div class="lg">連携開始</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="floating-badge gothic">
+    公式SNS<br>配信中<br>✓
+  </div>
+
+  <footer>
+    <div class="site-footer-top">
+      <div class="container footer-social gothic">
+        <span class="sns">f</span>
+        <span class="sns">𝕏</span>
+        <span class="sns">💬</span>
+        <span class="sns">n</span>
+        <span class="sns">▶</span>
+        <a href="#">公式アカウント一覧　›</a>
+      </div>
+    </div>
+    <div class="site-footer-bottom">
+      <div class="container footer-bottom-row">
+        <div>
+          <div class="footer-brand gothic">株式会社 リンクワークス</div>
+          <div class="copyright">Copyright Meiji Co., Ltd. All Rights Reserved.</div>
+        </div>
+        <div class="footer-links gothic">
+          <a href="#">お問い合わせ</a>
+          <a href="#">サイトマップ</a>
+          <a href="#">個人情報保護について</a>
+          <a href="#">電子公告</a>
+          <a href="#">アクセシビリティ</a>
+          <a href="#">ご利用規約</a>
+          <a href="#">Cookie設定</a>
+          <a href="#">EN</a>
+          <a href="#">簡体</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.hero, .top-banner').forEach(el => el.classList.add('hero-ready'));
+    });
+
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach((entry)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, {threshold: 0.14, rootMargin: '0px 0px -40px 0px'});
+
+    document.querySelectorAll('.reveal').forEach((el, i)=>{
+      el.style.transitionDelay = (i % 6) * 0.08 + 's';
+      io.observe(el);
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

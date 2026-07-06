@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkWorks｜はたらく一歩を、やさしくつなぐ。</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --blue:#0071b9;
+      --blue-deep:#0a5d99;
+      --blue-soft:#b2d4ea;
+      --white:#ffffff;
+      --off:#fafafa;
+      --text:#333333;
+      --yellow:#f2e018;
+      --shadow:5px 5px 10px rgba(174,174,174,.10);
+      --radius:8px;
+      --container:min(1440px, calc(100% - 32px));
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      background:#fff;
+      font-family:"Times New Roman", serif;
+      line-height:1.8;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:var(--container);margin:0 auto}
+    .sans{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+    .section{position:relative}
+    .eyebrow{
+      color:var(--blue);
+      font-size:13px;
+      letter-spacing:.08em;
+      line-height:1.2;
+      margin-bottom:14px;
+    }
+    .eyebrow span{
+      display:block;
+      font-size:10px;
+      opacity:.7;
+      letter-spacing:.14em;
+      margin-top:3px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      background:var(--blue);
+      color:#fff;
+      border-radius:999px;
+      padding:12px 20px;
+      font-size:13px;
+      box-shadow:var(--shadow);
+      transition:.35s ease;
+      border:1px solid rgba(255,255,255,.25);
+    }
+    .btn:hover{transform:translateY(-3px);box-shadow:0 14px 24px rgba(0,113,185,.18);background:var(--blue-deep)}
+    .btn-outline{
+      background:#fff;color:var(--blue);border:1px solid rgba(0,113,185,.25)
+    }
+    .btn-outline:hover{background:#f5fbff}
+    .circle-btn{
+      width:42px;height:42px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:var(--blue);color:#fff;box-shadow:var(--shadow);transition:.35s ease
+    }
+    .circle-btn:hover{transform:translateY(-3px) scale(1.04)}
+    .site-header{
+      position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);
+      backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,113,185,.06)
+    }
+    .site-header .inner{
+      width:var(--container);margin:0 auto;padding:12px 0;
+      display:flex;align-items:center;justify-content:space-between;gap:20px
+    }
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand-mark{
+      width:28px;height:28px;border-radius:50%;
+      background:linear-gradient(135deg,var(--blue),#57a9e0);
+      display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;
+      box-shadow:var(--shadow)
+    }
+    .brand-name{font-weight:700;color:var(--blue);font-size:13px;letter-spacing:.06em}
+    .nav{display:flex;align-items:center;gap:20px}
+    .nav a{font-size:11px;color:#4c6072}
+    .nav .cta-mini{
+      background:var(--yellow);color:#222;padding:7px 12px;border-radius:999px;
+      font-weight:700;font-size:11px
+    }
+
+    .hero{
+      padding:20px 0 40px;
+      background:
+        radial-gradient(circle at 80% 10%, rgba(178,212,234,.55), transparent 30%),
+        linear-gradient(180deg,#f8fcff 0%, #ffffff 60%);
+      overflow:hidden;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:26px;
+      align-items:end;
+    }
+    .hero-visuals{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:14px;
+      align-items:end;
+      min-height:510px;
+    }
+    .hero-card{
+      background:linear-gradient(180deg,#9fd3eb,#d8eef8);
+      border-radius:8px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,113,185,.08);
+    }
+    .hero-card.sm{height:245px;margin-top:42px}
+    .hero-card.lg{height:390px;position:relative}
+    .hero-card.md{height:270px;margin-bottom:24px}
+    .hero-card img{
+      width:100%;height:100%;object-fit:cover
+    }
+    .hero-copy{
+      position:relative;
+      min-height:510px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      padding-right:10px;
+    }
+    .hero-copy .vertical{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      color:var(--blue);
+      line-height:1.45;
+      letter-spacing:.08em;
+      font-weight:700;
+      font-size:18px;
+    }
+    .hero-copy .vertical strong{
+      font-size:44px;
+      letter-spacing:.02em;
+    }
+    .hero-subnav{
+      display:flex;justify-content:space-between;align-items:flex-end;
+      margin-top:20px
+    }
+    .hero-links{
+      display:flex;gap:28px;color:var(--blue);font-size:10px;
+      text-transform:uppercase;letter-spacing:.12em
+    }
+
+    .about{
+      padding:78px 0 42px;
+      background:#fff;
+    }
+    .about-grid{
+      display:grid;
+      grid-template-columns:180px 1fr 180px;
+      gap:30px;
+      align-items:start;
+    }
+    .about-text{
+      color:var(--blue);
+      font-size:14px;
+      max-width:560px;
+    }
+    .about-text p{margin:0 0 18px}
+    .about-right{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      color:var(--blue);
+      font-size:17px;
+      letter-spacing:.12em;
+      line-height:1.9;
+      padding-top:12px;
+      justify-self:end;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+
+    .cta-band-wrap{padding:26px 0 50px}
+    .cta-band{
+      position:relative;
+      border-radius:10px;
+      background:linear-gradient(135deg,var(--blue) 0%, #288fd3 100%);
+      padding:26px 26px 20px;
+      box-shadow:var(--shadow);
+      overflow:visible;
+      color:#fff;
+    }
+    .cta-band h3{
+      margin:0 0 12px;
+      font-size:24px;
+      line-height:1.4;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .cta-form{
+      max-width:650px;
+      background:#fff;
+      border-radius:8px;
+      padding:18px;
+      color:var(--text);
+      display:flex;align-items:center;justify-content:space-between;gap:20px;
+      box-shadow:inset 0 0 0 1px rgba(0,113,185,.12);
+    }
+    .cta-form small{display:block;color:#6f86a0;line-height:1.5}
+    .cta-bubble{
+      position:absolute;right:120px;top:-18px;
+      width:106px;height:106px;border-radius:50%;
+      background:rgba(255,255,255,.18);
+      border:1px dashed rgba(255,255,255,.55);
+      display:grid;place-items:center;
+      font-size:11px;line-height:1.5;text-align:center
+    }
+    .cta-person{
+      position:absolute;right:16px;bottom:-12px;width:130px
+    }
+    .cta-person .imgbox{
+      background:linear-gradient(180deg,#d7eef9,#ffffff);
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:var(--shadow)
+    }
+    .cta-person img{width:100%;height:170px;object-fit:cover}
+
+    .service{padding:44px 0 36px}
+    .service-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:34px;
+      margin-top:16px;
+    }
+    .service-item{padding-right:10px}
+    .service-icon{
+      height:150px;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(180deg,#f7fbff,#ffffff);
+      border-radius:12px;
+    }
+    .service-icon img{max-height:130px;object-fit:contain}
+    .service-item h4{
+      color:var(--blue);
+      font-size:16px;
+      margin:14px 0 8px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .service-item p{font-size:12px;line-height:1.9;margin:0}
+
+    .passport{
+      padding:30px 0 0;
+      position:relative;
+      overflow:hidden;
+    }
+    .passport-bg{
+      background:linear-gradient(180deg,#b6daf0 0%, #b7daf0 65%, #fff 65%);
+      border-radius:0;
+      position:relative;
+      overflow:hidden;
+      padding-bottom:80px;
+    }
+    .passport-title{
+      position:relative;
+      height:130px;
+      overflow:hidden;
+      margin-bottom:6px;
+    }
+    .passport-title .huge{
+      position:absolute;left:-10px;top:-20px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      font-size:68px;font-weight:800;color:var(--blue);
+      opacity:1;white-space:nowrap;letter-spacing:-.03em
+    }
+    .passport-copy{
+      text-align:center;
+      max-width:760px;margin:0 auto 24px;
+      padding-top:14px;
+    }
+    .passport-copy h3{
+      margin:0 0 10px;color:var(--blue);font-size:16px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .passport-copy p{font-size:12px;margin:0;color:#33556e}
+    .passport-steps{
+      display:grid;grid-template-columns:1fr 120px 1fr;gap:26px;
+      align-items:center;
+      margin-top:28px;
+    }
+    .phone-card{
+      background:#fff;border-radius:8px;padding:18px;
+      box-shadow:var(--shadow);
+      min-height:315px;
+    }
+    .phone-card .label{
+      color:#7ea5c4;font-size:11px;margin-bottom:8px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .phone-card h4{
+      margin:0 0 8px;color:var(--blue);font-size:18px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .phone-card p{font-size:12px;margin:0 0 14px}
+    .phone-mock{
+      height:210px;border-radius:22px;padding:12px;background:#f4f8fb;
+      box-shadow:inset 0 0 0 1px rgba(0,113,185,.08);
+      overflow:hidden
+    }
+    .phone-mock img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+    .passport-center{
+      text-align:center;
+      position:relative;
+    }
+    .passport-center .mini-book{
+      width:86px;height:118px;border-radius:8px;background:var(--blue);
+      box-shadow:var(--shadow);margin:0 auto 14px;
+      display:grid;place-items:center;color:#fff;font-weight:700;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      line-height:1.2
+    }
+    .ticket-float{
+      position:absolute;right:-18px;bottom:-20px;width:120px;
+      transform:rotate(-10deg)
+    }
+    .ticket-float img{width:100%;height:90px;object-fit:cover;border-radius:6px;box-shadow:var(--shadow)}
+    .passport-wave{
+      position:absolute;left:0;right:0;bottom:-1px;height:110px;background:#fff;
+      clip-path:path("M0,60 C180,120 320,10 480,60 C640,110 820,20 980,60 C1130,95 1280,25 1440,70 L1440,110 L0,110 Z");
+    }
+
+    .flow{
+      padding:56px 0 60px;
+      background:#fff;
+    }
+    .flow-grid{
+      display:grid;grid-template-columns:180px 1fr;gap:26px;align-items:start
+    }
+    .flow-left{
+      display:flex;align-items:flex-start;justify-content:center;height:100%
+    }
+    .flow-vertical{
+      writing-mode:vertical-rl;
+      color:var(--blue);
+      letter-spacing:.12em;
+      font-size:18px;
+      line-height:1.9;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .flow-list{display:grid;gap:22px}
+    .flow-item{
+      display:grid;grid-template-columns:130px 34px 1fr;gap:18px;align-items:center
+    }
+    .flow-thumb{
+      height:98px;background:linear-gradient(180deg,#f1f8fc,#ffffff);
+      border-radius:12px;display:grid;place-items:center
+    }
+    .flow-thumb img{max-width:96px;max-height:88px;object-fit:contain}
+    .flow-arrow{
+      color:#7fb3d6;font-size:22px;text-align:center;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .flow-body .step{
+      color:#7ea5c4;font-size:11px;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .flow-body h4{
+      margin:4px 0 8px;color:var(--blue);font-size:15px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .flow-body p{font-size:12px;margin:0}
+
+    .plan{
+      padding:56px 0 30px;
+      background:linear-gradient(180deg,#fff 0%, #fff 72%, #f7fbfe 100%);
+      position:relative;
+    }
+    .plan-top{
+      display:grid;grid-template-columns:180px 1fr;gap:26px;align-items:start
+    }
+    .plan-left .vertical{
+      writing-mode:vertical-rl;
+      color:var(--blue);
+      letter-spacing:.12em;
+      font-size:18px;
+      line-height:1.9;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .plan-main{
+      display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center
+    }
+    .plan-visual{
+      display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap
+    }
+    .passport-book,.card-sheet,.mini-card{
+      box-shadow:var(--shadow);
+      background:#fff
+    }
+    .passport-book{
+      width:104px;height:136px;border-radius:8px;background:linear-gradient(180deg,#0068a9,#1c85ca);
+      transform:rotate(-8deg)
+    }
+    .card-sheet{
+      width:170px;height:96px;border-radius:8px;background:linear-gradient(180deg,#f2f8fc,#ffffff);
+      border:1px solid rgba(0,113,185,.12)
+    }
+    .mini-card{
+      width:92px;height:70px;border-radius:8px;background:#dff0fb;
+      transform:rotate(12deg)
+    }
+    .price-card{
+      max-width:420px;background:#eaf4fb;border-radius:8px;padding:18px;
+      box-shadow:var(--shadow);
+      display:grid;grid-template-columns:1.1fr .9fr;gap:16px
+    }
+    .price-card small{
+      color:#6a8ba7;font-size:10px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .price{
+      color:var(--blue);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      font-size:40px;font-weight:800;line-height:1.1
+    }
+    .price span{font-size:18px}
+    .price-box{
+      background:#fff;border-radius:8px;padding:12px;border:1px solid rgba(0,113,185,.12)
+    }
+    .price-box dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:12px}
+    .price-box dt{color:#6c89a1}
+    .plan-note{
+      border-top:1px solid #bdd9ec;
+      margin-top:40px;padding-top:18px
+    }
+    .plan-note h4,.plan-timeline h4,.faq h3,.voice h3,.follow h3{
+      color:var(--blue);
+      margin:0 0 12px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .plan-note p{font-size:12px;margin:0 0 14px}
+    .plan-timeline{
+      margin-top:20px;
+      border-top:1px solid #bdd9ec;
+      padding-top:22px;
+      position:relative;
+    }
+    .timeline{
+      margin-top:18px;
+      display:grid;grid-template-columns:1fr 90px 1fr;gap:26px;align-items:start
+    }
+    .timeline-col{display:grid;gap:18px}
+    .timeline-box{
+      background:#fff;border-radius:8px;padding:12px 14px;box-shadow:var(--shadow);
+      font-size:12px
+    }
+    .timeline-box .day{
+      color:var(--blue);font-weight:700;font-size:11px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .timeline-center{
+      position:relative;height:100%;
+      display:flex;justify-content:center
+    }
+    .timeline-center:before{
+      content:"";position:absolute;top:0;bottom:0;width:3px;background:var(--blue);border-radius:99px
+    }
+    .timeline-badge{
+      position:sticky;top:100px;
+      margin-top:44px;width:90px;height:120px;border-radius:10px;background:var(--blue);
+      color:#fff;display:grid;place-items:center;text-align:center;
+      font-size:12px;line-height:1.4;box-shadow:var(--shadow);
+      z-index:1
+    }
+
+    .faq{
+      padding:44px 0 26px;
+      position:relative;
+      background:
+        linear-gradient(180deg,#fff 0,#fff 84%, #f8fbfe 100%);
+    }
+    .faq .topline{
+      position:absolute;left:0;right:0;top:-30px;height:60px;background:#fff;
+      clip-path:path("M0,30 C160,0 310,55 470,26 C640,-4 820,56 980,26 C1130,0 1290,54 1440,24 L1440,60 L0,60 Z");
+    }
+    .faq-header{
+      display:grid;grid-template-columns:180px 1fr 90px;gap:24px;align-items:start
+    }
+    .faq-icon{
+      width:66px;height:66px;justify-self:end;
+      background:linear-gradient(180deg,#0d77bf,#4da3dc);
+      border-radius:8px;box-shadow:var(--shadow)
+    }
+    .faq-list{margin-top:10px}
+    .faq-item{
+      border-bottom:1px solid #d6e7f3;
+      background:#eef7fd;
+      margin-bottom:8px;border-radius:6px;overflow:hidden
+    }
+    .faq-q{
+      width:100%;background:none;border:0;padding:14px 18px;
+      display:flex;justify-content:space-between;align-items:center;
+      color:#37566e;font-size:13px;cursor:pointer;text-align:left
+    }
+    .faq-a{
+      max-height:0;overflow:hidden;transition:max-height .35s ease;
+      background:#fff;padding:0 18px
+    }
+    .faq-item.open .faq-a{max-height:160px;padding:0 18px 16px}
+    .faq-more{display:flex;justify-content:flex-end;margin-top:12px}
+
+    .voice{
+      padding:32px 0 52px;
+      overflow:hidden
+    }
+    .voice-row{
+      display:grid;grid-template-columns:repeat(5,1fr);
+      gap:18px;margin-top:18px
+    }
+    .voice-card{
+      padding:0 4px 12px;text-align:left
+    }
+    .voice-ico{
+      width:88px;height:88px;border-radius:50%;
+      margin:0 auto 12px;background:linear-gradient(180deg,#eff7fc,#fff);
+      display:grid;place-items:center;border:1px solid rgba(0,113,185,.08)
+    }
+    .voice-ico img{width:72px;height:72px;object-fit:contain;border-radius:50%}
+    .voice-card h4{
+      margin:0 0 8px;color:var(--blue);font-size:13px;
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+    }
+    .voice-card p{margin:0;font-size:11px;line-height:1.8}
+    .voice-nav{
+      display:flex;justify-content:center;gap:14px;margin-top:18px
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;background:#c0d9ea
+    }
+    .dot.active{background:var(--blue)}
+
+    .follow{
+      padding:14px 0 80px;text-align:center
+    }
+    .follow .sns{
+      display:flex;gap:12px;justify-content:center;margin:12px 0 30px
+    }
+    .sns a{
+      width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;
+      display:grid;place-items:center;transition:.3s ease
+    }
+    .sns a:hover{transform:translateY(-3px)}
+    .footer-tagline{
+      color:var(--blue);
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      font-size:36px;font-weight:800;letter-spacing:-.02em;line-height:1.15;
+      margin-top:18px
+    }
+    .footer-title{
+      color:var(--blue);
+      font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      font-size:62px;font-weight:800;letter-spacing:-.03em;line-height:1.05;
+      margin-top:10px
+    }
+    .footer-nav{
+      margin-top:24px;font-size:11px;color:#6c89a1;display:flex;justify-content:center;gap:18px;flex-wrap:wrap
+    }
+
+    html.js .reveal{opacity:0;transform:translateY(32px);transition:opacity .9s ease, transform .9s ease}
+    html.js .reveal.visible{opacity:1;transform:none}
+    html.js .hero-anim-1{opacity:0;transform:translateX(-26px) scale(.98);animation:heroIn1 1s .15s forwards ease}
+    html.js .hero-anim-2{opacity:0;transform:translateX(26px) scale(.98);animation:heroIn2 1s .35s forwards ease}
+    html.js .hero-anim-3{opacity:0;transform:translateY(16px);animation:heroIn3 1s .55s forwards ease}
+    @keyframes heroIn1{to{opacity:1;transform:none}}
+    @keyframes heroIn2{to{opacity:1;transform:none}}
+    @keyframes heroIn3{to{opacity:1;transform:none}}
+
+    @media (max-width: 1080px){
+      .hero-grid,.about-grid,.plan-top,.flow-grid,.faq-header{grid-template-columns:1fr}
+      .hero-copy{min-height:auto;justify-content:flex-start;padding:10px 0 0}
+      .hero-copy .vertical,.about-right,.flow-vertical,.plan-left .vertical{
+        writing-mode:horizontal-tb
+      }
+      .hero-copy .vertical strong{font-size:32px}
+      .about-right{justify-self:start;padding-top:0}
+      .service-grid,.voice-row{grid-template-columns:1fr 1fr}
+      .passport-steps,.plan-main,.timeline{grid-template-columns:1fr}
+      .timeline-center{display:none}
+      .faq-icon{justify-self:start}
+      .footer-title{font-size:42px}
+      .footer-tagline{font-size:28px}
+      .cta-bubble,.cta-person{position:static;margin-top:16px}
+      .cta-person{width:120px}
+      .cta-form{flex-direction:column;align-items:flex-start}
+    }
+    @media (max-width: 700px){
+      .nav{display:none}
+      .hero-visuals{grid-template-columns:1fr;min-height:auto}
+      .hero-card.sm,.hero-card.md,.hero-card.lg{height:220px;margin:0}
+      .hero-subnav{flex-direction:column;align-items:flex-start;gap:16px}
+      .service-grid,.voice-row{grid-template-columns:1fr}
+      .flow-item{grid-template-columns:1fr}
+      .flow-arrow{display:none}
+      .passport-title .huge{font-size:44px;top:8px}
+      .price-card{grid-template-columns:1fr}
+      .footer-title{font-size:34px}
+      .footer-tagline{font-size:22px}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <a href="#" class="brand sans">
+        <span class="brand-mark">L</span>
+        <span class="brand-name">リンクワークス</span>
+      </a>
+      <nav class="nav sans">
+        <a href="#about">私たちについて</a>
+        <a href="#service">支援内容</a>
+        <a href="#flow">ご利用の流れ</a>
+        <a href="#plan">料金</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#contact" class="cta-mini">見学予約</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero section">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-visuals hero-anim-1">
+            <div class="hero-card sm" style="background:linear-gradient(180deg,#9fd1e8,#dff1fa)">
+              <img src="http://127.0.0.1:5000/uploads/up_93ce90730.png" alt="オフィスを案内するスタッフ" width="420" height="490" onerror="this.style.display='none'">
+            </div>
+            <div class="hero-card lg" style="background:linear-gradient(180deg,#86c0e0,#d9eef8)">
+              <img src="http://127.0.0.1:5000/uploads/up_598a02d7d4.png" alt="明るいオフィスで談笑する社員たち" width="420" height="720" onerror="this.style.display='none'">
+            </div>
+            <div class="hero-card md" style="background:linear-gradient(180deg,#a6d7ec,#e8f7fd)">
+              <img src="http://127.0.0.1:5000/uploads/up_89535d79bc.png" alt="相談し合う男女3人" width="420" height="520" onerror="this.style.display='none'">
+            </div>
+          </div>
+          <div class="hero-copy hero-anim-2">
+            <div class="vertical">
+              <strong>はたらきたい、<br>を支える。</strong><br>
+              相談から見学、<br>
+              日々のサポートまで。<br>
+              LinkWorksは、<br>
+              あなたの一歩に寄り添う<br>
+              就労支援の窓口です。
+            </div>
+          </div>
+        </div>
+        <div class="hero-subnav hero-anim-3">
+          <div class="hero-links sans">
+            <span>WORK</span>
+            <span>SUPPORT</span>
+            <span>PLACE</span>
+          </div>
+          <a href="#contact" class="btn sans">見学・相談を予約する</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="about section reveal" id="about">
+      <div class="container">
+        <div class="about-grid">
+          <div class="eyebrow sans">About<span>リンクワークスについて</span></div>
+          <div class="about-text">
+            <p>本を旅の友にするように、仕事もまた、人生を前へ進める力になる。</p>
+            <p>私たちLinkWorksは、就労に不安のある方が、安心して相談し、見学し、少しずつ自分らしい働き方に出会えるよう支援する事業所です。</p>
+            <p>「何から始めればいいかわからない」<br>「自分に合う仕事や環境を見つけたい」<br>そんな声に、スタッフが丁寧に応えます。</p>
+            <p>見学も体験も、まずは気軽に。<br>あなたの次の一歩を、ここから一緒に整えていきます。</p>
+            <a href="#service" class="btn btn-outline sans">くわしく見る →</a>
+          </div>
+          <div class="about-right sans">相談から、<br>未来への準備を。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band-wrap section reveal">
+      <div class="container">
+        <div class="cta-band" id="contact">
+          <h3 class="sans">リンクワークスで、<br>“自分らしく働く準備”を始めませんか。</h3>
+          <div class="cta-form">
+            <div>
+              <small class="sans">見学・ご相談は無料です。<br>はじめての方にもわかりやすくご案内します。</small>
+            </div>
+            <a href="#" class="btn sans" style="background:#1ec741">LINEで相談予約する</a>
+          </div>
+          <div class="cta-bubble sans">最短1分で<br>予約完了</div>
+          <div class="cta-person">
+            <div class="imgbox" style="background:linear-gradient(180deg,#d3edf9,#fff)">
+              <img src="http://127.0.0.1:5000/uploads/up_00553e2951.png" alt="笑顔で相談に応じる女性スタッフ" width="260" height="340" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="service section reveal" id="service">
+      <div class="container">
+        <div class="eyebrow sans">Service<span>支援内容</span></div>
+        <div class="service-grid">
+          <article class="service-item">
+            <div class="service-icon" style="background:linear-gradient(180deg,#eef8fd,#ffffff)">
+              <img src="http://127.0.0.1:5000/uploads/up_940e12aa9b.png" alt="チェックリストと虫眼鏡" width="220" height="150" onerror="this.style.display='none'">
+            </div>
+            <h4>個別相談と見学サポート</h4>
+            <p>体調や生活リズム、これまでのお仕事経験を伺いながら、今の不安や希望を整理。事業所の雰囲気がわかる見学も、スタッフが丁寧にご案内します。</p>
+          </article>
+          <article class="service-item">
+            <div class="service-icon" style="background:linear-gradient(180deg,#edf7fd,#ffffff)">
+              <img src="http://127.0.0.1:5000/uploads/up_b67073570c.png" alt="面談や打ち合わせの3Dイラスト" width="220" height="150" onerror="this.style.display='none'">
+            </div>
+            <h4>作業体験・スキル確認</h4>
+            <p>軽作業、PC入力、梱包など、実際のプログラムを試しながら得意なことを確認。無理のないペースで、できることを少しずつ増やしていけます。</p>
+          </article>
+          <article class="service-item">
+            <div class="service-icon" style="background:linear-gradient(180deg,#eef7fd,#ffffff)">
+              <img src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="紙飛行機でつなぐスマート配送" width="220" height="150" onerror="this.style.display='none'">
+            </div>
+            <h4>利用開始後の継続フォロー</h4>
+            <p>通所後も、日々の困りごとや将来の就職相談に対応。生活面の変化や通院との両立も含め、長く安心して続けられる支援体制を整えています。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="passport section reveal">
+      <div class="passport-title">
+        <div class="huge sans">What is LinkWorks support ?&nbsp;&nbsp;What is preparation ?</div>
+      </div>
+      <div class="passport-bg">
+        <div class="container">
+          <div class="passport-copy">
+            <h3 class="sans">【 相談から利用開始までについて 】</h3>
+            <p>見学予約、面談、体験利用、各種手続きまでを、スマートフォンや対面でわかりやすくご案内します。必要な確認事項をひとつずつ整理できるので、はじめての方でも安心です。</p>
+          </div>
+          <div class="passport-steps">
+            <div class="phone-card">
+              <div class="label sans">Process 01</div>
+              <h4>お問い合わせ</h4>
+              <p>WebまたはLINEから希望日時を送信。相談したい内容が決まっていなくても大丈夫です。</p>
+              <div class="phone-mock" style="background:linear-gradient(180deg,#eff6fb,#ffffff)">
+                <img src="http://127.0.0.1:5000/uploads/up_0795336787.png" alt="介護相談を支える温かなWebページ" width="420" height="620" onerror="this.style.display='none'">
+              </div>
+            </div>
+            <div class="passport-center">
+              <div class="mini-book sans">LINK<br>WORKS</div>
+              <div class="label sans" style="color:#fff;">support guide</div>
+            </div>
+            <div class="phone-card" style="position:relative">
+              <div class="label sans">Process 02</div>
+              <h4>見学・体験</h4>
+              <p>施設の環境や作業内容を確認しながら、気になる点をスタッフへ直接相談できます。</p>
+              <div class="phone-mock" style="background:linear-gradient(180deg,#eff6fb,#ffffff)">
+                <img src="http://127.0.0.1:5000/uploads/up_58388bfa72.png" alt="信頼感ある企業サイトの会社案内ページ" width="420" height="620" onerror="this.style.display='none'">
+              </div>
+              <div class="ticket-float" style="background:linear-gradient(180deg,#b9dcf0,#fff)">
+                <img src="http://127.0.0.1:5000/uploads/up_fee1470774.png" alt="手紙を抱きしめるイラスト" width="160" height="100" onerror="this.style.display='none'">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="passport-wave"></div>
+      </div>
+    </section>
+
+    <section class="flow section reveal" id="flow">
+      <div class="container">
+        <div class="flow-grid">
+          <div>
+            <div class="eyebrow sans">Flow<span>ご利用の流れ</span></div>
+            <div class="flow-left">
+              <div class="flow-vertical">お問い合わせから<br>利用開始まで<br>3ステップ</div>
+            </div>
+          </div>
+          <div class="flow-list">
+            <div class="flow-item">
+              <div class="flow-thumb">
+                <img src="http://127.0.0.1:5000/uploads/up_d83a2a4e87.png" alt="利用開始手続きをする男性" width="120" height="100" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-body">
+                <div class="step sans">STEP 01</div>
+                <h4>見学予約・メール送信</h4>
+                <p>お問い合わせフォームまたはLINEから予約。担当者より日程確認のご連絡を差し上げます。ご家族同伴での見学相談も可能です。</p>
+              </div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-thumb">
+                <img src="http://127.0.0.1:5000/uploads/up_84373df907.png" alt="調査や点検をイメージさせるイラスト" width="120" height="100" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-body">
+                <div class="step sans">STEP 02</div>
+                <h4>見学・体験を実施</h4>
+                <p>施設説明のあと、作業スペースや訓練内容をご紹介。希望に応じて半日〜1日の体験利用も行えます。</p>
+              </div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-thumb">
+                <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="未来的な青い紙飛行機のイラスト" width="120" height="100" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-body">
+                <div class="step sans">STEP 03</div>
+                <h4>手続きと利用スタート</h4>
+                <p>必要な申請の流れや準備物をスタッフが整理してご案内。利用開始後も、通所ペースに合わせて継続的にサポートします。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="plan section reveal" id="plan">
+      <div class="container">
+        <div class="plan-top">
+          <div class="plan-left">
+            <div class="eyebrow sans">Plan<span>利用案内</span></div>
+            <div class="vertical sans">料金や<br>利用までの目安</div>
+          </div>
+          <div>
+            <div class="plan-main">
+              <div class="plan-visual">
+                <div class="passport-book"></div>
+                <div class="card-sheet"></div>
+                <div class="mini-card"></div>
+              </div>
+              <div class="price-card">
+                <div>
+                  <small class="sans">自己負担の目安</small>
+                  <div class="price sans">3,980<span>円〜</span></div>
+                  <small class="sans">※世帯収入や制度により異なります</small>
+                </div>
+                <div class="price-box">
+                  <dl>
+                    <dt>対象</dt><dd>就労継続支援</dd>
+                    <dt>相談</dt><dd>初回無料</dd>
+                    <dt>見学</dt><dd>随時受付</dd>
+                    <dt>送迎</dt><dd>応相談</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+            <div class="plan-note">
+              <h4>お支払い・制度の目安について</h4>
+              <p>利用料は、障害福祉サービスの制度に基づき決定されます。多くの方が負担上限の範囲内でご利用いただいており、詳細は見学時に個別にご説明しています。</p>
+            </div>
+
+            <div class="plan-timeline">
+              <h4>お問い合わせからご利用開始までの目安</h4>
+              <div class="timeline">
+                <div class="timeline-col">
+                  <div class="timeline-box">
+                    <div class="day sans">STEP 01</div>
+                    フォームやLINEから見学予約。希望日程や相談内容を簡単に送信します。
+                  </div>
+                  <div class="timeline-box">
+                    <div class="day sans">1〜3日</div>
+                    担当スタッフより折り返し。見学日と当日の流れを確認します。
+                  </div>
+                  <div class="timeline-box">
+                    <div class="day sans">3〜7日</div>
+                    施設見学・体験利用を実施。ご本人の希望や体調面も丁寧にヒアリングします。
+                  </div>
+                </div>
+                <div class="timeline-center">
+                  <div class="timeline-badge sans">利用開始<br>までの<br>目安</div>
+                </div>
+                <div class="timeline-col">
+                  <div class="timeline-box">
+                    <div class="day sans">8〜14日</div>
+                    必要に応じて自治体手続きや受給者証の確認を進めます。
+                  </div>
+                  <div class="timeline-box">
+                    <div class="day sans">約2〜3週間</div>
+                    利用開始日を調整し、通所ペースや支援計画を一緒に作成します。
+                  </div>
+                  <div class="timeline-box">
+                    <div class="day sans">START</div>
+                    無理のないスケジュールで通所スタート。定着に向けた面談も継続します。
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq section reveal" id="faq">
+      <div class="topline"></div>
+      <div class="container">
+        <div class="faq-header">
+          <div class="eyebrow sans">FAQ<span>よくある質問</span></div>
+          <div class="faq-list">
+            <div class="faq-item open">
+              <button class="faq-q sans">見学だけでも申し込めますか？ <span>＋</span></button>
+              <div class="faq-a"><p>はい、見学のみでも歓迎しています。利用を前提にしていなくても、雰囲気を知りたい段階でお気軽にお越しください。</p></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-q sans">ひとりで行くのが不安です。家族と一緒でも大丈夫ですか？ <span>＋</span></button>
+              <div class="faq-a"><p>もちろん可能です。ご家族や支援員の方と一緒にご来所いただくケースも多く、安心してご相談いただけます。</p></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-q sans">利用までに必要な手続きはありますか？ <span>＋</span></button>
+              <div class="faq-a"><p>自治体での申請や受給者証の確認が必要になる場合があります。状況に応じて、スタッフが手順をわかりやすくご説明します。</p></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-q sans">体調に波があっても利用できますか？ <span>＋</span></button>
+              <div class="faq-a"><p>はい。通所日数や時間を調整しながら、無理のない範囲でスタートできます。まずは現在の状況をお聞かせください。</p></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-q sans">どんな作業や訓練がありますか？ <span>＋</span></button>
+              <div class="faq-a"><p>軽作業、梱包、PC作業、コミュニケーション支援などがあります。事業所ごとの内容は見学時に詳しくご紹介します。</p></div>
+            </div>
+          </div>
+          <div class="faq-icon"></div>
+        </div>
+        <div class="faq-more">
+          <a href="#contact" class="btn sans">すべて見る →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="voice section reveal">
+      <div class="container">
+        <div class="eyebrow sans">Voice<span>利用者さまの声</span></div>
+        <div class="voice-row">
+          <article class="voice-card">
+            <div class="voice-ico">
+              <img src="http://127.0.0.1:5000/uploads/up_4648a670eb.png" alt="利用者の声の人物イラスト" width="88" height="88" onerror="this.style.display='none'">
+            </div>
+            <h4>相談しやすい雰囲気でした</h4>
+            <p>初めての見学で緊張しましたが、スタッフの方が穏やかに話を聞いてくれて安心しました。ひとつずつ整理できたのが大きかったです。</p>
+          </article>
+          <article class="voice-card">
+            <div class="voice-ico">
+              <img src="http://127.0.0.1:5000/uploads/up_a8223805df.png" alt="女性イラスト" width="88" height="88" onerror="this.style.display='none'">
+            </div>
+            <h4>無理なく始められました</h4>
+            <p>最初は週に数日からの通所でした。体調に合わせて調整してもらえたので、焦らず続けられています。</p>
+          </article>
+          <article class="voice-card">
+            <div class="voice-ico">
+              <img src="http://127.0.0.1:5000/uploads/up_1d9bb593f4.png" alt="男性イラスト肖像" width="88" height="88" onerror="this.style.display='none'">
+            </div>
+            <h4>作業体験が役立ちました</h4>
+            <p>実際にやってみて、自分に合う作業が見えました。PCだけでなく軽作業も体験できたのがよかったです。</p>
+          </article>
+          <article class="voice-card">
+            <div class="voice-ico">
+              <img src="http://127.0.0.1:5000/uploads/up_6823dd700c.png" alt="笑顔の男性イラスト" width="88" height="88" onerror="this.style.display='none'">
+            </div>
+            <h4>就職に向けて前向きになれた</h4>
+            <p>生活リズムが整ってきて、少しずつ将来を考えられるようになりました。小さな変化を一緒に喜んでくれる場所です。</p>
+          </article>
+          <article class="voice-card">
+            <div class="voice-ico">
+              <img src="http://127.0.0.1:5000/uploads/up_d047f3036e.png" alt="迷いがあることを伝える男性イラスト" width="88" height="88" onerror="this.style.display='none'">
+            </div>
+            <h4>迷っている段階でも大丈夫でした</h4>
+            <p>まだ利用するか決めきれていない状態でも丁寧に案内してもらえました。押しつけ感がなく、安心して考えられました。</p>
+          </article>
+        </div>
+        <div class="voice-nav">
+          <span class="dot"></span>
+          <span class="dot active"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band-wrap section reveal">
+      <div class="container">
+        <div class="cta-band">
+          <h3 class="sans">リンクワークスで、<br>次の一歩を一緒に整える。</h3>
+          <div class="cta-form">
+            <div>
+              <small class="sans">見学予約・資料請求・利用相談など、<br>気になることをお気軽にお送りください。</small>
+            </div>
+            <a href="#" class="btn sans" style="background:#1ec741">LINEで予約する</a>
+          </div>
+          <div class="cta-bubble sans">相談無料<br>いつでも受付中</div>
+          <div class="cta-person">
+            <div class="imgbox" style="background:linear-gradient(180deg,#d3edf9,#fff)">
+              <img src="http://127.0.0.1:5000/uploads/up_06aa20751a.png" alt="相談に応じる女性スタッフ" width="260" height="340" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="follow section reveal">
+      <div class="container">
+        <h3 class="sans">Follow us</h3>
+        <div class="sns">
+          <a href="#" aria-label="X" class="sans">𝕏</a>
+          <a href="#" aria-label="Instagram" class="sans">◎</a>
+        </div>
+        <div class="footer-tagline">はたらくたび、前を向く。</div>
+        <div class="footer-title">THE LINKWORKS GUIDE</div>
+        <div class="footer-nav sans">
+          <a href="#">運営会社</a>
+          <a href="#">事業所一覧</a>
+          <a href="#">プライバシーポリシー</a>
+          <a href="#">お問い合わせ</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const els = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach((entry)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('visible');
+          const kids = entry.target.querySelectorAll('.service-item,.phone-card,.flow-item,.timeline-box,.voice-card,.faq-item');
+          kids.forEach((el,i)=>{
+            el.style.transitionDelay = (i * 70) + 'ms';
+            el.classList.add('visible');
+          });
+          io.unobserve(entry.target);
+        }
+      });
+    },{threshold:.14});
+    els.forEach(el=>io.observe(el));
+
+    document.querySelectorAll('.service-item,.phone-card,.flow-item,.timeline-box,.voice-card,.faq-item').forEach(el=>{
+      el.classList.add('reveal');
+    });
+
+    document.querySelectorAll('.faq-q').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const item = btn.parentElement;
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i], cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

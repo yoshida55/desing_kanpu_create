@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>就労継続支援事業所 あおば工房｜働くことを通じて、それぞれの「できる」を育てる</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #8ac75a;
+    --green-deep: #6fae3e;
+    --green-soft: rgba(138, 199, 90, 0.12);
+    --green-soft2: rgba(138, 199, 90, 0.22);
+    --ink: #333333;
+    --ink-soft: #5a6b5a;
+    --white: #ffffff;
+    --cream: #f7faf3;
+    --radius-lg: 32px;
+    --radius-sm: 2px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Zen Maru Gothic", sans-serif;
+    color: var(--ink);
+    background: var(--white);
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  a { text-decoration: none; color: inherit; }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(138, 199, 90, 0.18);
+    transition: all 0.3s ease;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    font-size: 20px;
+    color: var(--ink);
+  }
+  .logo-mark {
+    width: 38px;
+    height: 38px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+  }
+  .logo span { color: var(--green-deep); }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  .nav a {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    transition: color 0.3s ease;
+    position: relative;
+  }
+  .nav a:hover { color: var(--green-deep); }
+  .nav a::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--green);
+    transition: width 0.3s ease;
+  }
+  .nav a:hover::after { width: 100%; }
+
+  .btn-contact {
+    background: var(--green);
+    color: white !important;
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(138, 199, 90, 0.3);
+  }
+  .btn-contact:hover {
+    background: var(--green-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(138, 199, 90, 0.4);
+  }
+
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+  }
+  .menu-toggle span {
+    width: 24px;
+    height: 2px;
+    background: var(--ink);
+    transition: 0.3s;
+  }
+
+  /* ===== Hero ===== */
+  .hero {
+    padding: 140px 0 80px;
+    background: linear-gradient(180deg, var(--cream) 0%, #ffffff 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--green-soft) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+  }
+  .hero-text {
+    z-index: 2;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green-soft);
+    color: var(--green-deep);
+    padding: 8px 18px;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1.3;
+    color: var(--ink);
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+  }
+  .hero h1 .accent {
+    color: var(--green-deep);
+    position: relative;
+    display: inline-block;
+  }
+  .hero h1 .accent::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    width: 100%;
+    height: 12px;
+    background: var(--green-soft2);
+    z-index: -1;
+    border-radius: 4px;
+  }
+  .hero p {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-bottom: 32px;
+    line-height: 1.9;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--green);
+    color: white;
+    padding: 16px 36px;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 18px rgba(138, 199, 90, 0.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover {
+    background: var(--green-deep);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(138, 199, 90, 0.45);
+  }
+  .btn-secondary {
+    background: white;
+    color: var(--ink);
+    padding: 16px 36px;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 15px;
+    border: 2px solid var(--green-soft2);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-secondary:hover {
+    border-color: var(--green);
+    color: var(--green-deep);
+    transform: translateY(-3px);
+  }
+
+  .hero-visual {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: linear-gradient(135deg, var(--green-soft) 0%, #d4e8c4 100%);
+    box-shadow: 0 20px 60px rgba(138, 199, 90, 0.18);
+  }
+  .hero-visual img {
+    width: 100%;
+    height: 100%;
+  }
+  .hero-card {
+    position: absolute;
+    bottom: -20px;
+    left: -30px;
+    background: white;
+    padding: 18px 24px;
+    border-radius: 20px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 3;
+  }
+  .hero-card-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--green-soft);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+  .hero-card-text strong {
+    display: block;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .hero-card-text span {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--green-soft2);
+  }
+  .hero-stat strong {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--green-deep);
+    display: block;
+    line-height: 1;
+  }
+  .hero-stat span {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    display: block;
+  }
+
+  /* ===== Section Common ===== */
+  section { position: relative; }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--green-deep);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+  .section-label::before {
+    content: "";
+    width: 32px;
+    height: 2px;
+    background: var(--green);
+  }
+  .section-title {
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1.35;
+    color: var(--ink);
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
+  }
+  .section-title .accent { color: var(--green-deep); }
+  .section-lead {
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 640px;
+    line-height: 1.9;
+  }
+
+  /* ===== Greeting ===== */
+  .greeting {
+    padding: 100px 0;
+    background: var(--white);
+  }
+  .greeting-inner {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .greeting-visual {
+    position: relative;
+  }
+  .greeting-visual .main-img {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: linear-gradient(135deg, var(--green-soft) 0%, #c5dfa8 100%);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+  }
+  .greeting-visual .sub-img {
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    width: 180px;
+    height: 180px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--green);
+    border: 6px solid white;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  }
+  .greeting-content h2 {
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1.4;
+    margin-bottom: 28px;
+    color: var(--ink);
+  }
+  .greeting-content h2 .accent { color: var(--green-deep); }
+  .greeting-content p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 2;
+    margin-bottom: 20px;
+  }
+  .greeting-sign {
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--green-soft2);
+  }
+  .greeting-sign strong {
+    display: block;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .greeting-sign span {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  /* ===== Services ===== */
+  .services {
+    padding: 100px 0;
+    background: var(--cream);
+    position: relative;
+    overflow: hidden;
+  }
+  .services::before {
+    content: "";
+    position: absolute;
+    top: 10%;
+    left: -80px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--green-soft) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .services-header {
+    text-align: center;
+    margin-bottom: 72px;
+    position: relative;
+  }
+  .services-header .section-label {
+    justify-content: center;
+  }
+  .services-header .section-label::after {
+    content: "";
+    width: 32px;
+    height: 2px;
+    background: var(--green);
+  }
+  .services-header .section-lead {
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .service-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    margin-bottom: 100px;
+    position: relative;
+  }
+  .service-item:last-child { margin-bottom: 0; }
+  .service-item:nth-child(even) .service-visual {
+    order: 2;
+  }
+  .service-visual {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    aspect-ratio: 5 / 4;
+    background: linear-gradient(135deg, var(--green-soft) 0%, #d4e8c4 100%);
+    box-shadow: 0 16px 40px rgba(138, 199, 90, 0.15);
+  }
+  .service-visual::after {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: var(--green);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    z-index: 2;
+  }
+  .service-item:nth-child(1) .service-visual::after { content: "01 / 就労継続支援B型"; }
+  .service-item:nth-child(2) .service-visual::after { content: "02 / 就労継続支援A型"; }
+  .service-item:nth-child(3) .service-visual::after { content: "03 / 就労移行支援"; }
+
+  .service-content .section-label { margin-bottom: 16px; }
+  .service-content h3 {
+    font-size: 30px;
+    font-weight: 900;
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .service-content h3 .accent { color: var(--green-deep); }
+  .service-content p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 2;
+    margin-bottom: 24px;
+  }
+  .service-features {
+    list-style: none;
+    margin-bottom: 28px;
+  }
+  .service-features li {
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--green-soft2);
+    font-size: 14px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .service-features li::before {
+    content: "✓";
+    color: var(--green-deep);
+    font-weight: 900;
+    font-size: 16px;
+  }
+  .service-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--green-deep);
+    font-weight: 700;
+    font-size: 14px;
+    transition: gap 0.3s ease;
+  }
+  .service-link:hover { gap: 14px; }
+
+  /* ===== Day Flow ===== */
+  .dayflow {
+    padding: 100px 0;
+    background: var(--white);
+  }
+  .dayflow-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: end;
+    margin-bottom: 60px;
+  }
+  .dayflow-header .section-lead {
+    padding-bottom: 8px;
+  }
+
+  .dayflow-timeline {
+    position: relative;
+    padding-left: 0;
+  }
+  .dayflow-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 1fr;
+    gap: 40px;
+    padding: 32px 0;
+    border-bottom: 1px solid var(--green-soft2);
+    align-items: center;
+  }
+  .dayflow-row:last-child { border-bottom: none; }
+  .dayflow-time {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--green-deep);
+    line-height: 1;
+  }
+  .dayflow-time span {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+  .dayflow-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .dayflow-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .dayflow-img {
+    width: 100%;
+    height: 100px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--green-soft);
+  }
+
+  /* ===== Facility Gallery ===== */
+  .facility {
+    padding: 100px 0;
+    background: var(--cream);
+  }
+  .facility-header {
+    margin-bottom: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: end;
+  }
+  .facility-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 240px 240px;
+    gap: 20px;
+  }
+  .facility-item {
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, var(--green-soft) 0%, #c5dfa8 100%);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+  .facility-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(138, 199, 90, 0.25);
+  }
+  .facility-item img {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s ease;
+  }
+  .facility-item:hover img { transform: scale(1.06); }
+  .facility-item:first-child {
+    grid-row: span 2;
+  }
+  .facility-caption {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* ===== Voice ===== */
+  .voice {
+    padding: 100px 0;
+    background: var(--white);
+  }
+  .voice-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  .voice-header .section-label { justify-content: center; }
+  .voice-header .section-label::after {
+    content: "";
+    width: 32px;
+    height: 2px;
+    background: var(--green);
+  }
+  .voice-header .section-lead { margin: 0 auto; }
+
+  .voice-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 32px;
+  }
+  .voice-main {
+    background: var(--cream);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .voice-main::before {
+    content: """;
+    position: absolute;
+    top: -20px;
+    left: 24px;
+    font-size: 140px;
+    color: var(--green-soft2);
+    font-family: serif;
+    line-height: 1;
+  }
+  .voice-main-text {
+    position: relative;
+    z-index: 2;
+  }
+  .voice-main-text p {
+    font-size: 17px;
+    line-height: 2;
+    color: var(--ink);
+    margin-bottom: 28px;
+  }
+  .voice-main-person {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--green-soft2);
+  }
+  .voice-main-person .person-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--green-soft);
+    flex-shrink: 0;
+  }
+  .voice-main-person strong {
+    display: block;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .voice-main-person span {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .voice-side {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .voice-card {
+    background: var(--cream);
+    border-radius: 24px;
+    padding: 28px;
+    flex: 1;
+    transition: transform 0.3s ease;
+  }
+  .voice-card:hover { transform: translateY(-4px); }
+  .voice-card p {
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .voice-card-person {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .voice-card-person .person-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--green-soft);
+    flex-shrink: 0;
+  }
+  .voice-card-person strong {
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .voice-card-person span {
+    font-size: 11px;
+    color: var(--ink-soft);
+    display: block;
+  }
+
+  /* ===== Access ===== */
+  .access {
+    padding: 100px 0;
+    background: var(--cream);
+  }
+  .access-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: stretch;
+  }
+  .access-content {
+    padding: 20px 0;
+  }
+  .access-content h2 {
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1.4;
+    margin-bottom: 24px;
+    color: var(--ink);
+  }
+  .access-content h2 .accent { color: var(--green-deep); }
+  .access-content > p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.9;
+    margin-bottom: 36px;
+  }
+  .access-info {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 8px 24px rgba(138, 199, 90, 0.1);
+  }
+  .access-info-row {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px dashed var(--green-soft2);
+  }
+  .access-info-row:last-child { border-bottom: none; }
+  .access-info-row .label {
+    width: 80px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green-deep);
+  }
+  .access-info-row .value {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  .access-map {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--green-soft) 0%, #c5dfa8 100%);
+    min-height: 420px;
+    position: relative;
+    box-shadow: 0 16px 40px rgba(138, 199, 90, 0.15);
+  }
+  .access-map img { width: 100%; height: 100%; min-height: 420px; }
+
+  /* ===== Contact CTA ===== */
+  .cta {
+    padding: 100px 0;
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .cta::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+  .cta::after {
+    content: "";
+    position: absolute;
+    bottom: -100px;
+    left: -100px;
+    width: 350px;
+    height: 350px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+  }
+  .cta-inner {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+  .cta h2 {
+    font-size: 40px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+  .cta p {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 36px;
+    line-height: 1.9;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-white {
+    background: white;
+    color: var(--green-deep);
+    padding: 16px 40px;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-white:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  }
+  .btn-outline-white {
+    background: transparent;
+    color: white;
+    padding: 16px 40px;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-outline-white:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: white;
+    transform: translateY(-3px);
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    background: #2c3e2c;
+    color: white;
+    padding: 64px 0 32px;
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 48px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  .footer-logo .logo-mark {
+    background: var(--green);
+  }
+  .footer-info p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.9;
+    margin-bottom: 8px;
+  }
+  .footer-col h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--green);
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li {
+    margin-bottom: 12px;
+  }
+  .footer-col ul li a {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s ease;
+  }
+  .footer-col ul li a:hover { color: var(--green); }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* ===== Animations ===== */
+  @keyframes fadeInDown {
+    0% { opacity: 0; transform: translateY(-50px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInUP {
+    0% { opacity: 0; transform: translateY(50px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInRight {
+    0% { opacity: 0; transform: translateX(50px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeInLeft {
+    0% { opacity: 0; transform: translateX(-50px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeInScale {
+    0% { opacity: 0; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .hero-badge { animation: fadeInDown 0.8s ease 0.2s both; }
+  .hero h1 { animation: fadeInUP 1s ease 0.4s both; }
+  .hero p { animation: fadeInUP 1s ease 0.7s both; }
+  .hero-cta { animation: fadeInUP 1s ease 0.9s both; }
+  .hero-stats { animation: fadeInUP 1.2s ease 1.1s both; }
+  .hero-visual { animation: fadeInScale 1.2s ease 0.6s both; }
+  .hero-card { animation: fadeInLeft 1s ease 1.3s both; }
+
+  html.js .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  html.js .reveal.reveal-left { transform: translateX(-40px); }
+  html.js .reveal.reveal-right { transform: translateX(40px); }
+  html.js .reveal.reveal-scale { transform: scale(0.95); }
+  html.js .reveal.is-visible {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 900px) {
+    .nav { display: none; }
+    .menu-toggle { display: flex; }
+    .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+    .hero h1 { font-size: 34px; }
+    .hero-stats { gap: 24px; flex-wrap: wrap; }
+    .greeting-inner { grid-template-columns: 1fr; gap: 48px; }
+    .greeting-visual .sub-img { width: 120px; height: 120px; }
+    .service-item { grid-template-columns: 1fr; gap: 32px; margin-bottom: 60px; }
+    .service-item:nth-child(even) .service-visual { order: 0; }
+    .section-title { font-size: 28px; }
+    .dayflow-header { grid-template-columns: 1fr; gap: 20px; }
+    .dayflow-row { grid-template-columns: 1fr; gap: 12px; }
+    .dayflow-img { height: 140px; }
+    .facility-header { grid-template-columns: 1fr; gap: 20px; }
+    .facility-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 180px 180px 180px; }
+    .facility-item:first-child { grid-row: span 1; grid-column: span 2; }
+    .voice-grid { grid-template-columns: 1fr; }
+    .access-inner { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .cta h2 { font-size: 28px; }
+  }
+
+  @media (max-width: 560px) {
+    .container { padding: 0 16px; }
+    .hero { padding: 110px 0 60px; }
+    .hero h1 { font-size: 28px; }
+    .hero-card { left: 0; bottom: -10px; padding: 14px 18px; }
+    .section-title { font-size: 24px; }
+    .greeting-content h2 { font-size: 26px; }
+    .service-content h3 { font-size: 22px; }
+    .voice-main { padding: 32px 24px; }
+    .voice-main-text p { font-size: 15px; }
+    .footer-top { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark">葉</span>
+      あおば<span>工房</span>
+    </a>
+    <nav class="nav">
+      <a href="#about">私たちについて</a>
+      <a href="#services">事業内容</a>
+      <a href="#dayflow">1日の流れ</a>
+      <a href="#facility">施設の様子</a>
+      <a href="#voice">利用者の声</a>
+      <a href="#access">アクセス</a>
+      <a href="#contact" class="btn-contact">お問い合わせ</a>
+    </nav>
+    <div class="menu-toggle">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span>🌿</span> 就労継続支援事業所・仙台市青葉区
+        </div>
+        <h1>働くことを通じて、<br>それぞれの<span class="accent">「できる」</span>を<br>少しずつ育てる。</h1>
+        <p>あおば工房は、障がいのある方が自分のペースで働き、<br>生活のリズムと自信を一緒につくる場所です。<br>梱包・軽作業からPC作業まで、あなたに合った作業を見つけませんか。</p>
+        <div class="hero-cta">
+          <a href="#contact" class="btn-primary">見学・相談を予約する →</a>
+          <a href="#services" class="btn-secondary">事業内容を見る</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <strong>18年</strong>
+            <span>地域で積み重ねた支援実績</span>
+          </div>
+          <div class="hero-stat">
+            <strong>42名</strong>
+            <span>在籍するご利用者様</span>
+          </div>
+          <div class="hero-stat">
+            <strong>97%</strong>
+            <span>継続利用率（令和5年度）</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="就労支援事業所の明るい入口" onerror="this.style.display='none'">
+        <div class="hero-card">
+          <div class="hero-card-icon">📋</div>
+          <div class="hero-card-text">
+            <strong>まずは見学から</strong>
+            <span>お気軽にご相談ください</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Greeting -->
+<section class="greeting" id="about">
+  <div class="container">
+    <div class="greeting-inner">
+      <div class="greeting-visual reveal reveal-left">
+        <div class="main-img">
+          <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="女性相談員との穏やかな面談風景" onerror="this.style.display='none'">
+        </div>
+        <div class="sub-img">
+          <img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" alt="木漏れ日が心地よい並木道" onerror="this.style.display='none'">
+        </div>
+      </div>
+      <div class="greeting-content reveal reveal-right">
+        <div class="section-label">ごあいさつ</div>
+        <h2>「働きたい」という気持ちを、<br>あきらめないでください。<br><span class="accent">その気持ちが、はじまりです。</span></h2>
+        <p>あおば工房は、障がいのある方が「働く」という経験を通じて、社会とつながり、自分らしく生きることを応援する就労継続支援事業所です。</p>
+        <p>作業のスピードや量だけでなく、その人のペース、体調、気持ちに寄り添うことを大切にしています。できたことを認め合い、少しずつ自信を重ねていく。そんな日々を、スタッフ一同、一緒に歩んでいきます。</p>
+        <div class="greeting-sign">
+          <strong>代表理事 佐々木 美穂</strong>
+          <span>社会福祉士・精神保健福祉士</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="services" id="services">
+  <div class="container">
+    <div class="services-header reveal">
+      <div class="section-label">事業内容</div>
+      <h2 class="section-title">あなたの目標に合わせて、<br>3つの<span class="accent">支援のかたち</span>。</h2>
+      <p class="section-lead">就労に対するご本人の目標や体調に合わせて、B型・A型・移行支援の3つの事業を展開しています。まずは相談から、一緒に最適なかたちを見つけていきましょう。</p>
+    </div>
+
+    <!-- Service 1 -->
+    <div class="service-item">
+      <div class="service-visual reveal reveal-left">
+        <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="作業室で協力して梱包するスタッフ" onerror="this.style.display='none'">
+      </div>
+      <div class="service-content reveal reveal-right">
+        <div class="section-label">B型支援</div>
+        <h3>自分のペースで働き、<br><span class="accent">生活のリズム</span>をつくる。</h3>
+        <p>雇用契約を結ばず、自分のペースで作業に参加できる就労継続支援B型。体調や生活リズムに合わせて無理なく通所でき、作業を通じて社会参加の第一歩を支えます。</p>
+        <ul class="service-features">
+          <li>週1日・1時間〜の短時間から参加可能</li>
+          <li>梱包・検品・PC入力など多彩な作業メニュー</li>
+          <li>作業工程はスタッフが丁寧にサポート</li>
+          <li>工賃の向上を目指す個別支援計画を策定</li>
+        </ul>
+        <a href="#contact" class="service-link">詳しく見る →</a>
+      </div>
+    </div>
+
+    <!-- Service 2 -->
+    <div class="service-item">
+      <div class="service-visual reveal reveal-left">
+        <img src="http://127.0.0.1:5000/uploads/up_292cf87096.png" alt="和やかに打ち合わせる作業員" onerror="this.style.display='none'">
+      </div>
+      <div class="service-content reveal reveal-right">
+        <div class="section-label">A型支援</div>
+        <h3>雇用契約を結び、<br><span class="accent">働く自信</span>を深める。</h3>
+        <p>事業所と雇用契約を結び、一定の勤務時間を前提に働く就労継続支援A型。より一般的な就労に近いかたちで、責任とやりがいを持ちながら働く経験を積みます。</p>
+        <ul class="service-features">
+          <li>最低賃金を保証する雇用契約を締結</li>
+          <li>週20時間以上の勤務を目安に支援</li>
+          <li>一般就労への移行も視野に入れた個別支援</li>
+          <li>体調管理と相談支援を並行して実施</li>
+        </ul>
+        <a href="#contact" class="service-link">詳しく見る →</a>
+      </div>
+    </div>
+
+    <!-- Service 3 -->
+    <div class="service-item">
+      <div class="service-visual reveal reveal-left">
+        <img src="http://127.0.0.1:5000/uploads/up_3996f78e40.png" alt="明るい教室で学ぶ社会人たち" onerror="this.style.display='none'">
+      </div>
+      <div class="service-content reveal reveal-right">
+        <div class="section-label">移行支援</div>
+        <h3>一般就労に向けて、<br><span class="accent">スキルと自信</span>を育てる。</h3>
+        <p>一般企業での就労を目指す方を支援する就労移行支援。最大2年間、作業習慣の確立から職場実習、求職活動まで、専任スタッフが伴走します。</p>
+        <ul class="service-features">
+          <li>ビジネススキル・PC操作の基礎トレーニング</li>
+          <li>ハローワーク連携による求職活動サポート</li>
+          <li>職場実習を通じた就労経験の積み重ね</li>
+          <li>就労後も6ヶ月間の職場定着支援を実施</li>
+        </ul>
+        <a href="#contact" class="service-link">詳しく見る →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Day Flow -->
+<section class="dayflow" id="dayflow">
+  <div class="container">
+    <div class="dayflow-header reveal">
+      <div>
+        <div class="section-label">1日の流れ</div>
+        <h2 class="section-title">1日の流れ。<br>穏やかな<span class="accent">リズム</span>で。</h2>
+      </div>
+      <p class="section-lead">朝の挨拶から終業のミーティングまで、ご利用者様の体調に合わせた無理のないスケジュールで1日を過ごします。休憩やランチタイムも、スタッフと一緒に楽しく。</p>
+    </div>
+
+    <div class="dayflow-timeline">
+      <div class="dayflow-row reveal">
+        <div class="dayflow-time">9:30<span>朝の準備</span></div>
+        <div>
+          <div class="dayflow-title">出勤・バイタルチェック・朝の会</div>
+          <div class="dayflow-desc">体調を確認し、その日の作業スケジュールを共有。季節の話題や今日の目標を話します。</div>
+        </div>
+        <div class="dayflow-img">
+          <img src="http://127.0.0.1:5000/uploads/up_598a02d7d4.png" alt="明るいオフィスで談笑する社員たち" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <div class="dayflow-row reveal">
+        <div class="dayflow-time">10:00<span>午前の作業</span></div>
+        <div>
+          <div class="dayflow-title">作業スタート（90分×2）</div>
+          <div class="dayflow-desc">梱包・検品・PC作業など、その日のメニューに取り組みます。15分の休憩を挟んでリフレッシュ。</div>
+        </div>
+        <div class="dayflow-img">
+          <img src="http://127.0.0.1:5000/uploads/up_c6acf60a50.jpg" alt="マスク姿で検品・封入作業に取り組むスタッフ" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <div class="dayflow-row reveal">
+        <div class="dayflow-time">12:00<span>ランチタイム</span></div>
+        <div>
+          <div class="dayflow-title">お昼休憩（60分）</div>
+          <div class="dayflow-desc">希望者はみんなでランチ。一人で過ごす方も、スタッフが気にかけて声をかけます。</div>
+        </div>
+        <div class="dayflow-img">
+          <img src="http://127.0.0.1:5000/uploads/up_889764147f.webp" alt="オフィスでヘルシーなお弁当と緑茶でランチ休憩" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <div class="dayflow-row reveal">
+        <div class="dayflow-time">13:00<span>午後の作業</span></div>
+        <div>
+          <div class="dayflow-title">午後の作業スタート（90分×2）</div>
+          <div class="dayflow-desc">午前とは違う作業メニューに挑戦。集中しやすいよう、作業環境や道具の工夫も行っています。</div>
+        </div>
+        <div class="dayflow-img">
+          <img src="http://127.0.0.1:5000/uploads/up_22a345d107.png" alt="ノートPCで作業する穏やかな男性" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <div class="dayflow-row reveal">
+        <div class="dayflow-time">15:45<span>終業ミーティング</span></div>
+        <div>
+          <div class="dayflow-title">片付け・終業の会・退勤</div>
+          <div class="dayflow-desc">1日の振り返りと、明日の予定を共有。「今日も頑張ったね」の声をかけてお見送りします。</div>
+        </div>
+        <div class="dayflow-img">
+          <img src="http://127.0.0.1:5000/uploads/up_5c62bc58f1.png" alt="オフィスで一礼するスタッフたち" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Facility Gallery -->
+<section class="facility" id="facility">
+  <div class="container">
+    <div class="facility-header reveal">
+      <div>
+        <div class="section-label">施設の様子</div>
+        <h2 class="section-title">明るく穏やかな<span class="accent">空間</span>で、<br>安心して過ごせます。</h2>
+      </div>
+      <p class="section-lead">青葉区の閑静な住宅街にある事業所は、自然光が届く明るい作業スペースと、ゆっくり話せる相談室を備えています。見学は随時受付中です。</p>
+    </div>
+
+    <div class="facility-grid">
+      <div class="facility-item reveal reveal-scale">
+        <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" alt="明るく整ったオフィス空間" onerror="this.style.display='none'">
+        <div class="facility-caption">メイン作業スペース</div>
+      </div>
+      <div class="facility-item reveal reveal-scale">
+        <img src="http://127.0.0.1:5000/uploads/up_f986e18b07.png" alt="清潔感のあるシンプルで明るいミーティングルーム" onerror="this.style.display='none'">
+        <div class="facility-caption">相談室</div>
+      </div>
+      <div class="facility-item reveal reveal-scale">
+        <img src="http://127.0.0.1:5000/uploads/up_5ad70dab05.png" alt="明るい室内に並ぶ観葉植物" onerror="this.style.display='none'">
+        <div class="facility-caption">憩いのスペース</div>
+      </div>
+      <div class="facility-item reveal reveal-scale">
+        <img src="http://127.0.0.1:5000/uploads/up_d2ba1e1955.png" alt="整理整頓された明るく清潔感のある作業場" onerror="this.style.display='none'">
+        <div class="facility-caption">検品・梱包作業場</div>
+      </div>
+      <div class="facility-item reveal reveal-scale">
+        <img src="http://127.0.0.1:5000/uploads/up_e8aad4874e.png" alt="明るいオフィスでマグカップと観葉植物が置かれたデスク" onerror="this.style.display='none'">
+        <div class="facility-caption">PC作業エリア</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Voice -->
+<section class="voice" id="voice">
+  <div class="container">
+    <div class="voice-header reveal">
+      <div class="section-label">利用者の声</div>
+      <h2 class="section-title">ご利用者様の<span class="accent">声</span></h2>
+      <p class="section-lead">あおば工房に通う皆さんの、等身大の思いをお届けします。</p>
+    </div>
+
+    <div class="voice-grid">
+      <div class="voice-main reveal reveal-left">
+        <div class="voice-main-text">
+          <p>通い始めて2年が経ちます。最初は人と会うのも苦手で、1時間作業するだけで疲れ果てていました。でも、スタッフの方が「できたこと」を毎日見つけて声をかけてくれて、少しずつ自信が持てるようになりました。今では週4日、午前中しっかり働けています。何より、自分のペースを尊重してもらえるところが嬉しいです。</p>
+          <div class="voice-main-person">
+            <div class="person-img">
+              <img src="http://127.0.0.1:5000/uploads/up_7baf91717c.png" alt="相談者に優しく微笑みかける女性スタッフ" onerror="this.style.display='none'">
+            </div>
+            <div>
+              <strong>K.Mさん（30代・B型利用）</strong>
+              <span>通所歴：2年3ヶ月</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="voice-side">
+        <div class="voice-card reveal reveal-right">
+          <p>「作業がんばったね」の一言が毎日もらえる。それが私の励みです。家にいるだけだった頃とは全然違う毎日が送れています。</p>
+          <div class="voice-card-person">
+            <div class="person-img">
+              <img src="http://127.0.0.1:5000/uploads/up_8d5c4c2acf.png" alt="柔らかい水彩タッチで描かれた親身に相談に乗る女性スタッフ" onerror="this.style.display='none'">
+            </div>
+            <div>
+              <strong>T.Sさん（40代）</strong>
+              <span>B型利用・通所歴1年</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-card reveal reveal-right">
+          <p>一般就労を目指して移行支援を利用中。面接の練習から書類作成まで、親身に付き合ってもらえています。ここに来てよかった。</p>
+          <div class="voice-card-person">
+            <div class="person-img">
+              <img src="http://127.0.0.1:5000/uploads/up_d1fcb324e1.png" alt="親身に相談に応じる女性スタッフの優しい水彩風イラスト" onerror="this.style.display='none'">
+            </div>
+            <div>
+              <strong>R.Yさん（20代）</strong>
+              <span>移行支援・利用歴8ヶ月</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Access -->
+<section class="access" id="access">
+  <div class="container">
+    <div class="access-inner">
+      <div class="access-content reveal reveal-left">
+        <div class="section-label">アクセス</div>
+        <h2>仙台市青葉区、<br><span class="accent">閑静な住宅街</span>にあります。</h2>
+        <p>地下鉄「旭ヶ丘」駅から徒歩8分。バス停「あおば工房前」すぐ。駐車場も3台分ご用意していますので、お車でのご見学も可能です。</p>
+        <div class="access-info">
+          <div class="access-info-row">
+            <div class="label">所在地</div>
+            <div class="value">〒981-0933<br>宮城県仙台市青葉区桜ヶ丘5丁目12-8</div>
+          </div>
+          <div class="access-info-row">
+            <div class="label">電話</div>
+            <div class="value">022-278-4567（平日 9:00〜17:00）</div>
+          </div>
+          <div class="access-info-row">
+            <div class="label">FAX</div>
+            <div class="value">022-278-4568</div>
+          </div>
+          <div class="access-info-row">
+            <div class="label">営業日</div>
+            <div class="value">月曜〜金曜（土日・祝日・年末年始休み）</div>
+          </div>
+          <div class="access-info-row">
+            <div class="label">最寄り駅</div>
+            <div class="value">地下鉄南北線「旭ヶ丘」駅 徒歩8分</div>
+          </div>
+        </div>
+      </div>
+      <div class="access-map reveal reveal-right">
+        <img src="https://picsum.photos/seed/aobaworkshop-map/800/600" alt="あおば工房 周辺マップ" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <div class="container">
+    <div class="cta-inner reveal">
+      <h2>まずは、見学から。<br>あなたのペースで、一歩ずつ。</h2>
+      <p>見学・体験利用は随時受付中です。<br>お電話・メールフォーム、どちらでもお気軽にご連絡ください。</p>
+      <div class="cta-buttons">
+        <a href="tel:0222784567" class="btn-white">📞 022-278-4567</a>
+        <a href="#" class="btn-outline-white">お問い合わせフォーム →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-info">
+        <div class="footer-logo">
+          <span class="logo-mark">葉</span>
+          あおば工房
+        </div>
+        <p>就労継続支援事業所B型・A型</p>
+        <p>就労移行支援事業所</p>
+        <p>〒981-0933 宮城県仙台市青葉区桜ヶ丘5丁目12-8</p>
+        <p>TEL. 022-278-4567 / FAX. 022-278-4568</p>
+      </div>
+      <div class="footer-col">
+        <h4>事業案内</h4>
+        <ul>
+          <li><a href="#services">就労継続支援B型</a></li>
+          <li><a href="#services">就労継続支援A型</a></li>
+          <li><a href="#services">就労移行支援</a></li>
+          <li><a href="#dayflow">1日の流れ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>ご利用にあたって</h4>
+        <ul>
+          <li><a href="#about">ご利用までの流れ</a></li>
+          <li><a href="#about">受給者証の申請</a></li>
+          <li><a href="#voice">利用者の声</a></li>
+          <li><a href="#access">アクセス</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>お問い合わせ</h4>
+        <ul>
+          <li><a href="#contact">見学のご予約</a></li>
+          <li><a href="#contact">資料請求</a></li>
+          <li><a href="#contact">よくあるご質問</a></li>
+          <li><a href="#">プライバシーポリシー</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 あおば工房. All Rights Reserved.</p>
+      <p>社会福祉法人 あおば福祉会</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // JS有効化（reveal用）
+  document.documentElement.classList.add('js');
+
+  // Scroll reveal with IntersectionObserver
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        // 複数要素のstagger
+        const delay = entry.target.dataset.delay || (i % 5) * 80;
+        setTimeout(() => {
+          entry.target.classList.add('is-visible');
+        }, delay);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.12,
+    rootMargin: '0px 0px -50px 0px'
+  });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // ヘッダースクロール時の変化
+  const header = document.querySelector('.header');
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > 50) {
+      header.style.boxShadow = '0 4px 20px rgba(138, 199, 90, 0.1)';
+    } else {
+      header.style.boxShadow = 'none';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // モバイルメニュー（簡易）
+  const menuToggle = document.querySelector('.menu-toggle');
+  const nav = document.querySelector('.nav');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+      nav.style.display = (nav.style.display === 'flex') ? 'none' : 'flex';
+      nav.style.position = 'absolute';
+      nav.style.top = '70px';
+      nav.style.left = '0';
+      nav.style.right = '0';
+      nav.style.flexDirection = 'column';
+      nav.style.background = 'white';
+      nav.style.padding = '24px';
+      nav.style.gap = '16px';
+      nav.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+    });
+  }
+</script>
+
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<script>document.documentElement.classList.add('js');</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>リンクワークス青空｜就労継続支援A型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#008ed8;
+  --blue-90:rgba(4,143,216,.9);
+  --navy:#0a273f;
+  --pale:#eef5f8;
+  --white:#fff;
+  --line:#dbe9ef;
+  --muted:#6a8293;
+  --radius:15px;
+  --radius-sm:3px;
+  --container:1240px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:"Noto Sans JP",sans-serif;
+  color:var(--navy);
+  background:#fff;
+  letter-spacing:.02em;
+  line-height:1.9;
+}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{font:inherit}
+.container{width:min(var(--container),calc(100% - 72px));margin-inline:auto}
+.en{
+  display:block;
+  color:var(--blue);
+  font-weight:900;
+  font-size:40px;
+  line-height:1;
+  letter-spacing:.03em;
+}
+.ja{
+  display:block;
+  margin-top:8px;
+  font-size:16px;
+  font-weight:700;
+}
+.lead{
+  font-size:16px;
+  line-height:2.35;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  min-width:180px;
+  height:48px;
+  padding:0 24px;
+  border-radius:999px;
+  background:var(--pale);
+  color:var(--blue);
+  font-weight:800;
+  font-size:14px;
+  transition:transform .35s ease, background .35s ease, color .35s ease;
+}
+.btn .arrow,
+.circle-arrow{
+  width:28px;height:28px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#fff;color:var(--blue);
+  flex:0 0 auto;
+  transition:transform .35s ease, background .35s ease, color .35s ease;
+}
+.btn:hover{transform:translateY(-3px);background:var(--blue);color:#fff}
+.btn:hover .arrow{transform:translateX(4px);background:#fff;color:var(--blue)}
+.small-link{
+  display:inline-flex;align-items:center;gap:12px;
+  color:var(--blue);font-weight:800;font-size:14px;
+}
+.small-link:hover .circle-arrow{transform:translateX(5px)}
+.image-bg{background:var(--pale)}
+.card{
+  background:#fff;border-radius:var(--radius);overflow:hidden;
+  border:1px solid rgba(10,39,63,.07);
+  transition:transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 18px 34px rgba(10,39,63,.08);
+  border-color:rgba(0,142,216,.2);
+}
+.external{font-size:11px;color:var(--blue);margin-left:4px}
+.header-logo{
+  position:absolute;z-index:30;left:28px;top:24px;
+  display:flex;align-items:center;gap:10px;
+  color:var(--navy);font-weight:900;line-height:1.05;
+  animation:fadeIn .9s ease both .1s;
+}
+.logo-mark{
+  width:31px;height:31px;border-radius:8px 8px 3px 8px;
+  background:linear-gradient(135deg,#68c9ef 0%,var(--blue) 70%);
+  position:relative;flex:0 0 auto;
+}
+.logo-mark:after{
+  content:"";position:absolute;right:5px;bottom:5px;width:10px;height:10px;
+  border-radius:50%;background:#fff;
+}
+.header-logo small{display:block;font-size:10px;letter-spacing:.08em;color:var(--blue)}
+.header-logo strong{font-size:22px;letter-spacing:.01em}
+.menu-button{
+  position:fixed;right:24px;top:18px;z-index:60;
+  width:58px;height:58px;border:0;border-radius:50%;
+  background:var(--blue);color:#fff;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;box-shadow:0 8px 20px rgba(0,142,216,.22);
+  transition:transform .3s ease, background .3s ease;
+}
+.menu-button:hover{transform:scale(1.06);background:#007bc0}
+.menu-button span{width:18px;height:2px;background:#fff;border-radius:4px}
+.menu-button em{font-style:normal;font-size:10px;font-weight:800;line-height:1;margin-top:1px}
+.drawer{
+  position:fixed;z-index:55;right:24px;top:88px;width:min(360px,calc(100% - 48px));
+  padding:26px;border-radius:15px;background:rgba(255,255,255,.96);
+  border:1px solid rgba(0,142,216,.12);
+  box-shadow:0 18px 50px rgba(10,39,63,.13);
+  transform:translateX(28px);opacity:0;pointer-events:none;
+  transition:.35s ease;
+}
+.drawer.is-open{transform:translateX(0);opacity:1;pointer-events:auto}
+.drawer a{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 0;border-bottom:1px solid var(--line);
+  font-weight:800;color:var(--navy)
+}
+.drawer a span{color:var(--blue);font-size:12px}
+.hero{
+  position:relative;min-height:760px;height:78vh;overflow:hidden;background:var(--pale);
+}
+.hero__media{
+  position:absolute;inset:0;background:var(--blue);
+}
+.hero__media img{
+  width:100%;height:100%;object-fit:cover;aspect-ratio:1800/980;
+  filter:saturate(1.05) contrast(1.03);
+  animation:zoomIn 1.35s cubic-bezier(.2,.8,.2,1) both;
+}
+.hero__media:after{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(90deg,rgba(238,245,248,.28),rgba(255,255,255,0) 45%),
+    linear-gradient(0deg,rgba(10,39,63,.16),rgba(10,39,63,0) 44%);
+}
+.hero__copy{
+  position:absolute;left:0;bottom:165px;z-index:3;
+  padding-left:max(28px,calc((100vw - var(--container))/2));
+}
+.hero__tag{
+  display:inline-block;
+  transform:rotate(-4deg);
+  animation:slideIn .9s cubic-bezier(.16,1,.3,1) both .22s;
+}
+.hero__tag span{
+  display:block;width:max-content;
+  margin-top:-4px;padding:6px 18px 10px;
+  background:#fff;color:#111;font-weight:900;
+  font-size:clamp(42px,6vw,82px);line-height:1.03;
+  letter-spacing:.02em;
+  box-shadow:10px 10px 0 rgba(0,142,216,.78);
+}
+.hero__sub{
+  margin-top:30px;color:#fff;font-weight:800;font-size:18px;
+  text-shadow:0 2px 16px rgba(10,39,63,.5);
+  animation:fadeIn .8s ease both .85s;
+}
+.hero-news{
+  position:absolute;z-index:5;right:0;bottom:0;
+  width:min(690px,calc(100% - 320px));height:64px;
+  background:var(--blue-90);color:#fff;border-radius:15px 0 0 0;
+  display:flex;align-items:center;gap:24px;padding:0 26px;
+  animation:fadeUp .7s ease both 1s;
+}
+.hero-news b{font-size:14px;letter-spacing:.08em}
+.hero-news time{font-size:11px;font-weight:800;opacity:.85}
+.hero-news p{margin:0;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.hero-news a{
+  border:1px solid rgba(255,255,255,.75);border-radius:3px;
+  padding:4px 12px;font-size:12px;font-weight:800;transition:.25s
+}
+.hero-news a:hover{background:#fff;color:var(--blue)}
+.vision-blank{
+  height:620px;display:flex;align-items:flex-start;justify-content:center;
+  padding-top:160px;background:#fff;position:relative;
+}
+.vision-blank:before{
+  content:"VISION2030";font-size:58px;letter-spacing:.08em;
+  font-weight:900;color:rgba(238,245,248,.45);
+}
+.news-section{
+  position:relative;background:#fff;padding:0 0 0;
+}
+.news-wrap{
+  width:100%;display:grid;grid-template-columns:minmax(260px,32vw) 1fr;
+  min-height:670px;
+}
+.news-side{
+  background:var(--blue);color:#fff;padding-top:96px;
+  padding-left:max(50px,calc((100vw - var(--container))/2));
+}
+.news-side .en{color:#fff;font-size:36px}
+.news-side .ja{font-size:14px;color:#fff;font-weight:500}
+.news-side .side-link{
+  margin-top:50px;display:inline-flex;align-items:center;gap:16px;font-weight:800;font-size:13px;
+}
+.news-side .side-link i{
+  width:42px;height:42px;border-radius:50%;background:#fff;color:var(--blue);
+  display:inline-flex;align-items:center;justify-content:center;font-style:normal;
+}
+.news-main{
+  background:#fff;border-radius:15px 0 0 0;
+  margin-top:118px;margin-left:-1px;
+  padding:56px max(50px,calc((100vw - var(--container))/2)) 70px 88px;
+}
+.tabs{display:flex;gap:12px;justify-content:flex-end;margin-bottom:38px}
+.tab{
+  width:124px;height:54px;border:0;background:var(--pale);
+  color:var(--navy);font-weight:800;font-size:12px;border-radius:3px;cursor:pointer;
+  transition:.3s ease;
+}
+.tab.is-active,.tab:hover{background:var(--blue);color:#fff}
+.news-list{margin:0;padding:0;list-style:none}
+.news-list li{
+  display:grid;grid-template-columns:112px 116px 1fr;gap:20px;
+  align-items:center;padding:18px 0;border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+.news-cat{
+  display:inline-flex;align-items:center;justify-content:center;height:24px;
+  border-radius:3px;background:#77d7df;color:#fff;font-size:10px;font-weight:800;
+}
+.news-cat.yellow{background:#f0c86e}
+.news-list time{color:var(--blue);font-size:11px;font-weight:900}
+.pickup{
+  background:var(--pale);padding:72px 0 88px;
+}
+.pickup-grid{
+  margin-top:36px;display:grid;grid-template-columns:repeat(4,1fr);gap:44px 30px;
+}
+.pick-card img{
+  width:100%;height:auto;aspect-ratio:260/142;object-fit:cover;border-radius:10px;
+}
+.pick-card h3{
+  margin:16px 0 8px;font-size:15px;line-height:1.55;
+}
+.pick-card p{margin:0;font-size:12px;line-height:2;color:#31495a}
+.company{
+  padding:92px 0 78px;background:#fff;
+}
+.company-lead{
+  display:grid;grid-template-columns:1fr 450px;gap:86px;align-items:center;
+}
+.company h2{
+  margin:26px 0 28px;font-size:35px;line-height:1.55;color:#06406c;
+}
+.company-visual{
+  border-radius:15px;background:var(--pale);overflow:hidden;
+}
+.company-visual img{width:100%;aspect-ratio:450/330;object-fit:cover}
+.icon-row{
+  margin-top:74px;display:grid;grid-template-columns:repeat(6,1fr);
+  border-left:1px solid var(--line);
+}
+.icon-item{
+  min-height:132px;padding:0 24px;border-right:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:14px;
+}
+.icon-item svg{width:48px;height:48px;stroke:var(--blue);fill:none;stroke-width:1.8}
+.icon-item b{font-size:13px;line-height:1.45}
+.icon-item:hover .circle-arrow{transform:translateX(5px)}
+.business{
+  position:relative;padding:10px 0 102px;background:#fff;overflow:hidden;
+}
+.business:after{
+  content:"A";position:absolute;right:8%;bottom:-170px;
+  font-size:520px;line-height:1;font-weight:900;color:rgba(238,245,248,.9);
+  z-index:0;pointer-events:none;
+}
+.business .container{position:relative;z-index:1}
+.business .lead{max-width:650px;margin-top:28px}
+.business-grid{
+  margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+}
+.biz-card img{width:100%;aspect-ratio:380/210;object-fit:cover}
+.biz-card__body{padding:22px 24px 26px}
+.biz-card h3{margin:0 0 12px;font-size:20px}
+.topic{
+  border-top:2px solid var(--line);padding-top:10px;
+  font-size:12px;line-height:1.8;color:#334b5c
+}
+.topic b{display:block;color:var(--blue);font-size:10px;letter-spacing:.08em}
+.message{
+  background:var(--pale);display:grid;grid-template-columns:1fr 1fr;align-items:center;
+}
+.message-img{height:520px;background:var(--pale);overflow:hidden}
+.message-img img{width:100%;height:100%;object-fit:cover;aspect-ratio:760/520}
+.message-text{
+  padding:76px max(50px,calc((100vw - var(--container))/2)) 76px 86px;
+}
+.message-text h2{
+  margin:26px 0 32px;font-size:33px;line-height:1.75;color:#06406c;
+}
+.sustainability{
+  padding:90px 0 0;background:#fff;
+}
+.sus-head{
+  display:grid;grid-template-columns:1fr 430px;gap:80px;align-items:start;
+}
+.sus-head .lead{margin-top:34px}
+.goal-grid{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:10px;
+}
+.goal{
+  aspect-ratio:1/1;border-radius:3px;color:#fff;padding:6px;font-weight:900;
+  display:flex;flex-direction:column;justify-content:space-between;font-size:10px;line-height:1.2;
+}
+.goal strong{font-size:20px;line-height:1}
+.goal:nth-child(1){background:#df3347}.goal:nth-child(2){background:#d7a627}
+.goal:nth-child(3){background:#279b4d}.goal:nth-child(4){background:#c53833}
+.goal:nth-child(5){background:#e64b31}.goal:nth-child(6){background:#20a6d5}
+.goal:nth-child(7){background:#f3bd22}.goal:nth-child(8){background:#9f1f43}
+.goal:nth-child(9){background:#ef6d2f}.goal:nth-child(10){background:#d13f82}
+.goal:nth-child(11){background:#f2a52c}.goal:nth-child(12){background:#c7922d}
+.goal:nth-child(13){background:#498b3d}.goal:nth-child(14){background:#157eb7}
+.goal:nth-child(15){background:#5aa047}.goal:nth-child(16){background:#166097}
+.goal:nth-child(17){background:#234b7a}.goal:nth-child(18){background:#00a0d2}
+.sus-cards{
+  margin-top:54px;display:grid;grid-template-columns:repeat(4,1fr);gap:36px;
+}
+.sus-mini{padding-bottom:18px}
+.sus-mini img{width:100%;aspect-ratio:240/118;object-fit:cover;border-radius:10px}
+.sus-mini h3{
+  min-height:52px;margin:15px 0 0;font-size:14px;line-height:1.55;
+  display:flex;justify-content:space-between;gap:10px;align-items:flex-end;
+}
+.initiatives{
+  margin-top:66px;padding-bottom:0;position:relative;
+  background:linear-gradient(0deg,rgba(238,245,248,.72),rgba(238,245,248,0));
+}
+.initiatives h3{color:var(--blue);font-size:24px;margin:0 0 22px}
+.initiative-bg{
+  position:absolute;left:0;right:0;bottom:0;height:260px;background:var(--pale);overflow:hidden;z-index:0;
+}
+.initiative-bg img{
+  width:100%;height:100%;object-fit:cover;aspect-ratio:1800/360;opacity:.42;filter:saturate(.85);
+}
+.initiative-grid{
+  position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+}
+.init-card{
+  overflow:hidden;background:#fff;border-right:1px solid #fff;
+}
+.init-card img{width:100%;aspect-ratio:414/220;object-fit:cover}
+.init-body{
+  min-height:70px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  font-weight:800;font-size:14px;background:rgba(255,255,255,.96);
+}
+.init-no{
+  position:absolute;margin:12px;color:#fff;font-weight:900;font-size:13px;text-shadow:0 2px 10px rgba(10,39,63,.35)
+}
+.init-no b{display:block;font-size:28px;line-height:1}
+.ir-recruit{
+  padding:82px 0 80px;background:#fff;
+}
+.two-col{
+  width:min(960px,calc(100% - 72px));margin-inline:auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:34px;
+}
+.panel-title{
+  display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;
+}
+.panel-title .en{font-size:31px}
+.info-card img{width:100%;aspect-ratio:410/170;object-fit:cover}
+.info-body{padding:28px 32px 34px}
+.info-body h3{margin:0 0 18px;font-size:19px}
+.ir-list{list-style:none;margin:0;padding:0}
+.ir-list li{margin-bottom:15px;font-size:13px;line-height:1.7}
+.ir-list b{display:block;color:var(--blue);font-size:14px}
+.recruit-card{text-align:center;padding-bottom:28px}
+.recruit-card img{width:100%;aspect-ratio:410/170;object-fit:cover}
+.recruit-copy{
+  display:inline-block;margin:24px auto 20px;
+  font-size:42px;font-weight:900;line-height:1.5;letter-spacing:.13em;color:#111;
+}
+.recruit-links{display:grid;gap:12px;width:72%;margin-inline:auto}
+.recruit-links a{
+  height:40px;border-radius:999px;background:var(--pale);
+  display:flex;align-items:center;justify-content:center;gap:18px;
+  color:var(--navy);font-size:13px;font-weight:800;transition:.3s
+}
+.recruit-links a:hover{background:var(--blue);color:#fff;transform:translateY(-2px)}
+.banner-slider{
+  background:var(--pale);padding:34px 0;overflow:hidden;
+}
+.banner-row{
+  width:min(1180px,calc(100% - 72px));margin:auto;
+  display:grid;grid-template-columns:44px 1fr 44px;gap:20px;align-items:center;
+}
+.slider-btn{
+  width:44px;height:44px;border:0;border-radius:50%;background:#fff;color:var(--blue);
+  cursor:pointer;font-weight:900;transition:.3s
+}
+.slider-btn:hover{transform:translateY(-2px);background:var(--blue);color:#fff}
+.slider-window{overflow:hidden}
+.slider-track{display:flex;gap:24px;transition:transform .55s ease}
+.banner{
+  flex:0 0 260px;height:64px;background:#fff;border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--navy);font-weight:900;border:1px solid rgba(10,39,63,.06);
+}
+.banner:nth-child(2n){background:#0a273f;color:#fff}
+.banner:nth-child(3n){background:#fff;color:var(--blue)}
+.footer{
+  padding:48px 0 22px;background:#fff;
+}
+.footer-top{
+  display:grid;grid-template-columns:250px 1fr;gap:56px;align-items:start;
+}
+.footer-logo{
+  display:flex;align-items:center;gap:12px;font-weight:900;color:var(--navy);
+}
+.footer-logo .logo-mark{width:42px;height:42px}
+.footer-logo strong{font-size:22px;line-height:1.2}
+.footer-logo small{display:block;color:var(--blue);font-size:10px}
+.footer-links{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px 36px;
+}
+.footer-links a{font-size:13px;font-weight:700}
+.footer-links a:after{content:" →";color:var(--blue)}
+.footer-bottom{
+  margin-top:48px;padding-top:20px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  font-size:11px;color:#526b7c;
+}
+@keyframes swiper-preloader-spin{100%{transform:rotate(360deg)}}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes fadeOut{0%{opacity:1}100%{opacity:0}}
+@keyframes slideIn{0%{transform:translateX(180px) rotate(-4deg);opacity:0}100%{transform:translateX(0) rotate(-4deg);opacity:1}}
+@keyframes slideOut{0%{transform:translateX(0);opacity:1}100%{transform:translateX(-180px);opacity:0}}
+@keyframes zoomIn{0%{transform:scale(1.08);opacity:.45}100%{transform:scale(1);opacity:1}}
+@keyframes zoomOut{0%{transform:scale(1);opacity:1}100%{transform:scale(.94);opacity:0}}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(38px)}100%{opacity:1;transform:translateY(0)}}
+html.js .js-reveal{
+  opacity:0;transform:translateY(38px);
+}
+html.js .js-reveal.is-visible{
+  opacity:1;transform:translateY(0);
+  transition:opacity .8s ease,transform .8s cubic-bezier(.16,1,.3,1);
+}
+html.js .stagger > *{
+  opacity:0;transform:translateY(30px);
+}
+html.js .stagger.is-visible > *{
+  opacity:1;transform:translateY(0);
+  transition:opacity .75s ease,transform .75s cubic-bezier(.16,1,.3,1);
+}
+html.js .stagger.is-visible > *:nth-child(1){transition-delay:.03s}
+html.js .stagger.is-visible > *:nth-child(2){transition-delay:.10s}
+html.js .stagger.is-visible > *:nth-child(3){transition-delay:.17s}
+html.js .stagger.is-visible > *:nth-child(4){transition-delay:.24s}
+html.js .stagger.is-visible > *:nth-child(5){transition-delay:.31s}
+html.js .stagger.is-visible > *:nth-child(6){transition-delay:.38s}
+html.js .stagger.is-visible > *:nth-child(7){transition-delay:.45s}
+html.js .stagger.is-visible > *:nth-child(8){transition-delay:.52s}
+@media (max-width:1000px){
+  .container{width:min(var(--container),calc(100% - 42px))}
+  .hero{height:720px;min-height:680px}
+  .hero-news{width:calc(100% - 42px);left:42px;right:auto}
+  .vision-blank{height:300px;padding-top:100px}
+  .vision-blank:before{font-size:36px}
+  .news-wrap{grid-template-columns:1fr}
+  .news-side{padding:54px 32px}
+  .news-main{margin:0;padding:42px 32px 60px;border-radius:0}
+  .tabs{justify-content:flex-start;overflow-x:auto}
+  .pickup-grid,.sus-cards{grid-template-columns:repeat(2,1fr)}
+  .company-lead,.sus-head{grid-template-columns:1fr;gap:36px}
+  .icon-row{grid-template-columns:repeat(3,1fr)}
+  .business-grid,.initiative-grid{grid-template-columns:1fr;gap:18px}
+  .message{grid-template-columns:1fr}
+  .message-text{padding:56px 32px}
+  .two-col{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr}
+  .footer-links{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .en{font-size:30px}
+  .hero{min-height:620px;height:86vh}
+  .header-logo{left:18px;top:18px}
+  .header-logo strong{font-size:18px}
+  .menu-button{right:16px;top:14px;width:52px;height:52px}
+  .hero__copy{bottom:132px;padding-inline:20px}
+  .hero__tag span{font-size:42px;padding:7px 12px 10px;box-shadow:7px 7px 0 rgba(0,142,216,.78)}
+  .hero__sub{font-size:14px}
+  .hero-news{left:20px;width:calc(100% - 20px);gap:10px;padding:0 14px;height:58px}
+  .hero-news time{display:none}
+  .hero-news p{font-size:12px}
+  .news-list li{grid-template-columns:88px 1fr;gap:8px 14px}
+  .news-list time{grid-column:2}
+  .tab{min-width:112px}
+  .pickup-grid,.sus-cards{grid-template-columns:1fr}
+  .company h2,.message-text h2{font-size:25px}
+  .icon-row{grid-template-columns:repeat(2,1fr)}
+  .goal-grid{grid-template-columns:repeat(3,1fr)}
+  .two-col{width:calc(100% - 42px)}
+  .recruit-copy{font-size:32px}
+  .recruit-links{width:86%}
+  .banner-row{width:calc(100% - 28px);grid-template-columns:36px 1fr 36px;gap:8px}
+  .slider-btn{width:36px;height:36px}
+  .banner{flex-basis:220px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="header-logo" href="#" aria-label="リンクワークス青空 ホーム">
+    <span class="logo-mark" aria-hidden="true"></span>
+    <span><small>Employment Support A</small><strong>リンクワークス青空</strong></span>
+  </a>
+  <button class="menu-button" type="button" aria-label="メニューを開く" aria-expanded="false">
+    <span></span><span></span><em>MENU</em>
+  </button>
+  <nav class="drawer" aria-label="サイトメニュー">
+    <a href="#news">お知らせ <span>NEWS</span></a>
+    <a href="#pickup">ピックアップ <span>PICK UP</span></a>
+    <a href="#company">私たちについて <span>ABOUT</span></a>
+    <a href="#business">仕事と訓練 <span>WORKS</span></a>
+    <a href="#message">メッセージ <span>MESSAGE</span></a>
+    <a href="#contact">見学・お問い合わせ <span>CONTACT</span></a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" aria-label="メインビジュアル">
+    <div class="hero__media image-bg">
+      <img src="https://loremflickr.com/1800/980/people,workplace?lock=3101" width="1800" height="980" alt="明るい職場で一緒に作業する人たち">
+    </div>
+    <div class="hero__copy">
+      <h1 class="hero__tag">
+        <span>はたらくって、</span>
+        <span>あたたかい。</span>
+      </h1>
+      <p class="hero__sub">自分のペースで動き出す。仲間と支え合う就労継続支援A型。</p>
+    </div>
+    <div class="hero-news">
+      <b>NEWS</b>
+      <time datetime="2026-06-29">2026.06.29</time>
+      <p>7月の見学会と体験利用の受付を開始しました</p>
+      <a href="#news">一覧へ</a>
+    </div>
+  </section>
+
+  <section class="vision-blank js-reveal" aria-label="余白"></section>
+
+  <section class="news-section" id="news">
+    <div class="news-wrap">
+      <aside class="news-side js-reveal">
+        <span class="en">NEWS</span>
+        <span class="ja">お知らせ</span>
+        <a class="side-link" href="#">一覧を見る <i>→</i></a>
+      </aside>
+      <div class="news-main js-reveal">
+        <div class="tabs" role="tablist" aria-label="お知らせカテゴリー">
+          <button class="tab is-active" type="button">ALL</button>
+          <button class="tab" type="button">利用案内</button>
+          <button class="tab" type="button">活動報告</button>
+          <button class="tab" type="button">採用情報</button>
+        </div>
+        <ul class="news-list stagger js-reveal">
+          <li><span class="news-cat yellow">利用案内</span><time>2026.06.29</time><a href="#">7月の見学会と体験利用の受付を開始しました</a></li>
+          <li><span class="news-cat yellow">利用案内</span><time>2026.06.22</time><a href="#">夏季期間中の開所日・送迎時間について</a></li>
+          <li><span class="news-cat">活動報告</span><time>2026.06.14</time><a href="#">地域マルシェにて焼き菓子販売を行いました</a></li>
+          <li><span class="news-cat">活動報告</span><time>2026.05.30</time><a href="#">パソコン入力チームの新しい受託作業が始まりました</a></li>
+          <li><span class="news-cat yellow">採用情報</span><time>2026.05.18</time><a href="#">生活支援員・職業指導員の募集について</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="pickup" id="pickup">
+    <div class="container">
+      <div class="js-reveal">
+        <span class="en">PICK UP</span>
+        <span class="ja">ピックアップ</span>
+      </div>
+      <div class="pickup-grid stagger js-reveal">
+        <a class="pick-card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/520/284/workshop,craft?lock=3111" width="520" height="284" alt="クラフト作業の様子"></div>
+          <h3>一人ひとりの得意を見つける、やさしい作業設計</h3>
+          <p>軽作業、PC、清掃、カフェ補助など、体調や目標に合わせて選べます。</p>
+        </a>
+        <a class="pick-card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/520/284/computer,office?lock=3112" width="520" height="284" alt="パソコン作業の様子"></div>
+          <h3>データ入力チームが新設されました<span class="external">□</span></h3>
+          <p>短時間から集中しやすい環境を整え、丁寧なチェック体制で支えます。</p>
+        </a>
+        <a class="pick-card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/520/284/garden,community?lock=3113" width="520" height="284" alt="地域活動の様子"></div>
+          <h3>地域とつながる青空ガーデンプロジェクト</h3>
+          <p>花壇整備や納品活動を通じて、地域の方との自然な交流を育てます。</p>
+        </a>
+        <a class="pick-card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/520/284/cafe,work?lock=3114" width="520" height="284" alt="カフェで働く様子"></div>
+          <h3>見学から利用開始までの流れを公開しました<span class="external">□</span></h3>
+          <p>初めての方にも分かりやすく、相談・体験・手続きの流れをまとめました。</p>
+        </a>
+        <a class="pick-card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/520/284/delivery,team?lock=3115" width="520" height="284" alt="納品に向かうチーム"></div>
+          <h3>納品同行で「できた」を積み重ねる</h3>
+          <p>職員が同行し、挨拶や報告の練習も安心してチャレンジできます。</p>
+        </a>
+        <a class="pick-card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/520/284/cleaning,office?lock=3116" width="520" height="284" alt="清掃作業の様子"></div>
+          <h3>施設外就労先との連携ミーティング</h3>
+          <p>無理なく続けるために、作業量や休憩の取り方をこまめに調整します。</p>
+        </a>
+        <a class="pick-card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/520/284/factory,packing?lock=3117" width="520" height="284" alt="梱包作業の様子"></div>
+          <h3>梱包・検品作業の品質向上研修</h3>
+          <p>手順書と見本を使い、焦らず確認できる作業環境を整えています。</p>
+        </a>
+        <a class="pick-card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/520/284/smile,team?lock=3118" width="520" height="284" alt="笑顔のチーム"></div>
+          <h3>利用者インタビュー「朝が楽しみになった日」</h3>
+          <p>通所を始めて半年の方に、日々の変化とこれからの目標を聞きました。</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="company" id="company">
+    <div class="container">
+      <div class="company-lead">
+        <div class="js-reveal">
+          <span class="en">ABOUT</span>
+          <span class="ja">私たちについて</span>
+          <h2>働く喜びを通じて<br>その人らしい毎日を社会へつなぐ</h2>
+          <p class="lead">リンクワークス青空は、就労継続支援A型事業所として、雇用契約に基づく安心した働き方を支援しています。作業のスキルだけでなく、体調管理、相談、仲間との関わりを大切にしながら、地域で長く働き続ける力を育てます。</p>
+          <a class="btn" href="#">事業所情報を見る <span class="arrow">→</span></a>
+        </div>
+        <div class="company-visual image-bg js-reveal">
+          <img src="https://loremflickr.com/900/660/city,people?lock=3121" width="900" height="660" alt="街と人がつながるイメージ写真">
+        </div>
+      </div>
+
+      <div class="icon-row stagger js-reveal" aria-label="事業所情報メニュー">
+        <a class="icon-item" href="#">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 39V18l12-8 12 8v21"/><path d="M18 39V25h12v14"/><path d="M9 39h30"/></svg>
+          <b>代表メッセージ</b><span class="circle-arrow">→</span>
+        </a>
+        <a class="icon-item" href="#">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 36c8-16 16-24 28-28-1 16-9 26-25 30"/><path d="M18 30c5 0 9 3 12 8"/></svg>
+          <b>支援方針・大切にすること</b><span class="circle-arrow">→</span>
+        </a>
+        <a class="icon-item" href="#">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M11 40V12h14v28"/><path d="M25 22h12v18"/><path d="M16 18h4M16 25h4M16 32h4M30 28h3M30 34h3"/></svg>
+          <b>事業所概要</b><span class="circle-arrow">→</span>
+        </a>
+        <a class="icon-item" href="#">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 35l9-23 12 18 5-10 6 15z"/><path d="M17 12l3 23"/><path d="M29 30l-9 5"/></svg>
+          <b>一日の流れ</b><span class="circle-arrow">→</span>
+        </a>
+        <a class="icon-item" href="#">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 12h18l6 6v18H12z"/><path d="M30 12v7h7"/><path d="M18 27h12M18 33h8"/></svg>
+          <b>利用までの手続き</b><span class="circle-arrow">→</span>
+        </a>
+        <a class="icon-item" href="#">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 40V10h20v30"/><path d="M19 16h4M27 16h4M19 23h4M27 23h4M19 30h4M27 30h4"/></svg>
+          <b>アクセス</b><span class="circle-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="business" id="business">
+    <div class="container">
+      <div class="js-reveal">
+        <span class="en">WORKS</span>
+        <span class="ja">仕事と訓練</span>
+        <p class="lead">地域企業からの受託業務と、将来の一般就労に向けた訓練を組み合わせ、安心感と挑戦のバランスを大切にしています。</p>
+      </div>
+      <div class="business-grid stagger js-reveal">
+        <a class="biz-card card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/760/420/computer,training?lock=3131" width="760" height="420" alt="パソコン訓練"></div>
+          <div class="biz-card__body">
+            <h3>PC・事務作業 <span class="circle-arrow">→</span></h3>
+            <p class="topic"><b>TOPICS</b>入力、スキャン、封入など。集中しやすい席配置とダブルチェックで安心です。</p>
+          </div>
+        </a>
+        <a class="biz-card card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/760/420/bakery,cafe?lock=3132" width="760" height="420" alt="カフェと焼き菓子の仕事"></div>
+          <div class="biz-card__body">
+            <h3>カフェ・製菓補助 <span class="circle-arrow">→</span></h3>
+            <p class="topic"><b>TOPICS</b>計量、袋詰め、接客補助まで。得意に合わせて担当工程を調整します。</p>
+          </div>
+        </a>
+        <a class="biz-card card" href="#">
+          <div class="image-bg"><img src="https://loremflickr.com/760/420/warehouse,work?lock=3133" width="760" height="420" alt="梱包と倉庫作業"></div>
+          <div class="biz-card__body">
+            <h3>軽作業・施設外就労 <span class="circle-arrow">→</span></h3>
+            <p class="topic"><b>TOPICS</b>検品、梱包、清掃など。職員同行で外の現場にも少しずつ慣れていきます。</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="message" id="message">
+    <div class="message-img image-bg js-reveal">
+      <img src="https://loremflickr.com/760/520/portrait,business?lock=3141" width="760" height="520" alt="管理者のポートレート">
+    </div>
+    <div class="message-text js-reveal">
+      <span class="en">MESSAGE</span>
+      <h2>「できる日」も「休みたい日」も大切にし、<br>続けられる働き方を一緒につくります</h2>
+      <a class="small-link" href="#">管理者メッセージ <span class="circle-arrow">→</span></a>
+    </div>
+  </section>
+
+  <section class="sustainability">
+    <div class="container">
+      <div class="sus-head">
+        <div class="js-reveal">
+          <span class="en">COMMUNITY</span>
+          <span class="ja">地域と安心への取り組み</span>
+          <p class="lead">私たちは、障がいのある方の雇用機会を広げるだけでなく、地域企業、医療・福祉機関、ご家族との連携を通じて、誰もが働きやすいまちづくりに取り組んでいます。</p>
+          <a class="btn" href="#">取り組みを見る <span class="arrow">→</span></a>
+        </div>
+        <div class="goal-grid stagger js-reveal" aria-label="取り組み目標">
+          <div class="goal"><strong>1</strong><span>安心相談</span></div><div class="goal"><strong>2</strong><span>昼食支援</span></div><div class="goal"><strong>3</strong><span>健康管理</span></div><div class="goal"><strong>4</strong><span>学び直し</span></div><div class="goal"><strong>5</strong><span>尊重</span></div><div class="goal"><strong>6</strong><span>清潔環境</span></div>
+          <div class="goal"><strong>7</strong><span>省エネ</span></div><div class="goal"><strong>8</strong><span>働きがい</span></div><div class="goal"><strong>9</strong><span>工夫</span></div><div class="goal"><strong>10</strong><span>包摂</span></div><div class="goal"><strong>11</strong><span>地域連携</span></div><div class="goal"><strong>12</strong><span>責任</span></div>
+          <div class="goal"><strong>13</strong><span>環境配慮</span></div><div class="goal"><strong>14</strong><span>水辺清掃</span></div><div class="goal"><strong>15</strong><span>緑化</span></div><div class="goal"><strong>16</strong><span>権利擁護</span></div><div class="goal"><strong>17</strong><span>協働</span></div><div class="goal"><strong>A</strong><span>青空宣言</span></div>
+        </div>
+      </div>
+
+      <div class="sus-cards stagger js-reveal">
+        <a class="sus-mini" href="#"><div class="image-bg"><img src="https://loremflickr.com/480/236/counseling,office?lock=3151" width="480" height="236" alt="相談支援"></div><h3>個別支援計画について <span class="circle-arrow">→</span></h3></a>
+        <a class="sus-mini" href="#"><div class="image-bg"><img src="https://loremflickr.com/480/236/meeting,team?lock=3152" width="480" height="236" alt="チーム会議"></div><h3>関係機関との連携 <span class="circle-arrow">→</span></h3></a>
+        <a class="sus-mini" href="#"><div class="image-bg"><img src="https://loremflickr.com/480/236/education,workshop?lock=3153" width="480" height="236" alt="研修の様子"></div><h3>研修・ステップアップ <span class="circle-arrow">→</span></h3></a>
+        <a class="sus-mini" href="#"><div class="image-bg"><img src="https://loremflickr.com/480/236/report,office?lock=3154" width="480" height="236" alt="レポート資料"></div><h3>活動レポート <span class="circle-arrow">→</span></h3></a>
+      </div>
+
+      <div class="initiatives">
+        <h3 class="js-reveal">3つの取り組み</h3>
+        <div class="initiative-bg image-bg">
+          <img src="https://loremflickr.com/1800/360/city,sky?lock=3159" width="1800" height="360" alt="">
+        </div>
+        <div class="initiative-grid stagger js-reveal">
+          <a class="init-card card" href="#">
+            <span class="init-no">特徴<b>1</b></span>
+            <div class="image-bg"><img src="https://loremflickr.com/828/440/office,light?lock=3161" width="828" height="440" alt="明るい作業室"></div>
+            <div class="init-body">静かに集中できる作業スペース <span class="circle-arrow">→</span></div>
+          </a>
+          <a class="init-card card" href="#">
+            <span class="init-no">特徴<b>2</b></span>
+            <div class="image-bg"><img src="https://loremflickr.com/828/440/team,workshop?lock=3162" width="828" height="440" alt="チームで作業する様子"></div>
+            <div class="init-body">気持ちを言葉にできる面談時間 <span class="circle-arrow">→</span></div>
+          </a>
+          <a class="init-card card" href="#">
+            <span class="init-no">特徴<b>3</b></span>
+            <div class="image-bg"><img src="https://loremflickr.com/828/440/community,volunteer?lock=3163" width="828" height="440" alt="地域活動"></div>
+            <div class="init-body">地域企業とつくる実践的な仕事 <span class="circle-arrow">→</span></div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ir-recruit" id="contact">
+    <div class="two-col">
+      <div class="js-reveal">
+        <div class="panel-title">
+          <div><span class="en">GUIDE</span><span class="ja">利用案内</span></div>
+          <a class="circle-arrow" href="#">→</a>
+        </div>
+        <article class="info-card card">
+          <div class="image-bg"><img src="https://loremflickr.com/820/340/documents,desk?lock=3171" width="820" height="340" alt="利用案内資料"></div>
+          <div class="info-body">
+            <h3>最新の利用資料</h3>
+            <ul class="ir-list">
+              <li><b>見学・体験</b>毎週火曜・木曜 10:00〜 / 14:00〜</li>
+              <li><b>対象エリア</b>市内および近隣地域。送迎はご相談ください。</li>
+              <li><b>利用時間</b>10:00〜15:30を基本に、短時間から調整可能です。</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="js-reveal">
+        <div class="panel-title">
+          <div><span class="en">CONTACT</span><span class="ja">見学・お問い合わせ</span></div>
+          <a class="circle-arrow" href="#">→</a>
+        </div>
+        <article class="recruit-card card">
+          <div class="image-bg"><img src="https://loremflickr.com/820/340/support,team?lock=3172" width="820" height="340" alt="支援スタッフと利用者"></div>
+          <div class="recruit-copy">一歩ずつ、<br>青空へ。</div>
+          <div class="recruit-links">
+            <a href="#">見学を申し込む <span>→</span></a>
+            <a href="#">資料をダウンロード <span>→</span></a>
+            <a href="#">スタッフ採用情報 <span>→</span></a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="banner-slider" aria-label="連携先">
+    <div class="banner-row">
+      <button class="slider-btn prev" type="button" aria-label="前へ">←</button>
+      <div class="slider-window">
+        <div class="slider-track">
+          <div class="banner">地域福祉センター</div>
+          <div class="banner">AOZORA CAFE</div>
+          <div class="banner">市就労相談室</div>
+          <div class="banner">LINK PARTNERS</div>
+          <div class="banner">青空マルシェ</div>
+          <div class="banner">WORK SUPPORT</div>
+        </div>
+      </div>
+      <button class="slider-btn next" type="button" aria-label="次へ">→</button>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <a class="footer-logo" href="#">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span><small>Employment Support A</small><strong>リンクワークス青空</strong></span>
+      </a>
+      <nav class="footer-links" aria-label="フッターナビゲーション">
+        <a href="#">私たちについて</a><a href="#">仕事と訓練</a><a href="#">利用案内</a><a href="#">お知らせ</a>
+        <a href="#">地域連携</a><a href="#">一日の流れ</a><a href="#">アクセス</a><a href="#">お問い合わせ</a>
+        <a href="#">採用情報</a><a href="#">個人情報保護方針</a><a href="#">情報公開</a><a href="#">サイトマップ</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <span>〒000-0000 ○○県○○市青空町1-2-3　TEL 000-000-0000</span>
+      <span>COPYRIGHT LINK WORKS AOZORA. ALL RIGHTS RESERVED.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const menuButton=document.querySelector('.menu-button');
+const drawer=document.querySelector('.drawer');
+menuButton.addEventListener('click',()=>{
+  const open=drawer.classList.toggle('is-open');
+  menuButton.setAttribute('aria-expanded',String(open));
+});
+
+const revealTargets=document.querySelectorAll('.js-reveal');
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    }
+  });
+},{threshold:.14,rootMargin:'0px 0px -8% 0px'});
+revealTargets.forEach(el=>observer.observe(el));
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('is-active'));
+    tab.classList.add('is-active');
+  });
+});
+
+const track=document.querySelector('.slider-track');
+const items=document.querySelectorAll('.banner');
+let index=0;
+function updateSlider(){
+  const itemWidth=items[0].getBoundingClientRect().width+24;
+  const max=Math.max(0,items.length-3);
+  index=Math.max(0,Math.min(index,max));
+  track.style.transform=`translateX(${-index*itemWidth}px)`;
+}
+document.querySelector('.next').addEventListener('click',()=>{index++;updateSlider();});
+document.querySelector('.prev').addEventListener('click',()=>{index--;updateSlider();});
+window.addEventListener('resize',updateSlider);
+setInterval(()=>{index=(index+1)%(Math.max(1,items.length-2));updateSlider();},4200);
+</script>
+
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(!els.length) return;
+    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
+    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    setTimeout(function(){
+      els.forEach(function(e){
+        if(parseFloat(getComputedStyle(e).opacity)===0){
+          show(e); e.style.opacity='1'; e.style.transform='none';
+        }
+      });
+    }, 3500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+</body>
+</html>

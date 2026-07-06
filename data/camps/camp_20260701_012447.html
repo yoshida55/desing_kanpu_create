@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunny Bean Café｜まいにちに、ほっとひと息</title>
+<style>
+  :root{
+    --cream:#fff8ee;
+    --peach:#ffd9b0;
+    --coral:#ff8a5c;
+    --brown:#6b4a32;
+    --green:#7cb98a;
+    --sky:#9ed5e8;
+    --text:#5a4636;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+    color:var(--text);
+    background:linear-gradient(180deg,#fff8ee 0%,#fff1e2 100%);
+    line-height:1.8;
+    overflow-x:hidden;
+  }
+  a{text-decoration:none;color:inherit;}
+
+  /* header */
+  header{
+    position:fixed;top:0;left:0;width:100%;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 6vw;
+    background:rgba(255,248,238,.75);
+    backdrop-filter:blur(12px);
+    z-index:100;
+  }
+  .logo{
+    font-weight:800;font-size:1.3rem;color:var(--brown);
+    display:flex;align-items:center;gap:8px;
+  }
+  .logo span{font-size:1.5rem;}
+  nav ul{display:flex;gap:26px;list-style:none;align-items:center;}
+  nav a{font-size:.92rem;font-weight:600;transition:color .25s;}
+  nav a:hover{color:var(--coral);}
+  .nav-cta{
+    background:var(--coral);color:#fff;padding:9px 20px;border-radius:999px;
+    font-size:.85rem;box-shadow:0 6px 16px rgba(255,138,92,.35);
+    transition:transform .25s;
+  }
+  .nav-cta:hover{transform:translateY(-2px);}
+  .menu-btn{display:none;font-size:1.6rem;background:none;border:none;cursor:pointer;}
+
+  /* hero */
+  .hero{
+    min-height:100vh;display:flex;align-items:center;
+    padding:120px 6vw 60px;gap:40px;position:relative;
+    background:radial-gradient(circle at 80% 20%,#ffe2c4 0%,transparent 55%),
+               linear-gradient(160deg,#fff8ee 0%,#ffe9d4 100%);
+  }
+  .hero-text{flex:1;min-width:300px;}
+  .badge{
+    display:inline-block;background:#fff;color:var(--coral);
+    font-weight:700;font-size:.8rem;padding:6px 16px;border-radius:999px;
+    box-shadow:0 4px 14px rgba(0,0,0,.06);margin-bottom:24px;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;color:var(--brown);
+    line-height:1.35;letter-spacing:.02em;margin-bottom:22px;
+  }
+  .hero h1 .accent{color:var(--coral);}
+  .hero p{font-size:1.05rem;max-width:480px;margin-bottom:34px;}
+  .btns{display:flex;gap:16px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--coral);color:#fff;padding:14px 32px;border-radius:999px;
+    font-weight:700;box-shadow:0 10px 24px rgba(255,138,92,.4);
+    transition:transform .25s;
+  }
+  .btn-primary:hover{transform:translateY(-3px);}
+  .btn-ghost{
+    border:2px solid var(--coral);color:var(--coral);padding:12px 30px;border-radius:999px;
+    font-weight:700;transition:background .25s,color .25s;
+  }
+  .btn-ghost:hover{background:var(--coral);color:#fff;}
+
+  /* hero illustration */
+  .hero-art{flex:1;min-width:280px;display:flex;justify-content:center;}
+  .cup{
+    position:relative;width:240px;height:240px;border-radius:50%;
+    background:linear-gradient(145deg,#fff,#ffeede);
+    box-shadow:0 30px 60px rgba(107,74,50,.18);
+    display:flex;align-items:center;justify-content:center;
+    animation:float 4s ease-in-out infinite;
+  }
+  .cup .emoji{font-size:7rem;filter:drop-shadow(0 8px 12px rgba(0,0,0,.1));}
+  .bubble{
+    position:absolute;border-radius:50%;background:rgba(255,255,255,.6);
+    backdrop-filter:blur(2px);box-shadow:0 8px 20px rgba(0,0,0,.06);
+    display:flex;align-items:center;justify-content:center;font-size:1.8rem;
+  }
+  .b1{width:70px;height:70px;top:-10px;left:-10px;animation:float 5s ease-in-out infinite;}
+  .b2{width:54px;height:54px;bottom:10px;right:-20px;animation:float 6s ease-in-out infinite .5s;}
+  .b3{width:46px;height:46px;bottom:-15px;left:40px;animation:float 4.5s ease-in-out infinite 1s;}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+
+  /* sections */
+  section{padding:90px 6vw;}
+  .sec-head{text-align:center;margin-bottom:54px;}
+  .sec-head .en{
+    display:block;color:var(--coral);font-weight:700;letter-spacing:.15em;
+    font-size:.85rem;text-transform:uppercase;margin-bottom:10px;
+  }
+  .sec-head h2{font-size:clamp(1.8rem,4vw,2.6rem);color:var(--brown);font-weight:800;}
+
+  /* concept */
+  .concept{background:linear-gradient(180deg,#fff1e2,#fff8ee);}
+  .concept-grid{display:flex;gap:30px;flex-wrap:wrap;}
+  .card{
+    flex:1;min-width:240px;background:#fff;border-radius:24px;padding:38px 30px;
+    box-shadow:0 14px 40px rgba(107,74,50,.08);
+    transition:transform .3s;
+  }
+  .card:hover{transform:translateY(-8px);}
+  .card .ico{
+    width:64px;height:64px;border-radius:18px;display:flex;align-items:center;
+    justify-content:center;font-size:2rem;margin-bottom:20px;
+  }
+  .ico1{background:#ffe2c4;}
+  .ico2{background:#d6efde;}
+  .ico3{background:#d2eef6;}
+  .card h3{font-size:1.25rem;color:var(--brown);margin-bottom:12px;}
+  .card p{font-size:.95rem;}
+
+  /* menu */
+  .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:26px;}
+  .menu-item{
+    background:#fff;border-radius:20px;padding:28px;
+    box-shadow:0 10px 30px rgba(107,74,50,.07);
+    display:flex;flex-direction:column;gap:8px;transition:transform .3s;
+  }
+  .menu-item:hover{transform:translateY(-6px);}
+  .menu-emoji{
+    font-size:3rem;width:90px;height:90px;border-radius:50%;
+    background:linear-gradient(145deg,#fff8ee,#ffe9d4);
+    display:flex;align-items:center;justify-content:center;margin-bottom:6px;
+  }
+  .menu-item .row{display:flex;justify-content:space-between;align-items:baseline;}
+  .menu-item h4{font-size:1.15rem;color:var(--brown);}
+  .menu-item .price{color:var(--coral);font-weight:800;font-size:1.1rem;}
+  .menu-item p{font-size:.88rem;}
+
+  /* info */
+  .info{background:linear-gradient(160deg,#9ed5e8 0%,#cdeaf2 100%);border-radius:40px;margin:0 4vw;}
+  .info-inner{display:flex;gap:40px;flex-wrap:wrap;align-items:center;}
+  .info-text{flex:1;min-width:280px;color:#264653;}
+  .info-text h2{font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;margin-bottom:20px;}
+  .info-list{list-style:none;}
+  .info-list li{
+    display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(38,70,83,.15);
+    font-size:.98rem;
+  }
+  .info-list li b{min-width:80px;color:#1d3b47;}
+  .map{
+    flex:1;min-width:280px;height:280px;border-radius:24px;
+    background:linear-gradient(145deg,#fff,#eef9fc);
+    display:flex;align-items:center;justify-content:center;font-size:5rem;
+    box-shadow:0 16px 40px rgba(38,70,83,.18);
+  }
+
+  /* cta band */
+  .band{
+    text-align:center;
+    background:linear-gradient(120deg,#ff8a5c 0%,#ffb15c 100%);
+    color:#fff;border-radius:36px;margin:60px 4vw;padding:70px 6vw;
+  }
+  .band h2{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;margin-bottom:16px;}
+  .band p{margin-bottom:30px;opacity:.95;}
+  .band .btn-primary{background:#fff;color:var(--coral);}
+
+  /* footer */
+  footer{
+    background:var(--brown);color:#ffe9d4;padding:50px 6vw 30px;
+  }
+  .foot-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px;margin-bottom:30px;}
+  .foot-top .logo{color:#fff;}
+  .foot-links{display:flex;gap:40px;flex-wrap:wrap;}
+  .foot-links div h5{margin-bottom:12px;color:#ffd9b0;}
+  .foot-links a{display:block;font-size:.9rem;padding:4px 0;opacity:.85;}
+  .foot-links a:hover{opacity:1;color:var(--peach);}
+  .copy{text-align:center;font-size:.8rem;opacity:.7;border-top:1px solid rgba(255,255,255,.15);padding-top:20px;}
+
+  /* reveal animation */
+  .reveal{opacity:0;transform:translateY(34px);transition:opacity .8s ease,transform .8s ease;}
+  .reveal.show{opacity:1;transform:none;}
+
+  @media(max-width:760px){
+    nav ul{display:none;}
+    .menu-btn{display:block;}
+    .hero{flex-direction:column-reverse;text-align:center;}
+    .btns{justify-content:center;}
+    .hero p{margin-left:auto;margin-right:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>☕</span>Sunny Bean</div>
+  <nav>
+    <ul>
+      <li><a href="#concept">こだわり</a></li>
+      <li><a href="#menu">メニュー</a></li>
+      <li><a href="#info">店舗情報</a></li>
+      <li><a href="#contact" class="nav-cta">ご予約はこちら</a></li>
+    </ul>
+  </nav>
+  <button class="menu-btn">☰</button>
+</header>
+
+<section class="hero">
+  <div class="hero-text reveal">
+    <span class="badge">🌿 朝7時オープン</span>
+    <h1>まいにちに、<br><span class="accent">ほっとひと息</span>を。</h1>
+    <p>陽だまりのような空間で、ていねいに焙煎したコーヒーと焼きたてのスイーツを。Sunny Bean Caféは、あなたの「いつもの場所」になりたいカフェです。</p>
+    <div class="btns">
+      <a href="#menu" class="btn-primary">メニューを見る</a>
+      <a href="#info" class="btn-ghost">お店へ行く</a>
+    </div>
+  </div>
+  <div class="hero-art reveal">
+    <div class="cup">
+      <span class="emoji">☕</span>
+      <div class="bubble b1">🥐</div>
+      <div class="bubble b2">🍰</div>
+      <div class="bubble b3">🌻</div>
+    </div>
+  </div>
+</section>
+
+<section class="concept" id="concept">
+  <div class="sec-head reveal">
+    <span class="en">Our Concept</span>
+    <h2>わたしたちのこだわり</h2>
+  </div>
+  <div class="concept-grid">
+    <div class="card reveal">
+      <div class="ico ico1">🫘</div>
+      <h3>自家焙煎の一杯</h3>
+      <p>世界各地から届く厳選した豆を、毎朝少量ずつ焙煎。フレッシュな香りとまろやかな後味をお楽しみいただけます。</p>
+    </div>
+    <div class="card reveal">
+      <div class="ico ico2">🥯</div>
+      <h3>焼きたてベーカリー</h3>
+      <p>店内のオーブンで焼き上げるパンとお菓子。素材ひとつひとつにこだわり、安心して味わえるおいしさをお届けします。</p>
+    </div>
+    <div class="card reveal">
+      <div class="ico ico3">🪴</div>
+      <h3>居心地のいい空間</h3>
+      <p>木のぬくもりとやわらかな光に包まれた店内。お一人でも、大切な人とでも、ゆったり過ごせる時間が流れます。</p>
+    </div>
+  </div>
+</section>
+
+<section id="menu">
+  <div class="sec-head reveal">
+    <span class="en">Menu</span>
+    <h2>人気のメニュー</h2>
+  </div>
+  <div class="menu-grid">
+    <div class="menu-item reveal">
+      <div class="menu-emoji">☕</div>
+      <div class="row"><h4>サニーブレンド</h4><span class="price">¥520</span></div>
+      <p>当店いちばんの定番。やさしい酸味とコクのバランスが自慢のオリジナルブレンドです。</p>
+    </div>
+    <div class="menu-item reveal">
+      <div class="menu-emoji">🥛</div>
+      <div class="row"><h4>カフェラテ</h4><span class="price">¥580</span></div>
+      <p>きめ細かなミルクフォームと深煎りエスプレッソが溶け合う、ほっとする一杯。</p>
+    </div>
+    <div class="menu-item reveal">
+      <div class="menu-emoji">🍰</div>
+      <div class="row"><h4>季節のタルト</h4><span class="price">¥620</span></div>
+      <p>旬のフルーツをたっぷり使った日替わりタルト。コーヒーとの相性も抜群です。</p>
+    </div>
+    <div class="menu-item reveal">
+      <div class="menu-emoji">🥪</div>
+      <div class="row"><h4>たまごサンド</h4><span class="price">¥680</span></div>
+      <p>ふわふわのたまごをふんわり食パンでサンド。モーニングにもぴったりの一品。</p>
+    </div>
+    <div class="menu-item reveal">
+      <div class="menu-emoji">🍮</div>
+      <div class="row"><h4>自家製プリン</h4><span class="price">¥480</span></div>
+      <p>昔ながらのかための食感。ほろ苦カラメルがクセになる手づくりプリンです。</p>
+    </div>
+    <div class="menu-item reveal">
+      <div class="menu-emoji">🧋</div>
+      <div class="row"><h4>柚子はちみつソーダ</h4><span class="price">¥540</span></div>
+      <p>国産柚子のさわやかな香りとはちみつの甘み。暑い日にうれしいスパークリング。</p>
+    </div>
+  </div>
+</section>
+
+<section class="info" id="info">
+  <div class="info-inner">
+    <div class="info-text reveal">
+      <h2>店舗情報</h2>
+      <ul class="info-list">
+        <li><b>住所</b><span>〒150-0001 東京都渋谷区陽だまり町2-8-1 サニービル1F</span></li>
+        <li><b>営業時間</b><span>7:00 – 20:00（L.O. 19:30）</span></li>
+        <li><b>定休日</b><span>毎週水曜日</span></li>
+        <li><b>アクセス</b><span>陽だまり駅 西口より徒歩4分</span></li>
+        <li><b>TEL</b><span>03-1234-5678</span></li>
+      </ul>
+    </div>
+    <div class="map reveal">🗺️</div>
+  </div>
+</section>
+
+<section class="band reveal" id="contact">
+  <h2>席のご予約、承っています</h2>
+  <p>記念日やちょっとした集まりにも。お気軽にお問い合わせください。</p>
+  <a href="#" class="btn-primary">ご予約・お問い合わせ</a>
+</section>
+
+<footer>
+  <div class="foot-top">
+    <div>
+      <div class="logo"><span>☕</span>Sunny Bean</div>
+      <p style="margin-top:12px;font-size:.88rem;opacity:.8;max-width:260px;">まいにちに、ほっとひと息を。陽だまりのようなカフェ。</p>
+    </div>
+    <div class="foot-links">
+      <div>
+        <h5>メニュー</h5>
+        <a href="#menu">ドリンク</a>
+        <a href="#menu">フード</a>
+        <a href="#menu">スイーツ</a>
+      </div>
+      <div>
+        <h5>お店</h5>
+        <a href="#concept">こだわり</a>
+        <a href="#info">店舗情報</a>
+        <a href="#contact">ご予約</a>
+      </div>
+      <div>
+        <h5>SNS</h5>
+        <a href="#">📷 Instagram</a>
+        <a href="#">🐦 X (Twitter)</a>
+        <a href="#">📘 Facebook</a>
+      </div>
+    </div>
+  </div>
+  <div class="copy">© 2024 Sunny Bean Café. All rights reserved.</div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target);}
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<script>
+/* レビュー用フォールバック：出現アニメ未発火でも必ず全コンテンツが見えるようにする */
+(function(){
+  function showAll(){
+    document.querySelectorAll('[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"]')
+      .forEach(function(el){el.classList.add('show','is-visible','active','visible','in-view','animated','inview');});
+    document.querySelectorAll('body *').forEach(function(el){
+      var s=getComputedStyle(el);
+      if(parseFloat(s.opacity)===0){el.style.opacity='1';el.style.transform='none';}
+    });
+  }
+  if(document.readyState==='loading') window.addEventListener('DOMContentLoaded',showAll);
+  else showAll();
+  window.addEventListener('load',showAll);
+})();
+</script>
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(!els.length) return;
+    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
+    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    setTimeout(function(){
+      els.forEach(function(e){
+        if(parseFloat(getComputedStyle(e).opacity)===0){
+          show(e); e.style.opacity='1'; e.style.transform='none';
+        }
+      });
+    }, 3500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+
+</body>
+</html>

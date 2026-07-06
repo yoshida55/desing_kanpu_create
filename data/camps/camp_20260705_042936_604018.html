@@ -1,0 +1,2029 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js fxa-on" style="--accent: #81caa5; --accent-soft: #edf8f2;"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就労継続支援B型事業所 るぽ</title>
+  <meta name="description" content="就労継続支援B型事業所「るぽ」のホームページ。やさしく、自分らしく、安心して働ける場所をご紹介します。">
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#fff;
+      --bg-soft:#f6f6f6;
+      --text:#404040;
+      --text-strong:#363636;
+      --accent:#687e73;
+      --accent-soft:#c3d0cc;
+      --white:#fff;
+      --shadow:4px 4px 32px rgba(173, 179, 176, .3);
+      --radius:12px;
+      --pill:9999px;
+      --container:1440px;
+      --line:rgba(0,0,0,.08);
+      --muted:rgba(64,64,64,.72);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro",メイリオ,Meiryo,verdana,Osaka,"ＭＳ Ｐゴシック","MS PGothic",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 12% 82%, rgba(195, 208, 204, .95) 0, rgba(195, 208, 204, .55) 12%, transparent 26%),
+        radial-gradient(circle at 87% 14%, rgba(104, 126, 115, .08) 0, rgba(104, 126, 115, .04) 18%, transparent 34%),
+        linear-gradient(180deg, #fff 0%, #fff 55%, #fcfbfb 100%);
+      overflow-x:hidden;
+    }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    .container{
+      width:min(calc(100% - 48px), var(--container));
+      margin:0 auto;
+      position:relative;
+      z-index:2;
+    }
+
+    .site-bg-ring,
+    .site-bg-ring2,
+    .site-bg-ring3{
+      position:fixed;
+      border:6px solid rgba(64,64,64,.12);
+      border-radius:50%;
+      pointer-events:none;
+      z-index:0;
+    }
+    .site-bg-ring{width:420px;height:420px;right:-120px;top:-40px}
+    .site-bg-ring2{width:360px;height:360px;left:-180px;top:48%}
+    .site-bg-ring3{width:300px;height:300px;right:-140px;bottom:10%}
+
+    .floating-dot{
+      position:absolute;
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      opacity:.85;
+      box-shadow:0 0 0 8px rgba(104, 126, 115, .06);
+      animation:floatY 7s ease-in-out infinite;
+    }
+    .floating-dot.gray{
+      background:#d9d9d9;
+      box-shadow:0 0 0 8px rgba(0,0,0,.03);
+    }
+    .floating-dot.soft{
+      background:var(--accent-soft);
+    }
+
+    .site-header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(0,0,0,.06);
+      animation:header_fade_in .8s ease both;
+    }
+    .header-inner{
+      width:min(calc(100% - 40px), var(--container));
+      margin:0 auto;
+      height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:700;
+      color:var(--text-strong);
+      letter-spacing:.02em;
+    }
+    .logo-mark{
+      width:36px;height:36px;border-radius:50%;
+      background:
+        radial-gradient(circle at 35% 35%, #fff 0 16%, transparent 17% 100%),
+        linear-gradient(135deg, #889f92 0%, #687e73 55%, #4d6056 100%);
+      position:relative;
+      box-shadow:0 8px 24px rgba(104, 126, 115, .22);
+      flex:0 0 auto;
+    }
+    .logo small{
+      display:block;
+      font-size:11px;
+      font-weight:500;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .header-nav{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .header-nav a{
+      font-size:13px;
+      padding:10px 14px;
+      border-radius:var(--pill);
+      color:var(--text);
+      transition:background .2s ease,color .2s ease,transform .25s ease;
+    }
+    .header-nav a:hover{background:var(--accent-soft);color:var(--accent);transform:translateY(-1px)}
+    .header-cta{
+      padding:12px 18px !important;
+      background:linear-gradient(135deg, #889f92 0%, #687e73 100%);
+      color:#fff !important;
+      box-shadow:0 12px 24px rgba(104, 126, 115, .18);
+    }
+
+    .subnav{
+      border-top:1px solid rgba(0,0,0,.04);
+      border-bottom:1px solid rgba(0,0,0,.04);
+      background:#fff;
+    }
+    .subnav-inner{
+      width:min(calc(100% - 40px), var(--container));
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:0;
+    }
+    .subnav a{
+      padding:14px 8px;
+      text-align:center;
+      font-size:12px;
+      border-right:1px solid rgba(0,0,0,.05);
+      color:var(--muted);
+    }
+    .subnav a:first-child{border-left:1px solid rgba(0,0,0,.05)}
+    .subnav a:hover{color:var(--accent);background:linear-gradient(180deg, #fff 0%, #fff8f8 100%)}
+
+    section{
+      position:relative;
+      min-height:100vh;
+      padding:10vh 0;
+      overflow:hidden;
+    }
+
+    .eyebrow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:14px;
+      color:var(--accent);
+      margin-bottom:18px;
+      letter-spacing:.04em;
+    }
+    .eyebrow::before{
+      content:"";
+      width:8px;height:8px;border-radius:50%;
+      background:var(--accent);
+      display:inline-block;
+    }
+    .heading-xl{
+      font-size:clamp(36px,6vw,86px);
+      line-height:1.02;
+      letter-spacing:-.02em;
+      color:var(--text-strong);
+      font-weight:800;
+      margin:0 0 22px;
+    }
+    .heading-lg{
+      font-size:clamp(30px,4vw,56px);
+      line-height:1.2;
+      margin:0 0 18px;
+      font-weight:800;
+      color:var(--text-strong);
+    }
+    .heading-md{
+      font-size:clamp(24px,3vw,40px);
+      line-height:1.3;
+      margin:0 0 18px;
+      font-weight:800;
+      color:var(--text-strong);
+    }
+    .lead{
+      font-size:16px;
+      line-height:2;
+      color:var(--muted);
+      max-width:42em;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      min-height:52px;
+      padding:0 22px;
+      border-radius:var(--pill);
+      background:linear-gradient(135deg, #889f92 0%, #687e73 100%);
+      color:#fff;
+      font-weight:700;
+      font-size:14px;
+      border:none;
+      box-shadow:0 10px 28px rgba(104, 126, 115, .18);
+      transition:transform .25s ease, box-shadow .25s ease, filter .25s ease;
+    }
+    .btn:hover{transform:translateY(-3px);box-shadow:0 18px 32px rgba(104, 126, 115, .24);filter:saturate(1.03)}
+    .btn .arrow{
+      width:28px;height:28px;border-radius:50%;
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.16);
+      font-size:15px;
+    }
+    .btn.secondary{
+      background:#fff;
+      color:var(--accent);
+      border:1px solid rgba(104, 126, 115, .18);
+      box-shadow:none;
+    }
+
+    .hero{
+      padding-top:5vh;
+      min-height:calc(100vh - 120px);
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      align-items:center;
+      gap:32px;
+      min-height:78vh;
+    }
+    .hero-copy{
+      position:relative;
+      padding-left:20px;
+      animation:opening_logo_in 1.05s ease-out both;
+    }
+    .hero-copy::before{
+      content:"";
+      position:absolute;
+      left:0;top:6px;bottom:6px;width:4px;
+      background:linear-gradient(180deg, var(--accent-soft), var(--accent));
+      border-radius:999px;
+    }
+    .hero-copy .small{
+      font-size:15px;
+      color:var(--muted);
+      margin-bottom:14px;
+      display:block;
+    }
+    .hero-actions{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-top:28px;
+    }
+
+    .hero-visual{
+      position:relative;
+      min-height:620px;
+      animation:opening_bird_in 1.6s cubic-bezier(.16,1,.3,1) both;
+    }
+    .hero-glow{
+      position:absolute;inset:20px 10px auto auto;
+      width:72%;height:76%;
+      border-radius:46% 54% 48% 52% / 36% 36% 64% 64%;
+      background:
+        linear-gradient(135deg, rgba(176, 199, 199, .75) 0%, rgba(168, 192, 173, .42) 34%, rgba(108,99,255,.14) 76%, rgba(255,255,255,0) 100%);
+      filter:blur(2px);
+      opacity:.95;
+      animation:opening_wash_in 1.8s cubic-bezier(.16,1,.3,1) both;
+    }
+    .hero-card-main{
+      position:absolute;
+      right:5%; top:12%;
+      width:72%;
+      aspect-ratio:1.08/1;
+      border-radius:28px;
+      transform:rotate(-6deg);
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      background:
+        linear-gradient(135deg, #c3d0cc 0%, #fff 38%, #f2f7ff 100%);
+    }
+    .hero-card-main img{width:100%;height:100%;object-fit:cover}
+    .hero-card-small{
+      position:absolute;
+      left:0; top:42%;
+      width:48%;
+      aspect-ratio:1.02/1;
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      transform:rotate(7deg);
+      background:linear-gradient(135deg, #c3d0cc, #fff);
+    }
+    .hero-card-small img{width:100%;height:100%;object-fit:cover}
+    .hero-float{
+      position:absolute;
+      right:0; bottom:7%;
+      width:180px;height:180px;
+      border-radius:32px;
+      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(195, 208, 204, .78));
+      box-shadow:var(--shadow);
+      display:grid;place-items:center;
+      transform:translateY(0);
+      animation:floatY 5.8s ease-in-out infinite;
+    }
+    .hero-float .stack{
+      width:74px;height:74px;position:relative;
+    }
+    .hero-float .stack span{
+      position:absolute;border-radius:14px;
+      background:linear-gradient(135deg,#c3d0cc,#687e73);
+      box-shadow:0 8px 24px rgba(104, 126, 115, .2);
+    }
+    .hero-float .stack span:nth-child(1){width:42px;height:42px;right:0;top:8px}
+    .hero-float .stack span:nth-child(2){width:42px;height:42px;left:8px;bottom:6px;opacity:.7}
+    .hero-float .stack span:nth-child(3){width:14px;height:14px;border-radius:50%;right:-20px;bottom:0;background:#c3d0cc}
+
+    .message-section .message-grid{
+      display:grid;
+      grid-template-columns:1fr 1.02fr;
+      gap:48px;
+      align-items:center;
+      min-height:78vh;
+    }
+    .scroll-side{
+      position:absolute;
+      left:18px;top:18%;
+      writing-mode:vertical-rl;
+      font-size:11px;
+      color:rgba(104, 126, 115, .65);
+      letter-spacing:.16em;
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+    .scroll-side::after{
+      content:"";
+      width:14px;height:14px;border-radius:50%;
+      border:2px solid rgba(104, 126, 115, .25);
+      box-shadow:0 22px 0 -3px rgba(104, 126, 115, .15), 0 44px 0 -6px rgba(104, 126, 115, .1);
+    }
+
+    .cityline{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:240px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(195, 208, 204, .24) 100%);
+      pointer-events:none;
+    }
+    .cityline svg{
+      position:absolute;left:0;bottom:0;width:100%;height:100%;
+    }
+
+    .message-cards{
+      position:relative;
+      height:520px;
+    }
+    .message-card{
+      position:absolute;
+      width:290px;
+      border-radius:26px;
+      background:linear-gradient(180deg,#fff 0%, #fff7f7 100%);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      transition:transform .3s ease, box-shadow .3s ease;
+    }
+    .message-card:hover{transform:translateY(-8px);box-shadow:0 18px 42px rgba(173, 179, 176, .38)}
+    .message-card:nth-child(1){left:14%;top:15%}
+    .message-card:nth-child(2){right:0;top:2%}
+    .message-card .thumb{
+      aspect-ratio:1.08/1;
+      background:linear-gradient(135deg,#c3d0cc,#fff);
+    }
+    .message-card .thumb img{width:100%;height:100%;object-fit:cover}
+    .message-card .meta{
+      padding:20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .message-card h3{
+      margin:0;
+      font-size:18px;
+      color:var(--text-strong);
+      line-height:1.5;
+    }
+    .round-link{
+      flex:0 0 auto;
+      width:44px;height:44px;border-radius:50%;
+      background:linear-gradient(135deg,#889f92,#687e73);
+      color:#fff;
+      display:grid;place-items:center;
+      box-shadow:0 10px 20px rgba(104, 126, 115, .18);
+    }
+
+    .features-top{
+      text-align:center;
+      margin-bottom:42px;
+    }
+    .feature-bubbles{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:28px;
+      margin-top:48px;
+    }
+    .bubble{
+      text-align:center;
+    }
+    .bubble-badge{
+      display:inline-block;
+      padding:10px 18px;
+      background:#fff;
+      border-radius:var(--pill);
+      box-shadow:0 8px 20px rgba(173, 179, 176, .16);
+      font-size:12px;
+      color:var(--accent);
+      margin-bottom:-18px;
+      position:relative;
+      z-index:2;
+    }
+    .bubble-visual{
+      width:min(100%, 320px);
+      margin:0 auto 22px;
+      aspect-ratio:1/1;
+      border-radius:34px;
+      background:
+        radial-gradient(circle at 24% 18%, rgba(255,255,255,.92) 0 18%, transparent 19%),
+        linear-gradient(180deg,#fef6f7 0%, #eef6fb 100%);
+      box-shadow:var(--shadow);
+      padding:20px;
+      overflow:hidden;
+    }
+    .bubble-visual img{width:100%;height:100%;object-fit:cover;border-radius:24px}
+    .bubble h3{
+      margin:0 0 14px;
+      font-size:30px;
+      line-height:1.4;
+      color:var(--accent);
+      font-weight:800;
+    }
+    .bubble p{
+      margin:0 auto;
+      max-width:26em;
+      line-height:1.9;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .center-btn{
+      text-align:center;
+      margin-top:34px;
+    }
+
+    .gallery{
+      min-height:auto;
+      padding:4vh 0 8vh;
+    }
+    .gallery-row{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:22px;
+    }
+    .gallery-item{
+      border-radius:14px;
+      overflow:hidden;
+      background:linear-gradient(135deg,#c3d0cc,#f4f7fb);
+      aspect-ratio:1.22/1;
+      box-shadow:0 10px 24px rgba(0,0,0,.05);
+    }
+    .gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .8s ease}
+    .gallery-item:hover img{transform:scale(1.05)}
+
+    .welfare-section{
+      background:linear-gradient(180deg, #fff 0%, #fbfbfb 100%);
+    }
+    .welfare-grid{
+      display:grid;
+      grid-template-columns:.9fr 1.1fr;
+      gap:38px;
+      align-items:center;
+      min-height:78vh;
+    }
+    .welfare-left{
+      position:relative;
+      padding:56px 44px;
+      border-radius:50px;
+      background:
+        radial-gradient(circle at 26% 22%, rgba(195, 208, 204, .95) 0, rgba(195, 208, 204, .78) 28%, rgba(255,255,255,.9) 56%, rgba(255,255,255,.75) 100%);
+      overflow:hidden;
+    }
+    .welfare-left::before{
+      content:"";
+      position:absolute;inset:14px;
+      border:4px solid rgba(64,64,64,.08);
+      border-radius:50px;
+      pointer-events:none;
+    }
+    .welfare-illust{
+      width:100%;
+      aspect-ratio:1/1;
+      border-radius:28px;
+      overflow:hidden;
+      background:linear-gradient(135deg,#c3d0cc,#fff);
+      margin:22px 0 24px;
+    }
+    .welfare-illust img{width:100%;height:100%;object-fit:cover}
+    .welfare-right{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+    }
+    .benefit{
+      background:#fff;
+      border-radius:16px;
+      padding:26px 18px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,.04);
+      min-height:160px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      transition:transform .25s ease, box-shadow .25s ease;
+    }
+    .benefit:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,0,0,.08)}
+    .benefit-icon{
+      width:62px;height:62px;border-radius:50%;
+      margin:0 auto 14px;
+      background:linear-gradient(180deg,#fff,#c3d0cc);
+      display:grid;place-items:center;
+      font-size:28px;
+      box-shadow:inset 0 -8px 20px rgba(104, 126, 115, .08);
+    }
+    .benefit h4{
+      margin:0;
+      font-size:15px;
+      line-height:1.6;
+      color:var(--text-strong);
+    }
+
+    .interview-section{
+      background:#fff;
+    }
+    .interview-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:24px;
+      margin-bottom:36px;
+    }
+    .interview-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:22px;
+    }
+    .interview-card{
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow:0 8px 24px rgba(0,0,0,.05);
+      transition:transform .28s ease, box-shadow .28s ease;
+    }
+    .interview-card:hover{transform:translateY(-6px);box-shadow:0 18px 34px rgba(0,0,0,.09)}
+    .interview-thumb{
+      aspect-ratio:1.45/1;
+      background:linear-gradient(135deg,#c3d0cc,#eef5fb);
+    }
+    .interview-thumb img{width:100%;height:100%;object-fit:cover}
+    .interview-body{
+      padding:18px 18px 24px;
+      border-bottom:3px solid rgba(104, 126, 115, .22);
+    }
+    .tag{
+      display:inline-block;
+      color:var(--accent);
+      font-size:12px;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+    .interview-title{
+      margin:0 0 12px;
+      font-size:20px;
+      line-height:1.55;
+      color:var(--text-strong);
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .interview-title .mini-arrow{
+      flex:0 0 auto;
+      width:34px;height:34px;border-radius:50%;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#889f92,#687e73);
+      color:#fff;
+      font-size:14px;
+      margin-top:2px;
+    }
+    .interview-meta{
+      font-size:12px;
+      color:rgba(64,64,64,.58);
+      line-height:1.7;
+    }
+
+    .footer-top{
+      min-height:auto;
+      padding:8vh 0 0;
+    }
+    .footer-brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:28px;
+    }
+    .footer-panels{
+      display:grid;
+      grid-template-columns:1.05fr 1fr 1fr 1fr;
+      gap:12px;
+      margin-bottom:26px;
+    }
+    .footer-panel{
+      border-radius:16px;
+      padding:28px 22px;
+      min-height:108px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      box-shadow:0 8px 24px rgba(0,0,0,.04);
+      position:relative;
+      overflow:hidden;
+    }
+    .footer-panel.pale{background:linear-gradient(135deg,#c3d0cc,#fbeff0);color:rgba(64,64,64,.5)}
+    .footer-panel.red{background:linear-gradient(135deg,#758b7f,#687e73);color:#fff}
+    .footer-panel h4{margin:0;font-size:18px}
+    .footer-panel small{display:block;font-size:12px;opacity:.8;margin-top:6px}
+    .footer-panel .plus{
+      width:34px;height:34px;border-radius:50%;
+      display:grid;place-items:center;
+      border:1px solid currentColor;
+      font-size:18px;
+      flex:0 0 auto;
+    }
+
+    .footer-links{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:18px;
+      margin-bottom:24px;
+    }
+    .footer-col{
+      background:#fff;
+      border-radius:16px;
+      padding:24px 22px;
+      box-shadow:0 8px 24px rgba(0,0,0,.04);
+    }
+    .footer-col h5{
+      margin:0 0 16px;
+      font-size:14px;
+      color:var(--text-strong);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .footer-col h5::before{
+      content:"●";
+      font-size:10px;
+      color:var(--accent);
+    }
+    .footer-col ul{list-style:none;padding:0;margin:0}
+    .footer-col li{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:8px 0;
+      font-size:13px;
+      color:var(--muted);
+      border-bottom:1px dashed rgba(0,0,0,.05);
+    }
+    .footer-col li:last-child{border-bottom:none}
+
+    .footer-bottom{
+      background:linear-gradient(180deg,#667d72,#51655b);
+      color:#fff;
+      min-height:auto;
+      padding:14px 0;
+      font-size:11px;
+    }
+    .footer-bottom-inner{
+      width:min(calc(100% - 40px), var(--container));
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(36px);
+      transition:opacity .9s ease, transform .9s cubic-bezier(.16,1,.3,1);
+    }
+    html.js .reveal.show{
+      opacity:1;
+      transform:none;
+    }
+    html.js .reveal[data-delay="1"]{transition-delay:.08s}
+    html.js .reveal[data-delay="2"]{transition-delay:.16s}
+    html.js .reveal[data-delay="3"]{transition-delay:.24s}
+    html.js .reveal[data-delay="4"]{transition-delay:.32s}
+    html.js .reveal[data-delay="5"]{transition-delay:.40s}
+
+    @keyframes header_fade_in{
+      0%{opacity:0;transform:translateY(-4rem)}
+      100%{opacity:1;transform:none}
+    }
+    @keyframes opening_wash_in{
+      0%{opacity:0;transform:scale(.3) rotate(-8deg)}
+      55%{opacity:.82}
+      100%{opacity:.55;transform:scale(1.35) rotate(3deg)}
+    }
+    @keyframes opening_bird_in{
+      0%{opacity:0;filter:blur(.8rem);transform:translate(-8rem,-3rem) rotate(-10deg) scale(.75)}
+      60%{opacity:1;filter:blur(0)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes opening_logo_in{
+      0%{opacity:0;filter:blur(1rem);transform:translateY(1.5rem) scale(.94)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes floatY{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-12px)}
+    }
+
+    @media (max-width: 1100px){
+      .hero-grid,
+      .message-section .message-grid,
+      .welfare-grid{grid-template-columns:1fr}
+      .hero-visual{min-height:520px}
+      .message-cards{height:420px}
+      .message-card:nth-child(1){left:0;top:10%}
+      .message-card:nth-child(2){right:4%;top:0}
+      .feature-bubbles,
+      .gallery-row,
+      .interview-grid{grid-template-columns:1fr 1fr}
+      .welfare-right{grid-template-columns:repeat(2,1fr)}
+      .footer-panels{grid-template-columns:1fr 1fr}
+      .footer-links{grid-template-columns:1fr}
+      .subnav-inner{grid-template-columns:repeat(3,1fr)}
+    }
+
+    @media (max-width: 768px){
+      section{min-height:auto;padding:72px 0}
+      .header-inner{height:auto;padding:14px 0;align-items:flex-start;flex-direction:column}
+      .header-nav{gap:6px}
+      .subnav-inner{grid-template-columns:1fr 1fr}
+      .hero-grid{min-height:auto}
+      .hero-copy{padding-left:16px}
+      .hero-visual{min-height:420px}
+      .hero-card-main{width:76%;right:4%}
+      .hero-card-small{width:44%;top:48%}
+      .hero-float{width:130px;height:130px}
+      .scroll-side{display:none}
+      .message-cards{height:auto;display:grid;gap:18px}
+      .message-card{position:relative;width:100%;left:auto !important;right:auto !important;top:auto !important}
+      .feature-bubbles,
+      .gallery-row,
+      .interview-grid,
+      .welfare-right,
+      .footer-panels{grid-template-columns:1fr}
+      .interview-head{flex-direction:column;align-items:flex-start}
+      .footer-bottom-inner{flex-direction:column}
+      .site-bg-ring,.site-bg-ring2,.site-bg-ring3{display:none}
+      .container{width:min(calc(100% - 28px), var(--container))}
+    }
+  </style>
+<style id="fxa-css">html.fxa-on .fxa_pre{opacity:0;transition:opacity var(--fxa-dur,.8s) ease,transform var(--fxa-dur,.8s) ease,filter var(--fxa-dur,.8s) ease,clip-path var(--fxa-dur,.8s) ease}html.fxa-on .fxa_pre.fxa_y{transform:translateY(var(--fxa-dist,28px))}html.fxa-on .fxa_pre.fxa_xl{transform:translateX(calc(-1*var(--fxa-dist,48px)))}html.fxa-on .fxa_pre.fxa_xr{transform:translateX(var(--fxa-dist,48px))}html.fxa-on .fxa_pre.fxa_s{transform:scale(var(--fxa-scale,.86))}html.fxa-on .fxa_pre.fxa_bl{filter:blur(var(--fxa-blur,14px))}html.fxa-on .fxa_pre.fxa_ry{transform:perspective(800px) rotateY(var(--fxa-deg,90deg))}html.fxa-on .fxa_pre.fxa_clip{transform:translateY(var(--fxa-dist,40px))}html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}.fxa_ch{display:inline-block}html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,16px));transition:opacity .5s ease,transform .5s ease}html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,45ms))}html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}@keyframes fxa_glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}@keyframes fxa_wave{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,10px)))}}.fxa_lp_pulse{animation:fxa_pulse var(--fxa-dur,1.4s) ease-in-out infinite}.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}</style></head>
+<body style=""><header class="site-header" style="opacity: 1 !important; transform: none;">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="るぽ ホーム">
+        <span class="logo-mark" aria-hidden="true" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"></span>
+        <span>
+          るぽ
+          <small>就労継続支援B型事業所</small>
+        </span>
+      </a>
+      <nav class="header-nav">
+        <a href="#message">るぽについて</a>
+        <a href="#works">お仕事・活動</a>
+        <a href="#support">支援体制</a>
+        <a href="#interview">利用者さまの声</a>
+        <a href="#contact" class="header-cta" style="background: none rgb(129, 202, 165) !important; color: rgb(255, 255, 255) !important; -webkit-text-fill-color: rgb(255, 255, 255) !important; border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">見学・相談予約</a>
+      </nav>
+    </div>
+    <div class="subnav">
+      <div class="subnav-inner">
+        <a href="#message">採用トップ</a>
+        <a href="#works">働き方・活動</a>
+        <a href="#interview">ご利用インタビュー</a>
+        <a href="#support">支援制度</a>
+        <a href="#about">るぽについて</a>
+      </div>
+    </div>
+  </header><main class="">
+    <section class="hero" id="about" style="padding: 100px 24px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+  <div class="container hero-grid" data-cebt="" data-cetx="8" data-cety="-62" style="translate: 8px -62px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+    <div class="hero-copy" style="opacity: 1 !important; transform: none;">
+      <span class="small">やさしく、ゆっくり、自分らしく。</span>
+      <h1 class="heading-xl fxa_pre fxa_cpre" style="--fxa-dur: 800ms; --fxa-stag: 54ms; --fxa-dist: 40px; line-height: 1.4 !important; font-size: 64px !important; margin-bottom: 0.6em !important; font-weight: 700 !important;"><span style="color: rgb(59, 165, 86) !important; -webkit-text-fill-color: rgb(59, 165, 86) !important;"><span class="fxa_ch" style="display: inline-block; --i: 0;">楽</span><span class="fxa_ch" style="display: inline-block; --i: 1;">し</span><span class="fxa_ch" style="display: inline-block; --i: 2;">さ</span><span class="fxa_ch" style="display: inline-block; --i: 3;">を</span><span class="fxa_ch" style="display: inline-block; --i: 4;">仕</span><span class="fxa_ch" style="display: inline-block; --i: 5;">事</span><span class="fxa_ch" style="display: inline-block; --i: 6;">に</span></span><span class="fxa_ch" style="display: inline-block; --i: 7;">、</span><br><span class="fxa_ch" style="display: inline-block; --i: 8;">生</span><span class="fxa_ch" style="display: inline-block; --i: 9;">き</span><span class="fxa_ch" style="display: inline-block; --i: 10;">生</span><span class="fxa_ch" style="display: inline-block; --i: 11;">き</span><span class="fxa_ch" style="display: inline-block; --i: 12;">と</span><span class="fxa_ch" style="display: inline-block; --i: 13;">し</span><span class="fxa_ch" style="display: inline-block; --i: 14;">た</span><span class="fxa_ch" style="display: inline-block; --i: 15;">自</span><span class="fxa_ch" style="display: inline-block; --i: 16;">分</span><span class="fxa_ch" style="display: inline-block; --i: 17;">を</span><br><span class="fxa_ch" style="display: inline-block; --i: 18;">見</span><span class="fxa_ch" style="display: inline-block; --i: 19;">つ</span><span class="fxa_ch" style="display: inline-block; --i: 20;">け</span><span class="fxa_ch" style="display: inline-block; --i: 21;">よ</span><span class="fxa_ch" style="display: inline-block; --i: 22;">う</span><span class="fxa_ch" style="display: inline-block; --i: 23;">。</span></h1>
+      <p class="lead" style="line-height: 1.8 !important;">落ち着いた空間と丁寧なサポートで、「しっかりしている人」も「まだ自信が持てない人」<br>も、自分に合ったペースで働く楽しさを見つけられます。</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn" style="background: none rgb(129, 202, 165) !important; color: rgb(255, 255, 255) !important; -webkit-text-fill-color: rgb(255, 255, 255) !important; border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"><span>見学を予約する</span><span class="arrow">→</span></a>
+        <a href="#works" class="btn secondary" style="background: none transparent !important; color: rgb(129, 202, 165) !important; -webkit-text-fill-color: rgb(129, 202, 165) !important; border: 2px solid rgb(129, 202, 165) !important;"><span>活動内容を見る</span></a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true" style="opacity: 1 !important; transform: none;">
+      <div class="hero-glow" style="transform: matrix(1.34815, 0.0706535, -0.0706535, 1.34815, 0, 0) !important; translate: -102px 79px !important; rotate: 0deg !important; scale: 0.908909 !important; transform-origin: center center !important;" data-cebt="matrix(1.34815, 0.0706535, -0.0706535, 1.34815, 0, 0)" data-cetx="-102" data-cety="79" data-cesx="0.9089091000000001" data-cesy="0.9089091000000001"></div>
+
+      <div class="hero-card-main" style="translate: -1px -73px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(0.994522, -0.104528, 0.104528, 0.994522, 0, 0) !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix(0.994522, -0.104528, 0.104528, 0.994522, 0, 0)" data-cetx="-1" data-cety="-73">
+        <img src="http://127.0.0.1:5000/uploads/up_8a0a5872c1.png" alt="青空を背景に微笑む女性" width="760" height="700" onerror="this.style.display='none'">
+      </div>
+
+      <div class="hero-card-small" style="translate: 5px 26px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(0.992546, 0.121869, -0.121869, 0.992546, 0, 0) !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix(0.992546, 0.121869, -0.121869, 0.992546, 0, 0)" data-cetx="5" data-cety="26">
+        <img src="http://127.0.0.1:5000/uploads/up_5ad70dab05.png" alt="オフィスを案内するスタッフ" width="440" height="420" onerror="this.style.display='none'">
+      </div>
+
+      <div class="hero-float" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+        <div class="stack">
+          <span style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"></span><span style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"></span><span style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <section class="message-section" id="message">
+  <style>
+    .message-card .thumb {
+      position: relative;
+      aspect-ratio: 1.08/1;
+      background: linear-gradient(135deg, #c3d0cc, #fff);
+      overflow: hidden;
+    }
+
+    .message-card .thumb::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.3) 2px, rgba(255, 255, 255, 0.3) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /></filter><rect width="100" height="100" fill="rgba(0,0,0,0.02)" filter="url(%23noise)" /></svg>');
+      background-size: 100% 100%, 100% 100%, 100% 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.5;
+    }
+
+    .message-card .thumb img {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
+
+  <div class="scroll-side">Scroll</div>
+  <div class="cityline" aria-hidden="true">
+    <svg viewBox="0 0 1440 260" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="cityGrad" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#cde1d2"></stop>
+          <stop offset="55%" stop-color="#5d9e6c"></stop>
+          <stop offset="100%" stop-color="#3c6f48"></stop>
+        </linearGradient>
+        <linearGradient id="cityFade" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="rgba(255,255,255,0)"></stop>
+          <stop offset="100%" stop-color="rgba(255,255,255,.14)"></stop>
+        </linearGradient>
+      </defs>
+      <g opacity=".95">
+        <rect x="0" y="170" width="170" height="90" fill="url(#cityGrad)" opacity=".28"></rect>
+        <rect x="135" y="142" width="110" height="118" fill="url(#cityGrad)" opacity=".35"></rect>
+        <rect x="218" y="120" width="140" height="140" fill="url(#cityGrad)" opacity=".72"></rect>
+        <rect x="334" y="156" width="100" height="104" fill="url(#cityGrad)" opacity=".56"></rect>
+        <rect x="414" y="98" width="168" height="162" fill="url(#cityGrad)" opacity=".84"></rect>
+        <rect x="560" y="138" width="118" height="122" fill="url(#cityGrad)" opacity=".64"></rect>
+        <rect x="642" y="82" width="176" height="178" fill="url(#cityGrad)" opacity=".95"></rect>
+        <rect x="802" y="126" width="120" height="134" fill="url(#cityGrad)" opacity=".72"></rect>
+        <rect x="890" y="104" width="170" height="156" fill="url(#cityGrad)" opacity=".9"></rect>
+        <rect x="1040" y="148" width="94" height="112" fill="url(#cityGrad)" opacity=".6"></rect>
+        <rect x="1118" y="74" width="188" height="186" fill="url(#cityGrad)" opacity=".98"></rect>
+        <rect x="1290" y="118" width="130" height="142" fill="url(#cityGrad)" opacity=".7"></rect>
+        <path d="M0 250 C 180 210, 260 160, 360 120 C 470 75, 580 96, 700 70 C 840 40, 930 60, 1040 24 C 1140 -10, 1280 20, 1440 6 L1440 260 L0 260 Z" fill="url(#cityFade)" opacity=".18"></path>
+      </g>
+      <g fill="#fff" opacity=".22">
+        <rect x="245" y="136" width="8" height="10"></rect><rect x="263" y="136" width="8" height="10"></rect><rect x="281" y="136" width="8" height="10"></rect>
+        <rect x="245" y="156" width="8" height="10"></rect><rect x="263" y="156" width="8" height="10"></rect><rect x="281" y="156" width="8" height="10"></rect>
+        <rect x="668" y="106" width="8" height="10"></rect><rect x="686" y="106" width="8" height="10"></rect><rect x="704" y="106" width="8" height="10"></rect><rect x="722" y="106" width="8" height="10"></rect>
+        <rect x="668" y="126" width="8" height="10"></rect><rect x="686" y="126" width="8" height="10"></rect><rect x="704" y="126" width="8" height="10"></rect><rect x="722" y="126" width="8" height="10"></rect>
+        <rect x="1150" y="102" width="8" height="10"></rect><rect x="1168" y="102" width="8" height="10"></rect><rect x="1186" y="102" width="8" height="10"></rect><rect x="1204" y="102" width="8" height="10"></rect>
+        <rect x="1150" y="122" width="8" height="10"></rect><rect x="1168" y="122" width="8" height="10"></rect><rect x="1186" y="122" width="8" height="10"></rect><rect x="1204" y="122" width="8" height="10"></rect>
+      </g>
+      <g>
+        <circle cx="1240" cy="238" r="22" fill="#5fa299"></circle>
+        <circle cx="1180" cy="242" r="18" fill="#c3d0cc"></circle>
+        <circle cx="106" cy="230" r="18" fill="#bfd8f0"></circle>
+      </g>
+    </svg>
+  </div>
+
+  <div class="container message-grid">
+    <div class="reveal">
+      <div class="eyebrow">Message</div>
+      <p style="color: var(--accent); font-size: 14px; margin: 0px 0px 8px; line-height: 1.8;">スキルを磨きながらお試しませんか</p>
+      <h2 class="heading-lg">
+        事務サービスのプロとして<br>
+        共に働く仲間を募集しています
+      </h2>
+      <p class="lead">
+        るぽでは、軽作業・PC入力・封入作業・検品・ものづくりなど、
+        一人ひとりの得意や体調に合わせたお仕事をご用意しています。<br>
+        毎日完璧でなくて大丈夫。安心して通えること、少しでも前に進めることを大切にしながら、
+        「働けた」という実感を積み重ねていきます。
+      </p>
+    </div>
+
+    <div class="message-cards">
+      <article class="message-card reveal" data-delay="2">
+        <div class="thumb">
+          <img src="http://127.0.0.1:5000/uploads/up_7baf91717c.png" alt="相談に応じる女性スタッフ" width="520" height="500" onerror="this.style.display='none'">
+        </div>
+        <div class="meta">
+          <h3>気軽に話せる<br>相談体制</h3>
+          <span class="round-link">→</span>
+        </div>
+      </article>
+
+      <article class="message-card reveal" data-delay="3">
+        <div class="thumb">
+          <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="協力して梱包するスタッフ" width="520" height="500" onerror="this.style.display='none'">
+        </div>
+        <div class="meta">
+          <h3>人が育つ<br>キャリア支援</h3>
+          <span class="round-link">→</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+    <section id="works" class="" style="min-height: 1228px !important; padding: 100px 24px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+      <div class="container" data-cebt="" data-cetx="0" data-cety="78" style="translate: 0px 78px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+        <div class="features-top reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="">
+          <div class="eyebrow" style="justify-content: center;">働く環境 <span style="font-size:11px;color:#b8a8a8;margin-left:4px;">Work Environment</span></div>
+          <h2 class="heading-md fxa_pre fxa_cpre" style="--fxa-dur: 800ms; --fxa-stag: 57ms; --fxa-dist: 25px; font-family: &quot;Hiragino Maru Gothic ProN&quot;, &quot;Rounded Mplus 1c&quot;, sans-serif !important; font-size: 40px !important; translate: -1px 6px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; line-height: 1.4 !important; margin-bottom: 0.6em !important; font-weight: 600 !important;" data-cebt="" data-cetx="-1" data-cety="6">
+            <span class="fxa_ch" style="display: inline-block; --i: 0;">る</span><span class="fxa_ch" style="display: inline-block; --i: 1;">ぽ</span><span class="fxa_ch" style="display: inline-block; --i: 2;">は</span><span class="fxa_ch" style="display: inline-block; --i: 3;">ラ</span><span class="fxa_ch" style="display: inline-block; --i: 4;">イ</span><span class="fxa_ch" style="display: inline-block; --i: 5;">フ</span><span class="fxa_ch" style="display: inline-block; --i: 6;">ス</span><span class="fxa_ch" style="display: inline-block; --i: 7;">テ</span><span class="fxa_ch" style="display: inline-block; --i: 8;">ー</span><span class="fxa_ch" style="display: inline-block; --i: 9;">ジ</span><span class="fxa_ch" style="display: inline-block; --i: 10;">の</span><span class="fxa_ch" style="display: inline-block; --i: 11;">変</span><span class="fxa_ch" style="display: inline-block; --i: 12;">化</span><span class="fxa_ch" style="display: inline-block; --i: 13;">に</span><span class="fxa_ch" style="display: inline-block; --i: 14;">あ</span><span class="fxa_ch" style="display: inline-block; --i: 15;">わ</span><span class="fxa_ch" style="display: inline-block; --i: 16;">せ</span><span class="fxa_ch" style="display: inline-block; --i: 17;">て</span><br>
+            <span class="fxa_ch" style="display: inline-block; --i: 18;">安</span><span class="fxa_ch" style="display: inline-block; --i: 19;">心</span><span class="fxa_ch" style="display: inline-block; --i: 20;">し</span><span class="fxa_ch" style="display: inline-block; --i: 21;">て</span><span class="fxa_ch" style="display: inline-block; --i: 22;">長</span><span class="fxa_ch" style="display: inline-block; --i: 23;">く</span><span class="fxa_ch" style="display: inline-block; --i: 24;">通</span><span class="fxa_ch" style="display: inline-block; --i: 25;">え</span><span class="fxa_ch" style="display: inline-block; --i: 26;">る</span><span class="fxa_ch" style="display: inline-block; --i: 27;">場</span><span class="fxa_ch" style="display: inline-block; --i: 28;">所</span><span class="fxa_ch" style="display: inline-block; --i: 29;">で</span><span class="fxa_ch" style="display: inline-block; --i: 30;">す</span>
+          </h2>
+        </div>
+
+        <div class="feature-bubbles">
+          <div class="bubble reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="bubble-badge" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">見学の方の95%が安心と回答</div>
+            <div class="bubble-visual" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+              <img src="http://127.0.0.1:5000/uploads/up_7beb56fdd8.png" alt="パソコンで相談し合う風景" width="320" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>多数の女性が<br>活躍中！</h3>
+            <p>
+              女性でも通いやすい穏やかな雰囲気で、スタッフとの距離も近く、
+              安心して相談しながら活動を続けられます。
+            </p>
+          </div>
+
+          <div class="bubble reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="">
+            <div class="bubble-badge" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">必要な学び・スキルは通いながら身につけます</div>
+            <div class="bubble-visual" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+              <img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="ノートPCで作業する手元" width="320" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>経験や知識は<br>不要</h3>
+            <p>
+              入力作業から制作、封入、軽作業まで、いま出来ることから無理なくスタート。
+              支援員が丁寧にフォローします。
+            </p>
+          </div>
+
+          <div class="bubble reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+            <div class="bubble-badge" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">ライフステージの変化にも対応</div>
+            <div class="bubble-visual" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+              <img src="http://127.0.0.1:5000/uploads/up_cc6c33e328.png" alt="休憩時間の風景" width="320" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>充実した<br>育児・介護制度</h3>
+            <p>
+              通所時間の相談や体調面への配慮、家庭との両立も見据えた支援体制で、
+              長く安心して続けられる環境です。
+            </p>
+          </div>
+        </div>
+
+        <div class="center-btn reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="">
+          <a href="#contact" class="btn" style="background: none rgb(129, 202, 165) !important; color: rgb(255, 255, 255) !important; -webkit-text-fill-color: rgb(255, 255, 255) !important; border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"><span>働く環境を見る</span><span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery" style="min-height: 789px !important; translate: 0px 54px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; padding: 100px 24px !important; margin-top: 0px !important; margin-bottom: 0px !important;" data-cebt="" data-cetx="0" data-cety="54">
+  <style>
+    .gallery-row {
+      position: relative;
+    }
+    .gallery-row::before {
+      content: "";
+      position: absolute;
+      inset: -60px;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 25%, rgba(100, 150, 200, 0.18) 0%, rgba(100, 150, 200, 0.08) 18%, transparent 32%),
+        radial-gradient(circle at 72% 48%, rgba(120, 160, 210, 0.15) 0%, rgba(120, 160, 210, 0.06) 20%, transparent 38%),
+        radial-gradient(circle at 38% 72%, rgba(110, 155, 205, 0.16) 0%, rgba(110, 155, 205, 0.07) 19%, transparent 35%),
+        radial-gradient(circle at 85% 15%, rgba(130, 170, 215, 0.12) 0%, rgba(130, 170, 215, 0.05) 22%, transparent 40%),
+        radial-gradient(circle at 28% 88%, rgba(115, 160, 210, 0.14) 0%, rgba(115, 160, 210, 0.06) 21%, transparent 36%);
+      filter: blur(8px);
+    }
+    .gallery-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+      position: relative;
+      z-index: 2;
+    }
+  </style>
+  <div class="container">
+    <div class="gallery-row" style="translate: 33px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="33" data-cety="0">
+      <div class="gallery-item reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="translate: 836px 334px !important; rotate: 0deg !important; scale: 1.1 0.9999 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix3d(0.999961, -8.70667e-05, -0.00878963, 0, 0, 0.999951, -0.00990514, 0, 0.00879006, 0.00990476, 0.999912, 0, 0, -4, 0, 1)" data-cetx="836" data-cety="334" data-cesx="1.1" data-cesy="0.9999000000000001">
+        <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="事業所の入口" width="420" height="320" onerror="this.style.display='none'">
+      </div>
+      
+      <div class="gallery-item reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="translate: -126px 128px !important; rotate: 0deg !important; scale: 1.94872 2.35771 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="" data-cesx="1.9487171000000014" data-cesy="2.357711896230902" data-cetx="-126" data-cety="128" data-cero="0">
+        <img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" alt="明るいオフィスで働く人々" width="420" height="320" onerror="this.style.display='none'">
+      </div>
+      
+      <div class="gallery-item reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="translate: 105px -13px !important; rotate: 0deg !important; scale: 1.09989 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix3d(0.999937, 8.88773e-05, -0.011208, 0, 0, 0.999969, 0.00792957, 0, 0.0112083, -0.00792907, 0.999906, 0, 0, -2.39187, 0, 1)" data-cetx="105" data-cety="-13" data-cesx="1.0998900000000003" data-cesy="1.0998900000000003">
+        <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="オフィスのコーヒーとクッキー" width="420" height="320" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+</section>
+
+    <section class="welfare-section" id="support" style="padding: 100px 24px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+  <style>
+    .welfare-section {
+      position: relative;
+    }
+    
+    .welfare-illust-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .welfare-illust-backdrop {
+      position: absolute;
+      inset: -40px;
+      border-radius: 28px;
+      pointer-events: none;
+      z-index: 1;
+      background:
+        radial-gradient(ellipse 280px 240px at 35% 25%, rgba(173, 216, 230, 0.18) 0%, transparent 45%),
+        radial-gradient(ellipse 320px 260px at 60% 45%, rgba(135, 206, 235, 0.14) 0%, transparent 50%),
+        radial-gradient(ellipse 240px 200px at 20% 60%, rgba(186, 210, 220, 0.12) 0%, transparent 48%),
+        radial-gradient(ellipse 300px 280px at 75% 70%, rgba(173, 216, 230, 0.16) 0%, transparent 52%),
+        radial-gradient(ellipse 260px 220px at 45% 80%, rgba(135, 206, 250, 0.13) 0%, transparent 46%);
+      filter: blur(32px);
+    }
+    
+    .welfare-illust {
+      position: relative;
+      z-index: 2;
+    }
+  </style>
+
+  <div class="container welfare-grid">
+    <div class="welfare-left reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transform: none !important; translate: 85px -8px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="85" data-cety="-8">
+      <div class="eyebrow">福利厚生・社内制度 <span style="font-size:11px;color:#b8a8a8;margin-left:4px;">Comfort &amp; Support</span></div>
+      <h2 class="heading-md" style="font-size: 40px !important; line-height: 1.4 !important; margin-bottom: 0.6em !important; font-weight: 600 !important; translate: 0px !important; rotate: 0deg !important; scale: 0.9998 1 !important; transform-origin: center center !important; width: 623px !important; max-width: none !important;" data-cebt="" data-cesx="0.9998000100000003" data-cesy="1">
+        休日・体調配慮をはじめとした<br>
+        福利厚生が充実！
+      </h2>
+      
+      <div class="welfare-illust-wrapper">
+        <div class="welfare-illust-backdrop" style=""></div>
+        <div class="welfare-illust" style="background:linear-gradient(135deg,#c3d0cc,#fff);position:relative;z-index:2;">
+          <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="相談員と話す女性" width="520" height="520" onerror="this.style.display='none'">
+        </div>
+      </div>
+      
+      <a href="#contact" class="btn" style="background: none rgb(129, 202, 165) !important; color: rgb(255, 255, 255) !important; -webkit-text-fill-color: rgb(255, 255, 255) !important; border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"><span>相談窓口・利用案内</span><span class="arrow">→</span></a>
+    </div>
+
+    <div class="welfare-right">
+      <div class="benefit reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="translate: 69px -198px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix3d(0.999843, 0.000443308, -0.0177138, 0, 0, 0.999687, 0.0250183, 0, 0.0177193, -0.0250144, 0.99953, 0, 0, -3.99966, 0, 1)" data-cetx="69" data-cety="-198">
+        <div class="benefit-icon" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">📅</div>
+        <h4>年末年始休所</h4>
+      </div>
+      <div class="benefit reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="translate: 87px -192px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix3d(1, -1.52997e-06, 0.000784326, 0, 0, 0.999998, 0.00195067, 0, -0.000784328, -0.00195067, 0.999998, 0, 0, -0.286619, 0, 1)" data-cetx="87" data-cety="-192">
+        <div class="benefit-icon" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">🎉</div>
+        <h4>アニバーサリー休暇</h4>
+      </div>
+      <div class="benefit reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="translate: -184px -4px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix3d(0.999909, 0.000220057, -0.0135187, 0, 0, 0.999868, 0.0162758, 0, 0.0135205, -0.0162743, 0.999776, 0, 0, -3.88035, 0, 1)" data-cetx="-184" data-cety="-4">
+        <div class="benefit-icon" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">🩺</div>
+        <h4>生理休暇</h4>
+      </div>
+      <div class="benefit reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="translate: 55px -173px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix3d(0.999679, 0.000306309, -0.0253187, 0, 0, 0.999927, 0.0120973, 0, 0.0253205, -0.0120934, 0.999606, 0, 0, -3.76538, 0, 1)" data-cetx="55" data-cety="-173">
+        <div class="benefit-icon" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">🛏️</div>
+        <h4>介護休業・介護休暇</h4>
+      </div>
+      <div class="benefit reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="translate: -199px 4px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix3d(0.999793, -0.000346008, 0.0203522, 0, 0, 0.999856, 0.0169985, 0, -0.0203552, -0.016995, 0.999648, 0, 0, -3.75939, 0, 1)" data-cetx="-199" data-cety="4">
+        <div class="benefit-icon" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">⏰</div>
+        <h4>ノー残業デー</h4>
+      </div>
+      <div class="benefit reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="translate: -175px 8px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;" data-cebt="matrix3d(0.999721, 0.000223431, -0.0235983, 0, 0, 0.999955, 0.00946768, 0, 0.0235994, -0.00946504, 0.999677, 0, 0, -3.86559, 0, 1)" data-cetx="-175" data-cety="8">
+        <div class="benefit-icon" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">📘</div>
+        <h4 class="" style="">資格取得補助</h4>
+      </div>
+      
+    </div>
+  </div>
+
+  <span class="floating-dot soft" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"></span>
+</section>
+
+    <section class="interview-section" id="interview" style="padding: 100px 24px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+      <div class="container">
+        <div class="interview-head reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>
+            <div class="eyebrow">利用者インタビュー</div>
+            <h2 class="heading-md fxa_pre fxa_s" style="cursor: move; --fxa-dur: 800ms; --fxa-scale: 0.86; opacity: 1 !important; font-size: 40px !important; line-height: 1.4 !important; margin-bottom: 0.6em !important; font-weight: 600 !important;">
+              るぽで過ごす皆さんの<br>
+              働き方をご紹介
+            </h2>
+          </div>
+          <a href="#contact" class="btn" style="background: none rgb(129, 202, 165) !important; color: rgb(255, 255, 255) !important; -webkit-text-fill-color: rgb(255, 255, 255) !important; border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: initial !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"><span>インタビュー一覧</span><span class="arrow">→</span></a>
+        </div>
+
+        <div class="interview-grid">
+          <article class="interview-card reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <div class="interview-thumb fxa_pre fxa_xl" style="cursor: move; --fxa-dur: 897ms; --fxa-dist: 159px; opacity: 1 !important;">
+              <img src="http://127.0.0.1:5000/uploads/up_04b676c6fb.jpg" alt="スタッフたち" width="520" height="360" onerror="this.style.display='none'">
+            </div>
+            <div class="interview-body">
+              <span class="tag">ご利用者</span>
+              <h3 class="interview-title">
+                <span>キャリアや将来への不安をクロストークで共有できた時間</span>
+                <span class="mini-arrow">→</span>
+              </h3>
+              <div class="interview-meta">
+                20代 / 週4日通所<br>
+                パソコン入力・軽作業 / 利用歴1年2か月
+              </div>
+            </div>
+          </article>
+
+          <article class="interview-card reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <div class="interview-thumb" style="">
+              <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="面談風景" width="520" height="360" onerror="this.style.display='none'">
+            </div>
+            <div class="interview-body">
+              <span class="tag">ご利用者</span>
+              <h3 class="interview-title">
+                <span>安定した通所を通じて、新しい挑戦への自信がついた</span>
+                <span class="mini-arrow">→</span>
+              </h3>
+              <div class="interview-meta">
+                30代 / 週5日通所<br>
+                封入・検品・事務補助 / 利用歴2年3か月
+              </div>
+            </div>
+          </article>
+
+          <article class="interview-card reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <div class="interview-thumb fxa_pre fxa_xr" style="cursor: move; --fxa-dur: 976ms; --fxa-dist: 149px; opacity: 1 !important;">
+              <img src="http://127.0.0.1:5000/uploads/up_685785ec90.jpg" alt="働く女性" width="520" height="360" onerror="this.style.display='none'">
+            </div>
+            <div class="interview-body">
+              <span class="tag">ご利用者</span>
+              <h3 class="interview-title">
+                <span>組織の継続のなかに「成長のために」がある場所</span>
+                <span class="mini-arrow">→</span>
+              </h3>
+              <div class="interview-meta">
+                20代 / 週3日通所<br>
+                ハンドメイド制作・梱包 / 利用歴8か月
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="footer-top" id="contact" style="padding: 100px 24px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+      <div class="container">
+        <div class="footer-brand reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a href="#" class="logo" aria-label="るぽ ホーム">
+            <span class="logo-mark" aria-hidden="true" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"></span>
+            <span>
+              るぽ
+              <small>就労継続支援B型事業所 採用サイト</small>
+            </span>
+          </a>
+        </div>
+
+        <div class="footer-panels">
+          <div class="footer-panel pale reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <div>
+              <h4>新卒採用</h4>
+            </div>
+          </div>
+          <div class="footer-panel red reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <div>
+              <h4>キャリア採用</h4>
+            </div>
+            <span class="plus">○</span>
+          </div>
+          <div class="footer-panel red reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <div>
+              <h4>アルムナイ・ネットワーク</h4>
+            </div>
+            <span class="plus">○</span>
+          </div>
+          <div class="footer-panel red reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="4" style="transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <div>
+              <h4>パートタイマー採用</h4>
+              <small>相談員・作業サポート募集</small>
+            </div>
+            <span class="plus">○</span>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <div class="footer-col reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <h5>働き方・制度</h5>
+            <ul>
+              <li><span>働く環境</span><span>＋</span></li>
+              <li><span>気になる人物像</span><span>＋</span></li>
+              <li><span>人材育成・キャリアパス</span><span>＋</span></li>
+              <li><span>福利厚生・社内制度</span><span>＋</span></li>
+              <li><span>アルムナイ・ネットワーク</span><span>＋</span></li>
+            </ul>
+          </div>
+
+          <div class="footer-col reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <h5>ご利用インタビュー</h5>
+            <ul>
+              <li><span>利用者インタビュー</span><span>＋</span></li>
+              <li><span>キャリア支援者の座談会</span><span>＋</span></li>
+              <li><span>安心して通える理由を詳しく</span><span>＋</span></li>
+              <li><span>現場での1日の流れ</span><span>＋</span></li>
+            </ul>
+          </div>
+
+          <div class="footer-col reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+            <h5>るぽについて</h5>
+            <ul>
+              <li><span>会社概要</span><span>□</span></li>
+              <li><span>アクセス</span><span>□</span></li>
+              <li><span>支援方針</span><span>□</span></li>
+              <li><span>プライバシーポリシー</span><span>□</span></li>
+              <li><span>個別における個人情報の取り扱い</span><span>□</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <div>るぽについて ｜ 個人情報保護方針 ｜ サイトマップ</div>
+        <div>copyright © 2026 Reposu Support Service All Rights Reserved.</div>
+      </div>
+    </footer>
+  </main><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div style="position: absolute; left: 469px; top: 2699px; z-index: 60; font-weight: 700; font-family: inherit; line-height: 1.4; padding: 4px 8px; white-space: nowrap; --fxa-dur: 800ms; --fxa-dist: 28px; font-size: 38.7px !important; color: rgb(129, 202, 165) !important; translate: 230px 490px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; -webkit-text-fill-color: rgb(129, 202, 165) !important;" class="fxa_pre fxa_y" data-cebt="" data-cetx="230" data-cety="490">作業風景</div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+  
+  
+  
+
+  
+
+  
+
+  <script>
+    (() => {
+      const targets = document.querySelectorAll('.reveal');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+      targets.forEach(el => io.observe(el));
+
+      const cards = document.querySelectorAll('.message-card, .interview-card, .benefit, .gallery-item, .bubble');
+      cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          if (window.innerWidth <= 768) return;
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width;
+          const y = (e.clientY - r.top) / r.height;
+          const rx = (0.5 - y) * 4;
+          const ry = (x - 0.5) * 4;
+          card.style.transform = `translateY(-4px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = '';
+        });
+      });
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+<script id="fxa-run">(function(){var d=document,h=d.documentElement;if(!d.querySelector(".fxa_pre")){return;}h.classList.add("fxa-on");[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}if(!("IntersectionObserver" in window)){all().forEach(function(el){el.classList.add("fxa_in");});return;}var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){t.classList.add("fxa_in");});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",obs);else obs();})();</script>
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

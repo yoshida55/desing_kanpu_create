@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkWorks | 読むたび、進む。働く旅へ。</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --blue:#0071b9;
+      --blue-light:#b2d4ea;
+      --blue-pale:#e9f5ff;
+      --yellow:#f2e018;
+      --text:#333333;
+      --bg:#ffffff;
+      --bg-soft:#fafafa;
+      --shadow:5px 5px 10px rgba(174,174,174,.1);
+      --radius:8px;
+      --container:1440px;
+      --serif:"Times New Roman", serif;
+      --sans:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      background:var(--bg);
+      font-family:var(--serif);
+      line-height:1.8;
+      overflow-x:hidden;
+    }
+    a{text-decoration:none;color:inherit}
+    img{max-width:100%;display:block}
+    .container{
+      width:min(calc(100% - 32px), var(--container));
+      margin-inline:auto;
+    }
+    .section{
+      position:relative;
+      padding:82px 0;
+    }
+    .section-tight{padding:54px 0}
+    .eyebrow{
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      margin-bottom:10px;
+      position:relative;
+      display:inline-block;
+      padding-left:20px;
+    }
+    .eyebrow::before{
+      content:"";
+      position:absolute;
+      left:0; top:50%;
+      width:12px; height:1px;
+      background:var(--blue);
+    }
+    .title{
+      font-family:var(--sans);
+      color:var(--blue);
+      font-weight:700;
+      line-height:1.15;
+      margin:0 0 18px;
+    }
+    .lead{
+      font-size:15px;
+      max-width:62ch;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 22px;
+      border-radius:999px;
+      background:var(--blue);
+      color:#fff;
+      font-family:var(--sans);
+      font-size:13px;
+      font-weight:700;
+      box-shadow:var(--shadow);
+      transition:transform .35s ease, box-shadow .35s ease, background .35s ease;
+    }
+    .btn:hover{transform:translateY(-3px); box-shadow:0 10px 24px rgba(0,113,185,.22)}
+    .btn-outline{
+      background:#fff;
+      color:var(--blue);
+      border:1px solid rgba(0,113,185,.22);
+    }
+    .pill{
+      display:inline-block;
+      font-family:var(--sans);
+      font-size:11px;
+      color:var(--blue);
+      border:1px solid rgba(0,113,185,.26);
+      border-radius:999px;
+      padding:6px 12px;
+      background:#fff;
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:40;
+      background:rgba(255,255,255,.82);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid rgba(0,113,185,.08);
+    }
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+      padding:14px 0;
+      font-family:var(--sans);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      color:var(--blue);
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+    .brand-mark{
+      width:28px;height:28px;border-radius:50%;
+      background:linear-gradient(135deg,var(--blue),#50a8df);
+      position:relative;
+      box-shadow:var(--shadow);
+    }
+    .brand-mark::after{
+      content:"";
+      position:absolute; inset:8px 6px 8px 10px;
+      border-radius:30px 30px 30px 0;
+      background:#fff;
+      transform:rotate(-26deg);
+      opacity:.95;
+    }
+    .nav-links{
+      display:flex; align-items:center; gap:18px;
+      font-size:12px; color:#4b4b4b;
+    }
+    .nav-links a{transition:color .25s ease}
+    .nav-links a:hover{color:var(--blue)}
+    .nav-cta{display:flex; gap:10px; align-items:center}
+    .nav .small-btn{
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      border:1px solid rgba(0,113,185,.2);
+      background:#fff;
+      color:var(--blue);
+    }
+    .nav .small-btn.primary{
+      background:var(--yellow);
+      color:#1f2e3b;
+      border-color:transparent;
+    }
+
+    .hero{
+      padding:28px 0 62px;
+      background:
+        radial-gradient(circle at 78% 0%, rgba(178,212,234,.7), transparent 36%),
+        linear-gradient(180deg,#ffffff 0%, #f7fbff 100%);
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:36px;
+      align-items:end;
+    }
+    .hero-left{
+      min-width:0;
+      position:relative;
+    }
+    .hero-panels{
+      display:grid;
+      grid-template-columns:1fr 1.2fr 1fr;
+      gap:14px;
+      align-items:end;
+      margin-bottom:22px;
+    }
+    .hero-panel{
+      border-radius:14px;
+      overflow:hidden;
+      background:linear-gradient(180deg,var(--blue-light),#dff1fb);
+      box-shadow:var(--shadow);
+      aspect-ratio: 1 / 1.25;
+      position:relative;
+    }
+    .hero-panel.center{aspect-ratio:1/1.42}
+    .hero-panel img{
+      width:100%; height:100%; object-fit:cover;
+    }
+    .hero-maincard{
+      position:relative;
+      margin-top:-18px;
+      margin-left:8%;
+      width:72%;
+      border-radius:10px;
+      background:var(--blue);
+      padding:22px 20px 20px;
+      box-shadow:0 18px 40px rgba(0,113,185,.18);
+    }
+    .hero-maincard .office{
+      position:absolute;
+      right:-16px; bottom:-8px;
+      width:82px; height:82px;
+      border-radius:50%;
+      background:linear-gradient(180deg,#f3fbff,#d7efff);
+      border:6px solid #fff;
+      box-shadow:var(--shadow);
+      display:flex; align-items:center; justify-content:center;
+      font-size:30px;
+    }
+    .hero-maincard p{
+      margin:0;
+      color:#fff;
+      font-family:var(--sans);
+      font-size:28px;
+      font-weight:800;
+      line-height:1.35;
+      letter-spacing:.08em;
+    }
+    .hero-maincard small{
+      display:block;
+      margin-top:8px;
+      color:#dff2ff;
+      font-family:var(--sans);
+      font-size:12px;
+      letter-spacing:.12em;
+    }
+    .hero-side{
+      display:grid;
+      grid-template-columns:80px 1fr;
+      gap:28px;
+      align-items:center;
+      min-height:100%;
+    }
+    .meta-list{
+      font-family:var(--sans);
+      font-size:10px;
+      line-height:1.9;
+      color:var(--blue);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .hero-copy{
+      position:relative;
+      min-height:490px;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+    }
+    .hero-copy-inner{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+    }
+    .hero-vertical{
+      font-family:var(--sans);
+      color:var(--blue);
+      font-weight:800;
+      font-size:58px;
+      line-height:1.05;
+      letter-spacing:.06em;
+    }
+    .hero-vertical.small{
+      font-size:48px;
+      color:#1e5f95;
+      opacity:.92;
+    }
+    .hero-floatbtn{
+      position:absolute;
+      right:0;
+      bottom:18px;
+    }
+
+    .about{
+      background:#fff;
+    }
+    .about-grid{
+      display:grid;
+      grid-template-columns:220px minmax(0,1fr) 180px;
+      gap:36px;
+      align-items:start;
+    }
+    .about-text{
+      font-size:15px;
+      color:#2f4e68;
+    }
+    .about-text p{margin:0 0 18px}
+    .about-side{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:46px;
+      font-weight:700;
+      letter-spacing:.08em;
+      justify-self:end;
+    }
+
+    .cta-banner{
+      padding-top:8px;
+    }
+    .cta-box{
+      position:relative;
+      border-radius:10px;
+      background:var(--blue);
+      padding:22px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .cta-box::before{
+      content:"";
+      position:absolute;
+      inset:14px 14px auto 14px;
+      height:calc(100% - 28px);
+      background:linear-gradient(180deg,#ffffff, #f7fcff);
+      border-radius:8px;
+    }
+    .cta-content{
+      position:relative;
+      z-index:2;
+      display:grid;
+      grid-template-columns:1.3fr 1fr 150px;
+      align-items:center;
+      gap:18px;
+      min-height:150px;
+    }
+    .cta-copy{
+      color:#fff;
+      font-family:var(--sans);
+      font-weight:800;
+      font-size:28px;
+      padding-left:6px;
+    }
+    .cta-form{
+      justify-self:center;
+      width:min(100%,460px);
+      background:#fff;
+      border-radius:8px;
+      border:2px solid rgba(0,113,185,.15);
+      padding:14px;
+      text-align:center;
+      box-shadow: inset 0 0 0 1px rgba(0,113,185,.04);
+    }
+    .cta-form .mini{
+      font-family:var(--sans);
+      color:#6a7f91;
+      font-size:11px;
+      letter-spacing:.06em;
+    }
+    .cta-form .line{
+      margin:7px 0 12px;
+      height:1px; background:#dceaf3;
+    }
+    .cta-ill{
+      position:relative;
+      z-index:2;
+      align-self:end;
+      justify-self:end;
+      width:120px;
+    }
+    .cta-bubble{
+      position:absolute;
+      right:94px; top:10px;
+      width:100px; height:100px;
+      border-radius:50%;
+      background:rgba(255,255,255,.2);
+      color:#fff;
+      font-family:var(--sans);
+      font-size:11px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      line-height:1.5;
+      border:1px solid rgba(255,255,255,.3);
+    }
+
+    .service-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:34px;
+      align-items:start;
+    }
+    .service-card{
+      position:relative;
+      padding-top:8px;
+      transition:transform .35s ease;
+    }
+    .service-card:hover{transform:translateY(-4px)}
+    .service-icon{
+      width:120px; aspect-ratio:1/1;
+      margin-bottom:18px;
+      background:linear-gradient(180deg,#f2fbff,#dbeefa);
+      border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .service-icon img{width:72%;height:72%;object-fit:contain}
+    .service-card h3{
+      margin:0 0 10px;
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:18px;
+      line-height:1.4;
+    }
+    .service-card p{
+      font-size:13px;
+      line-height:1.9;
+      margin:0;
+      color:#445c70;
+    }
+    .service-note{
+      position:absolute;
+      right:0; top:0;
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:12px;
+      line-height:1.25;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      text-align:right;
+    }
+
+    .wave-section{
+      background:linear-gradient(180deg, #b8d9ee 0%, #b7d9ed 100%);
+      overflow:hidden;
+      padding-bottom:110px;
+    }
+    .mega-text{
+      font-family:var(--sans);
+      font-size:74px;
+      font-weight:800;
+      color:var(--blue);
+      line-height:.95;
+      letter-spacing:-.03em;
+      white-space:nowrap;
+      transform:translateX(-6%);
+      margin:0 0 42px;
+      opacity:.95;
+    }
+    .center-intro{
+      text-align:center;
+      margin:0 auto 40px;
+      max-width:920px;
+    }
+    .center-intro .title{
+      font-size:28px;
+      color:#235f93;
+      margin-bottom:12px;
+    }
+    .center-intro p{
+      margin:0 auto;
+      font-size:13px;
+      line-height:2;
+      color:#355970;
+      max-width:84ch;
+    }
+    .feature-steps{
+      display:grid;
+      grid-template-columns:1fr 160px 1fr;
+      gap:24px;
+      align-items:center;
+      margin-top:34px;
+    }
+    .phone-card{
+      background:#fff;
+      border-radius:10px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:1fr 160px 42px;
+      gap:12px;
+      align-items:center;
+      min-height:300px;
+      transition:transform .35s ease, box-shadow .35s ease;
+    }
+    .phone-card:hover{transform:translateY(-4px); box-shadow:0 18px 34px rgba(0,0,0,.08)}
+    .phone-card.reverse{grid-template-columns:42px 160px 1fr}
+    .phone-card.reverse .vlabels{order:1}
+    .phone-card.reverse .mock{order:2}
+    .phone-card.reverse .info{order:3}
+    .phone-card .info h4{
+      margin:0 0 10px;
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:19px;
+      line-height:1.4;
+    }
+    .phone-card .info p{
+      margin:0;
+      font-size:12px;
+      line-height:1.95;
+      color:#466679;
+    }
+    .mock{
+      justify-self:center;
+      width:160px;
+      height:250px;
+      border:8px solid #edf5fa;
+      border-radius:26px;
+      background:linear-gradient(180deg,#fefefe,#f3f9fd);
+      position:relative;
+      overflow:hidden;
+    }
+    .mock::before{
+      content:"";
+      position:absolute;
+      top:10px; left:50%; transform:translateX(-50%);
+      width:52px; height:7px; border-radius:999px;
+      background:#d6e8f3;
+    }
+    .mock img{width:100%; height:100%; object-fit:cover}
+    .vlabels{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      font-family:var(--sans);
+      font-size:10px;
+      color:#84a7c4;
+      letter-spacing:.1em;
+      align-self:stretch;
+      display:flex;
+      justify-content:space-between;
+    }
+    .passport-center{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100%;
+      min-height:300px;
+    }
+    .passport-book{
+      width:110px;
+      aspect-ratio: 4 / 5.8;
+      border-radius:8px;
+      background:var(--blue);
+      color:#fff;
+      box-shadow:0 18px 36px rgba(0,113,185,.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:12px;
+      font-family:var(--sans);
+      text-align:center;
+      transform:rotate(-2deg);
+    }
+    .passport-book::before{
+      content:"";
+      width:34px; height:34px;
+      border:2px solid #fff;
+      border-radius:4px;
+      box-shadow: inset 0 -10px 0 rgba(255,255,255,.12);
+    }
+    .passport-book span{font-size:11px; letter-spacing:.14em}
+
+    .wave-bottom{
+      position:absolute;
+      left:0; right:0; bottom:-1px;
+      height:90px;
+      background:
+        radial-gradient(60px 40px at 5% 100%, #fff 98%, transparent 100%),
+        radial-gradient(90px 50px at 20% 100%, #fff 98%, transparent 100%),
+        radial-gradient(80px 50px at 40% 100%, #fff 98%, transparent 100%),
+        radial-gradient(90px 55px at 60% 100%, #fff 98%, transparent 100%),
+        radial-gradient(80px 45px at 80% 100%, #fff 98%, transparent 100%),
+        radial-gradient(90px 52px at 98% 100%, #fff 98%, transparent 100%);
+      background-repeat:no-repeat;
+      background-size:20% 100%;
+    }
+
+    .flow{
+      background:#fff;
+      padding-top:58px;
+    }
+    .flow-grid{
+      display:grid;
+      grid-template-columns:170px 1fr;
+      gap:48px;
+      align-items:start;
+    }
+    .flow-side{
+      display:flex;
+      gap:20px;
+      align-items:flex-start;
+    }
+    .flow-vertical{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:30px;
+      font-weight:700;
+      letter-spacing:.08em;
+      line-height:1.4;
+    }
+    .flow-list{
+      display:grid;
+      gap:24px;
+      max-width:760px;
+    }
+    .flow-item{
+      display:grid;
+      grid-template-columns:120px 44px 1fr;
+      gap:18px;
+      align-items:center;
+      transition:transform .35s ease;
+    }
+    .flow-item:hover{transform:translateX(6px)}
+    .flow-thumb{
+      width:120px;height:120px;border-radius:50%;
+      background:linear-gradient(180deg,#eff9ff,#d9eefb);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .flow-thumb img{width:78%;height:78%;object-fit:contain}
+    .flow-arrow{
+      color:#7ea8c7;
+      font-size:24px;
+      text-align:center;
+      font-family:var(--sans);
+    }
+    .flow-item h4{
+      margin:0 0 8px;
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:18px;
+    }
+    .flow-item p{
+      margin:0;
+      font-size:13px;
+      color:#47697e;
+      line-height:1.9;
+    }
+    .flow-step{
+      display:block;
+      color:#88a9c3;
+      font-family:var(--sans);
+      font-size:10px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+
+    .plan{
+      background:linear-gradient(180deg,#ffffff 0%, #fafcfe 100%);
+    }
+    .plan-grid{
+      display:grid;
+      grid-template-columns:170px 1fr;
+      gap:38px;
+      align-items:start;
+    }
+    .plan-main{
+      display:grid;
+      grid-template-columns:1fr 1.1fr;
+      gap:30px;
+      align-items:center;
+    }
+    .plan-visual{
+      position:relative;
+      min-height:300px;
+    }
+    .plan-visual .book-a{
+      position:absolute; left:28px; top:56px;
+      width:110px; aspect-ratio:4/5.8; border-radius:8px;
+      background:#006ab0;
+      transform:rotate(-9deg);
+      box-shadow:var(--shadow);
+    }
+    .plan-visual .book-b{
+      position:absolute; left:150px; top:12px;
+      width:96px; aspect-ratio:4/5.8; border-radius:8px;
+      background:#0a7ac4;
+      transform:rotate(14deg);
+      box-shadow:var(--shadow);
+    }
+    .plan-visual .tickets{
+      position:absolute; left:185px; top:86px;
+      width:150px; height:100px;
+      background:linear-gradient(180deg,#eef9ff,#dcebfa);
+      border-radius:8px;
+      transform:rotate(-6deg);
+      box-shadow:var(--shadow);
+    }
+    .price-card{
+      background:#edf7fd;
+      border-radius:10px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,113,185,.08);
+      max-width:560px;
+    }
+    .price-top{
+      display:grid;
+      grid-template-columns:1.2fr .9fr;
+      gap:14px;
+      align-items:end;
+      margin-bottom:12px;
+    }
+    .price-left small{
+      display:block;
+      color:#7b9ab2;
+      font-family:var(--sans);
+      font-size:11px;
+      margin-bottom:6px;
+    }
+    .price-amount{
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:44px;
+      font-weight:800;
+      line-height:1;
+    }
+    .price-amount span{font-size:18px}
+    .price-table{
+      background:#fff;
+      border-radius:8px;
+      overflow:hidden;
+      border:1px solid #d8ebf6;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:120px 1fr;
+      border-top:1px solid #e5f1f8;
+    }
+    .row:first-child{border-top:0}
+    .row div{
+      padding:10px 12px;
+      font-size:12px;
+      line-height:1.6;
+    }
+    .row div:first-child{
+      background:#f7fbfe;
+      color:#5a7e98;
+      font-family:var(--sans);
+      font-weight:700;
+    }
+    .plan-detail{
+      margin-top:40px;
+      border-top:1px solid #cfe4f1;
+      padding-top:24px;
+    }
+    .plan-detail h3{
+      margin:0 0 20px;
+      text-align:center;
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:16px;
+      font-weight:700;
+    }
+    .plan-columns{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      max-width:880px;
+      margin-inline:auto;
+    }
+    .plan-info{
+      padding-bottom:14px;
+      border-bottom:1px solid #dbeaf4;
+    }
+    .plan-info h4{
+      margin:0 0 8px;
+      color:#2f6a97;
+      font-family:var(--sans);
+      font-size:14px;
+    }
+    .plan-info p{
+      margin:0;
+      font-size:12px;
+      color:#4f6d80;
+      line-height:1.9;
+    }
+    .timeline{
+      margin-top:28px;
+      background:#fff;
+      border-radius:10px;
+      padding:20px;
+      box-shadow:var(--shadow);
+      border:1px solid #dbeaf4;
+      overflow:auto;
+    }
+    .timeline-inner{
+      min-width:760px;
+      display:grid;
+      grid-template-columns:80px 1fr 80px 1fr 80px;
+      align-items:center;
+      gap:18px;
+    }
+    .time-node{
+      text-align:center;
+      font-family:var(--sans);
+      color:#587e99;
+      font-size:12px;
+    }
+    .time-badge{
+      margin:8px auto 0;
+      width:38px;height:38px;border-radius:50%;
+      background:#f2f8fc;
+      border:1px solid #d6e8f4;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--blue);
+      font-weight:700;
+    }
+    .time-line{
+      position:relative;
+      height:4px;
+      background:#d9ebf6;
+      border-radius:999px;
+    }
+    .time-line::after{
+      content:"";
+      position:absolute; left:0; top:0; bottom:0;
+      width:72%;
+      background:linear-gradient(90deg,var(--blue),#58a7dd);
+      border-radius:999px;
+    }
+
+    .faq{
+      background:linear-gradient(180deg,#ffffff 0%, #fbfdff 100%);
+    }
+    .faq-wrap{
+      position:relative;
+      display:grid;
+      grid-template-columns:180px 1fr;
+      gap:34px;
+      align-items:start;
+    }
+    .faq-icon-stack{
+      position:absolute;
+      right:10px; top:-8px;
+      width:86px;
+      transform:rotate(10deg);
+    }
+    .accordion{
+      display:grid;
+      gap:8px;
+    }
+    .acc-item{
+      background:#eef7fd;
+      border:1px solid #d8ebf5;
+      border-radius:6px;
+      overflow:hidden;
+    }
+    .acc-head{
+      width:100%;
+      border:0;
+      background:transparent;
+      text-align:left;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      cursor:pointer;
+      color:#315f7d;
+      font-family:var(--sans);
+      font-size:13px;
+      font-weight:700;
+    }
+    .acc-head span:last-child{
+      color:var(--blue);
+      font-size:20px;
+      line-height:1;
+    }
+    .acc-body{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .35s ease;
+      background:#fff;
+    }
+    .acc-body p{
+      margin:0;
+      padding:0 16px 16px;
+      font-size:12px;
+      line-height:1.9;
+      color:#506f83;
+    }
+    .faq-more{
+      margin-top:18px;
+      text-align:right;
+    }
+
+    .voice{
+      overflow:hidden;
+    }
+    .voice-row{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:20px;
+      align-items:start;
+      margin-top:12px;
+    }
+    .voice-card{
+      text-align:center;
+      padding:10px 8px 0;
+      transition:transform .35s ease;
+    }
+    .voice-card:hover{transform:translateY(-5px)}
+    .voice-icon{
+      width:112px;height:112px;margin:0 auto 14px;
+      border-radius:50%;
+      background:linear-gradient(180deg,#f0f9ff,#dfeffc);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .voice-icon img{width:100%;height:100%;object-fit:cover}
+    .voice-card h4{
+      margin:0 0 8px;
+      color:#2e6793;
+      font-family:var(--sans);
+      font-size:13px;
+      line-height:1.6;
+      min-height:42px;
+    }
+    .voice-card p{
+      margin:0;
+      font-size:11px;
+      line-height:1.9;
+      color:#5a788f;
+    }
+    .voice-dots{
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      margin-top:18px;
+    }
+    .voice-dots span{
+      width:10px;height:10px;border-radius:50%;
+      background:#b8d2e6;
+    }
+    .voice-dots span.active{background:var(--blue)}
+
+    .follow{
+      padding-top:50px;
+      text-align:center;
+    }
+    .follow h3{
+      margin:0 0 8px;
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:34px;
+      line-height:1.1;
+    }
+    .sns{
+      display:flex; justify-content:center; gap:10px; margin:12px 0 0;
+    }
+    .sns a{
+      width:34px;height:34px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--blue);
+      color:#fff;
+      font-family:var(--sans);
+      font-size:14px;
+      transition:transform .3s ease, opacity .3s ease;
+    }
+    .sns a:hover{transform:translateY(-3px); opacity:.9}
+
+    footer{
+      padding:44px 0 60px;
+      border-top:1px solid rgba(0,113,185,.08);
+    }
+    .footer-top{
+      display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+      flex-wrap:wrap;
+    }
+    .footer-copy{
+      color:var(--blue);
+      font-family:var(--sans);
+      font-size:28px;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .footer-logo{
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:62px;
+      font-weight:800;
+      letter-spacing:-.03em;
+      line-height:1;
+    }
+    .footer-links{
+      font-family:var(--sans);
+      font-size:11px;
+      color:#6b8295;
+      display:flex; gap:16px; flex-wrap:wrap;
+    }
+
+    .reveal{}
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(28px);
+      transition:opacity .9s ease, transform .9s ease;
+    }
+    html.js .reveal.show{
+      opacity:1;
+      transform:none;
+    }
+    html.js .hero-anim{
+      opacity:0;
+      transform:translateY(18px) scale(.985);
+      transition:opacity .95s ease, transform .95s ease;
+    }
+    html.js .hero-anim.show{opacity:1; transform:none}
+    html.js .delay-1{transition-delay:.08s}
+    html.js .delay-2{transition-delay:.16s}
+    html.js .delay-3{transition-delay:.24s}
+    html.js .delay-4{transition-delay:.32s}
+    html.js .delay-5{transition-delay:.40s}
+
+    @media (max-width: 1100px){
+      .hero-grid,
+      .about-grid,
+      .flow-grid,
+      .plan-grid,
+      .faq-wrap,
+      .plan-main{grid-template-columns:1fr}
+      .hero-side{grid-template-columns:1fr}
+      .hero-copy{
+        min-height:auto;
+        justify-content:flex-start;
+      }
+      .hero-copy-inner,
+      .about-side,
+      .flow-vertical{writing-mode:horizontal-tb}
+      .hero-copy-inner{display:block}
+      .hero-vertical,.hero-vertical.small{font-size:clamp(34px,7vw,56px)}
+      .about-side{justify-self:start;font-size:34px}
+      .feature-steps{grid-template-columns:1fr}
+      .passport-center{min-height:auto}
+      .cta-content{grid-template-columns:1fr}
+      .cta-copy{font-size:24px}
+      .cta-bubble{display:none}
+      .service-grid{grid-template-columns:1fr}
+      .voice-row{grid-template-columns:repeat(2,1fr)}
+      .mega-text{font-size:58px;white-space:normal;transform:none}
+      .hero-maincard{width:86%;margin-left:7%}
+      .faq-icon-stack{display:none}
+    }
+    @media (max-width: 700px){
+      .nav-links{display:none}
+      .hero-panels{grid-template-columns:1fr 1fr}
+      .hero-panel.center{grid-column:1 / -1; aspect-ratio:16/10}
+      .meta-list{display:flex; gap:14px; flex-wrap:wrap}
+      .phone-card,.phone-card.reverse{grid-template-columns:1fr}
+      .vlabels{writing-mode:horizontal-tb}
+      .flow-item{grid-template-columns:96px 1fr}
+      .flow-arrow{display:none}
+      .voice-row{grid-template-columns:1fr}
+      .footer-logo{font-size:40px}
+      .footer-copy{font-size:22px}
+      .section{padding:62px 0}
+      .mega-text{font-size:42px}
+      .price-top{grid-template-columns:1fr}
+      .timeline-inner{min-width:620px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a href="#" class="brand">
+        <span class="brand-mark"></span>
+        <span>LINKWORKS</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#about">私たちについて</a>
+        <a href="#service">支援内容</a>
+        <a href="#flow">ご利用の流れ</a>
+        <a href="#plan">料金</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#voice">利用者の声</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="small-btn" href="#faq">見学予約</a>
+        <a class="small-btn primary" href="#contact">無料相談</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-left">
+          <div class="hero-panels">
+            <div class="hero-panel hero-anim delay-1">
+              <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="オフィスのコーヒー" width="420" height="520" onerror="this.style.display='none'">
+            </div>
+            <div class="hero-panel center hero-anim delay-2">
+              <img src="http://127.0.0.1:5000/uploads/up_18537fbb29.png" alt="明るい打ち合わせ" width="560" height="760" onerror="this.style.display='none'">
+            </div>
+            <div class="hero-panel hero-anim delay-3">
+              <img src="http://127.0.0.1:5000/uploads/up_093ce90730.png" alt="オフィスを案内するスタッフ" width="420" height="520" onerror="this.style.display='none'">
+            </div>
+          </div>
+          <div class="hero-maincard hero-anim delay-4">
+            <p>働きたい。<br>続けたい。<br>自分らしく。</p>
+            <small>SUPPORT FOR WORK & DAILY STEPS</small>
+            <div class="office">✈️</div>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="meta-list hero-anim delay-2">
+            <div>Work Support</div>
+            <div>Daily Skills</div>
+            <div>Career Design</div>
+          </div>
+          <div class="hero-copy">
+            <div class="hero-copy-inner">
+              <div class="hero-vertical hero-anim delay-3">進みたい、<br>その気持ちに。</div>
+              <div class="hero-vertical small hero-anim delay-4">一歩ずつ伴走する。</div>
+            </div>
+            <div class="hero-floatbtn hero-anim delay-5">
+              <a href="#contact" class="btn">無料相談はこちら</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section about">
+      <div class="container about-grid">
+        <div class="reveal">
+          <div class="eyebrow">About</div>
+        </div>
+        <div class="about-text">
+          <p class="reveal delay-1">本を開くように、次の働き方をひらく。</p>
+          <p class="reveal delay-2">LinkWorksは、就労に不安がある方や、生活のリズムを整えながら社会とのつながりを育てたい方に向けた、伴走型の就労支援サービスです。</p>
+          <p class="reveal delay-3">相談の時間、毎日の通所、実務に近い軽作業やPC練習。小さな成功体験を積み重ねながら、「自分にもできるかもしれない」を「続けていける」に変えていきます。</p>
+          <p class="reveal delay-4">見学も相談も、まだ迷っている段階でも大丈夫です。あなたの今の気持ちに合わせて、無理のないペースをご提案します。</p>
+          <div class="reveal delay-5" style="margin-top:26px;">
+            <a href="#contact" class="btn btn-outline">くわしく見る →</a>
+          </div>
+        </div>
+        <div class="about-side reveal delay-3">働く旅に、<br>出よう。</div>
+      </div>
+    </section>
+
+    <section class="section-tight cta-banner">
+      <div class="container">
+        <div class="cta-box reveal">
+          <div class="cta-bubble">見学・相談は<br>いつでも受付中</div>
+          <div class="cta-content">
+            <div class="cta-copy">LinkWorksで<br>自分らしく働き始める。</div>
+            <div class="cta-form">
+              <div class="mini">オンライン相談 / 見学予約 / 資料請求</div>
+              <div class="line"></div>
+              <a href="#contact" class="btn" style="background:#14b63d;">LINEで相談する</a>
+            </div>
+            <div class="cta-ill">
+              <img src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="青い小鳥" width="120" height="120" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="service" class="section">
+      <div class="container">
+        <div class="service-note reveal">THE<br>WORK<br>PASSPORT</div>
+        <div class="eyebrow reveal">Service</div>
+        <div class="service-grid">
+          <div class="service-card reveal delay-1">
+            <div class="service-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_940e12aa9b.png" alt="チェックリストのイラスト" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <h3>あなたの現在地を確認</h3>
+            <p>体調、生活リズム、得意不得意、これまでの経験を整理し、今の自分に合うスタート地点を一緒に見つけます。相談だけでも利用可能です。</p>
+          </div>
+          <div class="service-card reveal delay-2">
+            <div class="service-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="配送やつながりのイラスト" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <h3>毎日に、小さな役割を作る</h3>
+            <p>軽作業、封入、梱包、PC入力など、無理のない作業から段階的に挑戦。通所習慣や報連相、集中時間の作り方も自然に身につけます。</p>
+          </div>
+          <div class="service-card reveal delay-3">
+            <div class="service-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="紙飛行機のイラスト" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <h3>次の働き方へ、伴走支援</h3>
+            <p>履歴書作成、面接練習、職場定着までをトータルにサポート。就職がゴールではなく、「続けられる働き方」を一緒に育てます。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wave-section">
+      <div class="container">
+        <h2 class="mega-text reveal">What is work passport ?&nbsp; What is LinkWorks ?</h2>
+        <div class="center-intro reveal delay-1">
+          <div class="title">「支援パスポート」について</div>
+          <p>LinkWorksでは、相談内容や目標、日々の変化をひとつの流れとして可視化する独自の支援パスポートを用意しています。いま何ができていて、次にどこへ向かうのかが分かるから、焦らず着実に前へ進めます。ご本人・ご家族・支援員のあいだでも情報共有しやすく、安心して続けられる仕組みです。</p>
+        </div>
+
+        <div class="feature-steps">
+          <div class="phone-card reveal delay-2">
+            <div class="info">
+              <span class="pill">Feature 01</span>
+              <h4>通所や生活の記録を、<br>ムリなく見える化</h4>
+              <p>出席状況や取り組んだ作業、気分の変化などをやさしく整理。振り返りがしやすくなり、次の目標設定もスムーズです。</p>
+            </div>
+            <div class="mock" style="background:linear-gradient(180deg,#f8fcff,#edf7fd);">
+              <img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="パソコン作業" width="160" height="250" onerror="this.style.display='none'">
+            </div>
+            <div class="vlabels">
+              <span>Record</span>
+              <span>Progress</span>
+            </div>
+          </div>
+
+          <div class="passport-center reveal delay-3">
+            <div class="passport-book">
+              <span>LINKWORKS</span>
+              <span>PASSPORT</span>
+            </div>
+          </div>
+
+          <div class="phone-card reverse reveal delay-4">
+            <div class="vlabels">
+              <span>Support</span>
+              <span>Review</span>
+            </div>
+            <div class="mock" style="background:linear-gradient(180deg,#fdfefe,#eef8fc);">
+              <img src="http://127.0.0.1:5000/uploads/up_1b516beb32.png" alt="資料を確認するスタッフ" width="160" height="250" onerror="this.style.display='none'">
+            </div>
+            <div class="info">
+              <span class="pill">Feature 02</span>
+              <h4>相談内容も共有できるから、<br>支援がぶれにくい</h4>
+              <p>目標や配慮事項、得意なことを見える形で残せるため、担当が変わっても安心。あなたに合う支援が継続しやすくなります。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wave-bottom"></div>
+    </section>
+
+    <section id="flow" class="section flow">
+      <div class="container flow-grid">
+        <div class="flow-side">
+          <div class="eyebrow reveal">Flow</div>
+          <div class="flow-vertical reveal delay-2">本が開くように、<br>働く準備を<br>ひとつずつ。</div>
+        </div>
+        <div class="flow-list">
+          <div class="flow-item reveal delay-1">
+            <div class="flow-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_d83a2a4e87.png" alt="利用開始手続きのイラスト" width="120" height="120" onerror="this.style.display='none'">
+            </div>
+            <div class="flow-arrow">↓</div>
+            <div>
+              <span class="flow-step">Step 01</span>
+              <h4>見学・相談・オンライン面談</h4>
+              <p>いま困っていること、働くうえで気になることを丁寧にお聞きします。施設見学や一日の流れのご説明もこの段階で行います。</p>
+            </div>
+          </div>
+
+          <div class="flow-item reveal delay-2">
+            <div class="flow-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_5e702ca432.jpg" alt="パソコン作業" width="120" height="120" onerror="this.style.display='none'">
+            </div>
+            <div class="flow-arrow">↓</div>
+            <div>
+              <span class="flow-step">Step 02</span>
+              <h4>利用計画とペースを相談</h4>
+              <p>通所回数や取り組む作業内容、生活面のサポートも含めて、続けられるスケジュールを一緒に設計していきます。</p>
+            </div>
+          </div>
+
+          <div class="flow-item reveal delay-3">
+            <div class="flow-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_0bb716a02d.png" alt="梱包作業" width="120" height="120" onerror="this.style.display='none'">
+            </div>
+            <div class="flow-arrow">↓</div>
+            <div>
+              <span class="flow-step">Step 03</span>
+              <h4>日々の記録と振り返りを重ねる</h4>
+              <p>作業や学びの内容を支援パスポートに蓄積し、定期的に振り返ります。自信がついてきたら、就職活動や定着支援へ進みます。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="plan" class="section plan">
+      <div class="container plan-grid">
+        <div class="flow-side">
+          <div class="eyebrow reveal">Plan</div>
+          <div class="flow-vertical reveal delay-2">生活と、<br>将来と、<br>料金の見通し。</div>
+        </div>
+        <div>
+          <div class="plan-main">
+            <div class="plan-visual reveal delay-1">
+              <div class="book-a"></div>
+              <div class="book-b"></div>
+              <div class="tickets"></div>
+            </div>
+            <div class="price-card reveal delay-2">
+              <div class="price-top">
+                <div class="price-left">
+                  <small>標準モデルケース / 自己負担の一例</small>
+                  <div class="price-amount">3,980<span>円 / 月</span></div>
+                </div>
+                <div style="font-size:12px;color:#57758b;line-height:1.8;">
+                  ※世帯収入や自治体の制度により自己負担額は異なります。詳しくは相談時に分かりやすくご案内します。
+                </div>
+              </div>
+              <div class="price-table">
+                <div class="row"><div>サポート内容</div><div>就労相談 / 生活支援 / 作業訓練 / 就職準備</div></div>
+                <div class="row"><div>通所頻度</div><div>週2〜5日で調整可能</div></div>
+                <div class="row"><div>対象</div><div>就労継続支援・一般就労を目指す方</div></div>
+                <div class="row"><div>見学・相談</div><div>無料</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="plan-detail reveal delay-3">
+            <h3>長く続けるためのオンライン相談について</h3>
+            <div class="plan-columns">
+              <div class="plan-info">
+                <h4>Option 01　オンライン見学・事前相談</h4>
+                <p>来所前に不安を解消したい方に向けて、スマートフォンやPCから参加できるオンライン相談を実施しています。ご家族との同席も可能です。</p>
+              </div>
+              <div class="plan-info">
+                <h4>Option 02　通所ペースの見直しサポート</h4>
+                <p>体調や生活リズムの変化に応じて、通所日数や作業内容の調整も柔軟に対応。無理なく継続できることを大切にしています。</p>
+              </div>
+            </div>
+
+            <div class="timeline">
+              <div class="timeline-inner">
+                <div class="time-node">
+                  相談
+                  <div class="time-badge">1</div>
+                </div>
+                <div class="time-line"></div>
+                <div class="time-node">
+                  体験
+                  <div class="time-badge">2</div>
+                </div>
+                <div class="time-line"></div>
+                <div class="time-node">
+                  利用開始
+                  <div class="time-badge">3</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section faq">
+      <div class="container faq-wrap">
+        <div class="reveal">
+          <div class="eyebrow">FAQ</div>
+        </div>
+        <div class="reveal delay-1" style="position:relative;">
+          <img class="faq-icon-stack" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="紙飛行機" width="86" height="86" onerror="this.style.display='none'">
+          <div class="accordion">
+            <div class="acc-item">
+              <button class="acc-head"><span>働くことに自信がない状態でも利用できますか？</span><span>+</span></button>
+              <div class="acc-body"><p>はい、もちろん可能です。まずは相談や見学から始めて、通所頻度も無理のないペースで調整できます。働く準備段階の方こそ歓迎しています。</p></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head"><span>どんな人が、どんな作業をしていますか？</span><span>+</span></button>
+              <div class="acc-body"><p>封入、検品、梱包、PC入力、事務補助など、比較的取り組みやすい作業を中心に用意しています。経験や体調に応じて内容を調整します。</p></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head"><span>見学や体験だけでも申し込みできますか？</span><span>+</span></button>
+              <div class="acc-body"><p>はい。見学のみ、オンライン相談のみでも問題ありません。ご本人だけでなく、ご家族や支援機関の方からのご相談も受け付けています。</p></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head"><span>利用料金や受給者証について教えてください。</span><span>+</span></button>
+              <div class="acc-body"><p>自己負担額は世帯収入や自治体制度によって異なります。受給者証の申請方法も含めて、初回相談時にスタッフが丁寧にご案内します。</p></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head"><span>通所が難しいときは、すぐに相談できますか？</span><span>+</span></button>
+              <div class="acc-body"><p>体調や気持ちの波があるのは自然なことです。お電話やオンラインで状況を共有し、通所ペースや取り組み方を一緒に見直していきます。</p></div>
+            </div>
+          </div>
+          <div class="faq-more">
+            <a href="#contact" class="btn">すべての質問を見る</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="voice" class="section voice">
+      <div class="container">
+        <div class="eyebrow reveal">Voice</div>
+        <div class="voice-row">
+          <div class="voice-card reveal delay-1">
+            <div class="voice-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_4648a670eb.png" alt="利用者の声" width="112" height="112" onerror="this.style.display='none'">
+            </div>
+            <h4>週2日から始めて、<br>生活リズムが整いました。</h4>
+            <p>「朝に外へ出る習慣がつき、気持ちも安定しました。焦らせずに見守ってくれるので、安心して続けられています。」</p>
+          </div>
+          <div class="voice-card reveal delay-2">
+            <div class="voice-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_7652703473.png" alt="男性ポートレート" width="112" height="112" onerror="this.style.display='none'">
+            </div>
+            <h4>相談の時間があることで、<br>一人で抱え込まずに済みました。</h4>
+            <p>「作業だけでなく、働くことへの不安も話せるのが大きかったです。自分に合う仕事のイメージが少しずつ見えてきました。」</p>
+          </div>
+          <div class="voice-card reveal delay-3">
+            <div class="voice-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_1d9bb593f4.png" alt="イラスト肖像" width="112" height="112" onerror="this.style.display='none'">
+            </div>
+            <h4>PC練習と軽作業の両方を経験でき、<br>自信につながりました。</h4>
+            <p>「得意なことと苦手なことが整理できたので、就職活動で何を伝えればいいか分かりやすくなりました。」</p>
+          </div>
+          <div class="voice-card reveal delay-4">
+            <div class="voice-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_785a85c0f8.png" alt="女性スタッフイラスト" width="112" height="112" onerror="this.style.display='none'">
+            </div>
+            <h4>話をきちんと聞いてくれるから、<br>また来ようと思えます。</h4>
+            <p>「できないことだけを見ないで、できたことを一緒に喜んでくれるのが嬉しいです。少しずつ前向きになれました。」</p>
+          </div>
+          <div class="voice-card reveal delay-5">
+            <div class="voice-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_6823dd700c.png" alt="男性イラスト" width="112" height="112" onerror="this.style.display='none'">
+            </div>
+            <h4>就職後も相談できると知って、<br>安心して一歩を踏み出せました。</h4>
+            <p>「働き始めてからの不安も支えてもらえるので、就職がゴールではないと感じられたのが大きかったです。」</p>
+          </div>
+        </div>
+        <div class="voice-dots reveal delay-3">
+          <span></span><span class="active"></span><span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight cta-banner" id="contact">
+      <div class="container">
+        <div class="cta-box reveal">
+          <div class="cta-bubble">ご家族・支援者の<br>相談も歓迎です</div>
+          <div class="cta-content">
+            <div class="cta-copy">LinkWorksで<br>働く準備を、やさしく始める。</div>
+            <div class="cta-form">
+              <div class="mini">見学予約 / オンライン相談 / LINE対応</div>
+              <div class="line"></div>
+              <a href="#" class="btn" style="background:#14b63d;">LINEで相談する</a>
+            </div>
+            <div class="cta-ill">
+              <img src="http://127.0.0.1:5000/uploads/up_4f5b5e1e9a.png" alt="青い小鳥" width="120" height="120" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section follow">
+      <div class="container">
+        <h3 class="reveal">Follow us !</h3>
+        <div class="reveal delay-1" style="font-family:var(--sans);color:#6b88a0;font-size:13px;">SNSでも情報発信中</div>
+        <div class="sns reveal delay-2">
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="Instagram">◎</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-top">
+      <div>
+        <div class="footer-copy">読むたび、進む旅。<br>働くたび、自分になる。</div>
+      </div>
+      <div class="footer-logo">LINKWORKS</div>
+    </div>
+    <div class="container" style="margin-top:18px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;">
+      <div class="footer-links">
+        <a href="#">運営会社</a>
+        <a href="#">個人情報保護方針</a>
+        <a href="#">お問い合わせ</a>
+        <a href="#">アクセス</a>
+      </div>
+      <div style="font-family:var(--sans);font-size:11px;color:#8aa2b4;">© LinkWorks All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach((entry)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+          io.unobserve(entry.target);
+        }
+      });
+    },{threshold:.14, rootMargin:"0px 0px -8% 0px"});
+
+    document.querySelectorAll('.reveal, .hero-anim').forEach(el=>io.observe(el));
+
+    window.addEventListener('load', ()=>{
+      document.querySelectorAll('.hero-anim').forEach((el,i)=>{
+        setTimeout(()=>el.classList.add('show'), 120 + i * 90);
+      });
+    });
+
+    document.querySelectorAll('.acc-head').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const body = btn.nextElementSibling;
+        const open = body.style.maxHeight && body.style.maxHeight !== '0px';
+        document.querySelectorAll('.acc-body').forEach(el=>{
+          el.style.maxHeight = null;
+          el.previousElementSibling.querySelector('span:last-child').textContent = '+';
+        });
+        if(!open){
+          body.style.maxHeight = body.scrollHeight + 'px';
+          btn.querySelector('span:last-child').textContent = '−';
+        }
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i], cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

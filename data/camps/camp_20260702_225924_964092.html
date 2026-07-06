@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkWorks｜忠実レイアウトデザインカンプ</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-soft:#eef5f8;
+      --blue:#008ed8;
+      --blue-strong:rgba(4,143,216,.9);
+      --text:#0a273f;
+      --radius-lg:15px;
+      --radius-sm:3px;
+      --container:1240px;
+      --shadow:none;
+      --transition:.45s cubic-bezier(.2,.65,.2,1);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"Noto Sans JP",sans-serif}
+    body{line-height:1.7;-webkit-font-smoothing:antialiased}
+    a{text-decoration:none;color:inherit}
+    img{max-width:100%;display:block}
+    .container{width:min(var(--container),calc(100% - 40px));margin:0 auto}
+    .section{position:relative}
+    .eyebrow{
+      font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;
+      margin-bottom:6px
+    }
+    .eyebrow-jp{font-size:11px;color:var(--text);opacity:.75;margin-bottom:14px}
+    h1,h2,h3,h4,p{margin:0}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;
+      border-radius:999px;padding:12px 22px;background:var(--blue);color:#fff;
+      font-weight:700;font-size:14px;transition:var(--transition);border:1px solid transparent
+    }
+    .btn:hover{transform:translateY(-2px);background:#007fc1}
+    .btn-outline{
+      background:#fff;color:var(--blue);border-color:#bfe3f5
+    }
+    .btn-outline:hover{background:var(--bg-soft)}
+    .arrow{
+      width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;
+      background:#fff;color:var(--blue);font-size:12px;flex:0 0 auto
+    }
+    .btn-outline .arrow{background:var(--bg-soft)}
+    .site-header{
+      position:absolute;left:0;right:0;top:0;z-index:30;padding:14px 0
+    }
+    .site-header .inner{
+      width:min(calc(100% - 24px), 1340px);margin:0 auto;display:flex;align-items:center;justify-content:space-between
+    }
+    .logo{
+      display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.92);padding:8px 12px;border-radius:999px
+    }
+    .logo img{height:30px;width:auto}
+    .menu-btn{
+      width:44px;height:44px;border-radius:50%;background:var(--blue);display:grid;place-items:center;color:#fff
+    }
+    .menu-btn span,.menu-btn span:before,.menu-btn span:after{
+      content:"";display:block;width:18px;height:2px;background:#fff;border-radius:2px;position:relative
+    }
+    .menu-btn span:before{position:absolute;top:-6px}
+    .menu-btn span:after{position:absolute;top:6px}
+
+    .hero{
+      position:relative;overflow:hidden;background:
+        linear-gradient(180deg, rgba(255,255,255,0) 60%, rgba(255,255,255,.08) 100%),
+        linear-gradient(135deg,#dff4fb 0%, #ffffff 55%, #eef5f8 100%);
+      min-height:760px
+    }
+    .hero-media{
+      position:absolute;inset:0;background:
+        radial-gradient(circle at 75% 20%, rgba(0,142,216,.20), transparent 26%),
+        linear-gradient(120deg, rgba(0,0,0,.03), rgba(0,0,0,0));
+    }
+    .hero-media .city{
+      position:absolute;inset:auto 0 0 0;height:42%;
+      background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.18) 8%, rgba(255,255,255,.92) 100%);
+    }
+    .hero-grid{
+      min-height:760px;display:grid;grid-template-columns:1.05fr 1.25fr;align-items:end;
+      width:min(calc(100% - 24px), 1340px);margin:0 auto;position:relative;z-index:2
+    }
+    .hero-copy{
+      padding:150px 0 110px 6px;align-self:center
+    }
+    .hero-copy .catch{
+      display:inline-block;background:rgba(255,255,255,.92);padding:18px 18px 14px;border-radius:var(--radius-sm);
+      box-shadow:none
+    }
+    .hero-copy h1{
+      font-size:74px;line-height:.98;font-weight:800;letter-spacing:-.04em
+    }
+    .hero-copy p{
+      margin-top:24px;max-width:430px;font-size:16px;color:rgba(10,39,63,.82)
+    }
+    .hero-actions{display:flex;gap:12px;margin-top:28px}
+    .hero-visual{
+      position:relative;height:100%;display:flex;align-items:flex-end;justify-content:center;padding-top:90px
+    }
+    .hero-visual .main-photo{
+      width:100%;max-width:760px;height:670px;border-radius:0 0 0 180px;overflow:hidden;position:relative;
+      background:linear-gradient(135deg,#cceefe,#ffffff 65%,#d9eef8);
+    }
+    .hero-visual .main-photo img{
+      width:100%;height:100%;object-fit:cover;object-position:center top
+    }
+    .hero-plane{
+      position:absolute;right:7%;top:118px;width:190px;opacity:.95
+    }
+    .hero-bottom-nav{
+      position:absolute;left:50%;transform:translateX(-50%);bottom:0;z-index:5;
+      width:min(var(--container), calc(100% - 40px));height:54px;background:var(--blue);
+      color:#fff;border-radius:0;display:flex;align-items:center;justify-content:space-between;padding:0 18px
+    }
+    .hero-bottom-nav .nav-links{
+      display:flex;gap:24px;font-size:11px;letter-spacing:.08em
+    }
+    .hero-bottom-nav .scroll-ind{
+      display:flex;align-items:center;gap:10px;font-size:11px;opacity:.95
+    }
+    .hero-bottom-nav .bar{
+      width:74px;height:1px;background:rgba(255,255,255,.4);position:relative
+    }
+    .hero-bottom-nav .bar:after{
+      content:"";position:absolute;left:0;top:-1px;width:26px;height:3px;background:#fff
+    }
+
+    .vision{
+      padding:110px 0 120px;background:#fff;text-align:center;position:relative
+    }
+    .vision .ghost{
+      font-size:78px;font-weight:800;letter-spacing:.06em;color:#f4f8fb
+    }
+
+    .news{
+      padding:0 0 56px;background:#fff
+    }
+    .news-wrap{
+      width:min(var(--container), calc(100% - 40px));margin:0 auto;display:grid;grid-template-columns:360px 1fr;align-items:stretch
+    }
+    .news-side{
+      background:var(--blue);color:#fff;padding:52px 42px;border-radius:0 var(--radius-sm) 0 0;min-height:350px
+    }
+    .news-side h2{font-size:34px;line-height:1.1;font-weight:800}
+    .news-side .eyebrow,.news-side .eyebrow-jp{color:#fff}
+    .news-side .more{
+      margin-top:26px;display:inline-flex;align-items:center;gap:12px;font-size:13px
+    }
+    .news-main{
+      background:#fff;margin-top:36px;margin-left:-32px;border-radius:var(--radius-lg) var(--radius-sm) var(--radius-sm) var(--radius-sm);
+      padding:28px 28px 18px;border:1px solid #edf3f6
+    }
+    .tabs{display:flex;justify-content:flex-end;gap:2px;margin-bottom:14px}
+    .tab{
+      min-width:78px;text-align:center;font-size:11px;padding:10px 12px;background:#f6f9fb;color:#5f7487;border-radius:var(--radius-sm)
+    }
+    .tab.active{background:var(--blue);color:#fff}
+    .news-list{display:flex;flex-direction:column}
+    .news-item{
+      display:grid;grid-template-columns:110px 100px 1fr;gap:16px;align-items:center;
+      padding:15px 8px;border-top:1px solid #eef4f7
+    }
+    .news-item:first-child{border-top:none}
+    .tag{
+      display:inline-block;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;line-height:1
+    }
+    .tag.yellow{background:#f3d78a;color:#7b5e12}
+    .tag.blue{background:#92dcf3;color:#005f86}
+    .date{font-size:11px;color:#7d90a0}
+    .news-item a{font-size:13px;color:#143554}
+
+    .pickup{
+      background:var(--bg-soft);padding:64px 0 72px
+    }
+    .pickup-grid{
+      margin-top:22px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px 18px
+    }
+    .pickup-card{
+      display:block;transition:var(--transition)
+    }
+    .pickup-card:hover{transform:translateY(-4px)}
+    .pickup-thumb{
+      aspect-ratio: 1.58 / 1;background:linear-gradient(135deg,#caecfa,#ffffff);border-radius:8px;overflow:hidden
+    }
+    .pickup-thumb img{width:100%;height:100%;object-fit:cover}
+    .pickup-title{font-size:14px;font-weight:700;line-height:1.5;margin-top:12px}
+    .pickup-text{font-size:12px;color:#5f7487;line-height:1.7;margin-top:8px}
+
+    .company{
+      background:#fff;padding:76px 0 62px
+    }
+    .company-top{
+      display:grid;grid-template-columns:1fr 460px;gap:32px;align-items:center
+    }
+    .company h2{font-size:36px;line-height:1.3;font-weight:800;color:var(--blue)}
+    .company .lead{
+      font-size:15px;color:#557086;margin-top:18px;max-width:580px
+    }
+    .company-illust{
+      background:linear-gradient(180deg,#f7fbfd,#eef5f8);border-radius:24px;padding:24px
+    }
+    .company-illust img{width:100%;height:300px;object-fit:contain}
+    .company-btn{margin-top:22px}
+    .icon-row{
+      display:grid;grid-template-columns:repeat(7,1fr);gap:18px;margin-top:38px
+    }
+    .icon-item{text-align:center}
+    .icon-box{
+      width:58px;height:58px;margin:0 auto 10px;border-radius:50%;border:1px solid #cae9f7;color:var(--blue);
+      display:grid;place-items:center;font-size:24px;background:#fff
+    }
+    .icon-label{font-size:12px;line-height:1.5;color:#335069}
+
+    .business{
+      padding:24px 0 80px;background:#fff;position:relative
+    }
+    .business:before{
+      content:"";position:absolute;right:10%;top:40px;width:360px;height:280px;
+      background:linear-gradient(180deg,rgba(0,142,216,.08),rgba(0,142,216,0));clip-path:polygon(55% 0,100% 0,45% 100%,0 100%);
+      opacity:.6
+    }
+    .business-grid{
+      margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px
+    }
+    .biz-card{
+      background:#fff;border:1px solid #edf3f6;border-radius:8px;overflow:hidden;transition:var(--transition)
+    }
+    .biz-card:hover{transform:translateY(-4px)}
+    .biz-thumb{aspect-ratio:1.55/1;background:linear-gradient(135deg,#d8f1fb,#fff)}
+    .biz-thumb img{width:100%;height:100%;object-fit:cover}
+    .biz-body{padding:14px 14px 18px}
+    .biz-title{font-size:15px;font-weight:700}
+    .biz-text{font-size:12px;color:#607688;margin-top:6px}
+
+    .message{
+      background:linear-gradient(90deg,#edf6fa 0%, #e7f3f9 50%, #dceefa 100%);
+      padding:0
+    }
+    .message-wrap{
+      display:grid;grid-template-columns:42% 58%;align-items:center;min-height:370px
+    }
+    .message-photo{
+      height:100%;background:linear-gradient(135deg,#eaf5fb,#ffffff);overflow:hidden
+    }
+    .message-photo img{
+      width:100%;height:100%;object-fit:cover;object-position:center top
+    }
+    .message-copy{padding:54px 54px 54px 42px}
+    .message-copy h3{
+      font-size:16px;color:var(--blue);font-weight:800;letter-spacing:.08em
+    }
+    .message-copy p.big{
+      font-size:34px;line-height:1.7;font-weight:700;color:#0f3353;margin-top:14px
+    }
+    .message-copy .name{margin-top:18px;font-size:13px;color:#6f8597}
+
+    .sustainability{
+      background:#fff;padding:70px 0 24px
+    }
+    .sus-top{
+      display:grid;grid-template-columns:1fr 370px;gap:34px;align-items:start
+    }
+    .sus-copy .lead{font-size:14px;color:#5e7486;max-width:560px;margin-top:10px}
+    .sdgs-grid{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:6px
+    }
+    .sdg{
+      aspect-ratio:1/1;border-radius:4px;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:flex-end;padding:8px
+    }
+    .sdg:nth-child(1){background:#e5243b}.sdg:nth-child(2){background:#dda63a}.sdg:nth-child(3){background:#4c9f38}.sdg:nth-child(4){background:#c5192d}
+    .sdg:nth-child(5){background:#ff3a21}.sdg:nth-child(6){background:#26bde2}.sdg:nth-child(7){background:#fcc30b}.sdg:nth-child(8){background:#a21942}
+    .sdg:nth-child(9){background:#fd6925}.sdg:nth-child(10){background:#dd1367}.sdg:nth-child(11){background:#fd9d24}.sdg:nth-child(12){background:#bf8b2e}
+    .pickup-mini{
+      margin-top:30px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px
+    }
+    .mini-card:hover{transform:translateY(-4px)}
+    .mini-card{transition:var(--transition)}
+    .mini-thumb{
+      aspect-ratio:1.4/1;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#d8effb,#fff)
+    }
+    .mini-thumb img{width:100%;height:100%;object-fit:cover}
+    .mini-title{font-size:13px;font-weight:700;margin-top:10px}
+    .undertake{
+      margin-top:36px
+    }
+    .undertake-grid{
+      margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-radius:10px;overflow:hidden
+    }
+    .undertake-item{
+      position:relative;min-height:220px;background:linear-gradient(135deg,#e5f4fb,#ffffff);overflow:hidden
+    }
+    .undertake-item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .undertake-item:after{
+      content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 25%, rgba(10,39,63,.58) 100%)
+    }
+    .undertake-content{
+      position:absolute;left:18px;right:18px;bottom:18px;color:#fff;z-index:2
+    }
+    .undertake-no{
+      width:30px;height:30px;border-radius:50%;background:#fff;color:var(--blue);display:grid;place-items:center;
+      font-size:13px;font-weight:800;margin-bottom:10px
+    }
+    .undertake-title{font-size:15px;font-weight:700}
+
+    .bottom-panels{
+      padding:50px 0 58px;background:linear-gradient(180deg,#eef5f8 0%,#f7fbfd 100%)
+    }
+    .bottom-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:26px
+    }
+    .panel{
+      background:#fff;border-radius:10px;padding:0 0 18px;border:1px solid #ebf2f5;overflow:hidden
+    }
+    .panel-head{padding:26px 24px 12px}
+    .panel-thumb{
+      margin:0 24px;border-radius:0;background:linear-gradient(135deg,#d8f0fb,#fff);overflow:hidden
+    }
+    .panel-thumb img{width:100%;height:180px;object-fit:cover}
+    .panel-body{padding:18px 24px 8px}
+    .panel-title{font-size:22px;font-weight:800;color:var(--blue)}
+    .panel-sub{font-size:13px;color:#5f7487;margin-top:8px}
+    .panel-list{margin-top:10px;font-size:12px;color:#42617b}
+    .recruit-catch{
+      font-size:54px;line-height:1.05;font-weight:800;letter-spacing:-.05em;color:#1a3550;margin:12px 0 18px
+    }
+    .pill-links{display:flex;flex-wrap:wrap;gap:10px}
+    .pill{
+      padding:10px 16px;border-radius:999px;background:#f1f7fa;font-size:12px;color:#25516f;transition:var(--transition)
+    }
+    .pill:hover{background:#e2f1f8;transform:translateY(-2px)}
+
+    .banners{
+      padding:12px 0 18px;background:#eef5f8
+    }
+    .banner-row{
+      display:grid;grid-template-columns:44px 1fr 1fr 1fr 44px;gap:12px;align-items:center
+    }
+    .banner-arrow{
+      width:32px;height:32px;border-radius:50%;background:#fff;display:grid;place-items:center;color:var(--blue);justify-self:center
+    }
+    .banner{
+      height:68px;border-radius:6px;overflow:hidden;background:linear-gradient(135deg,#d8eef9,#fff)
+    }
+    .banner img{width:100%;height:100%;object-fit:cover}
+
+    footer{
+      padding:28px 0 18px;background:#fff;border-top:1px solid #edf3f6
+    }
+    .footer-top{
+      display:grid;grid-template-columns:240px 1fr;gap:30px;align-items:start
+    }
+    .footer-logo img{height:36px;width:auto}
+    .footer-links{
+      display:grid;grid-template-columns:repeat(6,1fr);gap:18px
+    }
+    .footer-links h4{font-size:12px;margin-bottom:8px;color:#173754}
+    .footer-links a{display:block;font-size:11px;color:#688093;margin:5px 0}
+    .footer-bottom{
+      margin-top:22px;padding-top:12px;border-top:1px solid #edf3f6;
+      display:flex;justify-content:space-between;gap:20px;font-size:10px;color:#7b90a1
+    }
+
+    html.js .reveal{opacity:0;transform:translateY(32px);transition:opacity .8s ease, transform .8s ease}
+    html.js .reveal.is-visible{opacity:1;transform:none}
+    html.js .hero-copy > *{opacity:0;transform:translateY(28px)}
+    html.js .hero.is-loaded .hero-copy > *{opacity:1;transform:none;transition:opacity .9s ease, transform .9s ease}
+    html.js .hero.is-loaded .hero-copy > *:nth-child(2){transition-delay:.1s}
+    html.js .hero.is-loaded .hero-copy > *:nth-child(3){transition-delay:.2s}
+    html.js .hero.is-loaded .hero-copy > *:nth-child(4){transition-delay:.3s}
+    html.js .hero .main-photo{opacity:0;transform:translateX(34px) scale(1.04)}
+    html.js .hero.is-loaded .main-photo{opacity:1;transform:none;transition:1.1s ease}
+    html.js .hero .hero-plane{opacity:0;transform:translateY(-14px) translateX(18px)}
+    html.js .hero.is-loaded .hero-plane{opacity:.95;transform:none;transition:1.1s ease .25s}
+
+    @media (max-width: 1100px){
+      .hero-grid,.news-wrap,.company-top,.message-wrap,.sus-top,.bottom-grid,.footer-top{grid-template-columns:1fr}
+      .hero{min-height:auto}
+      .hero-grid{min-height:auto;padding-top:90px}
+      .hero-copy{padding:54px 0 24px}
+      .hero-copy h1{font-size:56px}
+      .hero-visual{padding-top:0}
+      .hero-visual .main-photo{height:520px;border-radius:30px}
+      .hero-bottom-nav{position:relative;left:auto;transform:none;width:100%;margin-top:18px}
+      .news-main{margin-left:0;margin-top:-34px}
+      .company-illust img{height:220px}
+      .message-copy{padding:34px 24px 42px}
+      .message-copy p.big{font-size:28px}
+      .pickup-grid,.business-grid,.pickup-mini,.footer-links{grid-template-columns:repeat(2,1fr)}
+      .icon-row{grid-template-columns:repeat(4,1fr)}
+      .banner-row{grid-template-columns:32px 1fr 1fr 32px}
+      .banner-row .banner:nth-of-type(3){display:none}
+    }
+    @media (max-width: 767px){
+      .container,.news-wrap{width:calc(100% - 24px)}
+      .hero-copy h1{font-size:42px}
+      .vision .ghost{font-size:44px}
+      .news-side{padding:32px 24px;min-height:auto}
+      .news-main{padding:18px 14px}
+      .news-item{grid-template-columns:1fr;gap:6px}
+      .pickup-grid,.business-grid,.pickup-mini,.undertake-grid,.bottom-grid,.footer-links{grid-template-columns:1fr}
+      .icon-row{grid-template-columns:repeat(3,1fr)}
+      .company h2{font-size:28px}
+      .message-copy p.big{font-size:22px}
+      .recruit-catch{font-size:38px}
+      .hero-actions{flex-wrap:wrap}
+      .hero-bottom-nav{padding:0 12px}
+      .hero-bottom-nav .nav-links{gap:14px;overflow:auto;white-space:nowrap}
+      .banner-row{grid-template-columns:1fr}
+      .banner-arrow{display:none}
+      .footer-bottom{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <a href="#" class="logo" aria-label="LinkWorks">
+        <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorksロゴ" onerror="this.style.display='none'">
+      </a>
+      <a href="#" class="menu-btn" aria-label="メニュー"><span></span></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero section" id="top">
+      <div class="hero-media">
+        <div class="city"></div>
+      </div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">LINKWORKS</div>
+          <div class="catch">
+            <h1>働くが、<br>好きだ。</h1>
+          </div>
+          <p>一人ひとりの強みをつなぎ、やさしく、確かに、地域と社会に役立つ仕事を生み出す。LinkWorksの就労支援と軽作業ソリューション。</p>
+          <div class="hero-actions">
+            <a class="btn" href="#">見学を申し込む <span class="arrow">→</span></a>
+            <a class="btn btn-outline" href="#">事業内容を見る <span class="arrow">→</span></a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img class="hero-plane" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="紙飛行機" onerror="this.style.display='none'">
+          <div class="main-photo">
+            <img src="http://127.0.0.1:5000/uploads/up_e832d00e50.png" alt="未来を見据える女性" width="760" height="670" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+      <div class="hero-bottom-nav">
+        <div class="nav-links">
+          <a href="#news">NEWS</a>
+          <a href="#pickup">PICK UP</a>
+          <a href="#company">COMPANY</a>
+          <a href="#business">BUSINESS</a>
+          <a href="#sustainability">SUSTAINABILITY</a>
+        </div>
+        <div class="scroll-ind">
+          <span>SCROLL</span>
+          <span class="bar"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="vision section reveal">
+      <div class="container">
+        <div class="ghost">VISION2030</div>
+      </div>
+    </section>
+
+    <section class="news section" id="news">
+      <div class="news-wrap">
+        <div class="news-side reveal">
+          <div class="eyebrow">NEWS</div>
+          <div class="eyebrow-jp">お知らせ</div>
+          <h2>NEWS</h2>
+          <a href="#" class="more">一覧を見る <span class="arrow">→</span></a>
+        </div>
+        <div class="news-main reveal">
+          <div class="tabs">
+            <div class="tab active">ALL</div>
+            <div class="tab">ニュースリリース</div>
+            <div class="tab">トピックス</div>
+            <div class="tab">採用</div>
+          </div>
+          <div class="news-list">
+            <div class="news-item">
+              <div><span class="tag yellow">お知らせ</span></div>
+              <div class="date">2025.06.20</div>
+              <a href="#">新拠点「LinkWorks 仙台中央」を開設しました</a>
+            </div>
+            <div class="news-item">
+              <div><span class="tag yellow">お知らせ</span></div>
+              <div class="date">2025.06.12</div>
+              <a href="#">梱包・封入業務の受託体制を強化。小ロット案件にも柔軟に対応</a>
+            </div>
+            <div class="news-item">
+              <div><span class="tag blue">プレスリリース</span></div>
+              <div class="date">2025.05.28</div>
+              <a href="#">企業向け就労体験プログラムを開始。地域の多様な働き方を支援します</a>
+            </div>
+            <div class="news-item">
+              <div><span class="tag blue">トピックス</span></div>
+              <div class="date">2025.05.14</div>
+              <a href="#">社内カフェスペースを改装し、相談しやすい環境づくりを推進</a>
+            </div>
+            <div class="news-item">
+              <div><span class="tag yellow">採用情報</span></div>
+              <div class="date">2025.04.26</div>
+              <a href="#">支援スタッフ・現場リーダーの採用情報を更新しました</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pickup section" id="pickup">
+      <div class="container">
+        <div class="reveal">
+          <div class="eyebrow">PICK UP</div>
+          <div class="eyebrow-jp">ピックアップ</div>
+        </div>
+        <div class="pickup-grid">
+          <a href="#" class="pickup-card reveal">
+            <div class="pickup-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_57b8cb489.png" alt="Nexoraロゴ" width="300" height="190" onerror="this.style.display='none'">
+            </div>
+            <div class="pickup-title">はたらくを、好きになる。</div>
+            <div class="pickup-text">働く楽しさと達成感を大切にした、LinkWorksの支援コンセプトをご紹介します。</div>
+          </a>
+          <a href="#" class="pickup-card reveal">
+            <div class="pickup-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="紙飛行機の空" width="300" height="190" onerror="this.style.display='none'">
+            </div>
+            <div class="pickup-title">人と仕事を結ぶ、新しい循環へ</div>
+            <div class="pickup-text">相談、訓練、実務、定着まで。一人ひとりに寄り添う伴走型の仕組みを整えています。</div>
+          </a>
+          <a href="#" class="pickup-card reveal">
+            <div class="pickup-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="事業所入口" width="300" height="190" onerror="this.style.display='none'">
+            </div>
+            <div class="pickup-title">見学受付中。明るく開かれた事業所へ</div>
+            <div class="pickup-text">初めての方でも安心して来所できるよう、やわらかな空間づくりを心がけています。</div>
+          </a>
+          <a href="#" class="pickup-card reveal">
+            <div class="pickup-thumb">
+              <img src="https://picsum.photos/seed/report2025/300/190" alt="レポート" width="300" height="190" onerror="this.style.display='none'">
+            </div>
+            <div class="pickup-title">ANNUAL REPORT 2025</div>
+            <div class="pickup-text">取り組み実績や支援体制、地域連携の成果をまとめたレポートを公開しました。</div>
+          </a>
+
+          <a href="#" class="pickup-card reveal">
+            <div class="pickup-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="明るくポーズするスタッフ" width="300" height="190" onerror="this.style.display='none'">
+            </div>
+            <div class="pickup-title">事業所の日常をフォトで紹介</div>
+            <div class="pickup-text">スタッフと利用者が自然体で過ごす、LinkWorksのリアルな雰囲気をお届けします。</div>
+          </a>
+          <a href="#" class="pickup-card reveal">
+            <div class="pickup-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_3996f78e40.png" alt="学ぶ社会人たち" width="300" height="190" onerror="this.style.display='none'">
+            </div>
+            <div class="pickup-title">学び直しと実務体験の両立</div>
+            <div class="pickup-text">PC訓練やコミュニケーション研修を通じて、働く自信を少しずつ育てます。</div>
+          </a>
+          <a href="#" class="pickup-card reveal">
+            <div class="pickup-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_34dd3e19ee.png" alt="企業ロゴの壁面サイン" width="300" height="190" onerror="this.style.display='none'">
+            </div>
+            <div class="pickup-title">企業との連携事例</div>
+            <div class="pickup-text">軽作業や事務補助など、地域企業と協力しながら多様な仕事を生み出しています。</div>
+          </a>
+          <a href="#" class="pickup-card reveal">
+            <div class="pickup-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_18537fbb29.png" alt="打ち合わせるビジネスチーム" width="300" height="190" onerror="this.style.display='none'">
+            </div>
+            <div class="pickup-title">伴走型サポートの現場</div>
+            <div class="pickup-text">面談、振り返り、目標設定を繰り返しながら、無理のない成長を支えます。</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="company section" id="company">
+      <div class="container">
+        <div class="company-top">
+          <div class="reveal">
+            <div class="eyebrow">COMPANY</div>
+            <div class="eyebrow-jp">会社情報</div>
+            <h2>社会との接点をひろげ、<br>一人ひとりの可能性を育てる</h2>
+            <p class="lead">LinkWorksは、就労支援と業務受託の両面から、安心して働き続けられる場づくりに取り組んでいます。地域とつながり、企業と協力し、本人らしい成長の機会を届けます。</p>
+            <div class="company-btn">
+              <a href="#" class="btn btn-outline">会社情報を見る <span class="arrow">→</span></a>
+            </div>
+          </div>
+          <div class="company-illust reveal">
+            <img src="http://127.0.0.1:5000/uploads/up_7742b7c774.png" alt="成長と共生のイラスト" width="460" height="300" onerror="this.style.display='none'">
+          </div>
+        </div>
+
+        <div class="icon-row">
+          <div class="icon-item reveal"><div class="icon-box">🤝</div><div class="icon-label">トップメッセージ</div></div>
+          <div class="icon-item reveal"><div class="icon-box">🧭</div><div class="icon-label">理念・支援方針</div></div>
+          <div class="icon-item reveal"><div class="icon-box">🏢</div><div class="icon-label">拠点情報</div></div>
+          <div class="icon-item reveal"><div class="icon-box">📘</div><div class="icon-label">ヒストリー</div></div>
+          <div class="icon-item reveal"><div class="icon-box">✍️</div><div class="icon-label">事業紹介資料</div></div>
+          <div class="icon-item reveal"><div class="icon-box">🪴</div><div class="icon-label">働く環境</div></div>
+          <div class="icon-item reveal"><div class="icon-box">📍</div><div class="icon-label">アクセス</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="business section" id="business">
+      <div class="container">
+        <div class="reveal">
+          <div class="eyebrow">BUSINESS</div>
+          <div class="eyebrow-jp">事業紹介</div>
+        </div>
+        <div class="business-grid">
+          <a href="#" class="biz-card reveal">
+            <div class="biz-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="協力して梱包するスタッフ" width="390" height="250" onerror="this.style.display='none'">
+            </div>
+            <div class="biz-body">
+              <div class="biz-title">軽作業・梱包受託</div>
+              <div class="biz-text">封入、箱組み立て、検品、発送準備まで。品質と納期を両立した現場運営を行います。</div>
+            </div>
+          </a>
+          <a href="#" class="biz-card reveal">
+            <div class="biz-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" alt="明るいオフィスで働く人々" width="390" height="250" onerror="this.style.display='none'">
+            </div>
+            <div class="biz-body">
+              <div class="biz-title">事務・デジタル業務支援</div>
+              <div class="biz-text">データ入力や書類整理、PC作業のトレーニングを通じて、実務につながる経験を提供します。</div>
+            </div>
+          </a>
+          <a href="#" class="biz-card reveal">
+            <div class="biz-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_3a159df441.jpg" alt="アクセサリー制作風景" width="390" height="250" onerror="this.style.display='none'">
+            </div>
+            <div class="biz-body">
+              <div class="biz-title">ものづくり・制作支援</div>
+              <div class="biz-text">手芸小物やオリジナル雑貨の制作を通じて、集中力や達成感を育むプログラムも展開しています。</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="message section">
+      <div class="message-wrap">
+        <div class="message-photo reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_07d8e0124b.png" alt="代表ポートレート" width="720" height="370" onerror="this.style.display='none'">
+        </div>
+        <div class="message-copy reveal">
+          <h3>MESSAGE</h3>
+          <p class="big">協力企業や地域の皆さまを含む<br>すべての「人」を大切にし、<br>持続的な成長を目指します</p>
+          <div class="name">トップメッセージ　代表取締役</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sustainability section" id="sustainability">
+      <div class="container">
+        <div class="sus-top">
+          <div class="sus-copy reveal">
+            <div class="eyebrow">SUSTAINABILITY</div>
+            <div class="eyebrow-jp">サステナビリティ</div>
+            <p class="lead">地域の中で働く選択肢を増やし、誰もが役割と尊厳を持てる社会へ。LinkWorksは「はたらく」を軸に、持続可能な未来づくりに貢献します。</p>
+            <div class="company-btn">
+              <a href="#" class="btn btn-outline">サステナビリティを見る <span class="arrow">→</span></a>
+            </div>
+          </div>
+          <div class="sdgs-grid reveal">
+            <div class="sdg">1</div><div class="sdg">2</div><div class="sdg">3</div><div class="sdg">4</div>
+            <div class="sdg">5</div><div class="sdg">6</div><div class="sdg">8</div><div class="sdg">9</div>
+            <div class="sdg">10</div><div class="sdg">11</div><div class="sdg">12</div><div class="sdg">17</div>
+          </div>
+        </div>
+
+        <div class="pickup-mini">
+          <a href="#" class="mini-card reveal">
+            <div class="mini-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_55f655b5cb.png" alt="支援員と利用者" width="280" height="200" onerror="this.style.display='none'">
+            </div>
+            <div class="mini-title">支援プログラム方針</div>
+          </a>
+          <a href="#" class="mini-card reveal">
+            <div class="mini-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_818aac54c7.png" alt="成長の3Dイラスト" width="280" height="200" onerror="this.style.display='none'">
+            </div>
+            <div class="mini-title">就労成果の可視化</div>
+          </a>
+          <a href="#" class="mini-card reveal">
+            <div class="mini-thumb">
+              <img src="https://picsum.photos/seed/sdgswheel/280/200" alt="SDGsホイール" width="280" height="200" onerror="this.style.display='none'">
+            </div>
+            <div class="mini-title">SDGsとのつながり</div>
+          </a>
+          <a href="#" class="mini-card reveal">
+            <div class="mini-thumb">
+              <img src="https://picsum.photos/seed/reportmini/280/200" alt="レポート2025" width="280" height="200" onerror="this.style.display='none'">
+            </div>
+            <div class="mini-title">レポート 2025</div>
+          </a>
+        </div>
+
+        <div class="undertake reveal">
+          <div class="eyebrow" style="margin-top:34px">3つの取り組み</div>
+          <div class="undertake-grid">
+            <a href="#" class="undertake-item">
+              <img src="http://127.0.0.1:5000/uploads/up_4bbbe0fee7.png" alt="緑あふれる都会のオフィス" width="400" height="220" onerror="this.style.display='none'">
+              <div class="undertake-content">
+                <div class="undertake-no">1</div>
+                <div class="undertake-title">クロスインクルージョン推進</div>
+              </div>
+            </a>
+            <a href="#" class="undertake-item">
+              <img src="http://127.0.0.1:5000/uploads/up_4856c07ccc.png" alt="会議室で作業するスタッフ" width="400" height="220" onerror="this.style.display='none'">
+              <div class="undertake-content">
+                <div class="undertake-no">2</div>
+                <div class="undertake-title">企業連携による実践機会づくり</div>
+              </div>
+            </a>
+            <a href="#" class="undertake-item">
+              <img src="https://picsum.photos/seed/tunnelfuture/400/220" alt="未来への通路" width="400" height="220" onerror="this.style.display='none'">
+              <div class="undertake-content">
+                <div class="undertake-no">3</div>
+                <div class="undertake-title">広域で地域に貢献する仕組み</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bottom-panels section">
+      <div class="container">
+        <div class="bottom-grid">
+          <div class="panel reveal">
+            <div class="panel-head">
+              <div class="eyebrow">INVESTER RELATIONS</div>
+              <div class="eyebrow-jp">企業案内</div>
+            </div>
+            <div class="panel-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg" alt="洗練されたオフィス風景" width="560" height="180" onerror="this.style.display='none'">
+            </div>
+            <div class="panel-body">
+              <div class="panel-title">会社資料</div>
+              <div class="panel-sub">会社概要、支援実績、協力企業向けのご案内を掲載しています。</div>
+              <div class="panel-list">
+                会社概要／支援方針／受託業務一覧／品質管理体制／拠点情報
+              </div>
+            </div>
+          </div>
+
+          <div class="panel reveal">
+            <div class="panel-head">
+              <div class="eyebrow">RECRUIT</div>
+              <div class="eyebrow-jp">採用情報</div>
+            </div>
+            <div class="panel-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_093ce90730.png" alt="オフィスを案内するスタッフ" width="560" height="180" onerror="this.style.display='none'">
+            </div>
+            <div class="panel-body">
+              <div class="recruit-catch">働くが、<br>好きだ。</div>
+              <div class="pill-links">
+                <a href="#" class="pill">中途採用</a>
+                <a href="#" class="pill">キャリア採用</a>
+                <a href="#" class="pill">スタッフの一日</a>
+                <a href="#" class="pill">エントリー</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="banners section">
+      <div class="container">
+        <div class="banner-row reveal">
+          <div class="banner-arrow">←</div>
+          <a href="#" class="banner"><img src="http://127.0.0.1:5000/uploads/up_8a2fbc1c56.png" alt="構成案" width="360" height="68" onerror="this.style.display='none'"></a>
+          <a href="#" class="banner"><img src="http://127.0.0.1:5000/uploads/up_71c58f68e0.png" alt="Nexoraロゴ壁面" width="360" height="68" onerror="this.style.display='none'"></a>
+          <a href="#" class="banner"><img src="http://127.0.0.1:5000/uploads/up_41f03beb70.png" alt="爽やかなWebサイト" width="360" height="68" onerror="this.style.display='none'"></a>
+          <div class="banner-arrow">→</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorksロゴ" onerror="this.style.display='none'">
+        </div>
+        <div class="footer-links">
+          <div>
+            <h4>企業情報</h4>
+            <a href="#">トップメッセージ</a>
+            <a href="#">理念・方針</a>
+            <a href="#">会社概要</a>
+          </div>
+          <div>
+            <h4>事業紹介</h4>
+            <a href="#">就労支援</a>
+            <a href="#">軽作業受託</a>
+            <a href="#">制作支援</a>
+          </div>
+          <div>
+            <h4>ニュース</h4>
+            <a href="#">お知らせ</a>
+            <a href="#">トピックス</a>
+            <a href="#">採用情報</a>
+          </div>
+          <div>
+            <h4>サステナビリティ</h4>
+            <a href="#">取り組み</a>
+            <a href="#">SDGs</a>
+            <a href="#">レポート</a>
+          </div>
+          <div>
+            <h4>採用情報</h4>
+            <a href="#">募集要項</a>
+            <a href="#">スタッフ紹介</a>
+            <a href="#">エントリー</a>
+          </div>
+          <div>
+            <h4>お問い合わせ</h4>
+            <a href="#">見学予約</a>
+            <a href="#">資料請求</a>
+            <a href="#">アクセス</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>サイトマップ　｜　個人情報保護方針　｜　利用規約</div>
+        <div>COPYRIGHT © LINKWORKS CO., LTD. ALL RIGHTS RESERVED.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      document.querySelector('.hero')?.classList.add('is-loaded');
+    });
+
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach((entry)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.14, rootMargin:'0px 0px -40px 0px'});
+
+    document.querySelectorAll('.reveal').forEach((el, i)=>{
+      el.style.transitionDelay = (i % 6) * 0.06 + 's';
+      observer.observe(el);
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(link=>{
+      link.addEventListener('click', e=>{
+        const id = link.getAttribute('href');
+        const target = document.querySelector(id);
+        if(target){
+          e.preventDefault();
+          target.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i], cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

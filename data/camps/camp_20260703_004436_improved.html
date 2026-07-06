@@ -1,0 +1,1185 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就労継続支援B型事業所 るわみ｜自分のペースで、やさしく働く</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --beige:#dfbb94;
+      --beige-soft:rgba(223,187,148,.1);
+      --gray:#eeeeee;
+      --text:#000000;
+      --text2:#333333;
+      --accent:#db9281;
+      --line:rgba(0,0,0,.15);
+      --shadow:0 4px 16px rgba(0,0,0,.13);
+      --radius-lg:25px;
+      --radius-sm:4px;
+      --container:1320px;
+      --serif:游明朝, YuMincho, "ヒラギノ明朝 ProN W3", "Hiragino Mincho ProN", HG明朝E, "ＭＳ Ｐ明朝", "ＭＳ 明朝", serif;
+      --sans:"Noto Sans JP", sans-serif;
+      --grad-soft:linear-gradient(180deg, #eef7ff 0%, #ffffff 60%);
+      --grad-card:linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,255,255,.88));
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text2);
+      background:var(--bg);
+      line-height:1.8;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    a{text-decoration:none;color:inherit}
+    img{display:block;max-width:100%}
+    .container{width:min(calc(100% - 80px), var(--container)); margin:0 auto}
+    .serif{font-family:var(--serif)}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:180px; height:46px; padding:0 26px;
+      background:var(--accent); color:#fff; border-radius:999px;
+      font-size:14px; letter-spacing:.04em; border:none;
+      box-shadow:none;
+      transition:all .35s cubic-bezier(.445,.05,.55,.95);
+    }
+    .btn:hover{transform:translateY(-2px); box-shadow:0 8px 18px rgba(219,146,129,.28); filter:saturate(1.05)}
+    .section-space{padding:110px 0}
+    .eyebrow{
+      font-size:12px; letter-spacing:.08em; color:#666; text-align:center; margin-bottom:14px;
+    }
+    .title-line{
+      width:72px; height:1px; background:var(--line); margin:0 auto 22px;
+    }
+    .section-title{
+      text-align:center; font-size:18px; font-weight:700; color:var(--text2); margin:0;
+    }
+
+    header{
+      background:var(--beige);
+      position:relative;
+      overflow:hidden;
+    }
+    .header-top{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 0 14px;
+    }
+    .logo{
+      background:#fff; padding:10px 16px; border-radius:2px;
+      width:145px; box-shadow:0 0 0 1px rgba(0,0,0,.04) inset;
+    }
+    .logo-mark{
+      font-family:var(--serif); color:#b3627f; font-size:24px; line-height:1;
+      text-align:center; margin-bottom:2px;
+    }
+    .logo-sub{
+      font-size:8px; text-align:center; color:#555; letter-spacing:.08em;
+      white-space:nowrap;
+    }
+    nav ul{
+      display:flex; gap:34px; list-style:none; margin:0; padding:0;
+      color:#fff; font-size:13px;
+    }
+    nav a{position:relative}
+    nav a:after{
+      content:""; position:absolute; left:0; bottom:-5px; width:0; height:1px; background:#fff;
+      transition:width .3s linear;
+    }
+    nav a:hover:after{width:100%}
+
+    .hero{
+      position:relative; padding:4px 0 0;
+    }
+    .hero-inner{
+      position:relative; min-height:600px;
+    }
+    .hero-copy{
+      position:absolute; left:0; top:72px; z-index:2; max-width:760px;
+    }
+    .hero-copy h1{
+      margin:0 0 34px; font-family:var(--serif); font-weight:400;
+      font-size:58px; line-height:1.5; color:#111; letter-spacing:.04em;
+    }
+    .hero-copy p{
+      margin:0; width:min(88%, 920px); font-size:18px; line-height:2;
+      color:#222; font-weight:500;
+    }
+    .hero-visual{
+      position:relative; margin-top:116px; margin-left:40px;
+      height:560px; border-radius:0; overflow:hidden;
+      background:
+        linear-gradient(135deg, rgba(238,247,255,.85), rgba(255,255,255,.35)),
+        linear-gradient(120deg, rgba(223,187,148,.40), rgba(223,187,148,.08));
+    }
+    .hero-visual img{
+      width:100%; height:100%; object-fit:cover; object-position:center;
+      transform:scale(1.03);
+    }
+    .hero-visual:before{
+      content:""; position:absolute; inset:auto -120px -120px auto; width:340px; height:340px;
+      background:radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 65%);
+      pointer-events:none;
+    }
+    .hero-visual:after{
+      content:""; position:absolute; right:8%; top:5%; width:180px; height:180px;
+      background:url('http://127.0.0.1:5000/uploads/up_110aebebef.png') center/contain no-repeat;
+      opacity:.18; animation:floatPlane 20s linear infinite;
+      pointer-events:none;
+    }
+
+    .floating-mail{
+      position:fixed; right:22px; top:54%; z-index:20;
+      width:54px; height:54px; border-radius:50%;
+      background:var(--accent); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 6px 18px rgba(219,146,129,.3);
+      font-size:24px;
+      transition:all .35s cubic-bezier(.445,.05,.55,.95);
+    }
+    .floating-mail:hover{transform:translateY(-3px) scale(1.04)}
+
+    .intro-wrap{
+      padding:62px 0 120px;
+      background:#fff;
+    }
+    .intro-panel{
+      background:linear-gradient(180deg, #fbf8f2 0%, #fbf8f2 54%, var(--beige) 54%, var(--beige) 84%, #fbf8f2 84%, #fbf8f2 100%);
+      padding:52px 38px 42px;
+      border:1px solid rgba(0,0,0,.04);
+    }
+    .intro-cards{
+      margin-top:42px;
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:30px;
+      align-items:start;
+    }
+    .card{
+      background:#fff;
+      box-shadow:var(--shadow);
+      transition:all .4s cubic-bezier(.445,.05,.55,.95);
+    }
+    .card:hover{transform:translateY(-5px)}
+    .card-media{
+      aspect-ratio: 4 / 2.45;
+      background:
+        linear-gradient(135deg, rgba(238,247,255,.85), rgba(223,187,148,.26));
+      overflow:hidden;
+    }
+    .card-media img{width:100%; height:100%; object-fit:cover}
+    .card-body{padding:12px 14px 16px}
+    .card-title{
+      font-size:15px; font-weight:700; color:#222; text-align:center; margin:0 0 4px;
+    }
+    .card-text{
+      font-size:12px; line-height:1.6; color:#333; margin:0;
+    }
+    .center-btn{display:flex; justify-content:center; margin-top:28px}
+
+    .news{
+      padding:78px 0 120px;
+    }
+    .news-head{
+      margin-bottom:30px;
+    }
+    .news-label{
+      font-size:13px; letter-spacing:.08em; color:#444; margin-bottom:18px;
+    }
+    .news-line{
+      width:74px; height:1px; background:var(--line);
+    }
+    .news-grid{
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;
+    }
+    .news-card{
+      background:#fff; box-shadow:var(--shadow);
+      transition:all .4s cubic-bezier(.445,.05,.55,.95);
+    }
+    .news-card:hover{transform:translateY(-5px)}
+    .news-media{
+      aspect-ratio: 1.55 / 1;
+      background:
+        linear-gradient(135deg, rgba(238,247,255,.88), rgba(223,187,148,.28));
+      overflow:hidden;
+    }
+    .news-media img{width:100%; height:100%; object-fit:cover}
+    .news-body{padding:10px 12px 14px}
+    .news-text{font-size:14px; line-height:1.7; color:#333; margin:0 0 8px}
+    .news-date{font-size:12px; color:#666}
+
+    .contact-band{
+      background:var(--gray);
+      padding:48px 0 72px;
+    }
+    .contact-box{
+      position:relative;
+      background:#fff;
+      padding:48px 28px 42px;
+      text-align:center;
+    }
+    .contact-script{
+      position:absolute; left:32px; top:-26px;
+      font-family:var(--serif); font-style:italic;
+      font-size:66px; color:rgba(0,0,0,.18); font-weight:400;
+    }
+    .contact-title{
+      font-size:18px; font-weight:700; color:#222; margin:0 0 8px;
+    }
+    .contact-line{
+      width:160px; height:1px; background:var(--line); margin:0 auto 18px;
+    }
+    .phone{
+      display:inline-block;
+      font-family:var(--serif);
+      font-size:62px; line-height:1; color:#222; font-weight:700;
+      padding:0 10px 4px;
+      background:linear-gradient(transparent 68%, rgba(223,187,148,.45) 68%);
+    }
+    .contact-note{
+      font-size:18px; color:#222; font-weight:700; margin-top:10px;
+    }
+    .mail-btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:12px;
+      margin-top:22px; background:#fff; color:#333; border:1px solid #ddd;
+      height:54px; padding:0 28px; border-radius:2px;
+      transition:all .35s cubic-bezier(.445,.05,.55,.95);
+    }
+    .mail-btn:hover{transform:translateY(-2px); box-shadow:var(--shadow)}
+    .contact-small{font-size:12px; color:#666; margin-top:10px}
+
+    footer{
+      background:var(--beige);
+      padding:36px 0 52px;
+      color:#fff;
+    }
+    .footer-top{
+      display:grid; grid-template-columns:320px 1fr; gap:80px; align-items:start;
+    }
+    .footer-brand .logo{margin-bottom:18px}
+    .address{
+      font-size:13px; line-height:2; color:rgba(255,255,255,.95)
+    }
+    .footer-nav{
+      display:grid; grid-template-columns:repeat(2, minmax(160px, 220px)); gap:14px 80px;
+      padding-top:18px;
+      font-size:14px;
+    }
+    .footer-nav a{color:rgba(255,255,255,.95)}
+    .footer-nav a:before{content:"・"; margin-right:4px}
+    .footer-bottom{
+      background:#fff; color:#222; text-align:center;
+      padding:22px 0 26px;
+    }
+    .insta{
+      font-size:26px; color:#d05f93; margin-bottom:10px;
+    }
+    .copy{font-size:13px}
+
+    .reveal{opacity:1; transform:none}
+    html.js .reveal{
+      opacity:0; transform:translateY(26px);
+      transition:
+        opacity .8s cubic-bezier(.445,.05,.55,.95),
+        transform .8s cubic-bezier(.445,.05,.55,.95);
+    }
+    html.js .reveal.is-visible{opacity:1; transform:translateY(0)}
+    html.js .stagger > *{
+      opacity:0; transform:translateY(24px);
+      transition:
+        opacity .8s cubic-bezier(.445,.05,.55,.95),
+        transform .8s cubic-bezier(.445,.05,.55,.95);
+    }
+    html.js .stagger.is-visible > *:nth-child(1){transition-delay:.05s}
+    html.js .stagger.is-visible > *:nth-child(2){transition-delay:.15s}
+    html.js .stagger.is-visible > *:nth-child(3){transition-delay:.25s}
+    html.js .stagger.is-visible > *:nth-child(4){transition-delay:.35s}
+    html.js .stagger.is-visible > *{
+      opacity:1; transform:translateY(0);
+    }
+
+    .hero-copy h1,
+    .hero-copy p,
+    .hero-visual{
+      opacity:0;
+      transition:all .9s cubic-bezier(.445,.05,.55,.95);
+    }
+    .hero-ready .hero-copy h1{opacity:1; transform:none}
+    .hero-ready .hero-copy p{opacity:1; transform:none; transition-delay:.18s}
+    .hero-ready .hero-visual{opacity:1; transform:none; transition-delay:.12s}
+    .hero-copy h1{transform:translateY(24px)}
+    .hero-copy p{transform:translateY(24px)}
+    .hero-visual{transform:translateY(18px) scale(1.02)}
+
+    @keyframes floatPlane{
+      0%{transform:translate3d(0,0,0) rotate(0deg)}
+      50%{transform:translate3d(-18px,10px,0) rotate(4deg)}
+      100%{transform:translate3d(-36px,18px,0) rotate(8deg)}
+    }
+    @keyframes loading-spin-36413753 {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(1turn); }
+    }
+
+    @media (max-width: 1024px){
+      .container{width:min(calc(100% - 40px), var(--container))}
+      .hero-copy{position:relative; top:auto; left:auto; max-width:none; margin-bottom:26px}
+      .hero-copy h1{font-size:42px}
+      .hero-copy p{width:100%; font-size:16px}
+      .hero-visual{margin:0; height:420px}
+      .intro-cards,.news-grid{grid-template-columns:1fr}
+      .footer-top{grid-template-columns:1fr; gap:30px}
+      .footer-nav{grid-template-columns:1fr 1fr; gap:12px 40px}
+      .phone{font-size:46px}
+      nav ul{gap:18px; font-size:12px}
+    }
+    @media (max-width: 720px){
+      .header-top{flex-direction:column; align-items:flex-start; gap:14px}
+      nav ul{flex-wrap:wrap}
+      .hero-inner{min-height:auto}
+      .hero-copy h1{font-size:34px; line-height:1.45}
+      .hero-copy p{font-size:15px; line-height:1.9}
+      .hero-visual{height:300px}
+      .intro-panel{padding:34px 18px}
+      .contact-script{font-size:46px; left:14px; top:-20px}
+      .phone{font-size:34px}
+      .contact-note{font-size:15px}
+      .footer-nav{grid-template-columns:1fr}
+      .floating-mail{right:14px; width:48px; height:48px}
+    }
+  </style>
+</head>
+<body style="">
+  <a href="#contact" class="floating-mail" aria-label="お問い合わせ">✉</a>
+
+  <header>
+    <div class="container">
+      <div class="header-top reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="">
+        <a href="#" class="logo" aria-label="るわみ ロゴ">
+          <div class="logo-mark">るわみ</div>
+          <div class="logo-sub">就労継続支援B型事業所</div>
+        </a>
+        <nav>
+          <ul>
+            <li><a href="#top">トップ</a></li>
+            <li><a href="#about">「るわみ」のご紹介</a></li>
+            <li><a href="#company">会社概要</a></li>
+            <li><a href="#news">お知らせ</a></li>
+            <li><a href="#contact">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <section class="imp-renewed-hero" id="top">
+  <style>
+    .imp-renewed-hero{
+      --imp-bg:#ffffff;
+      --imp-bg-soft:#eef5f8;
+      --imp-main:#008ed8;
+      --imp-main-deep:#047fbe;
+      --imp-main-strong:rgba(4,143,216,.9);
+      --imp-text:#0a273f;
+      --imp-line:rgba(0,142,216,.16);
+      --imp-line-strong:rgba(0,142,216,.28);
+      --imp-white:rgba(255,255,255,.94);
+      --imp-radius-lg:15px;
+      --imp-radius-sm:3px;
+      --imp-container:1240px;
+      position:relative;
+      overflow:hidden;
+      padding:48px 0 72px;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,1) 0%, rgba(238,245,248,1) 28%, rgba(255,255,255,1) 54%, rgba(230,243,250,1) 74%, rgba(255,255,255,1) 100%);
+      background-size:200% 200%;
+      animation:impBgFlow 18s ease-in-out infinite;
+      font-family:"Noto Sans JP", sans-serif;
+    }
+
+    .imp-renewed-hero *,
+    .imp-renewed-hero *::before,
+    .imp-renewed-hero *::after{
+      box-sizing:border-box;
+    }
+
+    .imp-renewed-hero::before,
+    .imp-renewed-hero::after{
+      content:"";
+      position:absolute;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .imp-renewed-hero::before{
+      width:520px;
+      height:520px;
+      border-radius:50%;
+      top:-120px;
+      right:-120px;
+      background:radial-gradient(circle, rgba(0,142,216,.18) 0%, rgba(0,142,216,.08) 38%, rgba(0,142,216,0) 72%);
+      animation:impFloatCircleA 11s ease-in-out infinite;
+    }
+
+    .imp-renewed-hero::after{
+      width:420px;
+      height:420px;
+      border-radius:50%;
+      left:-120px;
+      bottom:-140px;
+      background:radial-gradient(circle, rgba(0,142,216,.14) 0%, rgba(238,245,248,.65) 42%, rgba(255,255,255,0) 72%);
+      animation:impFloatCircleB 13s ease-in-out infinite;
+    }
+
+    .imp-shell{
+      width:min(calc(100% - 40px), var(--imp-container));
+      margin:0 auto;
+      position:relative;
+      z-index:1;
+    }
+
+    .imp-shell::before,
+    .imp-shell::after{
+      content:"";
+      position:absolute;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .imp-shell::before{
+      width:220px;
+      height:220px;
+      top:18px;
+      left:36%;
+      border:1px solid rgba(0,142,216,.16);
+      border-radius:15px;
+      transform:rotate(18deg);
+      animation:impFrameFloat 12s ease-in-out infinite;
+    }
+
+    .imp-shell::after{
+      width:160px;
+      height:160px;
+      right:2%;
+      bottom:34px;
+      border:1px solid rgba(0,142,216,.18);
+      border-radius:15px;
+      transform:rotate(-16deg);
+      animation:impFrameFloatB 10s ease-in-out infinite;
+    }
+
+    .imp-stage{
+      position:relative;
+      display:grid;
+      grid-template-columns:minmax(340px, 420px) minmax(520px, 1fr);
+      gap:48px;
+      align-items:center;
+      min-height:760px;
+    }
+
+    .imp-copy,
+    .imp-visual{
+      position:relative;
+      z-index:1;
+    }
+
+    .imp-copy-box{
+      position:relative;
+      background:linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(245,250,252,.96) 100%);
+      border:1px solid var(--imp-line);
+      border-radius:var(--imp-radius-lg);
+      padding:28px 28px 24px;
+      overflow:hidden;
+      transition:transform .45s ease, box-shadow .45s ease, border-color .45s ease;
+    }
+
+    .imp-copy-box:hover{
+      transform:translateY(-10px);
+      box-shadow:0 20px 42px rgba(0,142,216,.14);
+      border-color:var(--imp-line-strong);
+    }
+
+    .imp-copy-box::before{
+      content:"";
+      position:absolute;
+      inset:0 auto 0 0;
+      width:8px;
+      background:linear-gradient(180deg, var(--imp-main) 0%, rgba(4,143,216,.25) 100%);
+    }
+
+    .imp-copy-box::after{
+      content:"";
+      position:absolute;
+      right:-50px;
+      bottom:-40px;
+      width:180px;
+      height:180px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(0,142,216,.12) 0%, rgba(0,142,216,0) 70%);
+      animation:impPulseOrb 7s ease-in-out infinite;
+    }
+
+    .imp-copy-inner{
+      position:relative;
+      z-index:1;
+      display:grid;
+      gap:24px;
+    }
+
+    .imp-title{
+      margin:0;
+      color:var(--imp-text);
+      font-family:"Noto Sans JP", sans-serif;
+      font-weight:500;
+      font-size:clamp(36px, 5.5vw, 68px);
+      line-height:1.62;
+      letter-spacing:.12em;
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      height:min(700px, 72vw);
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-start;
+    }
+
+    .imp-title span{
+      display:inline-block;
+      opacity:0;
+      transform:translateY(70px) scale(.9) rotate(8deg);
+      filter:blur(6px);
+      transition:
+        opacity .7s cubic-bezier(.2,.7,.2,1),
+        transform .7s cubic-bezier(.2,.7,.2,1),
+        filter .7s ease;
+    }
+
+    .imp-title.is-visible span{
+      opacity:1;
+      transform:translateY(0) scale(1) rotate(0);
+      filter:blur(0);
+    }
+
+    .imp-text{
+      margin:0;
+      color:var(--imp-text);
+      font-size:15px;
+      line-height:2.2;
+      letter-spacing:.04em;
+    }
+
+    .imp-visual-wrap{
+      position:relative;
+      padding:24px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(238,245,248,.94) 100%);
+      border:1px solid var(--imp-line);
+      border-radius:var(--imp-radius-lg);
+      overflow:hidden;
+      transition:transform .45s ease, box-shadow .45s ease, border-color .45s ease;
+    }
+
+    .imp-visual-wrap:hover{
+      transform:translateY(-10px);
+      box-shadow:0 24px 48px rgba(0,142,216,.16);
+      border-color:var(--imp-line-strong);
+    }
+
+    .imp-visual-wrap::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg, rgba(0,142,216,.06) 0 1px, transparent 1px 100%),
+        linear-gradient(rgba(0,142,216,.06) 0 1px, transparent 1px 100%);
+      background-size:24px 24px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0));
+      pointer-events:none;
+      animation:impGridDrift 14s linear infinite;
+    }
+
+    .imp-visual-wrap::after{
+      content:"";
+      position:absolute;
+      left:-60px;
+      top:56px;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(0,142,216,.12) 0%, rgba(0,142,216,0) 72%);
+      animation:impFloatCircleC 9s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .imp-badge{
+      position:absolute;
+      z-index:3;
+      display:inline-flex;
+      align-items:center;
+      gap:9px;
+      padding:11px 16px;
+      min-height:42px;
+      border-radius:999px;
+      color:#fff;
+      background:linear-gradient(135deg, rgba(4,143,216,.9), rgba(0,142,216,1));
+      font-size:11px;
+      line-height:1;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-weight:700;
+      border:1px solid rgba(255,255,255,.32);
+      transition:transform .35s ease, filter .35s ease, background .35s ease;
+      box-shadow:0 12px 26px rgba(0,142,216,.22);
+      animation:impBadgeWave 4.6s ease-in-out infinite;
+      white-space:nowrap;
+    }
+
+    .imp-badge:hover{
+      transform:translateY(-8px) scale(1.08);
+      filter:brightness(1.08);
+      background:linear-gradient(135deg, rgba(0,142,216,1), rgba(10,39,63,1));
+    }
+
+    .imp-badge svg{
+      width:14px;
+      height:14px;
+      fill:currentColor;
+      flex:none;
+    }
+
+    .imp-badge-top{
+      top:-4px;
+      left:16px;
+    }
+
+    .imp-badge-bottom{
+      right:18px;
+      bottom:18px;
+      animation-delay:.8s;
+    }
+
+    .imp-dots{
+      position:absolute;
+      top:18px;
+      right:18px;
+      width:94px;
+      height:94px;
+      background-image:radial-gradient(rgba(0,142,216,.34) 1.7px, transparent 1.7px);
+      background-size:12px 12px;
+      opacity:.95;
+      z-index:2;
+      animation:impDotsFloat 8s ease-in-out infinite;
+    }
+
+    .imp-photo-frame{
+      position:relative;
+      border-radius:15px;
+      background:#fff;
+      padding:14px;
+      border:1px solid rgba(0,142,216,.12);
+      overflow:hidden;
+      z-index:1;
+    }
+
+    .imp-photo-frame::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.45) 42%, rgba(255,255,255,0) 72%);
+      transform:translateX(-120%);
+      animation:impShineSweep 5.8s ease-in-out infinite;
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .imp-photo{
+      position:relative;
+      border-radius:var(--imp-radius-sm);
+      overflow:hidden;
+      aspect-ratio:1.22/1;
+      background:var(--imp-bg-soft);
+    }
+
+    .imp-photo img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      transform:scale(1.15);
+      opacity:0;
+      filter:saturate(1.05) contrast(1.02);
+      transition:
+        transform 1.25s cubic-bezier(.2,.7,.2,1),
+        opacity 1s ease;
+    }
+
+    .imp-photo.is-visible img{
+      transform:scale(1);
+      opacity:1;
+    }
+
+    .imp-photo-frame:hover .imp-photo img{
+      transform:scale(1.07);
+    }
+
+    .imp-reveal{
+      opacity:0;
+      transform:translateY(80px);
+      transition:
+        opacity .95s cubic-bezier(.2,.7,.2,1),
+        transform .95s cubic-bezier(.2,.7,.2,1);
+      will-change:transform,opacity;
+    }
+
+    .imp-reveal.is-visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .imp-delay-1{ transition-delay:.05s; }
+    .imp-delay-2{ transition-delay:.2s; }
+
+    @keyframes impBgFlow{
+      0%{ background-position:0% 50%; }
+      50%{ background-position:100% 50%; }
+      100%{ background-position:0% 50%; }
+    }
+
+    @keyframes impFloatCircleA{
+      0%,100%{ transform:translate3d(0,0,0) scale(1); }
+      50%{ transform:translate3d(-40px,34px,0) scale(1.08); }
+    }
+
+    @keyframes impFloatCircleB{
+      0%,100%{ transform:translate3d(0,0,0) scale(1); }
+      50%{ transform:translate3d(34px,-38px,0) scale(1.12); }
+    }
+
+    @keyframes impFloatCircleC{
+      0%,100%{ transform:translate3d(0,0,0) scale(1); }
+      50%{ transform:translate3d(38px,-30px,0) scale(1.1); }
+    }
+
+    @keyframes impFrameFloat{
+      0%,100%{ transform:translate3d(0,0,0) rotate(18deg); }
+      50%{ transform:translate3d(32px,-34px,0) rotate(8deg); }
+    }
+
+    @keyframes impFrameFloatB{
+      0%,100%{ transform:translate3d(0,0,0) rotate(-16deg); }
+      50%{ transform:translate3d(-30px,28px,0) rotate(-6deg); }
+    }
+
+    @keyframes impPulseOrb{
+      0%,100%{ transform:scale(1); opacity:.7; }
+      50%{ transform:scale(1.16); opacity:1; }
+    }
+
+    @keyframes impGridDrift{
+      0%{ transform:translate3d(0,0,0); }
+      100%{ transform:translate3d(24px,24px,0); }
+    }
+
+    @keyframes impBadgeWave{
+      0%,100%{ transform:translateY(0) scale(1) rotate(0deg); }
+      50%{ transform:translateY(-10px) scale(1.05) rotate(-2deg); }
+    }
+
+    @keyframes impDotsFloat{
+      0%,100%{ transform:translate3d(0,0,0); }
+      50%{ transform:translate3d(-18px,16px,0); }
+    }
+
+    @keyframes impShineSweep{
+      0%,100%{ transform:translateX(-120%); }
+      48%,62%{ transform:translateX(120%); }
+    }
+
+    @media (max-width: 1080px){
+      .imp-stage{
+        grid-template-columns:1fr;
+        gap:28px;
+        min-height:auto;
+      }
+
+      .imp-title{
+        writing-mode:horizontal-tb;
+        text-orientation:initial;
+        height:auto;
+        font-size:clamp(30px, 6.8vw, 56px);
+        line-height:1.6;
+      }
+
+      .imp-visual{
+        order:2;
+      }
+
+      .imp-copy{
+        order:1;
+      }
+    }
+
+    @media (max-width: 720px){
+      .imp-renewed-hero{
+        padding:24px 0 52px;
+      }
+
+      .imp-shell{
+        width:min(calc(100% - 20px), var(--imp-container));
+      }
+
+      .imp-copy-box,
+      .imp-visual-wrap{
+        padding:18px;
+      }
+
+      .imp-title{
+        font-size:clamp(24px, 8.5vw, 36px);
+        letter-spacing:.08em;
+      }
+
+      .imp-text{
+        font-size:14px;
+        line-height:2;
+      }
+
+      .imp-photo-frame{
+        padding:10px;
+      }
+
+      .imp-photo{
+        aspect-ratio:1.05/1;
+      }
+
+      .imp-badge{
+        padding:10px 12px;
+        min-height:36px;
+        font-size:10px;
+        letter-spacing:.14em;
+      }
+
+      .imp-badge-top{
+        top:6px;
+        left:8px;
+      }
+
+      .imp-badge-bottom{
+        right:8px;
+        bottom:10px;
+      }
+
+      .imp-dots{
+        width:64px;
+        height:64px;
+        top:12px;
+        right:12px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .imp-renewed-hero,
+      .imp-renewed-hero *{
+        animation:none !important;
+        transition:none !important;
+        scroll-behavior:auto !important;
+      }
+      .imp-reveal,
+      .imp-title span,
+      .imp-photo img{
+        opacity:1 !important;
+        transform:none !important;
+        filter:none !important;
+      }
+    }
+  </style>
+
+  <div class="imp-shell">
+    <div class="imp-stage">
+      <div class="imp-copy imp-reveal imp-delay-1">
+        <div class="imp-copy-box">
+          <div class="imp-copy-inner">
+            <h1 class="imp-title" aria-label="あなたの「できる」を、やさしく未来へつないでいきます。">
+              <span>あ</span><span>な</span><span>た</span><span>の</span><span>「</span><span>で</span><span>き</span><span>る</span><span>」</span><span>を</span><span>、</span><span>や</span><span>さ</span><span>し</span><span>く</span><span>未</span><span>来</span><span>へ</span><span>つ</span><span>な</span><span>い</span><span>で</span><span>い</span><span>き</span><span>ま</span><span>す</span><span>。</span>
+            </h1>
+            <p class="imp-text">
+              「るわみ」は、就労継続支援B型の事業所です。落ち着いた空間のなかで、体調や気持ちに寄り添いながら、自分のペースで働く時間を育てていきます。<br>
+              軽作業や梱包、手しごと、パソコン作業などを通して、少しずつ自信を重ね、毎日の暮らしに安心と心地よいリズムをつくる場所です。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="imp-visual imp-reveal imp-delay-2">
+        <div class="imp-visual-wrap">
+          <div class="imp-badge imp-badge-top">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.6 5.27L20.5 8l-4.25 4.14L17.3 18 12 15.2 6.7 18l1.05-5.86L3.5 8l5.9-.73L12 2z"></path></svg>
+            warm support
+          </div>
+
+          <div class="imp-dots" aria-hidden="true"></div>
+
+          <div class="imp-photo-frame">
+            <div class="imp-photo">
+              <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="就労支援事業所の明るい入口" width="1280" height="560" onerror="this.style.display='none'">
+            </div>
+          </div>
+
+          <div class="imp-badge imp-badge-bottom">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+            positive place
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var root = document.currentScript.closest('.imp-renewed-hero');
+      if(!root) return;
+
+      var revealItems = root.querySelectorAll('.imp-reveal');
+      var title = root.querySelector('.imp-title');
+      var titleChars = title ? title.querySelectorAll('span') : [];
+      var photo = root.querySelector('.imp-photo');
+
+      function showTitle(){
+        if(!title) return;
+        title.classList.add('is-visible');
+        titleChars.forEach(function(ch, i){
+          ch.style.transitionDelay = (i * 0.06) + 's';
+        });
+      }
+
+      function showPhoto(){
+        if(photo) photo.classList.add('is-visible');
+      }
+
+      function showBlock(el){
+        el.classList.add('is-visible');
+        if(el.contains(title)) showTitle();
+        if(el.contains(photo)) showPhoto();
+      }
+
+      function showAll(){
+        revealItems.forEach(showBlock);
+        showTitle();
+        showPhoto();
+      }
+
+      if('IntersectionObserver' in window){
+        var io = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              showBlock(entry.target);
+              io.unobserve(entry.target);
+            }
+          });
+        }, {threshold:0.18, rootMargin:'0px 0px -10% 0px'});
+
+        revealItems.forEach(function(item){
+          io.observe(item);
+        });
+      }else{
+        showAll();
+      }
+
+      setTimeout(showAll, 3000);
+    })();
+  </script>
+</section>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro-wrap" id="about">
+      <div class="container">
+        <div class="intro-panel reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="eyebrow">ruwami</div>
+          <div class="title-line"></div>
+          <h2 class="section-title">「るわみ」のご紹介</h2>
+
+          <div class="intro-cards stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+            <article class="card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="card-media">
+                <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="協力して梱包するスタッフ" width="390" height="240" onerror="this.style.display='none'">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">作業内容</h3>
+                <p class="card-text">封入・梱包・検品・箱づくりなど、無理なく取り組める作業をご紹介します。</p>
+              </div>
+            </article>
+
+            <article class="card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="card-media">
+                <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="コーヒーとクッキー" width="390" height="240" onerror="this.style.display='none'">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">一日の流れ</h3>
+                <p class="card-text">通所から作業、休憩、面談まで。安心して過ごせる一日の流れをお伝えします。</p>
+              </div>
+            </article>
+
+            <article class="card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="card-media">
+                <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="事業所前のスタッフたち" width="390" height="240" onerror="this.style.display='none'">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">見学・体験受付中</h3>
+                <p class="card-text">初めての方も大丈夫。事業所の雰囲気を知っていただける見学を行っています。</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="center-btn">
+            <a href="#contact" class="btn">View More</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="news" id="news">
+      <div class="container">
+        <div class="news-head reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="news-label">NEWS</div>
+          <div class="news-line"></div>
+        </div>
+
+        <div class="news-grid stagger">
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="news-media">
+              <img src="http://127.0.0.1:5000/uploads/up_033afbf0bd.jpg" alt="和やかな梱包作業" width="410" height="265" onerror="this.style.display='none'">
+            </div>
+            <div class="news-body">
+              <p class="news-text">新しい軽作業プログラムがスタートしました。初めての方でも参加しやすい内容です。</p>
+              <div class="news-date">2026/06/18</div>
+            </div>
+          </article>
+
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="news-media">
+              <img src="http://127.0.0.1:5000/uploads/up_06aa20751a.png" alt="相談に応じる女性スタッフ" width="410" height="265" onerror="this.style.display='none'">
+            </div>
+            <div class="news-body">
+              <p class="news-text">見学相談会を開催しました。落ち着いた雰囲気の中で、ゆっくりお話いただけました。</p>
+              <div class="news-date">2026/06/07</div>
+            </div>
+          </article>
+
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="news-media">
+              <img src="http://127.0.0.1:5000/uploads/up_ca0295279d.jpg" alt="手作りアクセサリーの検品" width="410" height="265" onerror="this.style.display='none'">
+            </div>
+            <div class="news-body">
+              <p class="news-text">利用者さんが丁寧に仕上げた手しごとの一部をご紹介。集中して取り組める時間が広がっています。</p>
+              <div class="news-date">2026/05/24</div>
+            </div>
+          </article>
+        </div>
+
+        <div class="center-btn" style="margin-top:30px">
+          <a href="#contact" class="btn">View More</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-band" id="contact">
+      <div class="container">
+        <div class="contact-box reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="contact-script">Contact</div>
+          <h2 class="contact-title">ご相談はこちら</h2>
+          <div class="contact-line"></div>
+          <div class="phone">022-398-7350</div>
+          <div class="contact-note">平日のみ（土日祝休み）</div>
+          <a href="mailto:info@ruwami.jp" class="mail-btn">
+            <span style="font-size:24px">✉</span>
+            <span>お問い合わせフォーム</span>
+          </a>
+          <div class="contact-small">※ お電話またはメールフォームからお気軽にご相談ください。</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="company">
+    <div class="container">
+      <div class="footer-top reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="footer-brand">
+          <a href="#" class="logo" aria-label="るわみ ロゴ">
+            <div class="logo-mark">るわみ</div>
+            <div class="logo-sub">就労継続支援B型事業所</div>
+          </a>
+          <div class="address">
+            〒989-3126<br>
+            宮城県仙台市青葉区落合二丁目11番地2号 103<br>
+            株式会社Ruwami Care
+          </div>
+        </div>
+        <div class="footer-nav">
+          <a href="#top">トップ</a>
+          <a href="#about">「るわみ」のご紹介</a>
+          <a href="#company">会社案内</a>
+          <a href="#news">お知らせ</a>
+          <a href="#contact">お問い合わせ</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="footer-bottom">
+    <div class="insta">◎</div>
+    <div class="copy">©2026 株式会社Ruwami Care All Rights Reserved.</div>
+  </div>
+
+  <script>
+    (() => {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+
+      document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
+    })();
+  </script>
+
+
+
+
+
+
+
+<div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i], cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

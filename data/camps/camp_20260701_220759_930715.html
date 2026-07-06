@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<script>document.documentElement.classList.add('js');</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>リンクワークス｜就労継続支援A型</title>
+<meta name="description" content="就労継続支援A型リンクワークス。企業品質のクリエイティブ・事務・データ業務を、福祉の現場から。">
+<style>
+:root{
+  --blue:#0071b9;
+  --blue2:#0b86cf;
+  --light:#b2d4ea;
+  --pale:#eaf6fd;
+  --white:#fff;
+  --bg:#fafafa;
+  --text:#333333;
+  --yellow:#f2e018;
+  --navy:#063a66;
+  --shadow:rgba(174,174,174,.1) 5px 5px 10px 0px;
+  --ease:cubic-bezier(.445,.05,.55,.95);
+  --max:1440px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--text);
+  background:var(--bg);
+  font-family:"Times New Roman","Yu Mincho","Hiragino Mincho ProN",serif;
+  line-height:1.9;
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.sans{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic",YuGothic,Arial,sans-serif}
+.wrap{max-width:var(--max);margin:0 auto}
+.inner{width:min(1120px,calc(100% - 48px));margin:0 auto}
+.section{position:relative;padding:126px 0}
+.sec-head{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:34px;
+  align-items:start;
+  margin-bottom:56px;
+}
+.sec-kicker{
+  color:var(--blue);
+  font-weight:800;
+  letter-spacing:.02em;
+  line-height:1.15;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic",YuGothic,Arial,sans-serif;
+}
+.sec-kicker small{display:block;font-size:11px;margin-bottom:6px;font-family:"Times New Roman",serif}
+.sec-kicker span{display:block;font-size:28px}
+.sec-kicker em{display:block;font-size:12px;font-style:normal;margin-top:6px}
+.line-deco{position:absolute;left:0;top:116px;width:60px;height:1px;background:var(--blue);opacity:.65}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  border-radius:999px;border:0;background:var(--blue);color:white;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic",YuGothic,Arial,sans-serif;
+  font-weight:800;font-size:14px;padding:12px 23px;
+  box-shadow:var(--shadow);
+  transition:all .4s var(--ease);
+  cursor:pointer;
+}
+.btn:hover{transform:translateY(-4px);background:#005f9c;box-shadow:rgba(0,113,185,.18) 0 18px 36px}
+.btn.yellow{background:var(--yellow);color:#123}
+.btn.green{background:#00bf49;color:#fff}
+.btn.white{background:#fff;color:var(--blue)}
+.arrow{
+  width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.22);
+  display:inline-grid;place-items:center;font-family:sans-serif;font-size:12px;
+}
+.header{
+  position:absolute;z-index:30;top:0;left:0;right:0;color:white;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic",YuGothic,Arial,sans-serif;
+}
+.header-inner{
+  height:76px;width:min(1320px,calc(100% - 44px));margin:auto;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:21px;letter-spacing:-.04em}
+.logo-mark{
+  width:28px;height:28px;border-radius:8px;background:#fff;position:relative;overflow:hidden;
+}
+.logo-mark:before,.logo-mark:after{content:"";position:absolute;background:var(--blue);border-radius:2px}
+.logo-mark:before{width:15px;height:5px;left:7px;top:7px;box-shadow:0 8px 0 var(--blue)}
+.logo-mark:after{width:7px;height:5px;left:7px;bottom:4px}
+.nav{display:flex;align-items:center;gap:28px;font-size:12px;font-weight:800}
+.nav a{opacity:.95;transition:all .3s var(--ease)}
+.nav a:hover{opacity:1;transform:translateY(-2px)}
+.nav .pill{
+  background:white;color:var(--blue);border-radius:999px;padding:8px 16px;
+}
+.nav .pill.yellow{background:var(--yellow);color:#123}
+
+/* Hero */
+.hero{
+  background:var(--blue);
+  color:white;
+  min-height:690px;
+  position:relative;
+  overflow:hidden;
+}
+.hero:before{
+  content:"";
+  position:absolute;right:-10%;top:-28%;
+  width:780px;height:780px;border-radius:50%;
+  background:conic-gradient(from 120deg,#ff8b18,#ff62c8,#82c9ff,#ffffff00,#ff8b18);
+  filter:blur(12px);
+  opacity:.55;
+  animation:loading-spin-36413753 20s linear infinite;
+}
+@keyframes loading-spin-36413753{0%{transform:rotate(0)}100%{transform:rotate(1turn)}}
+.hero-stage{
+  position:relative;z-index:2;padding-top:116px;height:610px;
+  display:grid;grid-template-columns:1fr 1.06fr 220px;gap:66px;align-items:center;
+  width:min(1320px,calc(100% - 44px));margin:auto;
+}
+.hero-copy{padding-left:10px}
+.hero-copy .label{font-size:13px;font-weight:800;letter-spacing:.08em;margin-bottom:20px}
+.hero h1{
+  margin:0;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic",YuGothic,Arial,sans-serif;
+  font-size:clamp(48px,7.2vw,108px);line-height:.95;letter-spacing:-.07em;font-weight:950;
+}
+.hero h1 .thin{display:block;font-weight:800;color:#dff3ff}
+.hero-copy p{font-size:18px;font-weight:700;margin:28px 0 34px;max-width:500px}
+.hero-visual{position:relative;height:390px}
+.photo-window{
+  position:absolute;overflow:hidden;border:8px solid white;border-radius:8px;
+  background:linear-gradient(135deg,var(--light),#fff);
+  box-shadow:rgba(0,48,90,.18) 0 22px 45px;
+}
+.photo-window img{width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;opacity:.9}
+.photo-window.w1{width:45%;height:210px;left:0;top:0}
+.photo-window.w2{width:58%;height:260px;right:4%;top:34px}
+.photo-window.w3{width:42%;height:165px;left:18%;bottom:0}
+.device-card{
+  position:absolute;right:0;bottom:22px;width:230px;padding:22px;border-radius:22px;
+  background:rgba(255,255,255,.88);color:var(--navy);box-shadow:rgba(0,48,90,.2) 0 24px 55px;
+  backdrop-filter:blur(10px);
+  animation:float 5.4s ease-in-out infinite;
+}
+.device-card strong{display:block;font-family:sans-serif;font-size:15px;color:var(--blue)}
+.device-card .meter{height:8px;background:#d4edf9;border-radius:99px;margin:14px 0;overflow:hidden}
+.device-card .meter span{display:block;width:78%;height:100%;background:linear-gradient(90deg,var(--blue),#ff62c8)}
+.hero-tags{
+  align-self:start;padding-top:4px;display:grid;gap:18px;justify-items:end;
+}
+.vertical-tag{
+  writing-mode:vertical-rl;background:white;color:var(--blue);font-family:sans-serif;
+  font-weight:950;font-size:38px;line-height:1.1;letter-spacing:.08em;padding:16px 9px;
+  box-shadow:var(--shadow);
+}
+.hero-bottom{
+  position:relative;z-index:5;background:var(--bg);height:116px;color:var(--blue);
+}
+.hero-bottom .mini{
+  position:absolute;left:calc((100% - min(1320px,calc(100% - 44px)))/2 + 12px);
+  top:32px;font-family:sans-serif;font-size:11px;font-weight:900;line-height:1.25;letter-spacing:.03em;
+}
+.hero-bottom .cta-top{
+  position:absolute;right:calc((100% - min(1320px,calc(100% - 44px)))/2 + 12px);
+  top:30px;
+}
+
+/* About */
+.about{background:var(--bg);padding-top:112px}
+.about-grid{
+  display:grid;grid-template-columns:120px minmax(0,620px) 1fr;gap:34px;align-items:start;
+}
+.about-text{
+  color:var(--blue);font-weight:800;font-size:19px;letter-spacing:.02em;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic",YuGothic,Arial,sans-serif;
+}
+.about-text p{margin:0 0 34px}
+.about-vertical{
+  justify-self:end;writing-mode:vertical-rl;color:var(--blue);
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Yu Gothic",YuGothic,Arial,sans-serif;
+  font-weight:950;font-size:48px;line-height:1.45;letter-spacing:.08em;
+}
+.cta-panel{
+  margin:100px auto 74px;width:min(980px,calc(100% - 48px));
+  background:var(--blue);color:white;border-radius:16px;padding:34px 44px;
+  position:relative;box-shadow:rgba(0,113,185,.12) 0 30px 70px;
+  display:grid;grid-template-columns:1fr 220px;gap:26px;align-items:center;overflow:visible;
+}
+.cta-panel h3{font-family:sans-serif;font-size:30px;line-height:1.2;margin:5px 0 20px;letter-spacing:-.04em}
+.cta-form{
+  background:#fff;border-radius:8px;border:5px solid #d9eff9;padding:20px;display:flex;
+  align-items:center;justify-content:center;gap:18px;color:#123;font-family:sans-serif;font-weight:800;
+}
+.cta-img{
+  height:180px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,var(--light),#fff);
+}
+.cta-img img{width:100%;height:100%;object-fit:cover}
+.speech{
+  position:absolute;right:120px;top:-35px;width:120px;height:120px;border-radius:50%;
+  background:var(--light);color:var(--blue);display:grid;place-items:center;text-align:center;
+  font-family:sans-serif;font-size:12px;font-weight:900;line-height:1.45;animation:float 5s ease-in-out infinite reverse;
+}
+
+/* Service */
+.service{background:var(--bg)}
+.service-title-side{
+  position:absolute;right:90px;top:115px;color:var(--blue);font-family:sans-serif;
+  font-weight:950;font-size:28px;line-height:1.08;
+}
+.service-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:70px;align-items:start;margin-top:20px;
+}
+.service-item{transition:all .45s var(--ease)}
+.service-item:hover{transform:translateY(-8px)}
+.service-photo{
+  width:205px;height:205px;margin-bottom:26px;border-radius:4px;overflow:hidden;
+  background:linear-gradient(135deg,#dff3ff,var(--light));
+}
+.service-photo img{width:100%;height:100%;object-fit:cover}
+.service-item h3{font-family:sans-serif;color:var(--blue);font-size:19px;margin:0 0 12px;line-height:1.45}
+.service-item p{font-size:14px;font-weight:700;margin:0}
+
+/* Passport / Enterprise */
+.passport{
+  background:var(--light);position:relative;overflow:hidden;padding:116px 0 140px;
+}
+.marquee{
+  position:absolute;top:-70px;left:0;white-space:nowrap;color:var(--blue);
+  font-family:sans-serif;font-weight:950;font-size:92px;letter-spacing:-.05em;opacity:.95;
+  animation:marquee 20s linear infinite;
+}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.passport:after{
+  content:"";position:absolute;left:-5%;right:-5%;bottom:-1px;height:120px;background:var(--bg);
+  clip-path:ellipse(58% 44% at 50% 100%);
+}
+.passport-intro{text-align:center;width:min(760px,calc(100% - 48px));margin:20px auto 64px;position:relative;z-index:2}
+.passport-intro h2{font-family:sans-serif;color:var(--blue);font-size:22px;letter-spacing:.06em}
+.passport-intro p{font-weight:700}
+.feature-row{
+  position:relative;z-index:2;display:grid;grid-template-columns:1fr 110px 1fr;gap:28px;
+  width:min(900px,calc(100% - 48px));margin:auto;align-items:center;
+}
+.feature-card{
+  background:#fff;border-radius:16px;padding:34px 34px 0;min-height:440px;overflow:hidden;
+  box-shadow:rgba(0,113,185,.08) 0 20px 60px;transition:all .45s var(--ease);
+}
+.feature-card:hover{transform:translateY(-8px)}
+.feature-card small{font-family:sans-serif;color:var(--blue);font-weight:900}
+.feature-card h3{font-family:sans-serif;color:var(--blue);font-size:21px;margin:8px 0 10px}
+.feature-card p{font-size:14px;font-weight:700}
+.phone-img{
+  margin:26px auto 0;width:230px;height:260px;border-radius:34px 34px 0 0;overflow:hidden;
+  background:linear-gradient(135deg,#f9fdff,#bde3f6);
+}
+.phone-img img{width:100%;height:100%;object-fit:cover}
+.center-pass{
+  width:104px;height:140px;background:var(--blue);color:white;display:grid;place-items:center;
+  border-radius:4px;box-shadow:rgba(0,72,120,.2) 0 16px 35px;font-family:sans-serif;font-weight:950;
+  transform:rotate(.5deg);animation:float 4.8s ease-in-out infinite;
+}
+
+/* Flow */
+.flow{background:var(--bg);padding-top:130px}
+.flow-layout{display:grid;grid-template-columns:220px 1fr;gap:70px;width:min(920px,calc(100% - 48px));margin:auto}
+.flow-vertical{
+  writing-mode:vertical-rl;color:var(--blue);font-family:sans-serif;font-weight:950;
+  font-size:32px;line-height:1.7;letter-spacing:.08em;
+}
+.flow-list{display:grid;gap:48px}
+.flow-step{display:grid;grid-template-columns:150px 1fr;gap:42px;align-items:center;position:relative}
+.flow-step:not(:last-child):after{
+  content:"↓";position:absolute;left:64px;bottom:-45px;color:var(--blue);font-size:42px;
+  font-family:sans-serif;opacity:.65;transform:rotate(12deg);
+}
+.flow-img{width:150px;height:150px;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,var(--light),#fff)}
+.flow-img img{width:100%;height:100%;object-fit:cover}
+.flow-step small{font-family:sans-serif;color:var(--blue);font-weight:900}
+.flow-step h3{font-family:sans-serif;color:var(--blue);font-size:22px;margin:6px 0 8px}
+.flow-step p{font-size:14px;font-weight:700;margin:0}
+
+/* Plan */
+.plan{background:#fff}
+.plan-top{display:grid;grid-template-columns:220px 1fr;gap:70px;width:min(920px,calc(100% - 48px));margin:auto}
+.plan-vertical{
+  writing-mode:vertical-rl;color:var(--blue);font-family:sans-serif;font-weight:950;
+  font-size:31px;line-height:1.75;letter-spacing:.08em;
+}
+.price-visual{position:relative;padding-top:10px}
+.price-photo{
+  width:540px;height:240px;margin-left:auto;border-radius:18px;overflow:hidden;
+  background:linear-gradient(135deg,#d9eff9,#fff);
+}
+.price-photo img{width:100%;height:100%;object-fit:cover}
+.price-box{
+  width:560px;background:#d4e9f5;border-radius:8px;margin:22px auto 0;padding:28px 34px;
+  display:grid;grid-template-columns:1fr 1fr;gap:24px;box-shadow:var(--shadow);font-family:sans-serif;
+}
+.price-box .num{color:var(--blue);font-size:52px;font-weight:950;line-height:1}
+.price-box ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.price-box li{background:white;padding:7px 12px;font-size:13px;font-weight:800}
+.schedule{width:min(920px,calc(100% - 48px));margin:110px auto 0;border-top:1px solid var(--blue)}
+.schedule h3{
+  text-align:center;color:var(--blue);font-family:sans-serif;font-size:17px;
+  border-bottom:1px solid var(--blue);padding:22px 0;margin:0 0 46px;
+}
+.schedule-block{margin:0 0 56px}
+.schedule-block small{font-family:sans-serif;color:var(--blue);font-weight:900}
+.schedule-block h4{font-family:sans-serif;color:var(--blue);font-size:22px;margin:8px 0 10px}
+.schedule-block p{font-size:14px;font-weight:700}
+.timeline{
+  margin-top:28px;background:#fff;display:grid;grid-template-columns:1fr 1fr;gap:30px;
+  padding:24px;border:1px solid #e5edf2;box-shadow:var(--shadow);
+}
+.timeline-img{height:300px;overflow:hidden;border-radius:8px;background:linear-gradient(135deg,#e8f7ff,#fff)}
+.timeline-img img{width:100%;height:100%;object-fit:cover}
+.timeline-notes{display:grid;gap:16px}
+.note{background:#fafafa;border-left:6px solid var(--blue);padding:22px;font-family:sans-serif;font-weight:800;color:#18435f}
+.note b{color:var(--blue)}
+
+/* FAQ */
+.faq{background:var(--bg);position:relative}
+.faq:before{
+  content:"";position:absolute;left:-5%;right:-5%;top:-1px;height:120px;background:#fff;
+  clip-path:ellipse(58% 44% at 50% 0);
+}
+.faq-wrap{width:min(980px,calc(100% - 48px));margin:auto;position:relative;z-index:2}
+.faq-list{margin-left:155px;display:grid;gap:12px}
+.faq-item{background:#d8edf8;border-radius:4px;overflow:hidden;transition:all .35s var(--ease)}
+.faq-q{
+  width:100%;border:0;background:transparent;display:flex;align-items:center;gap:14px;
+  padding:18px 22px;text-align:left;font-family:sans-serif;font-weight:900;color:#18384f;cursor:pointer;
+}
+.qmark{width:28px;height:28px;border-radius:50%;background:white;display:grid;place-items:center;color:var(--blue)}
+.plus{margin-left:auto;font-size:26px;font-weight:400}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .45s var(--ease);background:#fff}
+.faq-a p{margin:0;padding:18px 64px 24px;font-weight:700;font-size:14px}
+.faq-item.open{box-shadow:rgba(0,113,185,.12) 0 12px 28px}
+.faq-item.open .faq-a{max-height:180px}
+.faq-item.open .plus{transform:rotate(45deg)}
+.faq-more{text-align:right;margin-top:32px}
+
+/* Voice */
+.voice{background:var(--bg);padding-top:94px;overflow:hidden}
+.voice-rail{display:flex;gap:22px;margin-top:28px;overflow:hidden;padding:20px 0 30px 0}
+.voice-card{
+  flex:0 0 300px;background:#fff;border-radius:4px;box-shadow:var(--shadow);
+  min-height:252px;padding:28px 24px;position:relative;transition:all .45s var(--ease);
+}
+.voice-card:hover{transform:translateY(-8px)}
+.voice-card:after{
+  content:"＋";position:absolute;right:0;bottom:0;transform:translate(35%,35%);
+  width:42px;height:42px;border-radius:50%;background:var(--blue);color:white;display:grid;place-items:center;
+  font-family:sans-serif;font-size:22px;
+}
+.voice-photo{width:82px;height:82px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--light),#fff);margin-bottom:18px}
+.voice-photo img{width:100%;height:100%;object-fit:cover}
+.voice-card small{position:absolute;right:16px;top:18px;writing-mode:vertical-rl;color:var(--blue);font-family:sans-serif;font-weight:900;font-size:11px}
+.voice-card h3{font-family:sans-serif;color:var(--blue);font-size:17px;line-height:1.5;margin:0 0 10px}
+.voice-card p{font-size:13px;font-weight:700;margin:0}
+.voice-controls{display:flex;justify-content:center;align-items:center;gap:28px;margin:22px 0 88px}
+.circle-btn{width:44px;height:44px;border-radius:50%;border:0;background:#073963;color:white;cursor:pointer;transition:all .3s var(--ease)}
+.circle-btn:hover{transform:translateY(-3px);background:var(--blue)}
+.pause{font-family:sans-serif;font-weight:900;color:#123}
+
+/* Follow / Footer */
+.follow{text-align:center;background:#fff;padding:18px 0 90px}
+.follow h2{font-family:sans-serif;color:var(--blue);font-size:38px;line-height:1;margin:0 0 8px}
+.follow p{font-family:sans-serif;color:var(--blue);font-weight:900;margin:0 0 18px}
+.social{display:flex;justify-content:center;gap:14px}
+.social a{width:42px;height:42px;border-radius:50%;background:var(--blue);color:white;display:grid;place-items:center;font-family:sans-serif;font-weight:900;transition:all .3s var(--ease)}
+.social a:hover{transform:translateY(-4px)}
+.footer{background:#fff;color:var(--blue);padding:34px 0 0;overflow:hidden}
+.footer-top{width:min(1320px,calc(100% - 44px));margin:auto;display:flex;align-items:flex-end;justify-content:space-between}
+.footer-catch{font-family:sans-serif;font-weight:950;font-size:38px;letter-spacing:-.04em}
+.footer-links{display:flex;gap:22px;font-family:sans-serif;font-size:12px;font-weight:800;color:#333}
+.footer-big{
+  font-family:sans-serif;font-weight:950;font-size:clamp(64px,10.2vw,150px);line-height:.9;
+  letter-spacing:-.06em;white-space:nowrap;margin-top:30px;color:var(--blue);
+}
+
+/* Animation */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes heroIn{0%{opacity:0;transform:translateY(26px) scale(.98)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.hero-copy,.hero-visual,.hero-tags{animation:heroIn .9s var(--ease) both}
+.hero-visual{animation-delay:.16s}.hero-tags{animation-delay:.28s}
+html.js .reveal{opacity:0;transform:translateY(34px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+html.js .reveal.in{opacity:1;transform:translateY(0)}
+html.js .stagger > *{opacity:0;transform:translateY(28px);transition:opacity .75s var(--ease),transform .75s var(--ease)}
+html.js .stagger.in > *{opacity:1;transform:translateY(0)}
+html.js .stagger.in > *:nth-child(2){transition-delay:.08s}
+html.js .stagger.in > *:nth-child(3){transition-delay:.16s}
+html.js .stagger.in > *:nth-child(4){transition-delay:.24s}
+html.js .stagger.in > *:nth-child(5){transition-delay:.32s}
+
+@media (max-width:900px){
+  .nav a:not(.pill){display:none}
+  .header-inner{height:64px}
+  .hero{min-height:auto}
+  .hero-stage{height:auto;padding:104px 0 70px;grid-template-columns:1fr;gap:32px}
+  .hero-copy{padding-left:0}
+  .hero-visual{height:330px}
+  .hero-tags{display:flex;justify-content:flex-start}
+  .vertical-tag{writing-mode:horizontal-tb;font-size:28px}
+  .hero-bottom{height:150px}
+  .hero-bottom .mini,.hero-bottom .cta-top{position:static;margin-left:24px;padding-top:18px}
+  .about-grid,.sec-head,.flow-layout,.plan-top{grid-template-columns:1fr}
+  .about-vertical,.flow-vertical,.plan-vertical{writing-mode:horizontal-tb;justify-self:start;font-size:30px}
+  .cta-panel{grid-template-columns:1fr;padding:28px}
+  .speech{right:20px}
+  .service-title-side{position:static;width:min(1120px,calc(100% - 48px));margin:0 auto 30px}
+  .service-grid{grid-template-columns:1fr;gap:46px}
+  .feature-row{grid-template-columns:1fr}
+  .center-pass{margin:auto}
+  .flow-step{grid-template-columns:110px 1fr;gap:22px}
+  .flow-img{width:110px;height:110px}
+  .price-photo,.price-box{width:100%}
+  .price-box,.timeline{grid-template-columns:1fr}
+  .faq-list{margin-left:0}
+  .footer-top{display:grid;gap:24px}
+  .footer-links{flex-wrap:wrap}
+}
+@media (max-width:560px){
+  .inner{width:calc(100% - 32px)}
+  .section{padding:82px 0}
+  .hero h1{font-size:54px}
+  .hero-visual{height:290px}
+  .photo-window{border-width:5px}
+  .device-card{width:190px}
+  .about-text{font-size:16px}
+  .cta-form{display:grid;text-align:center}
+  .marquee{font-size:58px}
+  .feature-card{min-height:auto}
+  .flow-step{grid-template-columns:1fr}
+  .flow-step:not(:last-child):after{left:45%;bottom:-42px}
+  .faq-a p{padding:16px 24px 22px}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark"></span>
+      <span>リンクワークス</span>
+    </a>
+    <nav class="nav">
+      <a href="#about">特徴</a>
+      <a href="#service">できること</a>
+      <a href="#flow">利用の流れ</a>
+      <a href="#plan">企業連携</a>
+      <a href="#faq">FAQ</a>
+      <a href="#voice">声</a>
+      <a class="pill" href="#contact">見学予約</a>
+      <a class="pill yellow" href="#company">企業相談</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-stage">
+      <div class="hero-copy">
+        <div class="label sans">TYPE-A EMPLOYMENT SUPPORT / LINK WORKS</div>
+        <h1><span>働くを、</span><span class="thin">未来の品質へ。</span></h1>
+        <p>就労者の安心と、企業が求める成果。その両方を同じテーブルで設計する、近未来型のA型事業所です。</p>
+        <a class="btn white" href="#about">リンクワークスを知る <span class="arrow">→</span></a>
+      </div>
+      <div class="hero-visual">
+        <div class="photo-window w1">
+          <img src="https://picsum.photos/seed/linkofficeblue/520/340" width="520" height="340" alt="" onerror="this.style.display='none'">
+        </div>
+        <div class="photo-window w2">
+          <img src="https://picsum.photos/seed/futureteamdesk/660/440" width="660" height="440" alt="" onerror="this.style.display='none'">
+        </div>
+        <div class="photo-window w3">
+          <img src="https://picsum.photos/seed/calmworkspace/460/280" width="460" height="280" alt="" onerror="this.style.display='none'">
+        </div>
+        <div class="device-card sans">
+          <strong>Daily Work Score</strong>
+          <div class="meter"><span></span></div>
+          <div>納期遵守率 98.7%</div>
+          <div>業務ログを可視化</div>
+        </div>
+      </div>
+      <div class="hero-tags">
+        <div class="vertical-tag">働くたび、</div>
+        <div class="vertical-tag">信頼になる。</div>
+      </div>
+    </div>
+    <div class="hero-bottom">
+      <div class="mini sans">THE<br>WORK<br>PASSPORT<br><br>福祉の安心を<br>企業品質へ</div>
+      <div class="cta-top"><a class="btn" href="#company">企業の方はこちら <span class="arrow">→</span></a></div>
+    </div>
+  </section>
+
+  <section class="section about" id="about">
+    <div class="line-deco"></div>
+    <div class="inner about-grid reveal">
+      <div class="sec-kicker">
+        <small>[ 01 ]</small><span>About</span><em>リンクワークスとは</em>
+      </div>
+      <div class="about-text">
+        <p>働くことは、社会とつながること。<br>そして企業にとっては、信頼できる仲間と出会うこと。</p>
+        <p>リンクワークスは、障害のある方が安心して働ける環境を整えながら、企業が驚くほど丁寧で安定した業務品質を届けます。</p>
+        <p>データ入力、Web更新、軽作業、クリエイティブ補助。<br>一人ひとりの得意をチームの力に変え、毎日の仕事を見える化します。</p>
+        <p>支援ではなく、共創へ。<br>「お願いしてよかった」と言われる仕事を、ここから増やしていきます。</p>
+        <a class="btn" href="#service">もっと見る <span class="arrow">→</span></a>
+      </div>
+      <div class="about-vertical">働く力に、出会おう。</div>
+    </div>
+
+    <div class="cta-panel reveal" id="contact">
+      <div>
+        <div class="sans" style="font-weight:900;font-size:12px;">[ Start Link Works ]</div>
+        <h3 class="sans">リンクワークスで、安心して働きはじめる。</h3>
+        <div class="cta-form">
+          <span>見学・体験利用を受付中</span>
+          <a class="btn green" href="#">LINEで相談する <span class="arrow">→</span></a>
+        </div>
+      </div>
+      <div class="cta-img">
+        <img src="https://picsum.photos/seed/supportmeeting/440/360" width="440" height="360" alt="" onerror="this.style.display='none'">
+      </div>
+      <div class="speech">企業担当者の<br>見学も<br>歓迎です</div>
+    </div>
+  </section>
+
+  <section class="section service" id="service">
+    <div class="line-deco"></div>
+    <div class="service-title-side">THE<br>WORK<br>QUALITY</div>
+    <div class="inner">
+      <div class="sec-head reveal">
+        <div class="sec-kicker">
+          <small>[ 02 ]</small><span>Service</span><em>できる仕事</em>
+        </div>
+      </div>
+      <div class="service-grid stagger">
+        <article class="service-item">
+          <div class="service-photo">
+            <img src="https://picsum.photos/seed/datainputworks/410/410" width="410" height="410" alt="" onerror="this.style.display='none'">
+          </div>
+          <h3>正確なデータ入力・事務代行</h3>
+          <p>名刺情報、アンケート、商品情報、リスト整備などを複数名チェックで対応。作業ログと進捗を共有し、企業側の管理負担を減らします。</p>
+        </article>
+        <article class="service-item">
+          <div class="service-photo">
+            <img src="https://picsum.photos/seed/webcreativeaid/410/410" width="410" height="410" alt="" onerror="this.style.display='none'">
+          </div>
+          <h3>Web更新・クリエイティブ補助</h3>
+          <p>画像リサイズ、CMS入力、SNS下書き、バナー量産補助など、デジタル業務を丁寧に分解。制作会社や広報部門の継続業務を支えます。</p>
+        </article>
+        <article class="service-item">
+          <div class="service-photo">
+            <img src="https://picsum.photos/seed/packingteamblue/410/410" width="410" height="410" alt="" onerror="this.style.display='none'">
+          </div>
+          <h3>軽作業・検品・発送準備</h3>
+          <p>封入、ラベル貼り、検品、梱包、ノベルティセット組みなど、工程表に沿って安定稼働。短納期案件もチームで柔軟に組み立てます。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="passport" id="company">
+    <div class="marquee sans">What is work passport ?　What is work passport ?　</div>
+    <div class="passport-intro reveal">
+      <h2 class="sans">［ 企業連携パスポートについて ］</h2>
+      <p>リンクワークスでは、企業から受けた仕事を「工程・品質・納期・支援」の4つで管理します。福祉事業所でありながら、業務委託先として選ばれる透明性を大切にしています。</p>
+    </div>
+    <div class="feature-row stagger">
+      <article class="feature-card">
+        <small>Feature 01</small>
+        <h3>作業工程を見える化</h3>
+        <p>誰が、どの工程を、どの基準で行うかを事前に設計。企業担当者が安心して任せられるよう、進捗と品質を共有します。</p>
+        <div class="phone-img">
+          <img src="https://picsum.photos/seed/progressdashboard/460/520" width="460" height="520" alt="" onerror="this.style.display='none'">
+        </div>
+      </article>
+      <div class="center-pass sans">LINK<br>WORKS<br>PASS</div>
+      <article class="feature-card">
+        <small>Feature 02</small>
+        <h3>成果を次の仕事へつなぐ</h3>
+        <p>納品後のレビューを蓄積し、得意業務や改善点をアップデート。継続案件ほど精度が高まる仕組みをつくります。</p>
+        <div class="phone-img">
+          <img src="https://picsum.photos/seed/reviewmeeting/460/520" width="460" height="520" alt="" onerror="this.style.display='none'">
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section flow" id="flow">
+    <div class="line-deco"></div>
+    <div class="flow-layout">
+      <div>
+        <div class="sec-kicker reveal">
+          <small>[ 03 ]</small><span>Flow</span><em>ご利用までの流れ</em>
+        </div>
+        <div class="flow-vertical reveal">あなたの得意が<br>仕事になる。</div>
+      </div>
+      <div class="flow-list stagger">
+        <article class="flow-step">
+          <div class="flow-img">
+            <img src="https://picsum.photos/seed/firstvisitlink/300/300" width="300" height="300" alt="" onerror="this.style.display='none'">
+          </div>
+          <div>
+            <small>Flow 01</small>
+            <h3>見学・相談</h3>
+            <p>事業所の雰囲気、仕事内容、勤務時間を確認。体調や希望に合わせて、無理のない働き方を一緒に整理します。</p>
+          </div>
+        </article>
+        <article class="flow-step">
+          <div class="flow-img">
+            <img src="https://picsum.photos/seed/trialworkday/300/300" width="300" height="300" alt="" onerror="this.style.display='none'">
+          </div>
+          <div>
+            <small>Flow 02</small>
+            <h3>体験利用・スキル確認</h3>
+            <p>PC作業、軽作業、チェック業務などを実際に体験。得意な工程や集中しやすい環境をスタッフが確認します。</p>
+          </div>
+        </article>
+        <article class="flow-step">
+          <div class="flow-img">
+            <img src="https://picsum.photos/seed/startworkingteam/300/300" width="300" height="300" alt="" onerror="this.style.display='none'">
+          </div>
+          <div>
+            <small>Flow 03</small>
+            <h3>利用開始・チームで就労</h3>
+            <p>個別支援計画に沿って勤務開始。日々の体調確認と業務フィードバックで、安定した就労をサポートします。</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section plan" id="plan">
+    <div class="line-deco"></div>
+    <div class="plan-top">
+      <div>
+        <div class="sec-kicker reveal">
+          <small>[ 04 ]</small><span>Plan</span><em>企業向け連携</em>
+        </div>
+        <div class="plan-vertical reveal">料金は<br>仕事の内容に<br>合わせて設計</div>
+      </div>
+      <div class="price-visual reveal">
+        <div class="price-photo">
+          <img src="https://picsum.photos/seed/businesscontractblue/900/420" width="900" height="420" alt="" onerror="this.style.display='none'">
+        </div>
+        <div class="price-box">
+          <div>
+            <div style="color:var(--blue);font-weight:900;">Plan</div>
+            <div style="font-weight:900;">業務委託プラン</div>
+            <div class="num">要相談</div>
+            <div style="font-size:13px;font-weight:800;">小ロット・継続案件どちらも対応</div>
+          </div>
+          <ul>
+            <li>データ入力・チェック</li>
+            <li>Web更新・画像加工</li>
+            <li>軽作業・発送代行</li>
+            <li>月次レポート提出</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="schedule reveal">
+      <h3 class="sans">企業案件の進行スケジュールについて</h3>
+      <div class="schedule-block">
+        <small>Schedule 01</small>
+        <h4>ヒアリングと工程設計について</h4>
+        <p>まずは業務内容・納期・数量・品質基準を伺います。作業を細かく分解し、スタッフが安定して取り組める工程表とチェック体制を設計します。</p>
+      </div>
+      <div class="schedule-block">
+        <small>Schedule 02</small>
+        <h4>納品までの流れについて</h4>
+        <p>試作・初回チェックを行ったうえで本作業へ進行。進捗は定期共有し、納品後には改善点をまとめて次回案件に反映します。</p>
+        <div class="timeline">
+          <div class="timeline-img">
+            <img src="https://picsum.photos/seed/projecttimeline/720/600" width="720" height="600" alt="" onerror="this.style.display='none'">
+          </div>
+          <div class="timeline-notes">
+            <div class="note"><b>初回3営業日</b>までに工程表と見積をご提出</div>
+            <div class="note"><b>作業期間中</b>は進捗と課題を共有</div>
+            <div class="note"><b>納品後5営業日</b>以内にレビューを実施</div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:13px;font-weight:700;">※内容により対応可否・納期が変動します。秘密保持契約、個人情報の取り扱いについてもご相談ください。</p>
+    </div>
+  </section>
+
+  <section class="section faq" id="faq">
+    <div class="line-deco"></div>
+    <div class="faq-wrap">
+      <div class="sec-head reveal">
+        <div class="sec-kicker">
+          <small>[ 05 ]</small><span>FAQ</span><em>よくある質問</em>
+        </div>
+      </div>
+      <div class="faq-list stagger">
+        <div class="faq-item">
+          <button class="faq-q"><span class="qmark">Q</span>企業からの継続案件は依頼できますか？<span class="plus">＋</span></button>
+          <div class="faq-a"><p>はい。月次のデータ入力、発送準備、Web更新など、継続業務に向いています。まずは小さな工程から試作をご提案します。</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span class="qmark">Q</span>どんな障害のある方が働いていますか？<span class="plus">＋</span></button>
+          <div class="faq-a"><p>精神・発達・身体など特性はさまざまです。本人の得意や体調に合わせ、スタッフが工程調整と日々のサポートを行います。</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span class="qmark">Q</span>見学や体験利用はいつできますか？<span class="plus">＋</span></button>
+          <div class="faq-a"><p>平日を中心に随時受け付けています。支援機関、ご家族、企業担当者の同席も可能です。</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span class="qmark">Q</span>短納期の作業も相談できますか？<span class="plus">＋</span></button>
+          <div class="faq-a"><p>数量と工程によって判断します。複数名で分担できる作業は、スピードと品質のバランスを見ながら対応します。</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span class="qmark">Q</span>一般就労へのステップアップ支援はありますか？<span class="plus">＋</span></button>
+          <div class="faq-a"><p>あります。勤務習慣、報連相、業務スキルを積み上げ、希望に応じて企業実習や就職活動の準備を支援します。</p></div>
+        </div>
+      </div>
+      <div class="faq-more reveal"><a class="btn" href="#contact">すべての質問を見る <span class="arrow">→</span></a></div>
+    </div>
+  </section>
+
+  <section class="section voice" id="voice">
+    <div class="line-deco"></div>
+    <div class="inner">
+      <div class="sec-head reveal">
+        <div class="sec-kicker">
+          <small>[ 06 ]</small><span>Voice</span><em>利用者と企業の声</em>
+        </div>
+      </div>
+    </div>
+    <div class="voice-rail stagger" id="voiceRail">
+      <article class="voice-card">
+        <small>利用者の声 01</small>
+        <div class="voice-photo"><img src="https://picsum.photos/seed/usercalm01/200/200" width="200" height="200" alt="" onerror="this.style.display='none'"></div>
+        <h3>朝の不安が少しずつ減りました</h3>
+        <p>体調確認があるので、無理をしすぎず働けます。できる作業が増えるのがうれしいです。</p>
+      </article>
+      <article class="voice-card">
+        <small>企業の声 01</small>
+        <div class="voice-photo"><img src="https://picsum.photos/seed/clientvoice01/200/200" width="200" height="200" alt="" onerror="this.style.display='none'"></div>
+        <h3>想像以上に報告が丁寧でした</h3>
+        <p>進捗共有が分かりやすく、安心して継続依頼できました。社内の定型業務が軽くなりました。</p>
+      </article>
+      <article class="voice-card">
+        <small>利用者の声 02</small>
+        <div class="voice-photo"><img src="https://picsum.photos/seed/userwork02/200/200" width="200" height="200" alt="" onerror="this.style.display='none'"></div>
+        <h3>得意なPC作業を仕事にできた</h3>
+        <p>入力やチェックの仕事で集中力を活かせています。次はWeb更新にも挑戦したいです。</p>
+      </article>
+      <article class="voice-card">
+        <small>企業の声 02</small>
+        <div class="voice-photo"><img src="https://picsum.photos/seed/clientteam02/200/200" width="200" height="200" alt="" onerror="this.style.display='none'"></div>
+        <h3>小ロットの検品で助かりました</h3>
+        <p>繁忙期だけお願いできる柔軟さが魅力です。チェック体制もあり、品質が安定していました。</p>
+      </article>
+      <article class="voice-card">
+        <small>利用者の声 03</small>
+        <div class="voice-photo"><img src="https://picsum.photos/seed/userfuture03/200/200" width="200" height="200" alt="" onerror="this.style.display='none'"></div>
+        <h3>チームで働く感覚が戻りました</h3>
+        <p>相談しやすい環境で、少しずつ自信がついてきました。一般就労も考え始めています。</p>
+      </article>
+    </div>
+    <div class="voice-controls">
+      <button class="circle-btn" data-scroll="-1">‹</button>
+      <span class="pause">Ⅱ</span>
+      <button class="circle-btn" data-scroll="1">›</button>
+    </div>
+
+    <div class="cta-panel reveal">
+      <div>
+        <div class="sans" style="font-weight:900;font-size:12px;">[ Start Link Works ]</div>
+        <h3 class="sans">福祉の現場から、企業の戦力へ。</h3>
+        <div class="cta-form">
+          <span>業務委託・見学相談はこちら</span>
+          <a class="btn green" href="#company">企業相談を予約する <span class="arrow">→</span></a>
+        </div>
+      </div>
+      <div class="cta-img">
+        <img src="https://picsum.photos/seed/companyvisitlink/440/360" width="440" height="360" alt="" onerror="this.style.display='none'">
+      </div>
+      <div class="speech">まずは<br>30分の相談<br>から</div>
+    </div>
+  </section>
+
+  <section class="follow">
+    <h2 class="sans reveal">Follow us</h2>
+    <p class="sans reveal">SNSでも活動を発信中！</p>
+    <div class="social reveal">
+      <a href="#">X</a>
+      <a href="#">◎</a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-catch sans">働くたび、信頼になる</div>
+    <div class="footer-links">
+      <a href="#">運営会社</a>
+      <a href="#">利用規約</a>
+      <a href="#">プライバシーポリシー</a>
+      <a href="#">特定商取引法に基づく表記</a>
+    </div>
+  </div>
+  <div class="footer-big sans">LINK WORKS</div>
+</footer>
+
+<script>
+const targets=document.querySelectorAll('.reveal,.stagger');
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:.14,rootMargin:'0px 0px -8% 0px'});
+targets.forEach(t=>io.observe(t));
+
+document.querySelectorAll('.faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item=btn.closest('.faq-item');
+    item.classList.toggle('open');
+  });
+});
+
+const rail=document.getElementById('voiceRail');
+document.querySelectorAll('[data-scroll]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const dir=Number(btn.dataset.scroll);
+    rail.scrollBy({left:dir*330,behavior:'smooth'});
+  });
+});
+
+let drift=0;
+function autoVoice(){
+  if(!rail) return;
+  drift+=0.35;
+  if(drift>1){
+    rail.scrollLeft+=1;
+    drift=0;
+  }
+  if(rail.scrollLeft+rail.clientWidth>=rail.scrollWidth-2) rail.scrollLeft=0;
+  requestAnimationFrame(autoVoice);
+}
+requestAnimationFrame(autoVoice);
+</script>
+
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(!els.length) return;
+    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
+    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    setTimeout(function(){
+      els.forEach(function(e){
+        if(parseFloat(getComputedStyle(e).opacity)===0){
+          show(e); e.style.opacity='1'; e.style.transform='none';
+        }
+      });
+    }, 3500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+</body>
+</html>

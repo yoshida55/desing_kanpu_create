@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html><head><title>Checking your browser...</title><meta content="width=device-width" name="viewport"><link href="data:;base64,=" rel="icon"><style>
+/* == inline == */
+* { font-family: "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; color: rgb(17, 21, 22); margin: 0px; padding: 0px; user-select: none; box-sizing: border-box; }
+body { min-height: 100dvh; padding: 8px; }
+#main, body { display: flex; flex-direction: column; align-items: center; }
+#main { flex: 1 1 0%; justify-content: center; }
+h1 { font-weight: 500; padding-bottom: 16px; text-align: center; }
+#active { display: none; position: relative; margin-bottom: calc(1em + 8ex + 48px); }
+#body { text-align: center; }
+input[type="checkbox"] { margin-right: 10px; }
+div.check-wrap { position: absolute; white-space: nowrap; background-color: rgb(247, 248, 254); border-radius: 4px; padding: 24px; left: 50%; line-height: 1em; transform: translateX(-50%); }
+.spinner { border-width: 3px; border-style: solid; border-color: transparent transparent rgb(63, 88, 224) rgb(63, 88, 224); border-image: initial; border-radius: 50%; animation: 0.6s linear 0s infinite normal none running rotate; aspect-ratio: 1 / 1; }
+.small { border-width: 2px; display: inline-block; vertical-align: bottom; width: 1em; margin-right: 16px; }
+.big { margin: 32px; height: 40px; width: 40px; }
+#brand { white-space: nowrap; font-weight: 700; margin: 10px 40px 40px; }
+svg { vertical-align: bottom; display: inline-block; fill: rgb(63, 88, 224); height: 1.3em; margin-right: -2px; }
+a { color: rgb(63, 88, 224); text-decoration: none; }
+@keyframes rotate { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style></head><body><div id="main"><h1 id="head">Checking your browser</h1><div id="body"><div id="text">This will only take a few seconds...</div><div id="active"></div></div><div class="spinner big"></div></div><div id="brand">Secured by
+<a href="https://wordpress.com">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="presentation" aria-label="WordPress.com logo">
+<path d="M 12.432 1.209 C 18.752 1.209 23.892 6.329 23.892 12.629 C 23.892 21.455 14.337 26.971 6.694 22.558 C 3.147 20.51 0.962 16.725 0.962 12.629 C 0.962 6.329 6.102 1.209 12.432 1.209 Z M 12.612 13.529 L 9.512 22.479 C 11.59 23.088 13.807 23.032 15.852 22.319 C 15.824 22.271 15.8 22.221 15.782 22.169 L 12.612 13.529 Z M 3.012 8.449 C 0.747 13.519 2.927 19.472 7.932 21.879 L 3.012 8.449 Z M 21.472 7.699 C 21.522 8.029 21.542 8.379 21.542 8.759 C 21.542 9.799 21.342 10.969 20.762 12.439 L 17.612 21.499 C 22.43 18.708 24.143 12.584 21.472 7.699 Z M 12.432 2.379 C 8.832 2.379 5.662 4.219 3.812 7.009 C 4.95 7.047 6.09 7.003 7.222 6.879 C 7.782 6.849 7.842 7.659 7.292 7.729 C 7.292 7.729 6.732 7.789 6.112 7.829 L 9.862 18.939 L 12.122 12.199 L 10.522 7.809 C 9.962 7.779 9.432 7.709 9.432 7.709 C 8.882 7.679 8.942 6.839 9.502 6.869 C 9.502 6.869 11.202 6.999 12.212 6.999 C 13.292 7.009 14.962 6.879 14.962 6.879 C 15.512 6.849 15.582 7.659 15.032 7.729 C 15.032 7.729 14.472 7.789 13.852 7.829 L 17.572 18.869 L 18.602 15.439 C 19.063 14.389 19.331 13.264 19.392 12.119 C 19.377 11.115 19.083 10.135 18.542 9.289 C 18.012 8.439 17.522 7.729 17.522 6.889 C 17.522 5.939 18.242 5.059 19.262 5.059 L 19.392 5.059 C 17.49 3.322 15.007 2.362 12.432 2.369 L 12.432 2.379 Z"></path>
+</svg>
+wp.com
+</a></div>
+<script id="__clone_reveal">
+(function(){
+  document.querySelectorAll(".__cl_pre,.__cl_kid").forEach(function(el){
+    el.classList.remove("__cl_pre","__cl_in","__cl_kid");
+    el.style.transitionDelay = "";
+  });
+  var st = document.createElement("style");
+  st.textContent = [
+    /* 動きは大きめ・1秒・最後スッと止まるイージング（派手め設定） */
+    ".__cl_pre{opacity:0;transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}",
+    '.__cl_pre[data-clv="up"]{transform:translateY(60px)}',
+    '.__cl_pre[data-clv="left"]{transform:translateX(-80px)}',
+    '.__cl_pre[data-clv="right"]{transform:translateX(80px)}',
+    '.__cl_pre[data-clv="zoom"]{transform:scale(.88)}',
+    ".__cl_pre.__cl_in{opacity:1;transform:none}",
+    ".__cl_kid{opacity:0;transform:translateY(34px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}",
+    ".__cl_in .__cl_kid{opacity:1;transform:none}"
+  ].join("");
+  document.head.appendChild(st);
+  var VARIANTS = ["up", "left", "zoom", "right"];
+  function prep(e, i){
+    e.classList.add("__cl_pre");
+    e.dataset.clv = VARIANTS[i % VARIANTS.length];
+    // 子が2〜10個あれば時間差で出す（カード群がパラパラ現れる）
+    var kids = Array.prototype.filter.call(e.children, function(k){ return k.offsetHeight > 20; });
+    if (kids.length >= 2 && kids.length <= 10) {
+      kids.forEach(function(k, j){
+        k.classList.add("__cl_kid");
+        k.style.transitionDelay = (0.15 * j).toFixed(2) + "s";
+      });
+    }
+  }
+  function init(){
+    var vh = window.innerHeight;
+    var els = Array.prototype.slice.call(document.querySelectorAll("section,footer,article"));
+    if (els.length < 3) {
+      els = Array.prototype.slice.call(document.querySelectorAll("body>*,body>div>*"))
+        .filter(function(e){ return e.offsetHeight > 80; });
+    }
+    els = els.filter(function(e){ return !els.some(function(o){ return o !== e && o.contains(e); }); });
+    // 最初の画面に見えている分＝開いた瞬間に時間差でフワッと出す
+    var heroes = els.filter(function(e){ return e.getBoundingClientRect().top <= vh * 0.85; });
+    els = els.filter(function(e){ return e.getBoundingClientRect().top > vh * 0.85; });
+    heroes.forEach(function(e, i){
+      prep(e, 0); /* 最初の画面は全部「下からフワッ」で統一 */
+      setTimeout(function(){ e.classList.add("__cl_in"); }, 120 + 160 * i);
+    });
+    els.forEach(prep);
+    var timer = setInterval(function(){
+      var h = window.innerHeight, left = 0;
+      els.forEach(function(e){
+        if (e.classList.contains("__cl_in")) return;
+        if (e.getBoundingClientRect().top < h * 0.88) { e.classList.add("__cl_in"); } else { left++; }
+      });
+      if (!left) clearInterval(timer);
+    }, 250);
+    setTimeout(function(){
+      heroes.concat(els).forEach(function(e){ e.classList.add("__cl_in"); });
+      clearInterval(timer);
+    }, 30000);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>
+</body></html>

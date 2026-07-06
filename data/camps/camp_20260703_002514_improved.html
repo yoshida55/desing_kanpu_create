@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就労継続支援B型事業所 るわみ｜自分のペースで、やさしく働く</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --beige:#dfbb94;
+      --beige-soft:rgba(223,187,148,.1);
+      --gray:#eeeeee;
+      --text:#000000;
+      --text2:#333333;
+      --accent:#db9281;
+      --line:rgba(0,0,0,.15);
+      --shadow:0 4px 16px rgba(0,0,0,.13);
+      --radius-lg:25px;
+      --radius-sm:4px;
+      --container:1320px;
+      --serif:游明朝, YuMincho, "ヒラギノ明朝 ProN W3", "Hiragino Mincho ProN", HG明朝E, "ＭＳ Ｐ明朝", "ＭＳ 明朝", serif;
+      --sans:"Noto Sans JP", sans-serif;
+      --grad-soft:linear-gradient(180deg, #eef7ff 0%, #ffffff 60%);
+      --grad-card:linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,255,255,.88));
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text2);
+      background:var(--bg);
+      line-height:1.8;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    a{text-decoration:none;color:inherit}
+    img{display:block;max-width:100%}
+    .container{width:min(calc(100% - 80px), var(--container)); margin:0 auto}
+    .serif{font-family:var(--serif)}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:180px; height:46px; padding:0 26px;
+      background:var(--accent); color:#fff; border-radius:999px;
+      font-size:14px; letter-spacing:.04em; border:none;
+      box-shadow:none;
+      transition:all .35s cubic-bezier(.445,.05,.55,.95);
+    }
+    .btn:hover{transform:translateY(-2px); box-shadow:0 8px 18px rgba(219,146,129,.28); filter:saturate(1.05)}
+    .section-space{padding:110px 0}
+    .eyebrow{
+      font-size:12px; letter-spacing:.08em; color:#666; text-align:center; margin-bottom:14px;
+    }
+    .title-line{
+      width:72px; height:1px; background:var(--line); margin:0 auto 22px;
+    }
+    .section-title{
+      text-align:center; font-size:18px; font-weight:700; color:var(--text2); margin:0;
+    }
+
+    header{
+      background:var(--beige);
+      position:relative;
+      overflow:hidden;
+    }
+    .header-top{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 0 14px;
+    }
+    .logo{
+      background:#fff; padding:10px 16px; border-radius:2px;
+      width:145px; box-shadow:0 0 0 1px rgba(0,0,0,.04) inset;
+    }
+    .logo-mark{
+      font-family:var(--serif); color:#b3627f; font-size:24px; line-height:1;
+      text-align:center; margin-bottom:2px;
+    }
+    .logo-sub{
+      font-size:8px; text-align:center; color:#555; letter-spacing:.08em;
+      white-space:nowrap;
+    }
+    nav ul{
+      display:flex; gap:34px; list-style:none; margin:0; padding:0;
+      color:#fff; font-size:13px;
+    }
+    nav a{position:relative}
+    nav a:after{
+      content:""; position:absolute; left:0; bottom:-5px; width:0; height:1px; background:#fff;
+      transition:width .3s linear;
+    }
+    nav a:hover:after{width:100%}
+
+    .hero{
+      position:relative; padding:4px 0 0;
+    }
+    .hero-inner{
+      position:relative; min-height:600px;
+    }
+    .hero-copy{
+      position:absolute; left:0; top:72px; z-index:2; max-width:760px;
+    }
+    .hero-copy h1{
+      margin:0 0 34px; font-family:var(--serif); font-weight:400;
+      font-size:58px; line-height:1.5; color:#111; letter-spacing:.04em;
+    }
+    .hero-copy p{
+      margin:0; width:min(88%, 920px); font-size:18px; line-height:2;
+      color:#222; font-weight:500;
+    }
+    .hero-visual{
+      position:relative; margin-top:116px; margin-left:40px;
+      height:560px; border-radius:0; overflow:hidden;
+      background:
+        linear-gradient(135deg, rgba(238,247,255,.85), rgba(255,255,255,.35)),
+        linear-gradient(120deg, rgba(223,187,148,.40), rgba(223,187,148,.08));
+    }
+    .hero-visual img{
+      width:100%; height:100%; object-fit:cover; object-position:center;
+      transform:scale(1.03);
+    }
+    .hero-visual:before{
+      content:""; position:absolute; inset:auto -120px -120px auto; width:340px; height:340px;
+      background:radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 65%);
+      pointer-events:none;
+    }
+    .hero-visual:after{
+      content:""; position:absolute; right:8%; top:5%; width:180px; height:180px;
+      background:url('http://127.0.0.1:5000/uploads/up_110aebebef.png') center/contain no-repeat;
+      opacity:.18; animation:floatPlane 20s linear infinite;
+      pointer-events:none;
+    }
+
+    .floating-mail{
+      position:fixed; right:22px; top:54%; z-index:20;
+      width:54px; height:54px; border-radius:50%;
+      background:var(--accent); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 6px 18px rgba(219,146,129,.3);
+      font-size:24px;
+      transition:all .35s cubic-bezier(.445,.05,.55,.95);
+    }
+    .floating-mail:hover{transform:translateY(-3px) scale(1.04)}
+
+    .intro-wrap{
+      padding:62px 0 120px;
+      background:#fff;
+    }
+    .intro-panel{
+      background:linear-gradient(180deg, #fbf8f2 0%, #fbf8f2 54%, var(--beige) 54%, var(--beige) 84%, #fbf8f2 84%, #fbf8f2 100%);
+      padding:52px 38px 42px;
+      border:1px solid rgba(0,0,0,.04);
+    }
+    .intro-cards{
+      margin-top:42px;
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:30px;
+      align-items:start;
+    }
+    .card{
+      background:#fff;
+      box-shadow:var(--shadow);
+      transition:all .4s cubic-bezier(.445,.05,.55,.95);
+    }
+    .card:hover{transform:translateY(-5px)}
+    .card-media{
+      aspect-ratio: 4 / 2.45;
+      background:
+        linear-gradient(135deg, rgba(238,247,255,.85), rgba(223,187,148,.26));
+      overflow:hidden;
+    }
+    .card-media img{width:100%; height:100%; object-fit:cover}
+    .card-body{padding:12px 14px 16px}
+    .card-title{
+      font-size:15px; font-weight:700; color:#222; text-align:center; margin:0 0 4px;
+    }
+    .card-text{
+      font-size:12px; line-height:1.6; color:#333; margin:0;
+    }
+    .center-btn{display:flex; justify-content:center; margin-top:28px}
+
+    .news{
+      padding:78px 0 120px;
+    }
+    .news-head{
+      margin-bottom:30px;
+    }
+    .news-label{
+      font-size:13px; letter-spacing:.08em; color:#444; margin-bottom:18px;
+    }
+    .news-line{
+      width:74px; height:1px; background:var(--line);
+    }
+    .news-grid{
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;
+    }
+    .news-card{
+      background:#fff; box-shadow:var(--shadow);
+      transition:all .4s cubic-bezier(.445,.05,.55,.95);
+    }
+    .news-card:hover{transform:translateY(-5px)}
+    .news-media{
+      aspect-ratio: 1.55 / 1;
+      background:
+        linear-gradient(135deg, rgba(238,247,255,.88), rgba(223,187,148,.28));
+      overflow:hidden;
+    }
+    .news-media img{width:100%; height:100%; object-fit:cover}
+    .news-body{padding:10px 12px 14px}
+    .news-text{font-size:14px; line-height:1.7; color:#333; margin:0 0 8px}
+    .news-date{font-size:12px; color:#666}
+
+    .contact-band{
+      background:var(--gray);
+      padding:48px 0 72px;
+    }
+    .contact-box{
+      position:relative;
+      background:#fff;
+      padding:48px 28px 42px;
+      text-align:center;
+    }
+    .contact-script{
+      position:absolute; left:32px; top:-26px;
+      font-family:var(--serif); font-style:italic;
+      font-size:66px; color:rgba(0,0,0,.18); font-weight:400;
+    }
+    .contact-title{
+      font-size:18px; font-weight:700; color:#222; margin:0 0 8px;
+    }
+    .contact-line{
+      width:160px; height:1px; background:var(--line); margin:0 auto 18px;
+    }
+    .phone{
+      display:inline-block;
+      font-family:var(--serif);
+      font-size:62px; line-height:1; color:#222; font-weight:700;
+      padding:0 10px 4px;
+      background:linear-gradient(transparent 68%, rgba(223,187,148,.45) 68%);
+    }
+    .contact-note{
+      font-size:18px; color:#222; font-weight:700; margin-top:10px;
+    }
+    .mail-btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:12px;
+      margin-top:22px; background:#fff; color:#333; border:1px solid #ddd;
+      height:54px; padding:0 28px; border-radius:2px;
+      transition:all .35s cubic-bezier(.445,.05,.55,.95);
+    }
+    .mail-btn:hover{transform:translateY(-2px); box-shadow:var(--shadow)}
+    .contact-small{font-size:12px; color:#666; margin-top:10px}
+
+    footer{
+      background:var(--beige);
+      padding:36px 0 52px;
+      color:#fff;
+    }
+    .footer-top{
+      display:grid; grid-template-columns:320px 1fr; gap:80px; align-items:start;
+    }
+    .footer-brand .logo{margin-bottom:18px}
+    .address{
+      font-size:13px; line-height:2; color:rgba(255,255,255,.95)
+    }
+    .footer-nav{
+      display:grid; grid-template-columns:repeat(2, minmax(160px, 220px)); gap:14px 80px;
+      padding-top:18px;
+      font-size:14px;
+    }
+    .footer-nav a{color:rgba(255,255,255,.95)}
+    .footer-nav a:before{content:"・"; margin-right:4px}
+    .footer-bottom{
+      background:#fff; color:#222; text-align:center;
+      padding:22px 0 26px;
+    }
+    .insta{
+      font-size:26px; color:#d05f93; margin-bottom:10px;
+    }
+    .copy{font-size:13px}
+
+    .reveal{opacity:1; transform:none}
+    html.js .reveal{
+      opacity:0; transform:translateY(26px);
+      transition:
+        opacity .8s cubic-bezier(.445,.05,.55,.95),
+        transform .8s cubic-bezier(.445,.05,.55,.95);
+    }
+    html.js .reveal.is-visible{opacity:1; transform:translateY(0)}
+    html.js .stagger > *{
+      opacity:0; transform:translateY(24px);
+      transition:
+        opacity .8s cubic-bezier(.445,.05,.55,.95),
+        transform .8s cubic-bezier(.445,.05,.55,.95);
+    }
+    html.js .stagger.is-visible > *:nth-child(1){transition-delay:.05s}
+    html.js .stagger.is-visible > *:nth-child(2){transition-delay:.15s}
+    html.js .stagger.is-visible > *:nth-child(3){transition-delay:.25s}
+    html.js .stagger.is-visible > *:nth-child(4){transition-delay:.35s}
+    html.js .stagger.is-visible > *{
+      opacity:1; transform:translateY(0);
+    }
+
+    .hero-copy h1,
+    .hero-copy p,
+    .hero-visual{
+      opacity:0;
+      transition:all .9s cubic-bezier(.445,.05,.55,.95);
+    }
+    .hero-ready .hero-copy h1{opacity:1; transform:none}
+    .hero-ready .hero-copy p{opacity:1; transform:none; transition-delay:.18s}
+    .hero-ready .hero-visual{opacity:1; transform:none; transition-delay:.12s}
+    .hero-copy h1{transform:translateY(24px)}
+    .hero-copy p{transform:translateY(24px)}
+    .hero-visual{transform:translateY(18px) scale(1.02)}
+
+    @keyframes floatPlane{
+      0%{transform:translate3d(0,0,0) rotate(0deg)}
+      50%{transform:translate3d(-18px,10px,0) rotate(4deg)}
+      100%{transform:translate3d(-36px,18px,0) rotate(8deg)}
+    }
+    @keyframes loading-spin-36413753 {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(1turn); }
+    }
+
+    @media (max-width: 1024px){
+      .container{width:min(calc(100% - 40px), var(--container))}
+      .hero-copy{position:relative; top:auto; left:auto; max-width:none; margin-bottom:26px}
+      .hero-copy h1{font-size:42px}
+      .hero-copy p{width:100%; font-size:16px}
+      .hero-visual{margin:0; height:420px}
+      .intro-cards,.news-grid{grid-template-columns:1fr}
+      .footer-top{grid-template-columns:1fr; gap:30px}
+      .footer-nav{grid-template-columns:1fr 1fr; gap:12px 40px}
+      .phone{font-size:46px}
+      nav ul{gap:18px; font-size:12px}
+    }
+    @media (max-width: 720px){
+      .header-top{flex-direction:column; align-items:flex-start; gap:14px}
+      nav ul{flex-wrap:wrap}
+      .hero-inner{min-height:auto}
+      .hero-copy h1{font-size:34px; line-height:1.45}
+      .hero-copy p{font-size:15px; line-height:1.9}
+      .hero-visual{height:300px}
+      .intro-panel{padding:34px 18px}
+      .contact-script{font-size:46px; left:14px; top:-20px}
+      .phone{font-size:34px}
+      .contact-note{font-size:15px}
+      .footer-nav{grid-template-columns:1fr}
+      .floating-mail{right:14px; width:48px; height:48px}
+    }
+  </style>
+</head>
+<body style="">
+  <a href="#contact" class="floating-mail" aria-label="お問い合わせ">✉</a>
+
+  <header>
+    <div class="container">
+      <div class="header-top reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="">
+        <a href="#" class="logo" aria-label="るわみ ロゴ">
+          <div class="logo-mark">るわみ</div>
+          <div class="logo-sub">就労継続支援B型事業所</div>
+        </a>
+        <nav>
+          <ul>
+            <li><a href="#top">トップ</a></li>
+            <li><a href="#about">「るわみ」のご紹介</a></li>
+            <li><a href="#company">会社概要</a></li>
+            <li><a href="#news">お知らせ</a></li>
+            <li><a href="#contact">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <section class="imp-renew-hero" id="top">
+  <style>
+    .imp-renew-hero{
+      --imp-bg-1:#e8c39d;
+      --imp-bg-2:#ddb183;
+      --imp-bg-3:#f3dfc8;
+      --imp-paper:rgba(255,250,244,.82);
+      --imp-paper-strong:rgba(255,255,255,.9);
+      --imp-ink:#201812;
+      --imp-text:#5a493c;
+      --imp-accent:#ef8d62;
+      --imp-accent-2:#f5b55e;
+      --imp-line:rgba(255,255,255,.28);
+      --imp-shadow:0 28px 70px rgba(122,76,22,.16);
+      position:relative;
+      overflow:hidden;
+      padding:34px 0 84px;
+      background:
+        radial-gradient(circle at 14% 16%, rgba(255,255,255,.18) 0 7%, transparent 8%),
+        radial-gradient(circle at 86% 20%, rgba(255,255,255,.16) 0 10%, transparent 11%),
+        radial-gradient(circle at 80% 82%, rgba(255,255,255,.14) 0 8%, transparent 9%),
+        linear-gradient(135deg, var(--imp-bg-1) 0%, #e4bc91 42%, var(--imp-bg-2) 100%);
+      isolation:isolate;
+    }
+
+    .imp-renew-hero *,
+    .imp-renew-hero *::before,
+    .imp-renew-hero *::after{
+      box-sizing:border-box;
+    }
+
+    .imp-renew-hero::before,
+    .imp-renew-hero::after{
+      content:"";
+      position:absolute;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .imp-renew-hero::before{
+      inset:auto auto -90px -60px;
+      width:300px;
+      height:300px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,.25) 0%, rgba(255,255,255,0) 70%);
+      animation:impAuraFloat 10s ease-in-out infinite;
+    }
+
+    .imp-renew-hero::after{
+      right:2.5%;
+      top:48px;
+      width:118px;
+      height:118px;
+      border-radius:30px;
+      border:1.5px solid rgba(255,255,255,.24);
+      transform:rotate(15deg);
+      backdrop-filter:blur(2px);
+      animation:impGlassDrift 8s ease-in-out infinite;
+    }
+
+    .imp-renew-shell{
+      width:min(calc(100% - 44px), 1260px);
+      margin:0 auto;
+      position:relative;
+      z-index:1;
+    }
+
+    .imp-renew-stage{
+      display:grid;
+      grid-template-columns:minmax(320px, 480px) minmax(420px, 1fr);
+      align-items:center;
+      gap:clamp(26px, 4.4vw, 68px);
+      min-height:clamp(620px, 76vw, 840px);
+      position:relative;
+    }
+
+    .imp-renew-copy{
+      position:relative;
+    }
+
+    .imp-renew-copy-card{
+      position:relative;
+      padding:26px;
+      border-radius:32px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,246,238,.76));
+      border:1px solid rgba(255,255,255,.38);
+      box-shadow:
+        var(--imp-shadow),
+        inset 0 1px 0 rgba(255,255,255,.72);
+      overflow:hidden;
+      transition:transform .45s cubic-bezier(.2,.65,.2,1), box-shadow .45s ease;
+    }
+
+    .imp-renew-copy-card:hover{
+      transform:translateY(-8px);
+      box-shadow:
+        0 34px 82px rgba(122,76,22,.2),
+        inset 0 1px 0 rgba(255,255,255,.78);
+    }
+
+    .imp-renew-copy-card::before{
+      content:"";
+      position:absolute;
+      inset:-20% 48% 58% -18%;
+      background:radial-gradient(circle, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 70%);
+      animation:impShinePulse 7s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .imp-renew-copy-card::after{
+      content:"";
+      position:absolute;
+      right:-26px;
+      bottom:26px;
+      width:110px;
+      height:110px;
+      border-radius:28px;
+      background:linear-gradient(135deg, rgba(239,141,98,.18), rgba(245,181,94,.08));
+      transform:rotate(16deg);
+      filter:blur(.2px);
+      opacity:.9;
+      pointer-events:none;
+      animation:impMiniFloat 6.2s ease-in-out infinite;
+    }
+
+    .imp-renew-copy-inner{
+      position:relative;
+      z-index:1;
+      display:grid;
+      gap:22px;
+    }
+
+    .imp-renew-title{
+      margin:0;
+      color:var(--imp-ink);
+      font-family:var(--serif);
+      font-weight:400;
+      font-size:clamp(34px, 5.2vw, 68px);
+      line-height:1.72;
+      letter-spacing:.12em;
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      height:min(760px, 72vw);
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-start;
+    }
+
+    .imp-renew-text{
+      margin:0;
+      color:var(--imp-text);
+      font-size:clamp(14px, 1.32vw, 17px);
+      line-height:2.35;
+      letter-spacing:.04em;
+    }
+
+    .imp-renew-visual{
+      position:relative;
+      min-width:0;
+    }
+
+    .imp-renew-visual-frame{
+      position:relative;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:18px;
+      padding:18px;
+      border-radius:38px;
+      background:linear-gradient(145deg, rgba(255,255,255,.2), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.24);
+      box-shadow:0 26px 70px rgba(125,79,27,.12);
+      backdrop-filter:blur(6px);
+    }
+
+    .imp-renew-visual-frame::before{
+      content:"";
+      position:absolute;
+      left:-20px;
+      top:56px;
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(239,141,98,.32) 0%, rgba(239,141,98,0) 72%);
+      animation:impMiniFloat 5.6s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .imp-renew-visual-frame::after{
+      content:"";
+      position:absolute;
+      right:28px;
+      bottom:-18px;
+      width:160px;
+      height:52px;
+      border-radius:999px;
+      background:rgba(179,111,48,.16);
+      filter:blur(18px);
+      pointer-events:none;
+    }
+
+    .imp-renew-photo-card{
+      position:relative;
+      border-radius:30px;
+      overflow:hidden;
+      background:linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,247,239,.74));
+      padding:12px;
+      box-shadow:
+        0 24px 60px rgba(117,72,22,.18),
+        inset 0 1px 0 rgba(255,255,255,.72);
+      transition:transform .55s cubic-bezier(.2,.65,.2,1), box-shadow .55s ease;
+    }
+
+    .imp-renew-photo-card:hover{
+      transform:translateY(-10px) rotate(-.4deg);
+      box-shadow:
+        0 38px 84px rgba(117,72,22,.24),
+        inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    .imp-renew-photo-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(120deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 34%, rgba(255,255,255,.16) 100%);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .imp-renew-photo{
+      position:relative;
+      overflow:hidden;
+      border-radius:22px;
+      aspect-ratio:1.14/1;
+      background:linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.06));
+    }
+
+    .imp-renew-photo img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      transform:scale(1.04);
+      filter:saturate(1.04) contrast(1.03) brightness(.99);
+      transition:transform .8s ease, filter .55s ease;
+    }
+
+    .imp-renew-photo-card:hover .imp-renew-photo img{
+      transform:scale(1.1);
+      filter:saturate(1.08) contrast(1.06) brightness(1.02);
+    }
+
+    .imp-renew-badge{
+      position:absolute;
+      z-index:4;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height:40px;
+      padding:11px 16px;
+      border-radius:999px;
+      color:#fffaf6;
+      font-size:12px;
+      line-height:1;
+      letter-spacing:.14em;
+      font-weight:700;
+      text-transform:uppercase;
+      box-shadow:0 16px 34px rgba(210,106,69,.28);
+      transition:transform .35s ease, filter .35s ease;
+      animation:impBadgeFloat 4.8s ease-in-out infinite;
+      white-space:nowrap;
+    }
+
+    .imp-renew-badge:hover{
+      transform:translateY(-4px) scale(1.03);
+      filter:brightness(1.04);
+    }
+
+    .imp-renew-badge svg{
+      width:15px;
+      height:15px;
+      fill:currentColor;
+      flex:none;
+    }
+
+    .imp-renew-badge-top{
+      top:2px;
+      left:10px;
+      background:linear-gradient(135deg, #f38e66, #e67054);
+      transform:rotate(-6deg);
+    }
+
+    .imp-renew-badge-bottom{
+      right:-6px;
+      bottom:22px;
+      background:linear-gradient(135deg, #ffba5c, #f1943c);
+      color:#fffaf2;
+      transform:rotate(7deg);
+      animation-direction:reverse;
+    }
+
+    .imp-renew-grid-dots{
+      position:absolute;
+      right:18px;
+      top:18px;
+      width:88px;
+      height:88px;
+      border-radius:18px;
+      background-image:radial-gradient(rgba(237,123,81,.52) 1.7px, transparent 1.7px);
+      background-size:13px 13px;
+      opacity:.6;
+      z-index:3;
+      animation:impMiniFloat 6.6s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .imp-renew-outline{
+      position:absolute;
+      border:1.5px solid rgba(255,255,255,.24);
+      border-radius:28px;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .imp-renew-outline-a{
+      width:148px;
+      height:148px;
+      right:8%;
+      top:18%;
+      transform:rotate(-10deg);
+      animation:impGlassDrift 9s ease-in-out infinite reverse;
+    }
+
+    .imp-renew-outline-b{
+      width:96px;
+      height:96px;
+      left:48%;
+      bottom:8%;
+      transform:rotate(14deg);
+      animation:impGlassDrift 7.5s ease-in-out infinite;
+    }
+
+    .imp-renew-reveal{
+      opacity:0;
+      transform:translateY(34px) scale(.985);
+      transition:
+        opacity .95s cubic-bezier(.22,.61,.36,1),
+        transform .95s cubic-bezier(.22,.61,.36,1);
+      will-change:opacity,transform;
+    }
+
+    .imp-renew-reveal.is-visible{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+
+    .imp-renew-delay-1{ transition-delay:.08s; }
+    .imp-renew-delay-2{ transition-delay:.22s; }
+    .imp-renew-delay-3{ transition-delay:.34s; }
+
+    @keyframes impAuraFloat{
+      0%,100%{ transform:translate3d(0,0,0) scale(1); }
+      50%{ transform:translate3d(22px,-10px,0) scale(1.06); }
+    }
+
+    @keyframes impGlassDrift{
+      0%,100%{ transform:translateY(0) rotate(15deg); }
+      50%{ transform:translateY(-12px) rotate(10deg); }
+    }
+
+    @keyframes impMiniFloat{
+      0%,100%{ transform:translateY(0) translateX(0); }
+      50%{ transform:translateY(-12px) translateX(8px); }
+    }
+
+    @keyframes impBadgeFloat{
+      0%,100%{ transform:translateY(0) rotate(-6deg); }
+      50%{ transform:translateY(-7px) rotate(-3deg); }
+    }
+
+    @keyframes impShinePulse{
+      0%,100%{ opacity:.75; transform:scale(1); }
+      50%{ opacity:1; transform:scale(1.06); }
+    }
+
+    @media (max-width: 1080px){
+      .imp-renew-shell{
+        width:min(calc(100% - 34px), 1260px);
+      }
+
+      .imp-renew-stage{
+        grid-template-columns:1fr;
+        min-height:auto;
+        gap:26px;
+      }
+
+      .imp-renew-title{
+        writing-mode:horizontal-tb;
+        text-orientation:initial;
+        height:auto;
+        font-size:clamp(30px, 6vw, 56px);
+        line-height:1.72;
+      }
+
+      .imp-renew-copy-inner{
+        gap:18px;
+      }
+
+      .imp-renew-photo{
+        aspect-ratio:1.25/1;
+      }
+
+      .imp-renew-badge-bottom{
+        right:8px;
+        bottom:18px;
+      }
+
+      .imp-renew-outline-a{
+        right:4%;
+        top:10%;
+      }
+    }
+
+    @media (max-width: 720px){
+      .imp-renew-hero{
+        padding:18px 0 56px;
+      }
+
+      .imp-renew-shell{
+        width:min(calc(100% - 20px), 1260px);
+      }
+
+      .imp-renew-copy-card{
+        padding:18px;
+        border-radius:24px;
+      }
+
+      .imp-renew-title{
+        font-size:clamp(24px, 8.4vw, 36px);
+        line-height:1.64;
+        letter-spacing:.08em;
+      }
+
+      .imp-renew-text{
+        font-size:14px;
+        line-height:2;
+      }
+
+      .imp-renew-visual-frame{
+        padding:10px;
+        border-radius:24px;
+      }
+
+      .imp-renew-photo-card{
+        padding:10px;
+        border-radius:22px;
+      }
+
+      .imp-renew-photo{
+        border-radius:16px;
+        aspect-ratio:1.08/1;
+      }
+
+      .imp-renew-badge{
+        padding:10px 12px;
+        min-height:36px;
+        font-size:10px;
+        letter-spacing:.12em;
+        gap:8px;
+      }
+
+      .imp-renew-badge-top{
+        left:6px;
+        top:-2px;
+      }
+
+      .imp-renew-badge-bottom{
+        right:6px;
+        bottom:12px;
+      }
+
+      .imp-renew-grid-dots{
+        width:58px;
+        height:58px;
+        top:12px;
+        right:12px;
+        background-size:11px 11px;
+      }
+
+      .imp-renew-outline-a{
+        width:88px;
+        height:88px;
+        border-radius:20px;
+      }
+
+      .imp-renew-outline-b{
+        width:68px;
+        height:68px;
+        border-radius:18px;
+      }
+
+      .imp-renew-hero::after{
+        width:82px;
+        height:82px;
+        border-radius:20px;
+        top:54px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .imp-renew-hero *,
+      .imp-renew-hero::before,
+      .imp-renew-hero::after{
+        animation:none !important;
+        transition:none !important;
+      }
+      .imp-renew-reveal{
+        opacity:1 !important;
+        transform:none !important;
+      }
+    }
+  </style>
+
+  <div class="imp-renew-outline imp-renew-outline-a" aria-hidden="true" style=""></div>
+  <div class="imp-renew-outline imp-renew-outline-b" aria-hidden="true" style=""></div>
+
+  <div class="imp-renew-shell">
+    <div class="imp-renew-stage">
+      <div class="imp-renew-copy imp-renew-reveal imp-renew-delay-1 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+        <div class="imp-renew-copy-card" data-cebt="matrix(1, 0, 0, 1, 0, -8)" data-cetx="14" data-cety="-101" data-cesx="1" data-cesy="0.8261157520628102" style="transform-origin: center center !important; transform: translate(14px, -101px) rotate(0deg) scale(1, 0.826116) matrix(1, 0, 0, 1, 0, -8) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important; cursor: move;">
+          <div class="imp-renew-copy-inner">
+            <h1 class="imp-renew-title" data-cebt="" data-cesx="1" data-cesy="0.7510894290000001" style="transform-origin: center center !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important;">あなたの「できる」を、やさしく未来へつないでいきます。</h1>
+            <p class="imp-renew-text" style="">
+              「るわみ」は、就労継続支援B型の事業所です。落ち着いた空間のなかで、体調や気持ちに寄り添いながら、自分のペースで働く時間を育てていきます。<br>
+              軽作業や梱包、手しごと、パソコン作業などを通して、少しずつ自信を重ね、毎日の暮らしに安心と心地よいリズムをつくる場所です。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="imp-renew-visual imp-renew-reveal imp-renew-delay-2 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+        <div class="imp-renew-visual-frame" data-cebt="" data-cetx="19" data-cety="-177" style="transform-origin: center center !important; transform: translate(19px, -177px) rotate(0deg) scale(1, 1) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important;">
+          <div class="imp-renew-photo-card">
+            <div class="imp-renew-badge imp-renew-badge-top">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.6 5.27L20.5 8l-4.25 4.14L17.3 18 12 15.2 6.7 18l1.05-5.86L3.5 8l5.9-.73L12 2z"></path></svg>
+              warm support
+            </div>
+
+            <div class="imp-renew-grid-dots" aria-hidden="true" style=""></div>
+
+            <div class="imp-renew-photo" data-cebt="" data-cetx="-18" data-cety="39" style="transform-origin: center center !important; transform: translate(-18px, 39px) rotate(0deg) scale(1, 1) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important;">
+              <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="就労支援事業所の明るい入口" width="1280" height="560" onerror="this.style.display='none'" class="" data-cebt="matrix(1.1, 0, 0, 1.1, 0, 0)" data-cetx="23" data-cety="111" style="transform-origin: center center !important; transform: translate(23px, 111px) rotate(0deg) scale(1, 1) matrix(1.1, 0, 0, 1.1, 0, 0) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important;">
+            </div>
+
+            <div class="imp-renew-badge imp-renew-badge-bottom">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+              positive place
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var root = document.currentScript.closest('.imp-renew-hero');
+      if(!root) return;
+      var items = root.querySelectorAll('.imp-renew-reveal');
+
+      function showAll(){
+        items.forEach(function(el){ el.classList.add('is-visible'); });
+      }
+
+      if('IntersectionObserver' in window){
+        var observer = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+
+        items.forEach(function(el){ observer.observe(el); });
+      }else{
+        showAll();
+      }
+
+      setTimeout(showAll, 3000);
+    })();
+  </script>
+</section>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro-wrap" id="about">
+      <div class="container">
+        <div class="intro-panel reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="eyebrow">ruwami</div>
+          <div class="title-line"></div>
+          <h2 class="section-title">「るわみ」のご紹介</h2>
+
+          <div class="intro-cards stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+            <article class="card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="card-media">
+                <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="協力して梱包するスタッフ" width="390" height="240" onerror="this.style.display='none'">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">作業内容</h3>
+                <p class="card-text">封入・梱包・検品・箱づくりなど、無理なく取り組める作業をご紹介します。</p>
+              </div>
+            </article>
+
+            <article class="card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="card-media">
+                <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="コーヒーとクッキー" width="390" height="240" onerror="this.style.display='none'">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">一日の流れ</h3>
+                <p class="card-text">通所から作業、休憩、面談まで。安心して過ごせる一日の流れをお伝えします。</p>
+              </div>
+            </article>
+
+            <article class="card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="card-media">
+                <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="事業所前のスタッフたち" width="390" height="240" onerror="this.style.display='none'">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">見学・体験受付中</h3>
+                <p class="card-text">初めての方も大丈夫。事業所の雰囲気を知っていただける見学を行っています。</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="center-btn">
+            <a href="#contact" class="btn">View More</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="news" id="news">
+      <div class="container">
+        <div class="news-head reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="news-label">NEWS</div>
+          <div class="news-line"></div>
+        </div>
+
+        <div class="news-grid stagger">
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="news-media">
+              <img src="http://127.0.0.1:5000/uploads/up_033afbf0bd.jpg" alt="和やかな梱包作業" width="410" height="265" onerror="this.style.display='none'">
+            </div>
+            <div class="news-body">
+              <p class="news-text">新しい軽作業プログラムがスタートしました。初めての方でも参加しやすい内容です。</p>
+              <div class="news-date">2026/06/18</div>
+            </div>
+          </article>
+
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="news-media">
+              <img src="http://127.0.0.1:5000/uploads/up_06aa20751a.png" alt="相談に応じる女性スタッフ" width="410" height="265" onerror="this.style.display='none'">
+            </div>
+            <div class="news-body">
+              <p class="news-text">見学相談会を開催しました。落ち着いた雰囲気の中で、ゆっくりお話いただけました。</p>
+              <div class="news-date">2026/06/07</div>
+            </div>
+          </article>
+
+          <article class="news-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="news-media">
+              <img src="http://127.0.0.1:5000/uploads/up_ca0295279d.jpg" alt="手作りアクセサリーの検品" width="410" height="265" onerror="this.style.display='none'">
+            </div>
+            <div class="news-body">
+              <p class="news-text">利用者さんが丁寧に仕上げた手しごとの一部をご紹介。集中して取り組める時間が広がっています。</p>
+              <div class="news-date">2026/05/24</div>
+            </div>
+          </article>
+        </div>
+
+        <div class="center-btn" style="margin-top:30px">
+          <a href="#contact" class="btn">View More</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-band" id="contact">
+      <div class="container">
+        <div class="contact-box reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="contact-script">Contact</div>
+          <h2 class="contact-title">ご相談はこちら</h2>
+          <div class="contact-line"></div>
+          <div class="phone">022-398-7350</div>
+          <div class="contact-note">平日のみ（土日祝休み）</div>
+          <a href="mailto:info@ruwami.jp" class="mail-btn">
+            <span style="font-size:24px">✉</span>
+            <span>お問い合わせフォーム</span>
+          </a>
+          <div class="contact-small">※ お電話またはメールフォームからお気軽にご相談ください。</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="company">
+    <div class="container">
+      <div class="footer-top reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="footer-brand">
+          <a href="#" class="logo" aria-label="るわみ ロゴ">
+            <div class="logo-mark">るわみ</div>
+            <div class="logo-sub">就労継続支援B型事業所</div>
+          </a>
+          <div class="address">
+            〒989-3126<br>
+            宮城県仙台市青葉区落合二丁目11番地2号 103<br>
+            株式会社Ruwami Care
+          </div>
+        </div>
+        <div class="footer-nav">
+          <a href="#top">トップ</a>
+          <a href="#about">「るわみ」のご紹介</a>
+          <a href="#company">会社案内</a>
+          <a href="#news">お知らせ</a>
+          <a href="#contact">お問い合わせ</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="footer-bottom">
+    <div class="insta">◎</div>
+    <div class="copy">©2026 株式会社Ruwami Care All Rights Reserved.</div>
+  </div>
+
+  <script>
+    (() => {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+
+      document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
+    })();
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i], cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

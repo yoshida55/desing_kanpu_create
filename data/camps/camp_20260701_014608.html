@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ヨムタビ｜本好きのためのオンライン読書コミュニティ</title>
+<style>
+:root{
+  --navy:#0a52c4;
+  --navy-deep:#063a8f;
+  --sky:#9ccaf0;
+  --sky-light:#d6e9f8;
+  --yellow:#ffd23f;
+  --coral:#ff7a59;
+  --cream:#f7f3e8;
+  --ink:#0e2444;
+  --paper:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif;
+  color:var(--ink);
+  background:var(--paper);
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{text-decoration:none;color:inherit;}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+
+/* ===== Header ===== */
+header{
+  position:sticky;top:0;z-index:100;
+  background:var(--navy);
+}
+.nav{
+  display:flex;align-items:center;justify-content:space-between;
+  height:72px;
+}
+.logo{
+  display:flex;align-items:center;gap:10px;
+  color:#fff;font-weight:800;font-size:22px;letter-spacing:.04em;
+}
+.logo .mark{
+  width:34px;height:34px;border-radius:8px;
+  background:var(--yellow);
+  display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;
+}
+.logo .mark span{display:block;width:18px;height:3px;background:var(--navy);border-radius:2px;}
+.nav ul{display:flex;gap:28px;list-style:none;align-items:center;}
+.nav ul li a{color:#fff;font-size:14px;font-weight:600;opacity:.92;transition:.2s;}
+.nav ul li a:hover{opacity:1;}
+.nav-actions{display:flex;gap:12px;align-items:center;}
+.btn{
+  display:inline-block;border-radius:999px;font-weight:700;font-size:14px;
+  padding:11px 22px;transition:.2s;cursor:pointer;border:none;
+}
+.btn-ghost{background:#fff;color:var(--navy);}
+.btn-yellow{background:var(--yellow);color:var(--navy);}
+.btn-yellow:hover,.btn-ghost:hover{transform:translateY(-2px);}
+.menu-toggle{display:none;background:none;border:none;color:#fff;font-size:26px;cursor:pointer;}
+
+/* ===== Hero ===== */
+.hero{
+  background:var(--navy);
+  position:relative;overflow:hidden;
+  padding:60px 0 120px;
+}
+.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;}
+.hero-copy h1{
+  color:#fff;font-size:clamp(38px,6vw,76px);font-weight:900;
+  line-height:1.15;letter-spacing:.02em;
+}
+.hero-copy h1 .hl{
+  display:inline-block;background:var(--yellow);color:var(--navy);
+  padding:0 .12em;border-radius:6px;margin:.06em 0;
+}
+.hero-copy p{color:var(--sky-light);font-size:17px;margin:26px 0 34px;max-width:420px;}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;}
+.hero-stat{margin-top:48px;display:flex;gap:40px;color:#fff;}
+.hero-stat .num{font-size:40px;font-weight:900;line-height:1;}
+.hero-stat .lbl{font-size:12px;color:var(--sky);}
+
+/* hero illustration */
+.scene{
+  position:relative;aspect-ratio:4/3.4;border-radius:20px;
+  background:linear-gradient(160deg,#bfe0fa,#7cb8ec);
+  overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.3);
+}
+.scene .frame{position:absolute;inset:18px;border:6px solid #fff;border-radius:14px;}
+.scene .sun{position:absolute;top:14%;right:16%;width:60px;height:60px;border-radius:50%;background:var(--yellow);}
+.scene .hill{position:absolute;bottom:0;left:0;right:0;height:46%;background:var(--coral);border-radius:50% 50% 0 0/40% 40% 0 0;}
+.scene .hill2{position:absolute;bottom:0;left:-10%;width:70%;height:34%;background:#ff9d80;border-radius:50% 50% 0 0;}
+.scene .chair{
+  position:absolute;bottom:8%;left:50%;transform:translateX(-50%);
+  width:140px;height:120px;background:var(--navy);border-radius:24px 24px 14px 14px;
+}
+.scene .head{position:absolute;bottom:38%;left:50%;transform:translateX(-50%);width:46px;height:46px;border-radius:50%;background:#1a1a2e;}
+.scene .book{position:absolute;bottom:30%;left:50%;transform:translateX(-50%) rotate(-8deg);width:64px;height:44px;background:#fff;border-left:8px solid var(--coral);border-radius:4px;}
+.scene .plant{position:absolute;bottom:8%;right:14%;width:14px;height:50px;background:#0c3;border-radius:6px;}
+.scene .plant::before,.scene .plant::after{content:"";position:absolute;width:26px;height:16px;background:#0b8a3a;border-radius:50% 50% 0 50%;top:-6px;left:-18px;transform:rotate(-30deg);}
+.scene .plant::after{left:6px;transform:rotate(40deg);border-radius:50% 50% 50% 0;}
+
+.hero-wave{position:absolute;bottom:-2px;left:0;width:100%;line-height:0;}
+
+/* ===== Section common ===== */
+section{padding:96px 0;}
+.eyebrow{
+  display:inline-block;font-size:13px;font-weight:800;letter-spacing:.18em;
+  color:var(--navy);text-transform:uppercase;margin-bottom:14px;
+}
+.sec-title{font-size:clamp(28px,4vw,46px);font-weight:900;line-height:1.2;}
+
+.reveal{opacity:0;transform:translateY(30px);transition:.8s cubic-bezier(.2,.7,.2,1);}
+.reveal.in{opacity:1;transform:none;}
+
+/* ===== New books — editorial asymmetric ===== */
+.newbooks{background:var(--cream);}
+.nb-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;margin-bottom:54px;}
+.nb-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:26px;}
+.book-card{
+  background:#fff;border-radius:16px;padding:24px;
+  box-shadow:0 12px 30px rgba(10,82,196,.07);transition:.3s;
+}
+.book-card:hover{transform:translateY(-6px);}
+.cover{
+  border-radius:10px;aspect-ratio:3/4;margin-bottom:18px;position:relative;overflow:hidden;
+  display:flex;align-items:flex-end;padding:18px;color:#fff;font-weight:800;
+}
+.book-card.big{grid-row:span 2;}
+.book-card.big .cover{aspect-ratio:auto;height:340px;font-size:24px;}
+.c1{background:linear-gradient(135deg,#0a52c4,#3d8bea);}
+.c2{background:linear-gradient(135deg,#ff7a59,#ffb199);}
+.c3{background:linear-gradient(135deg,#ffd23f,#ff9d2e);color:var(--navy);}
+.c4{background:linear-gradient(135deg,#1c2a4a,#3a5588);}
+.cover .tag{position:absolute;top:14px;left:14px;background:#fff;color:var(--navy);font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;}
+.book-card .meta{font-size:12px;color:#7a86a0;font-weight:700;}
+.book-card h3{font-size:17px;font-weight:800;margin:4px 0 8px;}
+.book-card p{font-size:13px;color:#56607a;}
+
+/* ===== Feature — split big number ===== */
+.feature .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:60px;align-items:center;}
+.feature-visual{
+  border-radius:24px;padding:50px;
+  background:linear-gradient(150deg,#ff7a59 0%,#ff5fa2 45%,#0a52c4 100%);
+  color:#fff;position:relative;overflow:hidden;min-height:380px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.feature-visual .bignum{font-size:clamp(64px,12vw,120px);font-weight:900;line-height:.95;}
+.feature-visual .sub{font-size:18px;font-weight:700;margin-top:8px;}
+.feature-visual .quote{
+  margin-top:30px;background:rgba(255,255,255,.16);backdrop-filter:blur(4px);
+  border-radius:14px;padding:20px;font-size:14px;line-height:1.8;
+}
+.feature-list{list-style:none;}
+.feature-list li{
+  display:flex;gap:18px;padding:22px 0;border-bottom:1px solid #e3e8f2;
+}
+.feature-list li .ico{font-size:28px;flex-shrink:0;}
+.feature-list li h4{font-size:18px;font-weight:800;}
+.feature-list li p{font-size:14px;color:#56607a;}
+
+/* ===== Reviews — staggered ===== */
+.reviews{background:var(--navy);color:#fff;}
+.reviews .sec-title{color:#fff;}
+.reviews .eyebrow{color:var(--yellow);}
+.rev-grid{
+  margin-top:54px;columns:3;column-gap:26px;
+}
+.rev{
+  break-inside:avoid;margin-bottom:26px;border-radius:16px;padding:24px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+}
+.rev .stars{color:var(--yellow);font-size:14px;letter-spacing:2px;}
+.rev p{font-size:14px;margin:12px 0 18px;color:#d6e3f6;}
+.rev .who{display:flex;align-items:center;gap:12px;}
+.rev .av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:var(--navy);}
+.rev .who .name{font-size:13px;font-weight:700;}
+.rev .who .book{font-size:11px;color:var(--sky);}
+.rev.tall p{font-size:16px;}
+
+/* ===== Join — apple-ish light ===== */
+.join{
+  background:linear-gradient(180deg,#eaf3fc 0%,#fff 100%);
+  text-align:center;
+}
+.join .sec-title{margin-bottom:14px;}
+.join .lead{font-size:17px;color:#56607a;max-width:560px;margin:0 auto 60px;}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;max-width:840px;margin:0 auto;position:relative;}
+.step{padding:0 22px;position:relative;text-align:left;}
+.step .n{font-size:54px;font-weight:900;color:var(--sky);line-height:1;}
+.step h4{font-size:18px;font-weight:800;margin:8px 0 6px;}
+.step p{font-size:14px;color:#56607a;}
+.step:not(:last-child)::after{content:"→";position:absolute;right:-4px;top:30px;color:var(--coral);font-weight:900;font-size:22px;}
+
+/* ===== CTA banner ===== */
+.cta{
+  margin:90px auto;max-width:1000px;border-radius:28px;
+  background:linear-gradient(135deg,#0a52c4,#3d8bea);
+  color:#fff;padding:64px 48px;text-align:center;position:relative;overflow:hidden;
+}
+.cta::before{content:"";position:absolute;top:-60px;right:-40px;width:220px;height:220px;border-radius:50%;background:var(--yellow);opacity:.25;}
+.cta::after{content:"";position:absolute;bottom:-70px;left:-30px;width:200px;height:200px;border-radius:50%;background:var(--coral);opacity:.3;}
+.cta h2{font-size:clamp(28px,4vw,42px);font-weight:900;position:relative;}
+.cta p{margin:16px 0 32px;color:var(--sky-light);position:relative;}
+
+/* ===== Footer ===== */
+footer{background:var(--navy-deep);color:#fff;padding:60px 0 30px;}
+.foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:30px;}
+footer h5{font-size:13px;font-weight:800;margin-bottom:14px;color:var(--yellow);letter-spacing:.06em;}
+footer ul{list-style:none;}
+footer ul li{margin-bottom:9px;}
+footer ul li a{font-size:13px;color:#c3d4ee;}
+footer ul li a:hover{color:#fff;}
+.foot-logo{font-size:22px;font-weight:900;margin-bottom:14px;}
+.foot-logo span{color:var(--yellow);}
+.copy{border-top:1px solid rgba(255,255,255,.12);margin-top:44px;padding-top:24px;font-size:12px;color:#9fb6d8;}
+
+/* responsive */
+@media(max-width:880px){
+  .nav ul{display:none;}
+  .menu-toggle{display:block;}
+  .hero-inner{grid-template-columns:1fr;}
+  .scene{max-width:420px;margin:36px auto 0;}
+  .nb-grid{grid-template-columns:1fr 1fr;}
+  .book-card.big{grid-column:span 2;grid-row:auto;}
+  .feature .wrap{grid-template-columns:1fr;gap:36px;}
+  .rev-grid{columns:2;}
+  .steps{grid-template-columns:1fr;gap:34px;}
+  .step:not(:last-child)::after{content:"↓";right:auto;left:30px;top:auto;bottom:-26px;}
+  .foot-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:540px){
+  .nb-grid{grid-template-columns:1fr;}
+  .book-card.big{grid-column:auto;}
+  .rev-grid{columns:1;}
+  .hero-stat{gap:24px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="#" class="logo"><span class="mark"><span></span><span></span></span>ヨムタビ</a>
+    <ul>
+      <li><a href="#new">新着の本</a></li>
+      <li><a href="#feature">特集</a></li>
+      <li><a href="#reviews">みんなのレビュー</a></li>
+      <li><a href="#join">参加方法</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a class="btn btn-ghost" href="#">ログイン</a>
+      <a class="btn btn-yellow" href="#join">無料ではじめる</a>
+      <button class="menu-toggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-copy reveal">
+      <h1>読むほど、<br><span class="hl">つながる。</span></h1>
+      <p>本好きが集まるオンライン読書コミュニティ「ヨムタビ」。一冊の本をきっかけに、まだ知らない物語と人に出会おう。</p>
+      <div class="hero-cta">
+        <a class="btn btn-yellow" href="#join" style="padding:14px 30px;font-size:16px;">読む旅をはじめる</a>
+        <a class="btn btn-ghost" href="#new" style="padding:14px 30px;font-size:16px;">新着の本を見る</a>
+      </div>
+      <div class="hero-stat">
+        <div><div class="num">38,200</div><div class="lbl">登録メンバー</div></div>
+        <div><div class="num">12,400</div><div class="lbl">投稿レビュー</div></div>
+        <div><div class="num">520</div><div class="lbl">今月の読書会</div></div>
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="scene">
+        <div class="frame"></div>
+        <div class="sun"></div>
+        <div class="hill2"></div>
+        <div class="hill"></div>
+        <div class="chair"></div>
+        <div class="head"></div>
+        <div class="book"></div>
+        <div class="plant"></div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,40 C360,90 1080,-10 1440,40 L1440,80 L0,80 Z" fill="#f7f3e8"/>
+    </svg>
+  </div>
+</section>
+
+<!-- NEW BOOKS -->
+<section class="newbooks" id="new">
+  <div class="wrap">
+    <div class="nb-head reveal">
+      <div>
+        <span class="eyebrow">New Arrivals</span>
+        <h2 class="sec-title">今週、みんなが<br>読みはじめた本。</h2>
+      </div>
+      <a href="#" class="btn btn-ghost" style="border:2px solid var(--navy);">すべての新着 →</a>
+    </div>
+    <div class="nb-grid">
+      <div class="book-card big reveal">
+        <div class="cover c1"><span class="tag">特集ピック</span>夜明けの図書室</div>
+        <div class="meta">小説・ミステリー</div>
+        <h3>夜明けの図書室で、私たちは</h3>
+        <p>閉館後の図書室に集う人々の小さな秘密を描いた連作短編。今週もっとも本棚に追加された一冊。読書会の課題図書にも選出されました。</p>
+      </div>
+      <div class="book-card reveal">
+        <div class="cover c2"><span class="tag">話題</span>余白の効用</div>
+        <div class="meta">エッセイ</div>
+        <h3>余白の効用</h3>
+        <p>暮らしに「間」を取り戻す思考術。</p>
+      </div>
+      <div class="book-card reveal">
+        <div class="cover c3"><span class="tag">急上昇</span>都市の地図</div>
+        <div class="meta">ノンフィクション</div>
+        <h3>歩いて知る、都市の地図</h3>
+        <p>足で集めた街の記録、写真と文章。</p>
+      </div>
+      <div class="book-card reveal">
+        <div class="cover c4">海辺の言語</div>
+        <div class="meta">海外文学</div>
+        <h3>海辺の言語学者</h3>
+        <p>言葉と記憶をめぐる静かな長編。</p>
+      </div>
+      <div class="book-card reveal">
+        <div class="cover c1">珈琲と時計</div>
+        <div class="meta">短編集</div>
+        <h3>珈琲と時計のあいだに</h3>
+        <p>朝の喫茶店で交わる12の物語。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE -->
+<section class="feature" id="feature">
+  <div class="wrap">
+    <div class="feature-visual reveal">
+      <div class="bignum">月12冊</div>
+      <div class="sub">メンバーの平均読書量が、参加後にぐっと増えました。</div>
+      <div class="quote">「読みかけの本が積み上がっていたけど、仲間が感想をくれるから読み切れる。読書が"会話"になりました。」<br>— 会員歴8ヶ月 / 佐倉さん</div>
+    </div>
+    <div>
+      <span class="eyebrow reveal">Monthly Feature</span>
+      <h2 class="sec-title reveal" style="margin-bottom:24px;">「ひとりで読む」を、<br>「みんなで味わう」に。</h2>
+      <ul class="feature-list">
+        <li class="reveal"><span class="ico">📖</span><div><h4>テーマ別ブッククラブ</h4><p>毎月の特集テーマに沿って、同じ本を読む仲間とオンラインで語り合えます。</p></div></li>
+        <li class="reveal"><span class="ico">✍️</span><div><h4>レビューがつながる本棚</h4><p>あなたの感想が、次に読む誰かの道しるべに。引用や注釈もシェアできます。</p></div></li>
+        <li class="reveal"><span class="ico">☕</span><div><h4>週末の読書会ルーム</h4><p>気軽に立ち寄れる音声ルーム。読みながら、聞きながら、ゆるく集まる。</p></div></li>
+        <li class="reveal"><span class="ico">🎁</span><div><h4>未読本のレコメンド</h4><p>あなたの読書傾向から、まだ出会っていない一冊をそっと提案します。</p></div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews" id="reviews">
+  <div class="wrap">
+    <span class="eyebrow">Members' Voice</span>
+    <h2 class="sec-title">読んだ人の数だけ、<br>感想がある。</h2>
+    <div class="rev-grid">
+      <div class="rev tall reveal">
+        <div class="stars">★★★★★</div>
+        <p>「夜明けの図書室で、私たちは」を読了。最後の一編で全部つながる構成に鳥肌。読書会でみんなの解釈を聞けたのが何より楽しかった。</p>
+        <div class="who"><div class="av" style="background:var(--yellow)">M</div><div><div class="name">三浦 さやか</div><div class="book">読了：夜明けの図書室で</div></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars">★★★★☆</div>
+        <p>エッセイ枠で出会えた一冊。日々の余白について考え直すきっかけに。</p>
+        <div class="who"><div class="av" style="background:var(--coral)">K</div><div><div class="name">小林 直人</div><div class="book">読了：余白の効用</div></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars">★★★★★</div>
+        <p>積読が30冊から12冊に。仲間に進捗を共有するだけで読むモチベが続く。</p>
+        <div class="who"><div class="av" style="background:var(--sky)">T</div><div><div class="name">田島 ゆい</div><div class="book">会員歴：1年2ヶ月</div></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars">★★★★★</div>
+        <p>海外文学が苦手だったけど、レコメンドされた「海辺の言語学者」で世界が広がった。注釈機能で読みにくい箇所もみんなで補い合える。</p>
+        <div class="who"><div class="av" style="background:var(--yellow)">A</div><div><div class="name">安藤 玲</div><div class="book">読了：海辺の言語学者</div></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars">★★★★☆</div>
+        <p>週末の音声ルームが心地よい。作業しながら他の人の読書音を聞く時間が好き。</p>
+        <div class="who"><div class="av" style="background:var(--coral)">N</div><div><div class="name">中村 ひかり</div><div class="book">会員歴：6ヶ月</div></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars">★★★★★</div>
+        <p>本を通じて知り合った人と、リアルの読書会まで開催。ヨムタビは"場所"になった。</p>
+        <div class="who"><div class="av" style="background:var(--sky)">S</div><div><div class="name">島田 健</div><div class="book">主催：神保町読書会</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOIN -->
+<section class="join" id="join">
+  <div class="wrap">
+    <span class="eyebrow reveal">How to Join</span>
+    <h2 class="sec-title reveal">3ステップで、<br>読む旅へ。</h2>
+    <p class="lead reveal">登録は無料。あなたの「いま読んでいる一冊」から、コミュニティはすぐにはじまります。</p>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="n">01</div>
+        <h4>アカウント作成</h4>
+        <p>メールアドレスだけ。30秒で本棚が手に入ります。</p>
+      </div>
+      <div class="step reveal">
+        <div class="n">02</div>
+        <h4>本棚をつくる</h4>
+        <p>読んだ本・読みたい本を登録して、好みを伝えよう。</p>
+      </div>
+      <div class="step reveal">
+        <div class="n">03</div>
+        <h4>仲間と読む</h4>
+        <p>ブッククラブや読書会に参加して、感想を交わそう。</p>
+      </div>
+    </div>
+  </div>
+  <div class="cta reveal">
+    <h2>さあ、次の一冊を<br>誰かと読みはじめよう。</h2>
+    <p>無料プランで、特集・レビュー・読書会のすべてを体験できます。</p>
+    <a class="btn btn-yellow" href="#" style="padding:16px 40px;font-size:17px;">無料で読む旅をはじめる →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <div class="foot-logo">ヨム<span>タビ</span></div>
+      <p style="font-size:13px;color:#c3d4ee;max-width:260px;">本好きのためのオンライン読書コミュニティ。一冊の本から、まだ知らない物語と人へ。</p>
+    </div>
+    <div>
+      <h5>サービス</h5>
+      <ul><li><a href="#new">新着の本</a></li><li><a href="#feature">特集</a></li><li><a href="#reviews">レビュー</a></li><li><a href="#">読書会</a></li></ul>
+    </div>
+    <div>
+      <h5>サポート</h5>
+      <ul><li><a href="#">はじめ方</a></li><li><a href="#">よくある質問</a></li><li><a href="#">お問い合わせ</a></li><li><a href="#">利用規約</a></li></ul>
+    </div>
+    <div>
+      <h5>フォロー</h5>
+      <ul><li><a href="#">X (Twitter)</a></li><li><a href="#">Instagram</a></li><li><a href="#">ニュースレター</a></li></ul>
+    </div>
+  </div>
+  <div class="wrap copy">© 2024 ヨムタビ All rights reserved.</div>
+</footer>
+
+<script>
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach((el,i)=>{
+  el.style.transitionDelay=(i%4*0.06)+'s';
+  io.observe(el);
+});
+document.querySelector('.menu-toggle').addEventListener('click',()=>{
+  const ul=document.querySelector('.nav ul');
+  ul.style.display=ul.style.display==='flex'?'none':'flex';
+  ul.style.position='absolute';ul.style.top='72px';ul.style.left='0';ul.style.right='0';
+  ul.style.flexDirection='column';ul.style.background='var(--navy)';ul.style.padding='20px 24px';ul.style.gap='16px';
+});
+</script>
+
+<script>
+/* レビュー用フォールバック：出現アニメ未発火でも必ず全コンテンツが見えるようにする */
+(function(){
+  function showAll(){
+    document.querySelectorAll('[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"]')
+      .forEach(function(el){el.classList.add('show','is-visible','active','visible','in-view','animated','inview');});
+    document.querySelectorAll('body *').forEach(function(el){
+      var s=getComputedStyle(el);
+      if(parseFloat(s.opacity)===0){el.style.opacity='1';el.style.transform='none';}
+    });
+  }
+  if(document.readyState==='loading') window.addEventListener('DOMContentLoaded',showAll);
+  else showAll();
+  window.addEventListener('load',showAll);
+})();
+</script>
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(!els.length) return;
+    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
+    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    setTimeout(function(){
+      els.forEach(function(e){
+        if(parseFloat(getComputedStyle(e).opacity)===0){
+          show(e); e.style.opacity='1'; e.style.transform='none';
+        }
+      });
+    }, 3500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+
+</body>
+</html>

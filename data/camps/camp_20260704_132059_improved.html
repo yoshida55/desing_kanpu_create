@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js fxa-on"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LinkWorks B型事業所 | らしく働ける場所</title>
+<script>document.documentElement.classList.add('js');</script>
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#333333;
+    --black:#000000;
+    --yellow:#f4e410;
+    --gray:#f0f0f0;
+    --dark:#2e2e2e;
+    --bluegray:#dfe8f2;
+    --line:#1f1f1f;
+    --radius:2px;
+    --corner:0 30px 0 0;
+    --container:1120px;
+    --serif:"Times New Roman", serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    --ease:cubic-bezier(.19,1,.22,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+  body{
+    font-family:var(--serif);
+    line-height:1.8;
+    overflow-x:hidden;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(223,232,242,.35), transparent 32%),
+      linear-gradient(to bottom, #fff 0%, #fbfdff 18%, #fff 48%);
+  }
+  img{max-width:100%;display:block}
+  a{text-decoration:none;color:inherit}
+  .container{width:min(var(--container),calc(100% - 40px));margin:0 auto}
+  .site-header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(0,0,0,.06);
+  }
+  .header-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:24px;padding:18px 0;
+  }
+  .logo{
+    font-family:var(--sans);font-weight:800;letter-spacing:.12em;font-size:20px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo-mark{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,var(--yellow),#ffe95e 50%, #9fc0e4 100%);
+    position:relative;overflow:hidden;flex:0 0 auto;
+  }
+  .logo-mark::after{
+    content:"";position:absolute;inset:9px 8px 8px 9px;border-radius:50% 50% 50% 6px;
+    background:#fff;transform:rotate(-25deg);
+  }
+  .logo small{font-size:11px;font-weight:600;letter-spacing:.18em;color:#666;display:block;margin-top:-2px}
+  .nav{display:flex;gap:22px;align-items:center;font-family:var(--sans);font-size:12px;letter-spacing:.1em}
+  .nav a{position:relative}
+  .nav a::after{
+    content:"";position:absolute;left:0;bottom:-4px;width:100%;height:1px;background:var(--black);
+    transform:scaleX(0);transform-origin:right;transition:transform .4s var(--ease);
+  }
+  .nav a:hover::after{transform:scaleX(1);transform-origin:left}
+  .nav-cta{
+    padding:8px 14px;background:var(--dark);color:#fff;border-radius:2px;
+    transition:transform .4s var(--ease), background .3s var(--ease);
+  }
+  .nav-cta:hover{transform:translateY(-2px);background:#111}
+  .hero{
+    position:relative;padding:32px 0 60px;overflow:hidden;
+  }
+  .hero-line{
+    position:absolute;left:-5%;right:-5%;top:78px;height:1px;background:#222;transform:rotate(-6deg);
+    opacity:.65;
+  }
+  .hero-copy{
+    position:absolute;right:6%;top:110px;writing-mode:vertical-rl;text-orientation:mixed;
+    font-family:var(--sans);font-size:42px;line-height:1.7;letter-spacing:.12em;color:#111;
+    z-index:3;
+  }
+  .hero-grid{
+    position:relative;min-height:620px;padding-top:70px;
+  }
+  .people-row{
+    display:grid;grid-template-columns:repeat(6,1fr);
+    gap:24px 16px;align-items:end;padding-right:140px;
+  }
+  .person{
+    position:relative;justify-self:center;
+    width:100px;
+    animation:tokotoko 6s cubic-bezier(0,1,0,1) infinite;
+  }
+  .person:nth-child(2){animation-delay:.6s}
+  .person:nth-child(3){animation-delay:1.2s}
+  .person:nth-child(4){animation-delay:1.8s}
+  .person:nth-child(5){animation-delay:2.4s}
+  .person:nth-child(6){animation-delay:3s}
+  .person .head{
+    width:30px;height:30px;border-radius:50%;margin:0 auto -6px;position:relative;z-index:2;
+  }
+  .person .head.blue{background:#1774c9}
+  .person .head.yellow{background:#f2b10b}
+  .person .head.gray{background:#9e9e9e}
+  .person .body{
+    width:76px;height:96px;margin:0 auto;border-radius:40px 40px 18px 18px;
+    background-size:cover;background-position:center;
+    clip-path:polygon(16% 14%, 82% 8%, 100% 52%, 74% 100%, 22% 100%, 0 46%);
+    border:1px solid rgba(0,0,0,.05);
+  }
+  .bubble{
+    position:absolute;width:26px;height:26px;border-radius:50%;z-index:1;
+    animation:pyoko 8s cubic-bezier(0,1,0,1) infinite;
+  }
+  .bubble.yellow{background:var(--yellow)}
+  .bubble.blue{background:#1470c2}
+  .bubble.gray{background:#b7b7b7}
+  .bubble.b1{left:4%;top:120px}
+  .bubble.b2{left:20%;top:80px}
+  .bubble.b3{left:34%;top:145px}
+  .bubble.b4{left:54%;top:95px}
+  .bubble.b5{left:69%;top:165px}
+  .bubble.b6{left:84%;top:86px}
+  .bubble.b7{left:14%;top:300px}
+  .bubble.b8{left:74%;top:330px}
+  .note-box{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    margin-top:36px;gap:20px;
+  }
+  .note{
+    font-family:var(--sans);font-size:10px;line-height:1.8;letter-spacing:.14em;color:#444;
+  }
+  .cta-note{
+    background:var(--yellow);padding:14px 18px;border-radius:2px;max-width:220px;
+    font-family:var(--sans);font-size:11px;line-height:1.6;letter-spacing:.1em;
+  }
+
+  .section{padding:72px 0;position:relative}
+  .intro{
+    padding-top:10px;
+  }
+  .intro-wrap{
+    display:grid;grid-template-columns:48% 1fr;gap:56px;align-items:center;
+  }
+  .photo-cluster{position:relative;min-height:360px}
+  .photo-main,.photo-sub,.photo-tag{
+    position:absolute;overflow:hidden;background:linear-gradient(135deg,var(--bluegray),#f8fbff);
+  }
+  .photo-main{
+    left:0;top:20px;width:72%;aspect-ratio:1.08/1;border-radius:2px;
+  }
+  .photo-sub{
+    right:10%;bottom:12px;width:42%;aspect-ratio:1/1;border-radius:2px;
+  }
+  .photo-tag{
+    left:56%;bottom:30px;width:18%;aspect-ratio:3/4;border-radius:2px;
+  }
+  .photo-main img,.photo-sub img,.photo-tag img,
+  .feature-card img,.split-photo img,.activity-card img,.mag-card img,.gallery-panels img,.spot-card img{
+    width:100%;height:100%;object-fit:cover;
+  }
+  .eyebrow{
+    font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#666;margin-bottom:12px;
+  }
+  h1,h2,h3,h4{margin:0;color:#111;font-family:var(--sans);line-height:1.35}
+  .intro h2{font-size:34px;font-weight:500;letter-spacing:.04em}
+  .intro p{font-size:15px;max-width:480px}
+  .btn{
+    display:inline-block;margin-top:18px;padding:10px 22px;background:var(--yellow);
+    font-family:var(--sans);font-size:11px;letter-spacing:.14em;border-radius:2px;
+    transition:transform .4s var(--ease), box-shadow .4s var(--ease), background .3s var(--ease);
+  }
+  .btn:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(0,0,0,.08)}
+  .btn.dark{background:var(--dark);color:#fff}
+  .btn.small{padding:8px 16px}
+
+  .spots{
+    display:grid;grid-template-columns:26% 1fr;gap:34px;align-items:stretch;
+  }
+  .spots-text{
+    padding:20px 0 0 8px;
+  }
+  .spots-text h2{
+    writing-mode:vertical-rl;text-orientation:mixed;font-size:28px;letter-spacing:.18em;
+    height:240px;
+  }
+  .spots-text p{font-size:13px;margin-top:18px;max-width:220px}
+  .spots-board{
+    background:var(--yellow);border-radius:var(--corner);padding:34px 28px 24px;position:relative;
+    min-height:320px;
+  }
+  .spot-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:20px 18px;
+  }
+  .spot-card{text-align:center}
+  .spot-thumb{
+    width:110px;height:110px;margin:0 auto 8px;border-radius:50%;overflow:hidden;
+    background:linear-gradient(135deg,#d9e7f5,#fff);
+    border:6px solid rgba(255,255,255,.45);
+  }
+  .spot-card span{
+    font-family:var(--sans);font-size:10px;letter-spacing:.12em;background:#fff;padding:3px 8px;border-radius:2px;
+  }
+
+  .feature-ribbons{
+    display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;padding-top:18px;
+  }
+  .feature-card{
+    position:relative;background:#d7d1a2;padding:18px 22px 16px 26px;border-radius:30px 8px 20px 8px;
+    min-height:94px;transform:rotate(-3deg);
+  }
+  .feature-card:nth-child(2){background:#d7d2b7;transform:rotate(3deg)}
+  .feature-card::before{
+    content:"";position:absolute;left:18px;top:-12px;width:14px;height:28px;background:#9c9c9c;border-radius:2px;
+  }
+  .feature-card h3{font-size:17px;margin-bottom:3px}
+  .feature-card p{margin:0;font-size:12px;line-height:1.6}
+  .feature-card .tiny{font-family:var(--sans);font-size:10px;letter-spacing:.12em;color:#444}
+
+  .gallery-panels{
+    margin-top:30px;display:grid;grid-template-columns:34% 1fr;gap:0;
+    min-height:200px;
+  }
+  .gallery-left{
+    background:#3b3b3b;color:#fff;display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .gallery-left .plaque{
+    background:#fff;color:#111;padding:18px 26px;border-radius:2px;text-align:center;
+  }
+  .gallery-left .plaque h3{font-size:28px;font-weight:400}
+  .gallery-left .plaque small{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.12em}
+  .gallery-right{
+    background:linear-gradient(135deg,#dfe8f2,#f7fbff);overflow:hidden;
+  }
+
+  .split{
+    padding-top:78px;
+  }
+  .split::before{
+    content:"";position:absolute;left:0;right:0;top:0;height:160px;
+    background:
+      linear-gradient(60deg, transparent 47%, rgba(0,0,0,.55) 48%, transparent 49%) 0 0/54px 100% repeat-x,
+      linear-gradient(-60deg, transparent 47%, rgba(0,0,0,.55) 48%, transparent 49%) 0 0/54px 100% repeat-x;
+    opacity:.45;
+  }
+  .split-wrap{
+    display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:end;
+  }
+  .split-photo{
+    position:relative;height:340px;background:linear-gradient(135deg,#dfe8f2,#fff);overflow:hidden;
+    border-radius:50% 50% 45% 45%/12% 12% 10% 10%;
+  }
+  .split-photo.left{height:300px;border-radius:2px}
+  .mini-cut{
+    position:absolute;width:72px;height:92px;left:46%;bottom:-20px;background:linear-gradient(135deg,#dfe8f2,#fff);overflow:hidden;
+  }
+
+  .journal-intro{
+    display:grid;grid-template-columns:1fr 190px;gap:30px;align-items:start;
+  }
+  .journal-intro h2{font-size:30px;font-weight:400;letter-spacing:.08em}
+  .journal-intro p{max-width:560px;font-size:13px}
+  .scribble{
+    position:relative;height:120px;
+  }
+  .scribble span{
+    position:absolute;border:1px solid #bbb;border-radius:50%;
+  }
+  .scribble span:nth-child(1){width:30px;height:42px;left:12px;top:14px}
+  .scribble span:nth-child(2){width:22px;height:34px;left:50px;top:10px}
+  .scribble span:nth-child(3){width:28px;height:40px;left:84px;top:12px}
+  .scribble span:nth-child(4){width:28px;height:22px;left:10px;top:66px}
+  .scribble span:nth-child(5){width:26px;height:24px;left:46px;top:68px}
+  .scribble span:nth-child(6){width:34px;height:26px;left:82px;top:64px}
+  .scribble::after{
+    content:"";position:absolute;right:10px;bottom:10px;width:44px;height:30px;background:#d2d2d2;
+    transform:rotate(-18deg);
+  }
+
+  .activity-board{
+    margin-top:26px;background:#f4f4f4;padding:30px 28px;border-radius:2px;position:relative;
+  }
+  .activity-row{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:18px;
+  }
+  .activity-card{font-size:12px;line-height:1.7}
+  .activity-thumb{
+    aspect-ratio:1.15/1;background:linear-gradient(135deg,#e2ebf5,#fff);margin-bottom:10px;overflow:hidden;
+  }
+  .activity-card h3{font-size:14px;margin-bottom:4px}
+  .slider-arrow{
+    position:absolute;right:18px;top:18px;width:34px;height:34px;border-radius:50%;
+    background:var(--dark);color:#fff;display:grid;place-items:center;font-family:var(--sans);
+  }
+  .center-btn{text-align:center;margin-top:24px}
+
+  .magazine{
+    position:relative;padding-top:86px;padding-bottom:100px;
+  }
+  .magazine .wave-top{
+    position:absolute;left:0;right:0;top:48px;height:110px;background:var(--yellow);
+    clip-path:polygon(0 42%, 10% 55%, 20% 36%, 30% 58%, 40% 34%, 50% 60%, 60% 38%, 70% 56%, 80% 35%, 90% 58%, 100% 42%, 100% 100%, 0 100%);
+  }
+  .magazine .wave-bottom{
+    position:absolute;left:0;right:0;bottom:0;height:84px;background:var(--yellow);
+    clip-path:polygon(0 0, 10% 18%, 20% 2%, 30% 20%, 40% 0, 50% 18%, 60% 0, 70% 20%, 80% 2%, 90% 18%, 100% 0, 100% 100%, 0 100%);
+  }
+  .magazine-head{
+    position:relative;text-align:center;padding-top:8px;margin-bottom:28px;
+  }
+  .flag{
+    display:inline-block;background:var(--yellow);padding:14px 18px;border-radius:0 20px 0 0;
+    font-family:var(--sans);font-size:12px;letter-spacing:.14em;
+  }
+  .mag-people{
+    display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end;position:relative;z-index:2;
+    margin-top:20px;
+  }
+  .mag-people .person{width:88px}
+  .mag-grid{
+    position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:34px;
+    width:min(760px,100%);margin:24px auto 0;
+  }
+  .mag-card{
+    background:#fff;padding:14px;border-radius:2px;
+  }
+  .mag-thumb{
+    aspect-ratio:1/1.16;background:linear-gradient(135deg,#e2ebf5,#fff);overflow:hidden;margin-bottom:10px;
+  }
+  .mag-card h3{font-size:14px}
+  .mag-card p{font-size:12px;margin:4px 0 0}
+  .mag-card time{display:block;font-family:var(--sans);font-size:10px;color:#666;margin-top:6px}
+  .mag-btn{text-align:center;position:relative;z-index:2;margin-top:22px}
+
+  .info h2{
+    font-size:24px;font-weight:500;margin-bottom:24px;letter-spacing:.08em;
+  }
+  .info-list{border-top:1px solid #555}
+  .info-item{
+    display:grid;grid-template-columns:100px 140px 1fr;gap:18px;align-items:center;
+    padding:14px 0;border-bottom:1px solid #777;
+    font-family:var(--sans);font-size:12px;letter-spacing:.04em;
+  }
+  .tag{
+    display:inline-block;background:#3a3a3a;color:#fff;padding:4px 8px;border-radius:2px;
+    font-size:10px;letter-spacing:.08em;text-align:center;
+  }
+  .info-more{text-align:right;margin-top:20px}
+
+  .footer-ornament{
+    position:relative;height:145px;overflow:hidden;margin-top:42px;
+  }
+  .footer-ornament::before{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 18%, rgba(0,0,0,.09) 18.5%, rgba(0,0,0,.09) 19%, rgba(0,0,0,0) 19.5%) 0 0/7px 7px repeat,
+      linear-gradient(#fafafa,#efefef);
+    filter:contrast(120%);
+  }
+  .footer-ornament .mini-people{
+    position:absolute;left:14%;bottom:34px;display:flex;gap:20px;
+  }
+  .footer-ornament .person{width:72px}
+  .seal{
+    position:absolute;right:10%;bottom:56px;background:var(--yellow);padding:16px 14px 10px;border-radius:0 16px 0 0;
+    font-family:var(--sans);font-size:10px;letter-spacing:.1em;text-align:center;
+  }
+
+  footer{
+    padding:34px 0 46px;text-align:center;position:relative;
+  }
+  footer .contact-ja{
+    font-family:var(--sans);font-size:22px;letter-spacing:.14em;margin-bottom:8px;
+  }
+  footer .contact-en{
+    font-family:var(--sans);font-size:11px;letter-spacing:.16em;color:#666;
+  }
+  footer .vtext{
+    position:absolute;right:10px;top:12px;writing-mode:vertical-rl;
+    font-family:var(--sans);font-size:10px;letter-spacing:.14em;color:#666;
+  }
+
+  .deco-paper{
+    position:absolute;background:#c8c8c8;opacity:.85;
+    clip-path:polygon(18% 0,100% 8%,82% 100%,0 78%);
+    animation:katakata 4s cubic-bezier(0,1,0,1) infinite;
+  }
+  .paper1{width:26px;height:22px;left:16%;top:12px}
+  .paper2{width:32px;height:26px;right:8%;top:76px}
+  .paper3{width:30px;height:24px;left:72%;top:260px}
+
+  .reveal{opacity:1;transform:none}
+  html.js .reveal{
+    opacity:0;transform:translateY(28px);
+    transition:opacity .9s var(--ease), transform .9s var(--ease);
+  }
+  html.js .reveal.is-visible{opacity:1;transform:none}
+  html.js .reveal[data-delay="1"]{transition-delay:.08s}
+  html.js .reveal[data-delay="2"]{transition-delay:.16s}
+  html.js .reveal[data-delay="3"]{transition-delay:.24s}
+  html.js .hero-anim{
+    opacity:0;transform:translateY(18px) scale(.98);
+    transition:opacity 1s var(--ease), transform 1.1s var(--ease);
+  }
+  html.js .hero-ready .hero-anim{opacity:1;transform:translateY(0) scale(1)}
+  .hover-lift{transition:transform .45s var(--ease), box-shadow .45s var(--ease)}
+  .hover-lift:hover{transform:translateY(-5px);box-shadow:0 14px 24px rgba(0,0,0,.08)}
+
+  @keyframes tokotoko{
+    0%{transform:translate(0,0) rotate(0deg)}
+    10%{transform:translate(2px,10px) rotate(-2deg)}
+    20%{transform:translate(8px,3px) rotate(2deg)}
+    30%{transform:translate(12px,14px) rotate(-1deg)}
+    40%{transform:translate(16px,4px) rotate(2deg)}
+    50%{transform:translate(10px,8px) rotate(0deg)}
+    60%{transform:translate(4px,2px) rotate(-2deg)}
+    100%{transform:translate(0,0) rotate(0deg)}
+  }
+  @keyframes pyoko{
+    0%,20%,40%,100%{transform:translateY(0)}
+    10%,30%{transform:translateY(-10px)}
+    50%{transform:translateY(-18px)}
+  }
+  @keyframes katakata{
+    0%,100%{transform:rotate(0deg) translateY(0)}
+    20%{transform:rotate(-8deg) translateY(-2px)}
+    40%{transform:rotate(6deg) translateY(1px)}
+    60%{transform:rotate(-4deg) translateY(-1px)}
+  }
+
+  @media (max-width: 980px){
+    .nav{display:none}
+    .hero-copy{position:static;writing-mode:horizontal-tb;font-size:28px;margin:10px 0 20px}
+    .hero-grid{min-height:auto;padding-top:10px}
+    .people-row,.mag-people{grid-template-columns:repeat(3,1fr);padding-right:0}
+    .intro-wrap,.spots,.split-wrap,.journal-intro,.gallery-panels{grid-template-columns:1fr}
+    .spot-grid,.activity-row,.mag-grid{grid-template-columns:1fr 1fr}
+    .feature-ribbons{grid-template-columns:1fr}
+    .gallery-right{min-height:220px}
+    .spots-text h2{writing-mode:horizontal-tb;height:auto}
+  }
+  @media (max-width: 640px){
+    .container{width:min(var(--container),calc(100% - 24px))}
+    .hero{padding-top:18px}
+    .people-row,.mag-people,.spot-grid,.activity-row,.mag-grid{grid-template-columns:1fr}
+    .person{width:86px}
+    .intro h2{font-size:28px}
+    .photo-cluster{min-height:300px}
+    .split-photo,.split-photo.left{height:260px}
+    .info-item{grid-template-columns:1fr;gap:8px}
+  }
+</style>
+<style id="fxa-css">html.fxa-on .fxa_pre{opacity:0;transition:opacity var(--fxa-dur,.8s) ease,transform var(--fxa-dur,.8s) ease,filter var(--fxa-dur,.8s) ease,clip-path var(--fxa-dur,.8s) ease}html.fxa-on .fxa_pre.fxa_y{transform:translateY(var(--fxa-dist,28px))}html.fxa-on .fxa_pre.fxa_xl{transform:translateX(calc(-1*var(--fxa-dist,48px)))}html.fxa-on .fxa_pre.fxa_xr{transform:translateX(var(--fxa-dist,48px))}html.fxa-on .fxa_pre.fxa_s{transform:scale(var(--fxa-scale,.86))}html.fxa-on .fxa_pre.fxa_bl{filter:blur(var(--fxa-blur,14px))}html.fxa-on .fxa_pre.fxa_ry{transform:perspective(800px) rotateY(var(--fxa-deg,90deg))}html.fxa-on .fxa_pre.fxa_clip{transform:translateY(var(--fxa-dist,40px))}html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}.fxa_ch{display:inline-block}html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,16px));transition:opacity .5s ease,transform .5s ease}html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,45ms))}html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}@keyframes fxa_glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}@keyframes fxa_wave{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,10px)))}}.fxa_lp_pulse{animation:fxa_pulse var(--fxa-dur,1.4s) ease-in-out infinite}.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}</style></head>
+<body style="">
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="#" class="logo hero-anim" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <span class="logo-mark"></span>
+      <span>
+        LINKWORKS
+        <small>B-TYPE SUPPORT</small>
+      </span>
+    </a>
+    <nav class="nav hero-anim" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <a href="#about">私たちについて</a>
+      <a href="#work">できること</a>
+      <a href="#place">事業所案内</a>
+      <a href="#story">日々の様子</a>
+      <a href="#news">お知らせ</a>
+      <a href="#contact" class="nav-cta">見学予約</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero hero-ready imp" data-cebt="" data-cesx="1.0997800110000004" data-cesy="1.0997800110000004" data-cetx="26" data-cety="38" style="transform-origin: center center !important; transform: translate(26px, 38px) rotate(0deg) scale(1.09978, 1.09978) !important; transition: none !important; min-height: 988px !important; animation: auto ease 0s 1 normal none running none !important;">
+    <div class="hero-line"></div>
+    <div class="deco-paper paper1" style="clip-path: none !important;"></div>
+    <div class="deco-paper paper2" style="clip-path: none !important;"></div>
+    <div class="deco-paper paper3" style="clip-path: none !important;"></div>
+    <div class="container" data-cebt="" data-cetx="-22" data-cety="96" style="transform-origin: center center !important; transform: translate(-22px, 96px) rotate(0deg) scale(1, 1) !important; transition: none !important; cursor: move; animation: auto ease 0s 1 normal none running none !important;">
+      <div class="hero-copy hero-anim fxa_pre fxa_cpre" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="-312" data-cety="-317" style="writing-mode: horizontal-tb; --fxa-dur: 800ms; --fxa-stag: 120ms; --fxa-dist: 32px; transform-origin: center center !important; transform: translate(-312px, -317px) rotate(0deg) scale(1, 1) matrix(1, 0, 0, 1, 0, 0) !important; transition: none !important; min-height: 40px !important; animation: auto ease 0s 1 normal none running none !important;"><span class="fxa_ch" style="display: inline-block; --i: 0;">楽</span><span class="fxa_ch" style="display: inline-block; --i: 1;">し</span><span class="fxa_ch" style="display: inline-block; --i: 2;">く</span><span class="fxa_ch" style="display: inline-block; --i: 3;">働</span><span class="fxa_ch" style="display: inline-block; --i: 4;">け</span><span class="fxa_ch" style="display: inline-block; --i: 5;">る</span><span class="fxa_ch" style="display: inline-block; --i: 6;">毎</span><span class="fxa_ch" style="display: inline-block; --i: 7;">日</span><span class="fxa_ch" style="display: inline-block; --i: 8;">を</span><span class="fxa_ch" style="display: inline-block; --i: 9;">。</span></div>
+      <div class="hero-grid" style="">
+        <div class="people-row hero-anim" style="">
+          <div class="person">
+            <div class="head yellow" data-cebt="" data-cetx="-29" data-cety="-40" style="transform-origin: center center !important; transform: translate(-29px, -40px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;"></div>
+            <div class="body fxa_pre fxa_xl" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_7d4bd13c0b.png&quot;); cursor: move; transform-origin: center center !important; translate: -6px -245px !important; rotate: 0deg !important; scale: 2.14359 !important; --fxa-dur: 800ms; --fxa-dist: 48px;" data-cebt="" data-cetx="-6" data-cety="-245" data-cesx="2.1435888100000016" data-cesy="2.1435888100000016"></div>
+          </div>
+          <div class="person">
+            <div class="head blue" data-cebt="" data-cetx="159" data-cety="-196" style="transform-origin: center center !important; transform: translate(159px, -196px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;"></div>
+            <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_3a159df441.jpg&quot;); transform-origin: center center !important; transform: translate(35px, -239px) rotate(0deg) scale(1.94794, 1.94794) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;" data-cebt="" data-cetx="35" data-cety="-239" data-cesx="1.9479377300752332" data-cesy="1.9479377300752332"></div>
+          </div>
+          <div class="person">
+            <div class="head gray" data-cebt="" data-cetx="-1" data-cety="-28" style="transform-origin: center center !important; transform: translate(-1px, -28px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;"></div>
+            <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_fcafceed40.png&quot;); transform-origin: center center !important; transition: none !important; transform: translate(56px, -237px) rotate(0deg) scale(1.94716, 1.94716) !important; animation: auto ease 0s 1 normal none running none !important;" data-cebt="" data-cesx="1.9471586718516762" data-cesy="1.9471586718516762" data-cetx="56" data-cety="-237"></div>
+          </div>
+          <div class="person">
+            <div class="head yellow"></div>
+            <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_c01c91624c.png&quot;); clip-path: none !important;"></div>
+          </div>
+          <div class="person">
+            <div class="head blue"></div>
+            <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_80cda69a7a.png&quot;); clip-path: none !important;"></div>
+          </div>
+          <div class="person">
+            <div class="head yellow"></div>
+            <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_d8b0898129.png&quot;); clip-path: none !important;"></div>
+          </div>
+        </div>
+
+        <span class="bubble yellow b1"></span>
+        <span class="bubble blue b2"></span>
+        <span class="bubble gray b3"></span>
+        <span class="bubble yellow b4"></span>
+        <span class="bubble blue b5"></span>
+        <span class="bubble yellow b6"></span>
+        <span class="bubble yellow b7"></span>
+        <span class="bubble blue b8"></span>
+
+        <div class="note-box hero-anim" style="">
+          <div class="note" data-cebt="" data-cetx="-47" data-cety="-90" style="transform-origin: center center !important; transform: translate(-47px, -90px) rotate(0deg) scale(1, 1) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">
+            〒980-0000 仙台市青葉区中央1-0-0<br>
+            就労継続支援B型事業所 LinkWorks
+          </div>
+          <div class="cta-note" data-cebt="matrix(1, 0, 0, 1, 0, -2)" data-cetx="1" data-cety="-97" style="transform-origin: center center !important; transform: translate(1px, -97px) rotate(0deg) scale(1, 1) matrix(1, 0, 0, 1, 0, -2) !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important;">
+            小さな一歩から、安心して。<br>
+            見学・体験はいつでも受付中です。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      /* ★ 上書き：セクション全体の余白と雰囲気 */
+      section.imp.hero {
+        padding: 56px 0 80px !important;
+        background: linear-gradient(180deg, #f9fafc 0%, #ffffff 100%) !important;
+        position: relative;
+      }
+      /* 旧ライン・ペーパーを完全非表示 */
+      section.imp.hero .hero-line,
+      section.imp.hero .deco-paper {
+        display: none !important;
+      }
+      /* ヒーローグリッドの再定義 */
+      section.imp.hero .hero-grid {
+        min-height: auto;
+        padding-top: 30px;
+        position: relative;
+      }
+      /* メインコピー：横書き・左寄せ・大きなタイポグラフィ */
+      section.imp.hero .hero-copy {
+        position: relative !important;
+        right: auto !important;
+        top: auto !important;
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+        font-family: var(--sans);
+        font-size: clamp(38px, 7vw, 60px) !important;
+        line-height: 1.25 !important;
+        letter-spacing: -0.01em !important;
+        color: #1a1a1a;
+        margin-bottom: 36px;
+        font-weight: 500;
+        z-index: 5;
+        text-shadow: none;
+        width: 100%;
+        max-width: 600px;
+      }
+      /* 3枚のみ表示 */
+      section.imp.hero .people-row {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 40px 28px !important;
+        padding-right: 0 !important;
+        align-items: start !important;
+        justify-items: center;
+        max-width: 780px;
+        margin: 0 auto;
+      }
+      section.imp.hero .person:nth-child(n+4) {
+        display: none !important;
+      }
+      /* カードサイズを大きく */
+      section.imp.hero .person {
+        width: 170px !important;
+        animation: none !important;
+        transition: transform 0.3s ease;
+      }
+      section.imp.hero .person:hover {
+        transform: translateY(-8px);
+      }
+      section.imp.hero .person .head {
+        width: 42px !important;
+        height: 42px !important;
+        margin-bottom: -5px;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        /* アクセントカラーに統一（彩度低め） */
+      }
+      section.imp.hero .person .head.yellow {
+        background: #c8b88a !important;
+      }
+      section.imp.hero .person .head.blue {
+        background: #8a9da8 !important;
+      }
+      section.imp.hero .person .head.gray {
+        background: #a3a3a3 !important;
+      }
+      section.imp.hero .person .body {
+        width: 120px !important;
+        height: 148px !important;
+        border-radius: 28px 28px 24px 24px !important;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04) !important;
+        background-size: cover !important;
+        background-position: center !important;
+        clip-path: none !important;
+        border: 1px solid rgba(0,0,0,0.04) !important;
+        transition: box-shadow 0.3s ease;
+      }
+      section.imp.hero .person:hover .body {
+        box-shadow: 0 18px 36px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06) !important;
+      }
+      /* 泡（バブル）を控えめに2つだけ残す */
+      section.imp.hero .bubble {
+        display: none !important;
+      }
+      section.imp.hero .bubble.b1,
+      section.imp.hero .bubble.b7 {
+        display: block !important;
+        width: 22px !important;
+        height: 22px !important;
+        background: #c8b88a !important;
+        opacity: 0.5;
+        animation: none !important;
+        border-radius: 50%;
+      }
+      section.imp.hero .bubble.b1 {
+        left: 6%;
+        top: 80px;
+      }
+      section.imp.hero .bubble.b7 {
+        left: 72%;
+        top: 240px;
+        background: #8a9da8 !important;
+      }
+      /* 下部ノートエリア */
+      section.imp.hero .note-box {
+        margin-top: 50px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 32px;
+        align-items: center;
+        text-align: center;
+      }
+      section.imp.hero .note {
+        font-family: var(--sans);
+        font-size: 13px !important;
+        letter-spacing: 0.06em;
+        color: #4a4a4a;
+        line-height: 1.8;
+        background: rgba(255,255,255,0.7);
+        padding: 14px 22px;
+        border-radius: 16px;
+        backdrop-filter: blur(4px);
+      }
+      section.imp.hero .cta-note {
+        background: #f0ede0 !important;
+        color: #2c2c2c;
+        font-family: var(--sans);
+        font-size: 14px !important;
+        letter-spacing: 0.05em;
+        line-height: 1.7;
+        padding: 18px 26px !important;
+        border-radius: 20px !important;
+        max-width: 300px !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.04);
+      }
+      section.imp.hero .cta-note:hover {
+        background: #e6e1cf !important;
+        box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+      }
+      /* レスポンシブ調整 */
+      @media (max-width: 768px) {
+        section.imp.hero .people-row {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 32px 20px !important;
+        }
+        section.imp.hero .person:nth-child(3) {
+          display: none !important;
+        }
+        section.imp.hero .person {
+          width: 140px !important;
+        }
+        section.imp.hero .person .body {
+          width: 100px !important;
+          height: 124px !important;
+        }
+        section.imp.hero .hero-copy {
+          font-size: 36px !important;
+        }
+      }
+    </style>
+
+    <style>
+      /* ★最優先：100VHセクション化 */
+      section.imp.hero {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+      }
+      section.imp.hero .container {
+        width: 100% !important;
+        max-width: 1120px !important;
+        margin: 0 auto !important;
+        padding: 4vh 40px !important;
+        transform: none !important;
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        height: auto !important;
+        box-sizing: border-box !important;
+      }
+      /* インラインスタイルのリセット（コンテナと内部要素） */
+      section.imp.hero .container[style] {
+        transform: none !important;
+      }
+      section.imp.hero .hero-copy[style] {
+        transform: none !important;
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        writing-mode: horizontal-tb !important;
+      }
+      section.imp.hero .person .head[style],
+      section.imp.hero .person .body[style] {
+        transform: none !important;
+      }
+      section.imp.hero .note[style],
+      section.imp.hero .cta-note[style] {
+        transform: none !important;
+      }
+      /* グリッド全体の高さ調整 */
+      section.imp.hero .hero-grid {
+        width: 100% !important;
+        max-width: 900px !important;
+        margin: 0 auto !important;
+        padding-top: 2vh !important;
+      }
+      section.imp.hero .hero-copy {
+        text-align: center !important;
+        margin: 0 auto 4vh !important;
+        max-width: 700px !important;
+      }
+      section.imp.hero .note-box {
+        margin-top: 5vh !important;
+      }
+      /* バブル位置微調整 */
+      section.imp.hero .bubble.b1 {
+        top: 15% !important;
+      }
+      section.imp.hero .bubble.b7 {
+        top: 55% !important;
+      }
+    </style>
+  </section>
+
+  <section class="section intro" id="about" style="min-height: 602px !important;">
+    <div class="container intro-wrap">
+      <div class="photo-cluster reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="photo-main hover-lift">
+          <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="面談風景" width="640" height="580" onerror="this.style.display='none'">
+        </div>
+        <div class="photo-sub hover-lift">
+          <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="コーヒー" width="320" height="320" onerror="this.style.display='none'">
+        </div>
+        <div class="photo-tag hover-lift">
+          <img src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="鳥のイラスト" width="120" height="160" onerror="this.style.display='none'">
+        </div>
+        <span class="bubble yellow" style="left:2%;top:64%;"></span>
+        <span class="bubble blue" style="right:0;bottom:8%;"></span>
+      </div>
+      <div class="reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="eyebrow">ABOUT LINKWORKS</div>
+        <h2>障がいのある方が、<br>無理なく通い、続けられる。<br>それが LinkWorks です。</h2>
+        <p>
+          軽作業やPC作業、手しごとを通して、その人のペースに合わせた「働く練習」を支えます。
+          体調や気持ちの波を尊重しながら、相談しやすい雰囲気と、静かで清潔な作業環境を整えています。
+        </p>
+        <a href="#contact" class="btn">FOLLOW US / 見学予約</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="place" style="cursor: move; min-height: 662px !important;">
+    <div class="container spots">
+      <div class="spots-text reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <h2>事業所案内</h2>
+        <p>
+          明るい作業室、落ち着いて話せる相談スペース、
+          毎日通うことが少し楽しみになる居場所づくりを大切にしています。
+        </p>
+        <a href="#" class="btn small">詳しく見る</a>
+      </div>
+      <div class="spots-board reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="spot-grid">
+          <div class="spot-card hover-lift">
+            <div class="spot-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="事業所入口" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <span>玄関・受付</span>
+          </div>
+          <div class="spot-card hover-lift">
+            <div class="spot-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" alt="オフィス空間" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <span>相談スペース</span>
+          </div>
+          <div class="spot-card hover-lift">
+            <div class="spot-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_07d8e0124b.png" alt="スタッフ" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <span>サービス管理責任者</span>
+          </div>
+          <div class="spot-card hover-lift">
+            <div class="spot-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_eaa92077a3.png" alt="整理された作業場" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <span>作業室</span>
+          </div>
+          <div class="spot-card hover-lift">
+            <div class="spot-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_9c262ef683.png" alt="ミーティングスペース" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <span>休憩コーナー</span>
+          </div>
+          <div class="spot-card hover-lift">
+            <div class="spot-thumb">
+              <img src="https://picsum.photos/seed/linkworksbuilding/160/160" alt="外観" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+            <span>仙台駅から徒歩8分</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="work" style="min-height: 1004px !important;">
+    <div class="container">
+      <div class="feature-ribbons">
+        <div class="feature-card reveal hover-lift is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="tiny">WORK MENU / 01</div>
+          <h3>軽作業・組み立て</h3>
+          <p>封入、箱づくり、検品、ピッキングなど、集中して取り組める仕事を用意しています。</p>
+        </div>
+        <div class="feature-card reveal hover-lift is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="tiny">WORK MENU / 02</div>
+          <h3>PC入力・事務補助</h3>
+          <p>タイピングやデータ入力、簡単な画像整理など、静かな環境で学びながら進められます。</p>
+        </div>
+      </div>
+
+      <div class="gallery-panels reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="gallery-left">
+          <div class="plaque hover-lift">
+            <h3>家しごとのこと</h3>
+            <small>LINKWORKS B-TYPE SUPPORT &amp; GALLERY</small>
+          </div>
+        </div>
+        <div class="gallery-right">
+          <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="作業風景" width="900" height="420" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section split imp" data-cebt="" data-cetx="0" data-cety="0" style="transform-origin: center center !important; transform: translate(0px, 0px) rotate(0deg) scale(1, 1) !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important;">
+    <style>
+        section.imp.split::before {
+            display: none !important;
+        }
+    </style>
+    <div class="container split-wrap">
+      <div class="split-photo left reveal hover-lift is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <img src="http://127.0.0.1:5000/uploads/up_033afbf0bd.jpg" alt="梱包作業" width="520" height="420" onerror="this.style.display='none'">
+        <div class="mini-cut">
+          <img src="http://127.0.0.1:5000/uploads/up_78c6a0d3e7.jpg" alt="手芸小物" width="72" height="92" onerror="this.style.display='none'">
+        </div>
+      </div>
+      <div class="split-photo reveal hover-lift is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <img src="http://127.0.0.1:5000/uploads/up_034d4c10b7.png" alt="スタッフ" width="560" height="560" onerror="this.style.display='none'" class="" style="cursor: move;">
+      </div>
+    </div>
+    <span class="bubble yellow" style="left:6%;bottom:28px;"></span>
+    <span class="bubble yellow" style="right:12%;top:110px;"></span>
+    <span class="bubble yellow" style="right:6%;bottom:64px;"></span>
+  </section>
+
+  <section class="section" id="story">
+    <div class="container">
+      <div class="journal-intro">
+        <div class="reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <h2>YELLOW ならぬ、<br>LINKWORKS の日々。</h2>
+          <p>
+            その日の体調に合わせた作業のこと、スタッフとの面談、昼休みの過ごし方、
+            新しくできるようになったこと。日常の小さな変化を、やさしい目線で紹介しています。
+          </p>
+        </div>
+        <div class="scribble reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="activity-board reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="slider-arrow in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">→</div>
+        <div class="activity-row">
+          <article class="activity-card hover-lift">
+            <div class="activity-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_488f6688b0.jpg" alt="箱づくり" width="260" height="220" onerror="this.style.display='none'">
+            </div>
+            <h3>箱づくりの基本を練習</h3>
+            <p>手順を一つずつ確認しながら、丁寧に組み立てる作業に取り組みました。</p>
+          </article>
+          <article class="activity-card hover-lift">
+            <div class="activity-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_06aa20751a.png" alt="相談" width="260" height="220" onerror="this.style.display='none'">
+            </div>
+            <h3>週1回の面談サポート</h3>
+            <p>困りごとや目標を整理し、無理のない通所ペースを一緒に考えます。</p>
+          </article>
+          <article class="activity-card hover-lift">
+            <div class="activity-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="PC作業" width="260" height="220" onerror="this.style.display='none'">
+            </div>
+            <h3>PC作業にも挑戦</h3>
+            <p>入力やチェック作業など、静かな席で集中しやすい仕事もあります。</p>
+          </article>
+          <article class="activity-card hover-lift">
+            <div class="activity-thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_35cc355ec7.webp" alt="休憩時間" width="260" height="220" onerror="this.style.display='none'">
+            </div>
+            <h3>休憩時間も大切に</h3>
+            <p>作業の合間には、温かい飲み物でひと息つける時間を設けています。</p>
+          </article>
+        </div>
+      </div>
+      <div class="center-btn reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a href="#" class="btn">暮らしの記事へ</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section magazine">
+    <div class="wave-top" style="clip-path: none !important;"></div>
+    <div class="wave-bottom" style="clip-path: none !important;"></div>
+    <div class="container">
+      <div class="magazine-head reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="flag">LINKWORKS LIFE MAGAZINE</div>
+      </div>
+
+      <div class="mag-people reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="person">
+          <div class="head yellow"></div>
+          <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_785a85c0f8.png&quot;); clip-path: none !important;"></div>
+        </div>
+        <div class="person">
+          <div class="head gray"></div>
+          <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_b1cc387964.png&quot;); clip-path: none !important;"></div>
+        </div>
+        <div class="person">
+          <div class="head blue"></div>
+          <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_9716d3c39a.webp&quot;); clip-path: none !important;"></div>
+        </div>
+        <div class="person">
+          <div class="head yellow"></div>
+          <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_d9912f4aae.png&quot;); clip-path: none !important;"></div>
+        </div>
+        <div class="person">
+          <div class="head gray"></div>
+          <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_f04018458e.png&quot;); clip-path: none !important;"></div>
+        </div>
+        <div class="person">
+          <div class="head yellow"></div>
+          <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_fee1470774.png&quot;); clip-path: none !important;"></div>
+        </div>
+      </div>
+
+      <div class="mag-grid">
+        <article class="mag-card reveal hover-lift in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="mag-thumb">
+            <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="イベント写真" width="360" height="420" onerror="this.style.display='none'">
+          </div>
+          <h3>見学会を開きました。</h3>
+          <p>地域の方やご家族に、普段の雰囲気を見ていただく一日になりました。</p>
+          <time datetime="2026-06-20">2026.06.20</time>
+        </article>
+        <article class="mag-card reveal hover-lift in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="mag-thumb">
+            <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="スタッフ集合" width="360" height="420" onerror="this.style.display='none'">
+          </div>
+          <h3>スタッフ紹介を更新。</h3>
+          <p>相談しやすい空気づくりを大切にする、LinkWorks の支援チームを紹介します。</p>
+          <time datetime="2026-05-30">2026.05.30</time>
+        </article>
+      </div>
+
+      <div class="mag-btn reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a href="#" class="btn dark">くわしく見る</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section info" id="news">
+    <div class="container">
+      <div class="reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <h2>INFORMATION</h2>
+      </div>
+      <div class="info-list">
+        <div class="info-item reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>2026.06.15</div>
+          <div><span class="tag">お知らせ</span></div>
+          <div>7月の見学・体験利用の日程を公開しました。</div>
+        </div>
+        <div class="info-item reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>2026.06.02</div>
+          <div><span class="tag">イベント</span></div>
+          <div>ご家族向け説明会「はじめてのB型利用」を開催します。</div>
+        </div>
+        <div class="info-item reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>2026.05.20</div>
+          <div><span class="tag">作業紹介</span></div>
+          <div>PC入力・封入作業の一日の流れを追加しました。</div>
+        </div>
+        <div class="info-item reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>2026.04.30</div>
+          <div><span class="tag">採用情報</span></div>
+          <div>生活支援員・職業指導員の募集を開始しました。</div>
+        </div>
+        <div class="info-item reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>2026.03.24</div>
+          <div><span class="tag">メディア</span></div>
+          <div>地域情報誌に LinkWorks の取り組みが掲載されました。</div>
+        </div>
+      </div>
+      <div class="info-more reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a href="#" class="btn small">もっと見る</a>
+      </div>
+    </div>
+
+    <div class="footer-ornament">
+      <div class="mini-people">
+        <div class="person">
+          <div class="head blue"></div>
+          <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_3475673acc.png&quot;); clip-path: none !important;"></div>
+        </div>
+        <div class="person">
+          <div class="head yellow"></div>
+          <div class="body" style="background-image: url(&quot;http://127.0.0.1:5000/uploads/up_9716d3c39a.webp&quot;); clip-path: none !important;"></div>
+        </div>
+      </div>
+      <div class="seal">LINKWORKS<br>MAGAZINE</div>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="container reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+    <div class="contact-en">お気軽なご相談・ご見学はこちらから</div>
+    <div class="contact-ja">お問い合わせ</div>
+    <a href="#" class="btn dark">CONTACT</a>
+  </div>
+  <div class="vtext">就労継続支援B型 LinkWorks / Sendai</div>
+</footer>
+
+<script>
+  window.addEventListener('load', function(){
+    document.querySelectorAll('.hero-ready').forEach(function(el){
+      el.classList.add('hero-ready');
+    });
+  });
+
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach((entry)=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+
+  document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const id=a.getAttribute('href');
+      const target=document.querySelector(id);
+      if(target){
+        e.preventDefault();
+        target.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    });
+  });
+</script>
+
+
+
+
+
+
+
+<div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div>
+
+
+
+
+<script id="fxa-run">(function(){var d=document,h=d.documentElement;if(!d.querySelector(".fxa_pre")){return;}h.classList.add("fxa-on");function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in)"));}if(!("IntersectionObserver" in window)){all().forEach(function(el){el.classList.add("fxa_in");});return;}var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){t.classList.add("fxa_in");});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",obs);else obs();})();</script>
+<div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div><div></div><div class="glasp-extension-toaster" style="display: block; width: 320px; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; top: 40px; right: 24px; z-index: 9999;"></div></body><div class="glasp-extension" style="display: block; width: unset; margin: unset; padding: unset; border: unset; border-radius: unset; outline: unset; background-color: unset; box-shadow: unset; position: fixed; bottom: 16px; right: 16px; z-index: 9999;"><div class="glasp-extension" style="font-family: inherit;"></div></div></html>

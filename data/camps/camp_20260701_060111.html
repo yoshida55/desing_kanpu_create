@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ヨミビト | 本好きのためのオンライン読書コミュニティ</title>
+<style>
+:root{
+  --blue:#1a3fd6;
+  --blue-deep:#142e9e;
+  --blue-light:#eaf0ff;
+  --blue-soft:#d6e1ff;
+  --ink:#1f2a44;
+  --paper:#ffffff;
+  --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif;
+  color:var(--ink);
+  background:var(--paper);
+  line-height:1.9;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+
+/* reveal */
+.js .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease;}
+.js .reveal.in{opacity:1;transform:none;}
+.js .stagger>*{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease;}
+.js .stagger.in>*{opacity:1;transform:none;}
+.js .stagger.in>*:nth-child(2){transition-delay:.12s;}
+.js .stagger.in>*:nth-child(3){transition-delay:.24s;}
+.js .stagger.in>*:nth-child(4){transition-delay:.36s;}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+/* header */
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--blue-light);
+}
+.nav{display:flex;align-items:center;gap:28px;height:62px;}
+.logo{font-weight:800;font-size:1.2rem;color:var(--blue);letter-spacing:.04em;}
+.nav ul{display:flex;gap:22px;list-style:none;margin-left:auto;font-size:.85rem;font-weight:600;}
+.nav ul a:hover{color:var(--blue);}
+.nav .cta{background:var(--blue);color:#fff;padding:8px 18px;border-radius:999px;font-weight:700;font-size:.82rem;transition:.25s;}
+.nav .cta:hover{background:var(--blue-deep);transform:translateY(-2px);}
+@media(max-width:860px){.nav ul{display:none;}}
+
+/* hero */
+.hero{
+  background:linear-gradient(180deg,var(--blue) 0%,var(--blue) 55%,#2f55e6 100%);
+  color:#fff;position:relative;overflow:hidden;
+}
+.hero-inner{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;padding:60px 0 80px;}
+.hero h1{
+  font-size:3.4rem;font-weight:800;line-height:1.3;letter-spacing:.05em;
+  writing-mode:vertical-rl;text-orientation:mixed;height:340px;
+  margin-left:auto;
+}
+.hero-vis{position:relative;}
+.hero-vis img{width:100%;aspect-ratio:5/4;object-fit:cover;border-radius:var(--radius);background:var(--blue-deep);box-shadow:0 24px 50px rgba(0,0,0,.25);}
+.hero-sub{margin-top:24px;font-size:.95rem;opacity:.95;}
+.hero-line{position:absolute;bottom:24px;left:24px;font-size:.7rem;letter-spacing:.3em;opacity:.6;writing-mode:vertical-rl;}
+.js .hero h1{opacity:0;transform:translateX(30px);animation:heroIn 1s .2s ease forwards;}
+.js .hero-vis{opacity:0;transform:scale(1.04);animation:heroVis 1.1s .35s ease forwards;}
+@keyframes heroIn{to{opacity:1;transform:none;}}
+@keyframes heroVis{to{opacity:1;transform:none;}}
+.float-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#fff;color:var(--blue);font-weight:700;
+  padding:14px 26px;border-radius:999px;margin-top:26px;font-size:.9rem;
+  transition:.25s;
+}
+.float-btn:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(0,0,0,.2);}
+@media(max-width:860px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hero h1{writing-mode:horizontal-tb;height:auto;font-size:2.4rem;margin:0;}
+}
+
+/* section common */
+section{padding:90px 0;}
+.label{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;}
+.label .en{font-size:1.7rem;font-weight:800;color:var(--blue);letter-spacing:.04em;}
+.label .ja{font-size:.78rem;color:#8b95ad;letter-spacing:.2em;}
+
+/* about */
+.about{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:start;}
+.about .big{
+  writing-mode:vertical-rl;font-size:2.2rem;font-weight:800;color:var(--blue);
+  letter-spacing:.18em;line-height:1.5;height:360px;
+}
+.about p{margin-bottom:1.4rem;max-width:560px;}
+.text-btn{display:inline-flex;align-items:center;gap:8px;color:var(--blue);font-weight:700;border:1.5px solid var(--blue);padding:12px 26px;border-radius:999px;transition:.25s;}
+.text-btn:hover{background:var(--blue);color:#fff;}
+@media(max-width:860px){.about{grid-template-columns:1fr;}.about .big{writing-mode:horizontal-tb;height:auto;font-size:1.8rem;}}
+
+/* banner cta */
+.banner{
+  background:var(--blue-light);border-radius:24px;padding:44px;
+  display:grid;grid-template-columns:1.4fr .6fr;gap:30px;align-items:center;
+}
+.banner .tag{font-size:.7rem;color:var(--blue);font-weight:700;letter-spacing:.1em;}
+.banner h3{font-size:1.7rem;font-weight:800;margin:6px 0 18px;}
+.banner .row{display:flex;gap:14px;flex-wrap:wrap;}
+.banner .pill{background:#fff;border-radius:12px;padding:14px 20px;font-size:.85rem;font-weight:600;}
+.banner-img img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:16px;background:var(--blue-soft);}
+@media(max-width:760px){.banner{grid-template-columns:1fr;}}
+
+/* service */
+.service-head{display:flex;justify-content:space-between;align-items:flex-end;}
+.service-head .right{font-size:1.9rem;font-weight:800;color:var(--blue);text-align:right;letter-spacing:.04em;line-height:1.4;}
+.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:46px;}
+.sv-card{transition:.3s;}
+.sv-card img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:14px;background:var(--blue-light);margin-bottom:18px;}
+.sv-card h4{font-size:1.1rem;font-weight:800;color:var(--blue);margin-bottom:8px;}
+.sv-card p{font-size:.86rem;color:#56607c;}
+.sv-card:hover{transform:translateY(-6px);}
+@media(max-width:760px){.service-grid{grid-template-columns:1fr;}.service-head{flex-direction:column;align-items:flex-start;gap:8px;}.service-head .right{text-align:left;}}
+
+/* whatis (big text band) */
+.whatis{background:var(--blue);color:#fff;overflow:hidden;}
+.whatis .scroller{font-size:5rem;font-weight:800;white-space:nowrap;opacity:.18;letter-spacing:.02em;animation:slidetext 22s linear infinite;}
+@keyframes slidetext{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.whatis-box{background:#fff;color:var(--ink);border-radius:24px;padding:46px;margin-top:-30px;position:relative;z-index:2;}
+.whatis-box .center{text-align:center;max-width:680px;margin:0 auto 38px;}
+.whatis-box .center .ttl{font-weight:800;color:var(--blue);font-size:1.2rem;margin-bottom:14px;}
+.whatis-box .center p{font-size:.9rem;color:#56607c;}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.feat .item{background:var(--blue-light);border-radius:16px;padding:30px;}
+.feat .item .en{font-size:.7rem;color:var(--blue);letter-spacing:.1em;font-weight:700;}
+.feat .item h4{font-size:1.15rem;font-weight:800;margin:6px 0 12px;}
+.feat .item p{font-size:.85rem;color:#56607c;margin-bottom:18px;}
+.feat .item img{width:100%;aspect-ratio:5/3;object-fit:cover;border-radius:12px;background:var(--blue-soft);}
+@media(max-width:760px){.feat{grid-template-columns:1fr;}.whatis .scroller{font-size:2.6rem;}}
+
+/* flow */
+.flow{display:grid;grid-template-columns:.6fr 1.4fr;gap:40px;align-items:start;}
+.flow .lead{font-size:1.7rem;font-weight:800;color:var(--blue);line-height:1.6;letter-spacing:.06em;}
+.steps{display:flex;flex-direction:column;gap:30px;}
+.step{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;}
+.step .ic{width:90px;height:90px;border-radius:18px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:2rem;}
+.step h4{font-size:1.05rem;font-weight:800;}
+.step .no{font-size:.72rem;color:var(--blue);font-weight:700;letter-spacing:.1em;}
+.step p{font-size:.85rem;color:#56607c;}
+@media(max-width:760px){.flow{grid-template-columns:1fr;}}
+
+/* plan */
+.plan{background:var(--blue-light);}
+.plan .head{display:grid;grid-template-columns:.6fr 1.4fr;gap:40px;align-items:center;}
+.plan .lead{font-size:1.9rem;font-weight:800;color:var(--blue);line-height:1.5;}
+.plan-card{background:#fff;border-radius:20px;padding:36px;display:grid;grid-template-columns:1fr 1fr;gap:30px;}
+.plan-card .price .tag{font-size:.75rem;color:#8b95ad;}
+.plan-card .price .amount{font-size:2.6rem;font-weight:800;color:var(--blue);}
+.plan-card .price .amount small{font-size:.9rem;}
+.plan-card .price .note{font-size:.75rem;color:#8b95ad;}
+.plan-card ul{list-style:none;font-size:.88rem;}
+.plan-card ul li{padding:8px 0;border-bottom:1px dashed var(--blue-soft);}
+.plan-card ul li:before{content:"📖 ";}
+.sched{background:#fff;border-radius:20px;padding:36px;margin-top:30px;}
+.sched h4{font-size:1rem;font-weight:800;margin-bottom:6px;}
+.sched .sm{font-size:.78rem;color:#8b95ad;}
+.sched-row{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;padding:22px 0;border-top:1px solid var(--blue-light);}
+.sched-row .badge{font-size:.7rem;background:var(--blue-light);color:var(--blue);padding:4px 12px;border-radius:999px;font-weight:700;}
+.sched-row p{font-size:.84rem;color:#56607c;}
+@media(max-width:760px){.plan .head{grid-template-columns:1fr;}.plan-card{grid-template-columns:1fr;}}
+
+/* faq */
+.faq-list{margin-top:30px;border-top:1px solid var(--blue-light);}
+.faq-item{border-bottom:1px solid var(--blue-light);}
+.faq-q{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 4px;cursor:pointer;font-weight:700;font-size:.95rem;}
+.faq-q .mk{color:var(--blue);font-size:1.4rem;transition:.3s;}
+.faq-item.open .mk{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+.faq-a p{padding:0 4px 22px;font-size:.85rem;color:#56607c;}
+.faq-more{margin-top:30px;}
+
+/* voice */
+.voice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:46px;}
+.vc{transition:.3s;}
+.vc img{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--blue-soft);margin-bottom:14px;}
+.vc .star{color:#ffb020;font-size:.8rem;}
+.vc p{font-size:.82rem;color:#56607c;margin:6px 0;}
+.vc .name{font-size:.75rem;color:#8b95ad;font-weight:700;}
+.vc:hover{transform:translateY(-5px);}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:40px;}
+.dots span{width:9px;height:9px;border-radius:50%;background:var(--blue-soft);}
+.dots span.on{background:var(--blue);}
+@media(max-width:860px){.voice-grid{grid-template-columns:repeat(2,1fr);}}
+
+/* bottom cta */
+.bottom-cta{background:var(--blue);color:#fff;}
+.bottom-cta .banner2{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:44px;display:grid;grid-template-columns:1.4fr .6fr;gap:30px;align-items:center;}
+.bottom-cta h3{font-size:1.7rem;font-weight:800;margin-bottom:18px;}
+.bottom-cta .banner2 img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:16px;background:var(--blue-deep);}
+.follow{text-align:center;padding-top:70px;}
+.follow h3{font-size:2.4rem;font-weight:800;letter-spacing:.1em;}
+.follow .sns{display:flex;gap:18px;justify-content:center;margin-top:20px;}
+.follow .sns a{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;transition:.25s;}
+.follow .sns a:hover{background:#fff;color:var(--blue);transform:translateY(-3px);}
+@media(max-width:760px){.bottom-cta .banner2{grid-template-columns:1fr;}}
+
+/* footer */
+footer{background:#0e2096;color:#fff;}
+.foot-top{padding:60px 0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px;}
+.foot-top .brand{font-size:1.6rem;font-weight:800;}
+.foot-top ul{list-style:none;font-size:.82rem;line-height:2.2;opacity:.85;}
+.foot-big{font-size:clamp(2.5rem,9vw,7rem);font-weight:800;text-align:center;letter-spacing:.04em;padding:20px 0 40px;opacity:.9;line-height:1;}
+.copy{text-align:center;font-size:.7rem;opacity:.6;padding-bottom:30px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo">📚 ヨミビト</div>
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#service">特集</a></li>
+      <li><a href="#flow">参加方法</a></li>
+      <li><a href="#plan">料金</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#voice">レビュー</a></li>
+    </ul>
+    <a href="#plan" class="cta">無料で参加する</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-vis">
+      <img src="https://loremflickr.com/640/512/books,reading,library?lock=11" width="640" height="512" alt="本を読む人々">
+      <p class="hero-sub">本好きが集まる、オンライン読書コミュニティ。<br>同じ一冊を、誰かと一緒に読み進めよう。</p>
+      <a href="#plan" class="float-btn">まずは見てみる →</a>
+    </div>
+    <h1>読むたび、<br>つながる。</h1>
+  </div>
+  <span class="hero-line">YOMIBITO READING COMMUNITY</span>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="wrap about">
+    <div class="reveal">
+      <div class="label"><span class="en">About</span><span class="ja">ヨミビトとは</span></div>
+      <p>本を読むのは、ひとりの時間。<br>でも、感じたことを誰かと分かち合えたら、その一冊はもっと深くなる。</p>
+      <p>あの場面で何を思った？ この登場人物は好き？ 同じ本を読んだ仲間と語り合う時間が、読書をもっと豊かにします。</p>
+      <p>ヨミビトは、本が好きな人だけが集まる小さな読書のまち。今日もどこかで、誰かがあなたと同じページをめくっています。</p>
+      <a href="#service" class="text-btn">もっと知る →</a>
+    </div>
+    <div class="big reveal">本と、<br>人と、出会う。</div>
+  </div>
+</section>
+
+<!-- BANNER CTA -->
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="banner reveal stagger">
+      <div>
+        <span class="tag">［ Start Yomibito! ］</span>
+        <h3>ヨミビトで、読書仲間に出会う。</h3>
+        <div class="row">
+          <span class="pill">📝 簡単3分の登録</span>
+          <span class="pill">📱 LINEで気軽に参加</span>
+        </div>
+      </div>
+      <div class="banner-img"><img src="https://loremflickr.com/400/400/coffee,book?lock=12" width="400" height="400" alt="読書とコーヒー"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE -->
+<section id="service">
+  <div class="wrap">
+    <div class="service-head reveal">
+      <div>
+        <div class="label"><span class="en">Service</span><span class="ja">できること</span></div>
+      </div>
+      <div class="right">THE READING<br>COMMUNITY</div>
+    </div>
+    <div class="service-grid stagger">
+      <div class="sv-card">
+        <img src="https://loremflickr.com/360/240/bookshelf,books?lock=21" width="360" height="240" alt="新着の本">
+        <h4>毎週届く、新着の本</h4>
+        <p>編集部が選んだ話題の新刊や隠れた名作を毎週ピックアップ。次に読む一冊が、きっと見つかります。</p>
+      </div>
+      <div class="sv-card">
+        <img src="https://loremflickr.com/360/240/reading,cafe?lock=22" width="360" height="240" alt="特集">
+        <h4>テーマで深まる特集</h4>
+        <p>「旅に出たくなる本」「眠れない夜の一冊」など、季節や気分に寄り添う特集で読書の幅が広がります。</p>
+      </div>
+      <div class="sv-card">
+        <img src="https://loremflickr.com/360/240/notebook,writing?lock=23" width="360" height="240" alt="レビュー">
+        <h4>みんなのレビュー</h4>
+        <p>読んだ感想を投稿し合い、共感したり新しい視点をもらったり。あなたの言葉が誰かの一冊になります。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IS -->
+<section class="whatis">
+  <div class="wrap" style="overflow:hidden;">
+    <div class="scroller">What is YOMIBITO ?　What is YOMIBITO ?　</div>
+  </div>
+  <div class="wrap">
+    <div class="whatis-box reveal">
+      <div class="center">
+        <div class="ttl">［ コミュニティについて ］</div>
+        <p>ヨミビトは、ただ本を紹介するだけのサービスではありません。読むこと、語ること、つながること。その三つを大切にした、本好きのためのオンラインの居場所です。同じ物語を分かち合う仲間と、読書の時間を分け合ってみてください。</p>
+      </div>
+      <div class="feat stagger">
+        <div class="item">
+          <span class="en">Feature 01</span>
+          <h4>読書ログを記録する</h4>
+          <p>読んだ本、心に残った一節、その日の気分。あなたの読書の足あとをアプリにそっと残せます。</p>
+          <img src="https://loremflickr.com/400/240/journal,diary?lock=31" width="400" height="240" alt="読書ログ">
+        </div>
+        <div class="item">
+          <span class="en">Feature 02</span>
+          <h4>仲間と語り合う</h4>
+          <p>同じ本を読んだ人とコメントで交流。感想をシェアして、読書の楽しみを何倍にも広げましょう。</p>
+          <img src="https://loremflickr.com/400/240/people,book,talk?lock=32" width="400" height="240" alt="語り合う">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW -->
+<section id="flow">
+  <div class="wrap flow">
+    <div class="lead reveal">3ステップで<br>はじめられる。</div>
+    <div class="steps stagger">
+      <div class="step">
+        <div class="ic">📝</div>
+        <div>
+          <span class="no">Step 01</span>
+          <h4>無料アカウントを登録</h4>
+          <p>メールアドレスかLINEで簡単登録。好きなジャンルを選ぶだけで準備完了です。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="ic">📚</div>
+        <div>
+          <span class="no">Step 02</span>
+          <h4>気になる本・特集を選ぶ</h4>
+          <p>毎週届く新着や特集の中から、読みたい一冊を選んで読書をスタート。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="ic">💬</div>
+        <div>
+          <span class="no">Step 03</span>
+          <h4>レビューで仲間とつながる</h4>
+          <p>感想を投稿したり、他の人のレビューに共感したり。読書がもっと楽しくなります。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section id="plan" class="plan">
+  <div class="wrap">
+    <div class="head reveal">
+      <div class="lead">料金は<br>コーヒー<br>2杯分。</div>
+      <div>
+        <div class="label"><span class="en">Plan</span><span class="ja">料金プラン</span></div>
+        <div class="plan-card stagger">
+          <div class="price">
+            <span class="tag">スタンダードプラン</span>
+            <div class="amount">¥980<small>/月</small></div>
+            <span class="note">税込・いつでも解約可能</span>
+          </div>
+          <ul>
+            <li>毎週の新着・特集が読み放題</li>
+            <li>レビュー投稿・交流が無制限</li>
+            <li>読書ログ機能</li>
+            <li>限定オンライン読書会への参加</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sched reveal">
+      <h4>毎月のお届けスケジュールについて</h4>
+      <span class="sm">参加タイミングによって最初のお届け日が変わります。</span>
+      <div class="sched-row stagger">
+        <span class="badge">Schedule 01</span>
+        <p>毎週月曜の朝、その週の新着本と特集テーマが配信されます。前週の日曜23:59までに登録すると、翌週分から受け取れます。</p>
+      </div>
+      <div class="sched-row stagger">
+        <span class="badge">Schedule 02</span>
+        <p>読書会は毎月第2・第4土曜の夜に開催。参加申込はマイページからいつでも可能で、当日のリマインドもお送りします。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="label reveal"><span class="en">FAQ</span><span class="ja">よくある質問</span></div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q">月額料金以外に費用はかかりますか？<span class="mk">+</span></div>
+        <div class="faq-a"><p>基本機能はすべて月額料金内でご利用いただけます。一部の有料イベントや書籍購入は別途費用が発生する場合があります。</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">本を読むのが遅くても参加できますか？<span class="mk">+</span></div>
+        <div class="faq-a"><p>もちろんです。ヨミビトに締め切りはありません。自分のペースで読み進め、いつでもレビューを投稿できます。</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">途中で退会することはできますか？<span class="mk">+</span></div>
+        <div class="faq-a"><p>はい、マイページからいつでも解約できます。違約金などは一切かかりません。</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">読書会はオンラインだけですか？<span class="mk">+</span></div>
+        <div class="faq-a"><p>基本はオンライン開催ですが、年に数回はオフラインのイベントも企画しています。詳細は会員ページでご案内します。</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">スマホだけで利用できますか？<span class="mk">+</span></div>
+        <div class="faq-a"><p>スマホ・タブレット・PCいずれにも対応しています。アプリとブラウザどちらからでもご利用いただけます。</p></div>
+      </div>
+    </div>
+    <div class="faq-more reveal"><a href="#" class="text-btn">すべての質問を見る →</a></div>
+  </div>
+</section>
+
+<!-- VOICE -->
+<section id="voice">
+  <div class="wrap">
+    <div class="label reveal"><span class="en">Voice</span><span class="ja">参加者の声</span></div>
+    <div class="voice-grid stagger">
+      <div class="vc">
+        <img src="https://loremflickr.com/64/64/portrait,woman?lock=41" width="64" height="64" alt="利用者">
+        <div class="star">★★★★★</div>
+        <p>同じ本を読んだ人と語れるのが楽しい。読み終わったあとの余韻を分け合える幸せを知りました。</p>
+        <div class="name">— 30代・会社員</div>
+      </div>
+      <div class="vc">
+        <img src="https://loremflickr.com/64/64/portrait,man?lock=42" width="64" height="64" alt="利用者">
+        <div class="star">★★★★★</div>
+        <p>毎週の特集で、自分では選ばない本に出会えるのが新鮮。読書の幅がぐっと広がりました。</p>
+        <div class="name">— 40代・自営業</div>
+      </div>
+      <div class="vc">
+        <img src="https://loremflickr.com/64/64/portrait,person?lock=43" width="64" height="64" alt="利用者">
+        <div class="star">★★★★☆</div>
+        <p>レビューを書くようになって、読書の解像度が上がった気がします。記録が増えていくのも嬉しい。</p>
+        <div class="name">— 20代・学生</div>
+      </div>
+      <div class="vc">
+        <img src="https://loremflickr.com/64/64/portrait,smile?lock=44" width="64" height="64" alt="利用者">
+        <div class="star">★★★★★</div>
+        <p>オンライン読書会が想像以上に温かい場でした。本を通じて新しい友達ができました。</p>
+        <div class="name">— 50代・主婦</div>
+      </div>
+    </div>
+    <div class="dots"><span class="on"></span><span></span><span></span></div>
+  </div>
+</section>
+
+<!-- BOTTOM CTA -->
+<section class="bottom-cta">
+  <div class="wrap">
+    <div class="banner2 reveal stagger">
+      <div>
+        <span class="tag" style="color:#cdd9ff;font-size:.7rem;font-weight:700;letter-spacing:.1em;">［ Start Yomibito! ］</span>
+        <h3>ヨミビトで、読書仲間に出会う。</h3>
+        <a href="#plan" class="float-btn">無料で参加する →</a>
+      </div>
+      <img src="https://loremflickr.com/400/400/books,stack?lock=51" width="400" height="400" alt="積まれた本">
+    </div>
+    <div class="follow reveal">
+      <h3>Follow us</h3>
+      <p style="opacity:.85;font-size:.85rem;">SNSで本の話題を発信中。</p>
+      <div class="sns">
+        <a href="#" aria-label="X">𝕏</a>
+        <a href="#" aria-label="Instagram">📷</a>
+        <a href="#" aria-label="note">✍️</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-top">
+    <div>
+      <div class="brand">📚 ヨミビト</div>
+      <p style="font-size:.8rem;opacity:.7;margin-top:8px;">読むたび、つながる。</p>
+    </div>
+    <ul>
+      <li><a href="#about">ヨミビトとは</a></li>
+      <li><a href="#service">特集</a></li>
+      <li><a href="#plan">料金プラン</a></li>
+      <li><a href="#faq">よくある質問</a></li>
+      <li><a href="#">プライバシーポリシー</a></li>
+    </ul>
+  </div>
+  <div class="foot-big">YOMIBITO</div>
+  <div class="copy">© 2024 YOMIBITO. All rights reserved.</div>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
+  });
+},{threshold:.15});
+document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
+
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    const a=item.querySelector('.faq-a');
+    const open=item.classList.toggle('open');
+    a.style.maxHeight=open?a.scrollHeight+'px':null;
+  });
+});
+</script>
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(!els.length) return;
+    if(!('IntersectionObserver' in window)){ els.forEach(show); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+    // 最終保険：3.5秒後、まだ隠れている要素は opacity を直接1にして必ず表示する。
+    // （クラス名がClaude側と一致しなくても確実に見える＝「下のセクションが無い」を根絶）
+    setTimeout(function(){
+      els.forEach(function(e){
+        if(parseFloat(getComputedStyle(e).opacity)===0){
+          show(e); e.style.opacity='1'; e.style.transform='none';
+        }
+      });
+    }, 3500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+
+</body>
+</html>

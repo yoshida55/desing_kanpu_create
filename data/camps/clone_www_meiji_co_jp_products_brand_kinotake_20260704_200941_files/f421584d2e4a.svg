@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_レイヤー_2" data-name="レイヤー 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29.5 29.5">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #ebebeb;
+        stroke-miterlimit: 10;
+        stroke-width: .5px;
+      }
+
+      .cls-3 {
+        fill: #040000;
+      }
+    </style>
+  </defs>
+  <g id="_編集モード" data-name="編集モード">
+    <g>
+      <rect class="cls-1" x=".25" y=".25" width="29" height="29" rx="6.15" ry="6.15"/>
+      <path class="cls-3" d="M8.43,8.57c2.44,0,5.77-.12,8.17-.06,3.21.08,4.43,1.48,4.47,4.94.04,1.96,0,7.55,0,7.55h-3.48c0-4.9.02-5.71,0-7.25-.04-1.36-.43-2.01-1.47-2.13-1.11-.12-4.21-.02-4.21-.02v9.41h-3.48v-12.44Z"/>
+      <rect class="cls-2" x=".25" y=".25" width="29" height="29" rx="6.15" ry="6.15"/>
+    </g>
+  </g>
+</svg>
