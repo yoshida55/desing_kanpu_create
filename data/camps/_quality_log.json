@@ -144,5 +144,26 @@
   "sections": 7,
   "warn": true,
   "ts": 1783441268
+ },
+ {
+  "file": "camp_20260708_082651_170367.html",
+  "base_id": "a0f202c0d58744e1",
+  "anim_id": "",
+  "model": "openai:gpt-5.4",
+  "text_len": 2464,
+  "sections": 12,
+  "warn": false,
+  "ts": 1783466811
+ },
+ {
+  "file": "camp_20260708_084105_136213.html",
+  "base_id": "a0f202c0d58744e1",
+  "anim_id": "a0f202c0d58744e1",
+  "model": "openai:gpt-5.4",
+  "text_len": 1876,
+  "sections": 10,
+  "warn": true,
+  "ts": 1783467665,
+  "rating": "○"
  }
 ]

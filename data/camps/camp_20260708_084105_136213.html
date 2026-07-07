@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>東精プレシジョン株式会社 採用・会社案内</title>
+  <meta name="description" content="ステンレス薄板 t0.1mmから、試作1個・翌日出荷にも対応。東精プレシジョン株式会社の加工技術、設備、品質保証、働く人を紹介するランディングページ。">
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#221814;
+      --main:#22b573;
+      --sub:#e5ff9e;
+      --dark:#221814;
+      --tint:#f5fff8;
+      --line:rgba(34,24,20,.12);
+      --line-strong:rgba(34,24,20,.2);
+      --shadow-sm:0 12px 28px rgba(34,181,115,.10);
+      --shadow-md:0 18px 42px rgba(34,181,115,.14);
+      --radius-sm:4px;
+      --radius-pill:999px;
+      --container:1440px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --subhead:clamp(1.1rem,1.4vw,1.25rem);
+      --body:clamp(.95rem,1vw,1rem);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Noto Sans JP",sans-serif}
+    body{font-size:var(--body);line-height:2;letter-spacing:.02em;overflow-x:hidden}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(var(--container),calc(100% - 40px));margin-inline:auto}
+    .section{position:relative;min-height:100vh;padding:10vh 0;display:flex;align-items:center}
+    .section.tint{background:var(--tint)}
+    .section-grid{display:grid;gap:40px;align-items:center;width:100%}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+    .eyebrow::before{content:"";width:36px;height:1px;background:var(--ink);opacity:.4}
+    .jp-title{font-size:var(--section);line-height:1.35;letter-spacing:.04em;margin:16px 0 16px}
+    .hero-title{font-size:var(--hero);line-height:1.3;letter-spacing:.03em;margin:16px 0 24px;max-width:11em}
+    .lead,.desc,.copy p{max-width:38em}
+    .lead{font-size:1rem;color:rgba(34,24,20,.88)}
+    .desc{color:rgba(34,24,20,.82)}
+    .small{font-size:.88rem;line-height:1.9}
+    .btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:12px 22px;border-radius:var(--radius-pill);border:1px solid transparent;
+      font-weight:700;transition:.35s ease;background:var(--main);color:#fff;box-shadow:var(--shadow-sm)
+    }
+    .btn.secondary{background:#fff;color:var(--ink);border-color:var(--line)}
+    .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+    .site-header{
+      position:fixed;top:12px;left:0;right:0;z-index:50;pointer-events:none
+    }
+    .header-inner{
+      pointer-events:auto;
+      width:min(calc(var(--container) - 80px),calc(100% - 24px));margin:auto;
+      background:rgba(255,255,255,.88);backdrop-filter:blur(14px);
+      border:1px solid rgba(34,24,20,.08);border-radius:999px;
+      display:flex;align-items:center;justify-content:space-between;padding:10px 14px 10px 18px;
+      box-shadow:0 8px 20px rgba(34,24,20,.05)
+    }
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800}
+    .brand-mark{
+      width:34px;height:34px;border-radius:50%;
+      background:linear-gradient(135deg,var(--main),#7ee5bc 65%,var(--sub));
+      position:relative;overflow:hidden;border:1px solid rgba(34,24,20,.08)
+    }
+    .brand-mark::after{
+      content:"";position:absolute;inset:8px;border:2px solid rgba(255,255,255,.92);border-left-width:4px;border-radius:50%
+    }
+    .nav{display:flex;gap:22px;align-items:center;font-size:.78rem;font-weight:700}
+    .nav a{opacity:.8}
+    .nav a:hover{opacity:1}
+    .entry-pill{background:var(--main);color:#fff;padding:10px 18px;border-radius:999px;font-size:.78rem;font-weight:800}
+    .hero-wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
+    .hero-notes{
+      margin-top:32px;display:grid;gap:10px;font-size:.9rem;max-width:34em
+    }
+    .hero-note{display:flex;gap:12px;align-items:flex-start}
+    .hero-note i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--main);margin-top:.7em;flex:0 0 auto}
+    .puzzle-stage{position:relative;min-height:520px}
+    .piece{
+      position:absolute;background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;
+      box-shadow:0 8px 20px rgba(34,24,20,.04)
+    }
+    .piece::before,.piece::after{
+      content:"";position:absolute;width:56px;height:56px;border-radius:50%;background:var(--bg);border:1px solid var(--line);z-index:3
+    }
+    .piece::before{left:-28px;top:50%;transform:translateY(-50%)}
+    .piece::after{right:-28px;top:50%;transform:translateY(-50%)}
+    .piece.top{width:50%;height:220px;left:0;top:0;transform:rotate(-2deg)}
+    .piece.mid{width:44%;height:240px;right:8%;top:86px;transform:rotate(2.5deg)}
+    .piece.low{width:52%;height:250px;left:18%;top:232px;transform:rotate(-3deg)}
+    .piece img{width:100%;height:100%;object-fit:cover}
+    .piece-label{
+      position:absolute;left:6%;top:50%;transform:translateY(-50%);
+      display:grid;gap:8px;z-index:5
+    }
+    .piece-label span{
+      background:rgba(255,255,255,.95);padding:8px 14px;border:1px solid var(--line);
+      border-radius:var(--radius-sm);font-weight:700;line-height:1.5;box-shadow:var(--shadow-sm)
+    }
+    .float-icon{
+      position:absolute;width:46px;height:46px;background:var(--main);opacity:.9;
+      clip-path:path("M22 0 C30 2,34 8,36 14 C42 14,46 18,46 24 C46 30,42 34,36 34 C34 40,30 44,24 44 C18 44,14 40,14 34 C8 34,4 30,4 24 C4 18,8 14,14 14 C16 8,20 2,22 0 Z");
+      filter:drop-shadow(0 10px 14px rgba(34,181,115,.18))
+    }
+    .float-icon.i1{left:-10px;top:40px}
+    .float-icon.i2{right:20px;top:10px;background:var(--sub)}
+    .float-icon.i3{right:70px;bottom:0}
+    .intro-copy{
+      padding-top:10vh;padding-bottom:14vh
+    }
+    .intro-copy .copy{max-width:300px;margin-left:10%}
+    .company-block{
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      background:
+        radial-gradient(circle at 20% 18%, rgba(34,181,115,.06), transparent 26%),
+        linear-gradient(180deg,#fff, #fbfffd)
+    }
+    .big-outline{
+      position:absolute;left:0;top:7vh;font-size:clamp(3rem,8vw,7rem);font-weight:800;line-height:1;
+      color:transparent;-webkit-text-stroke:1px rgba(34,24,20,.16);letter-spacing:.08em;pointer-events:none
+    }
+    .side-vert{
+      position:absolute;right:0;top:12vh;writing-mode:vertical-rl;font-size:.88rem;font-weight:700;
+      letter-spacing:.14em
+    }
+    .feature-stack{display:grid;gap:72px;padding-top:10vh;padding-bottom:10vh}
+    .feature-item{position:relative;display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center}
+    .feature-item:nth-child(even){grid-template-columns:.8fr 1.2fr}
+    .feature-item:nth-child(even) .feature-image{order:2}
+    .feature-item:nth-child(even) .feature-card{order:1;justify-self:start}
+    .feature-image{
+      position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(135deg,#dff6ea,#fff);
+      min-height:360px;border:1px solid var(--line)
+    }
+    .feature-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .feature-card{
+      position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;max-width:360px;
+      box-shadow:var(--shadow-sm);margin-left:-60px;z-index:2
+    }
+    .feature-item:nth-child(even) .feature-card{margin-left:0;margin-right:-60px}
+    .feature-card::before{
+      content:"";position:absolute;inset:auto 18px -18px auto;width:120px;height:120px;border-radius:50%;
+      background:rgba(34,181,115,.14);filter:blur(28px);z-index:-1
+    }
+    .feature-card h3{font-size:var(--subhead);line-height:1.5;margin:0 0 12px}
+    .feature-card p{margin:0 0 12px;color:rgba(34,24,20,.82)}
+    .inline-link{font-weight:800;color:var(--main)}
+    .team-section{
+      background:
+        linear-gradient(180deg, rgba(34,181,115,.04), rgba(34,181,115,.02)),
+        repeating-linear-gradient(90deg, transparent 0 180px, rgba(34,24,20,.03) 180px 181px)
+    }
+    .team-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px}
+    .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+    .member{
+      position:relative;padding-top:28px
+    }
+    .member-puzzle{
+      position:relative;border-radius:20px;overflow:hidden;background:#fff;border:1px solid var(--line);min-height:420px
+    }
+    .member-puzzle::before,.member-puzzle::after{
+      content:"";position:absolute;top:50%;transform:translateY(-50%);width:62px;height:62px;border-radius:50%;
+      background:var(--tint);border:1px solid var(--line);z-index:2
+    }
+    .member-puzzle::before{left:-31px}
+    .member-puzzle::after{right:-31px}
+    .member-puzzle img{width:100%;height:420px;object-fit:cover}
+    .tag-vertical{
+      position:absolute;left:20px;top:0;background:#fff;border:1px solid var(--line);padding:10px 8px;
+      writing-mode:vertical-rl;font-size:.74rem;font-weight:800;border-radius:4px
+    }
+    .caption-card{
+      position:absolute;right:-12px;bottom:-16px;background:#fff;border:1px solid var(--line);border-radius:16px;
+      padding:18px 18px 14px;max-width:240px;box-shadow:var(--shadow-sm)
+    }
+    .caption-card strong{display:block;line-height:1.6;margin-bottom:6px}
+    .caption-card span{font-size:.8rem;color:rgba(34,24,20,.68)}
+    .slider-dots{display:flex;justify-content:center;gap:10px;margin-top:24px}
+    .dot{width:10px;height:10px;border-radius:50%;border:1px solid var(--line-strong);background:#fff}
+    .dot.active{background:var(--main);border-color:var(--main)}
+    .cross-talk .poster{
+      position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(135deg,#d9f2ff,#fff);
+      min-height:480px
+    }
+    .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .poster-copy{
+      position:absolute;right:4%;top:14%;writing-mode:vertical-rl;background:rgba(255,255,255,.94);
+      padding:18px 16px;border-radius:16px;border:1px solid var(--line);font-weight:700;line-height:1.8
+    }
+    .seal{
+      position:absolute;right:5%;bottom:12%;width:110px;height:110px;border-radius:50%;
+      border:2px solid var(--main);display:grid;place-items:center;background:rgba(255,255,255,.9);
+      font-size:.76rem;font-weight:800;color:var(--main);transform:rotate(-12deg)
+    }
+    .marquee{
+      overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff;padding:24px 0
+    }
+    .marquee-track{
+      display:flex;gap:36px;white-space:nowrap;font-size:clamp(2.2rem,5.2vw,5rem);font-weight:800;
+      color:var(--main);letter-spacing:.04em;animation:loop 34s linear infinite
+    }
+    .welfare{
+      background:
+      radial-gradient(circle at 14% 18%, rgba(229,255,158,.55), transparent 18%),
+      radial-gradient(circle at 86% 78%, rgba(34,181,115,.08), transparent 20%),
+      #fff;
+    }
+    .welfare-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center}
+    .welfare-image{
+      position:relative;border-radius:24px;overflow:hidden;min-height:420px;border:1px solid var(--line);
+      background:linear-gradient(135deg,#e9fff2,#cdeff0)
+    }
+    .welfare-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .benefit-board{
+      margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px
+    }
+    .benefit{
+      background:var(--main);color:#fff;padding:18px 14px;border-radius:4px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between
+    }
+    .benefit:nth-child(2){background:#5dc993}
+    .benefit:nth-child(3){background:#3bbf7d}
+    .benefit:nth-child(4){background:#79d7aa}
+    .benefit b{font-size:1rem;line-height:1.5}
+    .benefit span{font-size:.78rem;line-height:1.7;opacity:.95}
+    .recruit .section-grid{grid-template-columns:220px 1fr;gap:40px}
+    .recruit-side{
+      display:flex;align-items:flex-start;justify-content:center
+    }
+    .recruit-side .side-vert{
+      position:static;writing-mode:vertical-rl;background:#fff;padding:16px 10px;border:1px solid var(--line);border-radius:4px
+    }
+    .recruit-content{display:grid;gap:28px}
+    .recruit-strip{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:16px
+    }
+    .thumb{
+      position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(135deg,#edf8f2,#fff);aspect-ratio:1/1
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .recruit-bottom{
+      display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:end
+    }
+    .worker-illust{
+      position:relative;min-height:220px;border-radius:22px;background:linear-gradient(180deg,#f7fffb,#fff);
+      border:1px dashed rgba(34,181,115,.25);display:grid;place-items:end center;padding:14px
+    }
+    .worker-illust img{width:82%;object-fit:contain}
+    .entry-section{
+      min-height:82vh;background:
+      radial-gradient(circle at 50% 85%, #bdeff7 0, #bdeff7 18%, transparent 19%),
+      linear-gradient(180deg,#fff 0 48%, #d4f5fb 48% 100%);
+      text-align:center
+    }
+    .entry-inner{width:min(1100px,calc(100% - 40px));margin:auto;position:relative}
+    .entry-arc{
+      font-size:clamp(3rem,8vw,7rem);font-weight:800;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.9);
+      letter-spacing:.2em;transform:rotate(-8deg);margin-bottom:-22px
+    }
+    .entry-title{font-size:clamp(2rem,4vw,3.2rem);line-height:1.3;margin:0}
+    .entry-sub{color:var(--main);font-weight:700;letter-spacing:.08em}
+    .entry-land{
+      margin-top:26px;height:240px;position:relative;overflow:hidden
+    }
+    .hill{
+      position:absolute;bottom:0;border-radius:50% 50% 0 0;background:#78d7bf
+    }
+    .hill.h1{left:10%;width:260px;height:120px}
+    .hill.h2{left:34%;width:340px;height:100px;background:#6bc8e7}
+    .hill.h3{right:8%;width:280px;height:140px;background:#8cd8a6}
+    .mini-crane{
+      position:absolute;left:18%;bottom:86px;width:90px;height:90px;border-left:4px solid var(--dark);border-bottom:4px solid var(--dark);transform:skewX(-12deg)
+    }
+    .mini-crane::before{content:"";position:absolute;left:0;top:-2px;width:72px;height:4px;background:var(--dark);transform:rotate(25deg);transform-origin:left center}
+    .mini-crane::after{content:"";position:absolute;right:10px;top:20px;width:2px;height:40px;background:var(--dark)}
+    .cta-band{
+      background:var(--main);color:#fff;padding:64px 0 40px;min-height:auto
+    }
+    .cta-grid{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end}
+    .cta-grid h2{font-size:clamp(1.8rem,3vw,3rem);line-height:1.45;letter-spacing:.03em;margin:0;max-width:11em}
+    .cta-actions{display:flex;gap:12px;align-items:center}
+    .cta-actions .btn{background:#fff;color:var(--ink);box-shadow:none}
+    .cta-actions .btn.secondary{background:rgba(229,255,158,.9);border-color:transparent}
+    footer{
+      background:var(--main);color:#fff;padding:24px 0 28px;border-top:1px solid rgba(255,255,255,.2)
+    }
+    .footer-grid{
+      display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:24px;align-items:start
+    }
+    .footer-logo{font-weight:800;margin-bottom:10px}
+    .footer-col h4{font-size:.88rem;letter-spacing:.08em;margin:0 0 8px}
+    .footer-col a,.footer-col p{font-size:.82rem;line-height:2;margin:0;opacity:.92}
+    .footer-meta{
+      margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.22);
+      display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.76rem;opacity:.86
+    }
+
+    .deco-bird,.deco-plane{position:absolute;z-index:1;pointer-events:none}
+    .deco-bird img,.deco-plane img{width:100%;height:auto}
+    .deco-bird{width:44px}
+    .deco-plane{width:88px;opacity:.92}
+
+    html.js .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease}
+    html.js .reveal.show{opacity:1;transform:none}
+    html.js .reveal[data-delay="1"]{transition-delay:.08s}
+    html.js .reveal[data-delay="2"]{transition-delay:.16s}
+    html.js .reveal[data-delay="3"]{transition-delay:.24s}
+    html.js .hero-title, html.js .hero-copy, html.js .puzzle-stage{opacity:0;transform:translateY(24px)}
+    html.js body.loaded .hero-title{animation:heroIn .9s ease forwards}
+    html.js body.loaded .hero-copy{animation:heroIn 1s ease .12s forwards}
+    html.js body.loaded .puzzle-stage{animation:heroInZoom 1s ease .2s forwards}
+    .floating-y{animation:floatingY 1.8s ease-in-out infinite}
+    .floating-x{animation:floatingX 1.8s ease-in-out infinite}
+    .rotate-slow{animation:rotateSlow 20s linear infinite}
+    .loop-bg{background-size:300px auto;animation:loopBgX 2000s linear infinite}
+    @keyframes heroIn{to{opacity:1;transform:none}}
+    @keyframes heroInZoom{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
+    @keyframes floatingY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes floatingX{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+    @keyframes rotateSlow{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    @keyframes loop{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    @keyframes loopBgX{0%{background-position:left 100000px top}100%{background-position:left 0 top}}
+
+    @media (max-width: 1100px){
+      .hero-wrap,.welfare-grid,.feature-item,.feature-item:nth-child(even),.cta-grid,.footer-grid,.recruit-bottom,.recruit .section-grid{grid-template-columns:1fr}
+      .feature-item:nth-child(even) .feature-image,.feature-item:nth-child(even) .feature-card{order:initial}
+      .feature-card,.feature-item:nth-child(even) .feature-card{margin: -50px 24px 0}
+      .team-grid,.benefit-board,.recruit-strip{grid-template-columns:repeat(2,1fr)}
+      .recruit-side{justify-content:flex-start}
+      .side-vert{display:none}
+      .big-outline{font-size:clamp(2.6rem,11vw,5rem)}
+    }
+    @media (max-width: 760px){
+      .site-header{top:8px}
+      .header-inner{border-radius:22px;padding:12px 14px}
+      .nav{display:none}
+      .section{min-height:auto;padding:88px 0}
+      .container{width:min(var(--container),calc(100% - 24px))}
+      .hero-wrap,.team-grid,.benefit-board,.recruit-strip{grid-template-columns:1fr}
+      .piece.top,.piece.mid,.piece.low{position:relative;left:auto;right:auto;top:auto;width:100%;transform:none;margin-bottom:16px}
+      .puzzle-stage{min-height:auto}
+      .piece::before,.piece::after,.member-puzzle::before,.member-puzzle::after{display:none}
+      .intro-copy .copy{margin-left:0;max-width:none}
+      .feature-card,.feature-item:nth-child(even) .feature-card{margin:-36px 12px 0;max-width:none}
+      .caption-card{position:relative;right:auto;bottom:auto;margin: -18px 12px 0}
+      .entry-land{height:180px}
+      .cta-actions{flex-wrap:wrap}
+    }
+  </style>
+</head>
+<body class="loaded" style="">
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#" class="brand" aria-label="東精プレシジョン">
+        <span class="brand-mark"></span>
+        <span>東精プレシジョン株式会社</span>
+      </a>
+      <nav class="nav">
+        <a href="#company">会社を知る</a>
+        <a href="#business">技術を知る</a>
+        <a href="#team">人を知る</a>
+        <a href="#welfare">働く環境</a>
+        <a href="#recruit">採用情報</a>
+      </nav>
+      <a href="#entry" class="entry-pill">ENTRY</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="section hero">
+      <div class="container hero-wrap">
+        <div>
+          <div class="eyebrow hero-copy">Precision Metal Works / Tokyo &amp; Saitama</div>
+          <h1 class="hero-title" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(1, 0, 0, 1, 0, 0) !important;">ステンレス薄板 t0.1mmから。<br>試作1個、翌日出荷にも応える町工場。</h1>
+          <p class="lead hero-copy">
+            調達担当・設計者が最初に知りたいのは、雰囲気ではなく「何がどこまでできるか」。
+            東精プレシジョンは、SUS304・SPCC・A5052の精密板金と治具製作を中心に、
+            試作から量産移管まで一貫対応します。
+          </p>
+          <div class="btns hero-copy">
+            <a class="btn" href="#entry">図面相談をする</a>
+            <a class="btn secondary" href="#business">保有設備を見る</a>
+          </div>
+          <div class="hero-notes hero-copy">
+            <div class="hero-note"><i></i><span>最小ロット1個／量産5,000個まで。板厚 t0.1〜t6.0、最短当日見積。</span></div>
+            <div class="hero-note"><i></i><span>アマダ製ファイバーレーザ、ベンダー、三次元測定機を保有。寸法公差 ±0.02mm対応実績。</span></div>
+            <div class="hero-note"><i></i><span>埼玉県川口市・戸田エリアへ30分圏、首都圏試作案件の急ぎ対応に強い体制。</span></div>
+          </div>
+        </div>
+
+        <div class="puzzle-stage">
+          <span class="float-icon i1 floating-y"></span>
+          <span class="float-icon i2 floating-x"></span>
+          <span class="float-icon i3 floating-y"></span>
+
+          <div class="piece top">
+            <img src="http://127.0.0.1:5000/uploads/up_ad57262578.jpg" alt="箱を組み立てる作業" width="800" height="500" onerror="this.style.display='none'">
+          </div>
+          <div class="piece mid">
+            <img src="http://127.0.0.1:5000/uploads/up_a18f5c2db4.png" alt="工場の作業風景" width="800" height="500" onerror="this.style.display='none'">
+          </div>
+          <div class="piece low">
+            <img src="http://127.0.0.1:5000/uploads/up_ef630e29f1.jpg" alt="検品梱包作業" width="800" height="500" onerror="this.style.display='none'">
+          </div>
+
+          <div class="piece-label">
+            <span>精度で選ばれる</span>
+            <span>設備で支える</span>
+            <span>短納期で返す</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro-copy">
+      <div class="container">
+        <div class="copy reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <p class="small">
+            板金の相談は、いつも時間との勝負です。<br>
+            試作評価に間に合うか。<br>
+            曲げRは図面どおりに出るか。<br>
+            外観NGを量産前に潰せるか。<br>
+            東精プレシジョンは、そうした現場の焦りに対して、<br>
+            連絡の速さ、段取りの正確さ、実測値の共有で応えます。<br>
+            華美な演出より、実物写真と数字で。<br>
+            まずは1枚、図面をお送りください。<br>
+            できることと、できないことを、即答します。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="company" class="section company-block">
+      <div class="big-outline">COMPANY</div>
+      <div class="side-vert">東精プレシジョンを知る</div>
+      <div class="container">
+        <div class="feature-stack">
+          <div class="feature-item reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="feature-image">
+              <img src="http://127.0.0.1:5000/uploads/up_04b676c6fb.jpg" alt="スタッフ集合写真" width="1000" height="700" onerror="this.style.display='none'">
+            </div>
+            <div class="feature-card">
+              <div class="eyebrow">Company</div>
+              <h2 class="jp-title">創業34年、図面から現場まで。<br>首都圏試作を支える製造体制</h2>
+              <p>
+                1992年創業。川口第一工場では精密板金、戸田第二工場では組立・検査を担当。
+                医療機器筐体、分析装置カバー、通信機器ブラケットなど、年間1,280件超の案件に対応しています。
+              </p>
+              <a href="#" class="inline-link">会社概要を見る →</a>
+            </div>
+          </div>
+
+          <div id="business" class="feature-item reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="feature-image">
+              <img src="http://127.0.0.1:5000/uploads/up_dc8609b1f4.jpg" alt="作業場での製造風景" width="1000" height="700" onerror="this.style.display='none'">
+            </div>
+            <div class="feature-card">
+              <div class="eyebrow">Business</div>
+              <h2 class="jp-title">保有設備 23台。<br>レーザ・曲げ・溶接・検査まで一貫</h2>
+              <p>
+                ENSIS-3015AJ、HG-1003ATC、YAG溶接機、三次元測定機 XM-1200を中心に構成。
+                設備型番まで開示できるのは、工程の見通しに責任を持っているからです。
+              </p>
+              <a href="#" class="inline-link">設備一覧を見る →</a>
+            </div>
+          </div>
+
+          <div class="feature-item reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="feature-image">
+              <img src="http://127.0.0.1:5000/uploads/up_eefd062ac1.jpg" alt="工場内での作業" width="1000" height="700" onerror="this.style.display='none'">
+            </div>
+            <div class="feature-card">
+              <div class="eyebrow">Area</div>
+              <h2 class="jp-title">川口・戸田・大田区。<br>試作案件が集まる半径50km圏</h2>
+              <p>
+                東京23区北部、埼玉南部、神奈川東部の設計部門からの依頼が中心。
+                15時までの仕様確定で、翌朝便出荷に乗せる緊急対応実績もあります。
+              </p>
+              <a href="#" class="inline-link">対応エリアを見る →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="deco-bird floating-y" style="left:6%; top:18%;">
+        <img src="http://127.0.0.1:5000/uploads/up_9716d3c39a.webp" alt="" width="44" height="44" onerror="this.style.display='none'">
+      </div>
+      <div class="deco-bird floating-x" style="right:7%; top:36%;">
+        <img src="http://127.0.0.1:5000/uploads/up_5c480bccae.png" alt="" width="44" height="44" onerror="this.style.display='none'">
+      </div>
+    </section>
+
+    <section id="team" class="section tint team-section">
+      <div class="container">
+        <div class="team-head reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>
+            <div class="eyebrow">Team</div>
+            <h2 class="jp-title">働く人を知る</h2>
+          </div>
+        </div>
+
+        <div class="team-grid">
+          <article class="member reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="tag-vertical">製造一課</div>
+            <div class="member-puzzle">
+              <img src="http://127.0.0.1:5000/uploads/up_07d8e0124b.png" alt="男性ポートレート" width="700" height="900" onerror="this.style.display='none'">
+            </div>
+            <div class="caption-card">
+              <strong>±0.02mmの公差は、機械より先に段取りで決まる。</strong>
+              <span>曲げ担当 / 佐野 恒一 / 入社11年目</span>
+            </div>
+          </article>
+
+          <article class="member reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="tag-vertical">品質保証</div>
+            <div class="member-puzzle">
+              <img src="http://127.0.0.1:5000/uploads/up_7652703473.png" alt="男性ポートレート" width="700" height="900" onerror="this.style.display='none'">
+            </div>
+            <div class="caption-card">
+              <strong>検査表は、営業資料ではなく次工程への約束です。</strong>
+              <span>品質保証 / 井上 里奈 / 入社6年目</span>
+            </div>
+          </article>
+
+          <article class="member reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="tag-vertical">生産管理</div>
+            <div class="member-puzzle">
+              <img src="http://127.0.0.1:5000/uploads/up_1d9bb593f4.png" alt="男性イラスト" width="700" height="900" onerror="this.style.display='none'">
+            </div>
+            <div class="caption-card">
+              <strong>急ぎ案件ほど、工程のどこを削らないかを先に決めます。</strong>
+              <span>生産管理 / 栗原 健 / 入社8年目</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="slider-dots reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cross-talk">
+      <div class="container">
+        <div class="poster reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="チーム写真" width="1400" height="900" onerror="this.style.display='none'">
+          <div class="poster-copy">3年目の若手、10年超の職長、営業設計の3人が語る。<br>東精プレシジョンが頼られる理由</div>
+          <div class="seal rotate-slow">CROSS<br>TALK</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="marquee">
+      <div class="marquee-track">
+        <span>WITH THE JOB. GROW WITH PRECISION.</span>
+        <span>WITH THE JOB. GROW WITH PRECISION.</span>
+        <span>WITH THE JOB. GROW WITH PRECISION.</span>
+      </div>
+    </section>
+
+    <section id="welfare" class="section welfare">
+      <div class="container welfare-grid">
+        <div class="welfare-image reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <img src="http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg" alt="洗練されたオフィス風景" width="1200" height="800" onerror="this.style.display='none'">
+          <div class="deco-plane floating-x" style="left:6%; bottom:16%;">
+            <img src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="" width="88" height="88" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div class="reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="eyebrow">Welfare</div>
+          <h2 class="jp-title">働く環境を知る</h2>
+          <p class="desc">
+            製造業の働きやすさは、休暇制度の言葉より、現場の温度・導線・人の密度に出ます。
+            東精プレシジョンでは、空調更新済みの板金工場、1食380円の昼食補助、
+            3か月ごとの技能手当見直しで、長く続けられる環境を整えています。
+          </p>
+
+          <div class="benefit-board">
+            <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <b>昼食補助</b>
+              <span>弁当補助 月4,000円。夜勤なし。</span>
+            </div>
+            <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <b>技能手当</b>
+              <span>ベンダー・溶接・検査で等級設定。</span>
+            </div>
+            <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <b>資格支援</b>
+              <span>JIS溶接、フォークリフト受講費補助。</span>
+            </div>
+            <div class="benefit reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="3" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <b>有休取得</b>
+              <span>2025年度取得率 78.4%。半休対応。</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="deco-bird floating-y" style="left:2%; bottom:14%;">
+        <img src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="" width="44" height="44" onerror="this.style.display='none'">
+      </div>
+      <div class="deco-bird floating-y" style="right:4%; bottom:10%;">
+        <img src="http://127.0.0.1:5000/uploads/up_4f5b5e1e9a.png" alt="" width="44" height="44" onerror="this.style.display='none'">
+      </div>
+    </section>
+
+    <section id="recruit" class="section tint recruit">
+      <div class="container section-grid">
+        <div class="recruit-side">
+          <div class="side-vert">採用情報</div>
+        </div>
+
+        <div class="recruit-content">
+          <div class="recruit-strip">
+            <div class="thumb reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <img src="http://127.0.0.1:5000/uploads/up_a29f0082d5.png" alt="作業風景1" width="500" height="500" onerror="this.style.display='none'">
+            </div>
+            <div class="thumb reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <img src="http://127.0.0.1:5000/uploads/up_c10708cb7c.png" alt="作業風景2" width="500" height="500" onerror="this.style.display='none'">
+            </div>
+            <div class="thumb reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <img src="http://127.0.0.1:5000/uploads/up_d0b8f06e81.jpg" alt="作業風景3" width="500" height="500" onerror="this.style.display='none'">
+            </div>
+          </div>
+
+          <div class="recruit-bottom">
+            <div class="worker-illust reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <img src="http://127.0.0.1:5000/uploads/up_84373df907.png" alt="調査点検イラスト" width="320" height="240" onerror="this.style.display='none'">
+            </div>
+            <div class="reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="eyebrow">Recruit</div>
+              <h2 class="jp-title">図面1枚から相談できる人。<br>現場と設計の間に立てる人。</h2>
+              <p class="desc">
+                募集職種は、精密板金オペレーター、品質保証、生産管理、営業技術。
+                新卒初任給 236,000円、中途は経験に応じて 280,000〜420,000円。
+                工場見学では、加工サンプル、検査記録、設備型番までその場で公開しています。
+              </p>
+              <div class="btns">
+                <a class="btn" href="#entry">募集要項を見る</a>
+                <a class="btn secondary" href="#entry">工場見学を申し込む</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="entry" class="section entry-section">
+      <div class="entry-inner">
+        <div class="entry-arc reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">LET’S MAKE</div>
+        <div class="eyebrow reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="justify-content: center; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Entry</div>
+        <h2 class="entry-title reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">まずは図面を見せてください。</h2>
+        <p class="entry-sub reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">量産前の試作でも、工程相談だけでも歓迎します。</p>
+        <div class="btns" style="justify-content:center">
+          <a class="btn" href="mailto:info@tosei-precision.co.jp">メールで相談する</a>
+        </div>
+        <div class="entry-land">
+          <div class="mini-crane floating-y"></div>
+          <div class="hill h1"></div>
+          <div class="hill h2"></div>
+          <div class="hill h3"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="cta-band">
+    <div class="container cta-grid">
+      <div>
+        <h2>この仕事で<br>自分をつくる<br>地域をつくる</h2>
+      </div>
+      <div class="cta-actions">
+        <a class="btn" href="tel:048-298-4177">048-298-4177</a>
+        <a class="btn secondary" href="mailto:info@tosei-precision.co.jp">エントリー</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">東精プレシジョン株式会社</div>
+          <p class="small" style="max-width:28em">
+            精密板金・筐体製作・治具設計製作<br>
+            SUS / SPCC / A5052 / SECC 対応
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4>会社情報</h4>
+          <a href="#">会社概要</a><br>
+          <a href="#">沿革</a><br>
+          <a href="#">取引実績</a><br>
+          <a href="#">品質保証体制</a>
+        </div>
+        <div class="footer-col">
+          <h4>採用情報</h4>
+          <a href="#">募集要項</a><br>
+          <a href="#">働く環境</a><br>
+          <a href="#">社員インタビュー</a><br>
+          <a href="#">工場見学</a>
+        </div>
+        <div class="footer-col">
+          <h4>お問い合わせ</h4>
+          <p>〒334-0013 埼玉県川口市南鳩ヶ谷6-14-3</p>
+          <p>TEL 048-298-4177</p>
+          <p>受付 8:30–17:30（土日祝除く）</p>
+          <p>Mail info@tosei-precision.co.jp</p>
+        </div>
+      </div>
+      <div class="footer-meta">
+        <span>© 2026 Tosei Precision Co., Ltd.</span>
+        <span>川口第一工場 / 戸田第二工場 / ISO9001準拠運用</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    window.addEventListener('load',()=>document.body.classList.add('loaded'));
+
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+          io.unobserve(entry.target);
+        }
+      });
+    },{threshold:.16, rootMargin:'0px 0px -8% 0px'});
+
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div></body></html>
