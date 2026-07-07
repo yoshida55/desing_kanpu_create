@@ -2023,20 +2023,33 @@
           document.querySelector(o.sel).value = card.dataset.id || "";
           sync();
           close();
+          if (o.onPick) o.onPick();
         });
         document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
       }
       return { build, sync };
     }
+    // ベース×アニメの相性を、選んだ瞬間にヒント行へ出す（LLM不使用・一瞬）
+    async function updatePairFit() {
+      const b = document.querySelector("#camp_base").value;
+      const a = document.querySelector("#camp_anim").value;
+      if (!b || !a) return;  // 両方選ばれた時だけ出す
+      try {
+        const d = await fetch(`/api/pair_fit?base=${encodeURIComponent(b)}&anim=${encodeURIComponent(a)}`).then((r) => r.json());
+        if (d.label) campState.textContent = d.label;
+      } catch (e) { /* 相性表示は飾りなので失敗しても黙る */ }
+    }
     const basePicker = createSitePicker({
       sel: "#camp_base", thumb: "#cbt_thumb", label: "#cbt_label",
       trigger: "#camp_base_trigger", overlay: "#base_overlay", grid: "#base_grid", close: "#base_close",
       noneIcon: "🎲", noneName: "おまかせ", noneDesc: "ブリーフから自動で選びます", noneLabel: "おまかせ（ブリーフから自動選択）",
+      onPick: updatePairFit,
     });
     const animPicker = createSitePicker({
       sel: "#camp_anim", thumb: "#cat_thumb", label: "#cat_label",
       trigger: "#camp_anim_trigger", overlay: "#anim_overlay", grid: "#anim_grid", close: "#anim_close",
       noneIcon: "✨", noneName: "なし", noneDesc: "標準のふわっと出現", noneLabel: "なし（標準のふわっと出現）",
+      onPick: updatePairFit,
     });
 
     // イベント：ボタン・Enter・「似てる」ボタン（カードは動的生成なので親で受ける）
@@ -2463,6 +2476,7 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
       campInput.focus();
       campState.textContent = "このサイトをベースにしました。必要なら『アニメ参照』を選び、作りたい内容を書いて「生成」を押してください。";
+      updatePairFit();  // アニメ参照が選択済みなら相性をすぐ出す
     }
 
     // 「✨雰囲気」：Claudeに雰囲気を言語化させる → 完了をポーリングして反映

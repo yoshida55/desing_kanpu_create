@@ -22,7 +22,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from . import anim as anim_mod, config, db, search, tokens as tokens_mod
+from . import anim as anim_mod, config, db, recipes, search, tokens as tokens_mod
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -85,6 +85,18 @@ _REVIEW_FALLBACK = _SAFE_START + """
       }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
       els.forEach(function(el){ io.observe(el); });
     } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
     // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
     // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
     // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
@@ -94,6 +106,8 @@ _REVIEW_FALLBACK = _SAFE_START + """
         var e=all[i];
         if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
         var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
         if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
         if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
       }
@@ -382,6 +396,64 @@ def _anim_ref_block(anim_ref_id: str) -> Optional[dict]:
     return {"type": "text", "text": "\n".join(parts)}
 
 
+def pair_fit_score(base_site_id: Optional[str], anim_ref_id: Optional[str]) -> Optional[float]:
+    """ベース（見た目）とアニメ参照の"雰囲気の近さ"を返す（0〜1・高いほど近い）。
+
+    保存済みの画像ベクトル（L2正規化済み）の内積＝コサイン類似度。計算はタダで一瞬。
+    どちらかにベクトルが無い・同一サイトなら None。
+    """
+    if not base_site_id or not anim_ref_id or base_site_id == anim_ref_id:
+        return None
+    with db.connect() as conn:
+        a = db.get_site(conn, base_site_id)
+        b = db.get_site(conn, anim_ref_id)
+    if not a or not b or not a["image_embedding"] or not b["image_embedding"]:
+        return None
+    import numpy as np
+    from .utils import blob_to_embedding
+    va, vb = blob_to_embedding(a["image_embedding"]), blob_to_embedding(b["image_embedding"])
+    if va.shape != vb.shape:
+        return None  # モデル違いで次元が異なる＝比較できない
+    return float(np.dot(va, vb))
+
+
+# 相性のしきい値。SigLIPのスコアは絶対値の感覚がCLIPと違うため決め打ちせず、
+# 手持ち15サイトの全ペア分布（2026-07-07実測: min0.46 / 中央0.60 / max0.73）から
+# 75%タイル≒0.635を「近い」、25%タイル≒0.56を「遠い」の境にした。
+# ストックが増えて分布が変わったら見直すこと。
+_FIT_NEAR = 0.635
+_FIT_FAR = 0.56
+
+
+def _pair_fit_block(base_site_id: Optional[str], anim_ref_id: Optional[str]) -> str:
+    """ベース×アニメの相性に応じた「動きの翻訳」指示文を作る。該当なしなら空文字。"""
+    score = pair_fit_score(base_site_id, anim_ref_id)
+    if score is None:
+        return ""
+    with db.connect() as conn:
+        a = db.get_site(conn, base_site_id)
+        b = db.get_site(conn, anim_ref_id)
+    vibe_lines = []
+    if a and a["vibe_description"]:
+        vibe_lines.append(f"- ベース（見た目の手本）の雰囲気: {a['vibe_description'][:120]}")
+    if b and b["vibe_description"]:
+        vibe_lines.append(f"- アニメ参照Bの雰囲気: {b['vibe_description'][:120]}")
+    if score >= _FIT_NEAR:
+        rule = ("2サイトの雰囲気は近い。Bの動きは本来の質感（速さ・振幅・遊び心）のまま移植してよい。")
+    elif score >= _FIT_FAR:
+        rule = ("2サイトの雰囲気はやや違う。動きの**種類**はBから借りつつ、"
+                "速さ・振幅・回数はベースAのトーンに合わせて微調整する（Aが落ち着いた見た目なら動きも控えめに）。")
+    else:
+        rule = ("2サイトの雰囲気はかなり違う。Bの動きは**種類のヒントだけ**借りて、"
+                "強さ・速さ・派手さはAのトーンに完全に翻訳し直す"
+                "（例：ゆるく跳ねる動き→上品なゆっくり浮遊に、賑やかな連発→1箇所だけの控えめな演出に）。"
+                "迷ったらAの世界観を必ず優先する。")
+    return (
+        f"【動きの翻訳（ベース×アニメの相性: {score:.2f}）】\n{rule}\n"
+        + ("\n".join(vibe_lines) + "\n" if vibe_lines else "")
+    )
+
+
 def generate_camp(
     brief: str,
     n_refs: int = 3,
@@ -479,11 +551,20 @@ def generate_camp(
                 brow = db.get_site(conn, anim_ref_id)
             anim_ref_url = brow["url"] if brow else None
             log.info("アニメ参照B を使用: %s", anim_ref_url)
+            # ベース×アニメの相性を測り、「動きの翻訳」指示を足す（遠い組み合わせほど控えめに翻訳）
+            fit_block = _pair_fit_block(base_site_id, anim_ref_id)
+            if fit_block:
+                content.append({"type": "text", "text": fit_block})
 
     # ②'' ユーザー提供の実画像があれば、それを優先的に使わせる
     up_block = uploads_prompt_block()
     if up_block:
         content.append({"type": "text", "text": up_block})
+
+    # ②''' briefから業種を推定し、その業種の「デザインの勘所」を1件だけ混ぜる
+    recipe_block = recipes.recipe_prompt_block(brief)
+    if recipe_block:
+        content.append({"type": "text", "text": recipe_block})
 
     # ③ 生成指示（参照→作り直し・1ファイルHTML・AIっぽさ回避）
     content.append(

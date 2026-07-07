@@ -15,6 +15,7 @@ CLI都度起動だと毎回モデル読込の数秒を待つが、ビューア�
 from __future__ import annotations
 
 import json as _json
+import os
 import re
 import threading
 import uuid
@@ -988,7 +989,18 @@ def _run_camp_job(job_id: str, brief: str, base_site_id: str, anim_ref_id: str =
                     log.exception("アニメ抽出に失敗（続行）")
         prov = {"openai": "GPT", "gemini": "Gemini", "deepseek": "DeepSeek"}.get(
             config.CONFIG.htmlgen.provider, "Claude")
-        _camp_set(job_id, phase=f"{prov}がHTMLを書いています…（一番長い段階・2分前後）")
+        # ベース×アニメ両指定なら相性を一言添える（生成には _pair_fit_block が自動で効く）
+        fit_note = ""
+        if base_site_id and anim_ref_id:
+            score = camp.pair_fit_score(base_site_id, anim_ref_id)
+            if score is not None:
+                if score >= camp._FIT_NEAR:
+                    fit_note = f"（相性◎ {score:.2f}・動きはそのまま移植）"
+                elif score >= camp._FIT_FAR:
+                    fit_note = f"（相性○ {score:.2f}・動きを微調整して合わせます）"
+                else:
+                    fit_note = f"（相性△ {score:.2f}・雰囲気が違うので動きを控えめに翻訳）"
+        _camp_set(job_id, phase=f"{prov}がHTMLを書いています…（一番長い段階・2分前後）{fit_note}")
         result = camp.generate_camp(
             brief, use_model=False,
             base_site_id=base_site_id or None,
@@ -1375,10 +1387,30 @@ def api_save_camp_html():
     if len(html) < 200 or "</html>" not in html.lower():
         return jsonify({"ok": False, "message": "HTMLが空か壊れています（保存中止）"}), 400
     try:
-        p.write_text(html, encoding="utf-8")
+        # 一時ファイルに書いてから差し替え＝書き込み途中で落ちても元ファイルが壊れない
+        tmp = p.with_suffix(".html.tmp")
+        tmp.write_text(html, encoding="utf-8")
+        os.replace(tmp, p)
     except Exception as exc:  # noqa: BLE001
         return jsonify({"ok": False, "message": str(exc)}), 500
     return jsonify({"ok": True, "file": fn})
+
+
+@app.route("/api/pair_fit")
+def api_pair_fit():
+    """ベース×アニメ参照の相性スコア（選んだ瞬間にUIへ出す用・LLM不使用で一瞬）。"""
+    base_id = (request.args.get("base") or "").strip()
+    anim_id = (request.args.get("anim") or "").strip()
+    score = camp.pair_fit_score(base_id, anim_id)
+    if score is None:
+        return jsonify({"ok": True, "score": None, "label": ""})
+    if score >= camp._FIT_NEAR:
+        label = f"相性◎ {score:.2f}：雰囲気が近い組み合わせ。動きはそのまま移植されます"
+    elif score >= camp._FIT_FAR:
+        label = f"相性○ {score:.2f}：動きの種類は活かしつつ、速さ・強さをベースに合わせて微調整します"
+    else:
+        label = f"相性△ {score:.2f}：雰囲気がだいぶ違うので、動きは控えめに翻訳されます（種類のヒントだけ借ります）"
+    return jsonify({"ok": True, "score": score, "label": label})
 
 
 @app.route("/api/camp_sections")
@@ -3842,9 +3874,12 @@ _SERVE_SAFETY = """
        張り直すので、まずそちらに任せる＝ここでは少し待ってFX_RUNが無い時だけの保険にする。 */
     setTimeout(function(){
       if(document.getElementById('fxa-run')) return;  // 本家(FX_RUN)が動いている＝そちらに任せて何もしない
-      function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')); }
-      if(!('IntersectionObserver' in window)){ all().forEach(function(el){ el.classList.add('fxa_in'); }); return; }
-      var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ var t=en.target; io.unobserve(t); var cd=t.getAttribute('data-cedelay'); if(cd!=null){ setTimeout(function(){ t.classList.add('fxa_in'); }, +cd); } else { t.classList.add('fxa_in'); } } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
+      /* ★フォールバックは fxa_hl(マーカー) も対象にする。本家のようにrAFで伸ばす芸は持たないが、
+         --hlw:100 を入れて「少なくとも引かれた状態」にする（0のままだと一生マーカーが出ない）。 */
+      function show(t){ if(t.classList.contains('fxa_hl')) t.style.setProperty('--hlw',100); t.classList.add('fxa_in'); }
+      function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in)')); }
+      if(!('IntersectionObserver' in window)){ all().forEach(show); return; }
+      var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ var t=en.target; io.unobserve(t); var cd=t.getAttribute('data-cedelay'); if(cd!=null){ setTimeout(function(){ show(t); }, +cd); } else { show(t); } } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
       all().forEach(function(el){ io.observe(el); });
     }, 50);
   }

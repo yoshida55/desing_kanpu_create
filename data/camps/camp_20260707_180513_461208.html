@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>就労継続支援B型 みなもワークス｜「できそう」から始める、やさしい仕事の場所</title>
+  <meta name="description" content="仙台市青葉区の就労継続支援B型 みなもワークス。週1日・1時間から見学OK。軽作業、PC、手しごとまで、一人ひとりの得意に合わせてサポートします。" />
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --bg2:#f5f7fc;
+      --white:#ffffff;
+      --text:#151927;
+      --blue:#2547d8;
+      --blue2:#3d60f0;
+      --line:rgba(37,71,216,.12);
+      --soft:rgba(37,71,216,.05);
+      --shadow:0 16px 40px rgba(29,53,111,.07);
+      --shadow-strong:0 24px 56px rgba(29,53,111,.12);
+      --radius:4px;
+      --pill:999px;
+      --container:1260px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.16rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP",sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg, #f1f4fa 0%, #f6f8fc 20%, #fff 100%);
+      line-height:2;
+      letter-spacing:.02em;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(calc(100% - 48px), var(--container)); margin-inline:auto}
+    .section{
+      position:relative;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      padding:10vh 0;
+      overflow:hidden;
+    }
+    .section.tint{
+      background:
+        radial-gradient(circle at 15% 20%, rgba(61,96,240,.08), transparent 28%),
+        radial-gradient(circle at 85% 70%, rgba(37,71,216,.06), transparent 24%),
+        linear-gradient(180deg, #f7f9fe 0%, #f4f7fd 100%);
+    }
+    .section.white{background:#fff}
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-size:.7rem;
+      font-weight:700;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--blue);
+      margin-bottom:24px;
+      line-height:1.4;
+    }
+    .eyebrow::before{
+      content:"";
+      width:24px;height:1px;background:var(--blue);
+      opacity:.7;
+    }
+    h1,h2,h3,p{margin:0}
+    h1{
+      font-size:var(--hero);
+      line-height:1.3;
+      letter-spacing:.03em;
+      font-weight:700;
+    }
+    h2{
+      font-size:var(--section);
+      line-height:1.35;
+      letter-spacing:.03em;
+      font-weight:700;
+    }
+    h3{
+      font-size:var(--sub);
+      line-height:1.5;
+      letter-spacing:.02em;
+      font-weight:700;
+    }
+    p,li,dd,dt{
+      font-size:var(--body);
+      line-height:2;
+    }
+    .lead,.copy,.text{
+      max-width:38em;
+    }
+    .muted{color:rgba(21,25,39,.68)}
+    .accent{color:var(--blue2)}
+    .btns{display:flex;gap:16px;flex-wrap:wrap;margin-top:32px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:48px;padding:0 22px;border-radius:var(--pill);
+      font-size:.92rem;font-weight:700;letter-spacing:.04em;
+      transition:.35s ease;
+      border:1px solid transparent;
+      box-shadow:0 8px 24px rgba(37,71,216,.12);
+    }
+    .btn.primary{
+      background:var(--blue);color:#fff;
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.88); color:var(--blue); border-color:rgba(37,71,216,.14);
+      box-shadow:none;
+    }
+    .btn:hover{transform:translateY(-2px); box-shadow:0 14px 28px rgba(37,71,216,.18)}
+    .btn.secondary:hover{background:#fff}
+    .site-header{
+      position:absolute; top:0; left:0; right:0; z-index:20;
+      padding:20px 0;
+    }
+    .site-header .inner{
+      display:flex; align-items:center; justify-content:space-between; gap:24px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; font-weight:700;
+      font-size:.95rem;
+    }
+    .brand img{width:160px;height:auto}
+    nav ul{
+      display:flex; list-style:none; padding:0; margin:0; gap:24px; align-items:center;
+      font-size:.78rem;
+      color:rgba(21,25,39,.78);
+    }
+    .nav-cta{
+      padding:11px 16px;
+      background:var(--blue); color:#fff; border-radius:var(--pill); font-weight:700;
+    }
+
+    .hero{
+      background:
+        linear-gradient(90deg, rgba(21,25,39,.52) 0%, rgba(21,25,39,.22) 32%, rgba(21,25,39,0) 58%),
+        linear-gradient(180deg,#eef2f8 0%,#f6f8fc 100%);
+    }
+    .hero-grid{
+      width:100%;
+      display:grid; grid-template-columns:1.02fr 1fr; gap:40px; align-items:center;
+    }
+    .hero-copy{
+      padding-top:56px;
+      position:relative; z-index:2;
+    }
+    .hero-copy .mini{
+      font-size:.62rem;
+      letter-spacing:.15em;
+      color:rgba(21,25,39,.62);
+      margin-bottom:24px;
+      text-transform:uppercase;
+    }
+    .hero-copy p{
+      margin-top:24px;
+      max-width:33em;
+      color:rgba(21,25,39,.72);
+    }
+    .hero-visual{
+      position:relative;
+      min-height:620px;
+      border-radius:0;
+      overflow:hidden;
+      background:linear-gradient(135deg,#dbe5f6 0%, #f8fbff 50%, #dfe8fb 100%);
+    }
+    .hero-visual img{
+      width:100%; height:100%; object-fit:cover;
+      filter:saturate(.95) contrast(1.02);
+    }
+
+    .about-watermark,
+    .support-watermark{
+      position:absolute;
+      left:0;
+      right:0;
+      top:24px;
+      font-size:clamp(3.2rem,9vw,6rem);
+      line-height:1;
+      letter-spacing:.06em;
+      color:rgba(61,96,240,.07);
+      font-weight:700;
+      pointer-events:none;
+      user-select:none;
+    }
+
+    .about-grid{
+      width:100%;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:72px;
+      align-items:center;
+      position:relative;
+      z-index:1;
+    }
+    .photo-stack{
+      position:relative;
+      padding:40px 20px 40px 0;
+    }
+    .photo-stack::before{
+      content:"";
+      position:absolute;
+      width:260px;height:260px;
+      left:20px;top:36px;
+      background:radial-gradient(circle, rgba(61,96,240,.2), rgba(61,96,240,0));
+      filter:blur(18px);
+      z-index:-1;
+    }
+    .frame{
+      position:relative;
+      border-radius:26px;
+      background:linear-gradient(135deg,#eaf0fb,#ffffff);
+      padding:18px;
+      box-shadow:var(--shadow);
+      transform:rotate(-2.4deg);
+      max-width:560px;
+    }
+    .frame img{
+      width:100%; aspect-ratio: 1.2/1; object-fit:cover; border-radius:18px;
+    }
+    .caption-card{
+      position:absolute;
+      right:-18px; bottom:-14px;
+      background:#fff;
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:14px 16px;
+      min-width:190px;
+      line-height:1.65;
+      font-size:.82rem;
+      transform:rotate(-2deg);
+    }
+    .caption-card strong{display:block;color:var(--blue);font-size:.8rem}
+    .about-copy ul{
+      margin:24px 0 0;
+      padding:0;
+      list-style:none;
+    }
+    .about-copy li{
+      position:relative;
+      padding-left:20px;
+      margin-top:8px;
+      color:rgba(21,25,39,.72);
+      max-width:36em;
+    }
+    .about-copy li::before{
+      content:"";
+      position:absolute; left:0; top:15px;
+      width:8px;height:8px;border-radius:50%;background:var(--blue2);
+    }
+
+    .service-grid{
+      width:100%;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:28px;
+      align-items:stretch;
+    }
+    .service-card{
+      background:#fff;
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:48px;
+      min-height:470px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .service-head p{margin-top:16px;color:rgba(21,25,39,.72)}
+    .job-box{
+      margin-top:32px;
+      border:1px solid rgba(21,25,39,.08);
+      border-radius:16px;
+      padding:28px 26px;
+      box-shadow:0 8px 18px rgba(29,53,111,.04);
+    }
+    .job-no{
+      display:flex;align-items:flex-end;gap:10px;
+      color:var(--blue);
+      margin-bottom:18px;
+    }
+    .job-no strong{font-size:2rem;line-height:1}
+    .job-no span{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase}
+    .service-visual{
+      position:relative;
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      background:linear-gradient(135deg,#e9effb,#fff);
+      min-height:470px;
+    }
+    .service-visual img{
+      width:100%; height:100%; object-fit:cover;
+    }
+    .visual-tag{
+      position:absolute;
+      right:20px; bottom:20px;
+      background:rgba(255,255,255,.92);
+      color:rgba(21,25,39,.7);
+      border-radius:999px;
+      padding:8px 14px;
+      font-size:.72rem;
+      box-shadow:var(--shadow);
+    }
+
+    .support{
+      align-items:flex-start;
+      padding-top:16vh;
+      background:
+        linear-gradient(180deg, rgba(245,247,252,1) 0%, rgba(246,248,253,1) 100%);
+    }
+    .support::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(rgba(37,71,216,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,71,216,.05) 1px, transparent 1px);
+      background-size:32px 32px;
+      opacity:.32;
+      mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.5) 22%, rgba(0,0,0,.7) 80%, transparent 100%);
+      pointer-events:none;
+    }
+    .support .container{position:relative;z-index:1}
+    .support-intro{
+      max-width:660px;
+      padding-top:120px;
+      min-height:58vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .support-intro p{margin-top:20px;color:rgba(21,25,39,.72)}
+    .facts{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      margin-top:40px;
+      max-width:860px;
+    }
+    .fact{
+      border-top:1px solid rgba(21,25,39,.14);
+      padding-top:16px;
+    }
+    .fact strong{
+      display:block;
+      font-size:1.9rem;
+      line-height:1.2;
+      color:var(--blue);
+      margin-bottom:8px;
+    }
+    .fact span{font-size:.82rem;color:rgba(21,25,39,.7)}
+    .support-ornament{
+      position:absolute;
+      right:84px; bottom:130px;
+      width:120px; height:120px;
+      border:1px solid rgba(37,71,216,.16);
+      border-radius:50%;
+      opacity:.7;
+    }
+    .support-line{
+      width:100%;
+      height:1px;
+      background:linear-gradient(90deg, rgba(21,25,39,.2), rgba(61,96,240,.3), rgba(21,25,39,.04));
+      margin-top:72px;
+    }
+
+    .flow-band{
+      min-height:auto;
+      padding:0;
+      background:#fff;
+    }
+    .flow-visual{
+      width:100%;
+      background:linear-gradient(180deg,#eef3fb 0%, #ffffff 100%);
+    }
+    .flow-visual img{
+      width:100%;
+      height:auto;
+      min-height:420px;
+      object-fit:cover;
+    }
+    .flow-overlay{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:42px;
+      width:min(calc(100% - 48px), var(--container));
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+    }
+    .flow-step{
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(6px);
+      border-radius:18px;
+      padding:18px 18px 16px;
+      box-shadow:var(--shadow);
+    }
+    .flow-step strong{
+      display:block;
+      color:var(--blue);
+      font-size:.72rem;
+      letter-spacing:.14em;
+      margin-bottom:8px;
+    }
+    .flow-step h3{font-size:1rem;margin-bottom:6px}
+    .flow-step p{font-size:.84rem;line-height:1.8;color:rgba(21,25,39,.68)}
+
+    .cta-band{
+      min-height:320px;
+      padding:0;
+      background:
+        linear-gradient(180deg, rgba(198,214,250,.95) 0%, rgba(214,227,252,.96) 45%, rgba(255,255,255,1) 100%);
+      border-top:1px solid rgba(37,71,216,.18);
+    }
+    .cta-wrap{
+      width:100%;
+      padding:72px 0 88px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:32px;
+    }
+    .cta-wrap h2{max-width:12em}
+    .cta-info p{margin-top:16px;color:rgba(21,25,39,.74)}
+    .cta-actions{
+      display:flex; gap:16px; flex-wrap:wrap; align-items:center; justify-content:flex-end;
+    }
+    .tel-box{
+      display:flex; flex-direction:column; align-items:flex-end;
+      font-size:.84rem; color:rgba(21,25,39,.68);
+    }
+    .tel-box strong{font-size:1.45rem; color:var(--text); line-height:1.3}
+
+    footer{
+      background:#fff;
+      padding:40px 0 24px;
+      border-top:1px solid rgba(37,71,216,.12);
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns:1.25fr .9fr .7fr;
+      gap:48px;
+      align-items:start;
+    }
+    .footer-brand img{width:150px}
+    .footer-brand p{
+      margin-top:18px; max-width:26em; color:rgba(21,25,39,.72); font-size:.88rem; line-height:1.9;
+    }
+    .footer-btn{
+      display:inline-flex; margin-top:18px; border:1px solid rgba(21,25,39,.14);
+      border-radius:999px; padding:10px 16px; font-size:.8rem; transition:.3s;
+      background:#fff;
+    }
+    .footer-btn:hover{transform:translateY(-2px); box-shadow:var(--shadow)}
+    .footer-col h3{
+      font-size:.72rem; letter-spacing:.16em; text-transform:uppercase;
+      color:var(--blue); margin-bottom:16px;
+    }
+    .footer-col ul{list-style:none; padding:0; margin:0}
+    .footer-col li{margin-bottom:10px; font-size:.88rem}
+    .footer-col address{
+      font-style:normal; font-size:.88rem; line-height:1.95; color:rgba(21,25,39,.74)
+    }
+    .footer-bottom{
+      margin-top:28px;
+      padding-top:18px;
+      border-top:1px solid rgba(21,25,39,.08);
+      display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+      font-size:.72rem; color:rgba(21,25,39,.56);
+    }
+
+    .reveal{opacity:1; transform:none}
+    html.js .reveal{
+      opacity:0; transform:translateY(28px);
+      transition:opacity .9s ease, transform .9s ease;
+    }
+    html.js .reveal.show{opacity:1; transform:translateY(0)}
+    html.js .hero-copy > *{
+      opacity:0; transform:translateY(24px);
+      animation:heroFade .9s ease forwards;
+    }
+    html.js .hero-copy > *:nth-child(1){animation-delay:.08s}
+    html.js .hero-copy > *:nth-child(2){animation-delay:.18s}
+    html.js .hero-copy > *:nth-child(3){animation-delay:.28s}
+    html.js .hero-copy > *:nth-child(4){animation-delay:.38s}
+    html.js .hero-visual{
+      opacity:0; transform:translateX(24px) scale(1.03);
+      animation:heroVisual 1.1s ease .22s forwards;
+    }
+    @keyframes heroFade{
+      to{opacity:1; transform:translateY(0)}
+    }
+    @keyframes heroVisual{
+      to{opacity:1; transform:translateX(0) scale(1)}
+    }
+
+    @media (max-width: 1024px){
+      .hero-grid,.about-grid,.service-grid,.footer-grid,.cta-wrap{grid-template-columns:1fr; display:grid}
+      .hero-visual{min-height:460px}
+      .service-card,.service-visual{min-height:auto}
+      .support-intro{padding-top:80px; min-height:auto}
+      .facts{grid-template-columns:repeat(2,1fr)}
+      .flow-overlay{
+        position:static; transform:none; width:min(calc(100% - 48px), var(--container));
+        margin:24px auto 40px; grid-template-columns:repeat(2,1fr);
+      }
+      .cta-wrap{padding:72px 0; gap:24px}
+      .cta-actions,.tel-box{justify-content:flex-start; align-items:flex-start}
+      nav ul{gap:14px; font-size:.72rem}
+    }
+    @media (max-width: 767px){
+      .section{min-height:auto; padding:88px 0}
+      .container{width:min(calc(100% - 32px), var(--container))}
+      .site-header{padding:14px 0}
+      nav{display:none}
+      .hero-copy{padding-top:24px}
+      .hero-visual{min-height:340px}
+      .about-watermark,.support-watermark{font-size:2.6rem; top:12px}
+      .frame{padding:12px; border-radius:20px}
+      .caption-card{position:static; margin-top:14px; transform:none}
+      .service-card{padding:32px 24px}
+      .facts{grid-template-columns:1fr}
+      .flow-overlay{width:min(calc(100% - 32px), var(--container)); grid-template-columns:1fr}
+      .flow-step{padding:16px}
+      .cta-wrap{display:flex; flex-direction:column; align-items:flex-start}
+      .btns,.cta-actions{width:100%}
+      .btn{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container inner">
+      <a href="#" class="brand" aria-label="みなもワークス ホーム">
+        <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="みなもワークス ロゴ" onerror="this.style.display='none'">
+      </a>
+      <nav aria-label="グローバルナビゲーション">
+        <ul>
+          <li><a href="#about">私たちについて</a></li>
+          <li><a href="#work">できる仕事</a></li>
+          <li><a href="#support">支援体制</a></li>
+          <li><a href="#flow">1日の流れ</a></li>
+          <li><a href="#contact" class="nav-cta">見学申込みはこちら</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="section hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="mini">MI NA MO WORKS / SENDAI AOBA</div>
+          <h1>「できそう」を、<br>毎日のしごとにしよう。</h1>
+          <p class="lead">
+            みなもワークスは、仙台市青葉区にある就労継続支援B型事業所です。
+            <br>週1日・1時間から。軽作業、PC、手しごとまで、今の体調や得意に合わせて始められます。
+          </p>
+          <div class="btns">
+            <a href="#contact" class="btn primary">見学を申し込む</a>
+            <a href="tel:022-398-5508" class="btn secondary">お電話で相談する</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <img src="http://127.0.0.1:5000/uploads/up_1f5fe56787.png" alt="面談シーンのやわらかなイラスト" width="720" height="620" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </section>
+
+    <section class="section tint" id="about">
+      <div class="about-watermark">ABOUT US</div>
+      <div class="container about-grid">
+        <div class="photo-stack reveal">
+          <div class="frame">
+            <img src="http://127.0.0.1:5000/uploads/up_04b676c6fb.jpg" alt="事業所前に立つスタッフたち" width="640" height="530" onerror="this.style.display='none'">
+            <div class="caption-card">
+              <strong>見学は平日毎日受付</strong>
+              地下鉄北四番丁駅から徒歩4分。<br>ご家族・支援者の同席も歓迎です。
+            </div>
+          </div>
+        </div>
+        <div class="about-copy reveal">
+          <div class="eyebrow">About / Minamo Linkworks</div>
+          <h2>一人で抱えないで。<br>あなたの「得意」を<span class="accent">一緒に見つけましょう。</span></h2>
+          <p class="text" style="margin-top:24px;color:rgba(21,25,39,.72)">
+            「外に出るのが不安」「毎日はむずかしい」「何が向いているか分からない」。
+            みなもワークスでは、就労継続支援B型の制度に基づき、生活リズムづくりから作業練習、
+            一般就労への移行準備まで、段階に合わせて支援します。
+          </p>
+          <ul>
+            <li>開設12年、これまで<strong>348名</strong>が利用開始。うち<strong>94名</strong>が一般就労やA型へ移行。</li>
+            <li>ご本人向けにはやさしく、家族・相談支援専門員向けには制度説明も正確にご案内します。</li>
+            <li>利用料は世帯収入に応じて上限あり。<strong>約9割の方が自己負担0円</strong>で利用しています。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section white" id="work">
+      <div class="container service-grid">
+        <div class="service-card reveal">
+          <div class="service-head">
+            <div class="eyebrow">Services</div>
+            <h2>あなたの速さに合った仕事が、<br><span class="accent">きっとここにあります。</span></h2>
+            <p>
+              毎日同じ作業だけではなく、封入・梱包、手芸品の検品、データ入力、館内清掃補助など、
+              体調や集中時間に合わせて複数の作業を用意しています。
+            </p>
+          </div>
+          <div class="job-box">
+            <div class="job-no"><strong>01</strong><span>Light work</span></div>
+            <h3>軽作業</h3>
+            <p class="muted">
+              箱づくり、封入、袋詰め、シール貼りなど。手順書を見ながら進められるので、
+              はじめての方でも落ち着いて取り組めます。顔が写らない手元作業の工程も多く、
+              実際の仕事の雰囲気がつかみやすいのも特長です。
+            </p>
+          </div>
+        </div>
+        <div class="service-visual reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_1d421dabc8.png" alt="封入作業を行う女性のイラスト" width="640" height="760" onerror="this.style.display='none'">
+          <div class="visual-tag">週1日 / 1時間から相談可</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section support tint" id="support">
+      <div class="support-watermark">SUPPORT SYSTEM</div>
+      <div class="container">
+        <div class="support-intro reveal">
+          <div class="eyebrow">Support</div>
+          <h2>通いやすさも、制度の安心も。<br>初めての見学から、ていねいに。</h2>
+          <p class="copy">
+            見学 → 体験利用 → 受給者証の申請 → 利用開始、という流れをスタッフが伴走します。
+            電話が苦手な方はフォームから、短いやりとりが安心な方はLINEから。
+            「まずは30分だけ見てみたい」という相談にも対応しています。
+          </p>
+          <div class="facts">
+            <div class="fact">
+              <strong>12年</strong>
+              <span>仙台市内での支援実績</span>
+            </div>
+            <div class="fact">
+              <strong>348名</strong>
+              <span>累計利用スタート人数</span>
+            </div>
+            <div class="fact">
+              <strong>94名</strong>
+              <span>一般就労・A型等への移行</span>
+            </div>
+            <div class="fact">
+              <strong>週1〜</strong>
+              <span>1時間から利用相談OK</span>
+            </div>
+          </div>
+          <div class="support-line"></div>
+        </div>
+      </div>
+      <div class="support-ornament" aria-hidden="true"></div>
+    </section>
+
+    <section class="section flow-band" id="flow" style="position:relative">
+      <div class="flow-visual">
+        <img src="http://127.0.0.1:5000/uploads/up_093ce90730.png" alt="事業所を案内するスタッフ" width="1440" height="720" onerror="this.style.display='none'">
+      </div>
+      <div class="flow-overlay">
+        <div class="flow-step reveal">
+          <strong>Flow 01</strong>
+          <h3>10:00　通所・体調確認</h3>
+          <p>その日の気分や体調を確認。無理のない作業量を一緒に決めます。</p>
+        </div>
+        <div class="flow-step reveal">
+          <strong>Flow 02</strong>
+          <h3>10:30　午前の作業</h3>
+          <p>封入、梱包、PC入力などから選択。途中休憩も自由に取れます。</p>
+        </div>
+        <div class="flow-step reveal">
+          <strong>Flow 03</strong>
+          <h3>12:00　昼休み</h3>
+          <p>静かな席あり。人と話さず休みたい日にも配慮しています。</p>
+        </div>
+        <div class="flow-step reveal">
+          <strong>Flow 04</strong>
+          <h3>13:00〜15:00　午後作業・振り返り</h3>
+          <p>できたことを短く共有。次回の通所ペースも相談しながら調整します。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta-band" id="contact">
+      <div class="container cta-wrap">
+        <div class="cta-info reveal">
+          <div class="eyebrow">Contact</div>
+          <h2>見学は、気負わず。<br>ご本人だけでも、ご家族と一緒でも。</h2>
+          <p>
+            平日 9:00–17:30。見学は最短2日後からご案内できます。<br>
+            就労継続支援B型の利用条件、受給者証の申請、利用料の目安も丁寧にご説明します。
+          </p>
+        </div>
+        <div class="cta-actions reveal">
+          <div class="tel-box">
+            <span>お電話でのご相談</span>
+            <strong>022-398-5508</strong>
+          </div>
+          <a href="#" class="btn primary">見学申込みフォーム</a>
+          <a href="#" class="btn secondary">LINEで相談する</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="http://127.0.0.1:5000/uploads/up_1aa2aa7dc0.png" alt="みなもワークス ロゴ" onerror="this.style.display='none'">
+        <p>
+          みなもワークスは、仙台市青葉区の就労継続支援B型事業所です。<br>
+          見学・体験利用・制度のご相談まで、まずはお気軽にお問い合わせください。
+        </p>
+        <a href="#contact" class="footer-btn">見学・相談はこちら</a>
+      </div>
+      <div class="footer-col">
+        <h3>Office</h3>
+        <ul>
+          <li>就労継続支援B型 みなもワークス</li>
+          <li>運営法人：一般社団法人リンクワーク支援会</li>
+          <li>TEL：022-398-5508</li>
+          <li>FAX：022-398-5512</li>
+          <li>受付：平日 9:00–17:30</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Info</h3>
+        <address>
+          〒980-0802<br>
+          宮城県仙台市青葉区二日町6-26<br>
+          NKビル 3F<br>
+          地下鉄南北線「北四番丁駅」徒歩4分
+        </address>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© 2026 Minamo Works. All Rights Reserved.</span>
+      <span>プライバシーポリシー / サイトマップ</span>
+    </div>
+  </footer>
+
+  <script>
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach((entry,i)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+          io.unobserve(entry.target);
+        }
+      });
+    },{threshold:.14, rootMargin:"0px 0px -8% 0px"});
+    document.querySelectorAll('.reveal').forEach((el,idx)=>{
+      el.style.transitionDelay = `${Math.min(idx % 4, 3) * 90}ms`;
+      io.observe(el);
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>
