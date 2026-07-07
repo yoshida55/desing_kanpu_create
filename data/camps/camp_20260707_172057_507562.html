@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>みらいワークス就労支援センター</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-soft:#fafafa;
+      --blue:#0071b9;
+      --blue-soft:#b2d4ea;
+      --yellow:#f2e018;
+      --text:#333333;
+      --shadow:5px 5px 10px rgba(174,174,174,.1);
+      --radius:8px;
+      --container:1440px;
+      --serif:"Times New Roman", serif;
+      --sans:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+    body{font-family:var(--serif);line-height:1.8;overflow-x:hidden}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(calc(100% - 48px), var(--container));margin-inline:auto}
+    .section{position:relative;padding:10vh 0;min-height:100vh;display:flex;align-items:center}
+    .section.section-auto{align-items:flex-start}
+    .eyebrow{
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:capitalize;
+      margin-bottom:8px;
+      position:relative;
+      padding-left:20px
+    }
+    .eyebrow::before{
+      content:"";
+      position:absolute;left:0;top:50%;
+      width:12px;height:1px;background:var(--blue);
+      transform:translateY(-50%)
+    }
+    .sec-head{margin-bottom:32px}
+    .sec-head h2{
+      margin:0;
+      font-family:var(--sans);
+      font-size:clamp(28px,3.2vw,54px);
+      line-height:1.1;
+      color:var(--blue);
+      letter-spacing:-.02em
+    }
+    .sub-jp{
+      font-family:var(--sans);
+      font-weight:500;
+      font-size:14px;
+      color:var(--text);
+      margin-top:6px
+    }
+
+    header{
+      position:sticky;top:0;z-index:40;
+      background:rgba(255,255,255,.84);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(0,113,185,.08)
+    }
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 0
+    }
+    .logo{
+      display:flex;align-items:center;gap:10px;font-family:var(--sans);font-weight:800;color:var(--blue)
+    }
+    .logo-mark{
+      width:34px;height:34px;border-radius:50%;
+      background:linear-gradient(135deg,var(--blue),var(--blue-soft));
+      display:grid;place-items:center;color:#fff;font-size:16px;
+      box-shadow:var(--shadow)
+    }
+    .nav-links{
+      display:flex;gap:26px;align-items:center;
+      font-family:var(--sans);font-size:12px;color:var(--blue)
+    }
+    .nav-links a{opacity:.9}
+    .nav-cta{
+      background:var(--yellow);
+      color:var(--blue);
+      padding:10px 16px;border-radius:999px;font-weight:700
+    }
+
+    .hero{
+      padding-top:6vh;
+      background:
+        radial-gradient(circle at 82% 18%, rgba(242,224,24,.22), transparent 18%),
+        radial-gradient(circle at 76% 12%, rgba(0,113,185,.10), transparent 22%),
+        linear-gradient(180deg,#fff 0%, #fbfdff 100%);
+      overflow:hidden
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:40px;
+      align-items:center
+    }
+    .hero-left{position:relative;z-index:2}
+    .hero-kicker{
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:12px;letter-spacing:.18em;
+      margin-bottom:20px
+    }
+    .hero-title{
+      font-family:var(--sans);
+      font-weight:800;
+      font-size:clamp(42px,7vw,94px);
+      line-height:.98;
+      margin:0 0 22px;
+      color:var(--blue)
+    }
+    .hero-title span{
+      display:block;
+      width:fit-content;
+      background:#fff;
+      padding:.04em .12em;
+      box-shadow:var(--shadow)
+    }
+    .hero-copy{
+      max-width:520px;
+      font-size:18px;
+      margin-bottom:28px
+    }
+    .hero-actions{display:flex;gap:14px;align-items:center}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:14px 24px;border-radius:999px;
+      font-family:var(--sans);font-size:14px;font-weight:700;
+      transition:transform .35s cubic-bezier(.19,1,.22,1), box-shadow .35s cubic-bezier(.19,1,.22,1), background .35s ease, color .35s ease
+    }
+    .btn:hover{transform:translateY(-3px);box-shadow:0 16px 28px rgba(0,113,185,.16)}
+    .btn-primary{background:var(--blue);color:#fff}
+    .btn-secondary{background:#fff;color:var(--blue);border:1px solid rgba(0,113,185,.16)}
+    .hero-right{
+      position:relative;min-height:680px;
+      display:flex;align-items:center;justify-content:center
+    }
+    .hero-strip{
+      position:absolute;top:0;left:-3%;right:-3%;
+      display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
+      transform:translateY(0)
+    }
+    .hero-window{
+      aspect-ratio:1/1;
+      border-radius:10px;
+      overflow:hidden;
+      background:linear-gradient(135deg,var(--blue-soft),#e8f4fb);
+      box-shadow:var(--shadow);
+      border:3px solid #fff
+    }
+    .hero-window img{width:100%;height:100%;object-fit:cover}
+    .hero-figure{
+      position:relative;z-index:2;
+      width:min(520px,92%);
+      margin-top:140px;
+      animation:floatSoft 7s cubic-bezier(0,1,0,1) infinite;
+      transform-origin:center bottom
+    }
+    .hero-figure::before{
+      content:"";
+      position:absolute;inset:auto 10% -10% 10%;
+      height:80px;border-radius:50%;
+      background:rgba(0,113,185,.12);
+      filter:blur(34px);
+      z-index:-1
+    }
+    .hero-figure-wrap{
+      background:linear-gradient(135deg,#fff, #f4fbff);
+      border-radius:24px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      transform:rotate(-2deg)
+    }
+    .hero-figure img{
+      width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:18px
+    }
+    .hero-vertical{
+      position:absolute;right:-8px;top:180px;
+      writing-mode:vertical-rl;
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:56px;font-weight:700;letter-spacing:.02em
+    }
+
+    .about-grid{
+      display:grid;grid-template-columns:.26fr .74fr;gap:40px;align-items:start;width:100%
+    }
+    .about-side{
+      display:flex;align-items:flex-end;justify-content:center;min-height:540px
+    }
+    .vertical-copy{
+      writing-mode:vertical-rl;
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:58px;
+      line-height:1.2;
+      letter-spacing:.04em
+    }
+    .about-main p{
+      font-size:18px;
+      max-width:690px;
+      margin:0 0 22px
+    }
+
+    .cta-banner{
+      min-height:auto;padding:0 0 8vh
+    }
+    .cta-box{
+      position:relative;
+      background:var(--blue);
+      color:#fff;
+      border-radius:14px;
+      padding:34px 34px;
+      box-shadow:var(--shadow);
+      overflow:hidden
+    }
+    .cta-box::before{
+      content:"";
+      position:absolute;right:8%;top:-30px;width:140px;height:140px;border-radius:50%;
+      background:rgba(255,255,255,.18);filter:blur(2px)
+    }
+    .cta-inner{
+      display:grid;grid-template-columns:1fr 270px;gap:24px;align-items:center
+    }
+    .cta-panel{
+      background:#fff;color:var(--text);
+      border-radius:10px;padding:18px 18px 18px 22px;
+      display:flex;align-items:center;justify-content:space-between;gap:18px
+    }
+    .cta-panel .btn{padding:12px 18px;background:#26c943;color:#fff}
+    .cta-illust{
+      position:absolute;right:18px;bottom:-8px;width:160px;
+      transform:rotate(-3deg);
+      animation:tokotokoLite 8s cubic-bezier(0,1,0,1) infinite
+    }
+
+    .service-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:28px;
+      align-items:start
+    }
+    .service-card{
+      position:relative;
+      padding:10px 6px 0;
+      background:transparent
+    }
+    .service-figure{
+      width:100%;
+      border-radius:14px;
+      background:linear-gradient(135deg,#eef8ff,#d5ebf8);
+      padding:14px;
+      box-shadow:var(--shadow);
+      transform-origin:center;
+      transition:transform .4s cubic-bezier(.19,1,.22,1), box-shadow .4s cubic-bezier(.19,1,.22,1)
+    }
+    .service-card:hover .service-figure{transform:translateY(-6px) rotate(-1deg);box-shadow:0 20px 32px rgba(0,113,185,.13)}
+    .service-figure img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px}
+    .service-card h3{
+      margin:18px 0 10px;font-family:var(--sans);font-size:18px;color:var(--blue)
+    }
+    .service-card p{margin:0;font-size:15px}
+    .service-side-title{
+      position:absolute;right:-16px;top:28px;
+      font-family:var(--sans);font-weight:800;
+      color:var(--blue);font-size:26px;line-height:1.05;text-align:right
+    }
+
+    .passport-sec{
+      background:linear-gradient(180deg, #bfe0f2 0%, #d7edf8 100%);
+      overflow:hidden
+    }
+    .passport-sec::after{
+      content:"";
+      position:absolute;left:0;right:0;bottom:-1px;height:120px;
+      background:
+        radial-gradient(120px 60px at 12% 0%, #fff 98%, transparent 100%),
+        radial-gradient(120px 60px at 36% 0%, #fff 98%, transparent 100%),
+        radial-gradient(120px 60px at 60% 0%, #fff 98%, transparent 100%),
+        radial-gradient(120px 60px at 84% 0%, #fff 98%, transparent 100%);
+      background-repeat:repeat-x
+    }
+    .big-runner{
+      position:absolute;left:-20px;top:40px;
+      white-space:nowrap;font-family:var(--sans);font-weight:800;
+      font-size:clamp(48px,6vw,92px);color:var(--blue);opacity:.9;letter-spacing:-.04em
+    }
+    .passport-content{position:relative;z-index:2;width:100%}
+    .passport-lead{
+      max-width:760px;margin:0 auto 42px;text-align:center;
+      font-size:15px
+    }
+    .phone-grid{
+      display:grid;grid-template-columns:1fr 180px 1fr;gap:24px;align-items:center
+    }
+    .phone-card{
+      background:#fff;border-radius:12px;padding:20px;box-shadow:var(--shadow)
+    }
+    .phone-card small{font-family:var(--sans);color:var(--blue);display:block;margin-bottom:8px}
+    .phone-card h3{font-family:var(--sans);font-size:20px;color:var(--blue);margin:0 0 10px}
+    .phone-card p{font-size:14px;margin:0 0 14px}
+    .phone-mock{
+      border-radius:24px;background:linear-gradient(180deg,#f6fbff,#e2f0f9);
+      padding:14px;box-shadow:var(--shadow)
+    }
+    .phone-mock img{width:100%;aspect-ratio:10/18;object-fit:cover;border-radius:18px}
+    .center-book{
+      justify-self:center;text-align:center
+    }
+    .center-book .mini{
+      width:92px;height:118px;margin:0 auto 12px;border-radius:8px;
+      background:var(--blue);color:#fff;display:grid;place-items:center;
+      font-family:var(--sans);font-weight:700;box-shadow:var(--shadow)
+    }
+
+    .flow-layout{
+      display:grid;grid-template-columns:.22fr .78fr;gap:34px;align-items:start;width:100%
+    }
+    .flow-side{
+      min-height:600px;display:flex;justify-content:center
+    }
+    .flow-side .vertical-copy{font-size:40px}
+    .flow-list{max-width:880px}
+    .flow-item{
+      display:grid;grid-template-columns:170px 1fr;gap:26px;
+      align-items:center;padding:18px 0
+    }
+    .flow-icon{
+      border-radius:16px;background:linear-gradient(135deg,#e8f5ff,#d3ebf8);
+      padding:16px;box-shadow:var(--shadow);transform:rotate(-4deg)
+    }
+    .flow-icon img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px}
+    .flow-text small{font-family:var(--sans);color:var(--blue)}
+    .flow-text h3{margin:4px 0 10px;font-family:var(--sans);color:var(--blue);font-size:20px}
+    .flow-text p{margin:0;font-size:15px}
+
+    .plan-grid{
+      display:grid;grid-template-columns:.24fr .76fr;gap:32px;align-items:start;width:100%
+    }
+    .plan-side{
+      min-height:620px;display:flex;justify-content:center
+    }
+    .plan-main{max-width:900px}
+    .plan-visual{
+      display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center;margin-bottom:18px
+    }
+    .plan-visual-stack{
+      position:relative;height:260px
+    }
+    .stack-card{
+      position:absolute;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);
+      background:linear-gradient(135deg,#e6f4ff,#d3ebf8);padding:10px
+    }
+    .stack-card img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+    .stack-card.one{width:180px;height:220px;left:14px;top:28px;transform:rotate(-10deg)}
+    .stack-card.two{width:170px;height:190px;left:128px;top:0;transform:rotate(9deg)}
+    .stack-card.three{width:190px;height:122px;left:182px;top:122px;transform:rotate(-5deg)}
+    .price-box{
+      background:linear-gradient(180deg,#f3f9fd,#dfeef8);
+      border:1px solid rgba(0,113,185,.12);
+      border-radius:14px;padding:22px;box-shadow:var(--shadow)
+    }
+    .price-box small{font-family:var(--sans);color:var(--blue)}
+    .price-main{
+      display:flex;align-items:flex-end;gap:6px;
+      color:var(--blue);font-family:var(--sans);font-weight:800;margin:8px 0 12px
+    }
+    .price-main .num{font-size:54px;line-height:1}
+    .price-main .yen{font-size:24px}
+    .price-notes{font-size:13px}
+    .rule-line{height:1px;background:rgba(0,113,185,.2);margin:26px 0}
+    .support-list .item{
+      padding:14px 0;border-top:1px solid rgba(0,113,185,.18)
+    }
+    .support-list .item:last-child{border-bottom:1px solid rgba(0,113,185,.18)}
+    .support-list h4{margin:0 0 6px;font-family:var(--sans);color:var(--blue);font-size:15px}
+    .support-list p{margin:0;font-size:14px}
+    .schedule-figure{
+      margin-top:20px;border-radius:14px;background:#fff;box-shadow:var(--shadow);padding:16px
+    }
+    .timeline{
+      display:grid;grid-template-columns:80px 1fr 80px 1fr;gap:10px 18px;align-items:center
+    }
+    .time{
+      font-family:var(--sans);font-size:12px;color:var(--blue);text-align:center
+    }
+    .activity{
+      background:#f4fbff;border:1px solid rgba(0,113,185,.12);border-radius:10px;padding:12px 10px;
+      font-size:13px;text-align:center
+    }
+    .timeline-bar{
+      grid-column:1/-1;height:28px;position:relative;margin:8px 0
+    }
+    .timeline-bar::before{
+      content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(0,113,185,.26)
+    }
+    .timeline-bar::after{
+      content:"";position:absolute;left:48%;top:50%;width:42px;height:42px;border-radius:50%;
+      background:var(--blue);transform:translate(-50%,-50%);
+      box-shadow:0 0 0 10px rgba(178,212,234,.45)
+    }
+
+    .faq-wrap{width:100%;position:relative}
+    .faq-wrap::before{
+      content:"";position:absolute;left:0;right:0;top:-60px;height:100px;
+      background:linear-gradient(180deg, transparent 0%, #fff 80%)
+    }
+    .faq-card{
+      max-width:980px;
+      background:linear-gradient(180deg,#f8fcff,#edf7fd);
+      border-radius:18px;padding:22px 20px 16px;box-shadow:var(--shadow);
+      position:relative
+    }
+    .faq-illust{
+      position:absolute;right:14px;top:-26px;width:88px;transform:rotate(8deg)
+    }
+    .faq-item{
+      display:flex;justify-content:space-between;align-items:center;
+      gap:16px;padding:14px 16px;margin-bottom:10px;border-radius:8px;
+      background:#fff;border:1px solid rgba(0,113,185,.1);font-family:var(--sans);font-size:14px
+    }
+    .faq-item span:last-child{color:var(--blue);font-weight:700;font-size:18px}
+
+    .voice-slider{
+      width:100%;overflow:hidden;padding-top:18px
+    }
+    .voice-track{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(240px,1fr));
+      gap:18px
+    }
+    .voice-card{
+      background:#fff;border-top:2px solid rgba(0,113,185,.18);
+      padding:12px 10px 18px;position:relative
+    }
+    .voice-card::before{
+      content:"“";position:absolute;left:10px;top:-12px;color:var(--blue-soft);
+      font-size:42px;font-family:var(--sans);font-weight:800
+    }
+    .voice-avatar{
+      width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;
+      background:linear-gradient(135deg,#edf8ff,#d8edf8);box-shadow:var(--shadow);margin-bottom:12px
+    }
+    .voice-avatar img{width:100%;height:100%;object-fit:cover}
+    .voice-card h3{margin:0 0 8px;font-family:var(--sans);color:var(--blue);font-size:16px}
+    .voice-card p{font-size:13px;margin:0 0 10px}
+    .voice-card small{font-family:var(--sans);color:#666}
+    .dots{
+      display:flex;justify-content:center;gap:10px;margin-top:18px
+    }
+    .dots span{
+      width:10px;height:10px;border-radius:50%;background:#b9d9ec
+    }
+    .dots span.active{background:var(--blue)}
+
+    .team-photo-wrap{
+      position:relative;
+      margin-top:24px;
+      width:min(760px,100%)
+    }
+    .team-photo-bg{
+      position:absolute;inset:22px -22px -22px 22px;
+      background:rgba(178,212,234,.55);
+      filter:blur(28px);z-index:-1;border-radius:22px
+    }
+    .team-photo{
+      border-radius:18px;overflow:hidden;box-shadow:var(--shadow);
+      background:linear-gradient(135deg,#d9eef9,#eef9ff)
+    }
+    .team-photo img{width:100%;aspect-ratio:16/10;object-fit:cover}
+    .caption-float{
+      position:absolute;right:-18px;bottom:-18px;
+      background:#fff;border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);
+      width:260px
+    }
+    .caption-float strong{display:block;font-family:var(--sans);color:var(--blue);margin-bottom:6px}
+    .caption-float span{font-size:13px}
+
+    .follow{
+      min-height:auto;padding:8vh 0 0;text-align:center
+    }
+    .follow h3{
+      margin:0;font-family:var(--sans);color:var(--blue);
+      font-size:42px;line-height:1.1
+    }
+    .sns{
+      margin-top:12px;display:flex;justify-content:center;gap:10px
+    }
+    .sns a{
+      width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;
+      display:grid;place-items:center;font-family:var(--sans);font-size:13px
+    }
+
+    footer{
+      padding:24px 0 36px;background:#fff
+    }
+    .footer-title{
+      font-family:var(--sans);font-weight:800;
+      font-size:clamp(48px,7vw,110px);
+      color:var(--blue);line-height:.95;letter-spacing:-.04em;
+      margin:20px 0 8px
+    }
+    .footer-mini{
+      display:flex;justify-content:flex-end;gap:18px;
+      font-family:var(--sans);font-size:11px;color:#666
+    }
+
+    .grad-accent{
+      position:absolute;pointer-events:none;inset:auto auto 8% -8%;
+      width:340px;height:340px;border-radius:50%;
+      background:conic-gradient(from 120deg, rgba(255,157,0,.22), rgba(255,58,114,.16), rgba(0,113,185,.14), rgba(255,157,0,.18));
+      filter:blur(36px);opacity:.6
+    }
+
+    html.js .reveal{opacity:0;transform:translateY(30px);transition:1s ease-out}
+    html.js .reveal-right{opacity:0;transform:translateX(-50px);transition:1s ease-out}
+    html.js .reveal-left{opacity:0;transform:translateX(60px);transition:1.1s ease-out}
+    html.js .reveal-right-2{opacity:0;transform:translateX(-60px);transition:1.1s ease-out}
+    html.js .reveal-fade{opacity:0;transition:.8s ease-out}
+    html.js .reveal-scale{opacity:0;transform:translateY(40px) scale(.96);transition:1s ease-out}
+    html.js .reveal-pop{opacity:0;transform:scale(.8);transition:.8s cubic-bezier(.34,1.56,.64,1)}
+    html.js .reveal-up-sm{opacity:0;transform:translateY(25px);transition:.8s ease-out}
+    html.js .reveal-down{opacity:0;transform:translateY(-30px);transition:.85s ease-out}
+    html.js .reveal-plan{opacity:0;transform:scale(.9);transition:.9s ease-out}
+    html.js .hero-figure-anim{opacity:0;transition:1.2s ease-out}
+
+    html.js .is-visible{opacity:1;transform:none}
+    html.js .delay-1{transition-delay:.12s}
+    html.js .delay-2{transition-delay:.24s}
+    html.js .delay-3{transition-delay:.36s}
+    html.js .delay-4{transition-delay:.48s}
+    html.js .delay-5{transition-delay:.6s}
+    html.js .delay-6{transition-delay:.72s}
+
+    @keyframes floatSoft{
+      0%,100%{transform:translate(0,0) rotate(0deg)}
+      10%{transform:translate(-4px,0) rotate(1.5deg)}
+      20%{transform:translate(0,8px) rotate(-1deg)}
+      30%{transform:translate(5px,-1px) rotate(1deg)}
+      45%{transform:translate(8px,6px) rotate(0deg)}
+      60%{transform:translate(2px,-4px) rotate(-1deg)}
+      80%{transform:translate(-3px,4px) rotate(.8deg)}
+    }
+    @keyframes tokotokoLite{
+      0%,100%{transform:translateY(0) rotate(-3deg)}
+      5%{transform:translateY(-8px) rotate(-2deg)}
+      10%{transform:translateY(0) rotate(-3deg)}
+      15%{transform:translateY(-8px) rotate(-2deg)}
+      25%{transform:translateY(-18px) rotate(-4deg)}
+      30%{transform:translateY(0) rotate(-3deg)}
+    }
+
+    @media (max-width: 1024px){
+      .hero-grid,.about-grid,.flow-layout,.plan-grid,.cta-inner,.plan-visual,.phone-grid{grid-template-columns:1fr}
+      .service-grid{grid-template-columns:1fr}
+      .hero-right{min-height:540px}
+      .hero-vertical,.vertical-copy,.service-side-title{display:none}
+      .flow-side,.plan-side,.about-side{min-height:auto;justify-content:flex-start}
+      .voice-track{grid-template-columns:1fr 1fr}
+      .caption-float{position:static;margin-top:14px;width:auto}
+    }
+    @media (max-width: 768px){
+      .section{min-height:auto;padding:72px 0}
+      .container{width:min(calc(100% - 28px), var(--container))}
+      .nav-links{display:none}
+      .hero-strip{gap:10px}
+      .hero-right{min-height:420px}
+      .hero-figure{margin-top:90px}
+      .hero-title{font-size:56px}
+      .about-main p,.hero-copy{font-size:16px}
+      .voice-track{grid-template-columns:1fr}
+      .flow-item{grid-template-columns:1fr}
+      .timeline{grid-template-columns:1fr 1fr}
+      .footer-mini{justify-content:flex-start;flex-wrap:wrap}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a href="#" class="logo">
+        <span class="logo-mark">◉</span>
+        <span>みらいワークス</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#about">施設について</a>
+        <a href="#service">支援内容</a>
+        <a href="#flow">1日の流れ</a>
+        <a href="#plan">利用案内</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#cta" class="nav-cta">見学申込み</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="section hero">
+      <div class="container hero-grid">
+        <div class="hero-left reveal-right is-visible">
+          <div class="hero-kicker">MIRAI WORKS SUPPORT CENTER</div>
+          <h1 class="hero-title">
+            <span>はたらく、</span>
+            <span>自分らしく。</span>
+          </h1>
+          <p class="hero-copy">
+            障がいのある方の「働きたい」に寄り添い、就職準備から職場定着までを丁寧にサポート。
+            ご本人もご家族も、安心して一歩を踏み出せる就労支援事業所です。
+          </p>
+          <div class="hero-actions">
+            <a href="#cta" class="btn btn-primary reveal-pop is-visible delay-5">見学を申し込む</a>
+            <a href="#about" class="btn btn-secondary">施設を知る</a>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="hero-strip hero-figure-anim is-visible">
+            <div class="hero-window">
+              <img src="http://127.0.0.1:5000/uploads/up_39f3639774.png" alt="" width="400" height="400" onerror="this.style.display='none'">
+            </div>
+            <div class="hero-window">
+              <img src="http://127.0.0.1:5000/uploads/up_9c262ef683.png" alt="" width="400" height="400" onerror="this.style.display='none'">
+            </div>
+            <div class="hero-window">
+              <img src="http://127.0.0.1:5000/uploads/up_5ad70dab05.png" alt="" width="400" height="400" onerror="this.style.display='none'">
+            </div>
+          </div>
+          <div class="hero-figure hero-figure-anim is-visible">
+            <div class="hero-figure-wrap">
+              <img src="http://127.0.0.1:5000/uploads/up_e15b699973.png" alt="就労支援事業所の見学風景" width="520" height="650" onerror="this.style.display='none'">
+            </div>
+          </div>
+          <div class="hero-vertical reveal-fade is-visible">安心して、はたらく。</div>
+        </div>
+      </div>
+      <div class="grad-accent"></div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="container about-grid">
+        <aside class="about-side">
+          <div>
+            <div class="sec-head reveal-fade">
+              <div class="eyebrow">About</div>
+              <div class="sub-jp">施設について</div>
+            </div>
+          </div>
+        </aside>
+        <div class="about-main">
+          <p class="reveal">就職したい気持ちはあるけれど、何から始めればいいか分からない。</p>
+          <p class="reveal delay-1">人との関わり方、生活リズム、仕事の選び方に不安がある。</p>
+          <p class="reveal delay-2">みらいワークスは、そんな悩みを一つずつ整理しながら、無理のないペースで「働く準備」を整えていく場所です。</p>
+          <p class="reveal delay-3">PC訓練、軽作業、コミュニケーション練習、企業実習、面接同行まで、スタッフがチームで支援します。</p>
+          <p class="reveal delay-4">ご本人の強みを見つけ、ご家族とも連携しながら、長く安心して働き続ける未来を一緒に考えていきます。</p>
+          <a href="#cta" class="btn btn-secondary reveal-pop delay-5">もっとくわしく</a>
+        </div>
+        <div class="about-side">
+          <div class="vertical-copy reveal-fade">働く旅に、出よう。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-banner" id="cta">
+      <div class="container">
+        <div class="cta-box reveal">
+          <div class="eyebrow" style="color:#fff">Contact</div>
+          <div class="cta-inner">
+            <div>
+              <div style="font-family:var(--sans);font-size:28px;font-weight:800;margin-bottom:6px">見学・体験はいつでも受付中。</div>
+              <div style="opacity:.92;font-size:15px">施設の雰囲気を見てみたい、ご家族と一緒に相談したい、という方もお気軽にどうぞ。</div>
+            </div>
+            <div class="cta-panel">
+              <div>
+                <small style="font-family:var(--sans);color:var(--blue)">LINE・フォームから</small>
+                <div style="font-family:var(--sans);font-weight:800;color:var(--blue)">見学申込み受付中</div>
+              </div>
+              <a href="#" class="btn">申し込む</a>
+            </div>
+          </div>
+          <img class="cta-illust" src="http://127.0.0.1:5000/uploads/up_4648a670eb.png" alt="" width="160" height="180" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="service">
+      <div class="container" style="width:100%">
+        <div class="sec-head reveal-fade">
+          <div class="eyebrow">Service</div>
+          <h2>支援プログラム</h2>
+          <div class="sub-jp">一人ひとりに合わせたサポート</div>
+        </div>
+        <div class="service-grid">
+          <article class="service-card reveal-scale">
+            <div class="service-figure">
+              <img src="http://127.0.0.1:5000/uploads/up_84373df907.png" alt="就職準備支援" width="420" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>就職準備サポート</h3>
+            <p>生活リズムの安定、通所習慣づくり、得意不得意の整理など、就職活動の土台を整えます。</p>
+          </article>
+          <article class="service-card reveal-scale delay-1">
+            <div class="service-figure">
+              <img src="http://127.0.0.1:5000/uploads/up_e6e396b3d5.png" alt="PC訓練とコミュニケーション" width="420" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>PC・実務・対人訓練</h3>
+            <p>PC基礎、軽作業、報連相の練習、グループワークなど、実際の職場を想定した学びを行います。</p>
+          </article>
+          <article class="service-card reveal-scale delay-2">
+            <div class="service-figure">
+              <img src="http://127.0.0.1:5000/uploads/up_5f87cfafba.png" alt="職場定着支援" width="420" height="320" onerror="this.style.display='none'">
+            </div>
+            <h3>就職後の定着支援</h3>
+            <p>就職して終わりではなく、働き始めた後の悩みや職場調整まで継続して伴走します。</p>
+            <div class="service-side-title">MIRAI<br>WORK<br>PASSPORT</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section passport-sec">
+      <div class="big-runner reveal-fade">What is support ? What is support ? What is support ?</div>
+      <div class="container passport-content">
+        <div class="sec-head reveal-fade" style="text-align:center">
+          <div class="eyebrow" style="display:inline-block;padding-left:0">Support</div>
+          <h2 style="text-align:center">利用までの安心ステップ</h2>
+          <div class="sub-jp" style="text-align:center">「就労支援ってどんな場所？」にお答えします</div>
+        </div>
+        <p class="passport-lead reveal">
+          まずは見学・相談からスタート。現在の困りごとや希望をうかがい、体験利用、受給者証の申請、
+          利用開始、就職活動、定着支援へと進みます。はじめての方にも分かりやすく、段階ごとに伴走します。
+        </p>
+
+        <div class="phone-grid">
+          <article class="phone-card reveal-right-2">
+            <small>STEP 01</small>
+            <h3>見学・体験相談</h3>
+            <p>施設内の雰囲気や訓練内容を実際に見ながら、今の不安や希望をスタッフと整理します。</p>
+            <div class="phone-mock">
+              <img src="http://127.0.0.1:5000/uploads/up_68a39f677b.png" alt="見学相談の様子" width="380" height="680" onerror="this.style.display='none'">
+            </div>
+          </article>
+
+          <div class="center-book reveal-fade">
+            <div class="mini">見学<br>ガイド</div>
+            <div style="font-family:var(--sans);font-size:12px;color:var(--blue)">Support Book</div>
+          </div>
+
+          <article class="phone-card reveal-left">
+            <small>STEP 02</small>
+            <h3>利用開始へ準備</h3>
+            <p>必要な手続きや通所ペースを確認し、ご本人に合ったプログラムを組み立てていきます。</p>
+            <div class="phone-mock">
+              <img src="http://127.0.0.1:5000/uploads/up_5e27f78625.png" alt="申請と利用準備" width="380" height="680" onerror="this.style.display='none'">
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="flow">
+      <div class="container flow-layout">
+        <aside class="flow-side">
+          <div>
+            <div class="sec-head reveal-fade">
+              <div class="eyebrow">Flow</div>
+              <div class="sub-jp">1日の流れ</div>
+            </div>
+            <div class="vertical-copy reveal-fade">無理なく、<br>少しずつ。</div>
+          </div>
+        </aside>
+
+        <div class="flow-list">
+          <article class="flow-item reveal">
+            <div class="flow-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_d83a2a4e87.png" alt="朝のチェックイン" width="170" height="170" onerror="this.style.display='none'">
+            </div>
+            <div class="flow-text">
+              <small>Flow 01</small>
+              <h3>体調確認とスケジュール共有</h3>
+              <p>朝のあいさつからスタート。体調や気分を確認し、その日の目標をスタッフと一緒に決めます。</p>
+            </div>
+          </article>
+
+          <article class="flow-item reveal delay-1">
+            <div class="flow-icon" style="transform:rotate(4deg)">
+              <img src="http://127.0.0.1:5000/uploads/up_3996f78e40.png" alt="訓練と学び" width="170" height="170" onerror="this.style.display='none'">
+            </div>
+            <div class="flow-text">
+              <small>Flow 02</small>
+              <h3>PC訓練・軽作業・グループワーク</h3>
+              <p>事務補助や入力練習、軽作業、コミュニケーション練習などを通して、働く力をバランス良く育てます。</p>
+            </div>
+          </article>
+
+          <article class="flow-item reveal delay-2">
+            <div class="flow-icon" style="transform:rotate(-5deg)">
+              <img src="http://127.0.0.1:5000/uploads/up_b67073570c.png" alt="振り返り面談" width="170" height="170" onerror="this.style.display='none'">
+            </div>
+            <div class="flow-text">
+              <small>Flow 03</small>
+              <h3>振り返りと個別面談</h3>
+              <p>その日の出来たことや疲れたポイントを整理し、次回へつながる小さな成功体験を積み重ねます。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="plan">
+      <div class="container plan-grid">
+        <aside class="plan-side">
+          <div>
+            <div class="sec-head reveal-fade">
+              <div class="eyebrow">Plan</div>
+              <div class="sub-jp">利用案内</div>
+            </div>
+            <div class="vertical-copy reveal-fade">暮らしと<br>就職の間を、<br>つなぐ。</div>
+          </div>
+        </aside>
+
+        <div class="plan-main">
+          <div class="plan-visual">
+            <div class="plan-visual-stack reveal">
+              <div class="stack-card one">
+                <img src="http://127.0.0.1:5000/uploads/up_eb40648014.png" alt="" width="180" height="220" onerror="this.style.display='none'">
+              </div>
+              <div class="stack-card two">
+                <img src="http://127.0.0.1:5000/uploads/up_dc59ed3112.png" alt="" width="170" height="190" onerror="this.style.display='none'">
+              </div>
+              <div class="stack-card three">
+                <img src="http://127.0.0.1:5000/uploads/up_9deeed0081.png" alt="" width="190" height="122" onerror="this.style.display='none'">
+              </div>
+            </div>
+
+            <div class="price-box reveal-plan">
+              <small>利用料金の目安</small>
+              <div class="price-main">
+                <span class="num">0</span>
+                <span class="yen">円〜</span>
+              </div>
+              <div class="price-notes">
+                多くの方が公費負担の対象となり、自己負担なく利用されています。<br>
+                世帯収入等に応じて上限が決まります。
+              </div>
+            </div>
+          </div>
+
+          <div class="rule-line"></div>
+
+          <div class="support-list">
+            <div class="item reveal-up-sm">
+              <h4>Support 01　通所ペースは個別に調整</h4>
+              <p>週2日からのスタートや、午前のみの通所なども可能です。体調や生活状況に合わせて無理なく進めます。</p>
+            </div>
+            <div class="item reveal-up-sm delay-1">
+              <h4>Support 02　就職活動も伴走</h4>
+              <p>履歴書作成、面接練習、求人選び、企業実習、面接同行までを支援員が一緒に進めます。</p>
+            </div>
+            <div class="item reveal-up-sm delay-2">
+              <h4>Support 03　ご家族・支援機関との連携</h4>
+              <p>必要に応じてご家族や医療機関、相談支援専門員と連携し、安心できる就労環境づくりを支えます。</p>
+            </div>
+          </div>
+
+          <div class="schedule-figure reveal">
+            <div style="font-family:var(--sans);color:var(--blue);font-weight:700;margin-bottom:14px">ある1日のスケジュール例</div>
+            <div class="timeline">
+              <div class="time">10:00</div>
+              <div class="activity">朝礼・体調確認</div>
+              <div class="time">11:00</div>
+              <div class="activity">PC訓練</div>
+
+              <div class="timeline-bar"></div>
+
+              <div class="time">13:00</div>
+              <div class="activity">昼休み・休憩</div>
+              <div class="time">14:00</div>
+              <div class="activity">軽作業・面談</div>
+
+              <div class="timeline-bar"></div>
+
+              <div class="time">15:30</div>
+              <div class="activity">振り返り</div>
+              <div class="time">16:00</div>
+              <div class="activity">終了・帰宅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-auto" id="faq">
+      <div class="container faq-wrap">
+        <div class="sec-head reveal-fade">
+          <div class="eyebrow">FAQ</div>
+          <h2>よくある質問</h2>
+          <div class="sub-jp">はじめての方が気になること</div>
+        </div>
+
+        <div class="faq-card">
+          <img class="faq-illust reveal-down" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="" width="88" height="88" onerror="this.style.display='none'">
+          <div class="faq-item reveal-up-sm"><span>障がい者手帳がなくても相談できますか？</span><span>＋</span></div>
+          <div class="faq-item reveal-up-sm delay-1"><span>働いた経験が少なくても利用できますか？</span><span>＋</span></div>
+          <div class="faq-item reveal-up-sm delay-2"><span>人との会話が苦手でも大丈夫ですか？</span><span>＋</span></div>
+          <div class="faq-item reveal-up-sm delay-3"><span>見学は家族や支援者と一緒でもいいですか？</span><span>＋</span></div>
+          <div class="faq-item reveal-up-sm delay-4"><span>就職した後も相談できますか？</span><span>＋</span></div>
+          <div style="text-align:right;margin-top:10px">
+            <a href="#cta" class="btn btn-primary reveal-pop">お問い合わせはこちら</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-auto">
+      <div class="container">
+        <div class="sec-head reveal-fade">
+          <div class="eyebrow">Voice</div>
+          <h2>利用者・ご家族の声</h2>
+          <div class="sub-jp">安心して通えた理由</div>
+        </div>
+
+        <div class="voice-slider">
+          <div class="voice-track">
+            <article class="voice-card reveal">
+              <div class="voice-avatar">
+                <img src="http://127.0.0.1:5000/uploads/up_d047f3036e.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+              </div>
+              <h3>少しずつ自信がついた</h3>
+              <p>最初は週2日からでしたが、今は通所が習慣になり、面接にも前向きに行けるようになりました。</p>
+              <small>20代 / 利用者</small>
+            </article>
+
+            <article class="voice-card reveal delay-1">
+              <div class="voice-avatar">
+                <img src="http://127.0.0.1:5000/uploads/up_b1cc387964.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+              </div>
+              <h3>家族としても安心でした</h3>
+              <p>本人の気持ちだけでなく、家族の不安にも丁寧に答えてもらえたので、安心して任せられました。</p>
+              <small>ご家族</small>
+            </article>
+
+            <article class="voice-card reveal delay-2">
+              <div class="voice-avatar">
+                <img src="http://127.0.0.1:5000/uploads/up_a836060db3.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+              </div>
+              <h3>相談しやすい雰囲気</h3>
+              <p>困った時に話しかけやすく、できないことを責められない環境だったのが大きかったです。</p>
+              <small>30代 / 利用者</small>
+            </article>
+
+            <article class="voice-card reveal delay-3">
+              <div class="voice-avatar">
+                <img src="http://127.0.0.1:5000/uploads/up_785a85c0f8.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+              </div>
+              <h3>スタッフの連携が丁寧</h3>
+              <p>担当だけでなく複数のスタッフが様子を見てくださり、その日の体調に合わせて声をかけてくれます。</p>
+              <small>ご家族</small>
+            </article>
+
+            <article class="voice-card reveal delay-4">
+              <div class="voice-avatar">
+                <img src="http://127.0.0.1:5000/uploads/up_ed36c0721a.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+              </div>
+              <h3>就職後も頼れた</h3>
+              <p>働き始めてからの悩みも相談できたので、辞めずに続けられています。定着支援が心強かったです。</p>
+              <small>20代 / 卒業生</small>
+            </article>
+          </div>
+          <div class="dots">
+            <span></span><span class="active"></span><span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-banner">
+      <div class="container">
+        <div class="cta-box reveal">
+          <div class="eyebrow" style="color:#fff">Visit</div>
+          <div class="cta-inner">
+            <div>
+              <div style="font-family:var(--sans);font-size:28px;font-weight:800;margin-bottom:6px">まずは、見学からはじめませんか。</div>
+              <div style="opacity:.92;font-size:15px">無理な勧誘はありません。お話を聞くだけでも大丈夫です。ご本人・ご家族・支援者の同席も歓迎します。</div>
+            </div>
+            <div class="cta-panel">
+              <div>
+                <small style="font-family:var(--sans);color:var(--blue)">受付時間 平日 9:00-17:00</small>
+                <div style="font-family:var(--sans);font-weight:800;color:var(--blue)">見学予約フォームへ</div>
+              </div>
+              <a href="#" class="btn">LINEで予約</a>
+            </div>
+          </div>
+          <img class="cta-illust" src="http://127.0.0.1:5000/uploads/up_88980e425b.png" alt="" width="160" height="180" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-auto">
+      <div class="container">
+        <div class="sec-head reveal-fade">
+          <div class="eyebrow">Staff</div>
+          <h2>スタッフ紹介</h2>
+          <div class="sub-jp">支援員・職業指導員・相談担当が連携します</div>
+        </div>
+
+        <div class="team-photo-wrap reveal">
+          <div class="team-photo-bg"></div>
+          <div class="team-photo">
+            <img src="http://127.0.0.1:5000/uploads/up_5c62bc58f1.png" alt="スタッフ紹介" width="960" height="600" onerror="this.style.display='none'">
+          </div>
+          <div class="caption-float">
+            <strong>「あなたのペースで大丈夫です」</strong>
+            <span>小さな変化を一緒に喜びながら、就職までの道のりを伴走します。 / 支援員一同</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="follow">
+      <div class="container">
+        <div class="eyebrow" style="display:inline-block;padding-left:0">Follow us !</div>
+        <h3>見学前に、<br>施設の雰囲気を。</h3>
+        <div class="sns">
+          <a href="#">ig</a>
+          <a href="#">X</a>
+          <a href="#">L</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-mini">
+        <span>施設紹介</span>
+        <span>支援プログラム</span>
+        <span>利用案内</span>
+        <span>見学申込み</span>
+      </div>
+      <div class="footer-title reveal-fade">MIRAI WORK PASSPORT</div>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const targets = document.querySelectorAll(
+        '.reveal,.reveal-right,.reveal-left,.reveal-right-2,.reveal-fade,.reveal-scale,.reveal-pop,.reveal-up-sm,.reveal-down,.reveal-plan,.hero-figure-anim'
+      );
+
+      const io = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.18,
+        rootMargin: '0px 0px -15% 0px'
+      });
+
+      targets.forEach(el => {
+        if (!el.classList.contains('is-visible')) io.observe(el);
+      });
+    })();
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

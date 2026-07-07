@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>就労支援事業所 そらみち｜読むように、ひとりずつ未来をひらく</title>
+  <meta name="description" content="就労支援事業所そらみちのホームページ。施設紹介、支援プログラム、1日の流れ、スタッフ紹介、よくある質問、見学申込みをご案内します。">
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-soft:#fafafa;
+      --blue:#0071b9;
+      --blue-soft:#b2d4ea;
+      --yellow:#f2e018;
+      --text:#333333;
+      --shadow:5px 5px 10px rgba(174,174,174,.10);
+      --shadow-strong:0 16px 32px rgba(50,50,93,.12);
+      --radius:8px;
+      --container:1440px;
+      --serif:"Times New Roman", serif;
+      --sans:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+      --grad-tech:linear-gradient(135deg, rgba(255,153,61,.22) 0%, rgba(255,117,180,.16) 30%, rgba(83,58,253,.12) 58%, rgba(0,113,185,.10) 100%);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+    body{
+      font-family:var(--serif);
+      line-height:1.8;
+      overflow-x:hidden;
+      background:
+        radial-gradient(circle at 88% 8%, rgba(255,153,61,.12), transparent 28%),
+        radial-gradient(circle at 100% 12%, rgba(83,58,253,.09), transparent 24%),
+        linear-gradient(180deg, #fff 0%, #fff 55%, #fafafa 100%);
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{
+      width:min(calc(100% - 48px), var(--container));
+      margin:0 auto;
+    }
+    .section{
+      position:relative;
+      min-height:100vh;
+      padding:10vh 0;
+      display:flex;
+      align-items:center;
+    }
+    .section.soft{background:var(--bg-soft)}
+    .section-title{
+      margin:0 0 30px;
+      text-align:left;
+    }
+    .section-title .en{
+      display:block;
+      font-family:var(--sans);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--blue);
+      margin-bottom:8px;
+      position:relative;
+      padding-left:22px;
+    }
+    .section-title .en::before{
+      content:"";
+      position:absolute;
+      left:0;top:50%;
+      width:14px;height:1px;
+      background:var(--blue);
+      transform:translateY(-50%);
+    }
+    .section-title .jp{
+      display:block;
+      font-family:var(--sans);
+      font-size:clamp(26px, 3vw, 42px);
+      line-height:1.3;
+      font-weight:800;
+      color:var(--text);
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(0,113,185,.08);
+    }
+    .header-inner{
+      width:min(calc(100% - 32px), var(--container));
+      margin:0 auto;
+      height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+    .logo{
+      display:flex;align-items:center;gap:10px;
+      font-family:var(--sans);
+      font-weight:800;
+      color:#fff;
+    }
+    .logo-mark{
+      width:34px;height:34px;border-radius:50%;
+      background:var(--blue);
+      display:grid;place-items:center;
+      box-shadow:var(--shadow);
+      font-size:16px;
+    }
+    .logo-text{
+      color:var(--blue);
+      font-size:15px;
+      letter-spacing:.02em;
+    }
+    nav{
+      display:flex;align-items:center;gap:22px;
+      font-family:var(--sans);
+      font-size:12px;
+      color:#4a4a4a;
+    }
+    nav a{opacity:.85}
+    nav a:hover{opacity:1;color:var(--blue)}
+    .header-cta{
+      padding:10px 16px;
+      border-radius:999px;
+      background:var(--yellow);
+      color:#222;
+      font-weight:700;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      padding-top:6vh;
+      overflow:hidden;
+      background:
+        linear-gradient(180deg, #fff 0%, #fff 68%, #f6f6f6 100%);
+    }
+    .hero-top{
+      display:grid;
+      grid-template-columns:1.15fr .95fr;
+      gap:56px;
+      align-items:center;
+      width:100%;
+    }
+    .hero-copy{
+      position:relative;
+      padding:20px 0 20px 10px;
+    }
+    .hero-copy::before{
+      content:"";
+      position:absolute;
+      right:-60px; top:-30px;
+      width:420px; height:420px;
+      background:var(--grad-tech);
+      filter:blur(10px);
+      border-radius:50%;
+      opacity:.85;
+      z-index:-1;
+    }
+    .hero-kicker{
+      font-family:var(--sans);
+      font-size:13px;
+      color:var(--blue);
+      letter-spacing:.12em;
+      font-weight:700;
+      margin-bottom:18px;
+    }
+    .hero-title{
+      font-family:var(--sans);
+      font-size:clamp(34px, 6vw, 84px);
+      line-height:1.08;
+      letter-spacing:.01em;
+      font-weight:800;
+      margin:0 0 22px;
+      color:var(--blue);
+    }
+    .hero-desc{
+      max-width:560px;
+      font-size:17px;
+      margin:0 0 28px;
+    }
+    .hero-actions{
+      display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+    }
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:14px 22px;
+      border-radius:999px;
+      font-family:var(--sans);
+      font-size:14px;
+      font-weight:700;
+      transition:transform .35s cubic-bezier(.19,1,.22,1), box-shadow .35s cubic-bezier(.19,1,.22,1), background .35s ease, color .35s ease;
+      will-change:transform;
+    }
+    .btn:hover{transform:translateY(-3px);box-shadow:var(--shadow-strong)}
+    .btn-primary{background:var(--blue);color:#fff;box-shadow:var(--shadow)}
+    .btn-secondary{background:#fff;color:var(--blue);border:1px solid rgba(0,113,185,.22)}
+    .hero-visual-wrap{
+      position:relative;
+      min-height:560px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .window-grid{
+      position:absolute;
+      inset:0;
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:12px;
+      pointer-events:none;
+      opacity:.95;
+    }
+    .window-grid .pane{
+      border-radius:12px;
+      overflow:hidden;
+      background:linear-gradient(180deg, #89d4ea 0%, #bde7f7 100%);
+      box-shadow:var(--shadow);
+      position:relative;
+    }
+    .window-grid .pane::after{
+      content:"";
+      position:absolute;inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,0));
+    }
+    .hero-figure{
+      position:relative;
+      width:min(86%, 540px);
+      aspect-ratio:1/1.05;
+      border-radius:18px;
+      overflow:visible;
+      z-index:2;
+    }
+    .hero-figure img{
+      width:100%;height:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 18px 30px rgba(0,0,0,.10));
+    }
+    .hero-badge{
+      position:absolute;
+      right:10px; top:20px;
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      font-family:var(--sans);
+      font-weight:800;
+      font-size:28px;
+      line-height:1.4;
+      color:var(--blue);
+      background:#fff;
+      padding:14px 10px;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+    }
+
+    .about-grid{
+      display:grid;
+      grid-template-columns:.18fr 1fr .34fr;
+      gap:42px;
+      align-items:center;
+      width:100%;
+    }
+    .vertical-copy{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      font-family:var(--sans);
+      font-weight:700;
+      letter-spacing:.08em;
+      font-size:clamp(22px, 3.2vw, 42px);
+      color:var(--blue);
+      justify-self:end;
+      height:420px;
+    }
+    .about-body{
+      max-width:640px;
+      margin-left:20px;
+    }
+    .about-body p{
+      margin:0 0 20px;
+      font-size:17px;
+    }
+
+    .cta-banner{
+      min-height:auto;
+      padding:30px 0 40px;
+    }
+    .cta-box{
+      background:var(--blue);
+      color:#fff;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      padding:28px 34px;
+      display:grid;
+      grid-template-columns:1.2fr auto;
+      align-items:center;
+      gap:20px;
+      position:relative;
+      overflow:visible;
+    }
+    .cta-box::before{
+      content:"";
+      position:absolute;
+      right:30px; top:-20px;
+      width:120px;height:120px;border-radius:50%;
+      background:rgba(255,255,255,.18);
+      filter:blur(2px);
+    }
+    .cta-box .small{
+      font-family:var(--sans);
+      font-size:12px;
+      letter-spacing:.12em;
+      opacity:.85;
+      text-transform:uppercase;
+    }
+    .cta-box h3{
+      font-family:var(--sans);
+      font-size:clamp(22px, 2.4vw, 36px);
+      line-height:1.25;
+      margin:6px 0 10px;
+    }
+    .cta-box p{margin:0;opacity:.92}
+    .cta-action{
+      display:flex;align-items:center;gap:14px;
+    }
+    .cta-btn-green{
+      background:#20c152;
+      color:#fff;
+      border-radius:999px;
+      padding:14px 28px;
+      font-family:var(--sans);
+      font-weight:800;
+      box-shadow:var(--shadow);
+      white-space:nowrap;
+    }
+    .cta-figure{
+      position:absolute;
+      right:14px;
+      bottom:-26px;
+      width:120px;
+      transform:rotate(-4deg);
+      animation:tokotoko-lite 8s cubic-bezier(0,1,0,1) infinite;
+    }
+
+    .service{
+      overflow:hidden;
+    }
+    .service-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:26px;
+      align-items:start;
+    }
+    .service-card{
+      position:relative;
+      background:#fff;
+      padding:16px;
+      border-radius:12px;
+      transition:transform .45s cubic-bezier(.19,1,.22,1), box-shadow .45s cubic-bezier(.19,1,.22,1);
+    }
+    .service-card:hover{transform:translateY(-6px) rotate(-.4deg);box-shadow:var(--shadow-strong)}
+    .service-card:nth-child(2){margin-top:36px}
+    .service-card:nth-child(3){margin-top:8px}
+    .service-media{
+      background:linear-gradient(180deg, #eef8fd 0%, #fff 100%);
+      border-radius:12px;
+      padding:16px;
+      aspect-ratio:4/3;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+    }
+    .service-media img{
+      width:100%;height:100%;object-fit:contain;
+    }
+    .service-card h4{
+      font-family:var(--sans);
+      font-size:22px;
+      margin:0 0 10px;
+      color:var(--blue);
+    }
+    .service-card p{
+      margin:0;
+      font-size:15px;
+    }
+    .service-sideword{
+      position:absolute;
+      right:0;
+      top:110px;
+      font-family:var(--sans);
+      font-weight:800;
+      font-size:24px;
+      letter-spacing:.08em;
+      color:var(--blue);
+      writing-mode:vertical-rl;
+    }
+
+    .passport{
+      background:linear-gradient(180deg, var(--blue-soft) 0%, #d5ebf7 100%);
+      overflow:hidden;
+    }
+    .passport::after{
+      content:"";
+      position:absolute;
+      left:0;right:0;bottom:-2px;
+      height:120px;
+      background:
+        radial-gradient(circle at 10% 0, #fff 0 55px, transparent 56px),
+        radial-gradient(circle at 30% 0, #fff 0 70px, transparent 71px),
+        radial-gradient(circle at 50% 0, #fff 0 62px, transparent 63px),
+        radial-gradient(circle at 70% 0, #fff 0 76px, transparent 77px),
+        radial-gradient(circle at 90% 0, #fff 0 56px, transparent 57px);
+      background-repeat:no-repeat;
+      background-size:20% 100%;
+      background-position:0 0, 25% 0, 50% 0, 75% 0, 100% 0;
+      transform:translateY(58px);
+    }
+    .passport .big-bg{
+      position:absolute;
+      left:-20px;
+      top:100px;
+      font-family:var(--sans);
+      font-size:clamp(42px, 7vw, 112px);
+      line-height:.95;
+      font-weight:800;
+      color:rgba(0,113,185,.95);
+      white-space:nowrap;
+      pointer-events:none;
+    }
+    .passport-head{
+      max-width:860px;
+      margin:0 auto 48px;
+      text-align:center;
+      position:relative;
+      z-index:2;
+    }
+    .passport-head .mini{
+      font-family:var(--sans);
+      font-size:13px;
+      color:var(--blue);
+      letter-spacing:.12em;
+      margin-bottom:12px;
+    }
+    .passport-head h3{
+      font-family:var(--sans);
+      font-size:clamp(26px,3vw,38px);
+      margin:0 0 12px;
+      color:var(--text);
+    }
+    .passport-head p{margin:0 auto;max-width:720px;font-size:15px}
+    .phone-grid{
+      position:relative;
+      z-index:2;
+      display:grid;
+      grid-template-columns:1fr 180px 1fr;
+      gap:24px;
+      align-items:center;
+      margin-top:26px;
+    }
+    .phone-card{
+      background:#fff;
+      border-radius:12px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      position:relative;
+      min-height:450px;
+    }
+    .phone-card .num{
+      font-family:var(--sans);
+      font-size:11px;
+      letter-spacing:.12em;
+      color:var(--blue);
+      text-transform:uppercase;
+      margin-bottom:4px;
+    }
+    .phone-card h4{
+      font-family:var(--sans);
+      font-size:22px;
+      line-height:1.35;
+      margin:0 0 10px;
+      color:var(--blue);
+    }
+    .phone-card p{font-size:14px;margin:0 0 16px}
+    .phone-frame{
+      background:linear-gradient(180deg, #f5fbff 0%, #eaf6fd 100%);
+      border:8px solid #dcecf6;
+      border-radius:30px;
+      padding:12px;
+      width:min(100%, 260px);
+      aspect-ratio:9/18.5;
+      margin:0 auto;
+      box-shadow:inset 0 0 0 2px rgba(0,113,185,.06);
+    }
+    .phone-frame img{
+      width:100%;height:100%;object-fit:cover;border-radius:20px;
+    }
+    .center-pass{
+      display:grid;place-items:center;
+      gap:16px;
+    }
+    .pass-book{
+      width:110px;aspect-ratio:4/5;
+      background:var(--blue);
+      border-radius:6px;
+      box-shadow:var(--shadow-strong);
+      position:relative;
+    }
+    .pass-book::before{
+      content:"就労\nパスポート";
+      white-space:pre;
+      position:absolute;inset:0;
+      display:grid;place-items:center;
+      color:#fff;
+      font-family:var(--sans);
+      font-weight:800;
+      letter-spacing:.08em;
+      font-size:17px;
+      text-align:center;
+      line-height:1.5;
+    }
+    .ticket-stack{
+      position:absolute;
+      right:-20px;bottom:-24px;
+      width:110px;
+      transform:rotate(-12deg);
+      animation:pyoko-lite 8s cubic-bezier(0,1,0,1) infinite;
+    }
+
+    .flow-grid{
+      display:grid;
+      grid-template-columns:.25fr 1fr;
+      gap:60px;
+      align-items:start;
+      width:100%;
+    }
+    .flow-side{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      font-family:var(--sans);
+      font-weight:700;
+      color:var(--blue);
+      font-size:clamp(20px,2.6vw,34px);
+      height:520px;
+      justify-self:center;
+    }
+    .flow-list{
+      display:grid;
+      gap:30px;
+      max-width:900px;
+    }
+    .flow-item{
+      display:grid;
+      grid-template-columns:130px 1fr;
+      gap:28px;
+      align-items:center;
+      position:relative;
+    }
+    .flow-item:not(:last-child)::after{
+      content:"";
+      position:absolute;
+      left:64px;
+      top:118px;
+      width:2px;height:52px;
+      background:linear-gradient(180deg, rgba(0,113,185,.6), rgba(0,113,185,.08));
+    }
+    .flow-icon{
+      width:120px;height:120px;
+      border-radius:22px;
+      background:linear-gradient(180deg, #f2fbff 0%, #fff 100%);
+      display:grid;place-items:center;
+      box-shadow:var(--shadow);
+      transform:rotate(-5deg);
+    }
+    .flow-icon img{width:82%;height:82%;object-fit:contain}
+    .flow-text .step{
+      font-family:var(--sans);
+      font-size:11px;
+      letter-spacing:.12em;
+      color:var(--blue);
+      text-transform:uppercase;
+      margin-bottom:3px;
+    }
+    .flow-text h4{
+      font-family:var(--sans);
+      font-size:24px;
+      margin:0 0 8px;
+      color:var(--blue);
+    }
+    .flow-text p{margin:0;font-size:15px}
+
+    .plan-layout{
+      display:grid;
+      grid-template-columns:.28fr .72fr;
+      gap:56px;
+      align-items:center;
+      width:100%;
+    }
+    .plan-side{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      font-family:var(--sans);
+      color:var(--blue);
+      font-weight:700;
+      font-size:clamp(20px,2.6vw,34px);
+      height:430px;
+      justify-self:center;
+    }
+    .plan-main{
+      max-width:860px;
+    }
+    .plan-illus{
+      display:flex;
+      align-items:end;
+      gap:20px;
+      margin-bottom:10px;
+      padding-left:40px;
+    }
+    .mini-book,.mini-tray,.mini-card{
+      box-shadow:var(--shadow);
+      background:#fff;
+    }
+    .mini-book{
+      width:90px;height:120px;background:var(--blue);border-radius:6px;transform:rotate(-12deg)
+    }
+    .mini-tray{
+      width:145px;height:70px;border-radius:10px;background:linear-gradient(180deg,#eef7fd,#d7ebf8);transform:rotate(10deg)
+    }
+    .mini-card{
+      width:130px;height:90px;border-radius:10px;background:linear-gradient(180deg,#fff,#f5fbff);transform:rotate(-6deg)
+    }
+    .price-box{
+      background:#e7f3fa;
+      border-radius:12px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
+      max-width:640px;
+      margin-left:40px;
+      border:1px solid rgba(0,113,185,.08);
+    }
+    .price-left{
+      background:#fff;
+      border-radius:10px;
+      padding:18px;
+    }
+    .price-left .label{
+      font-family:var(--sans);
+      font-size:12px;
+      color:var(--blue);
+      letter-spacing:.12em;
+      margin-bottom:8px;
+    }
+    .price-left .price{
+      font-family:var(--sans);
+      font-size:clamp(36px,5vw,58px);
+      font-weight:800;
+      color:var(--blue);
+      line-height:1;
+      margin-bottom:8px;
+    }
+    .price-left .note{font-size:13px;margin:0}
+    .price-right{
+      background:#f8fcff;
+      border-radius:10px;
+      padding:14px 16px;
+      font-size:14px;
+    }
+    .price-right dl{margin:0}
+    .price-right div{
+      display:flex;justify-content:space-between;gap:16px;
+      padding:10px 0;border-bottom:1px solid rgba(0,113,185,.12)
+    }
+    .price-right div:last-child{border-bottom:none}
+
+    .support-detail{
+      min-height:auto;
+      padding-top:20px;
+      padding-bottom:100px;
+      background:#fff;
+    }
+    .support-divider{
+      width:100%;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(0,113,185,.35), transparent);
+      margin:0 0 28px;
+    }
+    .support-copy{
+      max-width:900px;
+    }
+    .support-copy h3{
+      font-family:var(--sans);
+      font-size:28px;
+      margin:0 0 18px;
+      color:var(--blue);
+    }
+    .support-copy p{
+      margin:0 0 16px;
+      font-size:15px;
+    }
+    .support-diagram{
+      margin-top:30px;
+      background:linear-gradient(180deg,#f9fcfe 0%,#eef7fd 100%);
+      border-radius:16px;
+      padding:26px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:24px;
+      align-items:center;
+    }
+    .timeline{
+      position:relative;
+      padding:18px 0;
+      min-height:320px;
+    }
+    .timeline::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:10px;bottom:10px;
+      width:4px;border-radius:2px;
+      background:linear-gradient(180deg, #8bc2e4, #0071b9);
+      transform:translateX(-50%);
+    }
+    .timeline-node{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      width:78px;height:78px;border-radius:50%;
+      background:#fff;
+      display:grid;place-items:center;
+      box-shadow:var(--shadow);
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:12px;
+      font-weight:800;
+      text-align:center;
+      line-height:1.3;
+    }
+    .timeline-node:nth-child(1){top:18px}
+    .timeline-node:nth-child(2){top:124px}
+    .timeline-node:nth-child(3){top:232px}
+    .timeline-boxes{
+      display:grid;
+      gap:16px;
+    }
+    .timeline-box{
+      background:#fff;
+      border-radius:12px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      font-size:14px;
+    }
+
+    .faq{
+      background:linear-gradient(180deg, #fff 0%, #fbfdff 100%);
+    }
+    .faq::before{
+      content:"";
+      position:absolute;
+      left:0;right:0;top:-1px;
+      height:70px;
+      background:
+        radial-gradient(circle at 10% 100%, transparent 0 42px, #fff 43px),
+        radial-gradient(circle at 30% 100%, transparent 0 55px, #fff 56px),
+        radial-gradient(circle at 52% 100%, transparent 0 48px, #fff 49px),
+        radial-gradient(circle at 74% 100%, transparent 0 58px, #fff 59px),
+        radial-gradient(circle at 92% 100%, transparent 0 40px, #fff 41px);
+    }
+    .faq-wrap{
+      width:100%;
+      position:relative;
+    }
+    .faq-book{
+      position:absolute;
+      right:40px;
+      top:10px;
+      width:74px;height:92px;border-radius:6px;
+      background:linear-gradient(180deg,#347db7,#0f5c9b);
+      transform:rotate(8deg);
+      box-shadow:var(--shadow);
+    }
+    .faq-book::before{
+      content:"FAQ";
+      position:absolute;inset:0;display:grid;place-items:center;
+      color:#fff;font-family:var(--sans);font-weight:800;letter-spacing:.08em;
+    }
+    .faq-list{
+      max-width:980px;
+      display:grid;
+      gap:10px;
+    }
+    .faq-item{
+      background:#eef7fd;
+      border:1px solid rgba(0,113,185,.08);
+      border-radius:6px;
+      overflow:hidden;
+      box-shadow:0 2px 0 rgba(0,113,185,.03);
+    }
+    .faq-q{
+      width:100%;
+      background:none;border:none;
+      padding:18px 20px;
+      display:flex;align-items:center;justify-content:space-between;gap:20px;
+      font:600 15px var(--sans);
+      color:#234;
+      text-align:left;
+      cursor:pointer;
+    }
+    .faq-a{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .45s ease, padding .35s ease;
+      padding:0 20px;
+      font-size:14px;
+      background:#fff;
+    }
+    .faq-item.open .faq-a{
+      max-height:180px;
+      padding:0 20px 16px;
+    }
+    .faq-more{
+      margin-top:22px;
+      text-align:right;
+    }
+
+    .voice{
+      min-height:auto;
+      padding-top:80px;
+      padding-bottom:80px;
+    }
+    .voice-track{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(220px,1fr));
+      gap:18px;
+      overflow-x:auto;
+      padding-bottom:10px;
+      scrollbar-width:none;
+    }
+    .voice-track::-webkit-scrollbar{display:none}
+    .voice-card{
+      background:#fff;
+      border-radius:12px;
+      padding:18px 16px 20px;
+      box-shadow:var(--shadow);
+      min-width:220px;
+      position:relative;
+    }
+    .voice-card::before{
+      content:"“";
+      position:absolute;
+      right:12px;top:8px;
+      font-size:44px;line-height:1;color:rgba(0,113,185,.16);
+      font-family:var(--sans);font-weight:800;
+    }
+    .voice-avatar{
+      width:84px;height:84px;border-radius:50%;
+      overflow:hidden;
+      margin:0 auto 14px;
+      background:linear-gradient(180deg,#e5f2fb,#fff);
+      box-shadow:var(--shadow);
+    }
+    .voice-avatar img{width:100%;height:100%;object-fit:cover}
+    .voice-card h4{
+      font-family:var(--sans);
+      font-size:16px;
+      margin:0 0 8px;
+      text-align:center;
+      color:var(--blue);
+    }
+    .voice-card p{
+      margin:0;
+      font-size:13px;
+      line-height:1.75;
+      text-align:left;
+    }
+    .voice-dots{
+      display:flex;justify-content:center;gap:12px;margin-top:18px;
+    }
+    .voice-dots span{
+      width:10px;height:10px;border-radius:50%;
+      background:#c9e0ef;
+    }
+    .voice-dots span.active{background:var(--blue)}
+
+    .staff-photo-block{
+      position:relative;
+      margin-top:36px;
+      max-width:520px;
+    }
+    .staff-photo-bg{
+      position:absolute;
+      inset:auto -20px -20px auto;
+      width:180px;height:180px;
+      border-radius:50%;
+      background:rgba(178,212,234,.85);
+      filter:blur(18px);
+      z-index:-1;
+    }
+    .staff-photo{
+      border-radius:16px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#dff0fa,#f8fcff);
+      box-shadow:var(--shadow-strong);
+      aspect-ratio:4/4.8;
+    }
+    .staff-photo img{width:100%;height:100%;object-fit:cover}
+    .caption-card{
+      position:absolute;
+      right:-24px;
+      bottom:-26px;
+      background:#fff;
+      border-radius:12px;
+      padding:16px 18px;
+      box-shadow:var(--shadow-strong);
+      width:240px;
+    }
+    .caption-card strong{
+      display:block;
+      font-family:var(--sans);
+      color:var(--blue);
+      margin-bottom:6px;
+    }
+    .caption-card span{
+      font-size:13px;
+      line-height:1.6;
+      display:block;
+    }
+
+    .follow{
+      min-height:auto;
+      padding:80px 0 10px;
+      text-align:center;
+    }
+    .follow h3{
+      margin:0;
+      font-family:var(--sans);
+      font-size:36px;
+      color:var(--blue);
+    }
+    .follow p{
+      margin:8px 0 10px;
+      font-family:var(--sans);
+      font-size:13px;
+      letter-spacing:.08em;
+      color:#4a4a4a;
+    }
+    .sns{
+      display:flex;justify-content:center;gap:12px;
+    }
+    .sns a{
+      width:38px;height:38px;border-radius:50%;
+      background:var(--blue);
+      color:#fff;display:grid;place-items:center;
+      box-shadow:var(--shadow);
+      font-family:var(--sans);font-size:14px;font-weight:700;
+      transition:transform .3s ease, box-shadow .3s ease;
+    }
+    .sns a:hover{transform:translateY(-3px);box-shadow:var(--shadow-strong)}
+
+    .footer-title{
+      min-height:auto;
+      padding:14px 0 40px;
+      overflow:hidden;
+    }
+    .footer-title .big{
+      font-family:var(--sans);
+      font-size:clamp(48px, 8.5vw, 118px);
+      font-weight:900;
+      line-height:.95;
+      color:var(--blue);
+      letter-spacing:-.02em;
+      white-space:nowrap;
+      margin:0;
+    }
+    footer{
+      padding:10px 0 40px;
+      font-family:var(--sans);
+      font-size:12px;
+      color:#5b5b5b;
+    }
+    .footer-links{
+      display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-end;
+      margin-bottom:12px;
+    }
+    .footer-bottom{
+      display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap;
+      border-top:1px solid rgba(0,113,185,.10);
+      padding-top:16px;
+    }
+
+    @keyframes tokotoko-lite{
+      0%,100%{transform:rotate(-4deg) translateY(0)}
+      8%{transform:rotate(-2deg) translateY(-4px)}
+      16%{transform:rotate(-5deg) translateY(0)}
+      24%{transform:rotate(-1deg) translateY(-8px)}
+      32%{transform:rotate(-4deg) translateY(0)}
+    }
+    @keyframes pyoko-lite{
+      0%,100%{transform:rotate(-12deg) translateY(0)}
+      8%{transform:rotate(-12deg) translateY(-8px)}
+      12%{transform:rotate(-12deg) translateY(0)}
+      18%{transform:rotate(-12deg) translateY(-6px)}
+      24%{transform:rotate(-12deg) translateY(0)}
+    }
+
+    .hero-image-load{opacity:0;transform:scale(.96)}
+    .hero-text-load{opacity:0;transform:translateX(-50px)}
+    .hero-btn-load{opacity:0;transform:scale(.8)}
+
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(30px);
+      transition:
+        opacity .9s ease-out,
+        transform .9s ease-out;
+      will-change:opacity,transform;
+    }
+    html.js .reveal-left{transform:translateX(-60px);opacity:0}
+    html.js .reveal-right{transform:translateX(60px);opacity:0}
+    html.js .reveal-up-strong{transform:translateY(40px);opacity:0}
+    html.js .reveal-down{transform:translateY(-30px);opacity:0}
+    html.js .reveal-scale{transform:scale(.9) translateY(20px);opacity:0}
+    html.js .reveal.show,
+    html.js .reveal-left.show,
+    html.js .reveal-right.show,
+    html.js .reveal-up-strong.show,
+    html.js .reveal-down.show,
+    html.js .reveal-scale.show{
+      opacity:1;transform:none;
+    }
+
+    .stagger > *{transition-delay:var(--d,0s)}
+    .service-grid .service-card:nth-child(1),
+    .phone-grid > *:nth-child(1),
+    .flow-list .flow-item:nth-child(1),
+    .voice-track .voice-card:nth-child(1){--d:.02s}
+    .service-grid .service-card:nth-child(2),
+    .phone-grid > *:nth-child(2),
+    .flow-list .flow-item:nth-child(2),
+    .voice-track .voice-card:nth-child(2){--d:.14s}
+    .service-grid .service-card:nth-child(3),
+    .phone-grid > *:nth-child(3),
+    .flow-list .flow-item:nth-child(3),
+    .voice-track .voice-card:nth-child(3){--d:.28s}
+    .voice-track .voice-card:nth-child(4){--d:.40s}
+    .voice-track .voice-card:nth-child(5){--d:.52s}
+
+    .line-stagger p:nth-child(1){transition-delay:0s}
+    .line-stagger p:nth-child(2){transition-delay:.15s}
+    .line-stagger p:nth-child(3){transition-delay:.30s}
+    .line-stagger p:nth-child(4){transition-delay:.45s}
+    .line-stagger p:nth-child(5){transition-delay:.60s}
+    .line-stagger p:nth-child(6){transition-delay:.75s}
+
+    @media (max-width: 1080px){
+      nav{display:none}
+      .hero-top,
+      .about-grid,
+      .phone-grid,
+      .flow-grid,
+      .plan-layout,
+      .support-diagram,
+      .cta-box{
+        grid-template-columns:1fr;
+      }
+      .hero-visual-wrap{min-height:460px}
+      .hero-badge{right:0;top:10px;font-size:20px}
+      .about-body{margin-left:0}
+      .vertical-copy,.flow-side,.plan-side{
+        writing-mode:horizontal-tb;
+        height:auto;
+        justify-self:start;
+      }
+      .service-grid{grid-template-columns:1fr}
+      .service-card:nth-child(2),.service-card:nth-child(3){margin-top:0}
+      .service-sideword{display:none}
+      .price-box{margin-left:0}
+      .plan-illus{padding-left:0}
+      .caption-card{right:10px;bottom:-20px}
+      .faq-book{display:none}
+      .footer-bottom,.footer-links{justify-content:flex-start}
+    }
+    @media (max-width: 767px){
+      .section{min-height:auto;padding:80px 0}
+      .container{width:min(calc(100% - 24px), var(--container))}
+      .header-inner{height:64px}
+      .hero-title{font-size:clamp(34px, 12vw, 58px)}
+      .hero-desc{font-size:15px}
+      .hero-visual-wrap{min-height:360px}
+      .window-grid{gap:8px}
+      .phone-card{min-height:auto}
+      .flow-item{grid-template-columns:92px 1fr;gap:16px}
+      .flow-icon{width:88px;height:88px}
+      .flow-item:not(:last-child)::after{left:44px;top:88px;height:44px}
+      .price-box{grid-template-columns:1fr}
+      .support-diagram{padding:18px}
+      .timeline::before{left:24px}
+      .timeline-node{
+        left:24px;
+        width:60px;height:60px;font-size:10px
+      }
+      .timeline-boxes{padding-left:44px}
+      .voice-track{grid-template-columns:repeat(5, 82%)}
+      .footer-title .big{white-space:normal}
+      .cta-figure{width:92px;right:8px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="そらみち ホーム">
+        <span class="logo-mark">☁</span>
+        <span class="logo-text">そらみち就労支援</span>
+      </a>
+      <nav>
+        <a href="#about">施設について</a>
+        <a href="#service">支援プログラム</a>
+        <a href="#flow">1日の流れ</a>
+        <a href="#plan">ご利用案内</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#contact">見学申込み</a>
+      </nav>
+      <a href="#contact" class="header-cta">見学予約</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="section hero">
+      <div class="container">
+        <div class="hero-top">
+          <div class="hero-copy hero-text-load" id="heroText">
+            <div class="hero-kicker">WORK SUPPORT / YOUR NEXT STEP</div>
+            <h1 class="hero-title">はたらきたい、<br>その気持ちに<br>よりそう場所。</h1>
+            <p class="hero-desc">
+              就労支援事業所「そらみち」は、障がいのある方一人ひとりのペースに合わせて、
+              生活リズムづくりから職場定着までを丁寧にサポートします。
+              ご本人にもご家族にも、安心して相談していただける明るい施設です。
+            </p>
+            <div class="hero-actions">
+              <a href="#about" class="btn btn-primary hero-btn-load" id="heroBtn">もっと知る</a>
+              <a href="#contact" class="btn btn-secondary">見学を申し込む</a>
+            </div>
+          </div>
+
+          <div class="hero-visual-wrap hero-image-load" id="heroImage">
+            <div class="window-grid" aria-hidden="true">
+              <div class="pane"></div>
+              <div class="pane"></div>
+              <div class="pane"></div>
+            </div>
+            <div class="hero-figure">
+              <img src="http://127.0.0.1:5000/uploads/up_9e76cfe5f6.png" alt="多様な働く人々の明るい未来のイメージ" width="540" height="560" onerror="this.style.display='none'">
+            </div>
+            <div class="hero-badge">就職へ、<br>やさしく伴走。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="about">
+      <div class="container">
+        <div class="about-grid">
+          <div class="section-title reveal">
+            <span class="en">About</span>
+            <span class="jp">施設について</span>
+          </div>
+
+          <div class="about-body line-stagger">
+            <p class="reveal">本を開くように、次の一歩もそっと開く。</p>
+            <p class="reveal">通うことに少し不安がある日も、話すのがむずかしい日も、</p>
+            <p class="reveal">その日の体調や気持ちに合わせて過ごせるから、</p>
+            <p class="reveal">「今日は来られた」が、自信につながっていきます。</p>
+            <p class="reveal">PC作業、軽作業、面談、生活相談、就職準備。</p>
+            <p class="reveal">必要な支援を、必要な順番で。あなたらしい働き方を一緒に探します。</p>
+            <a href="#contact" class="btn btn-primary reveal" style="margin-top:8px;">見学・相談はこちら</a>
+          </div>
+
+          <div class="vertical-copy reveal">はたらく準備を、あわてずに。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-banner" aria-label="見学CTA">
+      <div class="container">
+        <div class="cta-box reveal" id="contact">
+          <div>
+            <div class="small">Free tour / counseling</div>
+            <h3>まずは見学から。<br>そらみちの雰囲気を体験してください。</h3>
+            <p>ご家族の同伴も歓迎です。無理な勧誘はありません。</p>
+          </div>
+          <div class="cta-action">
+            <a class="cta-btn-green" href="#">LINEで見学予約する</a>
+          </div>
+          <img class="cta-figure" src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="青い小鳥のイラスト" width="120" height="120" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </section>
+
+    <section class="section service" id="service">
+      <div class="container" style="position:relative;">
+        <div class="section-title reveal">
+          <span class="en">Service</span>
+          <span class="jp">支援プログラム</span>
+        </div>
+
+        <div class="service-grid stagger">
+          <article class="service-card reveal-up-strong">
+            <div class="service-media">
+              <img src="http://127.0.0.1:5000/uploads/up_84373df907.png" alt="点検や確認を表すイラスト" width="360" height="270" onerror="this.style.display='none'">
+            </div>
+            <h4>生活リズム支援</h4>
+            <p>安定して通うための体調管理、睡眠・食事の整え方、通所ペースの調整を一緒に考えます。まずは週1日からでも大丈夫です。</p>
+          </article>
+
+          <article class="service-card reveal-up-strong">
+            <div class="service-media">
+              <img src="http://127.0.0.1:5000/uploads/up_818aac54c7.png" alt="仕事の成長を表す3Dイラスト" width="360" height="270" onerror="this.style.display='none'">
+            </div>
+            <h4>就職準備トレーニング</h4>
+            <p>パソコン基礎、ビジネスマナー、報連相、履歴書作成、面接練習など、就職に必要な準備を実践的に学べます。</p>
+          </article>
+
+          <article class="service-card reveal-up-strong">
+            <div class="service-media">
+              <img src="http://127.0.0.1:5000/uploads/up_bc74a6f631.png" alt="つながりや配送をイメージするイラスト" width="360" height="270" onerror="this.style.display='none'">
+            </div>
+            <h4>職場定着サポート</h4>
+            <p>就職後も面談や企業連携を続け、働き続ける不安を軽くします。困りごとを早めに相談できる体制を大切にしています。</p>
+          </article>
+        </div>
+
+        <div class="service-sideword reveal">THE<br>WORK<br>PATH</div>
+      </div>
+    </section>
+
+    <section class="section passport">
+      <div class="big-bg reveal">What is support ?&nbsp;&nbsp;What is work step ?</div>
+      <div class="container">
+        <div class="passport-head">
+          <div class="mini reveal">[ 支援の流れについて ]</div>
+          <h3 class="reveal">就労支援って、どんなことをするの？</h3>
+          <p class="reveal">
+            そらみちでは「相談して終わり」ではなく、毎日の通所、学び、就職活動、そして就職後までを切れ目なく支えます。
+            下の2つのステップで、初めての方にもわかりやすくご案内しています。
+          </p>
+        </div>
+
+        <div class="phone-grid stagger">
+          <div class="phone-card reveal-left">
+            <div class="num">Phase 01</div>
+            <h4>通所の準備を整える</h4>
+            <p>見学・体験のあと、支援計画を作成。通える時間帯や苦手なこと、得意なことを整理しながら、無理のないスタートをつくります。</p>
+            <div class="phone-frame">
+              <img src="http://127.0.0.1:5000/uploads/up_815124db50.png" alt="相談に応じる女性のイラスト" width="260" height="500" onerror="this.style.display='none'">
+            </div>
+          </div>
+
+          <div class="center-pass reveal">
+            <div class="pass-book"></div>
+            <div style="font-family:var(--sans);font-size:13px;font-weight:700;color:var(--blue);text-align:center;">就労準備の<br>見える化</div>
+          </div>
+
+          <div class="phone-card reveal-right">
+            <div class="num">Phase 02</div>
+            <h4>就職へ向けて進める</h4>
+            <p>トレーニング、企業見学、応募書類、面接同行までを個別にサポート。就職後の困りごともスタッフが継続して相談対応します。</p>
+            <div class="phone-frame">
+              <img src="http://127.0.0.1:5000/uploads/up_d83a2a4e87.png" alt="手続きを進める男性のイラスト" width="260" height="500" onerror="this.style.display='none'">
+            </div>
+            <img class="ticket-stack" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="青い紙飛行機のイラスト" width="110" height="110" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="flow">
+      <div class="container">
+        <div class="section-title reveal">
+          <span class="en">Flow</span>
+          <span class="jp">1日の流れ</span>
+        </div>
+
+        <div class="flow-grid">
+          <div class="flow-side reveal">カフェに行く感覚で、今日の一歩だけでも。</div>
+
+          <div class="flow-list stagger">
+            <article class="flow-item reveal-up-strong">
+              <div class="flow-icon">
+                <img src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="小鳥のイラスト" width="100" height="100" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-text">
+                <div class="step">Step 01</div>
+                <h4>来所・体調チェック</h4>
+                <p>朝のあいさつから始まり、その日の体調や気分を確認します。無理のない予定に調整できるので、安心して過ごせます。</p>
+              </div>
+            </article>
+
+            <article class="flow-item reveal-up-strong">
+              <div class="flow-icon">
+                <img src="http://127.0.0.1:5000/uploads/up_940e12aa9b.png" alt="チェックリストのイラスト" width="100" height="100" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-text">
+                <div class="step">Step 02</div>
+                <h4>プログラム参加・個別支援</h4>
+                <p>PC練習、軽作業、グループワーク、面談などから、その日に合った活動へ。集中しやすい環境づくりも大切にしています。</p>
+              </div>
+            </article>
+
+            <article class="flow-item reveal-up-strong">
+              <div class="flow-icon">
+                <img src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="紙飛行機のイラスト" width="100" height="100" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-text">
+                <div class="step">Step 03</div>
+                <h4>振り返りと次回の準備</h4>
+                <p>できたこと、疲れたこと、次に試したいことを一緒に整理します。小さな積み重ねを見える形にし、次の通所につなげます。</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="plan">
+      <div class="container">
+        <div class="section-title reveal">
+          <span class="en">Plan</span>
+          <span class="jp">ご利用案内</span>
+        </div>
+
+        <div class="plan-layout">
+          <div class="plan-side reveal">料金の心配より、まずは相談から。</div>
+
+          <div class="plan-main">
+            <div class="plan-illus reveal">
+              <div class="mini-book"></div>
+              <div class="mini-card"></div>
+              <div class="mini-tray"></div>
+            </div>
+
+            <div class="price-box reveal-scale">
+              <div class="price-left">
+                <div class="label">利用料の目安</div>
+                <div class="price">0円〜</div>
+                <p class="note">多くの方が自己負担なく利用されています。前年の所得等に応じて上限が決まります。</p>
+              </div>
+              <div class="price-right">
+                <dl>
+                  <div><dt>見学・相談</dt><dd>無料</dd></div>
+                  <div><dt>体験利用</dt><dd>無料</dd></div>
+                  <div><dt>昼食提供</dt><dd>要相談</dd></div>
+                  <div><dt>送迎</dt><dd>地域により対応</dd></div>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="support-detail">
+      <div class="container">
+        <div class="support-divider"></div>
+        <div class="support-copy reveal">
+          <h3>ご利用開始までの流れについて</h3>
+          <p>お問い合わせ後は、見学・体験・面談・受給者証の確認・利用開始という流れで進みます。必要な手続きはスタッフが一つずつ丁寧にご案内しますので、福祉サービスが初めての方でもご安心ください。</p>
+          <p>市区町村での申請や医療機関・相談支援事業所との連携が必要な場合も、現在の状況を伺いながら、無理のない形で準備を進めます。ご本人だけでなく、ご家族からのご相談も歓迎しています。</p>
+        </div>
+
+        <div class="support-diagram reveal-up-strong">
+          <div class="timeline">
+            <div class="timeline-node">見学・<br>相談</div>
+            <div class="timeline-node">体験・<br>面談</div>
+            <div class="timeline-node">利用<br>開始</div>
+          </div>
+          <div class="timeline-boxes">
+            <div class="timeline-box">
+              <strong style="font-family:var(--sans);color:var(--blue);">見学・個別相談（約25〜59分）</strong><br>
+              施設の雰囲気や支援内容をご案内し、不安や希望をお伺いします。
+            </div>
+            <div class="timeline-box">
+              <strong style="font-family:var(--sans);color:var(--blue);">体験通所・プログラム確認</strong><br>
+              実際の活動を体験し、通いやすさや相性を確かめられます。
+            </div>
+            <div class="timeline-box">
+              <strong style="font-family:var(--sans);color:var(--blue);">受給者証確認後、利用スタート</strong><br>
+              開始後も面談を重ね、通所ペースや目標を一緒に調整します。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="container">
+        <div class="faq-wrap">
+          <div class="section-title reveal">
+            <span class="en">FAQ</span>
+            <span class="jp">よくある質問</span>
+          </div>
+
+          <div class="faq-book reveal"></div>
+
+          <div class="faq-list">
+            <div class="faq-item reveal">
+              <button class="faq-q" type="button">働いた経験がほとんどなくても利用できますか？<span>＋</span></button>
+              <div class="faq-a">はい。生活リズムづくりや対人コミュニケーションの練習など、就職準備の前段階から支援できます。まずは見学・体験で現在の状況をお聞かせください。</div>
+            </div>
+            <div class="faq-item reveal">
+              <button class="faq-q" type="button">毎日通所できるか不安です。週1日からでも大丈夫ですか？<span>＋</span></button>
+              <div class="faq-a">大丈夫です。体調や生活状況に合わせて通所回数を調整し、徐々にペースを整えていく方も多くいらっしゃいます。</div>
+            </div>
+            <div class="faq-item reveal">
+              <button class="faq-q" type="button">家族だけで相談してもよいですか？<span>＋</span></button>
+              <div class="faq-a">はい、ご本人がまだ不安な場合はご家族のみのご相談も承っています。制度や利用の流れについて丁寧にご説明します。</div>
+            </div>
+            <div class="faq-item reveal">
+              <button class="faq-q" type="button">見学のときに持ち物は必要ですか？<span>＋</span></button>
+              <div class="faq-a">特別な持ち物は必要ありません。気になることをメモした紙などがあると、相談がスムーズです。</div>
+            </div>
+            <div class="faq-item reveal">
+              <button class="faq-q" type="button">就職後も相談できますか？<span>＋</span></button>
+              <div class="faq-a">可能です。職場での困りごとや生活面の変化について、定着支援として継続的にフォローします。</div>
+            </div>
+          </div>
+
+          <div class="faq-more reveal faq-more">
+            <a href="#contact" class="btn btn-primary">見学を申し込む</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="voice">
+      <div class="container">
+        <div class="section-title reveal">
+          <span class="en">Voice</span>
+          <span class="jp">利用者とスタッフの声</span>
+        </div>
+
+        <div class="voice-track stagger">
+          <article class="voice-card reveal-down">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_4648a670eb.png" alt="利用者の声イラスト" width="84" height="84" onerror="this.style.display='none'">
+            </div>
+            <h4>20代・利用者</h4>
+            <p>最初は人と話すだけで緊張していましたが、短い面談を重ねるうちに自分のことを少しずつ話せるようになりました。</p>
+          </article>
+
+          <article class="voice-card reveal-down">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_8d5c4c2acf.png" alt="女性スタッフのイラスト" width="84" height="84" onerror="this.style.display='none'">
+            </div>
+            <h4>支援員</h4>
+            <p>「今日はここまでできた」を一緒に見つけることを大切にしています。小さな成功体験が、次の挑戦につながります。</p>
+          </article>
+
+          <article class="voice-card reveal-down">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_d047f3036e.png" alt="男性のイラスト" width="84" height="84" onerror="this.style.display='none'">
+            </div>
+            <h4>30代・利用者</h4>
+            <p>就職活動に苦手意識がありましたが、履歴書を一緒に整えてもらえて安心しました。面接同行が特に心強かったです。</p>
+          </article>
+
+          <article class="voice-card reveal-down">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_a8223805df.png" alt="女性のイラスト" width="84" height="84" onerror="this.style.display='none'">
+            </div>
+            <h4>職業指導員</h4>
+            <p>作業の得意・不得意は、実際に試してみると見えてきます。無理に急がず、その人に合う働き方を探していきます。</p>
+          </article>
+
+          <article class="voice-card reveal-down">
+            <div class="voice-avatar">
+              <img src="http://127.0.0.1:5000/uploads/up_1d9bb593f4.png" alt="男性のイラスト肖像" width="84" height="84" onerror="this.style.display='none'">
+            </div>
+            <h4>ご家族</h4>
+            <p>本人だけでなく家族の不安も受け止めてくれました。施設の雰囲気が明るく、安心して相談できたのが大きかったです。</p>
+          </article>
+        </div>
+
+        <div class="voice-dots" aria-hidden="true">
+          <span></span><span></span><span class="active"></span><span></span><span></span>
+        </div>
+
+        <div class="staff-photo-block reveal-up-strong">
+          <div class="staff-photo-bg"></div>
+          <div class="staff-photo">
+            <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="女性相談員との穏やかな面談風景" width="520" height="620" onerror="this.style.display='none'">
+          </div>
+          <div class="caption-card">
+            <strong>「ひとりにしない支援」を。</strong>
+            <span>サービス管理責任者 / 中村<br>ご本人の気持ちとご家族の安心、その両方に寄り添う支援を心がけています。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-banner">
+      <div class="container">
+        <div class="cta-box reveal">
+          <div>
+            <div class="small">Start with one message</div>
+            <h3>通えるか不安でも大丈夫。<br>見学・体験からゆっくり始めましょう。</h3>
+            <p>お電話・LINE・フォームから、お好きな方法でお問い合わせいただけます。</p>
+          </div>
+          <div class="cta-action">
+            <a class="cta-btn-green" href="#">LINEで相談する</a>
+          </div>
+          <img class="cta-figure" src="http://127.0.0.1:5000/uploads/up_5c480bccae.png" alt="青い小鳥のイラスト" width="120" height="120" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </section>
+
+    <section class="follow">
+      <div class="container">
+        <h3 class="reveal">Follow us !</h3>
+        <p class="reveal">SNSでも、施設の雰囲気をお届けしています。</p>
+        <div class="sns reveal">
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="LINE">L</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="footer-title">
+      <div class="container">
+        <p class="big reveal">THE WORK PASSPORT</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="#about">施設紹介</a>
+        <a href="#service">支援プログラム</a>
+        <a href="#flow">1日の流れ</a>
+        <a href="#plan">ご利用案内</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">見学申込み</a>
+      </div>
+      <div class="footer-bottom">
+        <div>就労支援事業所 そらみち｜〒980-0000 宮城県仙台市○○区○○1-2-3</div>
+        <div>© Soramichi Work Support.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    window.addEventListener('load', () => {
+      const heroImage = document.getElementById('heroImage');
+      const heroText = document.getElementById('heroText');
+      const heroBtn = document.getElementById('heroBtn');
+
+      if (heroImage) {
+        heroImage.style.transition = 'opacity 1.2s ease-out, transform 1.2s ease-out';
+        requestAnimationFrame(() => {
+          heroImage.style.opacity = '1';
+          heroImage.style.transform = 'scale(1)';
+        });
+      }
+      if (heroText) {
+        heroText.style.transition = 'opacity 1s ease-out, transform 1s ease-out';
+        requestAnimationFrame(() => {
+          heroText.style.opacity = '1';
+          heroText.style.transform = 'translateX(0)';
+        });
+      }
+      if (heroBtn) {
+        setTimeout(() => {
+          heroBtn.style.transition = 'opacity .8s cubic-bezier(0.34, 1.56, 0.64, 1), transform .8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          heroBtn.style.opacity = '1';
+          heroBtn.style.transform = 'scale(1)';
+        }, 600);
+      }
+    });
+
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+        }
+      });
+    }, {
+      threshold: 0.18,
+      rootMargin: '0px 0px -12% 0px'
+    });
+
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-up-strong, .reveal-down, .reveal-scale').forEach(el=>{
+      observer.observe(el);
+    });
+
+    document.querySelectorAll('.faq-q').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const item = btn.closest('.faq-item');
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>
