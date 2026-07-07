@@ -12,5 +12,137 @@
   "anim_id": "",
   "rating": "◎",
   "ts": 1783421674
+ },
+ {
+  "file": "camp_20260707_222251_299237.html",
+  "base_id": "91e1206c98fe9254",
+  "anim_id": "74e011ca8b70fe13",
+  "model": "openai:gpt-5.4",
+  "text_len": 1877,
+  "sections": 7,
+  "warn": true,
+  "ts": 1783430571,
+  "rating": "△"
+ },
+ {
+  "file": "camp_20260707_222350_improved.html",
+  "base_id": "",
+  "anim_id": "",
+  "rating": "○",
+  "ts": 1783431751
+ },
+ {
+  "file": "camp_20260707_224519_734769.html",
+  "base_id": "",
+  "anim_id": "",
+  "rating": "△",
+  "ts": 1783431936
+ },
+ {
+  "file": "camp_20260707_224711_065942.html",
+  "base_id": "",
+  "anim_id": "",
+  "rating": "✖",
+  "ts": 1783432140
+ },
+ {
+  "file": "camp_20260707_225047_585323.html",
+  "base_id": "",
+  "anim_id": "",
+  "rating": "✖",
+  "ts": 1783432259
+ },
+ {
+  "file": "camp_20260707_231501_878777.html",
+  "base_id": "acd96d1b84ac53af",
+  "anim_id": "cc63c39c89c41e04",
+  "model": "openai:gpt-5.4",
+  "text_len": 977,
+  "sections": 4,
+  "warn": true,
+  "ts": 1783433701,
+  "rating": "△"
+ },
+ {
+  "file": "camp_20260707_235350_925530.html",
+  "base_id": "acd96d1b84ac53af",
+  "anim_id": "acd96d1b84ac53af",
+  "model": "openai:gpt-5.4",
+  "text_len": 995,
+  "sections": 4,
+  "warn": true,
+  "ts": 1783436030,
+  "rating": "◎"
+ },
+ {
+  "file": "camp_20260708_001316_617054.html",
+  "base_id": "1c2dda29b6686e32",
+  "anim_id": "318476ce6a1c119f",
+  "model": "openai:gpt-5.4",
+  "text_len": 2730,
+  "sections": 10,
+  "warn": false,
+  "ts": 1783437196,
+  "rating": "○"
+ },
+ {
+  "file": "camp_20260708_002828_802723.html",
+  "base_id": "74e011ca8b70fe13",
+  "anim_id": "1c2dda29b6686e32",
+  "model": "openai:gpt-5.4",
+  "text_len": 1985,
+  "sections": 7,
+  "warn": true,
+  "ts": 1783438108,
+  "rating": "○"
+ },
+ {
+  "file": "camp_20260708_003442_134663.html",
+  "base_id": "6ee0141b496b0aec",
+  "anim_id": "318476ce6a1c119f",
+  "model": "openai:gpt-5.4",
+  "text_len": 1059,
+  "sections": 6,
+  "warn": true,
+  "ts": 1783438482
+ },
+ {
+  "file": "camp_20260708_003742_665966.html",
+  "base_id": "",
+  "anim_id": "",
+  "rating": "○",
+  "ts": 1783438774
+ },
+ {
+  "file": "camp_20260708_004226_917781.html",
+  "base_id": "3497be3a69399dc6",
+  "anim_id": "cc63c39c89c41e04",
+  "model": "openai:gpt-5.4",
+  "text_len": 1523,
+  "sections": 5,
+  "warn": true,
+  "ts": 1783438946,
+  "rating": "○"
+ },
+ {
+  "file": "camp_20260708_011904_080164.html",
+  "base_id": "a0f202c0d58744e1",
+  "anim_id": "318476ce6a1c119f",
+  "model": "openai:gpt-5.4",
+  "text_len": 2077,
+  "sections": 9,
+  "warn": false,
+  "ts": 1783441144,
+  "rating": "△"
+ },
+ {
+  "file": "camp_20260708_012108_527946.html",
+  "base_id": "cc63c39c89c41e04",
+  "anim_id": "318476ce6a1c119f",
+  "model": "openai:gpt-5.4",
+  "text_len": 1826,
+  "sections": 7,
+  "warn": true,
+  "ts": 1783441268
  }
 ]

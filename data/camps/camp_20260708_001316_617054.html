@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkWorks A型事業所 | 建設のように、毎日をていねいに積み上げる</title>
+  <meta name="description" content="仙台駅東口から徒歩4分。就労継続支援A型事業所 LinkWorks A型事業所。週1日から相談OK、見学・体験受付中。開設12年、一般就労移行348名。">
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-tint:#eef5f8;
+      --blue:#008ed8;
+      --blue-90:rgba(4,143,216,.9);
+      --text:#0a273f;
+      --line:#d7e5ee;
+      --muted:#688195;
+      --card-shadow:0 12px 32px rgba(0,142,216,.08);
+      --card-shadow-strong:0 20px 48px rgba(10,39,63,.10);
+      --radius:15px;
+      --radius-sm:3px;
+      --container:1240px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.15rem;
+      --body:0.98rem;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      font-size:var(--body);
+      line-height:2;
+      letter-spacing:.02em;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
+    .container{width:min(var(--container),calc(100% - 48px));margin-inline:auto}
+    .section{padding:10vh 0;min-height:100vh;display:flex;align-items:center}
+    .section.tint{background:var(--bg-tint)}
+    .eyebrow{
+      font-size:.92rem;
+      font-weight:700;
+      color:var(--blue);
+      letter-spacing:.05em;
+      line-height:1.4;
+      margin:0 0 12px;
+      text-transform:uppercase;
+    }
+    .eyebrow span{
+      display:block;
+      color:var(--muted);
+      font-size:.78rem;
+      font-weight:500;
+      text-transform:none;
+      letter-spacing:.04em;
+      margin-top:2px;
+    }
+    h1,h2,h3,p{margin:0}
+    h1{
+      font-size:var(--hero);
+      line-height:1.25;
+      letter-spacing:.03em;
+      font-weight:800;
+    }
+    h2{
+      font-size:var(--section);
+      line-height:1.35;
+      letter-spacing:.03em;
+      font-weight:800;
+      margin-bottom:20px;
+    }
+    h3{
+      font-size:var(--sub);
+      line-height:1.5;
+      font-weight:700;
+    }
+    p,li{max-width:38em}
+    .lead{font-size:1rem;color:var(--text)}
+    .muted{color:var(--muted)}
+    .btns{display:flex;gap:16px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;
+      min-height:48px;padding:0 22px;border-radius:999px;
+      border:1px solid transparent;font-weight:700;line-height:1;
+      transition:transform .25s ease, box-shadow .25s ease, background .2s ease, color .2s ease, border-color .2s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-2px)}
+    .btn-primary{background:var(--blue);color:#fff;box-shadow:var(--card-shadow)}
+    .btn-primary:hover{box-shadow:0 16px 36px rgba(0,142,216,.18)}
+    .btn-secondary{background:#fff;border-color:#b9d7e8;color:var(--text)}
+    .btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+    .btn-link{color:var(--blue);padding:0;min-height:auto}
+    .btn-link::after{content:"→";font-size:.95em}
+    .site-header{
+      position:absolute;left:0;top:0;width:100%;z-index:20;padding:20px 0;
+    }
+    .header-inner{
+      width:min(var(--container),calc(100% - 40px));
+      margin:auto;display:flex;align-items:center;justify-content:space-between;
+    }
+    .logo{
+      display:flex;align-items:center;gap:14px;color:#fff;font-weight:800;
+      text-shadow:0 2px 8px rgba(10,39,63,.18);
+    }
+    .logo-mark{
+      width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.28);display:grid;place-items:center;
+      backdrop-filter:blur(8px);
+    }
+    .logo-mark svg{width:22px;height:22px}
+    .nav-mini{display:flex;align-items:center;gap:14px}
+    .nav-chip{
+      color:#fff;font-size:.9rem;background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.26);padding:10px 14px;border-radius:999px;
+      backdrop-filter:blur(10px);
+    }
+    .menu-btn{
+      width:44px;height:44px;border-radius:50%;border:none;background:var(--blue);
+      display:grid;place-items:center;cursor:pointer;box-shadow:var(--card-shadow);
+    }
+    .menu-btn span,.menu-btn span::before,.menu-btn span::after{
+      content:"";display:block;width:18px;height:2px;background:#fff;border-radius:2px;position:relative;
+    }
+    .menu-btn span::before{position:absolute;top:-6px}
+    .menu-btn span::after{position:absolute;top:6px}
+    .hero{
+      min-height:100vh;position:relative;overflow:hidden;background:
+      linear-gradient(120deg, rgba(255,255,255,.06), rgba(255,255,255,0) 34%),
+      linear-gradient(180deg, rgba(10,39,63,.18), rgba(10,39,63,.06)),
+      #c8e7f6;
+    }
+    .hero::before{
+      content:"";position:absolute;right:-10%;top:-10%;width:48vw;height:48vw;min-width:420px;min-height:420px;
+      background:radial-gradient(circle at 30% 30%, rgba(255,176,120,.7), rgba(255,144,195,.45) 32%, rgba(83,58,253,.22) 58%, rgba(255,255,255,0) 72%);
+      filter:blur(10px);opacity:.55;pointer-events:none;
+    }
+    .hero-grid{
+      position:relative;z-index:2;
+      width:min(var(--container),calc(100% - 48px));
+      margin:auto;display:grid;grid-template-columns:1.05fr .95fr;
+      min-height:100vh;align-items:end;gap:24px;padding:120px 0 48px;
+    }
+    .hero-copy{
+      padding-bottom:76px;align-self:center;color:#fff;position:relative;z-index:3;
+    }
+    .hero-copy .tag{
+      display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);
+      color:#fff;padding:8px 14px;border-radius:999px;font-weight:700;font-size:.88rem;margin-bottom:24px;
+      backdrop-filter:blur(12px);
+    }
+    .hero-copy p{margin-top:24px;max-width:34em;color:rgba(255,255,255,.92)}
+    .hero-cta{margin-top:32px}
+    .hero-visual{
+      position:relative;height:min(82vh,820px);align-self:end;
+      background:linear-gradient(180deg,#dff3fb,#8fd0ef);
+      border-radius:30px 30px 0 0;overflow:hidden;
+      box-shadow:none;
+    }
+    .hero-visual img{
+      width:100%;height:100%;object-fit:cover;object-position:center top;
+      mix-blend-mode:normal;
+    }
+    .hero-badge{
+      position:absolute;left:-12px;bottom:32px;background:#fff;color:var(--text);
+      padding:18px 20px 16px;border-radius:0 var(--radius) var(--radius) 0;
+      box-shadow:var(--card-shadow);max-width:260px;
+    }
+    .hero-badge strong{display:block;font-size:1.45rem;line-height:1.25}
+    .hero-newsbar{
+      position:absolute;left:0;right:0;bottom:0;z-index:4;background:var(--blue);
+      color:#fff;font-size:.82rem;
+    }
+    .hero-newsbar .container{
+      display:grid;grid-template-columns:120px 1fr 56px;align-items:center;gap:18px;min-height:52px;
+    }
+    .hero-newsbar .label{font-weight:700;letter-spacing:.06em}
+    .hero-newsbar .marquee{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .hero-newsbar .arrow{justify-self:end}
+
+    .vision{
+      min-height:46vh;padding:96px 0 80px;display:flex;align-items:center;justify-content:center;
+      position:relative;overflow:hidden;
+    }
+    .vision .ghost{
+      font-size:clamp(3.5rem,9vw,7rem);font-weight:800;color:rgba(0,142,216,.05);letter-spacing:.04em;
+      user-select:none;
+    }
+
+    .news-wrap{display:grid;grid-template-columns:320px 1fr;gap:0;align-items:stretch}
+    .news-panel{
+      background:var(--blue);color:#fff;border-radius:0 var(--radius) var(--radius) 0;
+      padding:64px 32px;position:relative;min-height:470px;display:flex;flex-direction:column;justify-content:center;
+    }
+    .news-panel::after{
+      content:"";position:absolute;right:-52px;top:20px;width:54px;height:18px;background:var(--blue);
+      border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+    }
+    .news-panel p{color:rgba(255,255,255,.9)}
+    .news-panel .btn-link{color:#fff;margin-top:18px}
+    .news-card{
+      background:#fff;border-radius:var(--radius);padding:28px 28px 18px;align-self:center;
+      margin:38px 0 0 -12px;box-shadow:var(--card-shadow);
+      border:1px solid #edf5f9;
+    }
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .tab{
+      padding:8px 14px;border:1px solid #dfeaf1;border-radius:999px;color:var(--muted);font-size:.84rem;background:#fff;
+    }
+    .tab.active{background:var(--bg-tint);color:var(--blue);border-color:#b5d9ed}
+    .news-list{list-style:none;padding:0;margin:0}
+    .news-list li{
+      display:grid;grid-template-columns:110px 104px 1fr;gap:16px;align-items:center;
+      padding:14px 0;border-bottom:1px solid #eef3f6;font-size:.92rem;
+    }
+    .pill{
+      display:inline-block;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700;line-height:1.5;
+      background:#f7d78a;color:#7a5a12;
+    }
+    .pill.blue{background:#bfe8f7;color:#0a6e9e}
+    .pill.green{background:#dff0d8;color:#4e7b30}
+
+    .pickup .cards-top{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:24px;
+    }
+    .pickup .card{
+      background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e6f0f5;
+      box-shadow:none;transition:transform .25s ease, box-shadow .25s ease;
+    }
+    .pickup .card:hover{transform:translateY(-4px);box-shadow:var(--card-shadow)}
+    .pickup .thumb{
+      aspect-ratio:1.45/1;background:linear-gradient(135deg,#dff1fa,#b7ddf3);overflow:hidden;
+    }
+    .pickup .thumb img{width:100%;height:100%;object-fit:cover}
+    .pickup .body{padding:14px 14px 18px}
+    .pickup .body h3{margin-bottom:8px}
+    .pickup .body p{font-size:.9rem;color:var(--muted);line-height:1.85}
+    .pickup .cards-bottom{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:18px;
+    }
+
+    .company-grid{
+      display:grid;grid-template-columns:1fr .95fr;gap:48px;align-items:center;
+    }
+    .illust-box{
+      position:relative;background:linear-gradient(180deg,#f6fbfe,#e8f4fa);border-radius:28px;
+      min-height:420px;overflow:hidden;
+    }
+    .illust-box img{width:100%;height:100%;object-fit:cover}
+    .metrics{
+      margin-top:30px;display:grid;grid-template-columns:repeat(6,1fr);gap:20px;
+    }
+    .metric{
+      text-align:left;padding-top:12px;border-top:1px solid #dbe9f1;
+    }
+    .metric svg{width:32px;height:32px;color:var(--blue);margin-bottom:10px}
+    .metric strong{display:block;font-size:.94rem;line-height:1.5}
+    .metric span{display:block;color:var(--muted);font-size:.82rem;line-height:1.7}
+
+    .business-list{
+      margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+    }
+    .business-card{
+      background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e4eef4;
+    }
+    .business-card .thumb{aspect-ratio:1.6/1;background:linear-gradient(135deg,#d9eef8,#bfe4f4)}
+    .business-card .thumb img{width:100%;height:100%;object-fit:cover}
+    .business-card .body{padding:14px 16px 18px}
+    .business-card .small{font-size:.76rem;color:var(--blue);font-weight:700}
+    .business-card p{font-size:.9rem;color:var(--muted);margin-top:8px;line-height:1.85}
+
+    .message-band{
+      min-height:72vh;padding:0;background:
+      linear-gradient(90deg, rgba(255,255,255,.92), rgba(255,255,255,.84) 45%, rgba(238,245,248,.86)),
+      #eef5f8;
+    }
+    .message-grid{
+      display:grid;grid-template-columns:.95fr 1.05fr;gap:0;align-items:end;
+      width:min(var(--container),100%);
+      margin:auto;min-height:72vh;
+    }
+    .message-photo{
+      position:relative;min-height:72vh;background:linear-gradient(135deg,#d9ecf6,#eff8fc);overflow:visible;
+    }
+    .message-photo img{
+      position:absolute;left:0;bottom:0;width:88%;max-width:520px;height:auto;object-fit:contain;
+    }
+    .quote-card{
+      position:absolute;right:18px;bottom:26px;background:#fff;padding:18px 20px;border-radius:14px;
+      box-shadow:var(--card-shadow);width:240px;
+    }
+    .quote-card::before{
+      content:"";position:absolute;inset:auto auto 18px -18px;width:90px;height:90px;border-radius:50%;
+      background:rgba(0,142,216,.16);filter:blur(26px);z-index:-1;
+    }
+    .quote-card strong{display:block;font-size:1rem;line-height:1.6}
+    .quote-card span{display:block;color:var(--muted);font-size:.84rem;margin-top:8px}
+    .message-copy{padding:40px 0 40px 40px}
+
+    .sustain-grid{
+      display:grid;grid-template-columns:.95fr 1.05fr;gap:36px;align-items:start;
+    }
+    .sdgs-area{
+      position:relative;
+    }
+    .sdgs-bg{
+      position:absolute;left:0;top:-40px;font-size:clamp(2.8rem,7vw,5.2rem);font-weight:800;
+      color:rgba(0,142,216,.05);letter-spacing:.05em;pointer-events:none;
+    }
+    .sdgs-grid{
+      display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;
+    }
+    .sdg{
+      aspect-ratio:1/1;border-radius:10px;color:#fff;font-weight:800;font-size:1.2rem;
+      display:grid;place-items:center;
+    }
+    .c1{background:#e5243b}.c2{background:#dda63a}.c3{background:#4c9f38}.c4{background:#c5192d}.c5{background:#ff3a21}
+    .c6{background:#26bde2}.c7{background:#fcc30b}.c8{background:#a21942}.c9{background:#fd6925}.c10{background:#dd1367}
+    .topic-row{
+      margin-top:34px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;
+    }
+    .topic-card{
+      background:#fff;border:1px solid #e4eef4;border-radius:12px;overflow:hidden;
+    }
+    .topic-card .thumb{aspect-ratio:1.6/1;background:linear-gradient(135deg,#dbeefa,#b9dff0)}
+    .topic-card .thumb img{width:100%;height:100%;object-fit:cover}
+    .topic-card .body{padding:14px}
+    .topic-card .num{
+      width:28px;height:28px;border-radius:50%;background:var(--bg-tint);color:var(--blue);
+      display:grid;place-items:center;font-weight:800;margin-bottom:8px;font-size:.88rem;
+    }
+
+    .ir-recruit{
+      min-height:86vh;
+    }
+    .ir-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;
+    }
+    .panel{
+      background:#fff;border:1px solid #e6eef4;border-radius:14px;padding:20px;box-shadow:none;
+    }
+    .panel .thumb{
+      aspect-ratio:1.72/1;background:linear-gradient(135deg,#dff2fb,#bfe3f3);border-radius:10px;overflow:hidden;margin-bottom:18px;
+    }
+    .panel .thumb img{width:100%;height:100%;object-fit:cover}
+    .panel ul{list-style:none;padding:0;margin:12px 0 0}
+    .panel li{padding:8px 0;border-bottom:1px solid #edf3f6;font-size:.92rem}
+    .recruit-copy{
+      display:grid;grid-template-columns:1fr;gap:16px
+    }
+    .recruit-title{font-size:clamp(2rem,4vw,3rem);line-height:1.25;font-weight:800}
+    .bubble-links{display:grid;gap:10px;margin-top:8px}
+    .bubble-links a{
+      display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg-tint);
+      border-radius:999px;color:var(--text);transition:transform .2s ease, background .2s ease;
+    }
+    .bubble-links a:hover{transform:translateX(4px);background:#e3f2fa}
+
+    .cta-band{
+      background:linear-gradient(90deg,var(--blue),var(--blue-90));color:#fff;padding:40px 0;
+    }
+    .cta-band .inner{
+      width:min(var(--container),calc(100% - 48px));margin:auto;display:grid;
+      grid-template-columns:1.2fr auto;gap:24px;align-items:center;
+    }
+    .cta-band h2{color:#fff;margin-bottom:10px}
+    .cta-band p{color:rgba(255,255,255,.9)}
+    .cta-actions{display:flex;gap:14px;flex-wrap:wrap}
+    .cta-actions .btn-primary{background:#fff;color:var(--blue)}
+    .cta-actions .btn-secondary{background:transparent;border-color:rgba(255,255,255,.38);color:#fff}
+
+    .banner-strip{
+      background:#f7fbfd;padding:28px 0;border-top:1px solid #e6eef4;border-bottom:1px solid #e6eef4;
+    }
+    .banner-row{
+      width:min(var(--container),calc(100% - 48px));margin:auto;display:grid;
+      grid-template-columns:40px repeat(4,1fr) 40px;gap:16px;align-items:center;
+    }
+    .arrow-btn{
+      width:32px;height:32px;border-radius:50%;border:1px solid #d5e5ee;background:#fff;color:var(--blue);
+      display:grid;place-items:center;
+    }
+    .mini-banner{
+      background:#fff;border:1px solid #e3edf3;border-radius:10px;padding:12px 16px;min-height:70px;
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text);
+    }
+
+    footer{
+      background:#fff;padding:36px 0 28px;
+    }
+    .footer-top{
+      width:min(var(--container),calc(100% - 48px));margin:auto;
+      display:grid;grid-template-columns:280px 1fr;gap:40px;align-items:start;
+    }
+    .footer-brand .logo-plain{
+      display:flex;align-items:center;gap:12px;font-weight:800;margin-bottom:14px;
+    }
+    .footer-brand .logo-box{
+      width:42px;height:42px;border-radius:10px;background:var(--text);display:grid;place-items:center;color:#fff;
+    }
+    .footer-brand p{color:var(--muted);font-size:.9rem;line-height:1.9}
+    .footer-nav{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
+    }
+    .footer-nav h3{font-size:.95rem;margin-bottom:12px}
+    .footer-nav a,.footer-nav li{font-size:.88rem;color:var(--muted);line-height:2}
+    .footer-nav ul{list-style:none;padding:0;margin:0}
+    .footer-bottom{
+      width:min(var(--container),calc(100% - 48px));margin:24px auto 0;padding-top:18px;border-top:1px solid #e6eef4;
+      display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);
+    }
+
+    @keyframes header_fade_in{
+      0%{opacity:0;transform:translateY(-4rem)}
+      100%{opacity:1;transform:none}
+    }
+    @keyframes opening_logo_in{
+      0%{opacity:0;filter:blur(1rem);transform:translateY(1.5rem) scale(.94)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes opening_bird_in{
+      0%{opacity:0;filter:blur(.8rem);transform:translate(-4rem,-2rem) rotate(-4deg) scale(.96)}
+      60%{opacity:1;filter:blur(0)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+
+    html.js .reveal,
+    html.js .stagger > *{
+      opacity:0;transform:translateY(28px);
+    }
+    html.js .slide-left{
+      opacity:0;transform:translateX(-64px);
+    }
+    html.js .scale-up{
+      opacity:0;transform:translateY(26px) scale(.95);
+    }
+    html.js .fade-in{
+      opacity:0;
+    }
+    .is-visible{
+      opacity:1 !important;transform:none !important;
+      transition:opacity .8s ease-out, transform .8s ease-out, filter .8s ease-out;
+    }
+    .is-visible.scale-up{
+      transition:opacity 1s ease-out, transform 1s cubic-bezier(.34,1.56,.64,1);
+    }
+    .site-header{animation:header_fade_in .8s ease-out both}
+    .hero-copy{animation:opening_logo_in 1.05s ease-out both}
+    .hero-visual{animation:opening_bird_in 1.2s ease-out both}
+
+    @media (max-width: 1100px){
+      .hero-grid,
+      .company-grid,
+      .sustain-grid,
+      .message-grid,
+      .ir-grid{grid-template-columns:1fr}
+      .hero-copy{padding-bottom:24px}
+      .hero-visual{height:60vh;border-radius:24px}
+      .hero-badge{left:16px;bottom:16px}
+      .news-wrap{grid-template-columns:1fr}
+      .news-panel{border-radius:var(--radius)}
+      .news-panel::after{display:none}
+      .news-card{margin:-32px 0 0 24px}
+      .metrics{grid-template-columns:repeat(3,1fr)}
+      .pickup .cards-top,.pickup .cards-bottom{grid-template-columns:repeat(2,1fr)}
+      .business-list{grid-template-columns:1fr}
+      .sdgs-grid{grid-template-columns:repeat(5,1fr)}
+      .topic-row{grid-template-columns:1fr}
+      .cta-band .inner,.footer-top{grid-template-columns:1fr}
+      .footer-nav{grid-template-columns:repeat(2,1fr)}
+      .banner-row{grid-template-columns:repeat(2,1fr)}
+      .banner-row .arrow-btn{display:none}
+      .message-photo{min-height:420px}
+      .message-copy{padding:32px 0 0}
+    }
+    @media (max-width: 767px){
+      .section{min-height:auto;padding:80px 0}
+      .hero-grid{padding-top:100px}
+      .hero-newsbar .container{grid-template-columns:72px 1fr 28px}
+      .container{width:min(var(--container),calc(100% - 32px))}
+      .pickup .cards-top,.pickup .cards-bottom{grid-template-columns:1fr}
+      .metrics{grid-template-columns:repeat(2,1fr)}
+      .news-list li{grid-template-columns:1fr;gap:6px}
+      .sdgs-grid{grid-template-columns:repeat(3,1fr)}
+      .footer-nav{grid-template-columns:1fr}
+      .nav-chip{display:none}
+      .hero-badge strong{font-size:1.2rem}
+    }
+  </style>
+</head>
+<body style="">
+  <script>document.documentElement.classList.add('js');</script>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#" class="logo">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 15.5L10.2 9.2C11.2 8.2 12.8 8.2 13.8 9.2L20 15.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M7 12L10.5 15.5" stroke="white" stroke-width="1.8" stroke-linecap="round"></path>
+          </svg>
+        </span>
+        <span>LinkWorks A型事業所</span>
+      </a>
+      <div class="nav-mini">
+        <a class="nav-chip" href="#contact">見学予約</a>
+        <button class="menu-btn" aria-label="メニュー"><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-grid" data-cebt="" data-cetx="0" data-cety="-1" style="translate: 0px -1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+      <div class="hero-copy">
+        <div class="tag">仙台駅東口 徒歩4分 / 就労継続支援A型</div>
+        <h1>はじめてでも、<br>ここなら通えそう。</h1>
+        <p class="lead">
+          週1日から相談OK。梱包・検品・PC入力・施設外就労まで、
+          その人の体調と得意に合わせて組み立てるA型事業所です。
+          本人には通いやすさを、ご家族には制度のわかりやすさを、同じページで丁寧に伝えます。
+        </p>
+        <div class="btns hero-cta">
+          <a href="#contact" class="btn btn-primary">見学を申し込む</a>
+          <a href="tel:0220001286" class="btn btn-secondary">電話で相談 022-000-1286</a>
+        </div>
+      </div>
+
+      <div class="hero-visual" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="-28" data-cety="-16" style="translate: -28px -16px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(1, 0, 0, 1, 0, 0) !important;">
+        <img src="http://127.0.0.1:5000/uploads/up_4cde07b4f9.png" alt="青空を背景に微笑む女性" width="900" height="1100" onerror="this.style.display='none'" style="display: none;">
+        <div class="hero-badge" data-cebt="" data-cetx="174" data-cety="-200" style="translate: 174px -200px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          <strong>開設12年、<br>一般就労移行348名</strong>
+          <span class="muted">見学当日の体験参加も可能です。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-newsbar">
+      <div class="container">
+        <div class="label">NEWS</div>
+        <div class="marquee">7/22(火)・7/27(日) 見学会を開催。ご家族のみの参加、支援員同伴も歓迎しています。</div>
+        <div class="arrow">→</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vision">
+    <div class="ghost fade-in reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">VISION2030</div>
+  </section>
+
+  <section class="section" id="news">
+    <div class="container">
+      <div class="news-wrap">
+        <div class="news-panel slide-left reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <p class="eyebrow">NEWS<span>お知らせ</span></p>
+          <h2>見学会・空き状況・<br>制度のご案内</h2>
+          <p class="stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+            <span style="display: inline-block; opacity: 1; transform: translateY(0px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; animation: auto ease 0s 1 normal none running none;" class="is-visible">初めての方にもわかりやすいよう、更新情報をまとめています。</span><br class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.12s;">
+            <span style="display: inline-block; opacity: 1; transform: translateY(0px); transition: opacity 0.8s ease-out 0.24s, transform 0.8s ease-out; animation: auto ease 0s 1 normal none running none;" class="is-visible">送迎ルート、利用料の説明会、体験日の空き枠もこちらから。</span><br class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.36s;">
+            <span style="display: inline-block; opacity: 1; transform: translateY(0px); transition: opacity 0.8s ease-out 0.48s, transform 0.8s ease-out; animation: auto ease 0s 1 normal none running none;" class="is-visible">ご本人だけでなく、ご家族・相談支援専門員の確認にも使える内容です。</span>
+          </p>
+          <a href="#contact" class="btn btn-link">一覧を見る</a>
+        </div>
+
+        <div class="news-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="tabs">
+            <span class="tab active">ALL</span>
+            <span class="tab">見学・体験</span>
+            <span class="tab">空き状況</span>
+            <span class="tab">ご家族向け</span>
+          </div>
+          <ul class="news-list">
+            <li class="stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+              <span class="pill is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0s;">見学会</span>
+              <span class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.12s;">2026.07.18</span>
+              <span class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.24s;">泉中央ルートの送迎説明つき見学会を7月27日に開催します。</span>
+            </li>
+            <li class="stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+              <span class="pill blue is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0s;">制度案内</span>
+              <span class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.12s;">2026.07.12</span>
+              <span class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.24s;">就労継続支援A型の利用料について、よくある質問を更新しました。</span>
+            </li>
+            <li class="stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+              <span class="pill green is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0s;">空き状況</span>
+              <span class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.12s;">2026.07.09</span>
+              <span class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.24s;">PC入力コース 2名、軽作業コース 3名の受け入れが可能です。</span>
+            </li>
+            <li class="stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+              <span class="pill is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0s;">見学会</span>
+              <span class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.12s;">2026.07.02</span>
+              <span class="is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.24s;">ご家族のみ参加の個別見学を平日18時まで受け付けています。</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint pickup">
+    <div class="container">
+      <p class="eyebrow reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">PICK UP<span>ピックアップ</span></p>
+      <div class="cards-top">
+        <article class="card scale-up reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_9e76cfe5f6.png" alt="明るい未来を表すイメージ" width="600" height="420" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <h3>週1日から、ゆっくり開始</h3>
+            <p>午前だけ・午後だけの相談も可能。通所が久しぶりの方でも、生活リズムから整えていけます。</p>
+          </div>
+        </article>
+        <article class="card scale-up reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="紙飛行機のイラスト" width="600" height="420" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <h3>仙台市内3ルート送迎</h3>
+            <p>長町・泉中央・多賀城方面へ送迎車を運行。雨の日や通勤練習前の利用にも役立ちます。</p>
+          </div>
+        </article>
+        <article class="card scale-up reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.4s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_21d1e26c35.jpg" alt="棚へ箱を並べる作業風景" width="600" height="420" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <h3>顔が映らない作業写真も公開</h3>
+            <p>実際の環境が伝わるよう、手元や後ろ姿の写真を中心に掲載。見学前の不安を減らします。</p>
+          </div>
+        </article>
+        <article class="card scale-up reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="background: linear-gradient(135deg,var(--blue),#4baee3); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; transition-delay: 0.6s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">
+          <div class="body" style="padding:24px 18px 22px">
+            <div class="muted" style="color:rgba(255,255,255,.76);font-size:.8rem;">GUIDE BOOK</div>
+            <h3 style="margin-top:8px;color:#fff;font-size:1.55rem;line-height:1.2">見学前ガイド<br>2026</h3>
+            <p style="color:rgba(255,255,255,.88);margin-top:10px">利用開始までの流れ、工賃、雇用契約の考え方を1冊にまとめました。</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="cards-bottom">
+        <article class="card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_3e8318e559.png" alt="梱包作業をするスタッフ" width="600" height="420" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <h3>作業は3コース</h3>
+            <p>梱包・検品・PC入力の3コースから開始。途中での変更も、面談のうえ柔軟に行えます。</p>
+          </div>
+        </article>
+        <article class="card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_48d9130f53.png" alt="穏やかな相談室での面談" width="600" height="420" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <h3>相談支援専門員と連携</h3>
+            <p>受給者証の準備や見学日程も連携して調整。制度名は正確に、説明はやさしく行います。</p>
+          </div>
+        </article>
+        <article class="card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_5ec6d773f1.png" alt="ノートPCを囲む同僚たち" width="600" height="420" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <h3>就職準備も並行して</h3>
+            <p>履歴書添削、面接練習、通勤同行まで対応。A型利用中に一般就労へ進んだ方は昨年度41名でした。</p>
+          </div>
+        </article>
+        <article class="card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="明るい入口" width="600" height="420" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <h3>駅から徒歩4分</h3>
+            <p>仙台駅東口から平坦な道で通所可能。公共交通機関に慣れたい方にも向いています。</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container company-grid">
+      <div>
+        <p class="eyebrow reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">COMPANY<span>会社案内</span></p>
+        <h2 class="reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">地域で働く力を育て、<br>ひとりずつ就職へつなぐ</h2>
+        <p class="lead reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          LinkWorksは、仙台市宮城野区で2014年に開設した就労継続支援A型事業所です。
+          朝礼から終礼までを細かく管理しすぎず、けれど支援記録と安全確認はきちんと残す。
+          「やさしいが、あいまいではない」支援体制を大切にしています。
+        </p>
+        <a href="#contact" class="btn btn-link reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="margin-top: 18px; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">会社情報を見る</a>
+
+        <div class="metrics stagger reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="metric is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0s;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="1.8"></path><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"></circle></svg>
+            <strong>開設12年</strong><span>継続した運営</span>
+          </div>
+          <div class="metric is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.12s;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 19v-6m6 6V5m6 14v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+            <strong>移行348名</strong><span>一般就労実績</span>
+          </div>
+          <div class="metric is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.24s;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16M7 14l3-3 3 2 4-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <strong>定着率84%</strong><span>6か月後</span>
+          </div>
+          <div class="metric is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.36s;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12M6 12h12M6 16h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+            <strong>週1日〜</strong><span>相談可能</span>
+          </div>
+          <div class="metric is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.48s;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <strong>送迎3ルート</strong><span>市内対応</span>
+          </div>
+          <div class="metric is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none; transition-delay: 0.6s;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h18v10H3zM7 17v3m10-3v3" stroke="currentColor" stroke-width="1.8"></path></svg>
+            <strong>昼食補助あり</strong><span>栄養管理</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="illust-box fade-in reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <img src="http://127.0.0.1:5000/uploads/up_7742b7c774.png" alt="成長と共生を表すイラスト" width="900" height="700" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint">
+    <div class="container">
+      <p class="eyebrow reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">BUSINESS<span>事業内容</span></p>
+      <h2 class="reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">できることから始める、<br>3つの仕事コース</h2>
+      <p class="lead reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">体調や経験に合わせて、最初の担当量を細かく調整します。慣れてきたら施設外就労や就職準備も追加できます。</p>
+
+      <div class="business-list stagger reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <article class="business-card is-visible" style="transition-delay: 0s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_7899556a14.jpg" alt="段ボールを組み立てる作業" width="700" height="440" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <div class="small">WORK 01</div>
+            <h3>梱包・封入</h3>
+            <p>ギフト箱の組立、チラシ封入、発送前の最終確認など。手順が明確で、初日の方にも入りやすい仕事です。</p>
+          </div>
+        </article>
+        <article class="business-card is-visible" style="transition-delay: 0.12s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="ノートPCで作業する手元" width="700" height="440" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <div class="small">WORK 02</div>
+            <h3>PC入力・事務補助</h3>
+            <p>名刺情報の入力、PDF整理、EC商品の登録補助。座って取り組める作業が中心で、在宅練習への発展も可能です。</p>
+          </div>
+        </article>
+        <article class="business-card is-visible" style="transition-delay: 0.24s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_cef1599412.jpg" alt="商品を棚へ整理する作業スタッフ" width="700" height="440" onerror="this.style.display='none'"></div>
+          <div class="body">
+            <div class="small">WORK 03</div>
+            <h3>施設外就労</h3>
+            <p>物流補助や清掃補助など、実際の職場に近い環境での仕事。支援員が同行し、勤務リズムづくりを支えます。</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section message-band">
+    <div class="message-grid">
+      <div class="message-photo fade-in reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <img src="http://127.0.0.1:5000/uploads/ChatGPT Image 2026年7月5日 06_45_05.png" alt="穏やかな表情の男性ポートレート" width="700" height="900" onerror="this.style.display='none'" class="">
+        <div class="quote-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+          <strong>「できる日に、できる量から」<br>その約束を守ります。</strong>
+          <span>所長　佐々木 恒一</span>
+        </div>
+      </div>
+      <div class="message-copy">
+        <p class="eyebrow reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">MESSAGE<span>所長メッセージ</span></p>
+        <h2 class="reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">本人も、ご家族も、<br>置いていかない支援へ</h2>
+        <p class="lead reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          就労支援では、やる気だけでも、制度説明だけでも足りません。
+          体調の波、通勤の不安、人との距離感、家計の心配。そうした現実を一つずつ整理しながら、
+          働く準備を進めていく場所でありたいと考えています。見学の日は、無理に決めなくて大丈夫です。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="sustainability">
+    <div class="container sustain-grid">
+      <div>
+        <p class="eyebrow reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">SUSTAINABILITY<span>サステナビリティ</span></p>
+        <h2 class="reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">働くことを、<br>長く続けられる形に</h2>
+        <p class="lead reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          地域の企業と連携しながら、雇用・福祉・生活支援をひとつながりで考えます。
+          送迎、昼食、面談、就職後フォローまで含めて、「続けること」に責任を持つ設計です。
+        </p>
+        <a href="#contact" class="btn btn-link reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="margin-top: 18px; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">サポート体制を見る</a>
+      </div>
+
+      <div class="sdgs-area">
+        <div class="sdgs-bg fade-in reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="">SUSTAINABLE GOALS</div>
+        <div class="sdgs-grid stagger reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="sdg c1 scale-up is-visible" style="transition-delay: 0s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">1</div><div class="sdg c2 scale-up is-visible" style="transition-delay: 0.1s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">2</div><div class="sdg c3 scale-up is-visible" style="transition-delay: 0.2s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">3</div><div class="sdg c4 scale-up is-visible" style="transition-delay: 0.3s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">4</div><div class="sdg c5 scale-up is-visible" style="transition-delay: 0.4s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">5</div>
+          <div class="sdg c6 scale-up is-visible" style="transition-delay: 0.5s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">6</div><div class="sdg c7 scale-up is-visible" style="transition-delay: 0.6s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">7</div><div class="sdg c8 scale-up is-visible" style="transition-delay: 0.7s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">8</div><div class="sdg c9 scale-up is-visible" style="transition-delay: 0.8s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">9</div><div class="sdg c10 scale-up is-visible" style="transition-delay: 0.9s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important;">10</div>
+        </div>
+      </div>
+
+      <div style="grid-column:1 / -1;">
+        <div class="cards-top" style="grid-template-columns:repeat(4,1fr);gap:18px;margin-top:26px;">
+          <article class="card scale-up reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_e669b481aa.png" alt="相談に寄り添う風景" width="600" height="420" onerror="this.style.display='none'"></div>
+            <div class="body">
+              <h3>定期面談と記録</h3>
+              <p>支援員・本人・必要に応じてご家族で月1回面談。困りごとを早めに共有します。</p>
+            </div>
+          </article>
+          <article class="card scale-up reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="紙飛行機でつなぐ配送イラスト" width="600" height="420" onerror="this.style.display='none'"></div>
+            <div class="body">
+              <h3>地域企業との連携</h3>
+              <p>宮城野区・若林区の協力企業24社と連携し、実習先・就職先の開拓を進めています。</p>
+            </div>
+          </article>
+          <article class="card scale-up reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_55f655b5cb.png" alt="笑顔で作業する支援員" width="600" height="420" onerror="this.style.display='none'"></div>
+            <div class="body">
+              <h3>無理のない配慮</h3>
+              <p>静かな席、休憩の取り方、対人距離など、本人の特性に合わせた環境調整を行います。</p>
+            </div>
+          </article>
+          <article class="card scale-up reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="background: linear-gradient(135deg,var(--blue),#4ca8de); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="body" style="padding:24px 18px;">
+              <div style="font-size:.8rem;color:rgba(255,255,255,.78)">REPORT</div>
+              <h3 style="margin-top:8px;color:#fff;font-size:1.55rem;line-height:1.2">就職実績<br>2025</h3>
+              <p style="color:rgba(255,255,255,.88);margin-top:10px">一般就労41名、施設外就労継続率91%の記録を公開しています。</p>
+            </div>
+          </article>
+        </div>
+
+        <div style="margin-top:34px">
+          <h3 class="reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="font-size: 1.2rem; color: var(--blue); margin-bottom: 18px; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">3つの取り組み</h3>
+          <div class="topic-row">
+            <article class="topic-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg" alt="都心のオフィス風景" width="700" height="440" onerror="this.style.display='none'"></div>
+              <div class="body">
+                <div class="num">1</div>
+                <h3>企業見学の定例化</h3>
+                <p class="muted">月2回、実際の働く現場を見る機会を設定。就職後のイメージを具体的にします。</p>
+              </div>
+            </article>
+            <article class="topic-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.15s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_3996f78e40.png" alt="学ぶ社会人たち" width="700" height="440" onerror="this.style.display='none'"></div>
+              <div class="body">
+                <div class="num">2</div>
+                <h3>工賃と家計の相談会</h3>
+                <p class="muted">利用料、雇用契約、収入の変化を家族にも説明。制度の誤解を減らします。</p>
+              </div>
+            </article>
+            <article class="topic-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.3s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_fdc355fe00.png" alt="開放的な扉と都市の風景" width="700" height="440" onerror="this.style.display='none'"></div>
+              <div class="body">
+                <div class="num">3</div>
+                <h3>就職後6か月フォロー</h3>
+                <p class="muted">定着支援と連携し、就職後の相談も継続。働き続けるための伴走を行います。</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint ir-recruit">
+    <div class="container">
+      <div class="ir-grid">
+        <div>
+          <p class="eyebrow reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">INVESTOR RELATIONS<span>数字で見る運営</span></p>
+          <div class="panel reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_fce3b87280.png" alt="成長グラフを確認する3Dイラスト" width="900" height="520" onerror="this.style.display='none'"></div>
+            <h3>就職実績</h3>
+            <ul>
+              <li>2025年度 一般就労移行 <strong>41名</strong></li>
+              <li>継続通所率（6か月） <strong>87%</strong></li>
+              <li>就職後定着率（6か月） <strong>84%</strong></li>
+              <li>平均通所日数 <strong>週3.4日</strong></li>
+              <li>利用料負担0円の方 <strong>88%</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <p class="eyebrow reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">RECRUIT<span>採用・利用案内</span></p>
+          <div class="panel reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_e832d00e50.png" alt="未来を見据える爽やかな女性" width="900" height="520" onerror="this.style.display='none'"></div>
+            <div class="recruit-copy">
+              <div class="recruit-title">見学から、<br>はじめよう。</div>
+              <p class="muted">ご本人・ご家族・支援機関の方、それぞれの立場で相談できます。平日9:30〜17:30受付。</p>
+              <div class="bubble-links">
+                <a href="#contact"><span>見学予約フォーム</span><span>→</span></a>
+                <a href="tel:0220001286"><span>電話で相談する</span><span>→</span></a>
+                <a href="#contact"><span>LINE相談を希望</span><span>→</span></a>
+                <a href="#contact"><span>スタッフ採用情報</span><span>→</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band" id="contact">
+    <div class="inner">
+      <div>
+        <h2>まずは30分、見てから決めてください。</h2>
+        <p>見学のみ、体験のみ、ご家族だけの来所も歓迎です。受給者証の前でも相談できます。</p>
+      </div>
+      <div class="cta-actions">
+        <a href="#" class="btn btn-primary">見学を申し込む</a>
+        <a href="tel:0220001286" class="btn btn-secondary">022-000-1286</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="banner-strip">
+    <div class="banner-row">
+      <div class="arrow-btn">←</div>
+      <div class="mini-banner">仙台市障害福祉サービス情報</div>
+      <div class="mini-banner">見学前ガイド 2026</div>
+      <div class="mini-banner">受給者証の準備について</div>
+      <div class="mini-banner">採用情報・支援員募集</div>
+      <div class="arrow-btn">→</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo-plain">
+          <div class="logo-box">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+              <path d="M4 15.5L10.2 9.2C11.2 8.2 12.8 8.2 13.8 9.2L20 15.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M7 12L10.5 15.5" stroke="white" stroke-width="1.8" stroke-linecap="round"></path>
+            </svg>
+          </div>
+          <div>LinkWorks A型事業所</div>
+        </div>
+        <p>
+          〒983-0852 宮城県仙台市宮城野区榴岡3-6-16<br>
+          榴岡センタービル 4F<br>
+          TEL 022-000-1286 / FAX 022-000-1287<br>
+          受付時間 平日 9:30–17:30
+        </p>
+      </div>
+
+      <div class="footer-nav">
+        <div>
+          <h3>施設案内</h3>
+          <ul>
+            <li><a href="#">はじめての方へ</a></li>
+            <li><a href="#">1日の流れ</a></li>
+            <li><a href="#">利用料について</a></li>
+            <li><a href="#">送迎・昼食</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>支援内容</h3>
+          <ul>
+            <li><a href="#">梱包・封入</a></li>
+            <li><a href="#">PC入力</a></li>
+            <li><a href="#">施設外就労</a></li>
+            <li><a href="#">就職支援</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>見学・相談</h3>
+          <ul>
+            <li><a href="#">見学予約</a></li>
+            <li><a href="#">電話相談</a></li>
+            <li><a href="#">LINE相談</a></li>
+            <li><a href="#">よくある質問</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>運営情報</h3>
+          <ul>
+            <li><a href="#">会社概要</a></li>
+            <li><a href="#">情報公開</a></li>
+            <li><a href="#">採用情報</a></li>
+            <li><a href="#">個人情報保護方針</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>サイトマップ / English / 利用規約 / 個人情報保護方針</div>
+      <div>COPYRIGHT © LINKWORKS A-TYPE SUPPORT CENTER. ALL RIGHTS RESERVED.</div>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          const el = entry.target;
+          if(el.classList.contains('stagger')){
+            [...el.children].forEach((child,i)=>{
+              child.style.transitionDelay = `${i * 0.12}s`;
+              child.classList.add('is-visible');
+            });
+          }else{
+            el.classList.add('is-visible');
+          }
+          observer.unobserve(el);
+        }
+      });
+    },{threshold:0.24});
+
+    document.querySelectorAll('.reveal,.slide-left,.scale-up,.fade-in,.stagger').forEach(el=>{
+      observer.observe(el);
+    });
+
+    document.querySelectorAll('.news-panel .stagger span').forEach((el,i)=>{
+      el.style.display='inline-block';
+      el.style.opacity='0';
+      el.style.transform='translateY(18px)';
+      el.style.transition=`opacity .8s ease-out ${0.15*i}s, transform .8s ease-out ${0.15*i}s`;
+    });
+
+    const newsPanel = document.querySelector('.news-panel');
+    if(newsPanel){
+      const panelObserver = new IntersectionObserver((entries)=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            newsPanel.querySelectorAll('.stagger span').forEach(el=>{
+              el.style.opacity='1';
+              el.style.transform='translateY(0)';
+            });
+            panelObserver.unobserve(newsPanel);
+          }
+        });
+      },{threshold:.24});
+      panelObserver.observe(newsPanel);
+    }
+
+    document.querySelectorAll('.pickup .scale-up').forEach((el,i)=>{ el.style.transitionDelay = `${i*0.2}s`; });
+    document.querySelectorAll('.business-list > *').forEach((el,i)=>{ el.style.transitionDelay = `${i*0.12}s`; });
+    document.querySelectorAll('.sdgs-grid > *').forEach((el,i)=>{
+      el.style.transitionDelay = `${i*0.1}s`;
+      el.classList.add('scale-up');
+    });
+    document.querySelectorAll('.topic-row .topic-card').forEach((el,i)=>{ el.style.transitionDelay = `${i*0.15}s`; });
+    document.querySelectorAll('.ir-grid .panel').forEach((el,i)=>{ el.style.transitionDelay = `${i*0.2}s`; });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div><img src="http://127.0.0.1:5000/uploads/up_94cd7edc70.png" style="position: absolute; left: 506px; top: 288px; z-index: 19; width: 507px !important; height: 495px !important; translate: 383px -137px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; object-fit: cover !important; max-width: none !important; min-height: 655px !important;" class="" data-cebt="" data-cetx="383" data-cety="-137" data-cew="506.51446126568715" data-ceh="495.40480987910036">
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div></body></html>

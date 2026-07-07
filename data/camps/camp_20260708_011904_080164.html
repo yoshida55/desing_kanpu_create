@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>みどりワークス仙台｜就労継続支援B型</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#221814;
+      --green:#22b573;
+      --lime:#e5ff9e;
+      --soft:#f7fdf8;
+      --soft2:#fbfff1;
+      --line:rgba(34,24,20,.12);
+      --shadow:0 12px 32px rgba(34,181,115,.10);
+      --shadow-strong:0 18px 48px rgba(34,181,115,.16);
+      --radius-sm:4px;
+      --radius-lg:28px;
+      --container:1440px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.14rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Zen Kaku Gothic New", system-ui, sans-serif;
+      color:var(--ink);
+      background:var(--bg);
+      line-height:2;
+      letter-spacing:.02em;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{
+      width:min(calc(100% - 40px), var(--container));
+      margin-inline:auto;
+    }
+    .section{
+      position:relative;
+      min-height:100vh;
+      padding:10vh 0;
+      overflow:hidden;
+      border-top:1px solid rgba(34,24,20,.04);
+    }
+    .tint{background:linear-gradient(180deg, rgba(34,181,115,.04), rgba(229,255,158,.03))}
+    .eyebrow{
+      display:inline-block;
+      font-size:.78rem;
+      font-weight:700;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--green);
+      margin-bottom:16px;
+    }
+    .section-title{
+      font-size:var(--section);
+      line-height:1.35;
+      letter-spacing:.04em;
+      margin:0 0 16px;
+      font-weight:700;
+    }
+    .lead,.copy,.small{
+      font-size:var(--body);
+      max-width:38em;
+      margin:0;
+    }
+    .small{font-size:.9rem;color:rgba(34,24,20,.72)}
+    .btn-row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:0 22px;
+      border-radius:999px;
+      border:1px solid var(--ink);
+      font-size:.92rem;
+      font-weight:700;
+      transition:transform .25s ease, box-shadow .25s ease, background .2s ease, color .2s ease;
+    }
+    .btn:hover{transform:translateY(-2px)}
+    .btn-primary{
+      background:var(--green);
+      color:#fff;
+      border-color:var(--green);
+      box-shadow:var(--shadow);
+    }
+    .btn-primary:hover{box-shadow:var(--shadow-strong)}
+    .btn-secondary{
+      background:#fff;
+      color:var(--ink);
+      border-color:rgba(34,24,20,.18);
+    }
+    .btn-line{
+      background:var(--lime);
+      color:var(--ink);
+      border-color:transparent;
+    }
+
+    .site-header{
+      position:sticky;top:0;z-index:50;
+      background:rgba(255,255,255,.84);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(34,24,20,.06);
+      animation:header_fade_in .8s ease both;
+    }
+    .site-header .bar{
+      height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px;
+    }
+    .logo{
+      display:flex;align-items:center;gap:12px;font-weight:800;
+    }
+    .logo-mark{
+      width:42px;height:42px;border-radius:50%;
+      background:linear-gradient(135deg,var(--green),#86d8af);
+      position:relative;box-shadow:0 6px 18px rgba(34,181,115,.18);
+    }
+    .logo-mark:before,.logo-mark:after{
+      content:"";position:absolute;background:#fff;border-radius:999px;
+    }
+    .logo-mark:before{width:20px;height:8px;left:11px;top:11px;transform:rotate(-32deg)}
+    .logo-mark:after{width:12px;height:12px;left:17px;top:19px}
+    .logo small{display:block;font-size:.68rem;font-weight:600;letter-spacing:.1em;color:rgba(34,24,20,.56)}
+    nav ul{display:flex;gap:20px;list-style:none;margin:0;padding:0;font-size:.87rem;font-weight:600}
+    .header-cta{display:flex;gap:10px;align-items:center}
+
+    .hero{
+      min-height:calc(100vh - 72px);
+      display:flex;align-items:center;
+      background:
+        radial-gradient(circle at 82% 18%, rgba(255,154,88,.26), transparent 22%),
+        radial-gradient(circle at 78% 26%, rgba(255,110,196,.20), transparent 26%),
+        radial-gradient(circle at 70% 10%, rgba(83,58,253,.10), transparent 22%),
+        linear-gradient(180deg, #fff 0%, #fcfffa 100%);
+    }
+    .hero-grid{
+      display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;
+    }
+    .hero-copy{
+      padding-right:32px;
+      position:relative;z-index:2;
+    }
+    .hero-copy h1{
+      margin:0 0 24px;
+      font-size:var(--hero);
+      line-height:1.28;
+      letter-spacing:.03em;
+      font-weight:800;
+    }
+    .hero-copy p{
+      margin:0 0 32px;
+      max-width:34em;
+      font-size:1rem;
+    }
+    .hero-visual{
+      position:relative;
+      min-height:560px;
+      animation:opening_bird_in 1.4s cubic-bezier(.16,1,.3,1) both;
+    }
+    .puzzle{
+      position:absolute;
+      background:#fff;
+      border:2px solid rgba(34,24,20,.12);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 10px 28px rgba(34,24,20,.06);
+      background-image:linear-gradient(135deg, rgba(34,181,115,.12), rgba(229,255,158,.10));
+    }
+    .puzzle img{width:100%;height:100%;object-fit:cover}
+    .p1{left:0;top:10px;width:38%;aspect-ratio:1/1.08;transform:rotate(-3deg)}
+    .p2{left:27%;top:110px;width:34%;aspect-ratio:1/1.2;transform:rotate(2deg)}
+    .p3{right:0;top:26px;width:38%;aspect-ratio:1/1.08;transform:rotate(-1deg)}
+    .tag-stack{
+      position:absolute;left:18px;top:150px;display:grid;gap:8px;z-index:4;
+      animation:opening_logo_in 1s ease-out both;
+    }
+    .tag{
+      background:#fff;padding:8px 14px;border-radius:999px;font-weight:700;font-size:.92rem;
+      box-shadow:0 8px 18px rgba(34,24,20,.08);width:max-content;
+    }
+    .float-bird,.float-piece,.cloud{
+      position:absolute;pointer-events:none;z-index:1;
+      animation:floatY 6s ease-in-out infinite;
+    }
+    .float-bird img,.float-piece img{width:100%;height:100%;object-fit:contain}
+    .float-bird{width:62px;right:42px;top:210px}
+    .float-piece{width:56px;left:56%;top:30px;animation-delay:1.2s}
+    .cloud{
+      width:120px;height:38px;left:-10px;bottom:120px;opacity:.75;
+      background:radial-gradient(circle at 20% 50%, #fff 0 18px, transparent 19px),
+                 radial-gradient(circle at 43% 40%, #fff 0 22px, transparent 23px),
+                 radial-gradient(circle at 66% 52%, #fff 0 16px, transparent 17px),
+                 linear-gradient(#fff,#fff);
+      background-size:auto;
+      background-repeat:no-repeat;
+      filter:blur(.2px);
+    }
+    .intro-poem{
+      display:flex;align-items:flex-end;
+      min-height:72vh;
+      padding-bottom:8vh;
+    }
+    .intro-poem .poem{
+      max-width:18em;
+      font-size:.92rem;
+      line-height:2.15;
+      margin-left:8%;
+    }
+
+    .story-wrap{display:grid;gap:72px}
+    .story-item{
+      display:grid;grid-template-columns:56% 44%;align-items:center;gap:36px;
+      position:relative;
+    }
+    .story-item:nth-child(even){grid-template-columns:44% 56%}
+    .story-item:nth-child(even) .media{order:2}
+    .story-item:nth-child(even) .card-note{left:-32px;right:auto}
+    .bg-word{
+      position:absolute;
+      left:0;top:-36px;
+      font-size:clamp(2.8rem,7vw,5.4rem);
+      line-height:1;
+      color:transparent;
+      -webkit-text-stroke:1px rgba(34,24,20,.16);
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      pointer-events:none;
+    }
+    .media{
+      position:relative;
+      border-radius:24px;
+      overflow:visible;
+    }
+    .media .photo{
+      border-radius:24px;
+      overflow:hidden;
+      background:linear-gradient(135deg, rgba(34,181,115,.18), rgba(229,255,158,.18));
+      aspect-ratio:1.45/1;
+      border:1px solid rgba(34,24,20,.08);
+    }
+    .media .photo img{width:100%;height:100%;object-fit:cover}
+    .media::before{
+      content:"";position:absolute;inset:auto 30px -8px auto;width:180px;height:120px;
+      background:rgba(34,181,115,.18);filter:blur(36px);z-index:-1;border-radius:50%;
+    }
+    .card-note{
+      position:absolute;
+      right:-24px;bottom:-24px;
+      background:#fff;border-radius:20px;padding:18px 20px;max-width:320px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(34,24,20,.06);
+    }
+    .card-note .ttl{font-size:1rem;font-weight:800;margin:0 0 6px;color:var(--green)}
+    .card-note p{margin:0;font-size:.9rem;line-height:1.9}
+    .story-copy{
+      padding-right:24px;
+    }
+
+    .staff-sec{
+      background:
+      linear-gradient(180deg, rgba(34,181,115,.05), rgba(255,255,255,.92)),
+      radial-gradient(circle at 10% 10%, rgba(229,255,158,.55), transparent 18%);
+    }
+    .staff-intro{
+      margin-bottom:48px;
+    }
+    .staff-carousel{
+      position:relative;
+      display:grid;
+      grid-template-columns:1fr 1.25fr 1fr;
+      gap:24px;
+      align-items:end;
+    }
+    .staff-card{
+      position:relative;
+      border-radius:24px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#f7f7f7,#fff);
+      border:1px solid rgba(34,24,20,.08);
+      min-height:500px;
+    }
+    .staff-card img{
+      width:100%;height:100%;object-fit:cover;object-position:center top;
+    }
+    .staff-card.center{min-height:560px}
+    .staff-quote{
+      position:absolute;left:24px;right:24px;bottom:20px;
+      background:#fff;border-radius:18px;padding:18px 18px 16px;
+      box-shadow:var(--shadow);
+      font-size:.92rem;line-height:1.9;
+    }
+    .staff-quote strong{display:block;margin-bottom:6px}
+    .carousel-dots{
+      display:flex;gap:8px;justify-content:flex-end;margin-top:18px;
+    }
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(34,24,20,.18)}
+    .dot.active{background:var(--green)}
+
+    .banner-talk .banner{
+      position:relative;border-radius:28px;overflow:hidden;min-height:520px;
+      background:linear-gradient(135deg, rgba(34,181,115,.12), rgba(229,255,158,.22));
+      border:1px solid rgba(34,24,20,.08);
+    }
+    .banner-talk .banner img{width:100%;height:100%;object-fit:cover}
+    .banner-copy{
+      position:absolute;right:40px;top:36px;
+      writing-mode:vertical-rl;
+      font-weight:700;font-size:1rem;letter-spacing:.08em;
+      background:rgba(255,255,255,.84);padding:18px 12px;border-radius:16px;
+      backdrop-filter:blur(6px);
+    }
+    .seal{
+      position:absolute;right:34px;bottom:28px;width:120px;height:120px;border-radius:50%;
+      background:#fff;border:2px dashed var(--green);
+      display:grid;place-items:center;font-weight:800;color:var(--green);
+      box-shadow:var(--shadow);
+      text-align:center;font-size:.8rem;line-height:1.5;
+    }
+
+    .marquee-sec{
+      min-height:auto;
+      padding:0;
+      border-top:none;
+    }
+    .marquee{
+      white-space:nowrap;overflow:hidden;
+      font-size:clamp(2.4rem,5vw,4.8rem);
+      font-weight:800;line-height:1;
+      color:var(--green);
+      padding:34px 0 20px;
+      border-top:1px solid rgba(34,24,20,.06);
+      border-bottom:1px solid rgba(34,24,20,.06);
+    }
+    .marquee-track{
+      display:inline-block;
+      padding-left:100%;
+      animation:marquee 28s linear infinite;
+    }
+
+    .welfare{
+      background:#fff;
+    }
+    .welfare-grid{
+      display:grid;grid-template-columns:1.08fr .92fr;gap:36px;align-items:center;
+    }
+    .welfare-visual{
+      position:relative;min-height:560px;border-radius:28px;overflow:hidden;
+      background:linear-gradient(135deg, rgba(34,181,115,.16), rgba(229,255,158,.20));
+      border:1px solid rgba(34,24,20,.08);
+    }
+    .welfare-visual img{width:100%;height:100%;object-fit:cover}
+    .benefit-panel{
+      position:absolute;left:34px;bottom:28px;right:34px;
+    }
+    .benefit-title{
+      font-size:clamp(2.2rem,4vw,4rem);
+      color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.55);
+      letter-spacing:.12em;font-weight:800;margin:0 0 10px;
+    }
+    .benefit-tabs{
+      margin-top:28px;
+      display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+      border-radius:18px;overflow:hidden;border:1px solid rgba(34,24,20,.08);
+      box-shadow:var(--shadow);
+    }
+    .benefit-tabs div{
+      background:#fff;padding:18px 16px;min-height:120px;border-right:1px solid rgba(34,24,20,.08)
+    }
+    .benefit-tabs div:last-child{border-right:none}
+    .benefit-tabs strong{display:block;font-size:.92rem;color:var(--green);margin-bottom:8px}
+    .benefit-tabs p{margin:0;font-size:.87rem;line-height:1.8}
+
+    .gallery-grid{
+      display:grid;
+      grid-template-columns:.85fr 1fr .85fr;
+      gap:18px;
+      align-items:start;
+      margin-top:40px;
+    }
+    .gallery-grid .g{
+      border-radius:18px;overflow:hidden;background:linear-gradient(135deg, rgba(34,181,115,.14), rgba(229,255,158,.16));
+      border:1px solid rgba(34,24,20,.08);
+      aspect-ratio:.9/.72;
+    }
+    .gallery-grid .g img{width:100%;height:100%;object-fit:cover}
+    .gallery-caption{
+      display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;
+      margin-top:24px;
+    }
+    .mini-person{
+      width:170px;transform:translateY(10px) rotate(-5deg);
+    }
+
+    .entry-sec{
+      background:
+      linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(192,241,255,.55) 58%, rgba(145,230,240,.9) 100%);
+      min-height:92vh;
+      display:flex;align-items:flex-end;
+      padding-bottom:0;
+    }
+    .entry-scene{
+      position:relative;width:100%;padding:12vh 0 7vh;
+    }
+    .entry-scene:before{
+      content:"LET’S MAKE";position:absolute;left:50%;top:10%;
+      transform:translateX(-50%) rotate(-12deg);
+      font-size:clamp(2.4rem,6vw,5rem);
+      letter-spacing:.18em;color:rgba(255,255,255,.68);font-weight:800;
+    }
+    .entry-center{
+      position:relative;text-align:center;z-index:2;
+    }
+    .entry-center .eyebrow{color:#fff;background:rgba(34,181,115,.7);padding:6px 12px;border-radius:999px}
+    .entry-center h2{
+      font-size:clamp(2rem,4vw,4rem);letter-spacing:.1em;margin:0 0 10px;
+      color:#fff;text-shadow:0 10px 24px rgba(34,24,20,.18);
+    }
+    .entry-center p{max-width:32em;margin:0 auto 22px;color:#fff}
+    .hills{
+      position:absolute;left:0;right:0;bottom:0;height:220px;
+      background:
+      radial-gradient(ellipse at 20% 100%, #a7e8f2 0 28%, transparent 29%),
+      radial-gradient(ellipse at 50% 100%, #84d4df 0 30%, transparent 31%),
+      radial-gradient(ellipse at 80% 100%, #70c7d6 0 25%, transparent 26%),
+      linear-gradient(180deg, transparent 0%, #a8edf5 50%, #99e5ef 100%);
+    }
+    .entry-ornament{
+      position:absolute;left:18%;bottom:132px;width:72px;animation:floatX 8s ease-in-out infinite;
+    }
+    .entry-ornament2{
+      position:absolute;right:22%;bottom:128px;width:66px;animation:floatY 7s ease-in-out infinite 1s;
+    }
+
+    .footer-cta{
+      background:var(--green);color:#fff;
+      min-height:auto;padding:72px 0 24px;
+    }
+    .footer-cta .top{
+      display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end;
+      padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.18);
+    }
+    .footer-cta h3{
+      font-size:clamp(2rem,4vw,3.2rem);line-height:1.35;margin:0;letter-spacing:.04em
+    }
+    .cta-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .footer-grid{
+      display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr;gap:32px;
+      padding-top:36px;
+    }
+    .footer-title{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:12px;opacity:.8}
+    .footer-cta a.btn-secondary{background:#fff;color:var(--green);border-color:#fff}
+    .footer-cta a.btn-line{background:var(--lime);color:var(--ink)}
+    .footer-cta ul{list-style:none;padding:0;margin:0}
+    .footer-cta li{margin:8px 0;font-size:.92rem}
+    .copyright{
+      display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+      padding-top:28px;margin-top:28px;border-top:1px solid rgba(255,255,255,.14);
+      font-size:.82rem;opacity:.86;
+    }
+
+    html.js .reveal{opacity:0;transform:translateY(34px)}
+    html.js .reveal.visible{opacity:1;transform:none;transition:opacity .8s ease, transform .8s cubic-bezier(.16,1,.3,1)}
+    html.js .reveal[data-delay="1"].visible{transition-delay:.08s}
+    html.js .reveal[data-delay="2"].visible{transition-delay:.16s}
+    html.js .reveal[data-delay="3"].visible{transition-delay:.24s}
+
+    @keyframes header_fade_in{
+      0%{opacity:0;transform:translateY(-4rem)}
+      100%{opacity:1;transform:none}
+    }
+    @keyframes opening_bird_in{
+      0%{opacity:0;filter:blur(.8rem);transform:translate(-4rem,-2rem) rotate(-10deg) scale(.7)}
+      60%{opacity:1;filter:blur(0)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes opening_logo_in{
+      0%{opacity:0;filter:blur(1rem);transform:translateY(1.5rem) scale(.94)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes floatY{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-10px)}
+    }
+    @keyframes floatX{
+      0%,100%{transform:translateX(0)}
+      50%{transform:translateX(14px)}
+    }
+    @keyframes marquee{
+      0%{transform:translateX(0)}
+      100%{transform:translateX(-100%)}
+    }
+
+    @media (max-width: 1100px){
+      nav{display:none}
+      .hero-grid,.story-item,.story-item:nth-child(even),.welfare-grid,.footer-cta .top,.footer-grid,.gallery-caption,.staff-carousel{
+        grid-template-columns:1fr;
+      }
+      .hero-visual{min-height:460px}
+      .story-item:nth-child(even) .media{order:0}
+      .card-note{position:relative;right:auto;bottom:auto;left:auto;margin-top:-26px;margin-left:24px}
+      .staff-card,.staff-card.center{min-height:420px}
+      .benefit-tabs{grid-template-columns:1fr 1fr}
+      .gallery-grid{grid-template-columns:1fr 1fr}
+      .mini-person{display:none}
+    }
+    @media (max-width: 760px){
+      .section{min-height:auto;padding:88px 0}
+      .hero{min-height:auto;padding:44px 0 72px}
+      .hero-grid,.gallery-grid{grid-template-columns:1fr}
+      .hero-copy{padding-right:0}
+      .hero-visual{min-height:380px}
+      .p1{width:43%}.p2{width:36%;left:29%}.p3{width:43%}
+      .tag-stack{top:128px}
+      .intro-poem .poem{margin-left:0}
+      .benefit-tabs{grid-template-columns:1fr}
+      .footer-grid{grid-template-columns:1fr}
+      .site-header .bar{height:64px}
+      .header-cta .btn-secondary{display:none}
+      .entry-center h2{font-size:2rem}
+      .entry-scene:before{top:16%;font-size:2.2rem}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container bar">
+      <a href="#" class="logo">
+        <span class="logo-mark"></span>
+        <span>
+          みどりワークス仙台
+          <small>就労継続支援B型 / 仙台市青葉区</small>
+        </span>
+      </a>
+      <nav>
+        <ul>
+          <li><a href="#about">施設を知る</a></li>
+          <li><a href="#work">できること</a></li>
+          <li><a href="#people">スタッフ</a></li>
+          <li><a href="#welfare">利用案内</a></li>
+          <li><a href="#entry">見学申込み</a></li>
+        </ul>
+      </nav>
+      <div class="header-cta">
+        <a class="btn btn-secondary" href="tel:022-398-1247">022-398-1247</a>
+        <a class="btn btn-primary" href="#entry">見学予約</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero section">
+      <div class="container hero-grid">
+        <div class="hero-copy reveal visible">
+          <span class="eyebrow">Top / はじめに</span>
+          <h1>このしごとで、<br>自分をつくる。<br>まちとつながる。</h1>
+          <p>
+            仙台駅から徒歩4分。週1日・1日2時間から始められる、
+            就労継続支援B型「みどりワークス仙台」です。
+            箱づくり、封入、軽作業、PC入力まで、あなたのペースで通える場所を整えました。
+          </p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="#entry">まずは見学する</a>
+            <a class="btn btn-secondary" href="#welfare">利用料を見る</a>
+            <a class="btn btn-line" href="#">LINEで相談</a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="tag-stack">
+            <div class="tag">週1日から</div>
+            <div class="tag">送迎相談OK</div>
+            <div class="tag">昼食補助あり</div>
+          </div>
+          <div class="puzzle p1">
+            <img src="http://127.0.0.1:5000/uploads/up_1d421dabc8.png" alt="" width="500" height="560" onerror="this.style.display='none'">
+          </div>
+          <div class="puzzle p2">
+            <img src="http://127.0.0.1:5000/uploads/up_dcc6c928df.png" alt="" width="460" height="540" onerror="this.style.display='none'">
+          </div>
+          <div class="puzzle p3">
+            <img src="http://127.0.0.1:5000/uploads/up_34c90234be.png" alt="" width="500" height="560" onerror="this.style.display='none'">
+          </div>
+          <div class="float-bird">
+            <img src="http://127.0.0.1:5000/uploads/up_f04018458e.png" alt="" width="120" height="120" onerror="this.style.display='none'">
+          </div>
+          <div class="float-piece">
+            <img src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="" width="120" height="120" onerror="this.style.display='none'">
+          </div>
+          <div class="cloud"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section intro-poem">
+      <div class="container">
+        <div class="poem reveal">
+          はじめは、<br>
+          朝に起きて来るだけでもいい。<br>
+          人と話すのが少し苦手でも、<br>
+          手を動かす仕事が好きでも。<br>
+          <br>
+          みどりワークス仙台は、<br>
+          「いきなり就職」ではなく、<br>
+          「ちゃんと通える毎日」をつくる場所です。<br>
+          体調に合わせて、少しずつ。<br>
+          一人ひとりの速さで進みます。<br>
+          <br>
+          ご本人にも、ご家族にも、<br>
+          安心してもらえる支援を、<br>
+          制度にのっとって丁寧に。<br>
+          見学のときは、作業室も利用料も<br>
+          そのままお見せします。
+        </div>
+      </div>
+    </section>
+
+    <section class="section tint" id="about">
+      <div class="container story-wrap">
+        <div class="story-item reveal">
+          <div class="media">
+            <div class="bg-word">Company</div>
+            <div class="photo">
+              <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="" width="900" height="640" onerror="this.style.display='none'">
+            </div>
+            <div class="card-note">
+              <p class="ttl">施設を知る</p>
+              <p>開設12年。仙台市青葉区本町で、B型支援を中心に、一般就労への移行支援まで連携しています。</p>
+            </div>
+          </div>
+          <div class="story-copy">
+            <span class="eyebrow">Company / 施設紹介</span>
+            <h2 class="section-title">「通えそう」が、<br>最初の安心。</h2>
+            <p class="lead">
+              地下鉄広瀬通駅から徒歩4分。静かなオフィスビルの2階にあり、
+              作業室・面談室・休憩スペースを分けて整えています。
+              見学は平日10:00〜16:30。ご家族、支援員、相談支援専門員の同席も可能です。
+            </p>
+          </div>
+        </div>
+
+        <div class="story-item reveal" id="work">
+          <div class="media">
+            <div class="bg-word">Business</div>
+            <div class="photo">
+              <img src="http://127.0.0.1:5000/uploads/up_ee8ee19bc6.jpg" alt="" width="900" height="640" onerror="this.style.display='none'">
+            </div>
+            <div class="card-note">
+              <p class="ttl">仕事を知る</p>
+              <p>箱組み、封入、検品、シール貼り、PC入力。顔が映りすぎない作業写真も、見学時にそのままご案内します。</p>
+            </div>
+          </div>
+          <div class="story-copy">
+            <span class="eyebrow">Business / 作業内容</span>
+            <h2 class="section-title">手を動かすしごと、<br>静かに集中するしごと。</h2>
+            <p class="lead">
+              その日の体調や得意に合わせて、座り仕事中心の軽作業から始められます。
+              1工程ずつ手順書を用意し、スタッフが隣で確認。
+              「初めてだから不安」という方ほど、短時間の体験利用からどうぞ。
+            </p>
+          </div>
+        </div>
+
+        <div class="story-item reveal">
+          <div class="media">
+            <div class="bg-word">Area</div>
+            <div class="photo">
+              <img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" alt="" width="900" height="640" onerror="this.style.display='none'">
+            </div>
+            <div class="card-note">
+              <p class="ttl">地域とのつながり</p>
+              <p>宮城野区・若林区・泉区から通所実績あり。送迎は3ルートで応相談、公共交通での練習同行も行っています。</p>
+            </div>
+          </div>
+          <div class="story-copy">
+            <span class="eyebrow">Area / 通いやすさ</span>
+            <h2 class="section-title">駅から近くて、<br>地域ともつながる。</h2>
+            <p class="lead">
+              近隣企業の軽作業受託が多く、施設内にいながら社会との接点を感じやすいのが特長です。
+              毎月の外出訓練では、役所・図書館・店舗でのやりとりも一緒に練習します。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section staff-sec" id="people">
+      <div class="container">
+        <div class="staff-intro reveal">
+          <span class="eyebrow">Team / 働く人を知る</span>
+          <h2 class="section-title">支える人の顔が見えること。<br>それも、通いやすさのひとつ。</h2>
+          <p class="lead">
+            サービス管理責任者1名、職業指導員4名、生活支援員3名、看護職1名。
+            福祉だけでなく物流・接客・事務経験のあるスタッフが在籍しています。
+          </p>
+        </div>
+
+        <div class="staff-carousel reveal">
+          <article class="staff-card">
+            <img src="http://127.0.0.1:5000/uploads/up_1d9bb593f4.png" alt="" width="520" height="760" onerror="this.style.display='none'">
+          </article>
+          <article class="staff-card center">
+            <img src="http://127.0.0.1:5000/uploads/up_7652703473.png" alt="" width="620" height="900" onerror="this.style.display='none'">
+            <div class="staff-quote">
+              <strong>サービス管理責任者　高橋 圭介</strong>
+              「まずは週1日でも大丈夫です。体調の波を前提に、
+              無理なく続けられる計画を一緒に作ります。」
+            </div>
+          </article>
+          <article class="staff-card">
+            <img src="http://127.0.0.1:5000/uploads/up_07d8e0124b.png" alt="" width="520" height="760" onerror="this.style.display='none'">
+          </article>
+        </div>
+        <div class="carousel-dots">
+          <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section banner-talk tint">
+      <div class="container">
+        <div class="reveal">
+          <span class="eyebrow">Cross Talk / 利用者の声</span>
+          <h2 class="section-title">「3か月前は、朝に外へ出るのが不安だった。」</h2>
+        </div>
+        <div class="banner reveal" data-delay="1">
+          <img src="http://127.0.0.1:5000/uploads/up_9e76cfe5f6.png" alt="" width="1400" height="760" onerror="this.style.display='none'">
+          <div class="banner-copy">30代のAさん・<br>ご家族・担当支援員が語る、<br>通所が暮らしを整えた3か月</div>
+          <div class="seal">就職実績<br>348名</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="marquee-sec">
+      <div class="marquee">
+        <div class="marquee-track">WITH THE JOB. GROW WITH THE TOWN. WITH THE JOB. GROW WITH THE TOWN. WITH THE JOB. GROW WITH THE TOWN.</div>
+      </div>
+    </section>
+
+    <section class="section welfare" id="welfare">
+      <div class="container welfare-grid">
+        <div class="welfare-visual reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="" width="980" height="900" onerror="this.style.display='none'">
+          <div class="benefit-panel">
+            <div class="benefit-title">WELFARE</div>
+          </div>
+        </div>
+        <div class="reveal" data-delay="1">
+          <span class="eyebrow">Welfare / つかえる制度</span>
+          <h2 class="section-title">利用料も、1日の流れも、<br>先にきちんとお伝えします。</h2>
+          <p class="lead">
+            障害福祉サービス受給者証を利用して通所します。
+            世帯収入により自己負担上限額が決まり、多くの方が0円で利用しています。
+            昼食補助、交通費補助、体験利用にも対応。制度説明はご家族向け資料もご用意しています。
+          </p>
+
+          <div class="benefit-tabs">
+            <div>
+              <strong>利用料</strong>
+              <p>非課税世帯は0円。課税世帯は上限9,300円または37,200円。</p>
+            </div>
+            <div>
+              <strong>1日の流れ</strong>
+              <p>10:00開始、作業・休憩・昼食を挟み、15:00終了が基本です。</p>
+            </div>
+            <div>
+              <strong>通所条件</strong>
+              <p>週1日、1日2時間から可。午前のみ・午後のみも相談できます。</p>
+            </div>
+            <div>
+              <strong>実績数字</strong>
+              <p>一般就労移行 348名、定着率82%、見学後の体験参加率91%。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tint">
+      <div class="container">
+        <div class="reveal">
+          <span class="eyebrow">Recruit Info / 日々の風景</span>
+          <h2 class="section-title">見学前に、空気感を少しだけ。</h2>
+          <p class="lead">
+            作業のようす、相談の時間、静かな集中。写真は実際の雰囲気に近いものを選んでいます。
+          </p>
+        </div>
+
+        <div class="gallery-grid reveal" data-delay="1">
+          <div class="g">
+            <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="" width="520" height="420" onerror="this.style.display='none'">
+          </div>
+          <div class="g" style="margin-top:26px">
+            <img src="http://127.0.0.1:5000/uploads/up_68a39f677b.png" alt="" width="620" height="460" onerror="this.style.display='none'">
+          </div>
+          <div class="g">
+            <img src="http://127.0.0.1:5000/uploads/up_d0b8f06e81.jpg" alt="" width="520" height="420" onerror="this.style.display='none'">
+          </div>
+        </div>
+
+        <div class="gallery-caption reveal" data-delay="2">
+          <img class="mini-person" src="http://127.0.0.1:5000/uploads/up_cdf7175852.png" alt="" width="220" height="260" onerror="this.style.display='none'">
+          <div style="max-width:520px">
+            <p class="small">
+              体験利用は最短3日後から。見学→面談→体験→受給者証申請の順で、
+              スタッフが役所手続きも伴走します。電話が苦手な方はLINE・メールでもどうぞ。
+            </p>
+            <div class="btn-row" style="margin-top:16px">
+              <a class="btn btn-primary" href="#entry">見学を予約する</a>
+              <a class="btn btn-secondary" href="tel:022-398-1247">電話で相談</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section entry-sec" id="entry">
+      <div class="container entry-scene">
+        <div class="entry-center reveal">
+          <span class="eyebrow">Entry / 見学申込み</span>
+          <h2>見に来るだけでも、だいじょうぶ。</h2>
+          <p>
+            平日10:00〜16:30で受付中。所要時間は約45分。
+            ご本人のみ、ご家族同席、相談支援専門員同席、どの形でも対応できます。
+          </p>
+          <div class="btn-row" style="justify-content:center">
+            <a class="btn btn-primary" href="#">フォームで予約</a>
+            <a class="btn btn-secondary" href="tel:022-398-1247">022-398-1247</a>
+            <a class="btn btn-line" href="#">LINE相談</a>
+          </div>
+        </div>
+        <img class="entry-ornament" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="" width="100" height="100" onerror="this.style.display='none'">
+        <img class="entry-ornament2" src="http://127.0.0.1:5000/uploads/up_f8b7d3a516.png" alt="" width="100" height="100" onerror="this.style.display='none'">
+        <div class="hills"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-cta">
+    <div class="container">
+      <div class="top">
+        <div>
+          <h3>このしごとで<br>自分をつくる<br>地域をつくる</h3>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-secondary" href="#">見学予約</a>
+          <a class="btn btn-line" href="#">LINEで相談</a>
+        </div>
+      </div>
+
+      <div class="footer-grid">
+        <div>
+          <div class="footer-title">Office</div>
+          <p style="margin:0;font-size:.94rem;line-height:2">
+            みどりワークス仙台<br>
+            〒980-0014 宮城県仙台市青葉区本町2-6-15<br>
+            チサンマンション本町 2F<br>
+            TEL 022-398-1247<br>
+            受付時間 平日 9:30–17:30
+          </p>
+        </div>
+        <div>
+          <div class="footer-title">Menu</div>
+          <ul>
+            <li><a href="#about">施設を知る</a></li>
+            <li><a href="#work">作業内容</a></li>
+            <li><a href="#people">スタッフ紹介</a></li>
+            <li><a href="#welfare">利用案内</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-title">Guide</div>
+          <ul>
+            <li>見学の流れ</li>
+            <li>体験利用について</li>
+            <li>受給者証の申請</li>
+            <li>ご家族向け資料請求</li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-title">Access</div>
+          <ul>
+            <li>仙台駅西口 徒歩4分</li>
+            <li>広瀬通駅 徒歩3分</li>
+            <li>送迎相談 3ルート対応</li>
+            <li>自転車置場あり</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="copyright">
+        <span>Copyright © Midori Works Sendai All Rights Reserved.</span>
+        <span>運営：一般社団法人みどり福祉デザイン</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:0.14});
+
+    document.querySelectorAll('.reveal').forEach(el=>{
+      if(!el.classList.contains('visible')) observer.observe(el);
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

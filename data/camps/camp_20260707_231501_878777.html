@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Re:Work Link｜就労継続支援A型</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-tint:#f1ece9;
+      --text:#282b2d;
+      --muted:#6e6b65;
+      --line:rgba(49,54,57,.12);
+      --line-strong:rgba(49,54,57,.3);
+      --accent:#282b2d;
+      --leaf:#cfe58f;
+      --sky:#bfe3f6;
+      --soft:#eef7ef;
+      --shadow-sm:0 6px 16px rgba(40,43,45,.06);
+      --shadow-md:0 16px 36px rgba(40,43,45,.12);
+      --radius:7px;
+      --container:1232px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.16rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif}
+    body{line-height:2;letter-spacing:.02em}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(var(--container),calc(100% - 40px));margin-inline:auto}
+    .section{position:relative;padding:10vh 0;min-height:100vh;display:flex;align-items:center}
+    .section.tint{background:var(--bg-tint)}
+    .section-head{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:40px;padding-top:8px;border-top:1px solid var(--line);
+    }
+    .label{
+      font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:10px;white-space:nowrap
+    }
+    .label::before{
+      content:"";width:10px;height:10px;border-radius:50%;background:#a8d88b;box-shadow:0 0 0 4px rgba(168,216,139,.18)
+    }
+    .label-ja{font-size:.72rem;color:var(--muted)}
+    h1,h2,h3,p{margin:0}
+    h1{font-size:var(--hero);line-height:1.3;letter-spacing:.03em;font-weight:500}
+    h2{font-size:var(--section);line-height:1.35;letter-spacing:.04em;font-weight:500}
+    h3{font-size:var(--sub);line-height:1.5;font-weight:500}
+    p,li,dt,dd{font-size:var(--body);color:var(--muted)}
+    .lede{max-width:38em;margin-top:16px}
+    .btn{
+      display:inline-flex;align-items:center;gap:14px;
+      padding:12px 18px;border:1px solid rgba(40,43,45,.12);background:#fff;border-radius:6px;
+      box-shadow:var(--shadow-sm);font-size:.9rem;line-height:1.2;color:var(--text);
+      transition:transform .5s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1), background-color .3s cubic-bezier(.4,0,.2,1), color .3s cubic-bezier(.4,0,.2,1), border-color .3s cubic-bezier(.4,0,.2,1);
+    }
+    .btn::after{content:"›";font-size:1rem}
+    .btn:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+    .btn.dark{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+    .eyebrow{font-size:.78rem;color:rgba(255,255,255,.9);letter-spacing:.08em}
+    .note{font-size:.76rem;color:var(--muted)}
+    .grid-2{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+    .media{
+      position:relative;overflow:hidden;border-radius:0;background:linear-gradient(135deg,#dbeef7,#f0e9d7);min-height:320px
+    }
+    .media img{width:100%;height:100%;object-fit:cover}
+    .caption-card{
+      position:absolute;right:-24px;bottom:-24px;background:#fff;border-radius:6px;
+      padding:18px 20px;box-shadow:var(--shadow-md);max-width:240px;z-index:2
+    }
+    .caption-card strong{display:block;font-size:.92rem;line-height:1.6}
+    .caption-card span{font-size:.75rem;color:var(--muted)}
+    .blur-blob{
+      position:absolute;right:32px;bottom:24px;width:180px;height:180px;border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, rgba(191,227,246,.65), rgba(207,229,143,.38));
+      filter:blur(28px);z-index:0
+    }
+    .hero{
+      padding:0;min-height:100vh;background:#ddd;color:#fff;overflow:hidden
+    }
+    .hero .bg{
+      position:absolute;inset:0;
+      background:linear-gradient(rgba(40,43,45,.18),rgba(40,43,45,.24)), url('http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg') center/cover no-repeat;
+      transform:scale(1.04);
+    }
+    .hero .stripe-glow{
+      position:absolute;inset:auto -10% -10% auto;width:min(55vw,760px);height:min(70vh,760px);
+      background:
+        radial-gradient(circle at 70% 35%, rgba(255,166,90,.75), transparent 28%),
+        radial-gradient(circle at 62% 48%, rgba(255,120,170,.68), transparent 24%),
+        radial-gradient(circle at 56% 56%, rgba(132,140,255,.44), transparent 22%),
+        radial-gradient(circle at 78% 62%, rgba(255,210,120,.48), transparent 18%);
+      filter:blur(16px);
+      opacity:.72;
+      pointer-events:none;
+    }
+    .hero .inner{
+      position:relative;z-index:2;min-height:100vh;display:flex;align-items:flex-end;padding:0 0 64px
+    }
+    .hero-copy{max-width:760px}
+    .hero-copy .small{font-size:.9rem;margin-bottom:18px}
+    .hero h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(3.1rem,8vw,6rem);line-height:.95;letter-spacing:-.02em}
+    .hero .jp{font-size:1rem;margin-bottom:8px}
+    .hero .subline{margin-top:16px;max-width:34em;color:rgba(255,255,255,.84)}
+    .hero-nav{
+      position:absolute;top:24px;left:0;right:0;z-index:3
+    }
+    .hero-nav .container{display:flex;justify-content:space-between;align-items:center}
+    .brand{font-size:1rem;color:#fff;letter-spacing:.08em}
+    .menu{
+      width:32px;height:20px;position:relative;opacity:.9
+    }
+    .menu::before,.menu::after,.menu span{
+      content:"";position:absolute;left:0;right:0;height:1px;background:#fff;transition:transform .3s ease, opacity .3s ease
+    }
+    .menu::before{top:0}.menu span{top:9px}.menu::after{bottom:0}
+    .spacer{height:42vh}
+    .about-wrap{display:grid;grid-template-columns:.9fr 1fr;gap:72px;align-items:center}
+    .about-mainimg{aspect-ratio:4/5}
+    .stamp{
+      position:absolute;right:-22px;top:-18px;width:112px;transform:rotate(-10deg);opacity:.95
+    }
+    .line-illust{
+      position:absolute;right:-18px;bottom:-46px;width:180px;opacity:.88
+    }
+    .thumb-strip{
+      margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px
+    }
+    .thumb-strip .thumb{aspect-ratio:1/1.05;background:linear-gradient(135deg,#d7eef5,#ebe4d8);overflow:hidden}
+    .project-main{
+      position:relative;width:min(920px,100% - 80px);margin:0 auto 72px;
+    }
+    .project-main .media{aspect-ratio:16/9}
+    .project-main .swoop{
+      position:absolute;left:-54px;top:-56px;width:150px;animation:floatCircle 10s linear infinite
+    }
+    .project-main .overlay-text{
+      position:absolute;right:24px;bottom:20px;color:#fff;font-size:.76rem;letter-spacing:.08em;background:rgba(40,43,45,.32);padding:8px 10px;border-radius:4px
+    }
+    .project-secondary{width:min(820px,100% - 120px);margin:0 auto}
+    .project-secondary .media{aspect-ratio:16/9}
+    .coming{
+      position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-family:Georgia,serif;font-size:2rem;text-shadow:0 6px 20px rgba(0,0,0,.3)
+    }
+    .center-btn{display:flex;justify-content:center;margin-top:32px}
+    .company-stage{
+      position:relative;text-align:center;padding-top:24px
+    }
+    .company-stage .vert{
+      writing-mode:vertical-rl;margin:0 auto;font-size:clamp(1.8rem,3vw,2.5rem);line-height:1.2;letter-spacing:.08em;color:var(--text)
+    }
+    .company-stage .lead{
+      max-width:36em;margin:28px auto 28px
+    }
+    .float-card{
+      position:absolute;background:linear-gradient(135deg,#dbeef7,#f6efe7);padding:6px;border-radius:6px;box-shadow:var(--shadow-sm)
+    }
+    .float-card img{width:100%;height:100%;object-fit:cover;border-radius:4px}
+    .fc1{left:8%;top:0;width:130px;transform:rotate(-8deg)}
+    .fc2{right:10%;top:80px;width:138px;transform:rotate(6deg)}
+    .fc3{left:12%;top:210px;width:152px;transform:rotate(5deg)}
+    .fc4{right:15%;top:280px;width:148px;transform:rotate(-6deg)}
+    .paper{
+      position:absolute;opacity:.7;animation:floatRedCircle 16s linear infinite
+    }
+    .paper.p1{left:22%;top:26px;width:120px}
+    .paper.p2{right:20%;top:240px;width:110px;animation-duration:20s}
+    .paper.p3{right:7%;bottom:120px;width:84px;animation-duration:18s}
+    .figure{
+      position:absolute;width:180px;opacity:.96
+    }
+    .fg1{left:6%;top:120px;transform:rotate(-12deg)}
+    .fg2{right:8%;top:170px;transform:rotate(14deg)}
+    .fg3{right:5%;bottom:18px;transform:rotate(8deg);width:160px}
+    .fg4{left:4%;bottom:28px;transform:rotate(-8deg);width:154px}
+    .arc-cta{
+      position:relative;overflow:hidden;background:#f5f0ec;padding-top:160px;padding-bottom:120px
+    }
+    .arc-bg{
+      position:absolute;left:0;right:0;bottom:0;height:58%;
+      background:
+        radial-gradient(120% 120% at 18% 100%, rgba(191,227,246,.95), rgba(182,236,210,.92) 42%, rgba(209,237,141,.9) 70%, transparent 71%),
+        radial-gradient(120% 120% at 82% 100%, rgba(209,237,141,.92), rgba(186,235,210,.9) 42%, rgba(191,227,246,.96) 70%, transparent 71%);
+    }
+    .cta-grid{
+      position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:88px;align-items:start
+    }
+    .cta-col{text-align:center;max-width:380px;margin:0 auto}
+    .cta-col h2{font-family:Georgia,serif;font-size:clamp(2rem,4vw,2.8rem);font-weight:400}
+    .cta-col p{margin:18px auto 24px;max-width:32em}
+    .footer{
+      background:#f8f5f2;border-top:1px solid var(--line)
+    }
+    .footer-inner{
+      width:min(var(--container),calc(100% - 40px));margin:0 auto;padding:18px 0 28px;
+      display:grid;grid-template-columns:1.2fr .9fr .9fr .9fr;gap:24px;align-items:start
+    }
+    .footer small,.footer a,.footer p{font-size:.78rem;line-height:1.9}
+    .footer-title{font-size:.82rem;color:var(--text);margin-bottom:6px}
+    .scroll-indicator{
+      position:absolute;right:24px;bottom:24px;display:flex;flex-direction:column;align-items:center;gap:8px;color:#fff;font-size:.72rem;letter-spacing:.08em
+    }
+    .scroll-indicator .mouse{
+      width:20px;height:36px;border:1px solid rgba(255,255,255,.7);border-radius:20px;position:relative
+    }
+    .scroll-indicator .mouse::before{
+      content:"";position:absolute;left:50%;top:7px;transform:translateX(-50%);width:4px;height:8px;border-radius:4px;background:#fff;animation:scroll-dot-scale 3.2s ease infinite
+    }
+    .scroll-indicator .bar{
+      width:1px;height:36px;background:rgba(255,255,255,.35);position:relative;overflow:hidden
+    }
+    .scroll-indicator .bar::before{
+      content:"";position:absolute;inset:0;background:#fff;transform:scaleY(0);transform-origin:center top;animation:scroll-bar-scale 3.2s ease infinite
+    }
+
+    html.js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1)}
+    html.js .reveal.show{opacity:1;transform:none}
+    html.js .hero .hero-anim{opacity:0;transform:translateY(24px)}
+    html.js .hero.is-loaded .hero-anim{opacity:1;transform:none;transition:opacity .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1)}
+    html.js .hero.is-loaded .hero-anim.delay1{transition-delay:.12s}
+    html.js .hero.is-loaded .hero-anim.delay2{transition-delay:.28s}
+    html.js .hero.is-loaded .hero-anim.delay3{transition-delay:.42s}
+    html.js .hero.is-loaded .bg{transition:transform 2.2s ease;transform:scale(1)}
+
+    .hover-float{transition:transform .5s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1)}
+    .hover-float:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+
+    @keyframes scroll-bar-scale{
+      0%{transform:scaleY(0);transform-origin:center top}
+      15%{transform:scaleY(0);transform-origin:center top}
+      40%{transform:scaleY(1);transform-origin:center top}
+      70%{transform:scaleY(1);transform-origin:center bottom}
+      85%{transform:scaleY(0);transform-origin:center bottom}
+      100%{transform:scaleY(0);transform-origin:center bottom}
+    }
+    @keyframes scroll-dot-scale{
+      0%,15%{transform:translateX(-50%) translateY(0);opacity:0}
+      30%{opacity:1}
+      60%{transform:translateX(-50%) translateY(12px);opacity:1}
+      85%,100%{transform:translateX(-50%) translateY(12px);opacity:0}
+    }
+    @keyframes floatRedCircle{
+      0%{transform:translate3d(0,0,0) rotate(0)}
+      50%{transform:translate3d(18px,10px,0) rotate(7deg)}
+      100%{transform:translate3d(0,0,0) rotate(0)}
+    }
+    @keyframes floatCircle{
+      0%{transform:translate3d(0,0,0) rotate(0)}
+      50%{transform:translate3d(0,14px,0) rotate(5deg)}
+      100%{transform:translate3d(0,0,0) rotate(0)}
+    }
+    @keyframes loop{
+      0%{transform:translateX(0)}
+      100%{transform:translateX(-40px)}
+    }
+    @keyframes loop2{
+      0%{transform:translateX(0)}
+      100%{transform:translateX(40px)}
+    }
+
+    @media (max-width: 960px){
+      .section{min-height:auto;padding:88px 0}
+      .grid-2,.about-wrap,.cta-grid,.footer-inner{grid-template-columns:1fr}
+      .project-main,.project-secondary{width:100%}
+      .thumb-strip{grid-template-columns:repeat(2,1fr)}
+      .company-stage .vert{writing-mode:horizontal-tb}
+      .float-card,.figure,.paper,.stamp,.line-illust,.caption-card,.blur-blob{position:static;transform:none}
+      .company-stage{display:flex;flex-direction:column;gap:20px}
+      .arc-cta{padding-top:88px}
+      .arc-bg{height:44%}
+      .hero .stripe-glow{width:88vw;height:50vh;opacity:.54}
+      .spacer{height:34vh}
+      .scroll-indicator{display:none}
+      .footer-inner{padding-bottom:44px}
+    }
+  </style>
+</head>
+<body style="">
+
+  <header class="hero is-loaded" id="top">
+    <div class="bg"></div>
+    <div class="stripe-glow"></div>
+    <div class="hero-nav">
+      <div class="container">
+        <div class="brand hero-anim">就労継続支援A型 Re:Work Link</div>
+        <div class="menu hero-anim delay1" aria-label="menu"><span></span></div>
+      </div>
+    </div>
+    <div class="inner" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+      <div class="container">
+        <div class="hero-copy">
+          <p class="jp hero-anim">また、ひとつずつの「はたらく」を。</p>
+          <h1 class="hero-anim delay1">Re:Work</h1>
+          <p class="subline hero-anim delay2">仙台駅東口 徒歩4分。週1日・1日3時間から相談できる、就労継続支援A型事業所。見学は最短2日後、家族同伴も歓迎です。</p>
+          <div class="btn-row hero-anim delay3">
+            <a href="#about" class="btn">見学を申し込む</a>
+            <a href="#contact" class="btn dark">電話で相談する</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="mouse"></div>
+      <div class="bar"></div>
+      <span>SCROLL</span>
+    </div>
+  </header>
+
+  <div class="spacer"></div>
+
+  <section class="section tint" id="about">
+    <div class="container">
+      <div class="section-head reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="0" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="label">About us</div>
+        <div class="label-ja">私たちについて</div>
+      </div>
+
+      <div class="about-wrap">
+        <div class="media about-mainimg reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="60" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <img src="http://127.0.0.1:5000/uploads/up_9e76cfe5f6.png" alt="" width="720" height="900" onerror="this.style.display='none'">
+        </div>
+
+        <div class="reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="120" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div style="position:relative;display:inline-block">
+            <img class="stamp" src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="" width="112" height="112" onerror="this.style.display='none'">
+          </div>
+          <h2>“通えそう”を、<br>“続けられそう”へ</h2>
+          <p class="lede">Re:Work Link 仙台東口は、うつ・発達障害・不安症状などを抱える方が、体調に合わせて働く準備を進められる就労継続支援A型事業所です。軽作業だけでなく、PC入力、EC商品の梱包、館内清掃、社内サポート業務まで、実際の仕事に近い環境を整えています。</p>
+          <p class="lede" style="margin-top:16px">本人にはやさしく、家族には制度を正確に。障害福祉サービス受給者証の取得から利用料の見通しまで、見学時に30分でわかるようご案内します。</p>
+          <div class="btn-row">
+            <a href="#story" class="btn reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="180" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">私たちを見る</a>
+          </div>
+          <img class="line-illust reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" src="http://127.0.0.1:5000/uploads/up_4648a670eb.png" alt="" width="180" height="180" onerror="this.style.display='none'" data-delay="240">
+        </div>
+      </div>
+
+      <div class="thumb-strip reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="300" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="" width="240" height="240" onerror="this.style.display='none'"></div>
+        <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_76709a48f5.jpg" alt="" width="240" height="240" onerror="this.style.display='none'"></div>
+        <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_98b10f6d3c.jpg" alt="" width="240" height="240" onerror="this.style.display='none'"></div>
+        <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_dd9bb2577c.jpg" alt="" width="240" height="240" onerror="this.style.display='none'"></div>
+        <div class="thumb"><img src="http://127.0.0.1:5000/uploads/up_7899556a14.jpg" alt="" width="240" height="240" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="story">
+    <div class="container">
+      <div class="section-head reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="0" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="label">Project story</div>
+        <div class="label-ja">仕事と一日の流れ</div>
+      </div>
+
+      <div class="project-main reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="60" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <img class="swoop" src="http://127.0.0.1:5000/uploads/up_f8b7d3a516.png" alt="" width="150" height="150" onerror="this.style.display='none'">
+        <div class="media hover-float">
+          <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" alt="" width="1200" height="675" onerror="this.style.display='none'">
+          <div class="overlay-text">9:30 朝礼 ／ 10:00 作業開始</div>
+        </div>
+      </div>
+
+      <div class="project-secondary reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="120" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="media hover-float" style="background:linear-gradient(135deg,#bac9d4,#746b64)">
+          <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="" width="1100" height="620" onerror="this.style.display='none'">
+          <div class="coming">見学は、ふつうの服で。</div>
+        </div>
+      </div>
+
+      <div class="center-btn reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="180" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a href="#company" class="btn">仕事例を見る</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint" id="company">
+    <div class="container">
+      <div class="section-head reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="240" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="label">Company</div>
+        <div class="label-ja">働き方と実績</div>
+      </div>
+
+      <div class="company-stage reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="300" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="float-card fc1 hover-float"><img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="" width="130" height="90" onerror="this.style.display='none'"></div>
+        <div class="float-card fc2 hover-float"><img src="http://127.0.0.1:5000/uploads/up_9c262ef683.png" alt="" width="138" height="96" onerror="this.style.display='none'"></div>
+        <div class="float-card fc3 hover-float"><img src="http://127.0.0.1:5000/uploads/up_5e702ca432.jpg" alt="" width="152" height="102" onerror="this.style.display='none'"></div>
+        <div class="float-card fc4 hover-float"><img src="http://127.0.0.1:5000/uploads/up_acb5719efd.webp" alt="" width="148" height="100" onerror="this.style.display='none'"></div>
+
+        <img class="paper p1" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="" width="120" height="80" onerror="this.style.display='none'">
+        <img class="paper p2" src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="" width="110" height="80" onerror="this.style.display='none'">
+        <img class="paper p3" src="http://127.0.0.1:5000/uploads/up_be31fb9f7d.png" alt="" width="84" height="84" onerror="this.style.display='none'">
+
+        <img class="figure fg1" src="http://127.0.0.1:5000/uploads/up_80cda69a7a.png" alt="" width="180" height="180" onerror="this.style.display='none'">
+        <img class="figure fg2" src="http://127.0.0.1:5000/uploads/up_b0001cf704.png" alt="" width="180" height="180" onerror="this.style.display='none'">
+        <img class="figure fg3" src="http://127.0.0.1:5000/uploads/up_da9f066653.png" alt="" width="160" height="160" onerror="this.style.display='none'">
+        <img class="figure fg4" src="http://127.0.0.1:5000/uploads/up_fcafceed40.png" alt="" width="154" height="154" onerror="this.style.display='none'">
+
+        <h2 class="vert">建物を次世代へ。<br>ではなく、<br>働く一歩を次の日へ。</h2>
+        <p class="lead">開設12年、一般就労への移行者348名。定着率78%。週1日からの利用相談、昼食補助あり、交通費は上限月12,000円まで支給。A型らしく「働いた分の賃金」があること、就労移行支援とは制度が異なることも、初回見学で正確にご説明します。</p>
+        <p class="lead">作業は、箱の組立・封入・検品・データ入力・館内サポートなど。顔が写りにくい席配置や静かな休憩室も整え、安心して通える環境をつくっています。</p>
+        <a href="#contact" class="btn">制度と利用料を知る</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section arc-cta" id="contact" style="min-height:auto">
+    <div class="arc-bg"></div>
+    <div class="container">
+      <div class="cta-grid">
+        <div class="cta-col reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="0" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <h2>Recruit</h2>
+          <p>見学は平日9:30〜16:30に受付。本人だけでも、ご家族・支援員同伴でも大丈夫です。履歴書は不要。まずは事業所の空気を見に来てください。</p>
+          <a href="#" class="btn hover-float">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"></circle><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+            グループ見学を申し込む
+          </a>
+        </div>
+        <div class="cta-col reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-delay="60" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <h2>Contact</h2>
+          <p>お急ぎの方はお電話、通話が苦手な方はフォームかLINEで。受給者証、利用料、送迎の有無など、具体的な質問にその場でお答えします。</p>
+          <a href="#" class="btn hover-float">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.6"></path><path d="m7 8 5 4 5-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            お問い合わせをする
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">就労継続支援A型 Re:Work Link</div>
+        <p>〒983-0852 宮城県仙台市宮城野区榴岡2-3-28<br>東口サポートビル 4F</p>
+        <p>TEL 022-398-7142<br>見学受付 平日 9:30–16:30</p>
+        <small>Copyright © 2026 Re:Work Link</small>
+      </div>
+      <div>
+        <div class="footer-title">見学・相談</div>
+        <a href="#">見学申込み</a><br>
+        <a href="#">電話で相談</a><br>
+        <a href="#">LINE相談</a>
+      </div>
+      <div>
+        <div class="footer-title">利用案内</div>
+        <a href="#">1日の流れ</a><br>
+        <a href="#">仕事の内容</a><br>
+        <a href="#">利用料について</a>
+      </div>
+      <div>
+        <div class="footer-title">事業所情報</div>
+        <a href="#">事業所概要</a><br>
+        <a href="#">アクセス</a><br>
+        <a href="#">個人情報保護方針</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    window.addEventListener('load', () => {
+      document.querySelector('.hero')?.classList.add('is-loaded');
+    });
+
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach((entry, index)=>{
+        if(entry.isIntersecting){
+          const el = entry.target;
+          const delay = el.dataset.delay || 0;
+          setTimeout(()=>el.classList.add('show'), delay);
+          io.unobserve(el);
+        }
+      });
+    },{threshold:.14, rootMargin:'0px 0px -10% 0px'});
+
+    document.querySelectorAll('.reveal').forEach((el, i)=>{
+      el.dataset.delay = (i % 6) * 60;
+      io.observe(el);
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(link=>{
+      link.addEventListener('click', e=>{
+        const id = link.getAttribute('href');
+        if(id && id.length > 1){
+          const target = document.querySelector(id);
+          if(target){
+            e.preventDefault();
+            target.scrollIntoView({behavior:'smooth', block:'start'});
+          }
+        }
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div></body></html>

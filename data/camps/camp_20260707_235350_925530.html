@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Re:Build Works | 工事の現場を、次の品質へ。</title>
+  <script>
+    document.documentElement.classList.add('js');
+  </script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-tint:#f1ece9;
+      --text:#282b2d;
+      --muted:#6e6b65;
+      --line:rgba(49,54,57,.12);
+      --line-strong:rgba(49,54,57,.3);
+      --accent:#282b2d;
+      --accent-soft:#e8e3df;
+      --shadow-sm:0 6px 16px rgba(40,43,45,.06);
+      --shadow-md:0 16px 32px rgba(40,43,45,.10);
+      --radius:7px;
+      --container:1232px;
+      --ease:cubic-bezier(.55,.05,.22,.99);
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --sec:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.16rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif;
+      color:var(--text);
+      background:var(--bg);
+      font-size:var(--body);
+      line-height:2;
+      letter-spacing:.02em;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    .container{
+      width:min(calc(100% - 48px), var(--container));
+      margin-inline:auto;
+    }
+    .section{
+      position:relative;
+      min-height:100vh;
+      padding:10vh 0;
+      overflow:hidden;
+    }
+    .section.tint{background:var(--bg-tint)}
+    .eyebrow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:.82rem;
+      color:var(--muted);
+      margin-bottom:40px;
+      letter-spacing:.04em;
+    }
+    .eyebrow::before{
+      content:"";
+      width:8px;height:8px;border-radius:50%;
+      background:#9bcf86;
+      flex:0 0 auto;
+      box-shadow:0 0 0 4px rgba(155,207,134,.15);
+    }
+    .eyebrow .jp{margin-left:auto;font-size:.72rem;color:var(--muted)}
+    h1,h2,h3,p{margin:0}
+    h1{
+      font-size:var(--hero);
+      line-height:1.28;
+      letter-spacing:.03em;
+      font-weight:500;
+    }
+    h2{
+      font-size:var(--sec);
+      line-height:1.35;
+      letter-spacing:.04em;
+      font-weight:500;
+      max-width:12em;
+    }
+    h3{
+      font-size:var(--sub);
+      line-height:1.5;
+      font-weight:500;
+      letter-spacing:.03em;
+    }
+    p{
+      max-width:38em;
+      color:var(--muted);
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      min-width:160px;
+      height:44px;
+      padding:0 20px;
+      background:#fff;
+      border:1px solid rgba(40,43,45,.08);
+      border-radius:6.9552px;
+      box-shadow:var(--shadow-sm);
+      transition:transform .8s var(--ease), box-shadow .8s var(--ease), background .8s var(--ease), color .8s var(--ease), border-color .8s var(--ease);
+      font-size:.88rem;
+      line-height:1;
+    }
+    .btn:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+    .btn.dark{
+      background:var(--accent);
+      color:#fff;
+      border-color:var(--accent);
+    }
+    .btn .arrow{
+      display:inline-block;
+      animation:arw_r 2.8s ease infinite;
+      font-size:.9rem;
+    }
+
+    .site-header{
+      position:absolute;
+      inset:0 0 auto 0;
+      z-index:20;
+      padding:20px 0;
+      color:#fff;
+    }
+    .site-header .container{
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .brand{
+      font-size:1rem;
+      letter-spacing:.12em;
+      font-weight:500;
+    }
+    .menu{
+      width:34px;height:24px;position:relative;opacity:.9;
+    }
+    .menu span{
+      position:absolute;left:0;right:0;height:1px;background:#fff;transition:all .8s var(--ease);
+    }
+    .menu span:nth-child(1){top:4px}
+    .menu span:nth-child(2){top:12px;width:70%;margin-left:auto}
+    .menu span:nth-child(3){top:20px}
+
+    .hero{
+      min-height:100vh;
+      padding:0;
+      background:#d8d3cf;
+    }
+    .hero-media{
+      position:absolute;inset:0;
+      background:
+        linear-gradient(135deg, rgba(9,27,37,.28), rgba(255,255,255,.04) 45%, rgba(241,236,233,.18)),
+        radial-gradient(circle at 78% 15%, rgba(255,166,92,.30), transparent 28%),
+        radial-gradient(circle at 82% 18%, rgba(233,116,185,.18), transparent 20%),
+        radial-gradient(circle at 70% 20%, rgba(111,150,255,.14), transparent 18%),
+        #bfb6af;
+      overflow:hidden;
+    }
+    .hero-media img{
+      width:100%;height:100%;object-fit:cover;
+      opacity:.74;
+      transform:scale(1.05);
+      filter:saturate(.9);
+    }
+    .hero-media::after{
+      content:"";
+      position:absolute;inset:0;
+      background:
+        linear-gradient(to top, rgba(241,236,233,.26), rgba(0,0,0,0) 35%),
+        linear-gradient(to right, rgba(0,0,0,.18), rgba(0,0,0,0) 52%);
+      pointer-events:none;
+    }
+    .hero-inner{
+      position:relative;
+      min-height:100vh;
+      display:flex;
+      align-items:flex-end;
+      padding:0 0 64px;
+      color:#fff;
+      z-index:2;
+    }
+    .hero-copy{
+      max-width:760px;
+      padding-top:160px;
+    }
+    .hero-kicker{
+      font-size:.86rem;
+      margin-bottom:24px;
+      letter-spacing:.08em;
+      opacity:.9;
+    }
+    .hero-lead{
+      margin-top:24px;
+      font-size:.9rem;
+      max-width:34em;
+      color:rgba(255,255,255,.82);
+    }
+    .hero-logo{
+      display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;
+    }
+    .hero-logo .big{
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(3.8rem,9vw,6.8rem);
+      line-height:.9;
+      font-weight:400;
+      letter-spacing:-.03em;
+    }
+    .hero-side-illust{
+      margin-left:auto;
+      width:min(220px,28vw);
+      transform:translateY(18px);
+      opacity:.95;
+    }
+
+    .about-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:56px;
+      align-items:center;
+      margin-top:32px;
+    }
+    .photo-card{
+      position:relative;
+      background:linear-gradient(135deg, #d8eff7, #eef5f8 60%, #f1ece9);
+      box-shadow:var(--shadow-sm);
+      overflow:hidden;
+    }
+    .photo-card img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .photo-card.tall{aspect-ratio:4/5}
+    .photo-card.wide{aspect-ratio:16/9}
+    .about-copy{
+      position:relative;
+      padding-right:48px;
+    }
+    .about-copy .mini{
+      font-size:.72rem;
+      letter-spacing:.08em;
+      color:var(--muted);
+      margin-bottom:16px;
+    }
+    .about-copy p{
+      margin-top:24px;
+    }
+    .scribble{
+      position:absolute;
+      inset:auto auto -10px -10px;
+      width:120px;height:120px;
+      border-left:2px solid #b5c87b;
+      border-radius:50%;
+      transform:rotate(-28deg);
+      opacity:.5;
+    }
+    .about-illust{
+      position:absolute;
+      right:-6px;bottom:-18px;
+      width:140px;
+      transform:rotate(10deg);
+    }
+    .caption-card{
+      position:absolute;
+      right:-24px;bottom:-24px;
+      background:#fff;
+      border-radius:var(--radius);
+      padding:16px 18px;
+      box-shadow:var(--shadow-md);
+      width:min(240px,70%);
+      z-index:3;
+    }
+    .caption-card strong{
+      display:block;
+      font-size:.84rem;
+      line-height:1.6;
+      margin-bottom:6px;
+    }
+    .caption-card span{
+      font-size:.76rem;
+      color:var(--muted);
+    }
+    .photo-glow{
+      position:absolute;
+      right:24px;bottom:12px;
+      width:160px;height:120px;
+      background:radial-gradient(circle, rgba(155,207,134,.28), rgba(155,207,134,0));
+      filter:blur(20px);
+      z-index:-1;
+    }
+
+    .thumb-row{
+      margin-top:48px;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:4px;
+    }
+    .thumb{
+      aspect-ratio:4/3;
+      overflow:hidden;
+      background:linear-gradient(135deg,#d9eef3,#f3f5f7);
+    }
+    .thumb img{
+      width:100%;height:100%;object-fit:cover;
+    }
+
+    .project-wrap{
+      margin-top:32px;
+      display:grid;
+      gap:64px;
+    }
+    .project-main{
+      position:relative;
+      width:min(76%, 940px);
+      margin-left:32px;
+    }
+    .project-main .float-illust{
+      position:absolute;
+      left:-74px;top:-72px;
+      width:180px;
+      transform:rotate(-14deg);
+      z-index:2;
+    }
+    .project-main .project-label{
+      position:absolute;
+      right:18px;bottom:14px;
+      font-size:.72rem;color:#fff;
+      background:rgba(40,43,45,.52);
+      padding:6px 10px;border-radius:999px;
+      backdrop-filter:blur(4px);
+    }
+    .project-secondary{
+      width:min(70%, 860px);
+      margin-left:auto;
+      position:relative;
+    }
+    .project-secondary .overlay-text{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(1.8rem,4vw,2.4rem);
+      letter-spacing:.03em;
+      text-shadow:0 2px 14px rgba(0,0,0,.25);
+      pointer-events:none;
+    }
+    .project-actions{
+      display:flex;justify-content:center;
+    }
+
+    .company-scene{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:calc(100vh - 180px);
+      padding:40px 0 120px;
+      overflow:hidden;
+    }
+    .company-center{
+      position:relative;
+      text-align:center;
+      max-width:520px;
+      z-index:2;
+    }
+    .company-center h2{
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      max-width:none;
+      margin:0 auto 24px;
+      height:260px;
+      font-size:clamp(1.8rem,3vw,2.5rem);
+    }
+    .company-center p{
+      margin:0 auto 24px;
+      text-align:left;
+    }
+    .floating{
+      position:absolute;
+      box-shadow:var(--shadow-sm);
+      background:linear-gradient(135deg,#dcecf3,#f3f6f8 60%, #f1ece9);
+      overflow:hidden;
+    }
+    .floating img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .floating.f1{width:140px;aspect-ratio:4/3;left:80px;top:80px;transform:rotate(-5deg)}
+    .floating.f2{width:162px;aspect-ratio:4/3;right:90px;top:180px;transform:rotate(4deg)}
+    .floating.f3{width:170px;aspect-ratio:4/3;left:110px;bottom:170px;transform:rotate(6deg)}
+    .floating.f4{width:150px;aspect-ratio:4/3;right:170px;bottom:130px;transform:rotate(-7deg)}
+    .float-illus{
+      position:absolute;
+      width:168px;
+      opacity:.96;
+    }
+    .float-illus.i1{left:60px;top:180px;transform:rotate(-20deg)}
+    .float-illus.i2{right:64px;bottom:230px;transform:rotate(12deg)}
+    .float-illus.i3{left:120px;bottom:10px;transform:rotate(-4deg)}
+    .float-illus.i4{right:70px;bottom:30px;transform:rotate(8deg)}
+
+    .cta-arc{
+      position:relative;
+      margin-top:-30px;
+      padding-top:80px;
+      overflow:hidden;
+    }
+    .cta-arc::before,
+    .cta-arc::after{
+      content:"";
+      position:absolute;
+      top:0;
+      width:58%;
+      height:340px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255,255,255,.28), rgba(255,255,255,0) 44%),
+        linear-gradient(135deg, #bde9d7 0%, #cde889 45%, #dff089 100%);
+      filter:saturate(1.02);
+      z-index:0;
+    }
+    .cta-arc::before{
+      left:-6%;
+      border-top-right-radius:100% 100%;
+      transform:rotate(-6deg);
+    }
+    .cta-arc::after{
+      right:-6%;
+      border-top-left-radius:100% 100%;
+      transform:rotate(6deg);
+    }
+    .cta-grid{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:56px;
+      align-items:end;
+      padding:120px 0 56px;
+    }
+    .cta-block{
+      text-align:center;
+      padding:0 40px;
+    }
+    .cta-block h3{
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(2rem,4vw,2.6rem);
+      font-weight:400;
+      margin-bottom:24px;
+      color:var(--text);
+    }
+    .cta-block p{
+      margin:0 auto 24px;
+      max-width:30em;
+      font-size:.92rem;
+    }
+
+    .site-footer{
+      border-top:1px solid var(--line);
+      background:#fff;
+      padding:20px 0 28px;
+      font-size:.78rem;
+    }
+    .footer-row{
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1fr 1fr;
+      gap:24px;
+      align-items:start;
+    }
+    .footer-brand{
+      display:flex;flex-direction:column;gap:8px;
+      color:var(--muted);
+    }
+    .footer-brand strong{color:var(--text);font-size:.9rem}
+    .footer-nav a{
+      display:block;
+      padding:4px 0;
+      color:var(--muted);
+    }
+    .footer-meta{
+      color:var(--muted);
+      line-height:1.9;
+    }
+    .footer-copy{
+      text-align:right;
+      color:var(--muted);
+    }
+
+    @keyframes gradientShift{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+    @keyframes arw_r{
+      0%,100%{opacity:1;transform:translateX(0)}
+      50%{opacity:0;transform:translateX(.5rem)}
+      50.1%{opacity:0;transform:translateX(-.5rem)}
+    }
+    @keyframes floaty{
+      0%,100%{transform:translateY(0) rotate(var(--r,0deg))}
+      50%{transform:translateY(-8px) rotate(calc(var(--r,0deg) + 1deg))}
+    }
+    @keyframes drift{
+      0%,100%{transform:translate3d(0,0,0) rotate(var(--r,0deg))}
+      50%{transform:translate3d(0,-12px,0) rotate(calc(var(--r,0deg) + 2deg))}
+    }
+
+    .hero-media{
+      background-size:200% 200%, auto, auto, auto, auto;
+      animation:gradientShift 24s linear infinite;
+    }
+    .float-illus,.floating,.about-illust,.hero-side-illust,.project-main .float-illust{
+      animation:drift 7s ease-in-out infinite;
+    }
+    .floating.f1{--r:-5deg}
+    .floating.f2{--r:4deg}
+    .floating.f3{--r:6deg}
+    .floating.f4{--r:-7deg}
+    .float-illus.i1{--r:-20deg}
+    .float-illus.i2{--r:12deg}
+    .float-illus.i3{--r:-4deg}
+    .float-illus.i4{--r:8deg}
+    .about-illust{--r:10deg}
+    .hero-side-illust{--r:0deg}
+    .project-main .float-illust{--r:-14deg}
+
+    html.js .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s var(--ease), transform .8s var(--ease)}
+    html.js .reveal.is-visible{opacity:1;transform:translateY(0)}
+    html.js .hero-anim{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease), transform .9s var(--ease)}
+    html.js .hero-anim.in{opacity:1;transform:translateY(0)}
+    html.js .hero-zoom{opacity:0;transform:scale(1.06);transition:opacity 1.2s var(--ease), transform 1.2s var(--ease)}
+    html.js .hero-zoom.in{opacity:1;transform:scale(1)}
+
+    @media (max-width: 980px){
+      .section{min-height:auto;padding:88px 0}
+      .hero-inner{padding-bottom:40px}
+      .about-grid,.cta-grid,.footer-row{grid-template-columns:1fr}
+      .thumb-row{grid-template-columns:repeat(2,1fr)}
+      .project-main,.project-secondary{width:100%;margin-left:0}
+      .company-scene{min-height:auto;padding-bottom:420px}
+      .company-center h2{
+        writing-mode:horizontal-tb;height:auto;max-width:12em;margin-bottom:16px;
+      }
+      .floating.f1{left:10px;top:40px}
+      .floating.f2{right:10px;top:120px}
+      .floating.f3{left:12px;bottom:180px}
+      .floating.f4{right:20px;bottom:120px}
+      .float-illus.i1{left:-20px;top:180px;width:120px}
+      .float-illus.i2{right:-12px;bottom:250px;width:120px}
+      .float-illus.i3{left:10px;bottom:20px;width:110px}
+      .float-illus.i4{right:10px;bottom:40px;width:120px}
+      .caption-card{right:12px;bottom:12px;width:min(220px, calc(100% - 24px))}
+      .site-header{padding:16px 0}
+      .hero-side-illust{width:120px}
+      .footer-copy{text-align:left}
+    }
+
+    @media (max-width: 640px){
+      .container{width:min(calc(100% - 32px), var(--container))}
+      .hero-logo{gap:12px}
+      .thumb-row{grid-template-columns:1fr}
+      .about-copy{padding-right:0}
+      .cta-block{padding:0}
+      .cta-arc::before,.cta-arc::after{height:260px;width:64%}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="brand">RE:BUILD WORKS</div>
+      <div class="menu" aria-label="menu">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-media">
+      <img class="hero-zoom in" src="http://127.0.0.1:5000/uploads/up_5e702ca432.jpg" alt="" width="1600" height="1000" onerror="this.style.display='none'">
+    </div>
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <div class="hero-kicker hero-anim in">東京・神奈川・千葉の改修工事と現場管理</div>
+        <div class="hero-logo">
+          <div class="big hero-anim in">Re:Build</div>
+          <img class="hero-side-illust hero-anim in" src="http://127.0.0.1:5000/uploads/up_7742b7c774.png" alt="" width="220" height="180" onerror="this.style.display='none'">
+        </div>
+        <p class="hero-lead hero-anim in">
+          古くなった建物に、手を入れる。その一手が、入居率も、働きやすさも、街の印象も変えていく。
+          港区芝・川崎・船橋を中心に、原状回復から大規模修繕まで一貫して担う工事会社です。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint">
+    <div class="container">
+      <div class="eyebrow reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><span>About us</span><span class="jp">私たちについて</span></div>
+      <div class="about-grid">
+        <div class="photo-card tall reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 80ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <img src="http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg" alt="" width="760" height="950" onerror="this.style.display='none'">
+          <div class="photo-glow"></div>
+          <div class="caption-card">
+            <strong>「段取りが整うと、現場の空気まで変わる。」</strong>
+            <span>工事部 部長　田所 恒一</span>
+          </div>
+        </div>
+        <div class="about-copy reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 160ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="mini">Rebuild Design &amp; Management Co., Ltd.</div>
+          <h2>建物の次の10年を、<br>工事品質から支える。</h2>
+          <p>
+            2012年に品川で創業し、これまでに改修・修繕案件は1,860件。
+            商業ビルの共用部更新、オフィスの内装工事、マンションの外壁補修まで、
+            現地調査・積算・施工・アフター対応を社内でつないでいます。
+          </p>
+          <p>
+            現場監督が見積前の段階から同席するため、着工後の「話が違う」を減らせるのが私たちのやり方。
+            小さな補修一件でも、引き渡しの景色まで具体的に描いて進めます。
+          </p>
+          <div style="margin-top:32px">
+            <a class="btn" href="#company">私たちを知る <span class="arrow">›</span></a>
+          </div>
+          <div class="scribble"></div>
+          <img class="about-illust" src="http://127.0.0.1:5000/uploads/up_f04018458e.png" alt="" width="140" height="140" onerror="this.style.display='none'">
+        </div>
+      </div>
+      <div class="thumb-row">
+        <div class="thumb reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 240ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_18537fbb29.png" alt="" width="360" height="270" onerror="this.style.display='none'"></div>
+        <div class="thumb reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 320ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_292cf87096.png" alt="" width="360" height="270" onerror="this.style.display='none'"></div>
+        <div class="thumb reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 320ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_4bbbe0fee7.png" alt="" width="360" height="270" onerror="this.style.display='none'"></div>
+        <div class="thumb reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_598a02d7d4.png" alt="" width="360" height="270" onerror="this.style.display='none'"></div>
+        <div class="thumb reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 80ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_c1a12c00de.png" alt="" width="360" height="270" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint">
+    <div class="container">
+      <div class="eyebrow reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 160ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><span>Project Story</span><span class="jp">施工事例ストーリー</span></div>
+      <div class="project-wrap">
+        <div class="project-main reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 240ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <img class="float-illust" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="" width="180" height="180" onerror="this.style.display='none'">
+          <div class="photo-card wide">
+            <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" alt="" width="1100" height="620" onerror="this.style.display='none'">
+          </div>
+          <div class="project-label">港区芝 / オフィス改修 / 2025.11 完工</div>
+        </div>
+
+        <div class="project-secondary reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 320ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="photo-card wide" style="background:linear-gradient(135deg,#3a3a3a,#101214)">
+            <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="" width="980" height="560" style="opacity:.68" onerror="this.style.display='none'">
+            <div class="overlay-text">Coming Soon.</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px;color:var(--muted);font-size:.72rem">
+            <span>千代田区神田 / エントランス刷新</span>
+            <span>2026年春 公開予定</span>
+          </div>
+        </div>
+
+        <div class="project-actions reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 320ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a class="btn" href="#contact">仕事をみる <span class="arrow">›</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint" id="company">
+    <div class="container">
+      <div class="eyebrow reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><span>Company</span><span class="jp">私たちのチームについて</span></div>
+      <div class="company-scene">
+        <div class="floating f1 reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 80ms;">
+          <img src="http://127.0.0.1:5000/uploads/up_9c262ef683.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+        </div>
+        <div class="floating f2 reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 160ms;">
+          <img src="http://127.0.0.1:5000/uploads/up_f986e18b07.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+        </div>
+        <div class="floating f3 reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 240ms;">
+          <img src="http://127.0.0.1:5000/uploads/up_4b9841170b.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+        </div>
+        <div class="floating f4 reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 320ms;">
+          <img src="http://127.0.0.1:5000/uploads/up_34c90234be.png" alt="" width="320" height="240" onerror="this.style.display='none'">
+        </div>
+
+        <img class="float-illus i1 reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" src="http://127.0.0.1:5000/uploads/up_bc74a6f631.png" alt="" width="168" height="168" onerror="this.style.display='none'" style="transition-delay: 320ms;">
+        <img class="float-illus i2 reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" src="http://127.0.0.1:5000/uploads/up_71c58f68e0.png" alt="" width="168" height="168" onerror="this.style.display='none'" style="transition-delay: 0ms;">
+        <img class="float-illus i3 reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" src="http://127.0.0.1:5000/uploads/up_818aac54c7.png" alt="" width="168" height="168" onerror="this.style.display='none'" style="transition-delay: 80ms;">
+        <img class="float-illus i4 reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="" width="168" height="168" onerror="this.style.display='none'" style="transition-delay: 160ms;">
+
+        <div class="company-center reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 240ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <h2>建物を次世代へ。</h2>
+          <p>
+            施工管理12名、職方ネットワーク64社、定期点検担当4名。
+            数字だけ見れば小回りの効く工事会社ですが、だからこそ一件ごとの意思決定が早い。
+            現調から3営業日で概算提出、緊急補修は最短当日対応。都内近郊の現場を、
+            きちんと間に合う工事へ整えます。
+          </p>
+          <a class="btn" href="#contact">会社を知る <span class="arrow">›</span></a>
+        </div>
+      </div>
+
+      <div class="cta-arc">
+        <div class="cta-grid">
+          <div class="cta-block reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 320ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h3>Recruit</h3>
+            <p>
+              内装・修繕・設備の現場管理を志す方へ。未経験採用は年4名、現場見学は毎月第2金曜に実施。
+              横浜営業所、品川本社、船橋倉庫の3拠点で募集しています。
+            </p>
+            <a class="btn dark" href="#contact">リクルートをみる <span class="arrow">›</span></a>
+          </div>
+          <div class="cta-block reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" id="contact" style="transition-delay: 320ms; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h3>Contact</h3>
+            <p>
+              見積依頼、修繕相談、夜間工事のご相談まで。電話受付は平日8:30–18:30、
+              メールは24時間受付。図面が無い段階でも、現地調査からご一緒します。
+            </p>
+            <a class="btn dark" href="tel:03-6435-1840">お問い合わせをする <span class="arrow">›</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <div class="footer-brand">
+        <strong>株式会社 Re:Build Works</strong>
+        <span>工事と改修の計画室</span>
+        <span>〒108-0014 東京都港区芝5-14-13 アーク芝ビル 6F</span>
+      </div>
+      <div class="footer-nav">
+        <a href="#">私たちについて</a>
+        <a href="#">施工事例</a>
+        <a href="#">会社案内</a>
+        <a href="#">採用情報</a>
+      </div>
+      <div class="footer-meta">
+        TEL 03-6435-1840<br>
+        FAX 03-6435-1841<br>
+        営業時間 平日 8:30–18:30<br>
+        対応エリア 東京・神奈川・千葉
+      </div>
+      <div class="footer-copy">
+        CONTACT / RECRUIT / QUALITY NOTE<br>
+        <span style="display:block;margin-top:18px;">©2026 REBUILD WORKS.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const heroEls = document.querySelectorAll('.hero-anim, .hero-zoom');
+      heroEls.forEach((el, i) => {
+        setTimeout(() => el.classList.add('in'), 180 + i * 140);
+      });
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if(entry.isIntersecting){
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, {threshold: 0.14, rootMargin: '0px 0px -8% 0px'});
+
+      document.querySelectorAll('.reveal').forEach((el, i) => {
+        el.style.transitionDelay = `${Math.min((i % 6) * 80, 320)}ms`;
+        io.observe(el);
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div></body></html>

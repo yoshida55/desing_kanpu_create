@@ -1340,9 +1340,56 @@ def improve_all(filename: str, limit: int = 0, targets: list[int] | None = None,
     return {"file": out.name, "total": total, "improved": improved, "skipped": skipped}
 
 
-def edit_camp_section(filename: str, section_index: int, instruction: str) -> dict:
+# ── テキスト保全ゲート ─────────────────────────────────────────────
+# 「レイアウトは変えるが中身は保つ」系の編集（✨おしゃれ化）で、AIが本文や画像を
+# 落とす事故が頻発（Haiku/GPT問わず・プロンプトで頼んでも確率的に起きる）。
+# → AIを信じず、差し替え前にPythonで機械照合する。欠落があれば名指しで1回リトライ、
+#   それでもダメなら差し替え自体を中止（壊れた版をユーザーに見せない・保存しない）。
+
+def _norm_text(s: str) -> str:
+    """HTMLエンティティを戻し、空白を全部除去（改行位置の違いで照合が外れないように）。"""
+    import html as _html
+    return re.sub(r"\s+", "", _html.unescape(s))
+
+
+def _text_chunks(fragment: str) -> list:
+    """HTML断片から「見えるテキストのまとまり」を抽出（style/script/コメントは除外）。
+
+    8文字以上だけを対象にする＝「はこ」のような短ラベルは対象外、
+    説明文・キャッチコピーの消失（実害が大きい方）を確実に捕まえる。
+    """
+    frag = re.sub(r"<(style|script)\b[^>]*>.*?</\1>", " ", fragment, flags=re.DOTALL | re.IGNORECASE)
+    frag = re.sub(r"<!--.*?-->", " ", frag, flags=re.DOTALL)
+    chunks = []
+    for part in re.split(r"<[^>]+>", frag):
+        t = _norm_text(part)
+        if len(t) >= 8:
+            chunks.append(t)
+    return chunks
+
+
+def _img_srcs(fragment: str) -> set:
+    """HTML断片内の<img>のsrc一覧（背景画像はCSS側なのでここでは見ない）。"""
+    return set(re.findall(r"<img[^>]+?src=[\"']([^\"']+)[\"']", fragment, flags=re.IGNORECASE))
+
+
+def _content_losses(old_frag: str, new_frag: str) -> list:
+    """旧断片にあって新断片から消えたテキスト/画像を列挙（空なら合格）。"""
+    # style/scriptを剥がしてからタグを除去（順序が逆だとCSSの中身が本文扱いになる）
+    new_wo = re.sub(r"<(style|script)\b[^>]*>.*?</\1>", " ", new_frag, flags=re.DOTALL | re.IGNORECASE)
+    hay = _norm_text(re.sub(r"<[^>]+>", " ", new_wo))
+    losses = [f"テキスト「{c[:40]}」" for c in _text_chunks(old_frag) if c not in hay]
+    losses += [f"画像 {s[:80]}" for s in (_img_srcs(old_frag) - _img_srcs(new_frag))]
+    return losses
+
+
+def edit_camp_section(filename: str, section_index: int, instruction: str,
+                      keep_text: bool = False, style_type: str = "") -> dict:
     """指定セクションだけを依頼どおり直す（速い）。section_index<0 は全体編集（遅い）。
 
+    keep_text=True（✨おしゃれ化など「中身は変えない」系）のときはテキスト保全ゲートを通す。
+    style_type（使った型名）があれば新セクションに data-cestyle として刻印
+    ＝次回のおしゃれ化がページ内の使用済みの型を知り、同じ表情の繰り返しを避けられる。
     新しいHTMLは別ファイルに保存（元は残す＝いつでも戻れる）。
     """
     instruction = (instruction or "").strip()
@@ -1382,6 +1429,34 @@ def edit_camp_section(filename: str, section_index: int, instruction: str) -> di
         )}]
         raw, used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
         new_section = _strip_fragment(raw)
+        if keep_text:
+            # テキスト保全ゲート：欠落を機械照合→名指しで1回だけ自動リトライ
+            losses = _content_losses(section_html, new_section)
+            if losses:
+                log.warning("保全ゲート: %d箇所の欠落を検出→リトライ (%s)", len(losses), losses[:3])
+                content.append({"type": "text", "text": (
+                    "★前回のあなたの出力には、元のセクションにあった以下の中身が欠落していました。\n"
+                    "- " + "\n- ".join(losses[:20]) + "\n"
+                    "これらを**一字一句すべて含めて**、同じ依頼どおりのセクションHTMLを出力し直してください。"
+                    "デザインを簡素にしてでも中身を全部残すことを優先。返答はHTMLだけ。"
+                )})
+                raw2, used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
+                cand = _strip_fragment(raw2)
+                losses2 = _content_losses(section_html, cand)
+                if len(losses2) < len(losses):
+                    new_section, losses = cand, losses2
+            if losses:
+                # 2回やっても中身が欠ける＝壊れた版を採用しない（元ファイルは無傷のまま）
+                raise ValueError(
+                    f"AIが中身を{len(losses)}箇所落とすため差し替えを中止しました"
+                    f"（例: {losses[0]}）。もう一度ボタンを押すと別の型で再挑戦します"
+                )
+        if style_type:
+            # 使った型を刻印（AI任せにせず機械で確実に）。既存の刻印があれば付け直す
+            head, sep, rest = new_section.partition(">")
+            if sep and head.lstrip().lower().startswith("<section"):
+                head = re.sub(r'\s*data-cestyle="[^"]*"', "", head)
+                new_section = f'{head} data-cestyle="{style_type}"{sep}{rest}'
         new_html = html[:m.start()] + new_section + html[m.end():]
         # 差し替え後も必ず"全部見える保険"を入れ直す（出現アニメで真っ黒に消えるのを防ぐ）
         new_html = _finalize_html(new_html)

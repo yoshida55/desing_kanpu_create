@@ -1,0 +1,3546 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>みちるワークス｜就労継続支援B型</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#bcc2c5;
+      --main:#00b9ef;
+      --main-deep:#009ed0;
+      --main-soft:rgba(0,185,239,.08);
+      --white:#fff;
+      --text:#5e6164;
+      --text-light:rgba(255,255,255,.9);
+      --line:rgba(255,255,255,.42);
+      --shadow:0 12px 32px rgba(0,185,239,.12);
+      --shadow-strong:0 24px 48px rgba(0,185,239,.18);
+      --radius-xl:42px;
+      --radius-pill:999px;
+      --container:1180px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.16rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:2;
+      letter-spacing:.02em;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(calc(100% - 48px),var(--container));margin:0 auto}
+    .site-bg{
+      position:fixed; inset:0; pointer-events:none; z-index:-2;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.18), transparent 28%),
+        radial-gradient(circle at 82% 18%, rgba(255,255,255,.1), transparent 22%),
+        linear-gradient(180deg, #c2c7ca 0%, #bcc2c5 60%, #b8bec1 100%);
+    }
+    .gradient-ribbon{
+      position:fixed; top:-15vh; right:-10vw; width:48vw; height:45vh; pointer-events:none; z-index:-1;
+      background:linear-gradient(135deg, rgba(255,167,91,.0), rgba(255,150,92,.32) 20%, rgba(255,113,181,.22) 52%, rgba(0,185,239,.18) 100%);
+      filter:blur(48px);
+      transform:rotate(-12deg);
+      opacity:.8;
+    }
+
+    header{
+      position:relative;
+      padding:28px 0 12px;
+      z-index:20;
+    }
+    .header-inner{
+      display:grid;
+      grid-template-columns: 220px 1fr 136px 56px;
+      align-items:start;
+      gap:24px;
+    }
+    .logo{
+      display:flex; align-items:flex-start; gap:14px;
+    }
+    .logo-mark{
+      display:flex; gap:8px; margin-top:2px;
+    }
+    .blob-mini{
+      width:18px; height:42px; background:var(--main);
+      border-radius:20px 20px 24px 24px / 16px 16px 28px 28px;
+    }
+    .blob-mini:nth-child(2){height:38px; border-radius:42% 42% 50% 50% / 28% 28% 72% 72%;}
+    .blob-mini:nth-child(3){height:40px; border-radius:44% 44% 48% 48% / 30% 30% 74% 74%;}
+    .logo-text h1{
+      margin:0;
+      color:var(--main);
+      font-size:1.05rem;
+      line-height:1.2;
+      letter-spacing:.05em;
+      font-weight:700;
+    }
+    .logo-text p{
+      margin:4px 0 0;
+      font-size:.7rem;
+      color:rgba(94,97,100,.75);
+      line-height:1.5;
+    }
+    nav{
+      display:flex; justify-content:center; gap:32px; flex-wrap:wrap; padding-top:4px;
+      font-size:.78rem; color:var(--white);
+    }
+    nav a{opacity:.95}
+    .header-cta{
+      justify-self:end;
+      background:var(--main);
+      color:var(--white);
+      border-radius:24px;
+      width:96px; height:96px;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center; line-height:1.4; font-size:.72rem;
+      box-shadow:var(--shadow);
+      transition:.32s cubic-bezier(.19,1,.22,1);
+    }
+    .header-cta:hover{transform:translateY(-3px)}
+    .menu-dot{
+      width:40px;height:96px;border-radius:22px;background:rgba(255,255,255,.42);
+      display:flex;align-items:center;justify-content:center;justify-self:end;
+      backdrop-filter:blur(6px);
+    }
+    .menu-dot span{
+      width:6px;height:6px;border-radius:50%;background:var(--main);box-shadow:0 12px 0 var(--main),0 -12px 0 var(--main);
+      display:block;
+    }
+
+    .side-rail{
+      position:fixed; right:18px; top:120px; z-index:15;
+      display:flex; flex-direction:column; align-items:center; gap:18px;
+    }
+    .side-rail .rail{
+      width:50px; border-radius:28px; background:rgba(255,255,255,.42);
+      padding:18px 0; display:flex; flex-direction:column; align-items:center; gap:24px;
+      backdrop-filter:blur(8px);
+    }
+    .side-rail .vtxt{
+      writing-mode:vertical-rl; text-orientation:mixed; font-size:.7rem; color:var(--text); letter-spacing:.15em;
+    }
+    .rail .icon{
+      width:26px;height:26px;border-radius:50%; background:var(--white); position:relative;
+      box-shadow:0 0 0 1px rgba(0,185,239,.15) inset;
+    }
+    .rail .icon::before{
+      content:""; position:absolute; inset:7px; border:2px solid var(--main); border-radius:50%;
+    }
+
+    section{
+      position:relative;
+    }
+    .section-shell{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      padding:10vh 0;
+    }
+
+    .eyebrow{
+      font-size:.66rem;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.84);
+      display:block;
+      margin-bottom:24px;
+    }
+    .eyebrow.dark{color:rgba(94,97,100,.72)}
+    .section-title{
+      font-size:var(--section);
+      line-height:1.35;
+      letter-spacing:.04em;
+      margin:0 0 20px;
+      color:var(--white);
+      font-weight:500;
+      max-width:13em;
+    }
+    .section-title.dark{color:var(--white)}
+    .lead, .copy{
+      font-size:var(--body);
+      max-width:38em;
+      margin:0;
+    }
+    .lead{color:rgba(255,255,255,.92)}
+    .copy{color:rgba(255,255,255,.86)}
+    .btn, .link-pill{
+      display:inline-flex; align-items:center; gap:14px;
+      background:var(--white); color:var(--text);
+      border-radius:999px; padding:12px 18px;
+      font-size:.85rem; line-height:1;
+      transition:.32s cubic-bezier(.19,1,.22,1);
+      box-shadow:var(--shadow);
+    }
+    .btn:hover, .link-pill:hover{transform:translateY(-2px); box-shadow:var(--shadow-strong)}
+    .btn .arrow, .link-pill .arrow{
+      width:20px;height:20px;border-radius:50%; background:var(--main); color:#fff;
+      display:grid; place-items:center; font-size:.7rem; flex:0 0 auto;
+    }
+
+    .hero{
+      padding-top:12px;
+      min-height:calc(100vh - 12px);
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.05fr 140px;
+      gap:20px;
+      align-items:start;
+    }
+    .hero-main{
+      min-height:72vh;
+      display:flex;
+      align-items:center;
+    }
+    .hero-visuals{
+      width:100%;
+      display:grid;
+      grid-template-columns:1.1fr 1fr 1.12fr;
+      gap:28px;
+      align-items:end;
+    }
+    .organic{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(135deg, rgba(0,185,239,.86), rgba(0,157,208,.96));
+      box-shadow:var(--shadow);
+    }
+    .organic img{
+      width:100%; height:100%; object-fit:cover; mix-blend-mode:multiply; opacity:.9;
+    }
+    .organic.a{height:min(53vw,380px); border-radius:44% 56% 38% 54% / 24% 28% 72% 76%}
+    .organic.b{height:min(43vw,310px); border-radius:42% 42% 28% 32% / 18% 18% 58% 62%}
+    .organic.c{height:min(56vw,400px); border-radius:36% 40% 42% 44% / 12% 12% 68% 76%}
+    .hero-tag{
+      position:absolute; top:18px; right:14px;
+      background:var(--white); color:var(--text);
+      border-radius:18px; padding:9px 11px;
+      font-size:.72rem; line-height:1.25; box-shadow:var(--shadow);
+      text-align:center;
+    }
+    .hero-bubble{
+      position:absolute; right:32px; bottom:18px;
+      background:#4d4f53; color:#fff; border-radius:999px;
+      padding:14px 18px; font-size:.78rem; line-height:1.4;
+      display:flex; gap:18px; align-items:center;
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+    }
+    .hero-bubble small{opacity:.8}
+    .hero-copy{
+      position:absolute;
+      left:0; top:-40px;
+      max-width:420px;
+    }
+    .hero-copy .eyebrow.dark{margin-bottom:16px}
+    .hero-title{
+      font-size:var(--hero); line-height:1.35; color:var(--white); margin:0 0 20px; max-width:8em; font-weight:500;
+    }
+    .hero-sub{
+      font-size:1rem; max-width:30em; color:rgba(255,255,255,.9); margin:0;
+    }
+
+    .message-wrap{
+      background:var(--main);
+      border-radius:34px 34px 34px 34px;
+      padding:60px 64px;
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:56px;
+      align-items:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .message-wrap::after{
+      content:"MICHIRU WORKS";
+      position:absolute; left:26%; bottom:20px; font-size:7rem; color:rgba(255,255,255,.08);
+      letter-spacing:.12em; white-space:nowrap; pointer-events:none;
+    }
+    .message-images{
+      position:relative; min-height:470px;
+    }
+    .photo-large, .photo-small{
+      position:absolute; overflow:hidden; background:linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.02));
+    }
+    .photo-large{
+      left:0; top:0; width:300px; height:360px;
+      box-shadow:var(--shadow-strong);
+    }
+    .photo-small{
+      left:180px; bottom:20px; width:190px; height:170px;
+      transform:rotate(-3deg);
+      box-shadow:var(--shadow);
+    }
+    .photo-large img,.photo-small img{width:100%;height:100%;object-fit:cover}
+    .caption-card{
+      position:absolute; right:-34px; bottom:-24px;
+      background:rgba(255,255,255,.96); color:var(--text);
+      padding:16px 18px; border-radius:18px;
+      width:180px; box-shadow:var(--shadow);
+      font-size:.76rem; line-height:1.7;
+    }
+    .caption-card strong{display:block;color:var(--main);font-size:.84rem}
+    .blur-blob{
+      position:absolute; right:24px; top:150px; width:160px; height:120px; background:rgba(255,255,255,.18);
+      filter:blur(22px); border-radius:50%; z-index:0;
+    }
+
+    .news-row{
+      display:grid;
+      grid-template-columns: 150px 1fr;
+      gap:24px;
+      align-items:start;
+    }
+    .news-title{
+      color:var(--white);
+      font-size:1.85rem;
+      letter-spacing:.08em;
+      margin:0;
+      line-height:1.2;
+    }
+    .news-list{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:28px;
+      align-items:start;
+    }
+    .news-item{
+      position:relative;
+      padding-bottom:22px;
+      border-bottom:1px solid rgba(255,255,255,.3);
+      transition:.32s cubic-bezier(.19,1,.22,1);
+    }
+    .news-item:hover{transform:translateY(-4px)}
+    .news-thumb{
+      width:64px; height:64px; border-radius:50%; overflow:hidden;
+      margin-bottom:14px; background:linear-gradient(135deg, rgba(255,255,255,.3), rgba(0,185,239,.18));
+    }
+    .news-thumb img{width:100%;height:100%;object-fit:cover}
+    .news-meta{font-size:.6rem;color:rgba(255,255,255,.62);margin-bottom:6px}
+    .news-item h3{
+      margin:0; font-size:.82rem; line-height:1.7; color:var(--white); font-weight:500;
+    }
+    .news-more{
+      margin-top:26px;
+      display:inline-flex; align-items:center; gap:12px; color:var(--white); font-size:.78rem;
+    }
+    .news-more .dot, .small-dot{
+      width:22px;height:22px;border-radius:50%;background:var(--white);display:grid;place-items:center;color:var(--main);font-size:.65rem;
+      box-shadow:var(--shadow);
+    }
+
+    .program-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:22px;
+      align-items:start;
+    }
+    .program-card{
+      min-height:560px;
+      display:flex; flex-direction:column;
+      justify-content:flex-start;
+    }
+    .program-photo{
+      height:220px; overflow:hidden; background:linear-gradient(135deg, rgba(255,255,255,.2), rgba(0,185,239,.14));
+    }
+    .program-photo img{width:100%;height:100%;object-fit:cover}
+    .program-mark{
+      width:58px; height:90px; background:var(--main); margin:-24px auto 18px; position:relative; z-index:2;
+      border-radius:42% 42% 48% 48% / 18% 18% 76% 76%;
+    }
+    .program-card:nth-child(2) .program-mark{
+      border-radius:42% 42% 28% 32% / 18% 18% 58% 62%;
+    }
+    .program-card:nth-child(3) .program-mark{
+      border-radius:36% 40% 42% 44% / 12% 12% 68% 76%;
+    }
+    .program-name{
+      font-size:3rem; line-height:1; margin:0 0 8px; color:var(--white); text-align:center; font-weight:500;
+    }
+    .program-sub{
+      text-align:center; color:rgba(255,255,255,.78); font-size:.9rem; margin:0 0 22px;
+    }
+    .program-text{
+      color:rgba(255,255,255,.9); font-size:.88rem; margin:0 auto 24px; max-width:29ch; min-height:126px;
+    }
+    .program-card .link-pill{align-self:center; min-width:180px; justify-content:space-between}
+
+    .cta-card-wrap{
+      display:flex; justify-content:flex-start;
+    }
+    .cta-card{
+      width:min(100%, 520px);
+      background:var(--main);
+      border-radius:28px;
+      padding:42px 34px 28px;
+      color:#fff;
+      box-shadow:var(--shadow-strong);
+      position:relative;
+    }
+    .cta-logo{
+      display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;
+      margin-bottom:22px;
+    }
+    .cta-logo .logo-mark{gap:10px}
+    .cta-logo .blob-mini{background:#fff}
+    .cta-logo h3{margin:0;font-size:1.5rem;line-height:1.2;font-weight:600}
+    .cta-logo p{margin:0;font-size:.78rem;opacity:.88;line-height:1.7}
+    .contact-row{
+      display:grid; grid-template-columns:1fr 92px; gap:14px; align-items:center; margin-bottom:24px;
+    }
+    .phone-box{
+      border:1px solid rgba(255,255,255,.35);
+      border-radius:24px; padding:18px 22px;
+    }
+    .phone-box small{display:block;font-size:.68rem;opacity:.86}
+    .phone-box strong{display:block;font-size:2rem;line-height:1.2;letter-spacing:.03em}
+    .phone-box span{display:block;font-size:.72rem;opacity:.88}
+    .reserve-round{
+      width:92px;height:92px;border-radius:50%;background:#fff;color:var(--main);
+      display:grid;place-items:center;text-align:center;font-size:.75rem;line-height:1.4;
+      box-shadow:var(--shadow);
+    }
+    .schedule{
+      border-top:1px solid rgba(255,255,255,.24);
+      border-bottom:1px solid rgba(255,255,255,.24);
+      padding:18px 0 16px;
+      margin-bottom:18px;
+    }
+    .schedule-grid{
+      display:grid; grid-template-columns:64px repeat(7, 1fr); gap:6px; align-items:center;
+      font-size:.7rem; text-align:center;
+    }
+    .schedule-grid div{padding:3px 0}
+    .schedule-grid .label{text-align:left;opacity:.85}
+    .mark-open{color:#fff}
+    .mark-close{opacity:.35}
+    .cta-bar{
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      background:#fff; color:var(--main); border-radius:999px; padding:12px 18px;
+      font-size:.8rem; font-weight:600; margin-bottom:14px;
+    }
+    .cta-notes{
+      margin:0; padding-left:1.1em; font-size:.66rem; line-height:1.9; opacity:.88;
+    }
+
+    footer{
+      padding:24px 0 48px;
+      color:rgba(255,255,255,.82);
+      font-size:.76rem;
+    }
+    .footer-inner{
+      display:flex; justify-content:space-between; gap:20px; align-items:flex-end;
+      border-top:1px solid rgba(255,255,255,.24);
+      padding-top:18px;
+    }
+    .footer-nav{display:flex; gap:16px; flex-wrap:wrap}
+
+    @keyframes loop {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    @keyframes loop2 {
+      0% { transform: translateX(0px); }
+      100% { transform: translateX(-200%); }
+    }
+    @keyframes floaty {
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+    }
+    @keyframes heroIn {
+      from{opacity:0; transform:translateY(30px) scale(.98)}
+      to{opacity:1; transform:translateY(0) scale(1)}
+    }
+    .marquee{
+      position:absolute; left:0; right:0; bottom:20px; overflow:hidden; white-space:nowrap; opacity:.16;
+      color:#fff; font-size:1rem; letter-spacing:.24em;
+    }
+    .marquee span{display:inline-block; padding-left:2.4rem; animation:loop 100s linear infinite}
+    .organic, .program-mark, .header-cta{animation:floaty 7s ease-in-out infinite}
+    .organic.b{animation-delay:.6s}
+    .organic.c{animation-delay:1.2s}
+    .hero-copy, .organic.a, .organic.b, .organic.c, .hero-bubble{
+      animation:heroIn 1s cubic-bezier(.19,1,.22,1) both;
+    }
+    .organic.a{animation-delay:.12s}
+    .organic.b{animation-delay:.24s}
+    .organic.c{animation-delay:.36s}
+    .hero-bubble{animation-delay:.55s}
+    .hero-copy{animation-delay:.05s}
+
+    html.js .reveal{
+      opacity:0; transform:translateY(26px);
+      transition:opacity .82s ease, transform .82s cubic-bezier(.19,1,.22,1);
+    }
+    html.js .reveal.show{opacity:1; transform:none}
+    html.js .reveal[data-delay="1"]{transition-delay:.08s}
+    html.js .reveal[data-delay="2"]{transition-delay:.16s}
+    html.js .reveal[data-delay="3"]{transition-delay:.24s}
+    html.js .reveal[data-delay="4"]{transition-delay:.32s}
+
+    @media (max-width: 1100px){
+      .side-rail{display:none}
+      .header-inner{grid-template-columns:1fr auto auto}
+      nav{grid-column:1/-1; justify-content:flex-start}
+      .menu-dot{display:none}
+      .hero-grid{grid-template-columns:1fr}
+      .hero-main{min-height:auto}
+      .hero-copy{position:relative; top:auto; margin-bottom:34px}
+      .message-wrap{grid-template-columns:1fr; padding:44px 32px}
+      .news-row{grid-template-columns:1fr}
+      .news-list{grid-template-columns:repeat(3,1fr)}
+    }
+    @media (max-width: 768px){
+      .container{width:min(calc(100% - 32px),var(--container))}
+      .section-shell{min-height:auto; padding:72px 0}
+      .header-inner{grid-template-columns:1fr auto}
+      nav{gap:14px; font-size:.72rem}
+      .header-cta{width:82px;height:82px;font-size:.68rem}
+      .hero-visuals{grid-template-columns:1fr; gap:20px}
+      .organic.a,.organic.b,.organic.c{height:260px}
+      .hero-bubble{position:relative; right:auto; bottom:auto; margin-top:16px; display:inline-flex}
+      .message-images{min-height:390px}
+      .photo-large{width:72%; height:270px}
+      .photo-small{width:42%; height:130px; left:auto; right:0}
+      .caption-card{right:0; bottom:-16px; width:150px}
+      .news-list{grid-template-columns:1fr 1fr}
+      .program-grid{grid-template-columns:1fr}
+      .program-card{min-height:auto}
+      .contact-row{grid-template-columns:1fr}
+      .reserve-round{width:88px;height:88px}
+      .footer-inner{flex-direction:column; align-items:flex-start}
+    }
+  </style>
+</head>
+<body style="">
+  <div class="site-bg"></div>
+  <div class="gradient-ribbon"></div>
+
+  <header class="container">
+    <div class="header-inner">
+      <a href="#" class="logo reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+        <div class="logo-mark">
+          <span class="blob-mini"></span>
+          <span class="blob-mini"></span>
+          <span class="blob-mini"></span>
+        </div>
+        <div class="logo-text">
+          <h1>みちるワークス</h1>
+          <p>就労継続支援B型 / 仙台市青葉区</p>
+        </div>
+      </a>
+
+      <nav class="reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+        <a href="#about">私たちについて</a>
+        <a href="#work">できること</a>
+        <a href="#news">お知らせ</a>
+        <a href="#flow">1日の流れ</a>
+        <a href="#guide">利用案内</a>
+        <a href="#contact">見学・申込み</a>
+      </nav>
+
+      <a href="#contact" class="header-cta reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">無料見学<br>受付中</a>
+      <div class="menu-dot reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter"><span></span></div>
+    </div>
+  </header>
+
+  <div class="side-rail">
+    <div class="rail">
+      <div class="icon"></div>
+      <div class="vtxt">見学申込み</div>
+      <div class="icon"></div>
+      <div class="vtxt">施設案内</div>
+      <div class="icon"></div>
+      <div class="vtxt">アクセス</div>
+    </div>
+  </div>
+
+  <section class="imp-hero" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+  <style>
+    .imp-hero {
+      position: relative;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 50%, #f0e8f5 100%);
+      background-size: 400% 400%;
+      animation: imp-bg-shift 15s ease infinite;
+      overflow: hidden;
+      padding: 64px 24px;
+    }
+
+    @keyframes imp-bg-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .imp-hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -150px;
+      width: 500px;
+      height: 500px;
+      border-radius: 45% 55% 52% 48% / 48% 45% 55% 52%;
+      background: rgba(15, 118, 168, 0.03);
+      animation: imp-float 20s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    .imp-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      left: -100px;
+      width: 350px;
+      height: 350px;
+      border-radius: 62% 38% 58% 42% / 58% 58% 42% 42%;
+      background: rgba(15, 118, 168, 0.02);
+      animation: imp-float 25s ease-in-out infinite reverse;
+      z-index: 0;
+    }
+
+    @keyframes imp-float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-40px) rotate(10deg); }
+    }
+
+    .imp-hero-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .imp-hero-header {
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: imp-fade-in 0.8s ease forwards;
+    }
+
+    .imp-eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: #0f76a8;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .imp-hero-title {
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 600;
+      line-height: 1.35;
+      color: #1a2332;
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+      max-width: 14em;
+    }
+
+    .imp-hero-title span {
+      display: inline-block;
+      opacity: 0;
+      animation: imp-char-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes imp-char-pop {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .imp-hero-subtitle {
+      font-size: 0.98rem;
+      line-height: 1.9;
+      color: #5e6164;
+      max-width: 44em;
+      margin-bottom: 56px;
+      opacity: 0;
+      animation: imp-fade-in 0.8s ease 0.4s forwards;
+      letter-spacing: 0.02em;
+    }
+
+    .imp-hero-subtitle strong {
+      color: #0f76a8;
+      font-weight: 600;
+    }
+
+    .imp-layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+      margin-bottom: 56px;
+    }
+
+    .imp-main-card {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      height: 420px;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      opacity: 0;
+      animation: imp-card-in 0.8s ease forwards;
+      box-shadow: 0 12px 32px rgba(15, 118, 168, 0.12);
+      grid-row: span 2;
+    }
+
+    .imp-main-card:nth-child(1) {
+      animation-delay: 0.5s;
+    }
+
+    .imp-card {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      height: 190px;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      opacity: 0;
+      animation: imp-card-in 0.8s ease forwards;
+      box-shadow: 0 8px 24px rgba(15, 118, 168, 0.1);
+    }
+
+    .imp-card:nth-child(2) {
+      animation-delay: 0.65s;
+    }
+
+    .imp-card:nth-child(3) {
+      animation-delay: 0.8s;
+    }
+
+    @keyframes imp-card-in {
+      0% {
+        opacity: 0;
+        transform: scale(0.92) translateY(24px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .imp-main-card:hover,
+    .imp-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 48px rgba(15, 118, 168, 0.18);
+    }
+
+    .imp-card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+
+    .imp-main-card:hover .imp-card-image,
+    .imp-card:hover .imp-card-image {
+      transform: scale(1.06);
+    }
+
+    .imp-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 118, 168, 0) 0%, rgba(15, 118, 168, 0.15) 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .imp-main-card:hover .imp-card-overlay,
+    .imp-card:hover .imp-card-overlay {
+      opacity: 1;
+    }
+
+    .imp-card-tag {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a2332;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .imp-card-tag small {
+      display: block;
+      font-size: 10px;
+      font-weight: 400;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .imp-main-card .imp-card-contact {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      right: 14px;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(10px);
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      transform: translateY(6px);
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+
+    .imp-main-card:hover .imp-card-contact {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .imp-card-contact span {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f76a8;
+      margin-bottom: 4px;
+    }
+
+    .imp-card-contact small {
+      display: block;
+      font-size: 11px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    .imp-marquee {
+      background: rgba(15, 118, 168, 0.06);
+      padding: 20px;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 32px;
+      opacity: 0;
+      animation: imp-fade-in 0.8s ease 0.95s forwards;
+    }
+
+    .imp-marquee-content {
+      display: flex;
+      gap: 32px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #0f76a8;
+      text-transform: uppercase;
+      white-space: nowrap;
+      animation: imp-scroll 20s linear infinite;
+    }
+
+    @keyframes imp-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .imp-marquee-content span {
+      flex-shrink: 0;
+    }
+
+    @keyframes imp-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .imp-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .imp-main-card {
+        grid-row: span 1;
+        height: 340px;
+      }
+
+      .imp-card {
+        height: 180px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .imp-hero {
+        padding: 48px 16px;
+      }
+
+      .imp-hero-header {
+        margin-bottom: 32px;
+      }
+
+      .imp-hero-title {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+      }
+
+      .imp-hero-subtitle {
+        font-size: 0.95rem;
+        line-height: 1.85;
+        margin-bottom: 40px;
+      }
+
+      .imp-layout-grid {
+        gap: 16px;
+        margin-bottom: 40px;
+      }
+
+      .imp-main-card {
+        height: 280px;
+      }
+
+      .imp-card {
+        height: 160px;
+      }
+
+      .imp-marquee-content {
+        gap: 24px;
+        font-size: 10px;
+      }
+    }
+  </style>
+
+  <div class="imp-hero-wrapper">
+    <div class="imp-hero-header" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <div class="imp-eyebrow" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Employment Support B-type</div>
+      <h1 class="imp-hero-title">
+        <span style="animation: auto ease 0.2s 1 normal none running none; opacity: 1; transform: none;">む</span><span style="animation: auto ease 0.25s 1 normal none running none; opacity: 1; transform: none;">り</span><span style="animation: auto ease 0.3s 1 normal none running none; opacity: 1; transform: none;">な</span><span style="animation: auto ease 0.35s 1 normal none running none; opacity: 1; transform: none;">く</span><span style="animation: auto ease 0.4s 1 normal none running none; opacity: 1; transform: none;">通</span><span style="animation: auto ease 0.45s 1 normal none running none; opacity: 1; transform: none;">え</span><span style="animation: auto ease 0.5s 1 normal none running none; opacity: 1; transform: none;">て</span><span style="animation: auto ease 0.55s 1 normal none running none; opacity: 1; transform: none;">,</span><br>
+        <span style="animation: auto ease 0.6s 1 normal none running none; opacity: 1; transform: none;">ち</span><span style="animation: auto ease 0.65s 1 normal none running none; opacity: 1; transform: none;">ゃ</span><span style="animation: auto ease 0.7s 1 normal none running none; opacity: 1; transform: none;">ん</span><span style="animation: auto ease 0.75s 1 normal none running none; opacity: 1; transform: none;">と</span><span style="animation: auto ease 0.8s 1 normal none running none; opacity: 1; transform: none;">前</span><span style="animation: auto ease 0.85s 1 normal none running none; opacity: 1; transform: none;">に</span><span style="animation: auto ease 0.9s 1 normal none running none; opacity: 1; transform: none;">進</span><span style="animation: auto ease 0.95s 1 normal none running none; opacity: 1; transform: none;">め</span><span style="animation: auto ease 1s 1 normal none running none; opacity: 1; transform: none;">る</span><span style="animation: auto ease 1.05s 1 normal none running none; opacity: 1; transform: none;">場</span><span style="animation: auto ease 1.1s 1 normal none running none; opacity: 1; transform: none;">所</span><span style="animation: auto ease 1.15s 1 normal none running none; opacity: 1; transform: none;">。</span>
+      </h1>
+    </div>
+
+    <p class="imp-hero-subtitle" style="opacity: 1; translate: 0px -1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="0" data-cety="-1">
+      週1日・1日2時間から。<br>
+      仙台駅から送迎3ルート、工賃は月平均<strong>23,400円</strong>。<br>
+      ご本人にも、ご家族にも「ここなら通えそう」が伝わる就労継続支援B型です。
+    </p>
+
+    <div class="imp-layout-grid">
+      <div class="imp-main-card" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #0f76a8 0%, #06556a 100%); z-index: 0;"></div>
+        <img class="imp-card-image" src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="梱包作業" width="420" height="520" onerror="this.style.display='none'" style="position: relative; z-index: 1;">
+        <div class="imp-card-overlay" style="z-index: 2;"></div>
+        <div class="imp-card-tag" style="z-index: 3;">
+          はこ<br><small>梱包作業</small>
+        </div>
+        <div class="imp-card-contact" style="z-index: 3;">
+          <span>☎ 022-246-2551</span>
+          <small>見学・ご相談は平日9:30-17:30</small>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="imp-card" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #0f76a8 0%, #06556a 100%); z-index: 0;"></div>
+          <img class="imp-card-image" src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="PC入力作業" width="360" height="420" onerror="this.style.display='none'" style="position: relative; z-index: 1;">
+          <div class="imp-card-overlay" style="z-index: 2;"></div>
+          <div class="imp-card-tag" style="z-index: 3;">
+            PC<br><small>入力作業</small>
+          </div>
+        </div>
+
+        <div class="imp-card" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #0f76a8 0%, #06556a 100%); z-index: 0;"></div>
+          <img class="imp-card-image" src="http://127.0.0.1:5000/uploads/up_78c6a0d3e7.jpg" alt="検品・袋詰め" width="420" height="560" onerror="this.style.display='none'" style="position: relative; z-index: 1;">
+          <div class="imp-card-overlay" style="z-index: 2;"></div>
+          <div class="imp-card-tag" style="z-index: 3;">
+            てしごと<br><small>検品・袋詰め</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="imp-marquee" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <div class="imp-marquee-content">
+        <span>WEEKLY VISIT</span>
+        <span>SEND-OFF AVAILABLE</span>
+        <span>NO EXPERIENCE NEEDED</span>
+        <span>SUPPORT FOR FAMILY &amp; CASEWORKERS</span>
+        <span>WEEKLY VISIT</span>
+        <span>SEND-OFF AVAILABLE</span>
+        <span>NO EXPERIENCE NEEDED</span>
+        <span>SUPPORT FOR FAMILY &amp; CASEWORKERS</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.animationPlayState = 'running';
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.imp-hero-title span').forEach((span, index) => {
+        span.style.animationDelay = (0.05 * index + 0.2) + 's';
+        observer.observe(span);
+      });
+
+      setTimeout(() => {
+        document.querySelectorAll('.imp-hero-title span, .imp-hero-header, .imp-hero-subtitle, .imp-main-card, .imp-card, .imp-marquee').forEach(el => {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+        });
+      }, 3000);
+    })();
+  </script>
+</section>
+
+  <section id="about" class="imp-message-section">
+  <style>
+    .imp-message-section {
+      position: relative;
+      padding: 120px 40px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #0891b2 100%);
+      background-size: 400% 400%;
+      animation: imp-gradient-flow 8s ease infinite;
+      overflow: hidden;
+    }
+
+    @keyframes imp-gradient-flow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .imp-message-section::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+      animation: imp-float 6s ease-in-out infinite;
+    }
+
+    .imp-message-section::after {
+      content: '';
+      position: absolute;
+      bottom: -50px;
+      left: 10%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+      animation: imp-float 8s ease-in-out infinite 1s;
+    }
+
+    @keyframes imp-float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(40px); }
+    }
+
+    .imp-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .imp-images-wrapper {
+      position: relative;
+      height: 500px;
+    }
+
+    .imp-photo-large {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 360px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transform: scale(1.15);
+      animation: imp-image-zoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .imp-photo-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    @keyframes imp-image-zoom {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .imp-photo-small {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 190px;
+      height: 170px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: scale(1.15) translateY(30px);
+      animation: imp-image-zoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 0.15s;
+    }
+
+    .imp-photo-small img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .imp-caption-card {
+      position: absolute;
+      bottom: 40px;
+      left: 20px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      max-width: 200px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: imp-caption-appear 0.6s ease-out forwards 0.3s;
+    }
+
+    .imp-caption-card strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0891b2;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .imp-caption-card p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #1f2937;
+    }
+
+    @keyframes imp-caption-appear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .imp-content {
+      color: white;
+    }
+
+    .imp-eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: imp-text-appear 0.6s ease-out forwards 0.45s;
+      margin-bottom: 16px;
+    }
+
+    .imp-section-title {
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
+    }
+
+    .imp-title-char {
+      display: inline-block;
+      opacity: 0;
+      animation: imp-char-appear 0.5s ease-out forwards;
+    }
+
+    .imp-title-char:nth-child(1) { animation-delay: 0.6s; }
+    .imp-title-char:nth-child(2) { animation-delay: 0.65s; }
+    .imp-title-char:nth-child(3) { animation-delay: 0.7s; }
+    .imp-title-char:nth-child(4) { animation-delay: 0.75s; }
+    .imp-title-char:nth-child(5) { animation-delay: 0.8s; }
+    .imp-title-char:nth-child(6) { animation-delay: 0.85s; }
+    .imp-title-char:nth-child(7) { animation-delay: 0.9s; }
+    .imp-title-char:nth-child(8) { animation-delay: 0.95s; }
+    .imp-title-char:nth-child(9) { animation-delay: 1s; }
+    .imp-title-char:nth-child(10) { animation-delay: 1.05s; }
+    .imp-title-char:nth-child(11) { animation-delay: 1.1s; }
+    .imp-title-char:nth-child(12) { animation-delay: 1.15s; }
+    .imp-title-char:nth-child(13) { animation-delay: 1.2s; }
+    .imp-title-char:nth-child(14) { animation-delay: 1.25s; }
+    .imp-title-char:nth-child(15) { animation-delay: 1.3s; }
+    .imp-title-char:nth-child(16) { animation-delay: 1.35s; }
+    .imp-title-char:nth-child(17) { animation-delay: 1.4s; }
+    .imp-title-char:nth-child(18) { animation-delay: 1.45s; }
+    .imp-title-char:nth-child(19) { animation-delay: 1.5s; }
+
+    @keyframes imp-char-appear {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .imp-lead {
+      font-size: 16px;
+      line-height: 1.9;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: imp-text-appear 0.6s ease-out forwards 1.55s;
+    }
+
+    .imp-copy {
+      font-size: 15px;
+      line-height: 1.9;
+      opacity: 0.95;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: imp-text-appear 0.6s ease-out forwards 1.7s;
+    }
+
+    @keyframes imp-text-appear {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .imp-button-wrapper {
+      opacity: 0;
+      animation: imp-text-appear 0.6s ease-out forwards 1.85s;
+    }
+
+    .imp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 32px;
+      background: white;
+      color: #0891b2;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      letter-spacing: 0.5px;
+    }
+
+    .imp-btn:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+      background: #f0f9ff;
+    }
+
+    .imp-btn .imp-arrow {
+      font-size: 18px;
+      transition: transform 0.3s ease-out;
+    }
+
+    .imp-btn:hover .imp-arrow {
+      transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+      .imp-message-section {
+        padding: 60px 24px;
+      }
+
+      .imp-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .imp-images-wrapper {
+        height: 400px;
+      }
+
+      .imp-photo-large {
+        width: 240px;
+        height: 290px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .imp-photo-small {
+        width: 160px;
+        height: 140px;
+        right: 50%;
+        transform: translateX(50%);
+      }
+
+      .imp-section-title {
+        font-size: 28px;
+      }
+
+      .imp-lead {
+        font-size: 15px;
+      }
+
+      .imp-copy {
+        font-size: 14px;
+      }
+    }
+  </style>
+
+  <div class="imp-container" style="opacity: 1; transform: none;">
+    <div class="imp-images-wrapper" style="opacity: 1; transform: none;">
+      <div class="imp-photo-large" style="opacity: 1; transform: none;">
+        <img src="http://127.0.0.1:5000/uploads/up_034d4c10b7.png" alt="" width="300" height="360">
+      </div>
+      <div class="imp-photo-small" style="opacity: 1; transform: none;">
+        <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="" width="190" height="170">
+      </div>
+      <div class="imp-caption-card" style="opacity: 1; transform: none;">
+        <strong>見学は30分から</strong>
+        <p>「話だけ聞きたい」でも大丈夫。<br>支援員 佐藤</p>
+      </div>
+    </div>
+
+    <div class="imp-content" style="opacity: 1; transform: none;">
+      <span class="imp-eyebrow" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">Message</span>
+      <h2 class="imp-section-title" style="opacity: 1; transform: none;">
+        <span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">は</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">た</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">ら</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">く</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">、</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">に</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">お</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">い</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">を</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">。</span><br><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">く</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">ら</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">す</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">、</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">の</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">形</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">を</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">。</span><br><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">そ</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">の</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">人</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">の</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">速</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">さ</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">で</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">整</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">え</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">る</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">支</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">援</span><span class="imp-title-char" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">。</span>
+      </h2>
+      <p class="imp-lead" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">みちるワークスは、仙台市青葉区大町二丁目にある就労継続支援B型事業所です。箱づくり、封入、シール貼り、PC入力、撮影補助など、集中しやすい仕事を複数用意しています。</p>
+      <p class="imp-copy" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">「毎日はまだ不安」「午前だけなら通えそう」「家から出る練習から始めたい」——そんな段階から利用できます。障害福祉サービス受給者証の手続きも、相談支援専門員やご家族と連携して丁寧にご案内します。</p>
+      <div class="imp-button-wrapper" style="opacity: 1; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a class="imp-btn" href="#guide" style="opacity: 1; transform: none;">当事業所について <span class="imp-arrow" style="opacity: 1; transform: none;">›</span></a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const section = document.querySelector('.imp-message-section');
+      
+      // 強制表示タイマー（3秒後）
+      setTimeout(function() {
+        const elements = section.querySelectorAll('[class*="imp-"]');
+        elements.forEach(el => {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+        });
+      }, 3000);
+    })();
+  </script>
+</section>
+
+  <section class="imp-news-section" data-cebt="" data-cetx="-1" data-cety="0" style="translate: -1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+  <style>
+    .imp-news-section {
+      position: relative;
+      padding: 120px 0;
+      background: linear-gradient(-45deg, #f8f9fa 0%, #f0f4f8 50%, #f8f9fa 100%);
+      background-size: 400% 400%;
+      animation: imp-bg-drift 15s ease infinite;
+      overflow: hidden;
+    }
+
+    @keyframes imp-bg-drift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .imp-news-section::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -50px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(100, 180, 220, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: imp-float-slow 8s ease-in-out infinite;
+    }
+
+    .imp-news-section::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: 5%;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(100, 180, 220, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: imp-float-slow 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes imp-float-slow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(40px); }
+    }
+
+    .imp-news-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .imp-news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 80px;
+      gap: 32px;
+    }
+
+    .imp-news-title {
+      font-size: 56px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin: 0;
+      color: #1a2332;
+      line-height: 1.2;
+      display: flex;
+      gap: 4px;
+      align-items: baseline;
+    }
+
+    .imp-news-title span {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(60px);
+      animation: imp-char-reveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .imp-news-title span:nth-child(1) { animation-delay: 0.1s; }
+    .imp-news-title span:nth-child(2) { animation-delay: 0.2s; }
+    .imp-news-title span:nth-child(3) { animation-delay: 0.3s; }
+    .imp-news-title span:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes imp-char-reveal {
+      0% {
+        opacity: 0;
+        transform: translateY(60px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .imp-news-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #64b4dc;
+      text-decoration: none;
+      border: 2px solid #64b4dc;
+      border-radius: 6px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(40px);
+      animation: imp-fade-up 0.8s ease 0.4s forwards;
+    }
+
+    .imp-news-more::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: #64b4dc;
+      z-index: -1;
+      transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .imp-news-more:hover {
+      color: #fff;
+      border-color: #64b4dc;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(100, 180, 220, 0.3);
+    }
+
+    .imp-news-more:hover::before {
+      left: 0;
+    }
+
+    .imp-news-dot {
+      transition: transform 0.3s ease;
+    }
+
+    .imp-news-more:hover .imp-news-dot {
+      transform: translateX(4px);
+    }
+
+    @keyframes imp-fade-up {
+      0% {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .imp-news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .imp-news-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(26, 35, 50, 0.08);
+      opacity: 0;
+      transform: translateY(60px) scale(0.95);
+      animation: imp-card-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .imp-news-card:nth-child(1) { animation-delay: 0.6s; }
+    .imp-news-card:nth-child(2) { animation-delay: 0.75s; }
+    .imp-news-card:nth-child(3) { animation-delay: 0.9s; }
+    .imp-news-card:nth-child(4) { animation-delay: 1.05s; }
+    .imp-news-card:nth-child(5) { animation-delay: 1.2s; }
+
+    @keyframes imp-card-appear {
+      0% {
+        opacity: 0;
+        transform: translateY(60px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .imp-news-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 24px 48px rgba(26, 35, 50, 0.16);
+    }
+
+    .imp-news-thumb-wrapper {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e8f0f8 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .imp-news-thumb-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0;
+      transform: scale(1.2);
+      animation: imp-img-zoom 0.8s ease forwards;
+      animation-delay: inherit;
+    }
+
+    .imp-news-card:nth-child(1) .imp-news-thumb-wrapper img { animation-delay: 0.7s; }
+    .imp-news-card:nth-child(2) .imp-news-thumb-wrapper img { animation-delay: 0.85s; }
+    .imp-news-card:nth-child(3) .imp-news-thumb-wrapper img { animation-delay: 1.0s; }
+    .imp-news-card:nth-child(4) .imp-news-thumb-wrapper img { animation-delay: 1.15s; }
+    .imp-news-card:nth-child(5) .imp-news-thumb-wrapper img { animation-delay: 1.3s; }
+
+    @keyframes imp-img-zoom {
+      0% {
+        opacity: 0;
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .imp-news-meta {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #64b4dc;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .imp-news-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      color: #1a2332;
+      line-height: 1.6;
+      transition: color 0.3s ease;
+    }
+
+    .imp-news-card:hover h3 {
+      color: #64b4dc;
+    }
+
+    @media (max-width: 768px) {
+      .imp-news-section {
+        padding: 80px 0;
+      }
+
+      .imp-news-container {
+        padding: 0 20px;
+      }
+
+      .imp-news-header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 60px;
+        gap: 24px;
+      }
+
+      .imp-news-title {
+        font-size: 40px;
+      }
+
+      .imp-news-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+
+    .imp-reveal-visible {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+
+    .imp-reveal-visible.imp-news-card {
+      transform: translateY(0) scale(1) !important;
+    }
+  </style>
+
+  <div class="imp-news-container">
+    <div class="imp-news-header">
+      <h2 class="imp-news-title">
+        <span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">N</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">E</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">W</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">S</span>
+      </h2>
+      <a class="imp-news-more" href="#contact" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">お知らせ一覧 <span class="imp-news-dot">›</span></a>
+    </div>
+
+    <div class="imp-news-grid">
+      <a href="#" class="imp-news-card imp-reveal-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-news-thumb-wrapper">
+          <img src="http://127.0.0.1:5000/uploads/up_87303358c7.png" alt="" width="64" height="64" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        </div>
+        <p class="imp-news-meta">2026.07.05 / 見学</p>
+        <h3>8月の見学スケジュールを公開しました</h3>
+      </a>
+
+      <a href="#" class="imp-news-card imp-reveal-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-news-thumb-wrapper">
+          <img src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="" width="64" height="64" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        </div>
+        <p class="imp-news-meta">2026.07.03 / 実績</p>
+        <h3>2025年度の一般就労移行は14名でした</h3>
+      </a>
+
+      <a href="#" class="imp-news-card imp-reveal-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-news-thumb-wrapper">
+          <img src="http://127.0.0.1:5000/uploads/up_88c26af961.png" alt="" width="64" height="64" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        </div>
+        <p class="imp-news-meta">2026.06.29 / 施設案内</p>
+        <h3>静かなPC席を6席増設しました</h3>
+      </a>
+
+      <a href="#" class="imp-news-card imp-reveal-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-news-thumb-wrapper">
+          <img src="http://127.0.0.1:5000/uploads/up_2fd3b2f97a.png" alt="" width="64" height="64" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        </div>
+        <p class="imp-news-meta">2026.06.22 / 利用案内</p>
+        <h3>週1日利用からの相談枠を拡大しています</h3>
+      </a>
+
+      <a href="#" class="imp-news-card imp-reveal-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-news-thumb-wrapper">
+          <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="" width="64" height="64" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        </div>
+        <p class="imp-news-meta">2026.06.18 / 日常</p>
+        <h3>昼休みの過ごし方と見学時の流れを更新しました</h3>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const cards = document.querySelectorAll('.imp-news-card');
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('imp-reveal-visible');
+          }
+        });
+      }, { threshold: 0.1 });
+
+      cards.forEach(card => {
+        observer.observe(card);
+      });
+
+      setTimeout(() => {
+        cards.forEach(card => card.classList.add('imp-reveal-visible'));
+      }, 3000);
+    })();
+  </script>
+</section>
+
+  <section id="work" class="imp-work-section">
+  <style>
+    .imp-work-section {
+      position: relative;
+      overflow: hidden;
+      padding: 80px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #f3f5f7 50%, #eef2f6 100%);
+      background-size: 300% 300%;
+      animation: imp-bg-shift 20s ease infinite;
+    }
+
+    @keyframes imp-bg-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .imp-work-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .imp-work-header {
+      text-align: center;
+      margin-bottom: 64px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .imp-work-title {
+      font-size: 32px;
+      font-weight: 600;
+      color: #1a1a1a;
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+      margin: 0;
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .imp-work-title.imp-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-work-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+      margin-top: 40px;
+    }
+
+    .imp-program-card {
+      position: relative;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(26, 26, 26, 0.06);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(60px) scale(0.95);
+      cursor: pointer;
+    }
+
+    .imp-program-card.imp-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .imp-program-card:hover {
+      transform: translateY(-12px) scale(1);
+      box-shadow: 0 16px 48px rgba(26, 26, 26, 0.12);
+    }
+
+    .imp-program-photo {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+      background: #e8eef5;
+    }
+
+    .imp-program-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.15);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .imp-program-card.imp-visible .imp-program-photo img {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .imp-program-mark {
+      position: absolute;
+      width: 56px;
+      height: 56px;
+      background: #00bcd4;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      animation: imp-mark-pulse 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      box-shadow: 0 0 0 12px rgba(0, 188, 212, 0.1);
+    }
+
+    @keyframes imp-mark-pulse {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.6);
+      }
+      50% {
+        opacity: 0.8;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+    }
+
+    .imp-program-content {
+      padding: 32px 24px;
+    }
+
+    .imp-program-name {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 0 0 8px 0;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease 0.15s, transform 0.6s ease 0.15s;
+    }
+
+    .imp-program-card.imp-visible .imp-program-name {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-program-sub {
+      font-size: 13px;
+      color: #00bcd4;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      margin: 0 0 16px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease 0.25s, transform 0.6s ease 0.25s;
+    }
+
+    .imp-program-card.imp-visible .imp-program-sub {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-program-text {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.9;
+      margin: 0 0 24px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease 0.35s, transform 0.6s ease 0.35s;
+    }
+
+    .imp-program-card.imp-visible .imp-program-text {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-link-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: white;
+      color: #00bcd4;
+      border: 2px solid #00bcd4;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: imp-button-show 0.6s ease 0.45s forwards;
+    }
+
+    @keyframes imp-button-show {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .imp-link-pill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: #00bcd4;
+      z-index: -1;
+      transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .imp-link-pill:hover {
+      color: white;
+    }
+
+    .imp-link-pill:hover::before {
+      left: 0;
+    }
+
+    .imp-arrow {
+      font-weight: 300;
+      font-size: 18px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-block;
+    }
+
+    .imp-link-pill:hover .imp-arrow {
+      transform: translateX(4px);
+    }
+
+    .imp-decorator {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.04;
+      pointer-events: none;
+    }
+
+    .imp-decorator-1 {
+      width: 280px;
+      height: 280px;
+      background: #00bcd4;
+      top: -80px;
+      right: -100px;
+      animation: imp-float-1 8s ease-in-out infinite;
+    }
+
+    .imp-decorator-2 {
+      width: 200px;
+      height: 200px;
+      background: #1a1a1a;
+      bottom: -60px;
+      left: -80px;
+      animation: imp-float-2 10s ease-in-out infinite;
+    }
+
+    @keyframes imp-float-1 {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-40px) translateX(20px); }
+    }
+
+    @keyframes imp-float-2 {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(30px) translateX(-30px); }
+    }
+
+    @media (max-width: 768px) {
+      .imp-work-section {
+        padding: 60px 20px;
+      }
+
+      .imp-work-header {
+        margin-bottom: 48px;
+      }
+
+      .imp-work-title {
+        font-size: 24px;
+      }
+
+      .imp-work-grid {
+        gap: 24px;
+      }
+
+      .imp-program-name {
+        font-size: 24px;
+      }
+
+      .imp-program-photo {
+        height: 200px;
+      }
+    }
+  </style>
+
+  <div class="imp-decorator imp-decorator-1"></div>
+  <div class="imp-decorator imp-decorator-2"></div>
+
+  <div class="imp-work-container">
+    <div class="imp-work-header">
+      <h2 class="imp-work-title imp-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <span class="imp-char">プ</span><span class="imp-char">ロ</span><span class="imp-char">グ</span><span class="imp-char">ラ</span><span class="imp-char">ム</span>
+      </h2>
+    </div>
+
+    <div class="imp-work-grid">
+      <article class="imp-program-card imp-visible" data-index="0" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-program-photo">
+          <div class="imp-program-mark"></div>
+          <img src="http://127.0.0.1:5000/uploads/up_488f6688b0.jpg" alt="はこ - 箱づくり・封入・発送準備" width="360" height="220" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        </div>
+        <div class="imp-program-content">
+          <h3 class="imp-program-name" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">はこ</h3>
+          <p class="imp-program-sub" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">箱づくり・封入・発送準備</p>
+          <p class="imp-program-text" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">白手袋を使った紙箱の組み立て、封入、シール貼り、検品など。手順が明確で、初めての方にも取り組みやすい作業です。座ってできる工程も多く、午前だけの利用にも向いています。</p>
+          <a class="imp-link-pill" href="#flow" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">詳細をみる <span class="imp-arrow">›</span></a>
+        </div>
+      </article>
+
+      <article class="imp-program-card imp-visible" data-index="1" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-program-photo">
+          <div class="imp-program-mark"></div>
+          <img src="http://127.0.0.1:5000/uploads/up_5e702ca432.jpg" alt="PC - 入力・画像整理・事務補助" width="360" height="220" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        </div>
+        <div class="imp-program-content">
+          <h3 class="imp-program-name" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">PC</h3>
+          <p class="imp-program-sub" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">入力・画像整理・事務補助</p>
+          <p class="imp-program-text" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">データ入力、書類のスキャン、ネット出品補助、画像整理など。静かな席と見守りを用意し、自分のペースを守りながら集中できるよう整えています。文字入力がゆっくりでも問題ありません。</p>
+          <a class="imp-link-pill" href="#guide" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">詳細をみる <span class="imp-arrow">›</span></a>
+        </div>
+      </article>
+
+      <article class="imp-program-card imp-visible" data-index="2" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-program-photo">
+          <div class="imp-program-mark"></div>
+          <img src="http://127.0.0.1:5000/uploads/up_ca0295279d.jpg" alt="てしごと - 手芸小物・検品・袋詰め" width="360" height="220" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        </div>
+        <div class="imp-program-content">
+          <h3 class="imp-program-name" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">てしごと</h3>
+          <p class="imp-program-sub" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">手芸小物・検品・袋詰め</p>
+          <p class="imp-program-text" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">アクセサリーや雑貨の検品、袋詰め、セット組み。細かな作業が好きな方に人気です。顔が写りにくい手元中心の仕事も多く、人前がまだ苦手な時期でも始めやすい環境をつくっています。</p>
+          <a class="imp-link-pill" href="#contact" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">詳細をみる <span class="imp-arrow">›</span></a>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const cards = document.querySelectorAll('.imp-program-card');
+      const title = document.querySelector('.imp-work-title');
+      let hasTriggered = false;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !hasTriggered) {
+            hasTriggered = true;
+            if (title) {
+              setTimeout(() => {
+                title.classList.add('imp-visible');
+              }, 100);
+            }
+            cards.forEach((card, idx) => {
+              setTimeout(() => {
+                card.classList.add('imp-visible');
+              }, 200 + idx * 150);
+            });
+            setTimeout(() => {
+              cards.forEach(card => {
+                card.classList.add('imp-visible');
+              });
+              if (title) {
+                title.classList.add('imp-visible');
+              }
+            }, 3000);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      const section = document.querySelector('.imp-work-section');
+      if (section) {
+        observer.observe(section);
+      }
+
+      setTimeout(() => {
+        if (title && !title.classList.contains('imp-visible')) {
+          title.classList.add('imp-visible');
+        }
+        cards.forEach(card => {
+          if (!card.classList.contains('imp-visible')) {
+            card.classList.add('imp-visible');
+          }
+        });
+      }, 3000);
+    })();
+  </script>
+</section>
+
+  <section class="imp-flow-section">
+  <style>
+    .imp-flow-section {
+      position: relative;
+      overflow: hidden;
+      padding: 80px 24px;
+      background: #f8f9fa;
+    }
+
+    .imp-flow-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .imp-flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .imp-flow-grid {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+      .imp-flow-section {
+        padding: 64px 20px;
+      }
+    }
+
+    .imp-flow-images {
+      position: relative;
+      height: 480px;
+    }
+
+    .imp-flow-photo-large {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 320px;
+      height: 400px;
+      opacity: 0;
+      transform: scale(1.15) translateY(40px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .imp-flow-photo-large.imp-is-visible {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .imp-flow-photo-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 12px 32px rgba(10, 115, 140, 0.15);
+    }
+
+    .imp-flow-photo-small {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 240px;
+      height: 180px;
+      opacity: 0;
+      transform: scale(1.15) translateY(40px);
+      transition: opacity 0.8s ease-out 0.15s, transform 0.8s ease-out 0.15s;
+    }
+
+    .imp-flow-photo-small.imp-is-visible {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .imp-flow-photo-small img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(10, 115, 140, 0.12);
+    }
+
+    .imp-flow-caption {
+      position: absolute;
+      left: 8px;
+      bottom: -60px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 6px;
+      box-shadow: 0 8px 20px rgba(10, 115, 140, 0.1);
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s;
+    }
+
+    .imp-flow-caption.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-flow-caption strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: #073d52;
+      margin-bottom: 4px;
+    }
+
+    .imp-flow-caption p {
+      color: #555;
+      margin: 0;
+    }
+
+    .imp-flow-deco {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.08;
+      animation: imp-float 6s ease-in-out infinite;
+    }
+
+    .imp-flow-deco-1 {
+      width: 280px;
+      height: 280px;
+      background: #0a7390;
+      top: -80px;
+      right: 120px;
+      animation-delay: 0s;
+    }
+
+    .imp-flow-deco-2 {
+      width: 180px;
+      height: 180px;
+      background: #0a7390;
+      bottom: 60px;
+      left: -40px;
+      animation-delay: 1s;
+    }
+
+    @keyframes imp-float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(40px);
+      }
+    }
+
+    .imp-flow-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .imp-flow-eyebrow {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #0a7390;
+      margin-bottom: 12px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .imp-flow-eyebrow.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-flow-title {
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: #073d52;
+      margin: 0 0 28px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .imp-flow-title span {
+      display: inline;
+      opacity: 0;
+      animation: imp-char-appear 0.6s ease-out forwards;
+    }
+
+    @keyframes imp-char-appear {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .imp-flow-lead {
+      font-size: 15px;
+      line-height: 1.9;
+      color: #444;
+      margin: 0 0 24px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s;
+    }
+
+    .imp-flow-lead.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-flow-copy {
+      font-size: 15px;
+      line-height: 1.9;
+      color: #666;
+      margin: 24px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s;
+    }
+
+    .imp-flow-copy.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-flow-buttons {
+      display: flex;
+      gap: 16px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s;
+    }
+
+    .imp-flow-buttons.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-flow-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .imp-flow-btn-primary {
+      background: linear-gradient(135deg, #0a7390 0%, #0a9bc4 100%);
+      color: white;
+    }
+
+    .imp-flow-btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(10, 115, 144, 0.25);
+    }
+
+    .imp-flow-btn-primary:active {
+      transform: translateY(-2px);
+    }
+
+    .imp-flow-btn-secondary {
+      background: white;
+      color: #073d52;
+      border: 2px solid #e0e8f0;
+    }
+
+    .imp-flow-btn-secondary:hover {
+      transform: translateY(-4px);
+      border-color: #0a7390;
+      box-shadow: 0 12px 28px rgba(10, 115, 144, 0.12);
+      background: #f8fbfd;
+    }
+
+    .imp-flow-btn-secondary:active {
+      transform: translateY(-2px);
+    }
+
+    .imp-flow-arrow {
+      font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .imp-flow-title {
+        font-size: 32px;
+      }
+
+      .imp-flow-images {
+        height: 320px;
+      }
+
+      .imp-flow-photo-large {
+        width: 240px;
+        height: 300px;
+      }
+
+      .imp-flow-photo-small {
+        width: 180px;
+        height: 135px;
+      }
+
+      .imp-flow-caption {
+        font-size: 13px;
+      }
+
+      .imp-flow-buttons {
+        gap: 12px;
+      }
+
+      .imp-flow-btn {
+        padding: 12px 20px;
+        font-size: 13px;
+      }
+    }
+  </style>
+
+  <div class="imp-flow-container">
+    <div class="imp-flow-grid">
+      <div class="imp-flow-images">
+        <div class="imp-flow-deco imp-flow-deco-1"></div>
+        <div class="imp-flow-deco imp-flow-deco-2"></div>
+
+        <div class="imp-flow-photo-large imp-flow-photo imp-is-visible" data-index="0">
+          <img src="http://127.0.0.1:5000/uploads/up_eefd062ac1.jpg" alt="朝の様子" width="300" height="360">
+        </div>
+
+        <div class="imp-flow-photo-small imp-flow-photo imp-is-visible" data-index="1">
+          <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="作業風景" width="190" height="170">
+        </div>
+
+        <div class="imp-flow-caption imp-flow-photo imp-is-visible" data-index="2">
+          <strong>1日の流れ</strong>
+          <p>10:00開始、15:00終了。<br>昼食・休憩あり</p>
+        </div>
+      </div>
+
+      <div class="imp-flow-content">
+        <span class="imp-flow-eyebrow imp-flow-elem imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">DAILY FLOW</span>
+
+        <h2 class="imp-flow-title imp-flow-elem imp-is-visible">
+          <span style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important; transform: none;">朝</span><span style="animation: auto ease 0.08s 1 normal none running none; transform: none; opacity: 1 !important;">は</span><span style="animation: auto ease 0.16s 1 normal none running none; transform: none; opacity: 1 !important;">ゆ</span><span style="animation: auto ease 0.24s 1 normal none running none; transform: none; opacity: 1 !important;">っ</span><span style="animation: auto ease 0.32s 1 normal none running none; transform: none; opacity: 1 !important;">く</span><span style="animation: auto ease 0.4s 1 normal none running none; transform: none; opacity: 1 !important;">り</span><span style="animation: auto ease 0.48s 1 normal none running none; transform: none; opacity: 1 !important;">,</span><br>
+          <span style="animation: auto ease 0.56s 1 normal none running none; transform: none; opacity: 1 !important;">午</span><span style="animation: auto ease 0.64s 1 normal none running none; transform: none; opacity: 1 !important;">後</span><span style="animation: auto ease 0.72s 1 normal none running none; transform: none; opacity: 1 !important;">は</span><span style="animation: auto ease 0.8s 1 normal none running none; transform: none; opacity: 1 !important;">少</span><span style="animation: auto ease 0.88s 1 normal none running none; transform: none; opacity: 1 !important;">し</span><span style="animation: auto ease 0.96s 1 normal none running none; transform: none; opacity: 1 !important;">集</span><span style="animation: auto ease 1.04s 1 normal none running none; transform: none; opacity: 1 !important;">中</span><span style="animation: auto ease 1.12s 1 normal none running none; transform: none; opacity: 1 !important;">。</span><br>
+          <span style="animation: auto ease 1.2s 1 normal none running none; transform: none; opacity: 1 !important;">ま</span><span style="animation: auto ease 1.28s 1 normal none running none; transform: none; opacity: 1 !important;">ず</span><span style="animation: auto ease 1.36s 1 normal none running none; transform: none; opacity: 1 !important;">は</span><span style="animation: auto ease 1.44s 1 normal none running none; transform: none; opacity: 1 !important;">生</span><span style="animation: auto ease 1.52s 1 normal none running none; transform: none; opacity: 1 !important;">活</span><span style="animation: auto ease 1.6s 1 normal none running none; transform: none; opacity: 1 !important;">リ</span><span style="animation: auto ease 1.68s 1 normal none running none; transform: none; opacity: 1 !important;">ズ</span><span style="animation: auto ease 1.76s 1 normal none running none; transform: none; opacity: 1 !important;">ム</span><span style="animation: auto ease 1.84s 1 normal none running none; transform: none; opacity: 1 !important;">か</span><span style="animation: auto ease 1.92s 1 normal none running none; transform: none; opacity: 1 !important;">ら</span><span style="animation: auto ease 2s 1 normal none running none; transform: none; opacity: 1 !important;">。</span>
+        </h2>
+
+        <p class="imp-flow-lead imp-flow-elem imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          10:00 体調確認と今日の相談 / 10:30 作業開始 / 12:00 昼休み / 13:00 午後の作業 / 14:30 片づけと振り返り / 15:00 終了。体調に合わせて午前のみ・午後のみも相談できます。
+        </p>
+
+        <p class="imp-flow-copy imp-flow-elem imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          利用開始から3か月は、出席ペースを最優先に調整します。週1日から始め、慣れたら週3日へ。通所記録はご家族・支援機関とも共有できるため、「ちゃんと通えているか」が見えやすく安心です。
+        </p>
+
+        <div class="imp-flow-buttons imp-flow-elem imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a class="imp-flow-btn imp-flow-btn-primary" href="#contact">見学を申し込む <span class="imp-flow-arrow">›</span></a>
+          <a class="imp-flow-btn imp-flow-btn-secondary" href="#guide">利用料をみる <span class="imp-flow-arrow">›</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('imp-is-visible');
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.imp-flow-elem, .imp-flow-photo').forEach(el => {
+        observer.observe(el);
+      });
+
+      setTimeout(() => {
+        document.querySelectorAll('.imp-flow-elem, .imp-flow-photo').forEach(el => {
+          el.classList.add('imp-is-visible');
+        });
+      }, 3000);
+
+      document.querySelectorAll('.imp-flow-title span').forEach((span, i) => {
+        span.style.animationDelay = (i * 0.08) + 's';
+      });
+    })();
+  </script>
+</section>
+
+  <section class="imp-guide" id="guide">
+  <style>
+    .imp-guide {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f5f5f7 0%, #e8e8f0 50%, #f0e8f0 100%);
+      background-size: 200% 200%;
+      animation: imp-gradient-shift 8s ease infinite;
+      padding: 80px 24px;
+    }
+
+    @keyframes imp-gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .imp-guide::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -200px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(100, 150, 200, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: imp-float 12s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    @keyframes imp-float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(40px, -40px); }
+    }
+
+    .imp-guide::after {
+      content: '';
+      position: absolute;
+      bottom: -150px;
+      left: -150px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(180, 140, 180, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: imp-float-reverse 14s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    @keyframes imp-float-reverse {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-50px, 50px); }
+    }
+
+    .imp-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .imp-header {
+      margin-bottom: 64px;
+    }
+
+    .imp-eyebrow {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #6495c8;
+      font-weight: 600;
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: imp-fade-up 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+    }
+
+    .imp-title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #1a1a2e;
+      max-width: 10em;
+      margin: 0;
+    }
+
+    .imp-title span {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(60px);
+      animation: imp-char-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .imp-title span:nth-child(1) { animation-delay: 0.3s; }
+    .imp-title span:nth-child(2) { animation-delay: 0.4s; }
+    .imp-title span:nth-child(3) { animation-delay: 0.5s; }
+    .imp-title span:nth-child(4) { animation-delay: 0.6s; }
+    .imp-title span:nth-child(5) { animation-delay: 0.7s; }
+    .imp-title span:nth-child(6) { animation-delay: 0.8s; }
+    .imp-title span:nth-child(7) { animation-delay: 0.9s; }
+    .imp-title span:nth-child(8) { animation-delay: 1s; }
+    .imp-title span:nth-child(9) { animation-delay: 1.1s; }
+
+    @keyframes imp-char-appear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes imp-fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .imp-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+
+    .imp-stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 32px 24px;
+      box-shadow: 0 4px 16px rgba(100, 120, 140, 0.08);
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.92);
+      animation: imp-stat-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(100, 150, 200, 0.1);
+    }
+
+    .imp-stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba(100, 120, 140, 0.15);
+      border-color: rgba(100, 150, 200, 0.3);
+    }
+
+    @keyframes imp-stat-in {
+      from {
+        opacity: 0;
+        transform: scale(0.92);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .imp-stat-card:nth-child(1) { animation-delay: 0.5s; }
+    .imp-stat-card:nth-child(2) { animation-delay: 0.65s; }
+    .imp-stat-card:nth-child(3) { animation-delay: 0.8s; }
+    .imp-stat-card:nth-child(4) { animation-delay: 0.95s; }
+
+    .imp-stat-number {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #6495c8;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .imp-stat-label {
+      font-size: 0.875rem;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .imp-content {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .imp-description {
+      opacity: 0;
+      animation: imp-fade-up 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 1.1s forwards;
+    }
+
+    .imp-description p {
+      font-size: 1rem;
+      line-height: 1.9;
+      color: #333;
+      margin: 0 0 28px 0;
+      max-width: 42em;
+    }
+
+    .imp-cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 32px;
+      background: white;
+      border: 2px solid #6495c8;
+      color: #6495c8;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .imp-cta-button:hover {
+      background: #6495c8;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .imp-arrow {
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+
+    .imp-cta-button:hover .imp-arrow {
+      transform: translateX(4px);
+    }
+
+    .imp-features {
+      background: white;
+      border-radius: 12px;
+      padding: 32px 28px;
+      box-shadow: 0 4px 16px rgba(100, 120, 140, 0.08);
+      border: 1px solid rgba(100, 150, 200, 0.1);
+      opacity: 0;
+      animation: imp-fade-up 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 1.25s forwards;
+    }
+
+    .imp-feature-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .imp-feature-row:last-child {
+      border-bottom: none;
+    }
+
+    .imp-feature-label {
+      font-size: 0.875rem;
+      color: #999;
+      font-weight: 500;
+    }
+
+    .imp-feature-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #6495c8;
+      text-align: right;
+    }
+
+    @media (max-width: 768px) {
+      .imp-guide {
+        padding: 48px 16px;
+      }
+
+      .imp-title {
+        font-size: 2rem;
+      }
+
+      .imp-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+
+      .imp-content {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .imp-stat-card {
+        padding: 24px 16px;
+      }
+
+      .imp-stat-number {
+        font-size: 2rem;
+      }
+
+      .imp-features {
+        padding: 24px 20px;
+      }
+    }
+  </style>
+
+  <div class="imp-container">
+    <div class="imp-header">
+      <span class="imp-eyebrow" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Guide</span>
+      <h2 class="imp-title">
+        <span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">数</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">字</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">で</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">わ</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">か</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">る</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">、</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">&nbsp;</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">み</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">ち</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">る</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">ワ</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">ー</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">ク</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">ス</span><span style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">。</span>
+      </h2>
+    </div>
+
+    <div class="imp-stats-grid">
+      <div class="imp-stat-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-stat-number" data-target="12" data-counted="true">12</div>
+        <div class="imp-stat-label">開設からの運営年数</div>
+      </div>
+      <div class="imp-stat-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-stat-number" data-target="348" data-counted="true">348</div>
+        <div class="imp-stat-label">累計利用者数</div>
+      </div>
+      <div class="imp-stat-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-stat-number" data-target="14" data-counted="true">14</div>
+        <div class="imp-stat-label">2025年度一般就労</div>
+      </div>
+      <div class="imp-stat-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-stat-label" style="font-size: 2rem; font-weight: 700; color: #6495c8; margin-bottom: 0;">週1日</div>
+        <div class="imp-stat-label">から利用相談OK</div>
+      </div>
+    </div>
+
+    <div class="imp-content">
+      <div class="imp-description" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <p>利用料は、世帯収入に応じて自己負担上限が決まります。仙台市では多くの方が自己負担0円で利用されています。受給者証の申請がこれからでも、区役所や相談支援事業所とのやり取りを一緒に進めます。</p>
+        <a href="#contact" class="imp-cta-button">制度のことも相談する <span class="imp-arrow">›</span></a>
+      </div>
+
+      <div class="imp-features" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-feature-row">
+          <span class="imp-feature-label">送迎</span>
+          <strong class="imp-feature-value">3ルート対応</strong>
+        </div>
+        <div class="imp-feature-row">
+          <span class="imp-feature-label">昼食</span>
+          <strong class="imp-feature-value">希望者に提供</strong>
+        </div>
+        <div class="imp-feature-row">
+          <span class="imp-feature-label">工賃平均</span>
+          <strong class="imp-feature-value">月23,400円</strong>
+        </div>
+        <div class="imp-feature-row">
+          <span class="imp-feature-label">見学時間</span>
+          <strong class="imp-feature-value">最短30分</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 数字カウントアップアニメーション
+    const countUpNumbers = document.querySelectorAll('.imp-stat-number[data-target]');
+    
+    const countUp = (element) => {
+      const target = parseInt(element.getAttribute('data-target'));
+      const duration = 2000;
+      const start = Date.now();
+      
+      const animate = () => {
+        const elapsed = Date.now() - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = Math.floor(progress * target);
+        element.textContent = current;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          element.textContent = target;
+        }
+      };
+      
+      animate();
+    };
+
+    // IntersectionObserverで要素が見えたときにカウントアップ開始
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const target = entry.target.querySelector('.imp-stat-number[data-target]');
+          if (target && !target.getAttribute('data-counted')) {
+            target.setAttribute('data-counted', 'true');
+            countUp(target);
+          }
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    countUpNumbers.forEach((num) => {
+      observer.observe(num.closest('.imp-stat-card'));
+    });
+
+    // 強制表示タイマー（3秒後）
+    setTimeout(() => {
+      countUpNumbers.forEach((num) => {
+        if (!num.getAttribute('data-counted')) {
+          num.setAttribute('data-counted', 'true');
+          countUp(num);
+        }
+      });
+    }, 3000);
+  </script>
+</section>
+
+  <section id="contact" class="imp-contact-section">
+  <style>
+    .imp-contact-section {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 50%, #f0f4f9 100%);
+      background-size: 200% 200%;
+      animation: imp-bg-shift 8s ease infinite;
+      padding: 80px 20px;
+    }
+
+    @keyframes imp-bg-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .imp-contact-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .imp-contact-header {
+      text-align: center;
+      margin-bottom: 60px;
+      position: relative;
+    }
+
+    .imp-contact-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .imp-contact-logo.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-logo-marks {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .imp-blob {
+      width: 10px;
+      height: 32px;
+      background: linear-gradient(180deg, #00a8e8 0%, #0088d4 100%);
+      border-radius: 5px;
+      animation: imp-blob-float 3s ease-in-out infinite;
+    }
+
+    .imp-blob:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .imp-blob:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .imp-blob:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes imp-blob-float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .imp-contact-header h2 {
+      font-size: 42px;
+      font-weight: 700;
+      color: #1a2332;
+      margin: 0 0 12px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .imp-header-desc {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.8;
+      margin: 0;
+      opacity: 0;
+      animation: imp-fade-in 0.8s ease forwards;
+      animation-delay: 0.3s;
+    }
+
+    @keyframes imp-fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .imp-main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .imp-info-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 16px rgba(26, 35, 50, 0.08);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(60px);
+      border: 1px solid rgba(0, 168, 232, 0.05);
+    }
+
+    .imp-info-card.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-info-card:nth-child(1) {
+      animation-delay: 0.15s;
+    }
+
+    .imp-info-card:nth-child(2) {
+      animation-delay: 0.3s;
+    }
+
+    .imp-info-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba(0, 168, 232, 0.12);
+      border-color: rgba(0, 168, 232, 0.15);
+    }
+
+    .imp-info-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #00a8e8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .imp-info-main {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a2332;
+      margin: 12px 0 16px 0;
+      line-height: 1.3;
+    }
+
+    .imp-info-sub {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .imp-reserve-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #00a8e8 0%, #0088d4 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 20px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 12px rgba(0, 168, 232, 0.24);
+      opacity: 0;
+      transform: scale(0.95);
+      align-self: end;
+    }
+
+    .imp-reserve-button.imp-is-visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .imp-reserve-button:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(0, 168, 232, 0.32);
+    }
+
+    .imp-reserve-button:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    .imp-schedule-section {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 16px rgba(26, 35, 50, 0.08);
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s;
+    }
+
+    .imp-schedule-section.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-schedule-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a2332;
+      margin: 0 0 24px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .imp-schedule-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(7, 1fr);
+      gap: 12px;
+      text-align: center;
+    }
+
+    .imp-schedule-header {
+      font-weight: 600;
+      font-size: 12px;
+      color: #1a2332;
+      padding: 12px 8px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+      border-radius: 8px;
+    }
+
+    .imp-schedule-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #00a8e8;
+      padding: 12px 8px;
+      text-align: right;
+      grid-column: 1;
+    }
+
+    .imp-schedule-cell {
+      padding: 12px 8px;
+      font-size: 20px;
+      color: #00a8e8;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .imp-schedule-cell.imp-open {
+      color: #00a8e8;
+      background: rgba(0, 168, 232, 0.08);
+    }
+
+    .imp-schedule-cell.imp-close {
+      color: #ccc;
+      background: transparent;
+    }
+
+    .imp-cta-banner {
+      background: linear-gradient(135deg, #00a8e8 0%, #0088d4 100%);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s;
+      box-shadow: 0 8px 24px rgba(0, 168, 232, 0.24);
+    }
+
+    .imp-cta-banner.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-cta-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: imp-pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes imp-pulse {
+      0%, 100% { transform: scale(0.8); }
+      50% { transform: scale(1.2); }
+    }
+
+    .imp-cta-banner-text {
+      position: relative;
+      z-index: 1;
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .imp-notes-section {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 16px rgba(26, 35, 50, 0.08);
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.75s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.75s;
+    }
+
+    .imp-notes-section.imp-is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .imp-notes-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .imp-notes-list li {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .imp-notes-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      width: 6px;
+      height: 6px;
+      background: #00a8e8;
+      border-radius: 50%;
+    }
+
+    @media (max-width: 768px) {
+      .imp-contact-section {
+        padding: 60px 20px;
+      }
+
+      .imp-contact-header h2 {
+        font-size: 28px;
+      }
+
+      .imp-main-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+
+      .imp-reserve-button {
+        align-self: auto;
+      }
+
+      .imp-schedule-grid {
+        grid-template-columns: 60px repeat(7, 1fr);
+        gap: 8px;
+      }
+
+      .imp-schedule-label {
+        font-size: 11px;
+      }
+
+      .imp-cta-banner {
+        padding: 24px;
+      }
+
+      .imp-cta-banner-text {
+        font-size: 16px;
+      }
+
+      .imp-info-card {
+        padding: 24px;
+      }
+
+      .imp-info-main {
+        font-size: 24px;
+      }
+    }
+  </style>
+
+  <div class="imp-contact-container">
+    <div class="imp-contact-header">
+      <div class="imp-contact-logo imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-logo-marks">
+          <div class="imp-blob"></div>
+          <div class="imp-blob"></div>
+          <div class="imp-blob"></div>
+        </div>
+      </div>
+      <h2>みちるワークス</h2>
+      <p class="imp-header-desc" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">〒980-0804 宮城県仙台市青葉区大町2-4-17<br>ファインビル3F / 022-246-2551</p>
+    </div>
+
+    <div class="imp-main-grid">
+      <div class="imp-info-card imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <span class="imp-info-label">見学・相談のお申込み</span>
+        <div class="imp-info-main">022-246-2551</div>
+        <p class="imp-info-sub">平日 9:30-17:30 / 土日祝休</p>
+      </div>
+
+      <a href="#" class="imp-reserve-button imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">見学予約<br>フォーム</a>
+    </div>
+
+    <div class="imp-schedule-section imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <h3 class="imp-schedule-title">営業時間</h3>
+      <div class="imp-schedule-grid">
+        <div class="imp-schedule-label">OPEN</div>
+        <div class="imp-schedule-header">月</div>
+        <div class="imp-schedule-header">火</div>
+        <div class="imp-schedule-header">水</div>
+        <div class="imp-schedule-header">木</div>
+        <div class="imp-schedule-header">金</div>
+        <div class="imp-schedule-header">土</div>
+        <div class="imp-schedule-header">日</div>
+
+        <div class="imp-schedule-label">10:00-12:00</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-close">—</div>
+        <div class="imp-schedule-cell imp-close">—</div>
+
+        <div class="imp-schedule-label">13:00-15:00</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-open">●</div>
+        <div class="imp-schedule-cell imp-close">—</div>
+        <div class="imp-schedule-cell imp-close">—</div>
+      </div>
+    </div>
+
+    <div class="imp-cta-banner imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <p class="imp-cta-banner-text">まずは見学だけでも、お気軽にお越しください</p>
+    </div>
+
+    <div class="imp-notes-section imp-is-visible" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <ul class="imp-notes-list">
+        <li>障害福祉サービス受給者証が未取得でもご相談いただけます。</li>
+        <li>仙台市営地下鉄東西線「大町西公園駅」徒歩4分、送迎は青葉区・若林区の一部に対応。</li>
+        <li>LINE相談は平日18:00まで。ご家族・支援者の同席見学も歓迎しています。</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('imp-is-visible');
+          }
+        });
+      }, observerOptions);
+
+      const elements = document.querySelectorAll(
+        '.imp-contact-logo, .imp-info-card, .imp-reserve-button, .imp-schedule-section, .imp-cta-banner, .imp-notes-section'
+      );
+
+      elements.forEach(function(el) {
+        observer.observe(el);
+      });
+
+      setTimeout(function() {
+        elements.forEach(function(el) {
+          el.classList.add('imp-is-visible');
+        });
+      }, 3000);
+    })();
+  </script>
+</section>
+
+  <footer class="container">
+    <div class="footer-inner">
+      <div>
+        <div style="margin-bottom:8px;">© Michiru Works</div>
+        <div>就労継続支援B型 / 仙台市青葉区大町2-4-17 ファインビル3F</div>
+      </div>
+      <div class="footer-nav">
+        <a href="#about">私たちについて</a>
+        <a href="#work">作業内容</a>
+        <a href="#flow">1日の流れ</a>
+        <a href="#guide">利用案内</a>
+        <a href="#contact">見学申込み</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+        }
+      });
+    },{threshold:.16});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  </script>
+
+
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+<div></div></body></html>

@@ -1098,14 +1098,14 @@ def api_swap_image():
     return jsonify({"ok": True, **result})
 
 
-def _run_edit_job(job_id: str, fn: str, section: int, instruction: str) -> None:
+def _run_edit_job(job_id: str, fn: str, section: int, instruction: str, keep_text: bool = False, style_type: str = "") -> None:
     """バックグラウンドでカンプを部分編集する（生成ジョブ一覧に相乗り）。"""
     try:
         _ep = config.CONFIG.htmlgen.edit_provider
         prov = {"openai": "GPT", "gemini": "Gemini", "deepseek": "DeepSeek"}.get(_ep, "Claude")
         scope = "全体" if section is None or section < 0 else f"セクション{section + 1}"
         _camp_set(job_id, phase=f"{prov}が{scope}を直しています…")
-        result = camp.edit_camp_section(fn, section, instruction)
+        result = camp.edit_camp_section(fn, section, instruction, keep_text=keep_text, style_type=style_type)
         _camp_set(job_id, state="done", **result)
     except Exception as exc:  # noqa: BLE001
         log.exception("部分編集に失敗")
@@ -1128,15 +1128,17 @@ def api_edit_camp():
         return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
     if not instruction:
         return jsonify({"ok": False, "message": "修正指示を入れてください"}), 400
+    keep_text = bool(data.get("keep_text"))  # ✨おしゃれ化など「中身は変えない」系＝テキスト保全ゲートON
+    style_type = str(data.get("style_type") or "").strip()[:40]  # 使った型名→data-cestyleで刻印（型のページ内重複防止）
     with _CAMP_LOCK:
         running = sum(1 for j in _CAMP_JOBS.values() if j.get("state") == "running")
         if running >= _CAMP_MAX:
             return jsonify({"ok": False, "message": f"同時処理は最大{_CAMP_MAX}件までです（少し待って）"}), 429
         job_id = uuid.uuid4().hex
         _CAMP_JOBS[job_id] = {"state": "running", "brief": f"部分編集: {instruction[:24]}", "phase": "開始しています…"}
-    log.info("部分編集ジョブ開始[%s]: %s section=%s / %s", job_id[:6], fn, section, instruction)
+    log.info("部分編集ジョブ開始[%s]: %s section=%s keep_text=%s style=%s / %s", job_id[:6], fn, section, keep_text, style_type, instruction)
     threading.Thread(
-        target=_run_edit_job, args=(job_id, fn, section, instruction), daemon=True
+        target=_run_edit_job, args=(job_id, fn, section, instruction, keep_text, style_type), daemon=True
     ).start()
     return jsonify({"ok": True, "job_id": job_id})
 
@@ -2321,17 +2323,103 @@ html.__ce_altmode{cursor:text}
     {k:'float',b:'ゆらゆら',d:'浮遊(ループ)',g:'loop',dir:'fy',sl:[{k:'amp',l:'ゆれ幅',min:4,max:40,def:12},{k:'dur',l:'速さ',min:1000,max:4000,def:2200,u:'ms'}]},
     {k:'bounce',b:'バウンド',d:'弾む(ループ)',g:'loop',dir:'by',sl:[{k:'amp',l:'高さ',min:6,max:50,def:18},{k:'dur',l:'速さ',min:600,max:2600,def:1200,u:'ms'}]}
   ];
-  // 「このセクションをおしゃれに」ボタンの一括指示。中身は保ちつつ質感だけ上げる。
-  var STYLE_INS='プロのWebデザイナーとして、このセクションの見た目を現代的で洗練された印象にブラッシュアップする。'
-    +'文言・画像・情報の中身は一切変えず、次の規律で質感だけ上げる：'
-    +'①余白は8pxの倍数（8/16/24/40/64px）で整え、見出しとその本文は近く・別の話題とは大きく空ける（近接の原則）。'
-    +'②タイポグラフィは階層を明確に：見出しは大きく太く（clamp()で流体に）、日本語本文は行間1.9前後・字間0.02em、本文の1行が長すぎればmax-widthで制御。'
-    +'③配色は既存のブランド色の範囲内で、アクセント色はCTAや強調ラベルだけに絞る。背景に極薄のブランド色ティントを敷くのは可。'
-    +'④影はブランド色寄りの柔らかい影（例 0 12px 32px rgba(ブランド色,0.12)）にし、真っ黒の強い影は使わない。角丸は既存と揃える。'
-    +'⑤紫グラデ・絵文字アイコン多用・均等カード化などのAIっぽい既視感は持ち込まない。'
-    +'レイアウトの骨格・順番・情報量は保ち、既存のクラス構造を活かす。'
+  // 「このセクションをおしゃれに」ボタンの一括指示。中身は保ちつつ誌面として作り直す。
+  // ★「角丸＋影＋等間隔」の箱揃えに逃げるのが修正AIの癖なので、レイアウトのメリハリを最優先で指示する。
+  // ★型をリストで並べてAIに選ばせると先頭（非対称グリッド）ばかり選ぶ癖がある
+  //   → ボタンを押すたびにJS側でランダムに1型だけ指定する（毎回違う仕上がりになる）。
+  // ★w=出やすさの重み。「箱が並ぶ」見た目が残る型（非対称/ずらし）は低め、
+  //   箱をやめる型（互い違い/横帯）を出やすく。前回と同じ型は連続で選ばない（localStorage記憶）。
+  var STYLE_TYPES=[
+    {n:'非対称グリッド',w:2,i:'主役1枚をgrid-column:span 2等で2倍幅にし、残りを脇に小さく置く。新着1件目・代表的な1件を主役に選ぶ。3つの同型カードが1行に等間隔で並ぶ構図は残さない'},
+    {n:'ずらし配置',w:1,i:'カードの大きさは活かしつつ、奇数番目と偶数番目でmargin-topを変えて段違いに置く（例 nth-child(even){margin-top:56px}）。さらにカードの幅か写真の高さも1枚ごとに変え、「同じ箱が3つ並んでいる」印象を消す'},
+    {n:'互い違い型',w:3,i:'カード並びをやめ、写真と文章を左右交互の段に組み直す（1段=1項目で縦に積む。1段目=写真左・文章右、2段目=写真右・文章左）。項目同士を横に並べない。写真は大きく、文章側に番号やラベルを添える'},
+    {n:'横帯リスト型',w:3,i:'カードをやめ、1行1項目の横帯に組み直す。罫線や大きな番号(01/02/03)で区切り、写真は小さなサムネイルとして行の端に置く'}
+  ];
+  // ★トップ（ヒーロー）専用の型。ユーザーが良例として挙げた過去カンプ2本の実CSSから型化
+  //   （camp_20260702_223653=青コラージュ / camp_20260703_003012=るわみ。数値は実物から採取）。
+  var HERO_TYPES=[
+    {n:'縦書きヒーロー',w:3,i:'2カラムgrid（コピー側minmax(330px,460px)／写真側1fr・align-items:center・min-height:min(100vh,860px)）。'
+      +'キャッチコピーはwriting-mode:vertical-rlの縦書き大見出し（clamp(40px,5vw,60px)・font-weight:800）にし、'
+      +'半透明の紙カード（background:rgba(255,255,255,.85)・角丸・ブランド色の柔らかい影）に載せる。'
+      +'写真は大きな角丸で反対側に置き、写真の角に小さなピル型バッジ（白地・11〜12pxの英字1〜2語・例 WARM SUPPORT）を1〜2個重ねる。'
+      +'背景はブランド色の極薄グラデにし、::before/::afterで白薄の円や角丸枠を1〜2個浮かせる（pointer-events:none・z-index:0・文字より背面）'},
+    {n:'コラージュヒーロー',w:2,i:'2カラムgrid（写真側1.3fr／コピー側.7fr・align-items:end）。'
+      +'写真側は、上に小さな正方形写真2〜3枚（aspect-ratio:1/1.08・border:3px solid #fff・角丸10px・gap:12px）を並べ、'
+      +'margin-bottom:-46pxで下の大きなメイン写真（width:min(720px,100%)・角丸18px）に差し込むように重ねる（この重なりが命）。'
+      +'コピー側は、writing-mode:vertical-rlの縦書きキャッチ（56px級・font-weight:800・薄い白のtext-shadow）＋'
+      +'小さな英字キッカー（11px・letter-spacing:.18em）＋本文2〜3行＋11px英字2行組の小ラベルを3個flexで並べる。'
+      +'背景は白か極薄のブランド色。箱を等間隔に整列させない'},
+    {n:'大見出し2カラム型',w:3,i:'左＝小さな英字キッカー（11px・letter-spacing:.18em）＋横書きの特大見出し'
+      +'（clamp(44px,6vw,72px)・ブランド色・font-weight:800・2〜3行）＋本文3行前後＋ボタン2つ（塗り＋枠線の2種）。'
+      +'右＝大きな写真1枚を、縦長の角丸パネル2〜3本（ブランド色の極薄・幅違い）のリズムの上に少しだけ重ねて置き、'
+      +'右端に短い縦書きの一言（writing-mode:vertical-rl・小さめ）を添える。'
+      +'見出しの背後にブランド色系の極薄グラデーション円を1つ大きく敷く（pointer-events:none・文字より背面）'}
+  ];
+  function pickStyleType(pool,storeKey,excl){
+    var last='';
+    try{ last=localStorage.getItem(storeKey)||''; }catch(e){}
+    var ng={}; (excl||[]).concat([last]).forEach(function(n){ if(n) ng[n]=1; });
+    var cand=pool.filter(function(t){return !ng[t.n];});
+    if(!cand.length) cand=pool.filter(function(t){return t.n!==last;});  // 全部使用済みなら連続だけ避ける
+    if(!cand.length) cand=pool;
+    var total=cand.reduce(function(s,t){return s+t.w;},0), r=Math.random()*total, t=cand[0];
+    for(var i=0;i<cand.length;i++){ r-=cand[i].w; if(r<=0){ t=cand[i]; break; } }
+    try{ localStorage.setItem(storeKey,t.n); }catch(e){}
+    return t;
+  }
+  function styleIns(sIdx){
+    // 1番目のセクション＝ファーストビューはヒーロー専用の型、それ以外はリスト系の4型
+    var hero=(Number(sIdx)<=0);
+    // ★ページ内で使用済みの型（サーバーが data-cestyle として刻印）は抽選から除外
+    //   ＝1セクションずつの編集でも「ページ全体が同じ表情」にならない
+    var used=[].slice.call(document.querySelectorAll('section[data-cestyle]'))
+      .map(function(s){return s.getAttribute('data-cestyle')||'';}).filter(Boolean);
+    var t=hero?pickStyleType(HERO_TYPES,'__ce_style_last_hero',used):pickStyleType(STYLE_TYPES,'__ce_style_last',used);
+    var usedNote=used.length?('★このページの他セクションでは既に【'+used.join('・')+'】の型を使用済み。'
+      +'同じ見た目・同じあしらいをページ内で繰り返さない（特に大きな番号01/02/03は使用済みなら使わない）。'):'';
+    return {t:t.n, ins:'プロのWebデザイナーとして、このセクションを「AIが整えた感」のない雑誌の誌面のように仕上げ直す。'
+    +'【絶対条件・最優先（1つでも破ったら失格）】'
+    +'(A)元のHTMLにある日本語テキストは、見出し・ラベル・説明文・電話番号まで**全文をそのまま新HTMLに残す**。'
+    +'要約・省略・英語への置き換えは禁止。飾りの英語ラベルを足すのは可だが、その分日本語を削るのは不可。'
+    +'特に各項目の説明文（段落）を落とすのが最頻の失敗。必ず残す。'
+    +'(B)文字色は背景との明暗差を最優先：薄い背景・薄いグラデの上に白文字は禁止（濃色#222等にする）。'
+    +'白文字を使ってよいのは十分に濃い背景の上だけ。'
+    +'(C)中身のない巨大な空白面・色面を作らない：各段の高さは写真と文章の量に合わせ、'
+    +'min-heightや過大なpaddingで引き伸ばさない。文章側が寂しければ元の説明文を大きめに組む（新しい文を発明しない）。'
+    +'(D)同じ形の箱・項目を**横に3つ以上並べない**（grid-template-columns:repeat(3,..)や3つ横並びのflex禁止。'
+    +'列は最大2列。例外は小さなタグ/英字ラベルだけ）。'
+    +'(E)写真やカードをposition/負マージンで重ねる時は、相手の**縁に40〜50pxだけ**触れる程度にする。'
+    +'写真の被写体や文字を覆い隠す大きな重なりは禁止。'
+    +(hero
+      ?'【レイアウトの組み替え】ここはページの顔（ファーストビュー）。今回は必ず【'+t.n+'】の構図に組み替える：'+t.i+'。'
+       +'★セクション全体の高さは**100vh前後（最大110vh）**に収める。要素を縦に積んで長くせず、'
+       +'2カラムの中に収まるよう各要素を小さくまとめる。中に項目リストがあっても3列に並べない。'
+       +'★ヒーローの固定ルール（施主の要望・必ず守る）：'
+       +'(あ)主役は「写真」と「キャッチコピー」の2つだけ。他の要素は大きさ・彩度を明確に落として脇役にする。'
+       +'(い)要素は2カラムに集約する。四隅に散らさない・中央に大きな空白を作らない。'
+       +'(う)余白はゆったり派＝要素の数を増やすより、1つ1つを大きく堂々と置く。'
+       +'(え)作業・プログラム紹介などのカード群がこのセクション内にある場合は、目立たせず'
+       +'最下部に小さな横1行の帯として畳む（文章は消さずに小さく）。細い縦長カードに文字を押し込まない。'
+       +'(お)縦書きにする場合は「ゃゅょっ」や句読点が行頭に来ない改行位置にし、はみ出して切れないか確認する。'
+       +'英単語は途中で改行しない（white-space:nowrapか十分な幅）。'
+      :'【レイアウトの組み替え】同じ大きさの箱が均等に並んでいるだけなら、今回は必ず【'+t.n+'】の型で組み替える：'+t.i+'。')
+    +'（この型がこのセクションの内容に物理的に合わない場合のみ＝例:項目が1つしか無い等、他の型に替えてよい）'
+    +usedNote
+    +'❌禁止：角丸と影を付けて等間隔に並べ直すだけの修正（それが最もAIっぽい）。全カード同じ大きさ・同じ形のまま終わらせない。'
+    +'【余白】8pxの倍数（8/16/24/40/64px）で整え、見出しとその本文は近く・別の話題とは大きく空ける（近接の原則）。'
+    +'【タイポグラフィ】階層を明確に：見出しは大きく太く（clamp()で流体に）、日本語本文は行間1.9前後・字間0.02em、長い行はmax-widthで制御。日付やカテゴリ等のメタ情報は小さく淡く。'
+    +'【配色】既存のブランド色の範囲内。アクセント色はCTAや強調ラベルだけに絞る。背景に極薄のブランド色ティントを敷くのは可（その場合も文字は濃色）。'
+    +'【あしらい】ブランド色寄りの柔らかい影（例 0 12px 32px rgba(ブランド色,0.12)）。真っ黒の強い影は禁止。線・番号・小さな英語ラベルなど、雰囲気に合う小物を1つ効かせる。'
+    +'【禁じ手】紫グラデ・絵文字アイコン多用・左右対称の繰り返し。'
+    +'セクションの順番・情報量は保つ。組み替えに必要ならこのセクション内のHTML構造は変えてよい。'
     +'html.jsが付いた時だけ初期非表示にする保険を入れ、JSが無くても中身が見える状態を保つ。'
-    +'★このセクションだけに適用し、他のセクションや他の要素は一切変えない。';
+    +'★このセクションだけに適用し、他のセクションや他の要素は一切変えない。'
+    +'【出力前セルフチェック（全部YESになるまで出力しない）】'
+    +'(1)元の日本語テキストが全文残っているか（説明文の消失が最頻の失敗） '
+    +'(2)元の画像が全て残り、潰れず表示されるか（枠はoverflow:hidden＋imgはobject-fit:cover） '
+    +'(3)全ての文字が背景色に対して読めるコントラストか '
+    +'(4)中身のない巨大な色面・空白面ができていないか。1つでもNOなら組み替えを簡素化してでも中身の表示を優先する。'};
+  }
   fetch('/api/camp_sections?file='+encodeURIComponent(FILE)).then(function(r){return r.json();}).then(function(d){
     (d.sections||[]).forEach(function(s){var o=document.createElement('option');o.value=s.index;o.textContent=(s.index+1)+'. '+s.label;sec.appendChild(o);});
   }).catch(function(){});
@@ -2384,7 +2472,7 @@ html.__ce_altmode{cursor:text}
     try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(_){}
   }
   function clearSectionBusy(){ if(_busyEl){ _busyEl.classList.remove('__ce_busy'); _busyEl=null; } }
-  function submit(section,instruction){
+  function submit(section,instruction,keepText,styleType){
     if(!instruction){msg.textContent='指示が空です';return;}
     // ページ全体(-1)は"全文を書き直す"＝高い(数十円)・遅い。特定箇所なら安い(数円)。
     if(Number(section)<0){
@@ -2395,7 +2483,7 @@ html.__ce_altmode{cursor:text}
     //   AIはファイルを読んで直すので、保存しないと「以前の状態」に対してかかり手修正が戻ってしまう。
     flushThen(function(){
       msg.textContent='生成中…';
-      fetch('/api/edit_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:Number(section),instruction:instruction})})
+      fetch('/api/edit_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:Number(section),instruction:instruction,keep_text:keepText?1:0,style_type:styleType||''})})
       .then(function(r){return r.json();}).then(function(d){
         if(!d.ok){msg.textContent='失敗：'+d.message;busy(false);hideToast();clearSectionBusy();return;}
         poll(d.job_id);
@@ -2412,14 +2500,22 @@ html.__ce_altmode{cursor:text}
         cb();
       }).catch(function(){ cb(); });  // 保存に失敗しても処理は続ける（最悪でも従来どおり）
   }
-  function poll(id){
+  function poll(id,miss){
+    miss=miss||0;
+    // ★ジョブが見つからない状態が続く＝サーバー再起動でジョブが消えた（幽霊トースト）。
+    //   永遠に回さず、10回（約12秒）で諦めてユーザーに伝える。
+    if(miss>=10){
+      msg.textContent='⚠ ジョブが見つかりません。サーバーが再起動されて処理が消えた可能性があります。もう一度実行してください';
+      setToast('⚠ 処理が中断されました（もう一度どうぞ）'); setTimeout(hideToast,3500);
+      busy(false); clearSectionBusy(); return;
+    }
     fetch('/api/generate_camp/status').then(function(r){return r.json();}).then(function(d){
       var j=(d.jobs||{})[id];
-      if(!j){setTimeout(function(){poll(id);},1200);return;}
-      if(j.state==='running'){msg.textContent=(j.phase||'生成中…');setToast(j.phase||'AIが直しています…');setTimeout(function(){poll(id);},1200);}
+      if(!j){setTimeout(function(){poll(id,miss+1);},1200);return;}
+      if(j.state==='running'){msg.textContent=(j.phase||'生成中…');setToast(j.phase||'AIが直しています…');setTimeout(function(){poll(id,0);},1200);}
       else if(j.state==='done'){setToast('✅ できました。開きます…');msg.textContent='できました。開きます…';location.href='/camp/'+j.file;}
       else{msg.textContent='失敗：'+(j.message||'');busy(false);hideToast();clearSectionBusy();}
-    }).catch(function(){setTimeout(function(){poll(id);},1500);});
+    }).catch(function(){setTimeout(function(){poll(id,miss+1);},1500);});
   }
   go.addEventListener('click',function(){submit(sec.value,inp.value.trim());});
   sg.addEventListener('click',function(){
@@ -3726,7 +3822,7 @@ html.__ce_altmode{cursor:text}
     var all=[].slice.call(document.querySelectorAll('section')).filter(function(x){return !x.closest('#__ce');});
     return all.indexOf(s);
   }
-  function applyEl(sIdx, instruction){ closeMenu(); box.classList.remove('min'); submit(sIdx, instruction); }
+  function applyEl(sIdx, instruction, keepText, styleType){ closeMenu(); box.classList.remove('min'); submit(sIdx, instruction, keepText, styleType); }
   // 掴んだ要素が「1文字ずつ分割されたspan」などインラインの断片なら、
   // 内包する見出し/段落などのブロックまで親を上る（見出し全体をまとめて選べる）。
   function pickTarget(el){
@@ -3937,7 +4033,19 @@ html.__ce_altmode{cursor:text}
       var v=m.querySelector('#__ce_cmin').value.trim(); if(v) editElement(curEl, v);
     });
     var stBtn=m.querySelector('#__ce_cmstyle');
-    if(stBtn) stBtn.addEventListener('click',function(){ applyEl(sIdx, STYLE_INS); });
+    if(stBtn) stBtn.addEventListener('click',function(){
+      // ★おしゃれ化は必ずセクション単位。特定できない時（ヘッダー等セクション外）は
+      //   ページ全体編集（高額・全書き直し）に落とさず、その場で中止する。
+      var i=Number(sIdx);
+      if(!(i>=0)){
+        closeMenu();
+        msg.textContent='⚠ ここはセクション外（ヘッダー/フッター等）なので一括おしゃれ化は使えません。直したいセクションの中身を右クリックしてください';
+        showToast('セクションの中で右クリックしてね'); setTimeout(hideToast,2600);
+        return;
+      }
+      var o=styleIns(i);
+      applyEl(i, o.ins, 1, o.t);
+    });
     var brBtn=m.querySelector('#__ce_cmbr');
     if(brBtn) brBtn.addEventListener('click',function(){ openBreakEditor(curEl); });
     // 🖍 この文字にマーカー：選択がいらない版。右クリックした要素の中身を .fxa_hl で丸ごと囲む

@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AOI DENTAL CLINIC｜おしゃれな歯医者のランディングページ</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-soft:#f2fbfd;
+      --bg-gray:#f4f4f4;
+      --text:#061b23;
+      --white:#fff;
+      --accent:#165e83;
+      --accent-soft:#dff2f8;
+      --line:#cfe4ea;
+      --shadow:0 12px 32px rgba(22,94,131,.10);
+      --radius-sm:10px;
+      --radius-lg:60px;
+      --container:1180px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.15rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Zen Maru Gothic", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", 游ゴシック, YuGothic, Meiryo, "MS PGothic", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 15%, rgba(150,220,240,.14), transparent 14%),
+        radial-gradient(circle at 92% 24%, rgba(130,200,225,.18), transparent 12%),
+        radial-gradient(circle at 82% 72%, rgba(180,225,240,.14), transparent 14%),
+        linear-gradient(#fff,#fff);
+      overflow-x:hidden;
+      line-height:2;
+      letter-spacing:.02em;
+    }
+    a{text-decoration:none;color:inherit}
+    img{max-width:100%;display:block}
+    .container{width:min(var(--container),calc(100% - 48px));margin:0 auto}
+    .section{
+      position:relative;
+      min-height:100vh;
+      padding:10vh 0;
+      display:flex;
+      align-items:center;
+      overflow:hidden;
+    }
+    .section.soft{background:var(--bg-soft)}
+    .section.gray{background:var(--bg-gray)}
+    .eyebrow{
+      font-size:.82rem;
+      font-weight:700;
+      color:var(--accent);
+      letter-spacing:.08em;
+      margin-bottom:16px;
+      display:inline-block;
+    }
+    h1,h2,h3,p{margin:0}
+    h1{
+      font-size:var(--hero);
+      line-height:1.35;
+      letter-spacing:.04em;
+      font-weight:700;
+    }
+    h2{
+      font-size:var(--section);
+      line-height:1.38;
+      letter-spacing:.04em;
+      font-weight:700;
+      margin-bottom:24px;
+    }
+    h3{
+      font-size:var(--sub);
+      line-height:1.5;
+      font-weight:700;
+      margin-bottom:12px;
+    }
+    p,li,dt,dd{
+      font-size:var(--body);
+      line-height:2;
+    }
+    .lead,.copy{max-width:38em}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      min-width:212px;
+      padding:14px 18px 14px 22px;
+      border-radius:999px;
+      background:var(--accent);
+      color:#fff;
+      font-size:.92rem;
+      font-weight:700;
+      box-shadow:var(--shadow);
+      transition:transform .25s ease, box-shadow .25s ease, background .2s ease;
+    }
+    .btn:hover{transform:translateY(-3px); box-shadow:0 18px 40px rgba(22,94,131,.16)}
+    .btn .dot{
+      width:28px;height:28px;border-radius:50%;
+      background:#fff;color:var(--accent);
+      display:grid;place-items:center;
+      font-size:.9rem;line-height:1;
+      flex:0 0 auto;
+    }
+    .blob{
+      position:absolute;
+      background:rgba(140,215,237,.55);
+      filter:blur(.2px);
+      z-index:0;
+    }
+    .blob.b1{width:130px;height:90px;left:4%;top:14%;border-radius:57% 43% 47% 53% / 51% 39% 61% 49%;}
+    .blob.b2{width:160px;height:110px;right:8%;top:18%;border-radius:61% 39% 58% 42% / 45% 60% 40% 55%;}
+    .blob.b3{width:200px;height:140px;left:-2%;bottom:14%;border-radius:62% 38% 45% 55% / 46% 56% 44% 54%;opacity:.42}
+    .blob.b4{width:180px;height:120px;right:-1%;bottom:12%;border-radius:49% 51% 65% 35% / 47% 35% 65% 53%;opacity:.42}
+    .dotted-path{
+      position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.55;
+    }
+    .dotted-path:before{
+      content:"";
+      position:absolute;
+      left:14%;
+      top:8%;
+      width:72%;
+      height:86%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(22,94,131,.14) 0 2px, transparent 2.5px) 0 0/18px 18px;
+      mask:
+        radial-gradient(220px 180px at 18% 12%, transparent 42%, #000 43%) ,
+        radial-gradient(240px 220px at 80% 40%, transparent 42%, #000 43%),
+        radial-gradient(260px 200px at 25% 72%, transparent 42%, #000 43%),
+        radial-gradient(200px 180px at 78% 82%, transparent 42%, #000 43%);
+      -webkit-mask:
+        radial-gradient(220px 180px at 18% 12%, transparent 42%, #000 43%) ,
+        radial-gradient(240px 220px at 80% 40%, transparent 42%, #000 43%),
+        radial-gradient(260px 200px at 25% 72%, transparent 42%, #000 43%),
+        radial-gradient(200px 180px at 78% 82%, transparent 42%, #000 43%);
+      filter:blur(.2px);
+    }
+
+    header.site-header{
+      position:absolute; inset:0 0 auto 0; z-index:20;
+      padding:20px 28px;
+    }
+    .header-inner{
+      width:min(100%, calc(var(--container) + 56px));
+      margin:0 auto;
+      display:flex; align-items:flex-start; justify-content:space-between;
+    }
+    .brand-mark{
+      width:118px;height:118px;
+      background:var(--accent);
+      color:#fff;border-radius:0 0 64px 0;
+      padding:20px 18px;
+      display:flex;align-items:flex-start;justify-content:flex-start;
+      font-size:.82rem;line-height:1.2;font-weight:700;letter-spacing:.24em;
+    }
+    .brand-mark span{display:block}
+    .hero-nav{
+      writing-mode:vertical-rl;
+      display:flex; gap:18px;
+      font-size:.74rem;
+      letter-spacing:.12em;
+      margin-top:6px;
+    }
+    .hero-nav a{
+      padding:6px 0;
+      color:var(--text);
+      opacity:.9;
+      transition:opacity .2s ease, transform .25s ease;
+    }
+    .hero-nav a:hover{opacity:1; transform:translateY(-2px)}
+    .hero-grid{
+      position:relative; z-index:2;
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      align-items:center;
+      gap:56px;
+      width:100%;
+    }
+    .hero-copy{padding-top:84px}
+    .hero-photo-wrap{
+      position:relative;
+      min-height:560px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .hero-photo{
+      width:min(100%,560px);
+      aspect-ratio:1.12/1;
+      overflow:hidden;
+      border-radius:48% 52% 43% 57% / 39% 52% 48% 61%;
+      background:
+        linear-gradient(135deg, rgba(244,244,244,1), rgba(214,239,246,.85));
+      position:relative;
+    }
+    .hero-photo img{
+      width:100%;height:100%;object-fit:cover;
+      transform:scale(1.04);
+    }
+    .hero-badge{
+      position:absolute;
+      right:8%;
+      bottom:16%;
+      width:106px;height:106px;
+      border-radius:50%;
+      background:#28a7d7;
+      color:#fff;
+      display:grid;place-items:center;
+      text-align:center;
+      font-size:.8rem;
+      line-height:1.45;
+      box-shadow:0 0 0 4px rgba(255,255,255,.9), 0 0 0 6px rgba(22,94,131,.22);
+    }
+    .hero-badge svg{width:22px;height:22px;margin:0 auto 6px;display:block}
+    .hero-actions{margin-top:40px}
+    .hero-copy .lead{margin-top:24px}
+
+    .strip-gallery{
+      min-height:auto;
+      padding:24px 0 16px;
+    }
+    .thumb-row{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:20px;
+      align-items:center;
+    }
+    .thumb{
+      background:linear-gradient(135deg, #edf8fb, #f4f4f4);
+      border-radius:8px;
+      overflow:hidden;
+      aspect-ratio:1/1;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover}
+
+    .service-grid{
+      position:relative; z-index:2;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:72px;
+      width:100%;
+    }
+    .service-card{
+      display:grid;
+      grid-template-rows:auto auto 1fr auto;
+      align-content:start;
+    }
+    .service-card .service-en{
+      font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:6px
+    }
+    .service-card h3{
+      font-size:1.5rem;
+      margin-bottom:24px;
+    }
+    .service-image{
+      position:relative;
+      overflow:hidden;
+      border-radius:14px;
+      aspect-ratio:1.28/1;
+      background:linear-gradient(135deg,#e9f7fb,#f4f4f4);
+      margin-bottom:20px;
+    }
+    .service-image img{width:100%;height:100%;object-fit:cover}
+    .service-card ul{
+      margin:0 0 24px 1.1em;
+      padding:0;
+    }
+    .service-card li{margin:4px 0}
+    .caption-card{
+      position:absolute;
+      right:-20px; bottom:-20px;
+      background:#fff;
+      border-radius:12px;
+      padding:14px 16px;
+      box-shadow:var(--shadow);
+      max-width:210px;
+      line-height:1.7;
+      font-size:.84rem;
+    }
+    .service-image:after{
+      content:"";
+      position:absolute;
+      right:-18px; bottom:-22px;
+      width:120px;height:120px;border-radius:50%;
+      background:rgba(140,215,237,.45);
+      filter:blur(22px);
+      z-index:0;
+    }
+    .service-image .caption-card{z-index:2}
+
+    .news-wrap{
+      width:min(760px, 100%);
+      margin:0 auto;
+      text-align:left;
+      position:relative; z-index:2;
+    }
+    .center-title{
+      text-align:center;
+      margin-bottom:56px;
+    }
+    .center-title .eyebrow{display:block;margin-bottom:12px}
+    .news-list{
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+    }
+    .news-item{
+      display:grid;
+      grid-template-columns:120px 120px 1fr;
+      gap:16px;
+      align-items:center;
+      padding:18px 0;
+      border-top:1px solid rgba(22,94,131,.12);
+    }
+    .news-item:first-child{border-top:none}
+    .date{font-size:.84rem;color:rgba(6,27,35,.72)}
+    .label{
+      display:inline-flex;justify-content:center;align-items:center;
+      min-height:26px;padding:0 10px;
+      background:var(--accent);color:#fff;
+      border-radius:999px;font-size:.76rem;font-weight:700;
+      width:max-content;
+    }
+    .news-link{font-size:.95rem}
+
+    .insta-section .container{position:relative; z-index:2}
+    .insta-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:0;
+      width:min(760px,100%);
+      margin-top:24px;
+      overflow:hidden;
+    }
+    .insta-item{
+      aspect-ratio:1/1;
+      background:linear-gradient(135deg,#eaf6fa,#f2f2f2);
+      position:relative;
+      overflow:hidden;
+    }
+    .insta-item img{width:100%;height:100%;object-fit:cover}
+    .insta-item:after{
+      content:"";
+      position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(6,27,35,.12), transparent 40%);
+    }
+
+    .contact-band{
+      min-height:auto;
+      padding:12vh 0 11vh;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(244,244,244,1) 100%);
+    }
+    .contact-band .ghost-title{
+      position:absolute;
+      top:52px; left:50%; transform:translateX(-50%);
+      font-size:clamp(2.5rem,6vw,4.8rem);
+      color:rgba(6,27,35,.05);
+      font-weight:700;
+      letter-spacing:.06em;
+      pointer-events:none;
+    }
+    .contact-copy{
+      text-align:center;
+      max-width:760px;
+      margin:0 auto 40px;
+      position:relative; z-index:2;
+    }
+    .contact-actions{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:18px;
+      position:relative; z-index:2;
+    }
+    .contact-box{
+      background:var(--accent);
+      color:#fff;
+      border-radius:8px;
+      padding:16px 18px;
+      min-height:74px;
+      display:flex; align-items:center; justify-content:center; gap:12px;
+      text-align:center;
+      box-shadow:var(--shadow);
+      transition:transform .25s ease, box-shadow .25s ease;
+    }
+    .contact-box:hover{transform:translateY(-3px); box-shadow:0 18px 40px rgba(22,94,131,.16)}
+    .contact-box svg{width:22px;height:22px;flex:0 0 auto}
+    .contact-note{text-align:center;margin-top:10px;font-size:.82rem;color:rgba(6,27,35,.66)}
+
+    footer{
+      background:#fff;
+      padding:72px 0 28px;
+      position:relative;
+    }
+    .footer-inner{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:64px;
+      align-items:start;
+    }
+    .footer-brand{
+      display:flex; gap:18px; align-items:flex-start;
+    }
+    .footer-logo{
+      color:var(--accent);
+      font-weight:700;
+      letter-spacing:.2em;
+      font-size:.72rem;
+      line-height:1.3;
+      margin-top:4px;
+    }
+    .footer-clinic{
+      font-size:1.35rem;font-weight:700;margin-bottom:12px
+    }
+    .footer-address p{line-height:1.9}
+    .footer-nav{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px 28px;
+      font-size:.92rem;
+    }
+    .footer-nav a{color:var(--text); opacity:.9}
+    .footer-bottom{
+      display:flex; justify-content:space-between; gap:16px;
+      border-top:1px solid rgba(22,94,131,.14);
+      margin-top:40px; padding-top:18px;
+      font-size:.78rem; color:rgba(6,27,35,.7)
+    }
+
+    .reveal{}
+    html.js .reveal{opacity:0; transform:translateY(36px)}
+    html.js .reveal.in{
+      opacity:1; transform:none;
+      transition:opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1);
+    }
+    html.js .stagger > *{opacity:0; transform:translateY(28px)}
+    html.js .stagger.in > *{
+      opacity:1; transform:none;
+      transition:opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
+    }
+    html.js .stagger.in > *:nth-child(1){transition-delay:.04s}
+    html.js .stagger.in > *:nth-child(2){transition-delay:.12s}
+    html.js .stagger.in > *:nth-child(3){transition-delay:.2s}
+    html.js .stagger.in > *:nth-child(4){transition-delay:.28s}
+    html.js .stagger.in > *:nth-child(5){transition-delay:.36s}
+    html.js .stagger.in > *:nth-child(6){transition-delay:.44s}
+
+    .hero-animate{
+      animation:opening_logo_in 1.05s ease-out both;
+    }
+    .hero-figure-animate{
+      animation:opening_bird_in 1.6s cubic-bezier(.16,1,.3,1) both;
+    }
+    .wash{
+      position:absolute; inset:auto auto 8% -4%;
+      width:220px;height:160px;border-radius:58% 42% 64% 36% / 48% 44% 56% 52%;
+      background:rgba(140,215,237,.34);
+      animation:opening_wash_in 1.8s cubic-bezier(.16,1,.3,1) both;
+      z-index:0;
+    }
+
+    @keyframes opening_wash_in{
+      0%{opacity:0;transform:scale(.3) rotate(-8deg)}
+      55%{opacity:.82}
+      100%{opacity:.55;transform:scale(1.35) rotate(3deg)}
+    }
+    @keyframes opening_bird_in{
+      0%{opacity:0;filter:blur(.8rem);transform:translate(-8rem,-3rem) rotate(-10deg) scale(.82)}
+      60%{opacity:1;filter:blur(0)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes opening_logo_in{
+      0%{opacity:0;filter:blur(1rem);transform:translateY(1.5rem) scale(.94)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+
+    @media (max-width: 960px){
+      .section{min-height:auto;padding:88px 0}
+      .hero-grid,.service-grid,.footer-inner{grid-template-columns:1fr}
+      .hero-copy{padding-top:110px}
+      .hero-photo-wrap{min-height:auto}
+      .hero-badge{right:4%;bottom:8%}
+      .thumb-row{grid-template-columns:repeat(3,1fr)}
+      .insta-grid{grid-template-columns:repeat(2,1fr)}
+      .contact-actions{grid-template-columns:1fr}
+      .news-item{grid-template-columns:1fr;gap:8px}
+      .hero-nav{display:none}
+    }
+    @media (max-width: 640px){
+      .container{width:min(100% - 32px, var(--container))}
+      header.site-header{padding:16px}
+      .brand-mark{width:88px;height:88px;padding:14px 12px;border-radius:0 0 48px 0}
+      .thumb-row{grid-template-columns:repeat(2,1fr);gap:14px}
+      .service-grid{gap:56px}
+      .caption-card{
+        position:static;margin-top:12px;max-width:none
+      }
+      .service-image:after{display:none}
+      .footer-nav{grid-template-columns:1fr}
+      .contact-band .ghost-title{top:26px}
+    }
+  </style>
+</head>
+<body style="">
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#" class="brand-mark" aria-label="AOI DENTAL CLINIC" data-cebt="" data-cesx="2.1433744511190014" data-cesy="1.771561000000001" style="translate: -148px 34px !important; rotate: 0deg !important; scale: 2.14337 1.77156 !important; transform-origin: center center !important;" data-cetx="-148" data-cety="34">
+        <span>A<br>O<br>I<br>&nbsp;<br>D<br>E<br>N<br>T</span>
+      </a>
+      <nav class="hero-nav" aria-label="主要メニュー">
+        <a href="#about">初めての方へ</a>
+        <a href="#care">診療案内</a>
+        <a href="#news">お知らせ</a>
+        <a href="#gallery">院内風景</a>
+        <a href="#contact">ご予約</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="top">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <div class="blob b4"></div>
+      <div class="dotted-path" style=""></div>
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-copy hero-animate in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+            <div class="eyebrow">Top / 駅前3分の歯科クリニック</div>
+            <h1>歯医者に行く日が、<br>少し楽しみになる。</h1>
+            <p class="lead">
+              AOI DENTAL CLINICは、渋谷区代々木で開院12年。<br>
+              予防歯科・審美治療・マウスピース矯正を中心に、
+              平日20:00まで、土曜も18:00まで診療しています。<br>
+              白さや機能だけではなく、待ち時間の短さ、静かな空気、
+              相談しやすい説明まで整えた、やわらかな歯科医院です。
+            </p>
+            <div class="hero-actions">
+              <a class="btn" href="#contact">初診の予約をする <span class="dot">›</span></a>
+            </div>
+          </div>
+          <div class="hero-photo-wrap hero-figure-animate in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+            <div class="wash"></div>
+            <div class="hero-photo">
+              <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="歯科医師と患者の穏やかなカウンセリング風景" width="860" height="760" onerror="this.style.display='none'">
+            </div>
+            <a href="#contact" class="hero-badge" aria-label="見学と相談を予約">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M3 11.5 12 4l9 7.5"></path>
+                  <path d="M6.5 10.5V20h11V10.5"></path>
+                </svg>
+                初診・相談<br>ご予約
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="strip-gallery">
+      <div class="container">
+        <div class="thumb-row stagger reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="thumb" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_81a4abcdaa.png" alt="明るい受付空間" width="240" height="240" onerror="this.style.display='none'"></div>
+          <div class="thumb" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="待合のコーヒー" width="240" height="240" onerror="this.style.display='none'"></div>
+          <div class="thumb" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="問診票を書く手元" width="240" height="240" onerror="this.style.display='none'"></div>
+          <div class="thumb" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_48d9130f53.png" alt="個室でのカウンセリング" width="240" height="240" onerror="this.style.display='none'"></div>
+          <div class="thumb" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_5ad70dab05.png" alt="院内の観葉植物" width="240" height="240" onerror="this.style.display='none'"></div>
+          <div class="thumb" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="清潔感のある入口" width="240" height="240" onerror="this.style.display='none'"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="care">
+      <div class="blob b3" style="left:-3%;top:18%;bottom:auto;"></div>
+      <div class="blob b4" style="right:-3%;bottom:14%;"></div>
+      <div class="dotted-path" style=""></div>
+      <div class="container">
+        <div class="service-grid stagger reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <article class="service-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="service-en">support</div>
+            <h3>初めて受診したい</h3>
+            <div class="service-image">
+              <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="清潔感のある歯科クリニックの入口" width="720" height="560" onerror="this.style.display='none'">
+              <div class="caption-card">「説明が早すぎない」<br>それだけで安心できる。<br>— 初診担当 歯科衛生士</div>
+            </div>
+            <ul>
+              <li>痛みが苦手でも通いやすい、やさしい初診導線</li>
+              <li>レントゲン・口腔内写真で見える説明</li>
+              <li>代々木駅西口から徒歩3分、予約優先制</li>
+            </ul>
+            <div><a class="btn" href="#contact">初診予約をする <span class="dot">›</span></a></div>
+          </article>
+
+          <article class="service-card" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="service-en">business</div>
+            <h3>見た目まで整えたい</h3>
+            <div class="service-image">
+              <img src="http://127.0.0.1:5000/uploads/up_89535d79bc.png" alt="タブレットを見ながら相談するスタッフ" width="720" height="560" onerror="this.style.display='none'">
+            </div>
+            <ul>
+              <li>ホワイトニング、セラミック、マウスピース矯正に対応</li>
+              <li>仕事帰りでも通える平日20:00までの診療</li>
+              <li>治療回数と費用の目安を最初に共有</li>
+            </ul>
+            <div><a class="btn" href="#contact">審美相談をする <span class="dot">›</span></a></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="news">
+      <div class="container">
+        <div class="news-wrap reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="center-title">
+            <span class="eyebrow">News / お知らせ</span>
+            <h2>診療時間や空き状況、<br>今月のご案内</h2>
+          </div>
+          <div class="news-list">
+            <div class="news-item">
+              <div class="date">2026.07.02</div>
+              <div class="label">診療日変更</div>
+              <a href="#" class="news-link">7月21日（火）は院内研修のため17:30最終受付となります</a>
+            </div>
+            <div class="news-item">
+              <div class="date">2026.06.26</div>
+              <div class="label">初診受付</div>
+              <a href="#" class="news-link">平日18:00以降の初診枠を4枠追加しました</a>
+            </div>
+            <div class="news-item">
+              <div class="date">2026.06.18</div>
+              <div class="label">新メニュー</div>
+              <a href="#" class="news-link">オフィスホワイトニングの60分コースを開始しました</a>
+            </div>
+          </div>
+          <div style="text-align:center; margin-top:32px;">
+            <a class="btn" href="#">もっと見る <span class="dot">›</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section insta-section" id="gallery">
+      <div class="blob b1" style="left:6%;top:68%;"></div>
+      <div class="dotted-path" style=""></div>
+      <div class="container">
+        <div class="reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="width: min(760px, 100%); margin: 0px auto; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <span class="eyebrow">Instagram / 院内風景</span>
+          <h2>器具の清潔さも、<br>日々の空気も見えるように。</h2>
+          <div class="insta-grid stagger in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+            <div class="insta-item" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_81a4abcdaa.png" alt="明るいオフィス空間" width="320" height="320" onerror="this.style.display='none'"></div>
+            <div class="insta-item" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_5ad70dab05.png" alt="室内の植物" width="320" height="320" onerror="this.style.display='none'"></div>
+            <div class="insta-item" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="待合で出すドリンク" width="320" height="320" onerror="this.style.display='none'"></div>
+            <div class="insta-item" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="説明資料を準備する手元" width="320" height="320" onerror="this.style.display='none'"></div>
+          </div>
+          <div style="margin-top:24px;">
+            <a class="btn" href="#">もっと見る <span class="dot">›</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-band section" id="contact">
+      <div class="ghost-title" style="">CONTACT</div>
+      <div class="dotted-path" style=""></div>
+      <div class="container">
+        <div class="contact-copy reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <span class="eyebrow">Contact / ご予約・ご相談</span>
+          <h2>ひとりで悩まず、見た目・体験・費用まで<br>お気軽にご相談ください。</h2>
+          <p class="copy" style="margin:0 auto;">
+            はじめての方も、すでに治療中で転院を迷っている方も、ホワイトニングを検討中の方も。<br>
+            渋谷区代々木1-18-6 AOI Terrace 2Fにて、カウンセリングから丁寧にご案内します。
+          </p>
+        </div>
+        <div class="contact-actions stagger reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a class="contact-box" href="#" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M4 5h16v10H8l-4 4V5z"></path>
+            </svg>
+            LINEで予約
+          </a>
+          <a class="contact-box" href="#" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 6v6l4 2"></path>
+              <circle cx="12" cy="12" r="9"></circle>
+            </svg>
+            初診・無料相談
+          </a>
+          <a class="contact-box" href="tel:03-6456-7233" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M5 4h4l2 5-2.5 1.5a16 16 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"></path>
+            </svg>
+            03-6456-7233
+          </a>
+        </div>
+        <div class="contact-note">受付時間｜平日 10:00–20:00 / 土曜 10:00–18:00</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-brand">
+            <div class="footer-logo">A O I<br>D E N T</div>
+            <div>
+              <div class="footer-clinic">AOI DENTAL CLINIC / アオイデンタルクリニック</div>
+              <div class="footer-address">
+                <p>
+                  〒151-0053 東京都渋谷区代々木1-18-6 AOI Terrace 2F<br>
+                  代々木駅西口 徒歩3分 / 南新宿駅 徒歩4分<br>
+                  TEL 03-6456-7233
+                </p>
+                <p>
+                  診療時間｜平日 10:00–13:30 / 15:00–20:00<br>
+                  土曜 10:00–13:00 / 14:00–18:00　休診日｜日曜・祝日
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <nav class="footer-nav" aria-label="フッターナビ">
+          <a href="#top">ホーム</a>
+          <a href="#contact">お問い合わせ</a>
+          <a href="#care">診療案内</a>
+          <a href="#">よくあるご質問</a>
+          <a href="#">初めての方へ</a>
+          <a href="#">スタッフ紹介</a>
+          <a href="#news">お知らせ</a>
+          <a href="#">料金表</a>
+          <a href="#gallery">院内風景</a>
+          <a href="#">個人情報保護方針</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 AOI DENTAL CLINIC</span>
+        <span>Web予約は24時間受付中</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function(){
+      const targets = document.querySelectorAll('.reveal, .stagger');
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            entry.target.classList.add('in');
+            io.unobserve(entry.target);
+          }
+        });
+      },{threshold:.16, rootMargin:'0px 0px -8% 0px'});
+      targets.forEach(el=>io.observe(el));
+    })();
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div></body></html>
