@@ -13,6 +13,7 @@ DesignEmbedder() を作って .load() したとき（または初回エンコー
 from __future__ import annotations
 
 import os
+import threading
 
 # ★ torch を import する前に設定する（Windows対策・絶対にここで）。
 #   torch同梱のOpenMP(libiomp5md.dll)が numpy/MKL 等の別OpenMPと二重ロードされると、
@@ -59,6 +60,9 @@ class DesignEmbedder:
         self._processor = None
         self._device: Optional[str] = None
         self._dim: Optional[int] = None
+        # 二重読み込み防止（バックグラウンド先読みと初回検索が同時に走った時、
+        # 2つ同時に読むとメモリピークが倍＝このPCでは即クラッシュするため）
+        self._load_lock = threading.Lock()
 
     @property
     def model_name(self) -> str:
@@ -74,7 +78,16 @@ class DesignEmbedder:
         return self._dim
 
     def load(self) -> None:
-        """モデルとプロセッサを読み込む（数秒〜・初回はDLが走る）。"""
+        """モデルとプロセッサを読み込む（数秒〜・初回はDLが走る）。
+
+        鍵付き＝同時に呼ばれても実際に読むのは1回だけ（後から来た方は完了を待つ）。
+        """
+        if self._model is not None:
+            return
+        with self._load_lock:
+            self._load_inner()
+
+    def _load_inner(self) -> None:
         if self._model is not None:
             return
         import torch

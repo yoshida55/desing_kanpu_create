@@ -1634,6 +1634,8 @@ html.__ce_altmode{cursor:text}
 #__ce_rate .rt{width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;background:#3a3a3f;color:#bbb;cursor:pointer;font-size:14px;font-weight:700}
 #__ce_rate .rt:hover{background:#55555c;color:#fff}
 #__ce_rate .rt.on{background:#ff9a3c;color:#fff}
+#__ce_rate.done .rt{display:none}
+#__ce_rate.done .rt.on{display:inline-block}
 #__ce_toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:2147483004;background:#1d1d1f;color:#fff;border-radius:14px;padding:15px 24px;box-shadow:0 16px 44px rgba(0,0,0,.42);font-family:system-ui,sans-serif;min-width:320px;max-width:92vw;text-align:center}
 #__ce_toast .bar{height:7px;background:#43434a;border-radius:4px;overflow:hidden;margin-bottom:9px}
 #__ce_toast .bar span{display:block;height:100%;width:35%;background:#ff9a3c;border-radius:4px;animation:__ce_flow 1.2s ease-in-out infinite}
@@ -1670,6 +1672,7 @@ html.__ce_altmode{cursor:text}
     <div class="lbl">✍ 自分で指示</div>
     <div class="row"><input id="__ce_in" placeholder="例：見出しを大きく／CTAを黄色に"><button class="go" id="__ce_go">直す</button></div>
     <button class="im" id="__ce_img">🖼 画像を差し替え（AIなし・無料）</button>
+    <button class="im" id="__ce_align" title="各セクションの中身の幅を測り、多数派の幅にそろえます。全幅セクションや明らかに違う幅は触りません">📐 横幅をそろえる（AIなし・無料）</button>
     <div class="lbl plain">🎨 一括改善の手本（ストックの登録サイトに寄せる）</div>
     <select id="__ce_ref"><option value="">なし（AIおまかせ）</option></select>
     <button class="im" id="__ce_improve" style="background:#7c3aed;color:#fff">🚀 ページ全体を今風に（一括改善）</button>
@@ -2058,15 +2061,21 @@ html.__ce_altmode{cursor:text}
   });
   var undoBtn=document.getElementById('__ce_undo');
   if(undoBtn) undoBtn.addEventListener('click',function(ev){ ev.stopPropagation(); undoStep(); });
-  // ◎○△✖評価＝手本ごとのハズレ率集計の教師データ。同じのをもう一度押すと解除
+  // ◎○△✖評価＝手本ごとのハズレ率集計の教師データ。
+  // 評価すると選んだマークだけ残して畳む（邪魔にしない）。そのマークを押すと開いて変更・解除できる
   var rateBox=document.getElementById('__ce_rate');
-  function paintRate(v){ [].forEach.call(rateBox.querySelectorAll('.rt'),function(b){ b.classList.toggle('on', b.dataset.r===v); }); }
+  function paintRate(v){
+    [].forEach.call(rateBox.querySelectorAll('.rt'),function(b){ b.classList.toggle('on', b.dataset.r===v); });
+    rateBox.classList.toggle('done', !!v);
+  }
   if(rateBox){
     fetch('/api/camp_rate?file='+encodeURIComponent(FILE)).then(function(r){return r.json();})
       .then(function(d){ paintRate(d.rating||''); }).catch(function(){});
     rateBox.addEventListener('click',function(ev){
       var b=ev.target.closest('.rt'); if(!b) return;
       ev.stopPropagation();  // ヘッダの開閉トグルに食われない
+      // 畳まれた状態でマークを押したら＝開くだけ（変更・解除のため）
+      if(rateBox.classList.contains('done')){ rateBox.classList.remove('done'); return; }
       fetch('/api/camp_rate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,rating:b.dataset.r})})
       .then(function(r){return r.json();}).then(function(d){
         if(d.ok){ paintRate(d.rating); setToast(d.rating?('評価を保存: '+d.rating):'評価を解除しました'); setTimeout(hideToast,1200); }
@@ -2436,6 +2445,66 @@ html.__ce_altmode{cursor:text}
     if(box.classList.contains('min')) box.classList.remove('min');
   }
   imgBtn.addEventListener('click',function(){ setImgMode(!imgMode); });
+  // 📐 横幅をそろえる（AIなし）：各セクションの「中身の器」の幅を測り、多数派の幅に統一する。
+  // ・全幅（ページ幅の93%以上）＝意図的な全幅背景/帯なので触らない
+  // ・多数派から30%以上ズレている箱＝意図的に狭い/広い（とっておく）
+  // ・画像そのものは器として扱わない（飛ばす）
+  function innerBox(s){
+    var pageW=document.documentElement.clientWidth, pick=null;
+    function scan(kids){
+      [].forEach.call(kids,function(k){
+        if(k.nodeType!==1||k.tagName==='IMG'||k.closest('#__ce')) return;
+        var w=k.getBoundingClientRect().width;
+        if(w>0 && w<pageW*0.93 && (!pick||w>pick.w)) pick={el:k,w:w};
+      });
+    }
+    scan(s.children);
+    if(!pick){ [].forEach.call(s.children,function(k){ if(k.nodeType===1) scan(k.children); }); }  // 直下が全部全幅ラッパーなら1段降りる
+    return pick;
+  }
+  var alignBtn=document.getElementById('__ce_align');
+  if(alignBtn) alignBtn.addEventListener('click',function(){
+    var secs=[].slice.call(document.querySelectorAll('section')).filter(function(x){return !x.closest('#__ce');});
+    var items=[];
+    secs.forEach(function(s){ var p=innerBox(s); if(p) items.push(p); });
+    if(items.length<2){ msg.textContent='そろえられるセクションが2つ未満でした（全幅構成のようです）'; return; }
+    // 多数派の幅＝20px刻みの最頻値
+    var buckets={};
+    items.forEach(function(it){ var k=Math.round(it.w/20)*20; buckets[k]=(buckets[k]||0)+1; });
+    var target=+Object.keys(buckets).sort(function(a,b){ return buckets[b]-buckets[a]; })[0];
+    function applyW(el){
+      el.style.setProperty('width','min('+target+'px, calc(100% - 48px))','important');
+      el.style.setProperty('max-width','none','important');
+      el.style.setProperty('margin-left','auto','important');
+      el.style.setProperty('margin-right','auto','important');
+    }
+    var fixed=0, kept=0;
+    items.forEach(function(it){
+      var diff=Math.abs(it.w-target);
+      if(diff<=6) return;                       // もう揃っている
+      if(diff>target*0.3){ kept++; return; }    // 明らかに違う幅＝意図的なのでとっておく
+      applyW(it.el); fixed++;
+    });
+    // 2段目：器が全幅に壊れているセクション（width:100%上書き事故など）を救う。
+    // 中身に文章がある全幅の直下ボックスを基準幅に矯正（背景はsection側に残るので全幅のまま）
+    secs.forEach(function(s){
+      var p=innerBox(s); if(p) return;  // 1段目で器が見つかったセクションは対象外
+      var pageW=document.documentElement.clientWidth;
+      [].some.call(s.children,function(k){
+        if(k.nodeType!==1||k.tagName==='IMG'||k.closest('#__ce')) return false;
+        var cs=getComputedStyle(k);
+        if(cs.position==='absolute'||cs.position==='fixed') return false;
+        var w=k.getBoundingClientRect().width;
+        var hasText=(k.textContent||'').replace(/\s+/g,'').length>30;
+        if(w>=pageW*0.93 && hasText){ applyW(k); fixed++; return true; }
+        return false;
+      });
+    });
+    if(fixed) markDirty();
+    msg.textContent = fixed
+      ? ('📐 '+fixed+'個のセクションを幅'+target+'pxにそろえました'+(kept?('。'+kept+'個は明らかに違う幅なのでそのまま'):'')+'（💾保存で確定・⟲で戻せます）')
+      : ('すでに全部そろっています（基準幅 '+target+'px'+(kept?('・意図的に違う'+kept+'個はそのまま'):'')+'）');
+  });
   document.addEventListener('click',function(e){
     if(!imgMode) return;
     var im=e.target.closest('img'); if(!im||im.closest('#__ce')||im.closest('#__ce_pk')) return;
@@ -4098,11 +4167,27 @@ def video(site_id: str):
 
 
 def serve(host: str = "127.0.0.1", port: int = 5000, preload: bool = True) -> None:
-    """ビューアを起動する。preload=True で起動時にモデルを読み込んでおく。"""
+    """ビューアを起動する。preload=True で起動時にモデルを読み込んでおく。
+
+    preload=False（--no-preload・このPCの推奨）でも、起動して少し経ったら
+    バックグラウンドでこっそり読み込む＝初回検索の「遅い」を体感ゼロに近づける。
+    読み込みがメモリ不足で失敗しても握りつぶす（従来どおり初回検索時に再挑戦される）。
+    """
     db.init_db()
     if preload:
         log.info("モデルを先読みします（起動後の初回検索を速くするため）…")
         _EMBEDDER.load()
+    else:
+        def _warmup():
+            import time as _time
+            _time.sleep(5)  # まず画面を開ける方を優先。落ち着いてから読み込む
+            try:
+                log.info("モデルをバックグラウンドで先読み中…（初回検索を速くするため）")
+                _EMBEDDER.load()
+                log.info("モデル先読み完了。検索はすぐ返ります")
+            except Exception:  # noqa: BLE001
+                log.exception("バックグラウンド先読みに失敗（初回検索時に再挑戦します）")
+        threading.Thread(target=_warmup, daemon=True).start()
     log.info("ビューア起動: http://%s:%d  （Ctrl+C で停止）", host, port)
     # Flask開発サーバは POST + keep-alive で接続が切れて「Failed to fetch」になりやすい。
     # 頑丈な waitress（本番品質のWSGIサーバ）で配信する。複数スレッドで並行処理もOK。
