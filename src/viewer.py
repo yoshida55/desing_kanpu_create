@@ -23,7 +23,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, assets, camp, clone, config, db, embed, export_split, ingest, motion, search, style_check, vibe
+from . import anim, assets, camp, clone, config, db, embed, export_split, ingest, motion, quality, search, style_check, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -1006,6 +1006,15 @@ def _run_camp_job(job_id: str, brief: str, base_site_id: str, anim_ref_id: str =
             base_site_id=base_site_id or None,
             anim_ref_id=anim_ref_id or None,
         )
+        # 仕上がりチェック（薄い出力＝ハズレ回の検出）。警告はカードに出すだけで生成は止めない
+        _camp_set(job_id, phase="仕上がりをチェック中…")
+        q = quality.check_camp(result["file"])
+        if q.get("warn"):
+            result["quality_warn"] = q["warn"]
+        # どの手本でどんな仕上がりだったかを記録に残す
+        # （手本ごとのハズレ率が見えてきたら「選んだ瞬間の事前警告」に使う予定）
+        quality.log_result(result["file"], base_site_id, anim_ref_id,
+                           result.get("model", ""), q)
         _camp_set(job_id, state="done", **result)
     except Exception as exc:  # noqa: BLE001
         log.exception("カンプ生成に失敗")
@@ -1291,6 +1300,41 @@ def api_camp_name():
     return jsonify({"ok": True, "name": info.get("name", ""), "fav": bool(info.get("fav"))})
 
 
+@app.route("/api/camp_rate", methods=["POST"])
+def api_camp_rate():
+    """カンプにユーザー評価（◎○△✖）を付ける。同じ評価をもう一度押すと解除。
+
+    評価は品質ログ(_quality_log.json)に載り、手本ごとのハズレ率集計に使われる。
+    """
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    rating = (data.get("rating") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    if quality.get_rating(fn) == rating:
+        rating = ""  # 同じ評価をもう一度＝解除
+    if not quality.set_rating(fn, rating):
+        return jsonify({"ok": False, "message": "評価は ◎ ○ △ ✖ のどれかです"}), 400
+    return jsonify({"ok": True, "rating": rating})
+
+
+@app.route("/api/camp_rate")
+def api_camp_rate_get():
+    """カンプの現在の評価を返す（編集バーの初期表示用）。"""
+    fn = (request.args.get("file") or "").strip()
+    return jsonify({"ok": True, "rating": quality.get_rating(fn)})
+
+
+@app.route("/api/base_stats")
+def api_base_stats():
+    """手本（ベース）ごとの過去実績（◎○△✖と自動判定NG）を返す。選択時のヒント用。"""
+    base_id = (request.args.get("base_id") or "").strip()
+    if not base_id:
+        return jsonify({"ok": True, "note": ""})
+    return jsonify({"ok": True, **quality.base_stats(base_id)})
+
+
 @app.route("/api/save_favorite", methods=["POST"])
 def api_save_favorite():
     """現在の完成形DOM（見た目＋焼き込んだ動き）を『お気に入り』として複製保存する。
@@ -1411,6 +1455,23 @@ def api_pair_fit():
     else:
         label = f"相性△ {score:.2f}：雰囲気がだいぶ違うので、動きは控えめに翻訳されます（種類のヒントだけ借ります）"
     return jsonify({"ok": True, "score": score, "label": label})
+
+
+@app.route("/api/pair_fit_all")
+def api_pair_fit_all():
+    """ベースに対する全サイトの相性スコアを一括で返す（アニメ選択の並び替え用）。"""
+    base_id = (request.args.get("base") or "").strip()
+    if not base_id:
+        return jsonify({"ok": True, "scores": {}})
+    scores = {}
+    with db.connect() as conn:
+        rows = conn.execute("SELECT id FROM site").fetchall()
+    for r in rows:
+        s = camp.pair_fit_score(base_id, r["id"])
+        if s is not None:
+            scores[r["id"]] = round(s, 3)
+    return jsonify({"ok": True, "scores": scores,
+                    "near": camp._FIT_NEAR, "far": camp._FIT_FAR})
 
 
 @app.route("/api/camp_sections")
@@ -1569,6 +1630,10 @@ html.__ce_altmode{cursor:text}
 .__ceax_pulse{animation:__ceax_pulse 1.6s ease-in-out infinite}
 .__ceax_float{animation:__ceax_float 2.4s ease-in-out infinite}
 .__ceax_bounce{animation:__ceax_bounce 1.2s ease infinite}
+#__ce_rate{display:inline-flex;gap:4px;margin:0 4px;align-items:center}
+#__ce_rate .rt{width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;background:#3a3a3f;color:#bbb;cursor:pointer;font-size:14px;font-weight:700}
+#__ce_rate .rt:hover{background:#55555c;color:#fff}
+#__ce_rate .rt.on{background:#ff9a3c;color:#fff}
 #__ce_toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:2147483004;background:#1d1d1f;color:#fff;border-radius:14px;padding:15px 24px;box-shadow:0 16px 44px rgba(0,0,0,.42);font-family:system-ui,sans-serif;min-width:320px;max-width:92vw;text-align:center}
 #__ce_toast .bar{height:7px;background:#43434a;border-radius:4px;overflow:hidden;margin-bottom:9px}
 #__ce_toast .bar span{display:block;height:100%;width:35%;background:#ff9a3c;border-radius:4px;animation:__ce_flow 1.2s ease-in-out infinite}
@@ -1580,7 +1645,7 @@ html.__ce_altmode{cursor:text}
 @keyframes __ce_busypulse{0%,100%{outline-color:#7c3aed}50%{outline-color:#d3bef7}}
 </style>
 <div id="__ce" class="min">
-  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span class="x" id="__ce_homeh" style="background:#2b6cb0" title="ツール（ホーム）に戻る">🏠 ホーム</span><span class="sv" id="__ce_undo" style="background:#555;opacity:.4" title="ひとつ前に戻す">⟲ 戻す</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">▲ ひらく</span></div>
+  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span id="__ce_rate" title="このカンプの出来を評価（手本ごとのハズレ率集計に使われます）"><span class="rt" data-r="◎">◎</span><span class="rt" data-r="○">○</span><span class="rt" data-r="△">△</span><span class="rt" data-r="✖">✖</span></span><span class="x" id="__ce_homeh" style="background:#2b6cb0" title="ツール（ホーム）に戻る">🏠 ホーム</span><span class="sv" id="__ce_undo" style="background:#555;opacity:.4" title="ひとつ前に戻す">⟲ 戻す</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">▲ ひらく</span></div>
   <div class="bd">
     <button class="im" id="__ce_home" style="background:#eef2f7;color:#1d1d1f;border:1px solid #d6deea;font-weight:700">🏠 ツール（ホーム）に戻る</button>
     <div class="lbl plain">🎨 ベース色（テーマ色・AIなし・ページ全体に反映）</div>
@@ -1993,6 +2058,21 @@ html.__ce_altmode{cursor:text}
   });
   var undoBtn=document.getElementById('__ce_undo');
   if(undoBtn) undoBtn.addEventListener('click',function(ev){ ev.stopPropagation(); undoStep(); });
+  // ◎○△✖評価＝手本ごとのハズレ率集計の教師データ。同じのをもう一度押すと解除
+  var rateBox=document.getElementById('__ce_rate');
+  function paintRate(v){ [].forEach.call(rateBox.querySelectorAll('.rt'),function(b){ b.classList.toggle('on', b.dataset.r===v); }); }
+  if(rateBox){
+    fetch('/api/camp_rate?file='+encodeURIComponent(FILE)).then(function(r){return r.json();})
+      .then(function(d){ paintRate(d.rating||''); }).catch(function(){});
+    rateBox.addEventListener('click',function(ev){
+      var b=ev.target.closest('.rt'); if(!b) return;
+      ev.stopPropagation();  // ヘッダの開閉トグルに食われない
+      fetch('/api/camp_rate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,rating:b.dataset.r})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d.ok){ paintRate(d.rating); setToast(d.rating?('評価を保存: '+d.rating):'評価を解除しました'); setTimeout(hideToast,1200); }
+      }).catch(function(){});
+    });
+  }
   var esc=function(s){return String(s||'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});};
   // ①のドロップダウン(sec)で選ばれたセクション要素を返す（ページ全体=-1ならnull）
   function curSecEl(){

@@ -336,6 +336,8 @@
     }
     .camp_job.is_done { background: #f2f9f2; border-color: #cfe9cf; }
     .camp_job.is_err { background: #fdf2f2; border-color: #f0cccc; color: #b00; }
+    .camp_job.is_warn { background: #fff8ec; border-color: #f0ddb0; color: #8a5a00; }
+    .camp_job.is_warn .cj_close { float: right; border: 0; background: none; cursor: pointer; color: #b08a3a; font-size: 14px; }
     .camp_job_bar { height: 0.6rem; background: #f0e3d4; border-radius: 0.3rem; overflow: hidden; margin-bottom: 0.5rem; }
     .camp_job_bar span {
       display: block; height: 100%; width: 35%; background: #b8530a; border-radius: 0.3rem;
@@ -1889,9 +1891,17 @@
         const sec = Math.floor((Date.now() - start) / 1000);
         let el = document.getElementById("cj_" + id);
         // 完了したジョブはカードを残さない（自動でカンプを開く＋履歴に入る）。進行中とエラーだけ表示。
+        // ただし品質チェックの警告（内容が薄い＝ハズレ回）が付いた完了は、警告カードとして残す。
         if (j.state === "done") {
           if (!_campOpened[id]) { _campOpened[id] = 1; window.open("/camp/" + j.file, "campview"); loadCampHistory(); }
-          if (el) el.remove();
+          if (j.quality_warn) {
+            if (!el) { el = document.createElement("div"); el.id = "cj_" + id; campJobs.prepend(el); }
+            el.className = "camp_job is_warn";
+            if (el.dataset.state !== "done") {
+              el.dataset.state = "done";
+              el.innerHTML = `<button class="cj_close" title="閉じる">✕</button>${_esc(j.quality_warn)}　<a href="/camp/${j.file}" target="campview" rel="noopener">確認する</a>`;
+            }
+          } else if (el) { el.remove(); }
           delete _campLocal[id];
           return;
         }
@@ -1906,6 +1916,8 @@
     }
     // 改善案・自由指示・チップ適用（ジョブ一覧内のクリックをまとめて受ける）
     campJobs.addEventListener("click", async (e) => {
+      const wClose = e.target.closest(".cj_close");
+      if (wClose) { wClose.closest(".camp_job").remove(); return; }
       const sBtn = e.target.closest(".camp_suggest_btn");
       if (sBtn) { loadSuggestions(sBtn); return; }
       const chip = e.target.closest(".sugg_chip");
@@ -1979,15 +1991,17 @@
       function build() {
         const grid = document.querySelector(o.grid);
         if (!grid) return;
-        const sites = window._campSites || [];
-        const none = `<div class="base_card" data-id=""><div class="base_card_rand">${o.noneIcon}</div><div class="base_card_body"><div class="base_card_name">${o.noneName}</div><div class="base_card_vibe">${o.noneDesc}</div></div></div>`;
+        const sites = o.getSites ? o.getSites() : (window._campSites || []);
+        const none = `<div class="base_card" data-id=""><div class="base_card_rand">${o.noneIcon}</div><div class="base_card_body"><div class="base_card_name">${o.noneName}</div><div class="base_card_vibe">${o.noneDesc}</div></div></div>`
+          + (o.extraCard ? o.extraCard() : "");
         const cards = sites.map((s) => {
           const name = _esc(shorten(s.url));
           const vibe = _esc((s.vibe || "").slice(0, 60));
           const sw = (s.swatches && s.swatches.length)
             ? `<div class="base_card_sw">${s.swatches.slice(0, 5).map((c) => `<span style="background:${c}"></span>`).join("")}</div>` : "";
           const thumb = s.img ? `<img class="base_card_thumb" src="${s.img}" alt="" loading="lazy">` : `<div class="base_card_rand">🖼</div>`;
-          return `<div class="base_card" data-id="${s.site_id}">${thumb}<div class="base_card_body"><div class="base_card_name">${name}</div><div class="base_card_vibe">${vibe}</div>${sw}</div></div>`;
+          const badge = o.badge ? o.badge(s) : "";
+          return `<div class="base_card" data-id="${s.site_id}">${thumb}<div class="base_card_body"><div class="base_card_name">${name}</div><div class="base_card_vibe">${vibe}</div>${sw}${badge}</div></div>`;
         }).join("");
         grid.innerHTML = none + cards;
       }
@@ -2014,7 +2028,7 @@
       const overlay = document.querySelector(o.overlay);
       if (trigger && overlay) {
         const close = () => overlay.classList.remove("is_open");
-        trigger.addEventListener("click", () => { build(); sync(); overlay.classList.add("is_open"); });
+        trigger.addEventListener("click", async () => { if (o.preBuild) await o.preBuild(); build(); sync(); overlay.classList.add("is_open"); });
         document.querySelector(o.close).addEventListener("click", close);
         overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
         document.querySelector(o.grid).addEventListener("click", (e) => {
@@ -2034,22 +2048,65 @@
       const b = document.querySelector("#camp_base").value;
       const a = document.querySelector("#camp_anim").value;
       if (!b || !a) return;  // 両方選ばれた時だけ出す
+      if (b === a) { campState.textContent = "🅰 ベース自身の動きを使います（相性の翻訳なし・そのまま採用）。"; return; }
       try {
         const d = await fetch(`/api/pair_fit?base=${encodeURIComponent(b)}&anim=${encodeURIComponent(a)}`).then((r) => r.json());
         if (d.label) campState.textContent = d.label;
       } catch (e) { /* 相性表示は飾りなので失敗しても黙る */ }
     }
+    // 手本の過去実績（◎○△✖の集計）を選んだ瞬間にヒント表示。ハズレ率が高い手本は⚠が付く
+    async function updateBaseStats() {
+      const b = document.querySelector("#camp_base").value;
+      if (!b) return;
+      try {
+        const d = await fetch(`/api/base_stats?base_id=${encodeURIComponent(b)}`).then((r) => r.json());
+        if (d.note) campState.textContent = (campState.textContent ? campState.textContent + "　" : "") + d.note;
+      } catch (e) { /* 実績表示も飾り。失敗しても黙る */ }
+    }
     const basePicker = createSitePicker({
       sel: "#camp_base", thumb: "#cbt_thumb", label: "#cbt_label",
       trigger: "#camp_base_trigger", overlay: "#base_overlay", grid: "#base_grid", close: "#base_close",
       noneIcon: "🎲", noneName: "おまかせ", noneDesc: "ブリーフから自動で選びます", noneLabel: "おまかせ（ブリーフから自動選択）",
-      onPick: updatePairFit,
+      onPick: async () => { campState.textContent = ""; await updatePairFit(); await updateBaseStats(); },
     });
+    // アニメ選択：ベースが選ばれていたら相性順に並び替え＋◎○△バッジを付ける
+    let _fitScores = null, _fitNear = 0.635, _fitFar = 0.56;
     const animPicker = createSitePicker({
       sel: "#camp_anim", thumb: "#cat_thumb", label: "#cat_label",
       trigger: "#camp_anim_trigger", overlay: "#anim_overlay", grid: "#anim_grid", close: "#anim_close",
       noneIcon: "✨", noneName: "なし", noneDesc: "標準のふわっと出現", noneLabel: "なし（標準のふわっと出現）",
       onPick: updatePairFit,
+      // ベースが選択済みなら「🅰 ベースと同じ」カードを先頭に出す（1クリックでベース自身の動きを採用）
+      extraCard: () => {
+        const b = document.querySelector("#camp_base").value;
+        if (!b) return "";
+        const site = (window._campSites || []).find((s) => s.site_id === b);
+        if (!site) return "";
+        const thumb = site.img ? `<img class="base_card_thumb" src="${site.img}" alt="" loading="lazy">` : `<div class="base_card_rand">🅰</div>`;
+        return `<div class="base_card" data-id="${b}">${thumb}<div class="base_card_body"><div class="base_card_name">🅰 ベースと同じ</div><div class="base_card_vibe">このサイト自身の動きをそのまま使う</div></div></div>`;
+      },
+      preBuild: async () => {
+        _fitScores = null;
+        const b = document.querySelector("#camp_base").value;
+        if (!b) return;
+        try {
+          const d = await fetch(`/api/pair_fit_all?base=${encodeURIComponent(b)}`).then((r) => r.json());
+          if (d.ok && d.scores && Object.keys(d.scores).length) {
+            _fitScores = d.scores; _fitNear = d.near; _fitFar = d.far;
+          }
+        } catch (e) { /* 相性は飾り。失敗したら普通の並びで出すだけ */ }
+      },
+      getSites: () => {
+        const sites = (window._campSites || []).slice();
+        if (!_fitScores) return sites;
+        return sites.sort((a, b2) => (_fitScores[b2.site_id] ?? -1) - (_fitScores[a.site_id] ?? -1));
+      },
+      badge: (s) => {
+        if (!_fitScores || _fitScores[s.site_id] == null) return "";
+        const sc = _fitScores[s.site_id];
+        const [mark, col] = sc >= _fitNear ? ["◎", "#1a7f37"] : sc >= _fitFar ? ["○", "#9a6700"] : ["△", "#999"];
+        return `<div style="font-size:11px;margin-top:2px;color:${col}">相性${mark} ${sc.toFixed(2)}</div>`;
+      },
     });
 
     // イベント：ボタン・Enter・「似てる」ボタン（カードは動的生成なので親で受ける）

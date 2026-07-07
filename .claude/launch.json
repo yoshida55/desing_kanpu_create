@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "viewer",
+      "runtimeExecutable": "venv/Scripts/python.exe",
+      "runtimeArgs": ["cli.py", "serve", "--no-preload"],
+      "port": 5000
+    }
+  ]
+}

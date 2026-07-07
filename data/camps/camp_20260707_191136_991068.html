@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Re:Metal Works | 精密板金・試作製作</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-tint:#f1ece9;
+      --text:#282b2d;
+      --muted:#6e6b65;
+      --line:rgba(49,54,57,.16);
+      --line-strong:rgba(49,54,57,.3);
+      --card:#ffffff;
+      --shadow:0 5.9616px 15.8976px rgba(28,34,38,.05);
+      --shadow-strong:0 16px 32px rgba(40,43,45,.12);
+      --radius:6.9552px;
+      --container:1232px;
+      --accent:#282b2d;
+      --metal:#87919a;
+      --hero-grad:linear-gradient(120deg, rgba(255,255,255,.04), rgba(49,54,57,.12));
+      --soft-grad:linear-gradient(135deg, rgba(180,190,198,.14), rgba(241,236,233,.7));
+      --cta-grad:radial-gradient(circle at 20% 20%, rgba(187,212,229,.55), transparent 32%),
+                 radial-gradient(circle at 80% 10%, rgba(215,227,190,.6), transparent 28%),
+                 linear-gradient(180deg, #e9efe9 0%, #dce9d9 50%, #d4e9b7 100%);
+      --section-pad:10vh;
+      --hero-size:clamp(2.2rem,5vw,3.6rem);
+      --section-size:clamp(1.6rem,3vw,2.4rem);
+      --sub-size:1.14rem;
+      --body-size:.98rem;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif}
+    body{line-height:1.95;font-size:var(--body-size);letter-spacing:.01em}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(var(--container),calc(100% - 48px));margin:0 auto}
+    .section{
+      position:relative;
+      min-height:100vh;
+      padding:var(--section-pad) 0;
+      display:flex;
+      align-items:center;
+    }
+    .section.tint{background:var(--bg-tint)}
+    .section-line{padding-top:24px;border-top:1px solid rgba(110,107,101,.18)}
+    .section-head{
+      display:flex;justify-content:space-between;align-items:flex-end;
+      margin-bottom:40px;color:var(--muted);font-size:.78rem
+    }
+    .label{
+      display:flex;align-items:center;gap:8px;letter-spacing:.04em
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:#9cc779;display:inline-block}
+    .jp-title{
+      margin:0 0 16px;
+      font-size:var(--section-size);
+      line-height:1.35;
+      letter-spacing:.03em;
+      font-weight:500;
+      max-width:11em;
+    }
+    .lead{
+      margin:0;
+      color:var(--muted);
+      max-width:38em;
+      font-size:var(--body-size);
+    }
+    .eyebrow{font-size:.78rem;letter-spacing:.08em;color:var(--muted);text-transform:none}
+    .btn{
+      display:inline-flex;align-items:center;gap:16px;
+      background:#fff;border:1px solid rgba(49,54,57,.12);
+      color:var(--text);padding:12px 18px;border-radius:4px;
+      box-shadow:var(--shadow);font-size:.86rem;line-height:1;
+      transition:.35s ease;
+      min-width:150px;justify-content:space-between
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-strong)}
+    .btn .arrow{font-size:.8rem;opacity:.8}
+    .hero{
+      min-height:100vh;padding:0;background:#d9ddd8;overflow:hidden
+    }
+    .hero-media{
+      position:absolute;inset:0;
+      background:
+        linear-gradient(90deg, rgba(40,43,45,.42) 0%, rgba(40,43,45,.1) 36%, rgba(40,43,45,.02) 70%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.18));
+    }
+    .hero-media img{
+      width:100%;height:100%;object-fit:cover;filter:saturate(.82) contrast(1.02) brightness(.9);
+      transform:scale(1.04);
+    }
+    .hero-inner{
+      position:relative;z-index:2;display:flex;align-items:flex-end;height:100vh;
+      padding:36px 0 28px;
+    }
+    .hero-copy{color:#fff;max-width:760px}
+    .hero-topline{font-size:.82rem;letter-spacing:.06em;margin-bottom:20px;opacity:.92}
+    .hero-kicker{font-size:.86rem;letter-spacing:.05em;margin-bottom:8px;opacity:.95}
+    .hero-title{
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:var(--hero-size);line-height:1.04;letter-spacing:.01em;
+      font-weight:400;margin:0 0 18px
+    }
+    .hero-meta{
+      display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
+      color:rgba(255,255,255,.86);font-size:.74rem
+    }
+    .hero-illust{
+      position:absolute;right:4%;bottom:32px;width:min(210px,22vw);z-index:2;opacity:.92;
+      filter:drop-shadow(0 12px 20px rgba(0,0,0,.12));
+      transform:rotate(-3deg)
+    }
+
+    .about-grid{
+      display:grid;grid-template-columns:1.02fr .88fr;gap:56px;align-items:center
+    }
+    .photo-box{
+      position:relative;background:linear-gradient(135deg,#d8e0e5,#f1ece9);overflow:hidden
+    }
+    .photo-box img{width:100%;height:100%;object-fit:cover}
+    .about-main{aspect-ratio:5/6}
+    .about-main::after{
+      content:"";position:absolute;right:-18px;top:-18px;width:140px;height:140px;border-radius:50%;
+      background:radial-gradient(circle, rgba(184,210,123,.55), transparent 65%);filter:blur(18px);z-index:0
+    }
+    .about-card{
+      position:absolute;right:-18px;bottom:-18px;background:#fff;padding:14px 16px;border-radius:var(--radius);
+      box-shadow:var(--shadow-strong);font-size:.76rem;line-height:1.7;max-width:220px
+    }
+    .about-card strong{display:block;font-size:.92rem;margin-bottom:4px;color:var(--text)}
+    .about-text .jp-title{max-width:9em}
+    .about-text p{max-width:34em}
+    .mini-mark{
+      width:76px;margin:0 0 18px auto;transform:rotate(-12deg)
+    }
+    .about-row{
+      margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px
+    }
+    .about-row .photo-box{aspect-ratio:1/1.02}
+    .about-row .photo-box:nth-child(2){transform:translateY(12px)}
+    .about-row .photo-box:nth-child(4){transform:translateY(-8px)}
+
+    .story-wrap{position:relative}
+    .float-illust{
+      position:absolute;left:-24px;top:-64px;width:150px;transform:rotate(-9deg);z-index:2;opacity:.95
+    }
+    .story-feature{
+      width:82%;margin-left:30px;aspect-ratio:16/8.2;
+      background:linear-gradient(135deg,#d0d7db,#f1ece9);position:relative;overflow:hidden
+    }
+    .story-feature .caption{
+      position:absolute;right:16px;bottom:12px;color:#fff;font-size:.72rem;letter-spacing:.04em;
+      text-shadow:0 2px 12px rgba(0,0,0,.35)
+    }
+    .story-secondary{
+      width:82%;margin:72px 0 0 30px;aspect-ratio:16/7.2;position:relative;overflow:hidden;
+      background:linear-gradient(135deg,#555,#b7b7b7)
+    }
+    .story-secondary::before{
+      content:"Coming Soon.";position:absolute;inset:0;display:grid;place-items:center;color:#fff;
+      font-family:Georgia,serif;font-size:2rem;letter-spacing:.02em;z-index:2;text-shadow:0 8px 28px rgba(0,0,0,.35)
+    }
+    .story-secondary::after{
+      content:"品質保証室 / Trace Lab";position:absolute;left:16px;bottom:12px;color:rgba(255,255,255,.8);font-size:.72rem;z-index:2
+    }
+    .story-cta{margin:36px 0 0 30px}
+
+    .company-area{
+      position:relative;overflow:hidden
+    }
+    .company-center{
+      min-height:calc(100vh - 140px);
+      display:flex;align-items:center;justify-content:center;position:relative
+    }
+    .company-copy{
+      text-align:center;max-width:420px;position:relative;z-index:3
+    }
+    .company-copy .jp-title{max-width:none;margin-inline:auto;writing-mode:vertical-rl;text-orientation:mixed;line-height:1.6}
+    .company-copy p{max-width:26em;margin:18px auto 26px;color:var(--muted)}
+    .scatter{
+      position:absolute;display:flex;align-items:center;justify-content:center;z-index:1
+    }
+    .scatter img.frame{
+      width:170px;height:110px;object-fit:cover;box-shadow:var(--shadow);background:linear-gradient(135deg,#d8dde0,#f1ece9)
+    }
+    .scatter .ill{position:absolute}
+    .s1{left:8%;top:10%}
+    .s2{right:10%;top:16%}
+    .s3{left:12%;bottom:26%}
+    .s4{right:11%;bottom:20%}
+    .s5{left:34%;top:0%}
+    .s1 img.frame{transform:rotate(-6deg)}
+    .s2 img.frame{transform:rotate(7deg)}
+    .s3 img.frame{transform:rotate(5deg)}
+    .s4 img.frame{transform:rotate(-4deg)}
+    .s5 img.frame{transform:rotate(-9deg)}
+    .company-ill1{width:180px;transform:rotate(6deg)}
+    .company-ill2{width:150px;transform:rotate(-8deg)}
+    .company-ill3{width:130px;transform:rotate(10deg)}
+    .blur-swoosh{
+      position:absolute;inset:auto auto 20% 50%;width:220px;height:30px;background:linear-gradient(90deg, rgba(181,220,104,.1), rgba(171,219,166,.65), rgba(181,220,104,.08));
+      filter:blur(8px);transform:translateX(-50%) rotate(-22deg);z-index:2
+    }
+
+    .big-arches{
+      position:absolute;left:0;right:0;bottom:0;height:44vh;pointer-events:none
+    }
+    .big-arches::before,.big-arches::after{
+      content:"";position:absolute;bottom:-10vh;width:58vw;height:58vw;border-radius:50%;
+      background:radial-gradient(circle at 40% 30%, rgba(173,221,227,.9), rgba(193,230,146,.85) 65%, rgba(193,230,146,.95) 100%);
+      filter:saturate(.9)
+    }
+    .big-arches::before{left:-10vw}
+    .big-arches::after{right:-10vw}
+    .bottom-cta{
+      position:relative;min-height:100vh;background:var(--cta-grad);overflow:hidden;padding:14vh 0 0
+    }
+    .cta-grid{
+      min-height:70vh;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:end
+    }
+    .cta-col{
+      text-align:center;padding:32px 28px 72px;position:relative;z-index:2
+    }
+    .cta-col h3{
+      font-family:Georgia,serif;font-size:2rem;font-weight:400;letter-spacing:.02em;margin:0 0 18px
+    }
+    .cta-col p{max-width:28em;margin:0 auto 28px;color:#454844}
+    .footer{
+      border-top:1px solid rgba(49,54,57,.12);background:#fff;padding:16px 0 26px;position:relative;z-index:3
+    }
+    .footer-inner{
+      display:grid;grid-template-columns:1.3fr 1fr auto;gap:24px;align-items:start;font-size:.76rem;color:var(--muted)
+    }
+    .footer-brand{display:flex;align-items:center;gap:10px;color:var(--text)}
+    .footer-brand strong{font-size:.9rem}
+    .footer-nav{display:flex;flex-wrap:wrap;gap:10px 18px}
+    .footer-right{text-align:right}
+    .logo-mark{
+      width:18px;height:18px;border:1px solid var(--text);border-radius:50%;display:grid;place-items:center;font-size:10px
+    }
+
+    html.js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease}
+    html.js .reveal.is-visible{opacity:1;transform:none}
+    html.js .hero-title, html.js .hero-kicker, html.js .hero-topline, html.js .hero-meta, html.js .hero-illust{
+      opacity:0;transform:translateY(18px)
+    }
+    html.js .hero.is-ready .hero-topline{transition:.8s .1s ease;opacity:1;transform:none}
+    html.js .hero.is-ready .hero-kicker{transition:.8s .22s ease;opacity:1;transform:none}
+    html.js .hero.is-ready .hero-title{transition:1s .36s ease;opacity:1;transform:none}
+    html.js .hero.is-ready .hero-meta{transition:.9s .54s ease;opacity:1;transform:none}
+    html.js .hero.is-ready .hero-illust{transition:1.1s .62s ease;opacity:.92;transform:rotate(-3deg) translateY(0)}
+    html.js .hero .hero-media img{transition:transform 1.8s ease}
+    html.js .hero.is-ready .hero-media img{transform:scale(1)}
+
+    @media (max-width: 980px){
+      .section{min-height:auto;padding:96px 0}
+      .hero-inner{height:auto;min-height:100vh;align-items:flex-end}
+      .about-grid,.cta-grid,.footer-inner{grid-template-columns:1fr}
+      .about-row{grid-template-columns:repeat(2,1fr)}
+      .story-feature,.story-secondary,.story-cta{width:100%;margin-left:0}
+      .float-illust{left:-10px;top:-38px;width:110px}
+      .company-copy .jp-title{writing-mode:horizontal-tb;max-width:10em}
+      .scatter{display:none}
+      .big-arches{height:30vh}
+      .hero-illust{width:140px;right:12px;bottom:72px}
+      .footer-right{text-align:left}
+    }
+    @media (max-width: 640px){
+      .container{width:min(var(--container),calc(100% - 28px))}
+      .hero-title{font-size:clamp(2.4rem,13vw,3.6rem)}
+      .section-head{margin-bottom:28px}
+      .about-row{grid-template-columns:1fr 1fr}
+      .cta-grid{gap:16px}
+      .cta-col{padding:24px 12px 48px}
+      .big-arches::before,.big-arches::after{width:72vw;height:72vw}
+    }
+  </style>
+</head>
+<body style="">
+  <section class="hero section is-ready">
+    <div class="hero-media">
+      <img src="http://127.0.0.1:5000/uploads/ChatGPT Image 2026年7月4日 18_39_21.png" alt="精密加工の現場" onerror="this.style.display='none'">
+    </div>
+    <img class="hero-illust" src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="紙飛行機のイラスト" onerror="this.style.display='none'">
+    <div class="container hero-inner" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+      <div class="hero-copy">
+        <div class="hero-topline">東京・大田区 / 精密板金・機構部品設計</div>
+        <div class="hero-kicker">図面1枚から、試作1個から。</div>
+        <h1 class="hero-title">Re:Metal</h1>
+        <div class="hero-meta">
+          <span>ステンレス薄板 t0.1mmから。最短翌日出荷、±0.02mm検査対応。</span>
+          <span>2026 RE:METAL WORKS CO., LTD.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint">
+    <div class="container">
+      <div class="section-head reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="label"><span class="dot"></span><span>About us</span></div>
+        <div>私たちについて</div>
+      </div>
+
+      <div class="about-grid">
+        <div class="photo-box about-main reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.08s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <img src="http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg" alt="都市を望むオフィス" onerror="this.style.display='none'" width="760" height="910" data-cebt="" data-cetx="1" data-cety="0" style="translate: 1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          <div class="about-card">
+            <strong>試作〜量産立上げまで一気通貫</strong>
+            板厚0.1〜3.2mm、月産30点の試作から、量産5,000個まで同じ窓口で伴走します。
+          </div>
+        </div>
+
+        <div class="about-text reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.16s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <img class="mini-mark" src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="空のコラージュ" onerror="this.style.display='none'">
+          <h2 class="jp-title">建物や装置の中で働く、
+            金属部品を静かに支えます。</h2>
+          <p class="lead">
+            Re:Metal Worksは、東京都大田区・京浜島で精密板金と小型機構部品の試作製作を行う製造会社です。
+            調達担当者・設計者の「この工場に頼めるか」を、写真・寸法・検査記録で明快にお返しすることを大切にしています。
+            SUS304、A5052、SECCを中心に、医療機器筐体、計測機カバー、搬送治具まで、図面の意図を読み取って形にします。
+          </p>
+          <div style="margin-top:24px">
+            <a class="btn" href="#company">私たちを知る <span class="arrow">›</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-row reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.24s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="photo-box"><img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="設計の手元" onerror="this.style.display='none'" width="300" height="300"></div>
+        <div class="photo-box"><img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" alt="オフィスで働く人々" onerror="this.style.display='none'" width="300" height="300"></div>
+        <div class="photo-box"><img src="http://127.0.0.1:5000/uploads/up_4856c07ccc.png" alt="会議するスタッフ" onerror="this.style.display='none'" width="300" height="300"></div>
+        <div class="photo-box"><img src="http://127.0.0.1:5000/uploads/up_5518e04806.jpg" alt="組立作業" onerror="this.style.display='none'" width="300" height="300"></div>
+        <div class="photo-box"><img src="http://127.0.0.1:5000/uploads/up_9c262ef683.png" alt="ミーティングスペース" onerror="this.style.display='none'" width="300" height="300"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint">
+    <div class="container story-wrap">
+      <div class="section-head reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.32s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="label"><span class="dot"></span><span>Project Story</span></div>
+        <div>サンプルワーク / ケース</div>
+      </div>
+
+      <img class="float-illust" src="http://127.0.0.1:5000/uploads/up_1f5fe56787.png" alt="作業のイラスト" onerror="this.style.display='none'">
+
+      <div class="story-feature photo-box reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.4s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" alt="モダンな工房空間" onerror="this.style.display='none'" width="1200" height="620">
+        <div class="caption">CASE 01 / 医療分析装置カバー</div>
+      </div>
+
+      <div class="story-secondary photo-box reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="品質保証室の入口" onerror="this.style.display='none'" width="1200" height="560">
+      </div>
+
+      <div class="story-cta reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.08s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a class="btn" href="#cases">事例をみる <span class="arrow">›</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tint company-area" id="company">
+    <div class="container">
+      <div class="section-head reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.16s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="label"><span class="dot"></span><span>Company</span></div>
+        <div>会社と品質・対応力について</div>
+      </div>
+
+      <div class="company-center">
+        <div class="scatter s1 reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.24s;">
+          <img class="frame" src="http://127.0.0.1:5000/uploads/up_34dd3e19ee.png" alt="壁面サイン" onerror="this.style.display='none'" width="170" height="110">
+        </div>
+        <div class="scatter s2 reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.32s;">
+          <img class="frame" src="http://127.0.0.1:5000/uploads/up_f986e18b07.png" alt="ミーティングルーム" onerror="this.style.display='none'" width="170" height="110">
+        </div>
+        <div class="scatter s3 reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.4s;">
+          <img class="frame" src="http://127.0.0.1:5000/uploads/up_eaa92077a3.png" alt="整理整頓された工場" onerror="this.style.display='none'" width="170" height="110">
+          <img class="ill company-ill1" src="http://127.0.0.1:5000/uploads/up_6d106df4b7.png" alt="オフィスイラスト" onerror="this.style.display='none'">
+        </div>
+        <div class="scatter s4 reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0s;">
+          <img class="frame" src="http://127.0.0.1:5000/uploads/up_c1a12c00de.png" alt="モダンオフィス" onerror="this.style.display='none'" width="170" height="110">
+          <img class="ill company-ill2" src="http://127.0.0.1:5000/uploads/up_71eeb21e18.png" alt="会話するイラスト" onerror="this.style.display='none'">
+        </div>
+        <div class="scatter s5 reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.08s;">
+          <img class="frame" src="http://127.0.0.1:5000/uploads/up_88c26af961.png" alt="PCが並ぶオフィス" onerror="this.style.display='none'" width="170" height="110">
+        </div>
+        <div class="blur-swoosh"></div>
+
+        <div class="company-copy reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.16s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="eyebrow">Precision / Equipment / Quality</div>
+          <h2 class="jp-title">建物を次世代へ。<br>工場を、相談しやすく。</h2>
+          <p>
+            アマダ製ベンダー HG1003、ファイバーレーザー ENSIS-3015AJ、三次元測定機 Crysta-Apex S544を保有。
+            2025年度の納期遵守率98.6%、初回試作の再製率2.1%。
+            「多品種小ロット」「図面変更が多い」「組立まで任せたい」など、困りごとから相談できる町工場です。
+          </p>
+          <a class="btn" href="#contact">会社を知る <span class="arrow">›</span></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="big-arches"></div>
+  </section>
+
+  <section class="bottom-cta" id="contact">
+    <div class="container cta-grid">
+      <div class="cta-col reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.24s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <h3>Recruit</h3>
+        <p>
+          板金加工・検査・CAD/CAMオペレーターを募集しています。月平均残業13.4時間、技能手当あり。
+          町工場の精度を、次の世代へつなぐ仲間を探しています。
+        </p>
+        <a class="btn" href="#">リクルートサイトへ <span class="arrow">›</span></a>
+      </div>
+      <div class="cta-col reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transition-delay: 0.32s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <h3>Contact</h3>
+        <p>
+          3Dデータ、手描きスケッチ、現物支給いずれでも受付可能です。材質・サイズ・希望納期が分かれば、
+          8時間以内に一次回答します。
+        </p>
+        <a class="btn" href="#">お問い合わせをする <span class="arrow">›</span></a>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <div>
+          <div class="footer-brand">
+            <span class="logo-mark">◎</span>
+            <strong>RE:METAL WORKS</strong>
+          </div>
+          <div style="margin-top:8px">
+            東京都大田区京浜島2-14-7　Re:Metalビル 2F<br>
+            TEL 03-5755-1840 / FAX 03-5755-1841<br>
+            営業時間 8:30–17:30（土日祝休）
+          </div>
+        </div>
+        <nav class="footer-nav">
+          <a href="#">About us</a>
+          <a href="#">Project Story</a>
+          <a href="#">設備一覧</a>
+          <a href="#">品質保証</a>
+          <a href="#">会社概要</a>
+          <a href="#">採用情報</a>
+          <a href="#">お問い合わせ</a>
+        </nav>
+        <div class="footer-right">
+          ©2026 REMETAL WORKS CO.,LTD.
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <script>
+    window.addEventListener('load', () => {
+      const hero = document.querySelector('.hero');
+      requestAnimationFrame(() => hero.classList.add('is-ready'));
+    });
+
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach((entry, i)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.14, rootMargin:'0px 0px -8% 0px'});
+
+    document.querySelectorAll('.reveal').forEach((el, i)=>{
+      el.style.transitionDelay = (i % 6) * 0.08 + 's';
+      observer.observe(el);
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div></body></html>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link Garden Works | おしゃれなランディングページ</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#333333;
+      --green:#8ac75a;
+      --green-deep:#6ca63d;
+      --green-tint:#f6fbf1;
+      --green-tint-2:#eef7e5;
+      --white-70:rgba(255,255,255,.72);
+      --line:rgba(138,199,90,.24);
+      --shadow-soft:0 12px 32px rgba(138,199,90,.12);
+      --shadow-strong:0 20px 48px rgba(138,199,90,.18);
+      --radius-xl:32px;
+      --radius-sm:2px;
+      --container:1040px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.14rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"Zen Maru Gothic","Hiragino Sans","Yu Gothic",sans-serif}
+    body{line-height:2;letter-spacing:.01em;overflow-x:hidden}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(var(--container),calc(100% - 48px));margin:0 auto}
+    .section{position:relative;min-height:100vh;padding:10vh 0}
+    .section-white{background:#fff}
+    .section-tint{background:linear-gradient(180deg,#fff 0%,var(--green-tint) 100%)}
+    .eyebrow{font-size:.86rem;letter-spacing:.22em;color:var(--green);font-weight:700;text-transform:uppercase}
+    .eyebrow span{font-size:.72rem;letter-spacing:.08em;margin-left:10px;color:#b8caa7}
+    .title{
+      font-size:var(--section);
+      line-height:1.35;
+      letter-spacing:.04em;
+      margin:16px 0 0;
+      color:var(--green);
+      font-weight:700;
+    }
+    .lead,.body{
+      font-size:var(--body);
+      line-height:2;
+      max-width:38em;
+      color:#4a4a4a;
+    }
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-width:180px;padding:14px 24px;border-radius:999px;
+      background:var(--green);color:#fff;font-weight:700;
+      border:1px solid transparent;box-shadow:var(--shadow-soft);
+      transition:transform .35s ease, box-shadow .35s ease, background .35s ease;
+    }
+    .btn:hover{transform:translateY(-3px);box-shadow:var(--shadow-strong);background:var(--green-deep)}
+    .btn-ghost{
+      background:rgba(255,255,255,.92);color:var(--green-deep);border-color:rgba(138,199,90,.28)
+    }
+    .site-header{
+      position:relative;z-index:20;padding-top:32px;
+    }
+    .header-card{
+      background:rgba(255,255,255,.82);backdrop-filter:blur(10px);
+      border-radius:999px;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;
+      box-shadow:0 8px 24px rgba(138,199,90,.08);
+    }
+    .brand{display:flex;align-items:center;gap:14px}
+    .brand-mark{
+      width:56px;height:56px;border-radius:50%;
+      background:linear-gradient(135deg,#dff1cd,#ffffff);
+      display:grid;place-items:center;overflow:hidden;
+      border:1px solid rgba(138,199,90,.18);
+    }
+    .brand-mark img{width:42px;height:42px;object-fit:contain}
+    .brand-copy h1{font-size:1rem;line-height:1.2;margin:0;font-weight:700}
+    .brand-copy p{margin:4px 0 0;font-size:.74rem;line-height:1.6;color:#666}
+    .nav{display:flex;gap:22px;align-items:center;font-size:.84rem}
+    .nav a{
+      position:relative;padding-bottom:2px
+    }
+    .nav a::after{
+      content:"";position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--green);
+      transform:scaleX(0);transform-origin:right;transition:transform .45s ease;
+    }
+    .nav a:hover::after{transform:scaleX(1);transform-origin:left}
+    .menu-round{
+      width:48px;height:48px;border-radius:50%;background:var(--green);display:grid;place-items:center;color:#fff;
+      box-shadow:var(--shadow-soft)
+    }
+    .menu-round span,.menu-round span:before,.menu-round span:after{
+      content:"";display:block;width:18px;height:2px;background:#fff;border-radius:2px;position:relative
+    }
+    .menu-round span:before{position:absolute;top:-6px}
+    .menu-round span:after{position:absolute;top:6px}
+    .hero{
+      position:relative;overflow:hidden;
+      background:
+        radial-gradient(circle at 80% 8%, rgba(255,255,255,.95) 0 14%, transparent 14.5%),
+        radial-gradient(circle at 20% 16%, rgba(255,255,255,.8) 0 12%, transparent 12.5%),
+        linear-gradient(180deg, #eef7fd 0%, #ffffff 32%);
+    }
+    .hero .sky-bird{
+      position:absolute;width:42px;opacity:.82
+    }
+    .bird1{top:112px;right:10%}
+    .bird2{top:220px;left:8%}
+    .hero-inner{padding-top:20px}
+    .hero-top{
+      display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;
+      min-height:300px
+    }
+    .hero-copy h2{
+      font-size:var(--hero);line-height:1.3;letter-spacing:.03em;margin:0 0 16px;font-weight:700;
+      color:#44513b
+    }
+    .hero-copy h2 .accent{color:var(--green)}
+    .hero-copy p{margin:0;max-width:38em;font-size:1rem;color:#56614f}
+    .hero-visual{
+      position:relative;min-height:260px;border-radius:40px;
+      background:
+        linear-gradient(130deg, rgba(255,255,255,.2), rgba(255,255,255,.65)),
+        radial-gradient(circle at 15% 20%, rgba(255,179,179,.35), transparent 28%),
+        radial-gradient(circle at 82% 18%, rgba(138,199,90,.20), transparent 24%),
+        radial-gradient(circle at 55% 70%, rgba(149,196,255,.18), transparent 30%);
+    }
+    .hero-visual::before{
+      content:"";position:absolute;inset:36px 28px auto auto;width:220px;height:220px;border-radius:34px;
+      background:linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.55));
+      filter:blur(2px);
+    }
+    .hero-visual .photo{
+      position:absolute;border-radius:28px;overflow:hidden;box-shadow:var(--shadow-soft);
+      background:linear-gradient(135deg,#dceec9,#f7fbf2);
+    }
+    .hero-visual .photo img{width:100%;height:100%;object-fit:cover}
+    .hero-visual .p1{width:250px;height:170px;right:24px;top:26px;transform:rotate(5deg)}
+    .hero-visual .p2{width:230px;height:160px;left:18px;bottom:28px;transform:rotate(-6deg)}
+    .hero-visual .badge{
+      position:absolute;left:40px;top:32px;background:rgba(255,255,255,.88);padding:10px 14px;border-radius:999px;
+      font-size:.78rem;color:#5f6d52;border:1px solid rgba(138,199,90,.18)
+    }
+
+    .hills{
+      position:relative;margin-top:24px;padding-top:54px;min-height:500px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 24%, #d9ef7f 24%, #c4e466 100%);
+      overflow:hidden;
+    }
+    .hills::before{
+      content:"";position:absolute;left:-10%;right:-10%;top:34px;height:180px;
+      background:#a7d359;border-radius:50% 50% 0 0 / 100% 100% 0 0;
+      transform:scaleY(.55);
+      opacity:.92;
+    }
+    .hills::after{
+      content:"";position:absolute;left:-6%;right:-6%;bottom:-90px;height:240px;
+      background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.2), transparent 40%),
+      linear-gradient(180deg,#d7ee7d,#bddf58);
+      border-radius:50% 50% 0 0 / 100% 100% 0 0;
+    }
+    .scene{
+      position:relative;height:180px;z-index:2
+    }
+    .scene .obj{
+      position:absolute;bottom:12px
+    }
+    .tree1{left:4%;width:72px}
+    .tree2{left:18%;width:100px}
+    .house{left:48%;width:96px;transform:translateX(-50%)}
+    .tree3{right:18%;width:76px}
+    .tree4{right:5%;width:54px}
+    .personA{left:34%;width:42px;bottom:8px}
+    .personB{left:56%;width:38px;bottom:8px}
+    .news-card{
+      position:relative;z-index:3;margin-top:56px;
+      width:min(880px,calc(100% - 40px));margin-inline:auto;
+      background:rgba(255,255,255,.88);backdrop-filter:blur(8px);
+      border-radius:28px;padding:28px 30px;box-shadow:var(--shadow-soft)
+    }
+    .news-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:12px}
+    .news-head h3{margin:0;font-size:1.4rem;letter-spacing:.15em;color:var(--green)}
+    .news-head small{display:block;color:#8fa07f;font-size:.72rem}
+    .news-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .news-item{border-top:1px solid rgba(138,199,90,.22);padding-top:12px}
+    .tag{display:inline-block;background:var(--green);color:#fff;font-size:.7rem;padding:3px 10px;border-radius:999px;line-height:1.4}
+    .news-item .date{display:block;margin-top:10px;font-size:.72rem;color:#777}
+    .news-item p{margin:6px 0 0;font-size:.84rem;line-height:1.8;color:#465040}
+    .link-pill{
+      display:inline-flex;align-items:center;gap:8px;font-size:.78rem;color:#6f865d;border:1px solid rgba(138,199,90,.26);
+      border-radius:999px;padding:8px 14px;background:#fff
+    }
+
+    .concept-space{
+      display:flex;align-items:flex-start;justify-content:flex-start
+    }
+    .concept-copy{padding-top:20px}
+
+    .wave-section{
+      position:relative;background:#fff;overflow:hidden
+    }
+    .wave-band{
+      position:absolute;left:-8%;right:-8%;top:16%;bottom:10%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.16), transparent 28%),
+        radial-gradient(circle at 70% 70%, rgba(255,255,255,.14), transparent 26%),
+        linear-gradient(180deg,#d9ee7c,#bfdf59);
+      border-radius:43% 57% 50% 50% / 12% 10% 12% 14%;
+    }
+    .wave-card{
+      position:relative;z-index:2;background:#fff;border-radius:28px;padding:0;overflow:hidden;
+      box-shadow:var(--shadow-soft);min-height:560px;border:1px solid rgba(255,255,255,.45)
+    }
+    .wave-card-top{
+      padding:40px 44px 0;min-height:250px;background:#fff
+    }
+    .wave-card-top .mini{font-size:.74rem;color:#c7d2bc;letter-spacing:.12em}
+    .wave-card-illustration{
+      position:relative;height:310px;background:linear-gradient(180deg,#fff 0 58%,#8ac75a 58% 100%)
+    }
+    .wave-card-illustration::before{
+      content:"";position:absolute;left:-8%;right:-8%;top:44%;height:160px;background:#8ac75a;
+      border-radius:50% 50% 0 0 / 100% 100% 0 0;transform:scaleY(.7);
+    }
+    .wave-card-illustration .center-tree{
+      position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:90px;z-index:2
+    }
+    .flowerline{
+      position:absolute;left:50%;top:52%;transform:translateX(-50%);width:240px;height:24px;
+      background:
+        radial-gradient(circle,#f09bb4 0 3px,transparent 4px) 0 50%/40px 24px repeat-x;
+      opacity:.9;z-index:2
+    }
+    .floating-note{
+      width:min(1040px,calc(100% - 48px));margin:64px auto 0;min-height:180px;border-radius:28px;background:#fff;
+      border:1px solid rgba(138,199,90,.28);box-shadow:0 4px 16px rgba(138,199,90,.06)
+    }
+
+    .cta-band{
+      min-height:auto;background:linear-gradient(180deg,#fff 0%, #f7fbf2 100%);padding:80px 0 0;
+    }
+    .cta-box{
+      position:relative;background:#fff;border-radius:32px;padding:40px 42px;
+      box-shadow:var(--shadow-soft);border:1px solid rgba(138,199,90,.18);
+      display:grid;grid-template-columns:1.05fr .95fr;gap:32px;align-items:center
+    }
+    .cta-box::before{
+      content:"";position:absolute;right:80px;bottom:-26px;width:180px;height:80px;border-radius:999px;
+      background:rgba(138,199,90,.18);filter:blur(30px);z-index:-1
+    }
+    .cta-media{
+      position:relative;border-radius:28px;overflow:hidden;min-height:280px;
+      background:linear-gradient(135deg,#dfeecd,#f6fbf1)
+    }
+    .cta-media img{width:100%;height:100%;object-fit:cover}
+    .caption-card{
+      position:absolute;right:-18px;bottom:-18px;background:#fff;border-radius:18px;padding:14px 16px;max-width:220px;
+      box-shadow:var(--shadow-soft);line-height:1.7;font-size:.78rem
+    }
+    .caption-card strong{display:block;color:var(--green-deep)}
+    .cta-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:24px}
+    .stats{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px
+    }
+    .stat{
+      background:var(--green-tint);border-radius:18px;padding:16px 18px
+    }
+    .stat strong{display:block;font-size:1.6rem;line-height:1.2;color:var(--green-deep)}
+    .stat span{font-size:.78rem;color:#657257}
+
+    footer{
+      position:relative;background:
+        linear-gradient(180deg, transparent 0 62px, #8fcb58 62px 100%);
+      color:#fff;padding-top:0;overflow:hidden
+    }
+    .footer-scene{
+      position:relative;height:62px;background:#fff
+    }
+    .footer-scene img{position:absolute;bottom:0}
+    .footer-tree1{left:4%;width:58px}
+    .footer-tree2{left:14%;width:66px}
+    .footer-mini{left:28%;width:48px}
+    .footer-pine{left:42%;width:38px}
+    .footer-house{right:18%;width:70px}
+    .footer-tree3{right:4%;width:46px}
+    .footer-content{
+      padding:56px 0 44px
+    }
+    .footer-grid{
+      display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:36px;align-items:start
+    }
+    .footer-title{font-size:.84rem;letter-spacing:.08em;font-weight:700;margin-bottom:10px}
+    .footer-brand p,.footer-col a,.footer-col li{font-size:.86rem;line-height:2;color:#f4ffee}
+    .footer-phone{font-size:2rem;line-height:1.1;font-weight:700;letter-spacing:.08em;margin:8px 0}
+    .footer-small{font-size:.72rem;color:#edf8df}
+    .footer-col ul{list-style:none;padding:0;margin:0}
+    .footer-bottom{
+      background:#fff;color:#666;padding:22px 0 26px
+    }
+    .partners{
+      display:flex;gap:26px;align-items:center;flex-wrap:wrap;margin-bottom:16px
+    }
+    .partners img{
+      height:28px;width:auto;object-fit:contain;opacity:.95
+    }
+    .copyright{font-size:.7rem;color:#888}
+
+    .float{
+      animation:floatY 6s ease-in-out infinite;
+    }
+    .pulse-soft{
+      animation:heart 7.2s ease-in-out infinite;
+      transform-origin:center;
+    }
+    .spin-soft{
+      animation:loading 14s cubic-bezier(.45,0,.55,1) infinite;
+    }
+
+    @keyframes heart{
+      0%{transform:scale(1)}
+      4%{transform:scale(1.04)}
+      8%{transform:scale(1)}
+      12%{transform:scale(1.04)}
+      16%{transform:scale(1)}
+      63%{transform:scale(1)}
+      67%{transform:scale(1.04)}
+      71%{transform:scale(1)}
+      75%{transform:scale(1.04)}
+      79%{transform:scale(1)}
+      100%{transform:scale(1)}
+    }
+    @keyframes loading{
+      0%{transform:rotate(0deg)}
+      50%{transform:rotate(180deg)}
+      100%{transform:rotate(360deg)}
+    }
+    @keyframes floatY{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+    }
+    @keyframes riseIn{
+      from{opacity:0;transform:translateY(28px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    @keyframes heroLeft{
+      from{opacity:0;transform:translateX(-28px)}
+      to{opacity:1;transform:translateX(0)}
+    }
+    @keyframes heroRight{
+      from{opacity:0;transform:translateX(28px) scale(.98)}
+      to{opacity:1;transform:translateX(0) scale(1)}
+    }
+
+    html.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .9s ease, transform .9s ease}
+    html.js .reveal.is-visible{opacity:1;transform:translateY(0)}
+    html.js .stagger > *{opacity:0;transform:translateY(22px);transition:opacity .8s ease, transform .8s ease}
+    html.js .stagger.is-visible > *:nth-child(1){transition-delay:.04s}
+    html.js .stagger.is-visible > *:nth-child(2){transition-delay:.12s}
+    html.js .stagger.is-visible > *:nth-child(3){transition-delay:.2s}
+    html.js .stagger.is-visible > *:nth-child(4){transition-delay:.28s}
+    html.js .stagger.is-visible > *:nth-child(5){transition-delay:.36s}
+    html.js .stagger.is-visible > *{opacity:1;transform:translateY(0)}
+    .hero-copy{animation:heroLeft 1s ease .12s both}
+    .hero-visual{animation:heroRight 1.05s ease .22s both}
+
+    @media (max-width: 980px){
+      .nav{display:none}
+      .hero-top,.cta-box,.footer-grid{grid-template-columns:1fr}
+      .news-grid{grid-template-columns:1fr 1fr}
+      .hero-visual{min-height:320px}
+      .stats{grid-template-columns:1fr}
+      .caption-card{right:12px;bottom:12px}
+    }
+    @media (max-width: 720px){
+      .section{min-height:auto;padding:88px 0}
+      .container{width:min(var(--container),calc(100% - 28px))}
+      .header-card{padding:14px 16px}
+      .brand-copy p{display:none}
+      .news-card{padding:22px 18px}
+      .news-grid{grid-template-columns:1fr}
+      .hills{min-height:540px}
+      .wave-card{min-height:480px}
+      .wave-card-top{padding:28px 24px 0}
+      .cta-box{padding:28px 22px}
+      .footer-grid{gap:24px}
+      .footer-phone{font-size:1.6rem}
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero section section-white">
+    <div class="site-header container reveal">
+      <div class="header-card">
+        <div class="brand">
+          <div class="brand-mark pulse-soft">
+            <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="若葉のマーク" onerror="this.style.display='none'">
+          </div>
+          <div class="brand-copy">
+            <h1>一般社団法人 <span style="color:#8ac75a;">Link Garden Works</span></h1>
+            <p>仙台市青葉区で、相談から就労準備・軽作業・定着支援までを丁寧につなぐ支援拠点です。</p>
+          </div>
+        </div>
+        <nav class="nav" aria-label="グローバルナビゲーション">
+          <a href="#top">TOP</a>
+          <a href="#about">わたしたち</a>
+          <a href="#concept">大切にしていること</a>
+          <a href="#support">支援内容</a>
+          <a href="#contact">ご相談</a>
+        </nav>
+        <a href="#contact" class="menu-round" aria-label="メニュー">
+          <span></span>
+        </a>
+      </div>
+    </div>
+
+    <img class="sky-bird bird1 float" src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="小鳥" onerror="this.style.display='none'">
+    <img class="sky-bird bird2 float" src="http://127.0.0.1:5000/uploads/up_4f5b5e1e9a.png" alt="小鳥" onerror="this.style.display='none'">
+
+    <div class="hero-inner container" id="top">
+      <div class="hero-top">
+        <div class="hero-copy">
+          <h2>働く前の不安も、<br><span class="accent">働きはじめた後</span>の毎日も。</h2>
+          <p>
+            地下鉄北四番丁駅から徒歩4分。開設12年で、348名の就労相談に伴走。
+            見学、体験、軽作業、面談、定着支援まで、仙台の暮らしに合うペースで整えます。
+          </p>
+        </div>
+        <div class="hero-visual">
+          <div class="badge">見学は平日 10:00–16:30 / 予約制</div>
+          <div class="photo p1">
+            <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="面談の様子" width="500" height="340" onerror="this.style.display='none'">
+          </div>
+          <div class="photo p2">
+            <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="軽作業の様子" width="460" height="320" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hills">
+      <div class="scene container">
+        <img class="obj tree1 pulse-soft" src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="木" onerror="this.style.display='none'">
+        <img class="obj tree2 pulse-soft" src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_76ex8f76ex8f76ex.png" alt="木" onerror="this.style.display='none'">
+        <img class="obj house float" src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="事業所" onerror="this.style.display='none'">
+        <img class="obj tree3 pulse-soft" src="http://127.0.0.1:5000/uploads/up_f40340237c.png" alt="木" onerror="this.style.display='none'">
+        <img class="obj tree4 pulse-soft" src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_h6hgf9h6hgf9h6hg.png" alt="木" onerror="this.style.display='none'">
+        <img class="obj personA float" src="http://127.0.0.1:5000/uploads/up_1f5fe56787.png" alt="人物" onerror="this.style.display='none'">
+        <img class="obj personB float" src="http://127.0.0.1:5000/uploads/up_da9f066653.png" alt="人物" onerror="this.style.display='none'">
+      </div>
+
+      <div class="news-card reveal">
+        <div class="news-head">
+          <div>
+            <h3>NEWS <small>おしらせ</small></h3>
+          </div>
+          <a href="#contact" class="link-pill">すべてを見る</a>
+        </div>
+        <div class="news-grid stagger">
+          <article class="news-item">
+            <span class="tag">見学会</span>
+            <span class="date">2026.07.03</span>
+            <p>宮町サテライトでミニ見学会。はじめての方へ、30分の案内枠をご用意しました。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">受付中</span>
+            <span class="date">2026.06.25</span>
+            <p>箱組み・封入作業の体験週間を開始。手順確認から一緒に進めます。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">活動報告</span>
+            <span class="date">2026.06.12</span>
+            <p>青葉区役所前の清掃ボランティアへ参加。地域とのつながりを深めました。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">連携情報</span>
+            <span class="date">2026.05.28</span>
+            <p>若林区の企業2社と実習連携を開始。一般就労への選択肢が広がっています。</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="section section-white" id="concept">
+    <div class="container concept-space">
+      <div class="concept-copy reveal">
+        <div class="eyebrow">CONCEPT <span>たいせつにしていること</span></div>
+        <h2 class="title">「急がせない」支援。</h2>
+        <p class="lead">
+          体調に波がある日、言葉にしにくい不安がある日、働くことをまだ想像しきれない日。
+          そんな時間も含めて支援だと考えています。通所ペースは週1回から相談可。
+          2025年度は利用継続率91%でした。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wave-section section-tint" id="about">
+    <div class="wave-band"></div>
+    <div class="container">
+      <div class="wave-card reveal">
+        <div class="wave-card-top">
+          <div class="eyebrow">MESSAGE <span>私たちからのことば</span></div>
+          <h2 class="title">相談室から、次の一歩へ。</h2>
+          <p class="body">
+            Link Garden Worksでは、相談員、ジョブコーチ、作業指導スタッフの3職種が同じフロアで連携。
+            生活リズムの相談から、パソコン練習、軽作業、職場実習までを一つの流れで支えます。
+          </p>
+        </div>
+        <div class="wave-card-illustration">
+          <div class="flowerline spin-soft"></div>
+          <img class="center-tree pulse-soft" src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="シンボルツリー" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <div class="floating-note reveal"></div>
+    </div>
+  </section>
+
+  <section class="cta-band" id="support">
+    <div class="container">
+      <div class="cta-box reveal">
+        <div>
+          <div class="eyebrow">SUPPORT <span>支援内容と実績</span></div>
+          <h2 class="title">見学から定着支援まで、同じ担当で。</h2>
+          <p class="body">
+            たとえば、午前は面談、午後は箱組みや封入、週に一度はパソコン練習。
+            そんな実際の流れを、一人ひとりの体調と希望に合わせて設計します。
+            仙台市内3ルートの送迎相談、昼休憩スペース、企業実習先18社の紹介実績があります。
+          </p>
+
+          <div class="stats stagger">
+            <div class="stat">
+              <strong>348名</strong>
+              <span>開設からの相談実績</span>
+            </div>
+            <div class="stat">
+              <strong>91%</strong>
+              <span>2025年度の利用継続率</span>
+            </div>
+            <div class="stat">
+              <strong>18社</strong>
+              <span>実習・就労先の連携企業</span>
+            </div>
+          </div>
+
+          <div class="cta-actions">
+            <a class="btn" href="#contact">見学を申し込む</a>
+            <a class="btn btn-ghost" href="tel:0224277789">022-427-7789</a>
+          </div>
+        </div>
+
+        <div class="cta-media">
+          <img src="http://127.0.0.1:5000/uploads/up_06aa20751a.png" alt="相談風景" width="720" height="560" onerror="this.style.display='none'">
+          <div class="caption-card">
+            <strong>「初回は20分でも大丈夫です」</strong>
+            緊張しやすい方には、館内案内だけで終える日もあります。<br>相談員 / 佐藤 由紀
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="footer-scene">
+      <img class="footer-tree1 pulse-soft" src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="木" onerror="this.style.display='none'">
+      <img class="footer-tree2 pulse-soft" src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_76ex8f76ex8f76ex.png" alt="木" onerror="this.style.display='none'">
+      <img class="footer-mini pulse-soft" src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_lp99p5lp99p5lp99.png" alt="木" onerror="this.style.display='none'">
+      <img class="footer-pine pulse-soft" src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_o2mi8so2mi8so2mi.png" alt="木" onerror="this.style.display='none'">
+      <img class="footer-house float" src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="事業所" onerror="this.style.display='none'">
+      <img class="footer-tree3 pulse-soft" src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_h6hgf9h6hgf9h6hg.png" alt="木" onerror="this.style.display='none'">
+    </div>
+
+    <div class="footer-content">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <div class="footer-title">特定非営利活動法人に準じた地域連携拠点</div>
+          <p>
+            Link Garden Works 仙台北オフィス<br>
+            〒980-0802 宮城県仙台市青葉区二日町6-12
+          </p>
+          <div class="footer-phone">022-427-7789</div>
+          <div class="footer-small">平日 9:30 - 17:00 / 見学受付 10:00 - 16:30</div>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-title">Link Garden Works</div>
+          <ul>
+            <li><a href="#top">TOP</a></li>
+            <li><a href="#about">わたしたちのこと</a></li>
+            <li><a href="#support">支援内容</a></li>
+            <li><a href="#concept">大切にしていること</a></li>
+            <li><a href="#contact">お問い合わせ</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-title">相談をお考えの方へ</div>
+          <ul>
+            <li><a href="#contact">見学を予約する</a></li>
+            <li><a href="#contact">よくある質問</a></li>
+            <li><a href="#contact">ご利用の流れ</a></li>
+            <li><a href="#contact">資料請求フォーム</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-title">支援をご検討の方へ</div>
+          <ul>
+            <li><a href="#contact">企業連携のご相談</a></li>
+            <li><a href="#contact">実習受け入れについて</a></li>
+            <li><a href="#contact">ご寄付のお願い</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="partners">
+          <img src="http://127.0.0.1:5000/uploads/up_605e686583.png" alt="LinkWorksロゴ" onerror="this.style.display='none'">
+          <img src="http://127.0.0.1:5000/uploads/up_1aa2aa7dc0.png" alt="ロゴ" onerror="this.style.display='none'">
+          <img src="http://127.0.0.1:5000/uploads/up_88af365447.png" alt="ロゴ" onerror="this.style.display='none'">
+          <img src="http://127.0.0.1:5000/uploads/up_5202e41800.png" alt="ロゴ" onerror="this.style.display='none'">
+        </div>
+        <div class="copyright">
+          仙台圏就労支援ネットワーク / 宮城しごと連携会議 / みやぎ地域福祉研究会<br>
+          © 2026 Link Garden Works. All Rights Reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const targets = document.querySelectorAll('.reveal, .stagger');
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    },{threshold:0.16, rootMargin:'0px 0px -8% 0px'});
+    targets.forEach(el=>io.observe(el));
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

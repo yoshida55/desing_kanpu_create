@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>しごと日和｜就労継続支援B型事業所</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#333333;
+      --text-strong:#000000;
+      --yellow:#f4e410;
+      --yellow-soft:rgba(244,228,16,.08);
+      --gray:#f0f0f0;
+      --dark:#2e2e2e;
+      --blue:#2475c7;
+      --line:rgba(0,0,0,.12);
+      --shadow-soft:0 12px 32px rgba(46,46,46,.08);
+      --shadow-strong:0 18px 48px rgba(46,46,46,.14);
+      --radius:2px;
+      --radius-cut:0 30px 0 0;
+      --container:1180px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.14rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      background:var(--bg);
+      font-family:"Times New Roman", serif;
+      font-size:var(--body);
+      line-height:2;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(calc(100% - 48px), var(--container)); margin:0 auto;}
+    .serif{font-family:"Times New Roman", serif}
+    .sans{font-family:sans-serif}
+    .eyebrow{
+      font-family:sans-serif;
+      font-size:.7rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--text-strong);
+      display:block;
+      margin-bottom:12px;
+    }
+    .section-head{max-width:520px; margin-bottom:40px}
+    .section-head h2{
+      margin:0 0 16px;
+      font-family:sans-serif;
+      font-size:var(--section);
+      line-height:1.35;
+      letter-spacing:.03em;
+      color:var(--text-strong);
+      font-weight:700;
+    }
+    .section-head p{margin:0; max-width:38em}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      min-height:44px; padding:0 24px;
+      background:var(--yellow); color:#111;
+      border:1px solid rgba(0,0,0,.08);
+      font-family:sans-serif; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase;
+      transition:transform .35s ease, box-shadow .35s ease, background .35s ease;
+    }
+    .btn:hover{transform:translateY(-2px); box-shadow:var(--shadow-soft)}
+    .btn.dark{background:var(--dark); color:#fff}
+    .btn.outline{background:#fff}
+    .pill{
+      display:inline-block; padding:4px 10px; background:var(--dark); color:#fff;
+      font-family:sans-serif; font-size:.68rem; letter-spacing:.08em;
+    }
+    .site-header{
+      position:sticky; top:0; z-index:50;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(0,0,0,.05);
+    }
+    .site-header .inner{
+      width:min(calc(100% - 40px), 1280px);
+      margin:0 auto; height:72px;
+      display:flex; align-items:center; justify-content:space-between; gap:24px;
+    }
+    .logo{
+      font-family:sans-serif; font-weight:800; letter-spacing:.08em; font-size:1.05rem;
+      display:flex; align-items:flex-end; gap:6px;
+    }
+    .logo .mark{color:#9b9700}
+    .logo small{font-size:.62rem; letter-spacing:.14em; color:#666}
+    .nav{display:flex; gap:28px; font-family:sans-serif; font-size:.77rem; letter-spacing:.08em}
+    .nav a{position:relative}
+    .nav a::after{
+      content:""; position:absolute; left:0; bottom:-6px; width:0; height:1px; background:#111; transition:width .3s ease;
+    }
+    .nav a:hover::after{width:100%}
+
+    .hero{
+      min-height:100vh; position:relative; overflow:hidden; background:#fff;
+      padding:72px 0 40px;
+    }
+    .hero .topline{
+      position:absolute; left:-5%; top:88px; width:110%; height:1px; background:#222;
+      transform:rotate(-8deg); transform-origin:left center;
+      opacity:.7;
+    }
+    .hero-inner{
+      width:min(calc(100% - 48px), 1240px); margin:0 auto;
+      min-height:calc(100vh - 112px);
+      position:relative; display:flex; flex-direction:column; justify-content:space-between;
+      padding:28px 0 24px;
+    }
+    .hero-copy{
+      display:grid; grid-template-columns:1.1fr .9fr; align-items:start;
+      gap:24px; position:relative; z-index:2;
+    }
+    .hero-left h1{
+      margin:100px 0 0;
+      font-family:sans-serif;
+      font-size:var(--hero);
+      line-height:1.3;
+      letter-spacing:.04em;
+      color:var(--text-strong);
+      font-weight:700;
+      max-width:9em;
+    }
+    .hero-right{
+      display:flex; justify-content:flex-end; align-items:flex-start;
+      padding-top:28px;
+    }
+    .vertical-copy{
+      writing-mode:vertical-rl;
+      font-size:2rem;
+      line-height:1.7;
+      letter-spacing:.16em;
+      color:#111;
+      font-family:"Times New Roman", serif;
+    }
+    .paper-people{
+      position:relative; height:360px; margin-top:36px;
+    }
+    .figure{
+      position:absolute; width:112px; text-align:center;
+      transform-origin:center;
+    }
+    .figure .head{
+      width:28px; height:28px; border-radius:50%; margin:0 auto -4px;
+      position:relative; z-index:2;
+    }
+    .figure .body{
+      width:78px; height:90px; margin:0 auto;
+      clip-path:polygon(50% 0%, 100% 38%, 75% 100%, 25% 100%, 0% 38%);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,.08)),
+        url('http://127.0.0.1:5000/uploads/up_39f3639774.png') center/cover no-repeat;
+      border:1px solid rgba(0,0,0,.08);
+      filter:saturate(.9) contrast(1.02);
+    }
+    .figure .memo{
+      font-size:.65rem; line-height:1.5; max-width:110px; margin:8px auto 0; color:#444;
+      transform:rotate(-7deg);
+    }
+    .dot{
+      position:absolute; width:22px; height:22px; border-radius:50%;
+      z-index:1;
+    }
+    .dot.yellow{background:#f4b300}
+    .dot.blue{background:#2475c7}
+    .dot.gray{background:#b9b9b9}
+    .hero-foot{
+      display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-top:20px;
+    }
+    .hero-meta{
+      font-size:.72rem; line-height:1.7;
+    }
+    .hero-cta-note{
+      background:var(--yellow);
+      padding:18px 22px;
+      max-width:260px;
+      font-size:.78rem; line-height:1.8;
+      box-shadow:var(--shadow-soft);
+    }
+
+    section{position:relative}
+    .intro{
+      min-height:100vh; display:flex; align-items:center; padding:10vh 0;
+      background:#fff;
+    }
+    .intro-grid{
+      display:grid; grid-template-columns:1fr 1fr; gap:72px; align-items:center;
+    }
+    .photo-stack{position:relative; min-height:460px}
+    .photo-main, .photo-sub{
+      overflow:hidden; background:linear-gradient(135deg, var(--yellow-soft), #f7f7f7);
+    }
+    .photo-main{
+      width:68%; aspect-ratio:4/5; box-shadow:var(--shadow-soft);
+    }
+    .photo-sub{
+      width:44%; aspect-ratio:1/1; position:absolute; right:8%; bottom:10%;
+      box-shadow:var(--shadow-soft);
+    }
+    .photo-main img,.photo-sub img,.circle-card img,.gallery-card img,.mag-card img,.wide-image img,.person-shot img,.voice-card img,.office-shot img{width:100%;height:100%;object-fit:cover}
+    .intro-copy p{max-width:34em}
+    .intro-copy .btn{margin-top:24px}
+
+    .places{
+      min-height:100vh; display:flex; align-items:center; padding:10vh 0; background:var(--yellow-soft);
+    }
+    .places-grid{
+      display:grid; grid-template-columns:320px 1fr; gap:48px; align-items:center;
+    }
+    .note-column{
+      padding-right:24px;
+    }
+    .tag-vertical{
+      writing-mode:vertical-rl; font-size:1.4rem; letter-spacing:.16em; color:#111; margin-bottom:24px;
+    }
+    .note-column p{font-size:.92rem}
+    .yellow-panel{
+      background:var(--yellow);
+      padding:48px 40px 40px;
+      border-radius:var(--radius-cut);
+      position:relative;
+      overflow:hidden;
+    }
+    .circle-grid{
+      display:grid; grid-template-columns:repeat(3,1fr); gap:24px 20px;
+    }
+    .circle-card{text-align:center}
+    .circle-frame{
+      width:140px; height:140px; border-radius:50%; overflow:hidden; margin:0 auto 10px;
+      background:linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,.15));
+      border:6px solid rgba(255,255,255,.18);
+    }
+    .circle-card .cap{
+      display:inline-block; background:#fff; padding:4px 8px; font-size:.68rem; line-height:1.4;
+      font-family:sans-serif;
+    }
+
+    .works{
+      min-height:100vh; display:flex; align-items:center; padding:10vh 0; background:#fff;
+    }
+    .works-row{
+      display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px;
+    }
+    .work-note{
+      position:relative; background:#ece6b5; padding:24px 28px; min-height:128px;
+      box-shadow:var(--shadow-soft);
+      transform:rotate(-2deg);
+    }
+    .work-note:nth-child(2){background:#e9e4cf; transform:rotate(1.4deg)}
+    .work-note .mini{
+      font-size:.72rem; font-family:sans-serif; letter-spacing:.08em; display:block; margin-bottom:10px
+    }
+    .work-note h3{
+      margin:0; font-size:1.18rem; line-height:1.45; font-family:sans-serif;
+    }
+    .wide-image{
+      width:100%; aspect-ratio:21/7; overflow:hidden; background:linear-gradient(135deg,#ddd,#f5f5f5);
+    }
+
+    .feature-visual{
+      min-height:100vh; display:flex; align-items:center; padding:10vh 0; background:#fff;
+      overflow:hidden;
+    }
+    .mesh{
+      position:absolute; inset:0; pointer-events:none; opacity:.4;
+      background-image:
+        linear-gradient(60deg, transparent 48%, rgba(0,0,0,.12) 49%, rgba(0,0,0,.12) 50%, transparent 51%),
+        linear-gradient(-60deg, transparent 48%, rgba(0,0,0,.12) 49%, rgba(0,0,0,.12) 50%, transparent 51%);
+      background-size:120px 220px;
+      background-position:center;
+    }
+    .feature-wrap{position:relative; z-index:2}
+    .feature-layout{
+      display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;
+    }
+    .person-shot{
+      background:linear-gradient(135deg,var(--yellow-soft),#f7f7f7);
+      overflow:hidden; box-shadow:var(--shadow-soft);
+    }
+    .person-shot.left{aspect-ratio:5/6}
+    .person-shot.right{
+      aspect-ratio:4/5; border-radius:50% 50% 46% 46% / 44% 44% 56% 56%;
+    }
+    .floating-cut{
+      position:absolute; width:74px; height:74px; overflow:hidden; box-shadow:var(--shadow-soft);
+      background:linear-gradient(135deg,#eee,#fff);
+      transform:rotate(-8deg);
+    }
+    .floating-cut img{width:100%; height:100%; object-fit:cover}
+    .floating-cut.one{left:31%; bottom:12%}
+    .floating-cut.two{right:8%; top:18%}
+    .feature-dots .dot{width:20px;height:20px}
+
+    .voices{
+      min-height:100vh; display:flex; align-items:center; padding:10vh 0; background:#fff;
+    }
+    .voice-top{
+      display:flex; justify-content:space-between; align-items:flex-start; gap:24px;
+      margin-bottom:32px;
+    }
+    .scribble{
+      width:120px; height:120px; border:1px dashed rgba(0,0,0,.22); border-radius:40% 50% 45% 52%;
+      position:relative; transform:rotate(-10deg);
+    }
+    .scribble::before,.scribble::after{
+      content:""; position:absolute; background:#d8d8d8;
+    }
+    .scribble::before{width:48px;height:28px; right:-10px; bottom:18px; transform:rotate(12deg)}
+    .scribble::after{width:18px;height:18px; left:14px; bottom:-12px; background:#f4e410}
+    .voice-slider-wrap{
+      background:#f5f5f5; padding:40px;
+      position:relative;
+    }
+    .swiper{overflow:hidden}
+    .swiper-wrapper{display:flex}
+    .voice-card{
+      background:#fff; padding:0 0 20px; box-shadow:var(--shadow-soft);
+      height:auto;
+    }
+    .voice-thumb{aspect-ratio:4/3; overflow:hidden; background:linear-gradient(135deg,var(--yellow-soft),#efefef)}
+    .voice-body{padding:18px 18px 0}
+    .voice-body h3{margin:0 0 10px; font-size:1rem; line-height:1.6; font-family:sans-serif}
+    .voice-body p{margin:0; font-size:.88rem; line-height:1.9}
+    .slider-arrow{
+      position:absolute; right:18px; top:18px;
+      width:38px; height:38px; border-radius:50%;
+      border:none; background:#222; color:#fff; cursor:pointer;
+      font-size:1rem;
+    }
+    .voices .btn-wrap{text-align:center; margin-top:24px}
+
+    .magazine{
+      min-height:100vh; display:flex; align-items:center; padding:10vh 0; background:#fff;
+      overflow:hidden;
+    }
+    .wave-top{
+      position:relative; margin-bottom:32px; padding-top:24px;
+    }
+    .flag{
+      width:max-content; margin:0 auto 18px; background:var(--yellow); padding:10px 18px;
+      font-family:sans-serif; font-size:.76rem; letter-spacing:.12em; text-transform:uppercase;
+      border-radius:0 16px 0 0;
+    }
+    .mini-people{
+      position:relative; height:120px;
+    }
+    .mini-people .figure{width:84px}
+    .mini-people .figure .head{width:24px;height:24px}
+    .mini-people .figure .body{width:60px;height:72px}
+    .yellow-wave{
+      background:var(--yellow);
+      padding:80px 0 90px;
+      position:relative;
+      clip-path:polygon(0 12%, 8% 4%, 18% 10%, 28% 0, 39% 9%, 50% 2%, 61% 10%, 72% 0, 83% 8%, 92% 3%, 100% 12%, 100% 90%, 90% 84%, 78% 92%, 66% 82%, 54% 90%, 42% 82%, 30% 90%, 18% 80%, 0 88%);
+    }
+    .mag-grid{
+      width:min(calc(100% - 48px), 900px); margin:0 auto;
+      display:grid; grid-template-columns:1fr 1fr; gap:48px;
+    }
+    .mag-card{
+      background:#fff; padding:16px; box-shadow:var(--shadow-soft);
+    }
+    .mag-photo{aspect-ratio:4/5; overflow:hidden; background:linear-gradient(135deg,#fff3a6,#f7f7f7)}
+    .mag-card h3{margin:14px 0 6px; font-size:1rem; line-height:1.6; font-family:sans-serif}
+    .mag-card time{font-size:.74rem; color:#555}
+    .mag-btn{text-align:center; margin-top:24px}
+
+    .info{
+      min-height:100vh; display:flex; align-items:center; padding:10vh 0; background:#fff;
+    }
+    .info-list{
+      border-top:1px solid var(--line);
+      margin-top:24px;
+    }
+    .info-item{
+      display:grid; grid-template-columns:110px 160px 1fr; gap:20px;
+      padding:22px 0; border-bottom:1px solid var(--line); align-items:center;
+      font-size:.92rem;
+    }
+    .info-item .date{font-size:.78rem}
+    .info-btn{margin-top:24px; text-align:right}
+
+    .cta-band{
+      background:#fff; position:relative; overflow:hidden; padding-top:0;
+    }
+    .text-ground{
+      height:110px;
+      background:
+        radial-gradient(circle at 10px 10px, rgba(0,0,0,.08) 1px, transparent 1.4px) 0 0/12px 12px,
+        linear-gradient(#ededed,#ededed);
+      position:relative;
+    }
+    .band-figures{position:absolute; left:8%; top:-26px; width:240px; height:120px}
+    .stamp{
+      position:absolute; right:10%; top:26px; background:var(--yellow); padding:16px 18px;
+      font-family:sans-serif; font-size:.74rem; line-height:1.4; letter-spacing:.08em; border-radius:0 18px 0 0;
+      box-shadow:var(--shadow-soft);
+    }
+    .cta-core{
+      min-height:calc(100vh - 110px); display:flex; align-items:center; justify-content:center;
+      text-align:center; padding:10vh 24px;
+    }
+    .cta-core .eyebrow{justify-content:center}
+    .cta-core h2{
+      margin:0 0 16px; font-family:sans-serif; font-size:clamp(1.8rem,4vw,3rem); line-height:1.35; letter-spacing:.04em;
+      color:#111;
+    }
+    .cta-core p{max-width:42em; margin:0 auto 24px}
+    .cta-actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+    .line-btn{
+      display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 20px;
+      background:#fff; border:1px solid #111; font-family:sans-serif; font-size:.78rem; letter-spacing:.1em;
+    }
+
+    footer{
+      background:#fff; border-top:1px solid rgba(0,0,0,.06); padding:40px 0 56px;
+    }
+    .footer-grid{
+      display:grid; grid-template-columns:1.2fr .8fr .8fr; gap:32px;
+    }
+    footer h3{margin:0 0 12px; font-family:sans-serif; font-size:.9rem; letter-spacing:.08em}
+    footer p, footer li{font-size:.88rem; line-height:1.9; margin:0}
+    footer ul{list-style:none; padding:0; margin:0}
+    .copyright{margin-top:28px; font-size:.75rem; color:#777}
+
+    html.js .reveal{opacity:0; transform:translateY(26px)}
+    html.js .reveal.active{opacity:1; transform:none; transition:opacity .9s ease, transform .9s ease}
+    html.js .hero-anim{opacity:0}
+    html.js .hero-anim.active{opacity:1; transition:opacity 1.2s ease, transform 1.2s ease}
+    .fade-up{transform:translateY(30px)}
+    .slide-in{transform:translateX(36px)}
+    .zoom-in{transform:scale(.96)}
+    .stagger-1{transition-delay:.08s!important}
+    .stagger-2{transition-delay:.16s!important}
+    .stagger-3{transition-delay:.24s!important}
+    .stagger-4{transition-delay:.32s!important}
+    .floaty{animation:floaty 6s ease-in-out infinite}
+    @keyframes floaty{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+    }
+
+    @media (max-width: 960px){
+      .nav{display:none}
+      .hero,.intro,.places,.works,.feature-visual,.voices,.magazine,.info,.cta-core{min-height:auto}
+      .hero-copy,.intro-grid,.places-grid,.feature-layout,.footer-grid,.works-row,.mag-grid{grid-template-columns:1fr}
+      .hero-left h1{margin-top:56px}
+      .hero-right{justify-content:flex-start; padding-top:0}
+      .vertical-copy{writing-mode:horizontal-tb; font-size:1.35rem; letter-spacing:.08em}
+      .paper-people{height:300px}
+      .hero-foot{flex-direction:column; align-items:flex-start}
+      .yellow-panel{padding:32px 24px}
+      .circle-grid{grid-template-columns:repeat(2,1fr)}
+      .voice-top{flex-direction:column}
+      .info-item{grid-template-columns:1fr; gap:8px}
+      .stamp{position:static; display:inline-block; margin:16px}
+      .cta-actions{flex-direction:column}
+    }
+    @media (max-width: 640px){
+      .container{width:min(calc(100% - 32px), var(--container))}
+      .site-header .inner{width:min(calc(100% - 24px), 1280px)}
+      .circle-grid{grid-template-columns:1fr}
+      .circle-frame{width:120px;height:120px}
+      .voice-slider-wrap{padding:24px}
+      .paper-people{transform:scale(.88); transform-origin:left top}
+    }
+  </style>
+</head>
+<body>
+  <script>document.documentElement.classList.add('js');</script>
+
+  <header class="site-header">
+    <div class="inner">
+      <a href="#" class="logo">
+        <span class="mark">SHIGOTO</span><span>BIYORI</span>
+        <small>B-TYPE SUPPORT</small>
+      </a>
+      <nav class="nav">
+        <a href="#about">私たちについて</a>
+        <a href="#place">通える場所</a>
+        <a href="#works">できること</a>
+        <a href="#voices">利用者の声</a>
+        <a href="#news">お知らせ</a>
+        <a href="#contact">見学・相談</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="topline"></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <div class="hero-left hero-anim fade-up active">
+            <h1>じぶんの<br>ぺーすで、<br>しごとを始める。</h1>
+          </div>
+          <div class="hero-right hero-anim slide-in active">
+            <div class="vertical-copy">ちいさな一歩も、<br>ちゃんと仕事です。</div>
+          </div>
+        </div>
+
+        <div class="paper-people hero-anim zoom-in active">
+          <div class="figure floaty" style="left:2%; top:58px; transform:rotate(-10deg);">
+            <div class="head" style="background:#f4b300"></div>
+            <div class="body" style="background-image:linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,.05)), url('http://127.0.0.1:5000/uploads/up_39f3639774.png');"></div>
+            <div class="memo">週1日から。<br>朝が苦手でも相談できます。</div>
+          </div>
+          <div class="figure floaty" style="left:16%; top:18px; transform:rotate(8deg); animation-delay:.5s;">
+            <div class="head" style="background:#2475c7"></div>
+            <div class="body" style="background-image:linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,.05)), url('http://127.0.0.1:5000/uploads/up_87303358c7.png');"></div>
+            <div class="memo">箱づめ、入力、<br>ものづくり。</div>
+          </div>
+          <div class="figure floaty" style="left:31%; top:40px; transform:rotate(-4deg); animation-delay:1s;">
+            <div class="head" style="background:#b9b9b9"></div>
+            <div class="body" style="background-image:linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,.05)), url('http://127.0.0.1:5000/uploads/up_f40340237c.png');"></div>
+            <div class="memo">利用料は<br>9割以上の方が0円。</div>
+          </div>
+          <div class="figure floaty" style="left:47%; top:72px; transform:rotate(7deg); animation-delay:1.4s;">
+            <div class="head" style="background:#f4b300"></div>
+            <div class="body" style="background-image:linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,.05)), url('http://127.0.0.1:5000/uploads/up_b46f51fd85.png');"></div>
+            <div class="memo">昼食あり。<br>送迎は3ルート。</div>
+          </div>
+          <div class="figure floaty" style="left:62%; top:26px; transform:rotate(-8deg); animation-delay:1.8s;">
+            <div class="head" style="background:#f4e410"></div>
+            <div class="body" style="background-image:linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,.05)), url('http://127.0.0.1:5000/uploads/up_ceb28101cd.png');"></div>
+            <div class="memo">見学だけでも、<br>だいじょうぶ。</div>
+          </div>
+          <div class="figure floaty" style="left:77%; top:56px; transform:rotate(10deg); animation-delay:2.2s;">
+            <div class="head" style="background:#2475c7"></div>
+            <div class="body" style="background-image:linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,.05)), url('http://127.0.0.1:5000/uploads/up_39f3639774.png');"></div>
+            <div class="memo">家族・支援員の<br>同席も歓迎します。</div>
+          </div>
+
+          <span class="dot yellow" style="left:0; top:46px;"></span>
+          <span class="dot blue" style="left:10%; top:10px;"></span>
+          <span class="dot yellow" style="left:41%; top:28px;"></span>
+          <span class="dot yellow" style="left:57%; top:6px;"></span>
+          <span class="dot blue" style="left:91%; top:46px;"></span>
+          <span class="dot yellow" style="left:86%; top:194px;"></span>
+        </div>
+
+        <div class="hero-foot">
+          <div class="hero-meta hero-anim fade-up active">
+            <div>[ OPEN ] 平日 9:30–16:00</div>
+            <div>[ AREA ] 仙台市青葉区・宮城野区・若林区</div>
+            <div>[ ACCESS ] 地下鉄東西線「連坊駅」徒歩4分</div>
+          </div>
+          <div class="hero-cta-note hero-anim fade-up active">
+            <strong class="sans" style="display:block; margin-bottom:8px;">7月の見学枠</strong>
+            電話・フォーム・LINEで受付中。<br>
+            最短で今週金曜の午前にご案内できます。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro" id="about">
+      <div class="container intro-grid">
+        <div class="photo-stack reveal fade-up">
+          <div class="photo-main">
+            <img src="http://127.0.0.1:5000/uploads/up_034d4c10b7.png" alt="" width="560" height="700" onerror="this.style.display='none'">
+          </div>
+          <div class="photo-sub" style="transform:rotate(-4deg);">
+            <img src="http://127.0.0.1:5000/uploads/up_1d421dabc8.png" alt="" width="320" height="320" onerror="this.style.display='none'">
+          </div>
+          <span class="dot yellow" style="left:-10px; top:190px;"></span>
+          <span class="dot blue" style="right:0; bottom:38px;"></span>
+        </div>
+        <div class="intro-copy">
+          <div class="section-head reveal fade-up">
+            <span class="eyebrow">About / 私たちについて</span>
+            <h2>同じ速さを求めない、<br>就労支援B型。</h2>
+            <p>
+              しごと日和は、仙台市青葉区連坊にある就労継続支援B型事業所です。
+              「毎日通えるか不安」「人前が苦手」「まずは生活リズムから整えたい」――
+              そんな方のために、週1日・1時間から始められる通所設計にしています。
+              2026年6月時点で登録利用者は58名、うち14名が一般就労またはA型へ移行しました。
+            </p>
+          </div>
+          <div class="reveal fade-up stagger-1">
+            <a href="#contact" class="btn">見学を申し込む</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="places" id="place">
+      <div class="container places-grid">
+        <div class="note-column reveal fade-up">
+          <div class="tag-vertical">事業所案内</div>
+          <p>
+            明るすぎない照明、席間を広めに取った作業室、静かに過ごせる相談ブース。
+            本人にとって通いやすく、家族にとっても安心できる「ちゃんとした施設」であることを、
+            見た目だけでなく運営でも大切にしています。
+          </p>
+          <a href="#contact" class="btn" style="margin-top:24px;">見学予約へ</a>
+        </div>
+
+        <div class="yellow-panel reveal fade-up stagger-1">
+          <div class="circle-grid">
+            <div class="circle-card">
+              <div class="circle-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="" width="160" height="160" onerror="this.style.display='none'">
+              </div>
+              <span class="cap">連坊オフィス</span>
+            </div>
+            <div class="circle-card">
+              <div class="circle-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" alt="" width="160" height="160" onerror="this.style.display='none'">
+              </div>
+              <span class="cap">作業室A</span>
+            </div>
+            <div class="circle-card">
+              <div class="circle-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_07d8e0124b.png" alt="" width="160" height="160" onerror="this.style.display='none'">
+              </div>
+              <span class="cap">管理者 佐藤</span>
+            </div>
+            <div class="circle-card">
+              <div class="circle-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_88c26af961.png" alt="" width="160" height="160" onerror="this.style.display='none'">
+              </div>
+              <span class="cap">相談ブース</span>
+            </div>
+            <div class="circle-card">
+              <div class="circle-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_c9???.png" alt="" width="160" height="160" onerror="this.style.display='none'">
+              </div>
+              <span class="cap">送迎車 3ルート</span>
+            </div>
+            <div class="circle-card">
+              <div class="circle-frame">
+                <img src="http://127.0.0.1:5000/uploads/up_5ad70dab05.png" alt="" width="160" height="160" onerror="this.style.display='none'">
+              </div>
+              <span class="cap">休憩スペース</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="works" id="works">
+      <div class="container">
+        <div class="works-row">
+          <div class="work-note reveal fade-up">
+            <span class="mini">WORK 01 / できること</span>
+            <h3>軽作業・梱包・封入</h3>
+            <p style="margin:10px 0 0; max-width:32em;">
+              箱づくり、検品、封入、ラベル貼りなど。手順書を見ながら進められる作業が中心です。
+            </p>
+          </div>
+          <div class="work-note reveal fade-up stagger-1">
+            <span class="mini">WORK 02 / できること</span>
+            <h3>PC入力・EC発送補助</h3>
+            <p style="margin:10px 0 0; max-width:32em;">
+              商品登録、文字入力、発送伝票の準備など。集中しやすい席も選べます。
+            </p>
+          </div>
+        </div>
+
+        <div class="wide-image reveal fade-up stagger-2">
+          <img src="http://127.0.0.1:5000/uploads/up_9c262ef683.png" alt="" width="1400" height="460" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-visual">
+      <div class="mesh"></div>
+      <div class="container feature-wrap">
+        <div class="feature-layout">
+          <div style="position:relative;">
+            <div class="person-shot left reveal fade-up">
+              <img src="http://127.0.0.1:5000/uploads/up_0bb716a02d.png" alt="" width="560" height="680" onerror="this.style.display='none'">
+            </div>
+            <div class="floating-cut one reveal zoom-in stagger-2">
+              <img src="http://127.0.0.1:5000/uploads/up_ca0295279d.jpg" alt="" width="100" height="100" onerror="this.style.display='none'">
+            </div>
+            <span class="dot yellow" style="left:-10px; bottom:36px;"></span>
+          </div>
+
+          <div style="position:relative;">
+            <div class="person-shot right reveal fade-up stagger-1">
+              <img src="http://127.0.0.1:5000/uploads/up_00553e2951.png" alt="" width="520" height="620" onerror="this.style.display='none'">
+            </div>
+            <div class="floating-cut two reveal zoom-in stagger-3">
+              <img src="http://127.0.0.1:5000/uploads/up_78c6a0d3e7.jpg" alt="" width="100" height="100" onerror="this.style.display='none'">
+            </div>
+            <span class="dot blue" style="right:14%; top:14px;"></span>
+            <span class="dot yellow" style="right:-6px; top:210px;"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="voices" id="voices">
+      <div class="container">
+        <div class="voice-top">
+          <div class="section-head reveal fade-up" style="margin-bottom:0;">
+            <span class="eyebrow">Voices / 利用者の声</span>
+            <h2>“ここなら通えそう”が、<br>続いた理由。</h2>
+            <p>
+              最初は見学だけ。次に1時間。そんな始まり方をした方がほとんどです。
+              本人の不安と、ご家族の心配、その両方に向き合った声を集めました。
+            </p>
+          </div>
+          <div class="scribble reveal fade-up stagger-1"></div>
+        </div>
+
+        <div class="voice-slider-wrap reveal fade-up stagger-2">
+          <button class="slider-arrow" id="nextBtn" aria-label="次へ">→</button>
+          <div class="swiper" id="voiceSwiper">
+            <div class="swiper-wrapper">
+              <article class="voice-card swiper-slide" style="width:31%; margin-right:24px;">
+                <div class="voice-thumb">
+                  <img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="" width="360" height="270" onerror="this.style.display='none'">
+                </div>
+                <div class="voice-body">
+                  <h3>午前だけの利用から始めました</h3>
+                  <p>
+                    仙台市宮城野区・20代男性。朝が苦手で毎日は難しかったのですが、10時からの短時間利用で続きました。
+                    3か月後には週4日通えるようになりました。
+                  </p>
+                </div>
+              </article>
+
+              <article class="voice-card swiper-slide" style="width:31%; margin-right:24px;">
+                <div class="voice-thumb">
+                  <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="" width="360" height="270" onerror="this.style.display='none'">
+                </div>
+                <div class="voice-body">
+                  <h3>家族も一緒に説明を受けられて安心</h3>
+                  <p>
+                    若林区・40代女性のご家族。受給者証や利用料の話を制度名まで正確に説明してもらえ、
+                    “通わせる”ではなく“一緒に決める”姿勢が信頼できました。
+                  </p>
+                </div>
+              </article>
+
+              <article class="voice-card swiper-slide" style="width:31%;">
+                <div class="voice-thumb">
+                  <img src="http://127.0.0.1:5000/uploads/up_3e8318e559.png" alt="" width="360" height="270" onerror="this.style.display='none'">
+                </div>
+                <div class="voice-body">
+                  <h3>作業の種類が合っていました</h3>
+                  <p>
+                    青葉区・30代女性。人と話し続ける仕事は苦手でしたが、梱包や封入のように
+                    自分のペースで進められる作業が多く、無理なく続いています。
+                  </p>
+                </div>
+              </article>
+
+              <article class="voice-card swiper-slide" style="width:31%; margin-right:24px;">
+                <div class="voice-thumb">
+                  <img src="http://127.0.0.1:5000/uploads/up_2ec02b9651.jpg" alt="" width="360" height="270" onerror="this.style.display='none'">
+                </div>
+                <div class="voice-body">
+                  <h3>静かな席を選べるのが助かります</h3>
+                  <p>
+                    周囲の音が気になる日に、席や作業内容を調整してもらえました。
+                    “今日はここまでで大丈夫”と言ってもらえるだけで、次も来やすくなります。
+                  </p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-wrap reveal fade-up stagger-3">
+          <a href="#contact" class="btn">見学・相談はこちら</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="magazine">
+      <div style="width:100%;">
+        <div class="wave-top reveal fade-up">
+          <div class="flag">Shigoto Biyori Journal</div>
+          <div class="mini-people">
+            <div class="figure" style="left:10%; top:26px; transform:rotate(-6deg);">
+              <div class="head" style="background:#b9b9b9"></div>
+              <div class="body"></div>
+            </div>
+            <div class="figure" style="left:20%; top:14px; transform:rotate(7deg);">
+              <div class="head" style="background:#2475c7"></div>
+              <div class="body"></div>
+            </div>
+            <div class="figure" style="left:32%; top:26px; transform:rotate(-4deg);">
+              <div class="head" style="background:#f4b300"></div>
+              <div class="body"></div>
+            </div>
+            <div class="figure" style="left:46%; top:14px; transform:rotate(6deg);">
+              <div class="head" style="background:#b9b9b9"></div>
+              <div class="body"></div>
+            </div>
+            <div class="figure" style="left:58%; top:24px; transform:rotate(-7deg);">
+              <div class="head" style="background:#2475c7"></div>
+              <div class="body"></div>
+            </div>
+            <div class="figure" style="left:70%; top:20px; transform:rotate(8deg);">
+              <div class="head" style="background:#f4b300"></div>
+              <div class="body"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="yellow-wave reveal fade-up stagger-1">
+          <div class="mag-grid">
+            <article class="mag-card">
+              <div class="mag-photo">
+                <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="" width="420" height="520" onerror="this.style.display='none'">
+              </div>
+              <h3>春の外出レクリエーションを行いました</h3>
+              <time datetime="2026-05-20">2026.05.20</time>
+            </article>
+            <article class="mag-card">
+              <div class="mag-photo">
+                <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="" width="420" height="520" onerror="this.style.display='none'">
+              </div>
+              <h3>新しい送迎ルートが7月から始まります</h3>
+              <time datetime="2026-06-02">2026.06.02</time>
+            </article>
+          </div>
+          <div class="mag-btn">
+            <a href="#news" class="btn dark">くわしく見る</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="info" id="news">
+      <div class="container">
+        <div class="section-head reveal fade-up">
+          <span class="eyebrow">Information / お知らせ</span>
+          <h2>見学日程・制度説明会・<br>日々のこと。</h2>
+        </div>
+
+        <div class="info-list">
+          <div class="info-item reveal fade-up">
+            <div class="date">2026.06.15</div>
+            <div><span class="pill">見学会</span></div>
+            <div>6月の合同見学会を開催します。家族・相談支援専門員の同席も可能です。</div>
+          </div>
+          <div class="info-item reveal fade-up stagger-1">
+            <div class="date">2026.06.08</div>
+            <div><span class="pill">制度案内</span></div>
+            <div>就労継続支援B型の利用手順と受給者証の申請について、個別説明を始めました。</div>
+          </div>
+          <div class="info-item reveal fade-up stagger-2">
+            <div class="date">2026.05.30</div>
+            <div><span class="pill">実績</span></div>
+            <div>2025年度は4名が一般就労、2名が就労継続支援A型へ移行しました。</div>
+          </div>
+          <div class="info-item reveal fade-up stagger-3">
+            <div class="date">2026.05.12</div>
+            <div><span class="pill">募集</span></div>
+            <div>若林区・宮城野区方面の送迎ルートに空きが出ました。朝便・昼便ともに相談可能です。</div>
+          </div>
+          <div class="info-item reveal fade-up stagger-4">
+            <div class="date">2026.04.24</div>
+            <div><span class="pill">日常</span></div>
+            <div>昼食の提供メニューを更新しました。アレルギー対応は事前にご相談ください。</div>
+          </div>
+        </div>
+
+        <div class="info-btn reveal fade-up stagger-4">
+          <a href="#contact" class="btn">お知らせ一覧へ</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band" id="contact">
+      <div class="text-ground">
+        <div class="band-figures">
+          <div class="figure" style="left:0; top:0; transform:rotate(-6deg); width:84px;">
+            <div class="head" style="background:#2475c7; width:24px; height:24px;"></div>
+            <div class="body" style="width:60px; height:72px;"></div>
+          </div>
+          <div class="figure" style="left:70px; top:22px; transform:rotate(8deg); width:84px;">
+            <div class="head" style="background:#f4b300; width:24px; height:24px;"></div>
+            <div class="body" style="width:60px; height:72px;"></div>
+          </div>
+        </div>
+        <div class="stamp">YELLOWな気持ちでなく、<br>しずかな安心を。</div>
+      </div>
+
+      <div class="cta-core">
+        <div>
+          <span class="eyebrow">Contact / 見学・相談</span>
+          <h2>ふらっと見にくるだけでも、<br>大丈夫です。</h2>
+          <p>
+            見学は平日毎日開催。所要時間は45分ほどです。本人のみ・家族同伴・支援者同伴のどれでも可能。
+            利用料、工賃、1日の流れ、通所頻度、送迎、昼食、受給者証のことまで、順を追ってご説明します。
+          </p>
+          <div class="cta-actions">
+            <a class="btn dark" href="tel:022-000-1146">TEL 022-000-1146</a>
+            <a class="btn" href="#">見学フォーム</a>
+            <a class="line-btn" href="#">LINEで相談</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="logo" style="margin-bottom:16px;">
+            <span class="mark">SHIGOTO</span><span>BIYORI</span>
+          </div>
+          <p>
+            就労継続支援B型事業所 しごと日和<br>
+            〒984-0052 宮城県仙台市若林区連坊1-8-21 2F<br>
+            TEL 022-000-1146 ／ FAX 022-000-1147<br>
+            開所時間 9:30–16:00（土日祝休）
+          </p>
+        </div>
+        <div>
+          <h3>Site Map</h3>
+          <ul>
+            <li><a href="#about">私たちについて</a></li>
+            <li><a href="#place">通える場所</a></li>
+            <li><a href="#works">できること</a></li>
+            <li><a href="#voices">利用者の声</a></li>
+            <li><a href="#news">お知らせ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Guide</h3>
+          <p>
+            利用対象：障害福祉サービス受給者証をお持ちの方、または取得予定の方<br>
+            利用料：前年度世帯収入により決定。多くの方が自己負担0円です。<br>
+            工賃：2025年度平均 月額18,420円
+          </p>
+        </div>
+      </div>
+      <div class="copyright">© SHIGOTO BIYORI All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('active');
+          io.unobserve(entry.target);
+        }
+      });
+    }, {threshold:.14, rootMargin:'0px 0px -8% 0px'});
+    revealEls.forEach(el=>io.observe(el));
+
+    const swiper = new Swiper('#voiceSwiper', {
+      slidesPerView: 1.08,
+      spaceBetween: 16,
+      speed: 700,
+      breakpoints: {
+        700: { slidesPerView: 2.1, spaceBetween: 20 },
+        1024:{ slidesPerView: 3, spaceBetween: 24 }
+      }
+    });
+    document.getElementById('nextBtn').addEventListener('click', ()=>swiper.slideNext());
+
+    document.querySelectorAll('.btn, .line-btn, .voice-card, .mag-card').forEach(el=>{
+      el.addEventListener('mouseenter', ()=>{ el.style.transform = (el.classList.contains('voice-card') || el.classList.contains('mag-card')) ? 'translateY(-4px)' : ''; });
+      el.addEventListener('mouseleave', ()=>{ el.style.transform = ''; });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

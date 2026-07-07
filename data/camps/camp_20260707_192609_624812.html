@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>読むたび、街がひらく。| 蒼灯書房</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-soft:#fafafa;
+      --blue:#0071b9;
+      --blue-soft:#b2d4ea;
+      --blue-tint:#f3f9fd;
+      --text:#333333;
+      --yellow:#f2e018;
+      --shadow-soft: 0 10px 28px rgba(0,113,185,.10);
+      --shadow-strong: 0 18px 40px rgba(0,113,185,.16);
+      --radius:8px;
+      --container:1440px;
+      --serif:"Times New Roman", serif;
+      --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Sans","Yu Gothic",sans-serif;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.16rem;
+      --body:.98rem;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+    body{
+      font-family:var(--serif);
+      font-size:var(--body);
+      line-height:2;
+      letter-spacing:.01em;
+      overflow-x:hidden;
+      background:
+        radial-gradient(circle at 92% 8%, rgba(242,224,24,.16), transparent 15%),
+        linear-gradient(180deg, #fff 0%, #fff 100%);
+    }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    .container{width:min(calc(100% - 48px), var(--container));margin-inline:auto}
+    .section{position:relative;padding:10vh 0;min-height:100vh;display:flex;align-items:center}
+    .section.soft{background:var(--blue-tint)}
+    .section.paper{background:linear-gradient(180deg,#fff 0%,#fafafa 100%)}
+    .eyebrow{
+      font-family:var(--sans);
+      color:var(--blue);
+      font-size:.8rem;
+      font-weight:700;
+      letter-spacing:.08em;
+      margin-bottom:16px;
+      display:inline-block;
+      position:relative;
+      padding-left:22px;
+      text-transform:none;
+    }
+    .eyebrow::before{
+      content:"";
+      position:absolute;left:0;top:50%;
+      width:14px;height:1px;background:var(--blue);
+      transform:translateY(-50%);
+    }
+    .title{
+      font-family:var(--sans);
+      font-size:var(--section);
+      line-height:1.35;
+      letter-spacing:.03em;
+      margin:0 0 24px;
+      color:var(--text);
+    }
+    .lede,.body-copy,.narrow p,.faq-answer,.voice-note,.footer p,.plan-note,.flow-text,.service-text{
+      max-width:38em;
+    }
+    .lede{font-size:1rem;line-height:2.05;margin:0}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:14px 24px;border-radius:999px;
+      font-family:var(--sans);font-size:.88rem;font-weight:700;
+      background:var(--blue);color:#fff;border:1px solid transparent;
+      box-shadow:var(--shadow-soft);
+      transition:transform .3s ease, box-shadow .2s cubic-bezier(.42,0,1,1), background-color .2s ease;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-strong)}
+    .btn-outline{
+      background:#fff;color:var(--blue);border-color:rgba(0,113,185,.18)
+    }
+    .round-btn{
+      width:44px;height:44px;border-radius:50%;display:inline-grid;place-items:center;
+      background:#fff;color:var(--blue);box-shadow:var(--shadow-soft);font-weight:700
+    }
+    .site-header{
+      position:sticky;top:0;z-index:30;background:rgba(255,255,255,.84);backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(0,113,185,.08);
+      animation:navFade .5s ease-out;
+    }
+    .site-header.scrolled{box-shadow:0 8px 24px rgba(0,113,185,.08)}
+    @keyframes navFade{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+    .header-inner{
+      width:min(calc(100% - 40px),var(--container));margin:auto;height:72px;
+      display:flex;align-items:center;justify-content:space-between;gap:20px;
+    }
+    .logo{
+      font-family:var(--sans);font-weight:800;font-size:1rem;color:var(--blue);letter-spacing:.02em
+    }
+    .nav{
+      display:flex;align-items:center;gap:24px;font-family:var(--sans);font-size:.78rem;color:#5f7080
+    }
+    .nav a{transition:opacity .15s ease-in-out}
+    .nav a:hover{opacity:.65}
+    .nav-cta{display:flex;gap:12px;align-items:center}
+    .mini-btn{
+      padding:10px 16px;border-radius:999px;font-family:var(--sans);font-size:.75rem;font-weight:700;
+      border:1px solid rgba(0,113,185,.16);background:#fff;color:var(--blue);transition:transform .3s ease
+    }
+    .mini-btn:hover{transform:translateY(-1px)}
+    .mini-btn.fill{background:var(--blue);color:#fff}
+
+    .hero{min-height:100vh;padding-top:8vh;background:#fff}
+    .hero-grid{
+      display:grid;grid-template-columns:1.02fr 1.25fr;gap:40px;align-items:center;
+    }
+    .hero-copy{padding-left:8px;position:relative}
+    .hero-copy::after{
+      content:"読む旅に、\A 出よう。";
+      white-space:pre;
+      position:absolute;right:-34px;top:80px;
+      font-family:var(--sans);font-size:clamp(1.2rem,2.1vw,2rem);line-height:1.5;
+      color:var(--blue);writing-mode:vertical-rl;letter-spacing:.08em;
+    }
+    .hero-mark{
+      font-family:var(--sans);font-size:.72rem;font-weight:700;color:var(--blue);
+      letter-spacing:.1em;margin-bottom:24px;
+    }
+    .hero-title{
+      font-family:var(--sans);font-size:var(--hero);line-height:1.25;letter-spacing:.04em;
+      margin:0 0 24px;color:var(--text);
+    }
+    .hero-title .accent{color:var(--blue)}
+    .hero-copy p{margin:0 0 32px;max-width:31em}
+    .hero-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .hero-visual{
+      position:relative;min-height:640px;display:flex;align-items:center;justify-content:center;
+    }
+    .window-row{
+      position:absolute;inset:0 auto auto 0;width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+      padding-top:24px;
+    }
+    .window{
+      aspect-ratio:1/1;background:linear-gradient(180deg,#7fd0eb 0%,#b7e7f3 56%,#f5f0ea 56%,#f5f0ea 100%);
+      border-radius:10px;border:3px solid #fff;box-shadow:var(--shadow-soft);overflow:hidden;
+    }
+    .window img{width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;opacity:.55}
+    .hero-figure{
+      position:relative;z-index:2;width:min(520px,92%);
+      filter:drop-shadow(0 20px 36px rgba(0,113,185,.12));
+    }
+    .hero-badge{
+      position:absolute;right:30px;top:70px;z-index:3;
+      background:#fff;border:2px solid var(--blue);color:var(--blue);
+      font-family:var(--sans);font-weight:800;font-size:1.15rem;line-height:1.4;
+      writing-mode:vertical-rl;padding:18px 10px;border-radius:8px;letter-spacing:.08em;
+    }
+    .hero-badge.second{right:-8px;top:70px}
+    .hero-object{
+      position:absolute;right:40px;bottom:100px;width:92px;transform:rotate(-8deg)
+    }
+
+    .about-grid{
+      display:grid;grid-template-columns:280px 1fr 170px;gap:48px;align-items:start;width:100%;
+    }
+    .about-side{
+      display:flex;justify-content:flex-end
+    }
+    .vertical-copy{
+      font-family:var(--sans);color:var(--blue);font-size:clamp(1.6rem,2.4vw,2.6rem);
+      writing-mode:vertical-rl;line-height:1.6;letter-spacing:.08em;
+    }
+    .about-main{padding-top:40px}
+    .about-main p{margin:0 0 24px;max-width:35em}
+    .about-main .btn{margin-top:8px}
+    .cta-band{
+      margin-top:48px;background:var(--blue);border-radius:12px;padding:28px 32px;
+      color:#fff;display:grid;grid-template-columns:1.2fr .9fr 180px;gap:24px;align-items:center;
+      box-shadow:var(--shadow-strong);position:relative;overflow:hidden;
+    }
+    .cta-band::before{
+      content:"";
+      position:absolute;right:18%;top:-30px;width:180px;height:180px;border-radius:50%;
+      background:rgba(255,255,255,.14);filter:blur(6px)
+    }
+    .cta-band h3{
+      margin:0 0 8px;font-family:var(--sans);font-size:1.45rem;line-height:1.4;letter-spacing:.03em
+    }
+    .cta-panel{
+      background:#fff;color:var(--text);border-radius:10px;padding:16px 18px;box-shadow:inset 0 0 0 1px rgba(0,113,185,.08)
+    }
+    .cta-panel small{display:block;font-family:var(--sans);color:var(--blue);font-weight:700;letter-spacing:.06em}
+    .cta-illust{
+      align-self:end;justify-self:end;width:150px;transform:translateY(26px)
+    }
+
+    .service-wrap{
+      display:grid;grid-template-columns:220px 1fr 180px;gap:32px;align-items:start;width:100%;
+    }
+    .service-side-note{
+      font-family:var(--sans);font-size:1rem;color:var(--blue);font-weight:700;line-height:1.7;
+      align-self:center;justify-self:end;text-align:right
+    }
+    .service-cards{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:32px;
+    }
+    .service-card{
+      background:#fff;border-radius:12px;padding:0;position:relative
+    }
+    .service-thumb{
+      aspect-ratio:1.05/1;background:linear-gradient(180deg,#edf7fc,#fff);border-radius:12px;
+      box-shadow:var(--shadow-soft);padding:22px;display:flex;align-items:center;justify-content:center;
+    }
+    .service-thumb img{width:100%;height:100%;object-fit:contain}
+    .service-card h3{
+      margin:18px 0 10px;font-family:var(--sans);font-size:1.08rem;line-height:1.5;color:var(--text)
+    }
+    .service-card p{margin:0;color:#555;line-height:1.95}
+    .passport-label{
+      font-family:var(--sans);color:var(--blue);font-weight:800;font-size:.9rem;letter-spacing:.12em;
+      justify-self:end;align-self:start;margin-top:50px;text-align:right
+    }
+
+    .passport{
+      min-height:auto;padding:0;background:linear-gradient(180deg,var(--blue-soft) 0%, #c5e0f0 100%);
+      overflow:hidden;
+    }
+    .passport .container{padding:100px 0 120px;position:relative}
+    .big-running{
+      position:absolute;left:-20px;top:8px;
+      font-family:var(--sans);font-weight:800;font-size:clamp(3rem,6.5vw,7rem);
+      color:var(--blue);opacity:.95;letter-spacing:.01em;white-space:nowrap
+    }
+    .passport-head{
+      position:relative;z-index:1;padding-top:120px;text-align:center
+    }
+    .passport-head .eyebrow{padding-left:0}
+    .passport-head .eyebrow::before{display:none}
+    .passport-head p{max-width:50em;margin:24px auto 0}
+    .passport-grid{
+      margin-top:56px;display:grid;grid-template-columns:1fr 220px 1fr;gap:28px;align-items:end;
+    }
+    .phone-card{
+      background:#fff;border-radius:12px;padding:18px 18px 0;box-shadow:var(--shadow-soft);position:relative
+    }
+    .phone-card h4{
+      margin:0 0 12px;font-family:var(--sans);font-size:.92rem;color:var(--blue);letter-spacing:.04em
+    }
+    .phone{
+      height:420px;border-radius:22px 22px 0 0;background:linear-gradient(180deg,#f7fbfe,#ebf6fb);
+      border:1px solid rgba(0,113,185,.12);padding:18px 14px 0;overflow:hidden
+    }
+    .phone-screen{
+      width:100%;height:100%;background:#fff;border-radius:18px 18px 0 0;padding:18px;
+      box-shadow:inset 0 0 0 1px rgba(0,113,185,.08)
+    }
+    .screen-line,.screen-box,.screen-book{
+      background:#eaf4fb;border-radius:8px
+    }
+    .screen-line{height:10px;margin-bottom:10px}
+    .screen-box{height:72px;margin:16px 0}
+    .screen-book{height:120px}
+    .passport-core{
+      background:var(--blue);color:#fff;border-radius:10px;padding:24px 20px;text-align:center;
+      box-shadow:var(--shadow-strong);margin-bottom:56px
+    }
+    .passport-core strong{display:block;font-family:var(--sans);font-size:1.2rem;margin-bottom:8px}
+    .ticket-wave{
+      position:absolute;left:0;right:0;bottom:-1px;height:120px;
+      background:
+        radial-gradient(circle at 8% 0, transparent 58px, #fff 60px),
+        radial-gradient(circle at 28% 0, transparent 58px, #fff 60px),
+        radial-gradient(circle at 48% 0, transparent 58px, #fff 60px),
+        radial-gradient(circle at 68% 0, transparent 58px, #fff 60px),
+        radial-gradient(circle at 88% 0, transparent 58px, #fff 60px);
+      background-size:20% 100%;
+      background-repeat:no-repeat;
+    }
+
+    .flow-grid{
+      display:grid;grid-template-columns:180px 180px 1fr;gap:40px;align-items:start;width:100%;
+    }
+    .flow-vertical{
+      font-family:var(--sans);color:var(--blue);writing-mode:vertical-rl;
+      font-size:1.1rem;font-weight:700;letter-spacing:.08em;justify-self:center
+    }
+    .flow-center{
+      display:flex;justify-content:center;padding-top:76px
+    }
+    .flow-center img{width:120px;transform:rotate(-8deg)}
+    .flow-list{display:flex;flex-direction:column;gap:44px}
+    .flow-item{
+      display:grid;grid-template-columns:120px 1fr;gap:24px;align-items:center;
+    }
+    .flow-icon{
+      width:110px;height:110px;border-radius:24px;background:linear-gradient(180deg,#f2f9fd,#fff);
+      box-shadow:var(--shadow-soft);display:flex;align-items:center;justify-content:center;padding:14px
+    }
+    .flow-item h3{margin:0 0 10px;font-family:var(--sans);font-size:1.08rem;line-height:1.5}
+    .step{display:block;color:var(--blue);font-size:.8rem;font-weight:700;letter-spacing:.08em;margin-bottom:4px;font-family:var(--sans)}
+
+    .plan-grid{
+      display:grid;grid-template-columns:180px 1fr;gap:56px;align-items:start;width:100%;
+    }
+    .plan-side{
+      font-family:var(--sans);writing-mode:vertical-rl;color:var(--blue);font-size:1.05rem;font-weight:700;letter-spacing:.08em
+    }
+    .plan-main{
+      display:grid;grid-template-columns:360px 1fr;gap:48px;align-items:start
+    }
+    .plan-visual{
+      position:relative;padding-top:8px
+    }
+    .book-stack{
+      width:100%;aspect-ratio:1/1;background:linear-gradient(180deg,#eef7fc,#fff);
+      border-radius:18px;box-shadow:var(--shadow-soft);padding:24px;display:flex;align-items:center;justify-content:center
+    }
+    .price-box{
+      position:absolute;left:30px;bottom:-30px;background:#fff;border-radius:12px;padding:18px 20px;
+      box-shadow:var(--shadow-strong);min-width:250px;border:1px solid rgba(0,113,185,.08)
+    }
+    .price-box small{display:block;font-family:var(--sans);color:var(--blue);font-weight:700}
+    .price{font-family:var(--sans);font-weight:800;font-size:2.3rem;color:var(--blue);line-height:1.1}
+    .plan-table{
+      border-top:1px solid rgba(0,113,185,.2);padding-top:28px;margin-top:18px
+    }
+    .plan-row{
+      display:grid;grid-template-columns:160px 1fr;padding:14px 0;border-bottom:1px solid rgba(0,113,185,.12);
+      gap:20px
+    }
+    .plan-row dt{font-family:var(--sans);font-size:.9rem;color:var(--blue);font-weight:700}
+    .timeline{
+      margin-top:40px;padding-top:28px;border-top:1px solid rgba(0,113,185,.18)
+    }
+    .timeline h3{margin:0 0 20px;font-family:var(--sans);font-size:1.02rem}
+    .timeline-track{
+      display:grid;grid-template-columns:110px 1fr 200px;gap:28px;align-items:center
+    }
+    .months{
+      display:flex;flex-direction:column;gap:18px;font-family:var(--sans);font-size:.82rem;color:#6587a0
+    }
+    .track-bar{
+      position:relative;height:280px;padding-left:26px
+    }
+    .track-bar::before{
+      content:"";position:absolute;left:10px;top:0;bottom:0;width:2px;background:rgba(0,113,185,.25)
+    }
+    .dot{
+      position:absolute;left:0;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--blue);box-shadow:var(--shadow-soft)
+    }
+    .dot.d1{top:10px}.dot.d2{top:118px}.dot.d3{top:228px}
+    .milestone{
+      position:absolute;left:40px;background:#f7fbfe;border-radius:10px;padding:14px 16px;box-shadow:var(--shadow-soft)
+    }
+    .milestone.m1{top:0}.milestone.m2{top:104px}.milestone.m3{top:214px}
+    .timeline-side{
+      display:flex;flex-direction:column;gap:18px
+    }
+    .mini-card{
+      background:var(--blue);color:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-soft)
+    }
+    .mini-card.light{background:#fff;color:var(--text);border:1px solid rgba(0,113,185,.12)}
+
+    .faq{
+      min-height:auto;background:linear-gradient(180deg,#fff 0%, #fbfdff 100%);
+    }
+    .faq-box{
+      position:relative;background:#fff;border-radius:18px;padding:24px 24px 18px;box-shadow:var(--shadow-soft)
+    }
+    .faq-top{
+      display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:12px
+    }
+    .faq-stack{width:82px;transform:rotate(8deg)}
+    .faq-list{margin-top:16px}
+    .faq-item{
+      border-bottom:1px solid rgba(0,113,185,.1)
+    }
+    .faq-q{
+      width:100%;background:none;border:0;padding:18px 0;display:flex;align-items:center;justify-content:space-between;
+      text-align:left;font-family:var(--sans);font-size:.94rem;color:var(--text);cursor:pointer
+    }
+    .faq-q span:first-child{display:flex;align-items:center;gap:12px}
+    .faq-no{
+      width:24px;height:24px;border-radius:50%;background:#eaf4fb;color:var(--blue);display:grid;place-items:center;font-size:.74rem;font-weight:800
+    }
+    .faq-answer{
+      max-height:0;overflow:hidden;transition:max-height .3s ease, opacity .2s ease;
+      opacity:.7;padding-right:42px
+    }
+    .faq-item.open .faq-answer{max-height:180px;opacity:1;padding-bottom:18px}
+    .plus{transition:rotate .3s cubic-bezier(.86,0,.07,1);font-size:1.2rem;color:var(--blue)}
+    .faq-item.open .plus{rotate:45deg}
+    .faq-more{display:flex;justify-content:flex-end;margin-top:18px}
+
+    .voice-grid{
+      display:grid;grid-template-columns:220px 1fr;gap:36px;align-items:start;width:100%;
+    }
+    .voice-track{
+      display:grid;grid-template-columns:repeat(5, minmax(180px,1fr));gap:18px;align-items:start
+    }
+    .voice-card{
+      position:relative;background:#fff;border-radius:16px;padding:18px 16px 20px;box-shadow:var(--shadow-soft);min-height:260px
+    }
+    .voice-card:nth-child(even){margin-top:28px}
+    .voice-card::before{
+      content:"読";
+      position:absolute;right:14px;top:10px;font-family:var(--sans);font-size:1.1rem;color:#cae4f4;font-weight:800
+    }
+    .voice-portrait{
+      width:74px;height:74px;border-radius:50%;background:linear-gradient(180deg,#f0f8fc,#fff);overflow:hidden;
+      margin-bottom:14px;border:1px solid rgba(0,113,185,.1)
+    }
+    .voice-portrait img{width:100%;height:100%;object-fit:cover}
+    .voice-card h3{margin:0 0 8px;font-family:var(--sans);font-size:.96rem;line-height:1.5}
+    .pager{
+      display:flex;justify-content:center;gap:14px;margin-top:28px
+    }
+    .pager span{
+      width:10px;height:10px;border-radius:50%;background:#cbdfee
+    }
+    .pager span.active{background:var(--blue)}
+    .caption-wrap{
+      position:relative;
+    }
+    .caption-blob{
+      position:absolute;right:28px;bottom:22px;width:140px;height:140px;border-radius:50%;
+      background:rgba(178,212,234,.55);filter:blur(28px);z-index:0
+    }
+    .caption-card{
+      position:absolute;right:-22px;bottom:-20px;background:#fff;border-radius:12px;
+      padding:14px 16px;box-shadow:var(--shadow-strong);z-index:2;max-width:240px
+    }
+    .caption-card strong{display:block;font-family:var(--sans);font-size:.86rem;color:var(--blue);margin-bottom:4px}
+
+    .follow{
+      min-height:auto;padding:96px 0 72px;text-align:center
+    }
+    .follow h2{
+      font-family:var(--sans);font-size:2rem;line-height:1.35;letter-spacing:.03em;margin:0 0 12px;color:var(--blue)
+    }
+    .sns{
+      display:inline-flex;gap:12px;align-items:center
+    }
+    .sns a{
+      width:38px;height:38px;border-radius:50%;background:var(--blue);color:#fff;
+      display:grid;place-items:center;font-family:var(--sans);font-size:.9rem;font-weight:700;
+      box-shadow:var(--shadow-soft);transition:transform .3s ease
+    }
+    .sns a:hover{transform:translateY(-2px)}
+    .final-band{
+      padding:12px 0 36px
+    }
+    .final-title{
+      font-family:var(--sans);font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.02;letter-spacing:.01em;
+      color:var(--blue);font-weight:800;margin:0;text-align:left;white-space:nowrap
+    }
+
+    .footer{
+      background:#fff;border-top:1px solid rgba(0,113,185,.08);padding:28px 0 44px
+    }
+    .footer-grid{
+      display:grid;grid-template-columns:1.2fr 1fr auto;gap:24px;align-items:end
+    }
+    .footer-nav{
+      display:flex;flex-wrap:wrap;gap:14px 18px;font-family:var(--sans);font-size:.8rem;color:#617789
+    }
+    .footer small{font-family:var(--sans);color:#7c8d9c}
+
+    @keyframes popIn{
+      0%{opacity:0;transform:scale(.75)}
+      100%{opacity:1;transform:scale(1)}
+    }
+    @keyframes scaleIn{
+      0%{transform:scale(.975)}
+      100%{transform:scale(1)}
+    }
+
+    .js .reveal{opacity:0;transform:translateY(30px)}
+    .js .reveal-left{opacity:0;transform:translateX(-60px)}
+    .js .reveal-right{opacity:0;transform:translateX(60px)}
+    .js .hero-figure-anim{opacity:0;transform:scale(.975)}
+    .js .hero-copy-anim{opacity:0;transform:translateX(-50px)}
+    .js .hero-btn-anim{opacity:0;transform:scale(.8)}
+    .inview,.inview.reveal,.inview.reveal-left,.inview.reveal-right{
+      opacity:1;transform:none;
+      transition:opacity .9s ease-out, transform .9s ease-out;
+    }
+    .hero-loaded{opacity:1!important;transform:none!important;transition:1.2s ease-out}
+    .hero-copy-loaded{opacity:1!important;transform:none!important;transition:1s ease-out}
+    .hero-btn-loaded{animation:popIn .8s cubic-bezier(.34,1.56,.64,1) .6s both}
+    [data-stagger]{transition-delay:calc(var(--i,0) * .15s)}
+    [data-stagger-short]{transition-delay:calc(var(--i,0) * .12s)}
+    [data-stagger-icon]{transition-delay:calc(var(--i,0) * .10s)}
+    .hover-float{transition:transform .3s ease, box-shadow .2s cubic-bezier(.42,0,1,1)}
+    .hover-float:hover{transform:translateY(-4px);box-shadow:var(--shadow-strong)}
+
+    @media (max-width:1100px){
+      .hero-grid,.about-grid,.service-wrap,.passport-grid,.flow-grid,.plan-grid,.plan-main,.voice-grid,.footer-grid,.timeline-track{
+        grid-template-columns:1fr;
+      }
+      .service-cards{grid-template-columns:1fr}
+      .voice-track{grid-template-columns:1fr 1fr}
+      .hero-copy::after,.hero-badge,.hero-badge.second,.about-side,.service-side-note,.passport-label,.flow-vertical,.plan-side{display:none}
+      .window-row{position:relative;padding-top:0;margin-bottom:16px}
+      .hero-visual{min-height:auto}
+      .cta-band{grid-template-columns:1fr}
+      .cta-illust{justify-self:start;transform:none}
+      .price-box{position:relative;left:auto;bottom:auto;margin-top:20px}
+      .timeline-track{gap:20px}
+      .track-bar{height:320px}
+      .final-title{white-space:normal}
+    }
+    @media (max-width:760px){
+      .section{min-height:auto;padding:80px 0}
+      .header-inner{height:64px}
+      .nav{display:none}
+      .container{width:min(calc(100% - 32px),var(--container))}
+      .hero-title{max-width:10em}
+      .voice-track{grid-template-columns:1fr}
+      .passport .container{padding:72px 0 100px}
+      .big-running{top:18px;font-size:2.8rem}
+      .phone{height:320px}
+      .final-band{padding-bottom:24px}
+    }
+  </style>
+</head>
+<body style="">
+  <header class="site-header scrolled" id="header">
+    <div class="header-inner">
+      <a href="#" class="logo">蒼灯書房</a>
+      <nav class="nav">
+        <a href="#about">私たちの棚</a>
+        <a href="#service">選書サービス</a>
+        <a href="#passport">会員証</a>
+        <a href="#flow">めぐり方</a>
+        <a href="#plan">料金</a>
+        <a href="#faq">よくある質問</a>
+      </nav>
+      <div class="nav-cta">
+        <a href="#follow" class="mini-btn">店舗情報</a>
+        <a href="#cta" class="mini-btn fill">入会する</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section hero">
+      <div class="container hero-grid">
+        <div class="hero-copy hero-copy-anim hero-copy-loaded">
+          <div class="hero-mark">SOTO BOOKS / KANDA TOKYO</div>
+          <h1 class="hero-title">読まない日まで、<br><span class="accent">好きになる本屋。</span></h1>
+          <p class="lede">
+            神田小川町で朝8時から開く小さな書店、蒼灯書房。新刊3,200冊と古書870冊を、
+            文芸・建築・詩・郷土史の4つの棚でゆっくり選べます。店内で淹れる深煎り珈琲は1杯420円。
+          </p>
+          <div class="hero-actions">
+            <a href="#about" class="btn hero-btn-anim hero-btn-loaded">もう少し知る <span>→</span></a>
+            <a href="#plan" class="btn btn-outline">月会員について</a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="window-row">
+            <div class="window"><img src="http://127.0.0.1:5000/uploads/up_39f3639774.png" alt="" width="400" height="400" onerror="this.style.display='none'"></div>
+            <div class="window"><img src="http://127.0.0.1:5000/uploads/up_87303358c7.png" alt="" width="400" height="400" onerror="this.style.display='none'"></div>
+            <div class="window"><img src="http://127.0.0.1:5000/uploads/up_39f3639774.png" alt="" width="400" height="400" onerror="this.style.display='none'"></div>
+          </div>
+          <div class="hero-badge">読もたび、</div>
+          <div class="hero-badge second">読む旅。</div>
+          <img class="hero-figure hero-figure-anim hero-loaded" src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_h6hgf9h6hgf9h6hg.png" alt="本を読む人物イラスト" width="700" height="700" onerror="this.style.display='none'">
+          <img class="hero-object" src="http://127.0.0.1:5000/uploads/up_d8b0898129.png" alt="" width="120" height="120" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </section>
+
+    <section class="section paper" id="about">
+      <div class="container">
+        <div class="about-grid">
+          <div>
+            <div class="eyebrow reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">About / 本屋について</div>
+          </div>
+          <div class="about-main narrow">
+            <p class="reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger="" style="--i: 0; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              本を閉じたあと、水上バスに乗ることも、<br>
+              神保町の喫茶店で続きを読むことも、<br>
+              たった一冊の装丁から始まります。
+            </p>
+            <p class="reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger="" style="--i: 1; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              蒼灯書房の棚は、背表紙の色や作家名ではなく、<br>
+              「夕方に読む」「旅に持っていく」「誰かに手渡したくなる」<br>
+              そんな気分の粒でゆるやかにつながっています。
+            </p>
+            <p class="reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger="" style="--i: 2; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              たとえば名取市の郷土詩集、目黒の写真家が撮った深夜の歩道、<br>
+              山形の印刷所で刷られた小部数のZINE。<br>
+              大型店にはない手触りを、東京の真ん中で静かに集めました。
+            </p>
+            <p class="reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger="" style="--i: 3; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              気になれば、棚ごとに付いた短いメモを読んでください。<br>
+              それだけでも、次の休日の行き先が少し変わります。
+            </p>
+            <a href="#cta" class="btn reveal hover-float inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger="" style="--i: 4; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">あたらしい会員証へ</a>
+
+            <div class="cta-band reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" id="cta" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div>
+                <h3>蒼灯書房で<br>読む旅に出る。</h3>
+                <p style="margin:0;opacity:.92">入会すると、月1冊の選書便と店内ラウンジ利用が始まります。</p>
+              </div>
+              <div class="cta-panel">
+                <small>MEMBERSHIP START</small>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px">
+                  <div>
+                    <div style="font-family:var(--sans);font-weight:800;font-size:1.2rem;color:var(--blue)">初月 1,100円</div>
+                    <div style="font-size:.86rem;color:#667">神田店受け取り / 郵送どちらも可</div>
+                  </div>
+                  <a href="#plan" class="btn" style="padding:12px 18px">申し込む</a>
+                </div>
+              </div>
+              <img class="cta-illust" src="http://127.0.0.1:5000/uploads/up_f04018458e.png" alt="青い小鳥イラスト" width="160" height="160" onerror="this.style.display='none'">
+            </div>
+          </div>
+          <div class="about-side">
+            <div class="vertical-copy reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">読む旅に、<br>出よう。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="service">
+      <div class="container">
+        <div class="service-wrap">
+          <div>
+            <div class="eyebrow reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Service / 選べる楽しみ</div>
+          </div>
+
+          <div class="service-cards">
+            <article class="service-card reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--i: 0; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;" data-stagger="">
+              <div class="service-thumb">
+                <img src="http://127.0.0.1:5000/uploads/up_84373df907.png" alt="選書カルテのイメージ" width="360" height="360" onerror="this.style.display='none'">
+              </div>
+              <h3>あなたの読書カルテを作る</h3>
+              <p class="service-text">
+                最初の3分で、「最近最後まで読めた本」「積んでいる理由」「休日の歩き方」をうかがい、
+                スタッフがA6サイズのカルテを記入。次回来店時の棚案内に反映します。
+              </p>
+            </article>
+
+            <article class="service-card reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--i: 1; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;" data-stagger="">
+              <div class="service-thumb">
+                <img src="http://127.0.0.1:5000/uploads/up_bc74a6f631.png" alt="本が飛び出すイラスト" width="360" height="360" onerror="this.style.display='none'">
+              </div>
+              <h3>毎月一箱、店主の選書便</h3>
+              <p class="service-text">
+                仙台の詩人、尾道の古本市、深夜のラジオ特集など、テーマを決めて2冊とリーフレットを発送。
+                封を開けるところから、ひとつの企画展のように届けます。
+              </p>
+            </article>
+
+            <article class="service-card reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--i: 2; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;" data-stagger="">
+              <div class="service-thumb">
+                <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="青い会員証とチケット" width="360" height="360" onerror="this.style.display='none'">
+              </div>
+              <h3>しおり一枚で、街へ回遊</h3>
+              <p class="service-text">
+                レシート裏の地図には、近くの喫茶店「トリノ舎」、額装店「白栞舎」、夜営業の古書スタンドを掲載。
+                買った本の続きを、街のどこで読むかまで提案します。
+              </p>
+            </article>
+          </div>
+
+          <div class="passport-label reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">THE<br>BOOK<br>PASSPORT</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="passport" id="passport">
+      <div class="container">
+        <div class="big-running reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">What is book passport ? What is book passport ?</div>
+        <div class="passport-head">
+          <div class="eyebrow reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Passport / 会員証について</div>
+          <h2 class="title reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">一枚の会員証で、棚と街を行き来する。</h2>
+          <p class="lede reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            「蒼灯パスポート」は、店内ラウンジ利用・読書カルテ・選書便・イベント先行予約をまとめた会員証です。
+            レジで提示すると購入履歴に応じて、おすすめの棚メモや特集冊子がアプリに追加されます。
+          </p>
+        </div>
+
+        <div class="passport-grid">
+          <div class="phone-card reveal-left hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h4>Passport 01<br>パスポート画面</h4>
+            <div class="phone">
+              <div class="phone-screen">
+                <div class="screen-line" style="width:52%"></div>
+                <div class="screen-box"></div>
+                <div class="screen-line" style="width:70%"></div>
+                <div class="screen-line" style="width:92%"></div>
+                <div class="screen-book"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="passport-core reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <strong>BOOK PASSPORT</strong>
+            <div style="font-family:var(--sans);font-size:.85rem;opacity:.84">神田・蔵前・オンライン共通</div>
+          </div>
+
+          <div class="phone-card reveal-right hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <h4>Passport 02<br>カルテの記録</h4>
+            <div class="phone">
+              <div class="phone-screen">
+                <div class="screen-line" style="width:44%"></div>
+                <div class="screen-line" style="width:86%"></div>
+                <div class="screen-box" style="height:58px"></div>
+                <div class="screen-line" style="width:64%"></div>
+                <div class="screen-line" style="width:90%"></div>
+                <div class="screen-box" style="height:110px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ticket-wave"></div>
+      </div>
+    </section>
+
+    <section class="section soft" id="flow">
+      <div class="container">
+        <div class="flow-grid">
+          <div>
+            <div class="eyebrow reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Flow / めぐり方</div>
+          </div>
+          <div class="flow-center reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="青いパスポート" width="140" height="140" onerror="this.style.display='none'">
+          </div>
+          <div class="flow-list">
+            <article class="flow-item reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger="" style="--i: 0; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="flow-icon"><img src="http://127.0.0.1:5000/uploads/up_d83a2a4e87.png" alt="登録のイラスト" width="100" height="100" onerror="this.style.display='none'"></div>
+              <div>
+                <span class="step">STEP 01</span>
+                <h3>会員登録と、いまの読書メモ記入</h3>
+                <p class="flow-text" style="margin:0">
+                  Webで3分。最近読んだ本、気になっている街、読む時間帯を入力すると、
+                  初回の棚案内カードが発行されます。
+                </p>
+              </div>
+            </article>
+
+            <article class="flow-item reveal hover-float inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger="" style="--i: 1; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="flow-icon"><img src="http://127.0.0.1:5000/uploads/up_940e12aa9b.png" alt="点検イラスト" width="100" height="100" onerror="this.style.display='none'"></div>
+              <div>
+                <span class="step">STEP 02</span>
+                <h3>スタッフと5分、読書カルテを整える</h3>
+                <p class="flow-text" style="margin:0">
+                  初回来店時に、神田店のスタッフがカルテを更新。
+                  苦手な分厚さ、装丁の好み、読みたい速度まで拾います。
+                </p>
+              </div>
+            </article>
+
+            <article class="flow-item reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger="" style="--i: 2; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="flow-icon"><img src="http://127.0.0.1:5000/uploads/up_bc74a6f631.png" alt="本を届けるイラスト" width="100" height="100" onerror="this.style.display='none'"></div>
+              <div>
+                <span class="step">STEP 03</span>
+                <h3>月の終わりに、選書便か店頭受取を選ぶ</h3>
+                <p class="flow-text" style="margin:0">
+                  毎月25日に次号のテーマを公開。蔵前の川辺を歩く週末、雨の日の短編、
+                  夜更けのデザイン書など、季節に合う組み合わせをお届けします。
+                </p>
+              </div>
+            </article>
+          </div>
+          <div class="flow-vertical reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">カルテ作成から<br>本との出会いまで</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section paper" id="plan">
+      <div class="container">
+        <div class="plan-grid">
+          <div>
+            <div class="eyebrow reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Plan / 料金</div>
+            <div class="plan-side reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">本と出会う、<br>月々のたのしみ。</div>
+          </div>
+
+          <div class="plan-main">
+            <div class="plan-visual reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="book-stack hover-float">
+                <img src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_lp99p5lp99p5lp99.png" alt="本とボックスのイメージ" width="420" height="420" onerror="this.style.display='none'">
+              </div>
+              <div class="price-box reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+                <small>月額メンバーシップ</small>
+                <div class="price">3,980<span style="font-size:1rem;font-weight:700">円</span></div>
+                <div class="plan-note">税込 / 選書2冊・店内ラウンジ・イベント先行予約付き</div>
+              </div>
+            </div>
+
+            <div class="reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <h2 class="title">神田の棚を、部屋の中まで。</h2>
+              <dl class="plan-table">
+                <div class="plan-row">
+                  <dt>含まれるもの</dt>
+                  <dd>月2冊の選書、オリジナルしおり、読書カルテ更新、店内コーヒー月2杯、会員限定棚の閲覧。</dd>
+                </div>
+                <div class="plan-row">
+                  <dt>受け取り方法</dt>
+                  <dd>店頭受取 / 郵送（全国一律430円）を毎月変更できます。神田店は平日8:00–20:00、土日11:00–19:00。</dd>
+                </div>
+                <div class="plan-row">
+                  <dt>こんな方に</dt>
+                  <dd>本屋に長居したい方、何を読めばよいか迷う方、街歩きと読書をひとつながりで楽しみたい方。</dd>
+                </div>
+                <div class="plan-row">
+                  <dt>初回特典</dt>
+                  <dd>2026年8月入会分までは、蔵前の提携喫茶「雨読堂」のドリンク券1枚を同封します。</dd>
+                </div>
+              </dl>
+
+              <div class="timeline reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <h3>読み始めるまでのイメージ</h3>
+                <div class="timeline-track">
+                  <div class="months">
+                    <span>W1</span>
+                    <span>W2</span>
+                    <span>W3</span>
+                    <span>W4</span>
+                  </div>
+                  <div class="track-bar">
+                    <div class="dot d1"></div>
+                    <div class="dot d2"></div>
+                    <div class="dot d3"></div>
+                    <div class="milestone m1">登録完了<br><small>プロフィール入力</small></div>
+                    <div class="milestone m2">初回来店 or オンライン面談<br><small>カルテの聞き取り</small></div>
+                    <div class="milestone m3">選書便が到着<br><small>月末発送・翌月は継続</small></div>
+                  </div>
+                  <div class="timeline-side">
+                    <div class="mini-card">最短で申し込み当日に店頭利用OK</div>
+                    <div class="mini-card light">会員の継続率 78%<br>2025年4月–2026年3月実績</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="container">
+        <div class="faq-box reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="faq-top">
+            <div>
+              <div class="eyebrow reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">FAQ / よくある質問</div>
+              <h2 class="title reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">はじめての方へ、先に答えておきたいこと。</h2>
+            </div>
+            <img class="faq-stack reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_o2mi8so2mi8so2mi.png" alt="本の束イメージ" width="100" height="100" onerror="this.style.display='none'" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          </div>
+
+          <div class="faq-list">
+            <div class="faq-item reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-short="" style="--i: 0; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <button class="faq-q">
+                <span><span class="faq-no">1</span> 会員にならなくても入店できますか？</span>
+                <span class="plus">＋</span>
+              </button>
+              <div class="faq-answer">
+                もちろん可能です。1階の一般棚はどなたでも利用できます。会員限定なのは2階ラウンジ、月次選書便、読書カルテの保存機能です。
+              </div>
+            </div>
+
+            <div class="faq-item reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-short="" style="--i: 1; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <button class="faq-q">
+                <span><span class="faq-no">2</span> どんな本が届くか事前に選べますか？</span>
+                <span class="plus">＋</span>
+              </button>
+              <div class="faq-answer">
+                ジャンルの希望や避けたいテーマは事前に登録できます。タイトルの完全指定はできませんが、「海外小説は苦手」「写真集を1冊入れたい」など細かい要望に対応しています。
+              </div>
+            </div>
+
+            <div class="faq-item reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-short="" style="--i: 2; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <button class="faq-q">
+                <span><span class="faq-no">3</span> プレゼント用に申し込むことはできますか？</span>
+                <span class="plus">＋</span>
+              </button>
+              <div class="faq-answer">
+                できます。ギフト用は3か月・6か月の2種類。東京都内なら最短2日で発送、メッセージカードも無料で同封します。
+              </div>
+            </div>
+
+            <div class="faq-item reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-short="" style="--i: 3; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <button class="faq-q">
+                <span><span class="faq-no">4</span> 途中で店頭受取から郵送に変更できますか？</span>
+                <span class="plus">＋</span>
+              </button>
+              <div class="faq-answer">
+                毎月20日までにマイページから変更できます。出張や引っ越しの多い方にも使いやすいよう、受け取り方法は柔軟に切り替えられます。
+              </div>
+            </div>
+
+            <div class="faq-item reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-short="" style="--i: 4; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <button class="faq-q">
+                <span><span class="faq-no">5</span> ラウンジでは何ができますか？</span>
+                <span class="plus">＋</span>
+              </button>
+              <div class="faq-answer">
+                会員は90分まで利用可能です。電源席6席、読書用の大机、書き込みできる感想カード、静かなBGMをご用意しています。仕事利用より、読む時間を整える場として設計しています。
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-more">
+            <a href="#follow" class="btn">質問をまとめて見る</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="voice">
+      <div class="container">
+        <div class="voice-grid">
+          <div>
+            <div class="eyebrow reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Voice / 読者の声</div>
+          </div>
+
+          <div>
+            <div class="voice-track">
+              <article class="voice-card reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-icon="" style="--i: 0; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <div class="voice-portrait"><img src="http://127.0.0.1:5000/uploads/up_785a85c0f8.png" alt="読者イラスト" width="100" height="100" onerror="this.style.display='none'"></div>
+                <h3>買う冊数より、読み切る冊数が増えました。</h3>
+                <p class="voice-note">中野区・29歳 / 編集者<br>選書便のメモが短くて、でも的確。4月に届いた河川地形の本から、週末の散歩先が変わりました。</p>
+              </article>
+
+              <article class="voice-card reveal hover-float inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-icon="" style="--i: 1; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <div class="voice-portrait"><img src="http://127.0.0.1:5000/uploads/up_1d9bb593f4.png" alt="読者イラスト" width="100" height="100" onerror="this.style.display='none'"></div>
+                <h3>本屋に行く理由が、またできた。</h3>
+                <p class="voice-note">台東区・34歳 / 設計士<br>会員証を出すと「前回の続きならこちらです」と棚を案内してくれる。小さな店なのに、毎回新鮮です。</p>
+              </article>
+
+              <article class="voice-card reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-icon="" style="--i: 2; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <div class="voice-portrait"><img src="http://127.0.0.1:5000/uploads/up_d047f3036e.png" alt="読者イラスト" width="100" height="100" onerror="this.style.display='none'"></div>
+                <h3>難しい本の入口を、やさしく作ってくれる。</h3>
+                <p class="voice-note">船橋市・41歳 / 会社員<br>思想書は苦手でしたが、関連するエッセイから案内してもらえて助かりました。順番を作ってくれる店です。</p>
+              </article>
+
+              <article class="voice-card reveal hover-float caption-wrap inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-icon="" style="--i: 3; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <div class="caption-blob"></div>
+                <div class="voice-portrait"><img src="http://127.0.0.1:5000/uploads/up_da36dc9307.png" alt="読者イラスト" width="100" height="100" onerror="this.style.display='none'"></div>
+                <h3>喫茶店の一席まで含めて、選書体験でした。</h3>
+                <p class="voice-note">墨田区・27歳 / パティシエ<br>紹介された蔵前の喫茶店で読み始めた短編集が忘れられません。店を出た後まで設計されています。</p>
+                <div class="caption-card">
+                  <strong>読者メモ</strong>
+                  「装丁の青で手に取った一冊が、旅の予定を決めました。」<br>— 会員歴8か月
+                </div>
+              </article>
+
+              <article class="voice-card reveal hover-float in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-stagger-icon="" style="--i: 4; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <div class="voice-portrait"><img src="http://127.0.0.1:5000/uploads/up_6823dd700c.png" alt="読者イラスト" width="100" height="100" onerror="this.style.display='none'"></div>
+                <h3>積読が悪いことじゃなくなりました。</h3>
+                <p class="voice-note">横浜市・38歳 / 営業<br>カルテに「いま読めない本」も残るので、背伸びして買った一冊にも戻りやすい。急かさない本屋です。</p>
+              </article>
+            </div>
+            <div class="pager">
+              <span></span><span class="active"></span><span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-band reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="margin-top: 56px; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div>
+            <h3>蒼灯書房で読む旅に出る。</h3>
+            <p style="margin:0;opacity:.9">まずは店頭での見学だけでも歓迎です。神田店は都営新宿線小川町駅から徒歩4分。</p>
+          </div>
+          <div class="cta-panel">
+            <small>BOOK PASSPORT</small>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px">
+              <div>
+                <div style="font-family:var(--sans);font-weight:800;font-size:1.15rem;color:var(--blue)">LINEで仮登録</div>
+                <div style="font-size:.86rem;color:#667">来店日時の相談も可能</div>
+              </div>
+              <a href="#follow" class="btn">登録する</a>
+            </div>
+          </div>
+          <img class="cta-illust" src="http://127.0.0.1:5000/uploads/up_5c480bccae.png" alt="青い小鳥" width="160" height="160" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </section>
+
+    <section class="follow" id="follow">
+      <div class="container" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+        <div class="eyebrow reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Follow us / 最新情報</div>
+        <h2 class="reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">新刊入荷と夜の読書会は、<br>ここでお知らせしています。</h2>
+        <div class="sns reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="Instagram">IG</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-band">
+      <div class="container">
+        <p class="final-title reveal inview in show is-visible active visible in-view animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">THE BOOK PASSPORT</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:10px">蒼灯書房</div>
+        <p style="margin:0 0 10px">
+          〒101-0052 東京都千代田区神田小川町2-14-7 青栞ビル1F・2F<br>
+          TEL 03-6824-1187 / 営業時間 平日 8:00–20:00 土日 11:00–19:00
+        </p>
+        <small>古物商許可 東京都公安委員会 第301032604218号</small>
+      </div>
+      <div class="footer-nav">
+        <a href="#about">本屋について</a>
+        <a href="#service">選書サービス</a>
+        <a href="#passport">会員証</a>
+        <a href="#flow">めぐり方</a>
+        <a href="#plan">料金</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#">アクセス</a>
+        <a href="#">特定商取引法に基づく表記</a>
+        <a href="#">プライバシーポリシー</a>
+      </div>
+      <small>© 2026 SOTO BOOKS.</small>
+    </div>
+  </footer>
+
+  <script>
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    window.addEventListener('load', () => {
+      document.querySelector('.hero-figure-anim')?.classList.add('hero-loaded');
+      document.querySelector('.hero-copy-anim')?.classList.add('hero-copy-loaded');
+      document.querySelector('.hero-btn-anim')?.classList.add('hero-btn-loaded');
+    });
+
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('inview');
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.22, rootMargin:'0px 0px -12% 0px'});
+
+    document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>observer.observe(el));
+
+    document.querySelectorAll('.faq-item .faq-q').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const item = btn.parentElement;
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div></body></html>

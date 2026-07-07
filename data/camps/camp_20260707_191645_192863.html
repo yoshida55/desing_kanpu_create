@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>はたらく支援室 みなも｜就労継続支援B型</title>
+  <meta name="description" content="週1日・1時間から見学OK。仙台駅から徒歩6分の就労継続支援B型「はたらく支援室 みなも」。軽作業・PC作業・ものづくりを通して、安心して通える毎日を支えます。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-soft:#f6f6f6;
+      --text:#404040;
+      --text-strong:#363636;
+      --muted:#777;
+      --line:#e8dddd;
+      --pink-weak:#fce4e5;
+      --red:#ba2c2f;
+      --red-deep:#a02226;
+      --white:#fff;
+      --shadow-soft:0 8px 24px rgba(186,44,47,.08);
+      --shadow-strong:4px 4px 32px rgba(187,165,165,.3);
+      --radius:12px;
+      --pill:9999px;
+      --container:1440px;
+      --body:1rem;
+      --smallhead:1.15rem;
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --hero:clamp(2.2rem,5vw,3.6rem);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"Noto Sans JP","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro",Meiryo,verdana,Osaka,"ＭＳ Ｐゴシック","MS PGothic",sans-serif}
+    body{line-height:2;letter-spacing:.01em;overflow-x:hidden}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(calc(100% - 48px),var(--container));margin-inline:auto}
+    .section{position:relative;min-height:100vh;padding:10vh 0;display:flex;align-items:center;overflow:hidden}
+    .section.soft{background:linear-gradient(180deg,#fff 0%, #fff 18%, color-mix(in srgb, var(--pink-weak) 32%, white) 100%)}
+    .eyebrow{
+      display:flex;align-items:center;gap:10px;
+      font-size:.86rem;color:var(--red);font-weight:700;letter-spacing:.08em;margin-bottom:18px
+    }
+    .eyebrow::before{
+      content:"";width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block
+    }
+    h1,h2,h3,p{margin:0}
+    h1{
+      font-size:var(--hero);line-height:1.32;letter-spacing:.03em;color:var(--text-strong);font-weight:800;
+      max-width:11em
+    }
+    h2{
+      font-size:var(--section);line-height:1.38;letter-spacing:.03em;color:var(--text-strong);font-weight:800;
+      max-width:14em
+    }
+    h3{font-size:var(--smallhead);line-height:1.5;color:var(--text-strong);font-weight:700}
+    p,.lead,.desc,.meta,.small{font-size:var(--body);line-height:2;max-width:38em}
+    .lead{margin-top:24px;color:var(--text)}
+    .small,.meta{font-size:.93rem;color:#666}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      min-width:180px;padding:14px 22px;border-radius:var(--pill);
+      background:linear-gradient(180deg,var(--red),var(--red-deep));color:#fff;font-weight:700;
+      box-shadow:var(--shadow-soft);transition:transform .25s ease,box-shadow .25s ease,background .2s ease
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(186,44,47,.18)}
+    .btn-outline{
+      background:#fff;color:var(--red);border:1px solid #e7c6c7
+    }
+    .btn .arrow, .link-arrow::after{
+      content:"→";display:inline-block;line-height:1;transform:translateY(-1px)
+    }
+    .hero{
+      background:
+        radial-gradient(circle at 88% 10%, rgba(0,0,0,.05) 0 11%, transparent 11.2%),
+        radial-gradient(circle at 88% 10%, rgba(0,0,0,.15) 0 11.8%, transparent 12.2%),
+        linear-gradient(180deg,#fff 0%,#fbf7f7 100%);
+    }
+    .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;position:relative}
+    .logo-line{
+      display:flex;align-items:center;gap:12px;margin-top:26px;color:var(--text-strong);font-weight:700
+    }
+    .logo-mark{
+      width:34px;height:34px;border-radius:50%;
+      background:radial-gradient(circle at 34% 35%, #fff 0 16%, transparent 17%),
+      linear-gradient(135deg,#d3484a 0%,#ba2c2f 60%,#8f1b1f 100%);
+      position:relative;box-shadow:0 0 0 1px rgba(0,0,0,.04) inset
+    }
+    .hero-visual{position:relative;min-height:560px}
+    .hero-card{
+      position:absolute;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#f7dfe3,#fff);
+      box-shadow:var(--shadow-strong)
+    }
+    .hero-card.main{width:min(100%,530px);right:10px;top:38px;transform:rotate(-7deg)}
+    .hero-card.sub{width:360px;left:40px;bottom:90px;transform:rotate(7deg)}
+    .hero-card .frame{background:linear-gradient(135deg,#f6d7d9 0%,#ffffff 100%);padding:14px}
+    .hero-card img{width:100%;height:300px;object-fit:cover;border-radius:12px}
+    .hero-card.sub img{height:220px}
+    .stripe-glow{
+      position:absolute;right:-10px;top:0;width:230px;height:420px;
+      background:linear-gradient(180deg, rgba(255,179,112,.85), rgba(255,111,181,.78), rgba(178,109,255,.35));
+      filter:blur(18px);opacity:.34;border-radius:120px 120px 0 120px;transform:rotate(15deg)
+    }
+    .floating-cubes{position:absolute;right:80px;top:70px;width:110px;height:110px}
+    .floating-cubes span{
+      position:absolute;display:block;width:44px;height:44px;background:linear-gradient(180deg,#ffb4bf,#d95057);
+      border-radius:2px;box-shadow:var(--shadow-soft)
+    }
+    .floating-cubes span:nth-child(1){right:18px;top:4px}
+    .floating-cubes span:nth-child(2){right:0;top:22px;background:linear-gradient(180deg,#ef6e7b,#a11c23)}
+    .hero-nav{
+      border-top:1px solid #edd7d8;border-bottom:1px solid #edd7d8;background:#fff
+    }
+    .hero-nav .container{display:grid;grid-template-columns:repeat(5,1fr)}
+    .hero-nav a{
+      padding:16px 12px;text-align:center;font-size:.88rem;color:#555;position:relative
+    }
+    .hero-nav a:not(:last-child)::after{
+      content:"";position:absolute;right:0;top:50%;transform:translateY(-50%);width:1px;height:24px;background:#efe2e2
+    }
+
+    .message-wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:48px;align-items:center}
+    .message-left{position:relative;padding-left:60px}
+    .scroll-mark{
+      position:absolute;left:0;top:40px;display:flex;flex-direction:column;align-items:center;gap:12px;color:#b26a6a;font-size:.76rem
+    }
+    .scroll-mark .wheel{
+      width:22px;height:42px;border:1px solid #d9bcbc;border-radius:20px;position:relative
+    }
+    .scroll-mark .wheel::after{
+      content:"";position:absolute;left:50%;top:8px;transform:translateX(-50%);width:4px;height:9px;border-radius:999px;background:#d9bcbc;animation:scrollDot 2s ease infinite
+    }
+    @keyframes scrollDot{
+      0%{opacity:0;transform:translate(-50%,0)}
+      30%{opacity:1}
+      100%{opacity:0;transform:translate(-50%,14px)}
+    }
+    .cityline{
+      position:absolute;left:-40px;right:-40px;bottom:-40px;height:190px;pointer-events:none;opacity:.95
+    }
+    .cityline .building{
+      position:absolute;bottom:0;background:linear-gradient(180deg,#ef8189,#ba2c2f);border-radius:8px 8px 0 0
+    }
+    .cityline .building::before{
+      content:"";position:absolute;inset:12px 10px auto 10px;height:70%;background:
+      linear-gradient(90deg, rgba(255,255,255,.35) 0 12%, transparent 12% 24%, rgba(255,255,255,.35) 24% 36%, transparent 36% 48%, rgba(255,255,255,.35) 48% 60%, transparent 60% 72%, rgba(255,255,255,.35) 72% 84%, transparent 84% 100%);
+      opacity:.35
+    }
+    .cityline .b1{left:60px;width:150px;height:95px}
+    .cityline .b2{left:190px;width:120px;height:120px}
+    .cityline .b3{left:300px;width:170px;height:140px}
+    .cityline .b4{left:455px;width:130px;height:110px}
+    .cityline .b5{left:585px;width:180px;height:150px}
+    .cityline .b6{left:750px;width:115px;height:95px}
+    .cityline .b7{left:855px;width:170px;height:130px}
+    .curve{
+      position:absolute;left:44%;top:120px;width:180px;height:420px;border:6px solid #d9444e;border-color:#d9444e transparent transparent transparent;border-radius:50%;transform:rotate(18deg);opacity:.85
+    }
+    .message-cards{
+      position:relative;display:grid;grid-template-columns:1fr 1fr;gap:28px;padding-bottom:140px
+    }
+    .message-card{
+      border-radius:22px;overflow:hidden;background:#fff;box-shadow:var(--shadow-soft);position:relative
+    }
+    .message-card .thumb{
+      aspect-ratio:1/1.08;background:linear-gradient(135deg,#fce4e5,#f7f7f7);padding:0
+    }
+    .message-card img{width:100%;height:100%;object-fit:cover}
+    .message-card .cap{
+      position:absolute;left:18px;right:18px;bottom:16px;background:#fff;border-radius:999px;
+      padding:10px 16px;font-size:.9rem;font-weight:700;color:var(--text-strong);
+      display:flex;justify-content:space-between;align-items:center;box-shadow:0 10px 24px rgba(186,44,47,.12)
+    }
+    .message-card .cap span:last-child{
+      width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;flex:0 0 auto
+    }
+    .tree{position:absolute;bottom:-6px;width:54px;height:70px}
+    .tree::before{content:"";position:absolute;left:20px;bottom:0;width:8px;height:26px;background:#8c6b5f;border-radius:8px}
+    .tree::after{content:"";position:absolute;left:0;bottom:18px;width:54px;height:40px;background:linear-gradient(180deg,#70d6bb,#2da173);border-radius:50% 50% 45% 45%}
+    .tree.t1{left:72%}.tree.t2{left:82%;transform:scale(1.18)}
+
+    .features-head{max-width:900px;margin:0 auto 48px;text-align:center}
+    .features-head .eyebrow{justify-content:center}
+    .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+    .feature-item{text-align:center}
+    .feature-icon{
+      width:230px;height:230px;margin:0 auto 24px;border-radius:40px;background:
+      radial-gradient(circle at 25% 25%, rgba(255,255,255,.8) 0 16%, transparent 17%),
+      linear-gradient(180deg,#fce4e5 0%,#e5f6fb 100%);
+      box-shadow:var(--shadow-soft);display:flex;align-items:center;justify-content:center;padding:20px
+    }
+    .feature-icon img{width:100%;height:100%;object-fit:contain}
+    .feature-item h3{font-size:1.45rem;color:var(--red);margin-bottom:10px}
+    .center-btn{text-align:center;margin-top:40px}
+
+    .gallery-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .gallery-photo{
+      border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#f1d7d9,#f7f7f7);height:230px
+    }
+    .gallery-photo img{width:100%;height:100%;object-fit:cover}
+
+    .welfare-wrap{display:grid;grid-template-columns:.88fr 1.12fr;gap:48px;align-items:center}
+    .welfare-left{position:relative;padding:40px 30px 40px 10px}
+    .ring-bg{
+      position:absolute;left:-120px;top:-60px;width:620px;height:620px;border-radius:50%;
+      border:6px solid rgba(0,0,0,.1);opacity:.25
+    }
+    .benefit-figure{
+      position:relative;background:linear-gradient(180deg,#fff,#f9f4f5);border-radius:36px;padding:24px;max-width:430px
+    }
+    .benefit-figure .illust{
+      width:100%;aspect-ratio:1/1.05;border-radius:26px;background:linear-gradient(180deg,#e9f9ff,#fdebed);
+      display:flex;align-items:center;justify-content:center;padding:18px
+    }
+    .benefit-figure img{width:100%;height:100%;object-fit:contain}
+    .benefit-cta{margin-top:18px}
+    .benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .benefit-card{
+      background:#fff;border-radius:12px;padding:20px 14px;text-align:center;min-height:150px;
+      box-shadow:0 0 0 1px #f0e6e6 inset, var(--shadow-soft)
+    }
+    .benefit-card .mini{
+      width:66px;height:66px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(180deg,#fce4e5,#f6f6f6);
+      display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--red)
+    }
+    .benefit-card h3{font-size:1rem;line-height:1.6}
+    .benefit-card p{font-size:.86rem;line-height:1.8;max-width:none;color:#666}
+    .corner-card{
+      position:absolute;right:-30px;bottom:-10px;width:190px;height:130px;border-radius:36px;background:linear-gradient(180deg,#c6eef8,#fce4e5);transform:rotate(22deg);opacity:.9
+    }
+
+    .interview-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:34px}
+    .interview-grid{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:18px}
+    .story-card{
+      background:#fff;border-radius:10px;overflow:hidden;position:relative
+    }
+    .story-photo{
+      position:relative;height:250px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#f7d8db,#f0f0f0)
+    }
+    .story-photo img{width:100%;height:100%;object-fit:cover}
+    .story-body{padding:16px 6px 0}
+    .tag{font-size:.76rem;color:var(--red);font-weight:700;margin-bottom:6px}
+    .story-title{font-size:1.22rem;line-height:1.6;margin-bottom:10px}
+    .story-meta{font-size:.82rem;line-height:1.8;color:#777}
+    .story-arrow{
+      position:absolute;right:12px;bottom:12px;width:38px;height:38px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center
+    }
+    .story-accent{
+      position:absolute;left:0;bottom:-1px;width:70%;height:3px;background:#df5a61
+    }
+    .caption-float{
+      position:absolute;right:-14px;bottom:-18px;background:#fff;padding:12px 14px;border-radius:12px;
+      box-shadow:var(--shadow-strong);max-width:220px;z-index:2
+    }
+    .caption-float::before{
+      content:"";position:absolute;inset:auto 18px -10px auto;width:80px;height:28px;background:#f8d9dc;
+      filter:blur(14px);z-index:-1;border-radius:999px
+    }
+
+    .cta-band{
+      min-height:auto;padding:72px 0;background:linear-gradient(180deg,#fff 0%,#f7f2f2 100%);
+      border-top:1px solid #eee
+    }
+    .cta-panel{
+      position:relative;border-radius:18px;padding:30px;background:#fff;box-shadow:var(--shadow-soft)
+    }
+    .cta-brand{
+      display:flex;align-items:center;gap:12px;font-weight:700;margin-bottom:24px
+    }
+    .cta-row{
+      display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:22px
+    }
+    .cta-box{
+      min-height:110px;border-radius:12px;padding:20px;background:linear-gradient(180deg,#f9dede,#fceced);position:relative
+    }
+    .cta-box.strong{background:linear-gradient(180deg,#dd4f58,#ba2c2f);color:#fff}
+    .cta-box h3{font-size:1rem}
+    .cta-box p{font-size:.83rem;line-height:1.8;max-width:none;margin-top:4px}
+    .cta-box .round{
+      position:absolute;right:14px;top:14px;width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.55);display:grid;place-items:center;font-size:.8rem
+    }
+    .cta-box:not(.strong) .round{border-color:#d89da1;color:var(--red)}
+    .footer-links{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px
+    }
+    .link-col{
+      background:#fff;border-radius:12px;padding:22px 22px 18px;box-shadow:0 0 0 1px #f2e7e7 inset
+    }
+    .link-col h4{
+      margin:0 0 12px;font-size:.95rem;color:var(--text-strong);display:flex;align-items:center;gap:8px
+    }
+    .link-col h4::before{
+      content:"";width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block
+    }
+    .link-col ul{list-style:none;padding:0;margin:0}
+    .link-col li{
+      padding:8px 0;border-bottom:1px solid #f3eeee;font-size:.9rem;color:#555;display:flex;justify-content:space-between;gap:8px
+    }
+    .link-col li:last-child{border-bottom:0}
+    .link-col li span:last-child{color:#b8a0a0}
+    .footer-bottom{
+      border-top:1px solid #eee;margin-top:18px;padding-top:14px;font-size:.78rem;color:#777;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap
+    }
+    .footer-bar{
+      background:linear-gradient(180deg,#cb2f36,#a61f25);color:#fff;padding:10px 0;font-size:.72rem
+    }
+    .footer-bar .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+    .deco-dot,.deco-ring{position:absolute;pointer-events:none}
+    .deco-dot{width:8px;height:8px;border-radius:50%;background:#d94c55}
+    .deco-dot.soft{background:#d8d8d8}
+    .deco-ring{border:2px solid rgba(0,0,0,.12);border-radius:50%}
+
+    .hover-lift{transition:transform .3s ease, box-shadow .3s ease}
+    .hover-lift:hover{transform:translateY(-4px);box-shadow:0 16px 30px rgba(186,44,47,.12)}
+
+    html.js .reveal{opacity:0;transform:translateY(34px)}
+    html.js .reveal.in{
+      opacity:1;transform:none;transition:opacity .8s ease,transform .8s cubic-bezier(.16,1,.3,1)
+    }
+    html.js .hero-title{opacity:0;filter:blur(1rem);transform:translateY(1.5rem) scale(.94)}
+    html.js .hero-title.in{animation:openingLogoIn 1.05s ease-out forwards}
+    html.js .hero-copy{opacity:0;transform:translateY(1rem)}
+    html.js .hero-copy.in{transition:opacity .8s ease .16s, transform .8s ease .16s;opacity:1;transform:none}
+    html.js .hero-card.main{opacity:0;filter:blur(.8rem);transform:translate(-8rem,-2rem) rotate(-12deg) scale(.78)}
+    html.js .hero-card.main.in{animation:openingBirdIn 1.6s cubic-bezier(.16,1,.3,1) forwards}
+    html.js .hero-card.sub{opacity:0;transform:scale(.3) rotate(-8deg)}
+    html.js .hero-card.sub.in{animation:openingWashIn 1.8s cubic-bezier(.16,1,.3,1) forwards}
+    html.js .hero-nav{opacity:0;transform:translateY(-4rem)}
+    html.js .hero-nav.in{animation:headerFadeIn .8s ease forwards}
+
+    @keyframes headerFadeIn{
+      0%{opacity:0;transform:translateY(-4rem)}
+      100%{opacity:1;transform:none}
+    }
+    @keyframes openingWashIn{
+      0%{opacity:0;transform:scale(.3) rotate(-8deg)}
+      55%{opacity:.82}
+      100%{opacity:1;transform:scale(1) rotate(7deg)}
+    }
+    @keyframes openingBirdIn{
+      0%{opacity:0;filter:blur(.8rem);transform:translate(-8rem,-2rem) rotate(-14deg) scale(.65)}
+      60%{opacity:1;filter:blur(0)}
+      100%{opacity:1;filter:blur(0);transform:rotate(-7deg) scale(1)}
+    }
+    @keyframes openingLogoIn{
+      0%{opacity:0;filter:blur(1rem);transform:translateY(1.5rem) scale(.94)}
+      100%{opacity:1;filter:blur(0);transform:none}
+    }
+
+    @media (max-width: 1100px){
+      .hero-grid,.message-wrap,.welfare-wrap,.interview-grid,.cta-row,.footer-links{grid-template-columns:1fr}
+      .feature-grid,.benefit-grid,.gallery-strip{grid-template-columns:repeat(2,1fr)}
+      .hero-visual{min-height:500px}
+      .hero-card.sub{left:0}
+      .message-left{padding-left:0}
+      .scroll-mark{display:none}
+      .message-cards{padding-bottom:40px}
+      .interview-head{align-items:flex-start;flex-direction:column}
+      .hero-nav .container{grid-template-columns:repeat(3,1fr)}
+    }
+    @media (max-width: 767px){
+      .section{min-height:auto;padding:88px 0}
+      .container{width:min(calc(100% - 28px),var(--container))}
+      .hero-visual{min-height:380px}
+      .hero-card.main{width:88%;right:0}
+      .hero-card.sub{width:62%;bottom:10px}
+      .hero-card img{height:190px}
+      .hero-card.sub img{height:140px}
+      .feature-grid,.benefit-grid,.gallery-strip,.hero-nav .container{grid-template-columns:1fr}
+      .feature-icon{width:190px;height:190px}
+      .cta-row{grid-template-columns:1fr}
+      .cityline{height:120px}
+      .curve,.ring-bg,.corner-card,.floating-cubes,.stripe-glow{display:none}
+      .caption-float{position:relative;right:auto;bottom:auto;margin-top:12px;max-width:none}
+    }
+  </style>
+</head>
+<body>
+
+  <header class="section hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="hero-title">
+          <div class="eyebrow">就労継続支援B型</div>
+          <h1>まずは週1日から。<br>自分のペースで、<br>はたらく練習を。</h1>
+        </div>
+        <p class="lead hero-copy">仙台駅から徒歩6分。<br>「はたらく支援室 みなも」は、軽作業・PC作業・ものづくりを通して、
+          <strong>“ここなら通えそう”</strong>を大切にする就労継続支援B型です。見学は最短2日後、1時間の体験利用もできます。</p>
+        <div class="logo-line hero-copy">
+          <span class="logo-mark"></span>
+          <span>はたらく支援室 みなも</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="stripe-glow"></div>
+        <div class="floating-cubes"><span></span><span></span></div>
+
+        <div class="hero-card main hover-lift">
+          <div class="frame">
+            <img src="http://127.0.0.1:5000/uploads/up_abd04ea9b.webp" alt="笑顔の女性" width="530" height="300" onerror="this.style.display='none'">
+          </div>
+        </div>
+
+        <div class="hero-card sub hover-lift">
+          <div class="frame">
+            <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="相談風景" width="360" height="220" onerror="this.style.display='none'">
+          </div>
+        </div>
+
+        <span class="deco-dot" style="right:18px; top:160px;"></span>
+        <span class="deco-dot soft" style="left:40px; bottom:70px; width:10px;height:10px;"></span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="hero-nav">
+    <div class="container">
+      <a href="#message">施設トップ</a>
+      <a href="#work">働き方・制度</a>
+      <a href="#interview">利用者インタビュー</a>
+      <a href="#flow">1日の流れ</a>
+      <a href="#cta">見学・相談</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section" id="message">
+      <div class="container message-wrap">
+        <div class="message-left reveal">
+          <div class="scroll-mark">
+            <span>Scroll</span>
+            <span class="wheel"></span>
+          </div>
+          <div class="eyebrow">Message</div>
+          <p class="small" style="color:var(--red);margin-bottom:10px;">見学だけでも大丈夫です</p>
+          <h2>事業所のことを知って、<br>ほっとできる場所かを<br>見に来てください</h2>
+          <p class="lead">みなもでは、就労継続支援B型を初めて利用する方、
+            しばらく外出が不安だった方、ご家族と一緒に探している方にも、
+            わかりやすく丁寧にご案内しています。</p>
+          <p class="lead">作業内容だけでなく、通所日数、送迎、昼食、体調配慮、利用料のことまで、
+            相談員が一つずつお話しします。見学当日に契約をすすめることはありません。</p>
+        </div>
+
+        <div class="message-cards reveal">
+          <div class="curve"></div>
+
+          <article class="message-card hover-lift">
+            <div class="thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_7baf91717c.png" alt="人物イラスト" width="360" height="390" onerror="this.style.display='none'">
+            </div>
+            <div class="cap"><span>見学・体験のご案内</span><span>→</span></div>
+          </article>
+
+          <article class="message-card hover-lift" style="margin-top:56px;">
+            <div class="thumb">
+              <img src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="サポートイラスト" width="360" height="390" onerror="this.style.display='none'">
+            </div>
+            <div class="cap"><span>作業内容とサポート体制</span><span>→</span></div>
+          </article>
+
+          <div class="tree t1"></div>
+          <div class="tree t2"></div>
+
+          <div class="cityline" aria-hidden="true">
+            <span class="building b1"></span>
+            <span class="building b2"></span>
+            <span class="building b3"></span>
+            <span class="building b4"></span>
+            <span class="building b5"></span>
+            <span class="building b6"></span>
+            <span class="building b7"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="work">
+      <div class="container">
+        <div class="features-head reveal">
+          <div class="eyebrow">Work Environment</div>
+          <h2>安心して長く通える、<br>“つづけやすさ”のある場所です</h2>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-item reveal hover-lift">
+            <div class="feature-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_d200fb9732.png" alt="女性のイラスト" width="220" height="220" onerror="this.style.display='none'">
+            </div>
+            <h3>週1日・1時間から</h3>
+            <p>「毎日はまだ不安」という方も大丈夫。午前だけ、午後だけ、在宅相談からのスタートにも対応しています。</p>
+          </article>
+
+          <article class="feature-item reveal hover-lift" style="transition-delay:.12s">
+            <div class="feature-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_818aac54c7.png" alt="3Dイラスト" width="220" height="220" onerror="this.style.display='none'">
+            </div>
+            <h3>軽作業もPCも学べる</h3>
+            <p>封入・検品・箱組み立てのほか、データ入力、EC出品補助、名刺作成など、得意に合わせて選べます。</p>
+          </article>
+
+          <article class="feature-item reveal hover-lift" style="transition-delay:.24s">
+            <div class="feature-icon">
+              <img src="http://127.0.0.1:5000/uploads/up_eef377663d.png" alt="支援イラスト" width="220" height="220" onerror="this.style.display='none'">
+            </div>
+            <h3>相談しやすい支援体制</h3>
+            <p>精神保健福祉士1名、職業指導員4名、生活支援員3名が在籍。通院や生活面の相談も受けています。</p>
+          </article>
+        </div>
+
+        <div class="center-btn reveal">
+          <a class="btn" href="#cta">働き方を相談する <span class="arrow"></span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-label="施設写真">
+      <div class="container">
+        <div class="gallery-strip reveal">
+          <div class="gallery-photo hover-lift">
+            <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" alt="オフィス空間" width="340" height="230" onerror="this.style.display='none'">
+          </div>
+          <div class="gallery-photo hover-lift">
+            <img src="http://127.0.0.1:5000/uploads/up_4bbbe0fee7.png" alt="緑のあるオフィス" width="340" height="230" onerror="this.style.display='none'">
+          </div>
+          <div class="gallery-photo hover-lift">
+            <img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" alt="働く人々" width="340" height="230" onerror="this.style.display='none'">
+          </div>
+          <div class="gallery-photo hover-lift">
+            <img src="http://127.0.0.1:5000/uploads/up_acb5719efd.webp" alt="デスク風景" width="340" height="230" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="flow">
+      <div class="container welfare-wrap">
+        <div class="welfare-left reveal">
+          <div class="ring-bg"></div>
+          <div class="eyebrow">Support / Fee / Program</div>
+          <h2>利用料やお休み制度も。<br>通い始める前に<br>知っておきたいこと</h2>
+          <div class="benefit-figure hover-lift" style="margin-top:28px;">
+            <div class="illust">
+              <img src="http://127.0.0.1:5000/uploads/up_4648c07ccc.png" alt="人物イラスト" width="380" height="380" onerror="this.style.display='none'">
+            </div>
+            <div class="benefit-cta">
+              <a href="#cta" class="btn">利用料・送迎を相談 <span class="arrow"></span></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal">
+          <div class="benefit-grid">
+            <article class="benefit-card hover-lift">
+              <div class="mini">¥</div>
+              <h3>利用料の目安</h3>
+              <p>9割以上の方が自己負担0円。世帯収入に応じて上限が決まります。</p>
+            </article>
+            <article class="benefit-card hover-lift">
+              <div class="mini">★</div>
+              <h3>昼食サポート</h3>
+              <p>1食200円。体調やアレルギーに配慮し、栄養士監修のメニューを提供。</p>
+            </article>
+            <article class="benefit-card hover-lift">
+              <div class="mini">❤</div>
+              <h3>通院・面談配慮</h3>
+              <p>通院日や疲れやすい時間帯に合わせ、通所時間の調整が可能です。</p>
+            </article>
+            <article class="benefit-card hover-lift">
+              <div class="mini">↺</div>
+              <h3>欠席連絡も簡単</h3>
+              <p>電話・フォーム・LINEに対応。当日朝の連絡でも大丈夫です。</p>
+            </article>
+            <article class="benefit-card hover-lift">
+              <div class="mini">🚌</div>
+              <h3>送迎相談OK</h3>
+              <p>宮城野区・若林区の一部で送迎対応。詳細は面談時にご案内します。</p>
+            </article>
+            <article class="benefit-card hover-lift">
+              <div class="mini">☏</div>
+              <h3>家族同席の見学</h3>
+              <p>ご本人だけでなく、ご家族・支援員との見学にも対応しています。</p>
+            </article>
+            <article class="benefit-card hover-lift">
+              <div class="mini">◎</div>
+              <h3>週1日から調整</h3>
+              <p>初月は週1日、その後週3日に増やすなど、無理のない計画を立てます。</p>
+            </article>
+            <article class="benefit-card hover-lift">
+              <div class="mini">✎</div>
+              <h3>1日の流れが明確</h3>
+              <p>10:00朝礼、10:15作業、12:00昼休み、13:00午後作業、15:00終礼です。</p>
+            </article>
+            <article class="benefit-card hover-lift">
+              <div class="mini">⇢</div>
+              <h3>一般就労への支援</h3>
+              <p>履歴書、面接練習、実習同行まで。昨年は11名が一般就労へ進みました。</p>
+            </article>
+          </div>
+          <div class="corner-card" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="interview">
+      <div class="container">
+        <div class="interview-head reveal">
+          <div>
+            <div class="eyebrow">Interview</div>
+            <h2>通い方も、目標もそれぞれ。<br>利用者さんの声をご紹介</h2>
+          </div>
+          <a class="btn btn-outline" href="#cta">見学の前に相談する <span class="arrow"></span></a>
+        </div>
+
+        <div class="interview-grid">
+          <article class="story-card reveal hover-lift">
+            <div class="story-photo">
+              <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="事業所前のスタッフ" width="520" height="250" onerror="this.style.display='none'">
+              <div class="caption-float">
+                <strong style="display:block;color:var(--text-strong);font-size:.95rem;line-height:1.7;">「最初は月4回から。今は週4日通えています」</strong>
+                <span class="small">利用2年目／20代・宮城野区</span>
+              </div>
+            </div>
+            <div class="story-body">
+              <div class="tag">通所歴 / 2年目</div>
+              <h3 class="story-title">人と比べずに続けられたことが、次の一歩につながりました</h3>
+              <p class="story-meta">見学では作業室の静かさと、職員の距離感がちょうどよく感じました。最初は短時間から始め、今はPC入力にも挑戦しています。</p>
+            </div>
+            <span class="story-arrow">→</span>
+            <span class="story-accent"></span>
+          </article>
+
+          <article class="story-card reveal hover-lift" style="transition-delay:.12s">
+            <div class="story-photo">
+              <img src="http://127.0.0.1:5000/uploads/up_9d9264f3c3.png" alt="相談に応じる女性スタッフ" width="420" height="250" onerror="this.style.display='none'">
+            </div>
+            <div class="story-body">
+              <div class="tag">ご家族より</div>
+              <h3 class="story-title">制度の説明が明確で、家族としても安心してお願いできました</h3>
+              <p class="story-meta">就労継続支援B型の利用料、受給者証、送迎の範囲まで、見学時に書面で丁寧に説明がありました。</p>
+            </div>
+            <span class="story-arrow">→</span>
+          </article>
+
+          <article class="story-card reveal hover-lift" style="transition-delay:.24s">
+            <div class="story-photo">
+              <img src="http://127.0.0.1:5000/uploads/up_c833e57cc6.png" alt="女性ポートレート" width="420" height="250" onerror="this.style.display='none'">
+            </div>
+            <div class="story-body">
+              <div class="tag">支援員より</div>
+              <h3 class="story-title">“できる日を増やす”支援を。無理に急がせないことを大切に</h3>
+              <p class="story-meta">通所回数を増やすことだけが目標ではありません。体調の波を把握しながら、その人らしい働き方を一緒に探します。</p>
+            </div>
+            <span class="story-arrow">→</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band" id="cta">
+      <div class="container">
+        <div class="cta-panel reveal">
+          <div class="cta-brand">
+            <span class="logo-mark"></span>
+            <span>はたらく支援室 みなも　就労継続支援B型</span>
+          </div>
+
+          <div class="cta-row">
+            <a href="tel:022-398-7142" class="cta-box hover-lift">
+              <h3>電話で見学予約</h3>
+              <p>022-398-7142<br>平日 9:00〜17:30</p>
+              <span class="round">→</span>
+            </a>
+            <a href="#" class="cta-box strong hover-lift">
+              <h3>見学申込み</h3>
+              <p>最短2日後から受付<br>所要時間は約45分</p>
+              <span class="round">→</span>
+            </a>
+            <a href="#" class="cta-box strong hover-lift">
+              <h3>LINEで相談</h3>
+              <p>ご本人・ご家族どちらもOK<br>写真付きで施設案内を送付</p>
+              <span class="round">→</span>
+            </a>
+            <a href="#" class="cta-box strong hover-lift">
+              <h3>資料ダウンロード</h3>
+              <p>1日の流れ・作業内容・利用料を<br>PDF1冊で確認できます</p>
+              <span class="round">→</span>
+            </a>
+          </div>
+
+          <div class="footer-links">
+            <div class="link-col">
+              <h4>働き方・制度</h4>
+              <ul>
+                <li><span>週1日から通える？</span><span>＋</span></li>
+                <li><span>どんな作業がある？</span><span>＋</span></li>
+                <li><span>利用料の説明</span><span>＋</span></li>
+                <li><span>送迎・昼食について</span><span>＋</span></li>
+              </ul>
+            </div>
+            <div class="link-col">
+              <h4>利用者インタビュー</h4>
+              <ul>
+                <li><span>20代・PC作業に挑戦</span><span>＋</span></li>
+                <li><span>30代・生活リズムの回復</span><span>＋</span></li>
+                <li><span>ご家族の見学レポート</span><span>＋</span></li>
+                <li><span>一般就労へ進んだ事例</span><span>＋</span></li>
+              </ul>
+            </div>
+            <div class="link-col">
+              <h4>事業所情報</h4>
+              <ul>
+                <li><span>所在地</span><span>宮城県仙台市宮城野区榴岡2-4-2</span></li>
+                <li><span>アクセス</span><span>仙台駅東口 徒歩6分</span></li>
+                <li><span>営業時間</span><span>平日 9:00〜17:30</span></li>
+                <li><span>対象</span><span>18歳以上 / 就労継続支援B型</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            <div>施設について ｜ 個人情報保護方針 ｜ サイトマップ</div>
+            <div>見学予約は電話・フォーム・LINEに対応しています</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-bar">
+    <div class="container">
+      <div>はたらく支援室 みなも / 就労継続支援B型</div>
+      <div>Copyright © 2026 Minamo Support Studio.</div>
+    </div>
+  </footer>
+
+  <script>
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('in');
+          const kids = entry.target.querySelectorAll('.reveal');
+          kids.forEach((el,i)=>setTimeout(()=>el.classList.add('in'), i*90));
+        }
+      });
+    },{threshold:.16});
+
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+    const heroEls = [
+      document.querySelector('.hero-title'),
+      document.querySelectorAll('.hero-copy')[0],
+      document.querySelectorAll('.hero-copy')[1],
+      document.querySelector('.hero-card.main'),
+      document.querySelector('.hero-card.sub'),
+      document.querySelector('.hero-nav')
+    ];
+    window.addEventListener('load', ()=>{
+      heroEls.forEach((el,i)=>{
+        if(!el) return;
+        setTimeout(()=>el.classList.add('in'), i*120);
+      });
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click',e=>{
+        const id = a.getAttribute('href');
+        if(id && id !== '#'){
+          const target = document.querySelector(id);
+          if(target){
+            e.preventDefault();
+            target.scrollIntoView({behavior:'smooth', block:'start'});
+          }
+        }
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

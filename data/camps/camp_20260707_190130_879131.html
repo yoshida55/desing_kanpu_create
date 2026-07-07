@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>就労継続支援B型 みどりの実ワークス | 仙台駅東口の就労支援事業所</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#333333;
+      --green:#8ac75a;
+      --green-deep:#74b144;
+      --green-tint:#f6fbf1;
+      --green-tint-2:#eef8e6;
+      --white70:rgba(255,255,255,.72);
+      --line:rgba(138,199,90,.22);
+      --shadow-soft:0 12px 32px rgba(138,199,90,.12);
+      --shadow-strong:0 22px 50px rgba(138,199,90,.18);
+      --radius-lg:32px;
+      --radius-sm:2px;
+      --container:1120px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.15rem;
+      --body:.98rem;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Zen Maru Gothic","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+      color:var(--text);
+      background:var(--bg);
+      line-height:2;
+      letter-spacing:.02em;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    ul{margin:0;padding:0;list-style:none}
+    .container{width:min(var(--container),calc(100% - 48px));margin-inline:auto}
+    .section{
+      position:relative;
+      min-height:100vh;
+      padding:10vh 0;
+      display:flex;
+      align-items:center;
+    }
+    .section.white{background:#fff}
+    .section.tint{background:linear-gradient(180deg,#fff 0%,var(--green-tint) 100%)}
+    .eyebrow{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      font-size:.78rem;
+      letter-spacing:.18em;
+      color:var(--green);
+      text-transform:uppercase;
+      margin-bottom:16px;
+    }
+    .eyebrow::after{
+      content:"";
+      width:54px;
+      height:1px;
+      background:linear-gradient(90deg,var(--green),transparent);
+    }
+    h1,h2,h3,p{margin:0}
+    h1{
+      font-size:var(--hero);
+      line-height:1.32;
+      letter-spacing:.04em;
+      font-weight:700;
+    }
+    h2{
+      font-size:var(--section);
+      line-height:1.38;
+      letter-spacing:.04em;
+      color:var(--green);
+      font-weight:700;
+    }
+    h3{
+      font-size:var(--sub);
+      line-height:1.6;
+      font-weight:700;
+    }
+    p,li,dd,dt,span{
+      font-size:var(--body);
+    }
+    .lede,.copy,.narrow{
+      max-width:38em;
+    }
+    .btns{display:flex;gap:16px;flex-wrap:wrap;margin-top:32px}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:52px;
+      padding:0 24px;
+      border-radius:999px;
+      transition:transform .3s ease, box-shadow .3s ease, background .2s ease, color .2s ease;
+      font-weight:700;
+      border:1px solid transparent;
+    }
+    .btn.primary{
+      background:var(--green);
+      color:#fff;
+      box-shadow:var(--shadow-soft);
+    }
+    .btn.secondary{
+      background:#fff;
+      color:var(--green-deep);
+      border-color:rgba(138,199,90,.35);
+    }
+    .btn:hover{
+      transform:translateY(-2px);
+      box-shadow:var(--shadow-strong);
+    }
+
+    .site-header{
+      position:absolute;
+      top:0;left:0;right:0;
+      z-index:20;
+      padding:32px 0 0;
+    }
+    .header-card{
+      background:rgba(255,255,255,.9);
+      border-radius:999px;
+      padding:18px 22px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+      box-shadow:0 10px 24px rgba(138,199,90,.08);
+      backdrop-filter:blur(8px);
+    }
+    .brand{
+      display:flex;align-items:center;gap:16px;
+      min-width:0;
+    }
+    .brand-mark{
+      width:58px;height:58px;flex:0 0 58px;
+      object-fit:contain;
+    }
+    .brand-text strong{
+      display:block;
+      font-size:1rem;
+      font-weight:700;
+      color:#2f2f2f;
+      line-height:1.4;
+    }
+    .brand-text small{
+      display:block;
+      color:#65715c;
+      font-size:.78rem;
+      line-height:1.7;
+      max-width:36em;
+    }
+    .nav{
+      display:flex;align-items:center;gap:22px;
+      font-size:.82rem;
+      white-space:nowrap;
+    }
+    .nav a{
+      position:relative;
+      color:#474747;
+    }
+    .nav a::after{
+      content:"";
+      position:absolute;
+      left:0;bottom:-5px;
+      width:100%;height:1px;
+      background:var(--green);
+      transform:scaleX(0);
+      transform-origin:left;
+      transition:transform .25s ease;
+    }
+    .nav a:hover::after{transform:scaleX(1)}
+    .menu-badge{
+      width:44px;height:44px;border-radius:50%;
+      background:var(--green);
+      color:#fff;display:grid;place-items:center;
+      box-shadow:var(--shadow-soft);
+      flex:0 0 auto;
+    }
+
+    .hero{
+      min-height:100vh;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 78% 18%, rgba(255,168,86,.38), transparent 20%),
+        radial-gradient(circle at 70% 28%, rgba(238,112,193,.22), transparent 18%),
+        radial-gradient(circle at 86% 20%, rgba(93,140,255,.18), transparent 18%),
+        linear-gradient(180deg,#edf6fb 0%, #f7fbff 24%, #fff 45%);
+    }
+    .cloud{
+      position:absolute;opacity:.55;pointer-events:none;
+      filter:blur(.2px);
+    }
+    .cloud.one{top:72px;left:16%;width:92px}
+    .cloud.two{top:120px;right:16%;width:110px}
+    .bird{
+      position:absolute;
+      right:8%;
+      top:130px;
+      width:76px;
+      opacity:.9;
+    }
+    .hillscape{
+      position:absolute;left:0;right:0;bottom:0;
+      height:54vh;
+      pointer-events:none;
+    }
+    .hillscape::before{
+      content:"";
+      position:absolute;inset:auto 0 0 0;
+      height:78%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.28) 0 2px, transparent 3px) 0 0/52px 52px,
+        linear-gradient(180deg,#d9ef87 0%, #c1e066 55%, #9ed054 100%);
+      clip-path:ellipse(78% 55% at 50% 100%);
+    }
+    .hillscape::after{
+      content:"";
+      position:absolute;inset:auto 0 0 0;
+      height:58%;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.15),transparent 30%),
+        linear-gradient(180deg,#b6df5f 0%, #95ca4d 100%);
+      clip-path:ellipse(85% 46% at 50% 100%);
+      opacity:.88;
+    }
+    .hill-items{
+      position:absolute;left:0;right:0;bottom:23vh;
+      display:flex;justify-content:center;gap:48px;align-items:flex-end;
+      padding:0 7vw;
+    }
+    .mini-item{
+      object-fit:contain;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.04));
+    }
+    .mini-item.tree1{width:78px}
+    .mini-item.tree2{width:104px}
+    .mini-item.house{width:98px}
+    .mini-item.person{width:70px}
+    .hero-inner{
+      position:relative;z-index:3;
+      padding-top:132px;
+      width:min(var(--container),calc(100% - 48px));
+      margin:0 auto;
+    }
+    .hero-logo-line{
+      display:flex;align-items:flex-start;gap:22px;
+      margin-bottom:18px;
+    }
+    .hero-logo{
+      width:92px;object-fit:contain;flex:0 0 92px;
+    }
+    .hero-copy{
+      max-width:720px;
+      margin-bottom:42px;
+    }
+    .hero-copy h1{
+      color:#3c3c3c;
+      margin-bottom:18px;
+    }
+    .hero-copy h1 .accent{color:var(--green)}
+    .hero-copy p{max-width:40em}
+    .news-card{
+      position:relative;
+      margin-top:26vh;
+      background:var(--white70);
+      border-radius:28px;
+      padding:28px 30px;
+      box-shadow:0 14px 36px rgba(138,199,90,.12);
+      backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,.65);
+    }
+    .news-head{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:16px;margin-bottom:18px;
+    }
+    .news-title{
+      display:flex;align-items:flex-end;gap:14px;
+    }
+    .news-title strong{
+      font-size:1.7rem;color:var(--green);letter-spacing:.14em;
+    }
+    .news-title span{
+      font-size:.8rem;color:#666;
+    }
+    .news-more{
+      font-size:.8rem;
+      color:#64854d;
+      border:1px solid rgba(138,199,90,.4);
+      padding:7px 14px;
+      border-radius:999px;
+      background:#fff;
+    }
+    .news-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:18px;
+    }
+    .news-item{
+      padding-right:16px;
+      border-right:1px solid rgba(138,199,90,.16);
+    }
+    .news-item:last-child{border-right:none}
+    .pill{
+      display:inline-block;
+      background:var(--green);
+      color:#fff;
+      font-size:.7rem;
+      border-radius:999px;
+      padding:3px 10px;
+      line-height:1.5;
+      margin-bottom:10px;
+    }
+    .date{
+      display:block;
+      font-size:.72rem;
+      color:#7f7f7f;
+      margin-bottom:6px;
+    }
+    .news-item a{
+      font-size:.86rem;
+      line-height:1.75;
+      display:block;
+    }
+
+    .concept-space{
+      align-items:flex-start;
+      padding-top:15vh;
+    }
+    .concept-box{
+      width:100%;
+    }
+    .concept-lead{
+      margin-top:12px;
+      max-width:18em;
+    }
+
+    .wave-area{
+      min-height:120vh;
+      background:
+        radial-gradient(circle at 78% 12%, rgba(255,184,116,.15), transparent 18%),
+        linear-gradient(180deg,#fff 0 18%, transparent 18%);
+      overflow:hidden;
+    }
+    .wave-area .bg-wave{
+      position:absolute;
+      inset:18% 0 8% 0;
+      background:
+        radial-gradient(circle at 18% 28%, rgba(255,255,255,.22) 0 2px, transparent 3px) 0 0/44px 44px,
+        linear-gradient(180deg,#d7ef86 0%, #c3e166 48%, #b0d954 100%);
+      border-radius:44% 56% 43% 57% / 13% 14% 12% 11%;
+      transform:scale(1.08);
+      filter:saturate(1.02);
+    }
+    .story-card{
+      position:relative;
+      z-index:2;
+      width:min(var(--container),calc(100% - 48px));
+      margin-inline:auto;
+      background:#fff;
+      border-radius:var(--radius-lg);
+      min-height:74vh;
+      box-shadow:0 14px 40px rgba(138,199,90,.12);
+      overflow:hidden;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      border:1px solid rgba(255,255,255,.7);
+    }
+    .story-copy{
+      padding:48px 52px 22px;
+      max-width:650px;
+    }
+    .story-visual{
+      position:relative;
+      background:linear-gradient(180deg,#fff 0 50%, #87c958 50% 100%);
+      overflow:hidden;
+    }
+    .story-visual::before{
+      content:"";
+      position:absolute;
+      left:-3%;
+      right:-3%;
+      top:36%;
+      height:160px;
+      background:#fff;
+      border-radius:50% 50% 0 0 / 100% 100% 0 0;
+      transform:rotate(-2deg);
+    }
+    .story-visual .center-tree{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:28%;
+      width:110px;
+      z-index:2;
+    }
+    .flowers{
+      position:absolute;left:50%;transform:translateX(-50%);
+      bottom:34%;width:min(520px,84%);
+      display:flex;justify-content:space-between;
+      opacity:.86;
+      z-index:2;
+    }
+    .flowers span{
+      width:9px;height:9px;border-radius:50%;
+      background:#ff8fb1;
+      box-shadow:0 0 0 3px rgba(255,255,255,.8);
+    }
+
+    .cta-band-wrap{
+      padding:96px 0 80px;
+      min-height:auto;
+      display:block;
+      background:#fff;
+    }
+    .cta-band{
+      position:relative;
+      background:#fff;
+      border:1px solid rgba(138,199,90,.32);
+      border-radius:28px;
+      padding:42px 46px;
+      min-height:230px;
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:28px;
+      align-items:center;
+      box-shadow:0 10px 24px rgba(138,199,90,.07);
+    }
+    .cta-band::before{
+      content:"";
+      position:absolute;
+      inset:auto auto -12px 28px;
+      width:180px;height:34px;
+      background:rgba(138,199,90,.12);
+      filter:blur(20px);
+      z-index:-1;
+    }
+    .cta-meta{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      color:#698458;
+      font-size:.85rem;
+    }
+    .tel-box{
+      justify-self:end;
+      text-align:right;
+    }
+    .tel-box strong{
+      display:block;
+      font-size:2rem;
+      line-height:1.3;
+      color:var(--green-deep);
+    }
+    .tel-box span{
+      display:block;
+      color:#777;
+      font-size:.82rem;
+    }
+
+    footer{
+      position:relative;
+      background:
+        linear-gradient(180deg,#fff 0 4%, transparent 4%),
+        linear-gradient(180deg,#a6d760 0%, #91cb50 100%);
+      color:#fff;
+      overflow:hidden;
+    }
+    .footer-top-ornaments{
+      display:flex;
+      justify-content:center;
+      gap:44px;
+      align-items:flex-end;
+      padding-top:30px;
+      transform:translateY(-20px);
+    }
+    .footer-top-ornaments img{
+      object-fit:contain;
+      filter:drop-shadow(0 5px 10px rgba(0,0,0,.05));
+    }
+    .footer-inner{
+      width:min(var(--container),calc(100% - 48px));
+      margin:0 auto;
+      padding:36px 0 72px;
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr .8fr;
+      gap:40px;
+    }
+    .footer-col h4{
+      margin:0 0 12px;
+      font-size:.92rem;
+      font-weight:700;
+      color:#fff;
+      border-bottom:1px solid rgba(255,255,255,.35);
+      padding-bottom:10px;
+    }
+    .footer-brand strong{
+      display:block;
+      font-size:.95rem;
+      margin-bottom:10px;
+    }
+    .footer-brand address{
+      font-style:normal;
+      font-size:.9rem;
+      line-height:1.9;
+      opacity:.96;
+    }
+    .footer-tel{
+      margin-top:8px;
+      font-size:1.85rem;
+      line-height:1.2;
+      font-weight:700;
+      letter-spacing:.04em;
+    }
+    .footer-col li{
+      margin:4px 0;
+      font-size:.88rem;
+      opacity:.97;
+    }
+    .footer-bottom{
+      background:#fff;
+      color:#777;
+      padding:18px 0 24px;
+    }
+    .footer-bottom-inner{
+      width:min(var(--container),calc(100% - 48px));
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+      flex-wrap:wrap;
+    }
+    .partner-logos{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+    .partner-logos .logo-chip{
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--green-tint);
+      color:#5a7a40;
+      font-size:.75rem;
+      font-weight:700;
+    }
+    .copyright{
+      font-size:.72rem;
+      color:#8a8a8a;
+    }
+
+    .caption-photo{
+      position:relative;
+      overflow:visible;
+    }
+    .caption-photo::before{
+      content:"";
+      position:absolute;
+      width:180px;height:120px;
+      background:rgba(138,199,90,.18);
+      filter:blur(38px);
+      right:-16px;bottom:-26px;
+      z-index:-1;
+      border-radius:50%;
+    }
+    .caption-card{
+      position:absolute;
+      right:-18px;
+      bottom:-18px;
+      background:#fff;
+      color:#4a4a4a;
+      padding:14px 16px;
+      border-radius:18px;
+      box-shadow:var(--shadow-soft);
+      max-width:220px;
+      line-height:1.8;
+    }
+    .caption-card strong{
+      display:block;
+      color:var(--green-deep);
+      font-size:.82rem;
+      margin-top:4px;
+    }
+
+    .reveal{opacity:1;transform:none}
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(28px);
+      transition:opacity .8s ease, transform .8s cubic-bezier(.16,1,.3,1);
+    }
+    html.js .reveal.show{
+      opacity:1;
+      transform:none;
+    }
+    html.js .hero-logo-line{animation:heroLogo 1.05s ease-out both}
+    html.js .hero-copy{animation:heroText 1.15s cubic-bezier(.16,1,.3,1) .08s both}
+    html.js .news-card{animation:heroCard 1.25s cubic-bezier(.16,1,.3,1) .18s both}
+    html.js .bird{animation:birdIn 1.6s cubic-bezier(.16,1,.3,1) both}
+    html.js .header-card{animation:headerIn .9s cubic-bezier(.16,1,.3,1) both}
+    @keyframes headerIn{
+      from{opacity:0;transform:translateY(-3rem)}
+      to{opacity:1;transform:none}
+    }
+    @keyframes heroLogo{
+      from{opacity:0;filter:blur(1rem);transform:translateY(1.2rem) scale(.95)}
+      to{opacity:1;filter:blur(0);transform:none}
+    }
+    @keyframes heroText{
+      0%{opacity:0;transform:translateY(2rem)}
+      100%{opacity:1;transform:none}
+    }
+    @keyframes heroCard{
+      0%{opacity:0;transform:translateY(2rem) scale(.98)}
+      100%{opacity:1;transform:none}
+    }
+    @keyframes birdIn{
+      0%{opacity:0;filter:blur(.6rem);transform:translate(-10rem,-4rem) rotate(-12deg) scale(.72)}
+      60%{opacity:1;filter:blur(0)}
+      100%{opacity:1;transform:none}
+    }
+
+    @media (max-width: 980px){
+      .nav{display:none}
+      .hero-inner{padding-top:122px}
+      .news-grid{grid-template-columns:1fr 1fr}
+      .cta-band{grid-template-columns:1fr}
+      .tel-box{justify-self:start;text-align:left}
+      .footer-inner{grid-template-columns:1fr 1fr}
+      .hill-items{gap:22px;bottom:25vh}
+    }
+    @media (max-width: 720px){
+      .section{min-height:auto;padding:88px 0}
+      .hero{min-height:auto;padding-bottom:220px}
+      .brand-text small{display:none}
+      .header-card{padding:14px 16px}
+      .brand-mark{width:46px;height:46px;flex-basis:46px}
+      .hero-logo{width:72px;flex-basis:72px}
+      .hero-logo-line{align-items:center}
+      .news-card{margin-top:18vh;padding:22px}
+      .news-grid{grid-template-columns:1fr}
+      .news-item{border-right:none;border-bottom:1px solid rgba(138,199,90,.16);padding:0 0 14px;margin-bottom:14px}
+      .news-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+      .story-card{min-height:auto}
+      .story-copy{padding:34px 28px 18px}
+      .story-visual{min-height:340px}
+      .cta-band{padding:28px}
+      .footer-inner{grid-template-columns:1fr;gap:24px}
+      .footer-top-ornaments{gap:18px}
+      .hill-items{bottom:28vh}
+      .mini-item.tree1{width:54px}
+      .mini-item.tree2{width:72px}
+      .mini-item.house{width:68px}
+      .mini-item.person{width:46px}
+      .caption-card{position:static;margin-top:12px}
+      .caption-photo::before{display:none}
+    }
+  </style>
+</head>
+<body>
+  <script>document.documentElement.classList.add('js');</script>
+
+  <section class="hero">
+    <img class="cloud one" src="http://127.0.0.1:5000/uploads/up_39f3639774.png" alt="" onerror="this.style.display='none'">
+    <img class="cloud two" src="http://127.0.0.1:5000/uploads/up_39f3639774.png" alt="" onerror="this.style.display='none'">
+    <img class="bird" src="http://127.0.0.1:5000/uploads/up_f04018458e.png" alt="" onerror="this.style.display='none'">
+
+    <header class="site-header">
+      <div class="container">
+        <div class="header-card">
+          <div class="brand">
+            <img class="brand-mark" src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="みどりの実ワークス ロゴ" onerror="this.style.display='none'">
+            <div class="brand-text">
+              <strong>就労継続支援B型 みどりの実ワークス</strong>
+              <small>仙台駅東口から徒歩4分。見学・体験は平日毎日受付。はじめての方も、ご家族のご相談も、ゆっくりお聞きします。</small>
+            </div>
+          </div>
+          <nav class="nav" aria-label="グローバルナビゲーション">
+            <a href="#top">TOP</a>
+            <a href="#about">みどりの実とは</a>
+            <a href="#work">作業と1日の流れ</a>
+            <a href="#results">就職実績</a>
+            <a href="#fee">利用料のご案内</a>
+            <a href="#contact">ご相談・見学</a>
+          </nav>
+          <div class="menu-badge" aria-label="メニュー">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 7h14M5 12h14M5 17h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="hero-inner" id="top">
+      <div class="hero-logo-line">
+        <img class="hero-logo" src="http://127.0.0.1:5000/uploads/up_b46f51fd85.png" alt="" onerror="this.style.display='none'">
+        <div class="hero-copy">
+          <h1>自分のペースで、<span class="accent">はたらく練習</span>を。<br>週1日から始められる、仙台のB型事業所です。</h1>
+          <p class="lede">開設12年、延べ348名が利用。箱づめ・検品・手芸・PC入力など、顔ぶれに合わせた仕事を用意しています。本人には「ここなら通えそう」を、ご家族には「ちゃんとしている安心」を、同じページで伝えます。</p>
+          <div class="btns">
+            <a class="btn primary" href="#contact">見学を申し込む</a>
+            <a class="btn secondary" href="tel:0224277789">電話で相談する</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-card">
+        <div class="news-head">
+          <div class="news-title">
+            <strong>NEWS</strong>
+            <span>お知らせ</span>
+          </div>
+          <a class="news-more" href="#">すべて見る</a>
+        </div>
+        <div class="news-grid">
+          <article class="news-item">
+            <span class="pill">見学会</span>
+            <span class="date">2026.07.03</span>
+            <a href="#">7月の見学説明会を公開しました。ご家族のみの参加も可能です。</a>
+          </article>
+          <article class="news-item">
+            <span class="pill">送迎</span>
+            <span class="date">2026.06.25</span>
+            <a href="#">宮城野・若林方面の送迎ルートを1便追加しました。</a>
+          </article>
+          <article class="news-item">
+            <span class="pill">実績</span>
+            <span class="date">2026.06.18</span>
+            <a href="#">2025年度は14名が一般就労へ。定着6か月は92%でした。</a>
+          </article>
+          <article class="news-item">
+            <span class="pill">体験利用</span>
+            <span class="date">2026.06.10</span>
+            <a href="#">初回体験は2時間から。昼食前までの短時間も選べます。</a>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="hillscape"></div>
+    <div class="hill-items" aria-hidden="true">
+      <img class="mini-item tree1" src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="" onerror="this.style.display='none'">
+      <img class="mini-item tree2" src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_76ex8f76ex8f76ex.png" alt="" onerror="this.style.display='none'">
+      <img class="mini-item person" src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="" onerror="this.style.display='none'">
+      <img class="mini-item house" src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_luk6ctluk6ctluk6.png" alt="" onerror="this.style.display='none'">
+      <img class="mini-item tree1" src="http://127.0.0.1:5000/uploads/up_fa6471b419.png" alt="" onerror="this.style.display='none'">
+    </div>
+  </section>
+
+  <section class="section white concept-space" id="about">
+    <div class="container concept-box">
+      <div class="reveal">
+        <div class="eyebrow">Concept <span>みどりの実の想い</span></div>
+        <h2>あせらなくていい。<br>ひとり取り残さない支援。</h2>
+        <p class="concept-lead">「毎日通わなきゃ」と思うと、最初の一歩が重くなることがあります。みどりの実ワークスは、週1日・1日2時間から相談OK。相談支援専門員、精神保健福祉士、就労支援員が連携し、体調・生活リズム・将来の希望をいっしょに整えます。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wave-area tint" id="work">
+    <div class="bg-wave"></div>
+    <div class="story-card reveal">
+      <div class="story-copy">
+        <div class="eyebrow">Support <span>作業・1日の流れ・利用しやすさ</span></div>
+        <h2>作業は実際的に。<br>通い方は、やわらかく。</h2>
+        <p class="copy">午前は検品や箱づめ、午後はPC入力や手芸制作など、その日の体調に合わせて組み合わせます。10:00開始、昼休みはしっかり60分。静かな席、スタッフ同席の面談、見学後の体験利用まで、段階を踏める設計です。</p>
+        <div class="btns" style="margin-top:24px">
+          <a class="btn primary" href="#contact">体験利用を相談する</a>
+          <a class="btn secondary" href="#fee">利用料を見る</a>
+        </div>
+      </div>
+      <div class="story-visual">
+        <img class="center-tree" src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="" onerror="this.style.display='none'">
+        <div class="flowers" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band-wrap" id="results">
+    <div class="container">
+      <div class="cta-band reveal">
+        <div>
+          <div class="eyebrow">Contact & Data <span>見学申込み / 実績 / 利用料</span></div>
+          <h2 style="margin-bottom:10px">まずは見学から。<br>数字でも、安心が伝わるように。</h2>
+          <p class="narrow">2025年度の一般就労移行は14名、職場定着6か月92%。利用者の約83%が自己負担0円で通所しています。見学は毎週月〜金、10:30／13:30の2枠。LINE相談、電話、フォームの3通りから選べます。</p>
+          <div class="cta-meta">
+            <span>週1日から相談可</span>
+            <span>仙台駅東口 徒歩4分</span>
+            <span>送迎3ルート</span>
+            <span>昼食提供あり</span>
+          </div>
+        </div>
+        <div class="tel-box caption-photo">
+          <strong>022-427-7789</strong>
+          <span>平日 9:00 - 17:00 / 見学受付 10:30・13:30</span>
+          <div class="btns" style="justify-content:flex-end;margin-top:22px">
+            <a class="btn primary" href="#contact">見学フォームへ</a>
+          </div>
+          <div class="caption-card">
+            「家族だけの相談でも大丈夫でした」<br>
+            <strong>ご利用者ご家族・宮城野区</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="footer-top-ornaments" aria-hidden="true">
+      <img src="http://127.0.0.1:5000/uploads/up_30aaf74832.png" alt="" width="54" height="70" onerror="this.style.display='none'">
+      <img src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_76ex8f76ex8f76ex.png" alt="" width="72" height="92" onerror="this.style.display='none'">
+      <img src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_vcfx2uvcfx2uvcfx.png" alt="" width="64" height="76" onerror="this.style.display='none'">
+      <img src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_o2mi8so2mi8so2mi.png" alt="" width="54" height="72" onerror="this.style.display='none'">
+      <img src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_luk6ctluk6ctluk6.png" alt="" width="78" height="86" onerror="this.style.display='none'">
+      <img src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_h6hgf9h6hgf9h6hg.png" alt="" width="50" height="70" onerror="this.style.display='none'">
+    </div>
+
+    <div class="footer-inner">
+      <div class="footer-col footer-brand">
+        <strong>特定非営利活動法人 みどりの実会</strong>
+        <address>
+          就労継続支援B型 みどりの実ワークス<br>
+          〒983-0852 宮城県仙台市宮城野区榴岡3-6-22<br>
+          レジデンス榴岡 1F<br>
+          Tel.
+        </address>
+        <div class="footer-tel">022-427-7789</div>
+        <div style="font-size:.8rem;opacity:.95;">平日 9:00 - 17:00</div>
+      </div>
+
+      <div class="footer-col">
+        <h4>みどりの実</h4>
+        <ul>
+          <li><a href="#top">TOP</a></li>
+          <li><a href="#about">みどりの実のきほん</a></li>
+          <li><a href="#work">作業と1日の流れ</a></li>
+          <li><a href="#results">就職実績</a></li>
+          <li><a href="#contact">お問い合わせ</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>相談する方へ</h4>
+        <ul>
+          <li>・見学申込み</li>
+          <li>・体験利用の流れ</li>
+          <li>・利用料のご案内</li>
+          <li>・受給者証の申請について</li>
+          <li>・ご家族からの相談</li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>支援者・企業の方へ</h4>
+        <ul>
+          <li>・医療機関・相談支援専門員の方へ</li>
+          <li>・企業実習の受け入れについて</li>
+          <li>・施設外就労のご相談</li>
+          <li>・寄付・備品協力のお願い</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <div class="partner-logos">
+          <span class="logo-chip">地域連携 仙台東部ネットワーク</span>
+          <span class="logo-chip">就労支援B型協議会</span>
+          <span class="logo-chip">みやぎ福祉しごと応援</span>
+        </div>
+        <div class="copyright">© 2026 MIDORINOMI WORKS All Rights Reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach((entry)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+        }
+      });
+    },{threshold:.16});
+
+    document.querySelectorAll('.reveal').forEach((el)=>observer.observe(el));
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>
