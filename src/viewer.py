@@ -23,7 +23,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, assets, camp, clone, config, db, embed, export_split, ingest, motion, quality, search, style_check, vibe
+from . import anim, assets, camp, clone, config, db, embed, export_split, ingest, motion, quality, search, spec, style_check, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -80,6 +80,10 @@ _CLONE_LOCK = threading.Lock()
 # 一括改善（Before→After）中の状態（同時に1つ・LLMを何度も呼ぶ）
 _IMPROVING: dict = {"file": None, "phase": "", "result": None, "error": None}
 _IMPROVE_LOCK = threading.Lock()
+
+# コーディング仕様書の作成中状態（同時に1つ・Playwrightでカンプを実測する）
+_SPEC_RUNNING: dict = {"file": None, "result": None, "error": None}
+_SPEC_LOCK = threading.Lock()
 
 
 def _swatches(design_tokens_json) -> list[str]:
@@ -1442,6 +1446,78 @@ def api_save_camp_html():
     return jsonify({"ok": True, "file": fn})
 
 
+def _run_spec_job(filename: str) -> None:
+    """バックグラウンドでカンプを実測し、仕様書HTMLを作る。"""
+    try:
+        result = spec.build_spec(filename)
+        with _SPEC_LOCK:
+            _SPEC_RUNNING["result"] = result
+            _SPEC_RUNNING["error"] = None
+    except Exception as exc:  # noqa: BLE001
+        log.exception("仕様書の作成に失敗: %s", filename)
+        with _SPEC_LOCK:
+            _SPEC_RUNNING["error"] = str(exc)
+    finally:
+        with _SPEC_LOCK:
+            _SPEC_RUNNING["file"] = None
+
+
+@app.route("/api/make_spec", methods=["POST"])
+def api_make_spec():
+    """カンプの実測仕様書を作る（非同期・AIなし）。進捗は /api/make_spec/status。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    with _SPEC_LOCK:
+        if _SPEC_RUNNING.get("file") is not None:
+            return jsonify({"ok": False, "message": "別の仕様書を作成中です"}), 409
+        _SPEC_RUNNING.update({"file": fn, "result": None, "error": None})
+    log.info("仕様書ジョブ開始: %s", fn)
+    threading.Thread(target=_run_spec_job, args=(fn,), daemon=True).start()
+    return jsonify({"ok": True, "file": fn})
+
+
+@app.route("/api/make_spec/status")
+def api_make_spec_status():
+    """仕様書作成の進捗（ポーリング用）。"""
+    with _SPEC_LOCK:
+        running = _SPEC_RUNNING.get("file") is not None
+        result = _SPEC_RUNNING.get("result")
+        error = _SPEC_RUNNING.get("error")
+    return jsonify({"running": running, "result": result, "error": error})
+
+
+@app.route("/spec/<path:filename>")
+def spec_file(filename: str):
+    """仕様書HTMLを返す（保存JSは生成時に焼き込み済み）。"""
+    path = spec.SPEC_DIR / filename
+    if not path.exists() or not path.is_file() or path.suffix != ".html":
+        abort(404)
+    return Response(path.read_text(encoding="utf-8"), mimetype="text/html")
+
+
+@app.route("/api/save_spec_html", methods=["POST"])
+def api_save_spec_html():
+    """仕様書の編集（セルの数値・メモ書き換え）をファイルに焼き込む（AIなし）。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    html = data.get("html") or ""
+    p = spec.SPEC_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != spec.SPEC_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "仕様書が見つかりません"}), 404
+    if len(html) < 200 or "</html>" not in html.lower():
+        return jsonify({"ok": False, "message": "HTMLが空か壊れています（保存中止）"}), 400
+    try:
+        tmp = p.with_suffix(".html.tmp")
+        tmp.write_text(html, encoding="utf-8")
+        os.replace(tmp, p)
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True, "file": fn})
+
+
 @app.route("/api/pair_fit")
 def api_pair_fit():
     """ベース×アニメ参照の相性スコア（選んだ瞬間にUIへ出す用・LLM不使用で一瞬）。"""
@@ -1689,6 +1765,8 @@ html.__ce_altmode{cursor:text}
     <button class="im" id="__ce_autopolish" style="background:#7c3aed;color:#fff">🎯 チェックして自動で磨く（採点→改善を一括・AI）</button>
     <div class="lbl plain">📦 納品用に書き出す（HTML/CSS/JS＋画像を分割・AIなし）</div>
     <button class="im" id="__ce_export" style="background:#0b6e4f;color:#fff">📦 分割エクスポート（zipで保存）</button>
+    <div class="lbl plain">📐 コーディング仕様書（寸法・色・フォント・動きを実測で1枚に・AIなし）</div>
+    <button class="im" id="__ce_spec" style="background:#0b6bcb;color:#fff">📐 仕様書を作る（コーディング担当に渡す用）</button>
     <div class="msg" id="__ce_msg">💡 直したい所を<b>右クリック</b>すると、その要素に直接アニメ・指示が出せます</div>
   </div>
 </div>
@@ -2270,6 +2348,28 @@ html.__ce_altmode{cursor:text}
       msg.textContent='📦 書き出し完了：画像 '+d.images+'枚'+miss+'。zipをダウンロードします';
       var a=document.createElement('a'); a.href=d.download; a.download=''; document.body.appendChild(a); a.click(); a.remove();
     }).catch(function(){ exportBtn.disabled=false; exportBtn.textContent=old; msg.textContent='通信エラー'; });
+  });
+  // 📐 コーディング仕様書（実測・AIなし）。未保存の編集を先に焼き込んでから測る
+  var specBtn=document.getElementById('__ce_spec');
+  if(specBtn) specBtn.addEventListener('click',function(){
+    specBtn.disabled=true; var old=specBtn.textContent; specBtn.textContent='📐 実測中…（10〜30秒）';
+    function reset(){ specBtn.disabled=false; specBtn.textContent=old; }
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
+    .then(function(){ return fetch('/api/make_spec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})}); })
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d.ok){ reset(); msg.textContent='仕様書の開始に失敗：'+(d.message||''); return; }
+      var t=setInterval(function(){
+        fetch('/api/make_spec/status').then(function(r){return r.json();}).then(function(s){
+          if(s.running) return;
+          clearInterval(t); reset();
+          if(s.error){ msg.textContent='仕様書の作成に失敗：'+s.error; return; }
+          if(s.result&&s.result.file){
+            msg.textContent='📐 仕様書ができました（'+s.result.sections+'セクション・'+s.result.items+'要素を実測）';
+            window.open('/spec/'+encodeURIComponent(s.result.file),'_blank');
+          }
+        }).catch(function(){});
+      },1200);
+    }).catch(function(){ reset(); msg.textContent='通信エラー'; });
   });
   // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
   var favListBtn=document.getElementById('__ce_favlist');
