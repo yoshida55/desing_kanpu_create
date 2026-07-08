@@ -1334,11 +1334,21 @@ def api_camp_rate_get():
 
 @app.route("/api/base_stats")
 def api_base_stats():
-    """手本（ベース）ごとの過去実績（◎○△✖と自動判定NG）を返す。選択時のヒント用。"""
+    """手本（ベース）ごとの過去実績（◎○△✖と自動判定NG）を返す。選択時のヒント用。
+
+    anim_id も渡されたら「その組み合わせ」の実績も足して返す（ログには生成時から
+    base×animが残っているのに、手本単位でしか集計していなかったのを解消）。
+    """
     base_id = (request.args.get("base_id") or "").strip()
+    anim_id = (request.args.get("anim_id") or "").strip()
     if not base_id:
         return jsonify({"ok": True, "note": ""})
-    return jsonify({"ok": True, **quality.base_stats(base_id)})
+    res = quality.base_stats(base_id)
+    if anim_id:
+        pair_note = quality.pair_stats(base_id, anim_id).get("note", "")
+        if pair_note:
+            res["note"] = (res.get("note", "") + ("　" if res.get("note") else "") + pair_note).strip()
+    return jsonify({"ok": True, **res})
 
 
 @app.route("/api/save_favorite", methods=["POST"])
@@ -2142,15 +2152,22 @@ html.__ce_altmode{cursor:text}
   var undoBtn=document.getElementById('__ce_undo');
   if(undoBtn) undoBtn.addEventListener('click',function(ev){ ev.stopPropagation(); undoStep(); });
   // ◎○△✖評価＝手本ごとのハズレ率集計の教師データ。
-  // 評価すると選んだマークだけ残して畳む（邪魔にしない）。そのマークを押すと開いて変更・解除できる
+  // 評価したらボタンごと消す（画面に残ると邪魔なため）。変更したいときは同じカンプを
+  // もう一度評価し直せないので、解除・変更はAI（チャット）に頼む運用
   var rateBox=document.getElementById('__ce_rate');
   function paintRate(v){
     [].forEach.call(rateBox.querySelectorAll('.rt'),function(b){ b.classList.toggle('on', b.dataset.r===v); });
     rateBox.classList.toggle('done', !!v);
+    rateBox.style.display = v ? 'none' : '';  // 評価済みならボタンごと消す
   }
   if(rateBox){
     fetch('/api/camp_rate?file='+encodeURIComponent(FILE)).then(function(r){return r.json();})
       .then(function(d){ paintRate(d.rating||''); }).catch(function(){});
+    // 評価を変更・解除したいとき用：ヘッダ左の✏をダブルクリックでボタンを再表示
+    var hdIco=hd.querySelector('span');
+    if(hdIco) hdIco.addEventListener('dblclick',function(ev){
+      ev.stopPropagation(); rateBox.style.display=''; rateBox.classList.remove('done');
+    });
     rateBox.addEventListener('click',function(ev){
       var b=ev.target.closest('.rt'); if(!b) return;
       ev.stopPropagation();  // ヘッダの開閉トグルに食われない
@@ -2443,9 +2460,11 @@ html.__ce_altmode{cursor:text}
       +'半透明の紙カード（background:rgba(255,255,255,.85)・角丸・ブランド色の柔らかい影）に載せる。'
       +'写真は大きな角丸で反対側に置き、写真の角に小さなピル型バッジ（白地・11〜12pxの英字1〜2語・例 WARM SUPPORT）を1〜2個重ねる。'
       +'背景はブランド色の極薄グラデにし、::before/::afterで白薄の円や角丸枠を1〜2個浮かせる（pointer-events:none・z-index:0・文字より背面）'},
-    {n:'コラージュヒーロー',w:2,i:'2カラムgrid（写真側1.3fr／コピー側.7fr・align-items:end）。'
-      +'写真側は、上に小さな正方形写真2〜3枚（aspect-ratio:1/1.08・border:3px solid #fff・角丸10px・gap:12px）を並べ、'
-      +'margin-bottom:-46pxで下の大きなメイン写真（width:min(720px,100%)・角丸18px）に差し込むように重ねる（この重なりが命）。'
+    {n:'コラージュヒーロー',w:2,i:'2カラムgrid（写真側1.2fr／コピー側.8fr・align-items:center）。'
+      +'写真側は画面の約半分を使い、大きなメイン写真1枚（写真側の85〜95%幅・高さ60vh級・角丸18px）を主役にする。'
+      +'そこにサイズの違う小写真を1〜2枚だけ（メインの1/3〜1/4幅・border:3px solid #fff・角丸10px・柔らかい影・'
+      +'rotate(-3deg)〜rotate(3deg)）、メインの角に負マージン-30〜-50pxで斜めに重ねる（この大小の重なりが命）。'
+      +'★写真を同じ大きさ・同じ形で横に並べるのは失格（正方形3枚が1行に等間隔で並ぶ構図は最頻の失敗例）。'
       +'コピー側は、writing-mode:vertical-rlの縦書きキャッチ（56px級・font-weight:800・薄い白のtext-shadow）＋'
       +'小さな英字キッカー（11px・letter-spacing:.18em）＋本文2〜3行＋11px英字2行組の小ラベルを3個flexで並べる。'
       +'背景は白か極薄のブランド色。箱を等間隔に整列させない'},
@@ -2498,6 +2517,8 @@ html.__ce_altmode{cursor:text}
        +'(あ)主役は「写真」と「キャッチコピー」の2つだけ。他の要素は大きさ・彩度を明確に落として脇役にする。'
        +'(い)要素は2カラムに集約する。四隅に散らさない・中央に大きな空白を作らない。'
        +'(う)余白はゆったり派＝要素の数を増やすより、1つ1つを大きく堂々と置く。'
+       +'(う2)写真が複数あるときは**同じ大きさで並べない**。大1枚を主役に、残りはサイズ違いで'
+       +'角に少し重ねる（大:小=3:1程度）。同サイズの写真が2枚以上横に並んだ時点で失格。'
        +'(え)作業・プログラム紹介などのカード群がこのセクション内にある場合は、目立たせず'
        +'最下部に小さな横1行の帯として畳む（文章は消さずに小さく）。細い縦長カードに文字を押し込まない。'
        +'(お)縦書きにする場合は「ゃゅょっ」や句読点が行頭に来ない改行位置にし、はみ出して切れないか確認する。'

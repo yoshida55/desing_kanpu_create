@@ -169,3 +169,33 @@ def base_stats(base_id: str) -> dict:
     elif auto_warn:
         note = f"この手本: 過去{total}回中{auto_warn}回が自動判定で「薄い」でした"
     return {"counts": counts, "auto_warn": auto_warn, "total": total, "note": note}
+
+
+def pair_stats(base_id: str, anim_id: str) -> dict:
+    """ベース×アニメの「組み合わせ」の実績を集計する（base_statsの組み合わせ版）。
+
+    ログには生成時からbase_id×anim_idが両方残っているので、同じ組み合わせで
+    作った過去カンプの評価だけを数える。組み合わせは件数が貯まりにくいので
+    ⚠のしきい値はbase_stats(3件)より緩い2件にしてある。
+    """
+    counts = {k: 0 for k in RATINGS}
+    auto_warn = 0
+    total = 0
+    for r in _load_log():
+        if r.get("base_id") != base_id or r.get("anim_id") != anim_id:
+            continue
+        total += 1
+        rt = r.get("rating", "")
+        if rt in counts:
+            counts[rt] += 1
+        elif r.get("warn"):
+            auto_warn += 1
+    note = ""
+    rated = sum(counts.values())
+    if rated:
+        bad = counts["△"] + counts["✖"]
+        parts = "・".join(f"{k}{v}" for k, v in counts.items() if v)
+        note = f"この組み合わせの過去実績: {parts}"
+        if rated >= 2 and bad / rated >= 0.5:
+            note = f"⚠ {note}（ハズレ率{bad / rated:.0%}・組み合わせの変更も検討を）"
+    return {"counts": counts, "auto_warn": auto_warn, "total": total, "note": note}

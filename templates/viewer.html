@@ -2055,11 +2055,13 @@
       } catch (e) { /* 相性表示は飾りなので失敗しても黙る */ }
     }
     // 手本の過去実績（◎○△✖の集計）を選んだ瞬間にヒント表示。ハズレ率が高い手本は⚠が付く
+    // アニメも選択済みなら「その組み合わせ」の実績も一緒に出る
     async function updateBaseStats() {
       const b = document.querySelector("#camp_base").value;
       if (!b) return;
+      const a = document.querySelector("#camp_anim").value || "";
       try {
-        const d = await fetch(`/api/base_stats?base_id=${encodeURIComponent(b)}`).then((r) => r.json());
+        const d = await fetch(`/api/base_stats?base_id=${encodeURIComponent(b)}&anim_id=${encodeURIComponent(a)}`).then((r) => r.json());
         if (d.note) campState.textContent = (campState.textContent ? campState.textContent + "　" : "") + d.note;
       } catch (e) { /* 実績表示も飾り。失敗しても黙る */ }
     }
@@ -2075,7 +2077,7 @@
       sel: "#camp_anim", thumb: "#cat_thumb", label: "#cat_label",
       trigger: "#camp_anim_trigger", overlay: "#anim_overlay", grid: "#anim_grid", close: "#anim_close",
       noneIcon: "✨", noneName: "なし", noneDesc: "標準のふわっと出現", noneLabel: "なし（標準のふわっと出現）",
-      onPick: updatePairFit,
+      onPick: async () => { campState.textContent = ""; await updatePairFit(); await updateBaseStats(); },
       // ベースが選択済みなら「🅰 ベースと同じ」カードを先頭に出す（1クリックでベース自身の動きを採用）
       extraCard: () => {
         const b = document.querySelector("#camp_base").value;

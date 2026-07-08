@@ -1,0 +1,2207 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>南青山デンタルアトリエ | おしゃれで通いやすい歯科クリニック</title>
+  <meta name="description" content="表参道駅徒歩4分。南青山デンタルアトリエのランディングページデザインカンプです。予防歯科、審美治療、マウスピース矯正、ホワイトニングまで、静かで上質な空間で丁寧にご案内します。">
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#333333;
+      --main:#8ac75a;
+      --main-deep:#6bb13a;
+      --main-soft:rgba(138,199,90,.08);
+      --main-soft-2:rgba(138,199,90,.14);
+      --white70:rgba(255,255,255,.7);
+      --line:rgba(138,199,90,.28);
+      --shadow-sm:0 10px 28px rgba(138,199,90,.10);
+      --shadow-md:0 18px 42px rgba(138,199,90,.16);
+      --radius-xl:32px;
+      --radius-sm:2px;
+      --container:1100px;
+      --hero:clamp(2.2rem,5vw,3.6rem);
+      --section:clamp(1.6rem,3vw,2.4rem);
+      --sub:1.15rem;
+      --body:.98rem;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"Zen Maru Gothic","Hiragino Sans","Yu Gothic",sans-serif}
+    body{line-height:2;letter-spacing:.01em}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    ul{margin:0;padding:0;list-style:none}
+
+    .container{
+      width:min(calc(100% - 48px),var(--container));
+      margin-inline:auto;
+    }
+
+    .section{
+      position:relative;
+      padding:10vh 0;
+      min-height:100vh;
+      overflow:hidden;
+    }
+
+    .section--white{background:#fff}
+    .section--tint{background:linear-gradient(180deg, rgba(138,199,90,.05), rgba(138,199,90,.09))}
+    .section-head{
+      margin-bottom:64px;
+    }
+    .eyebrow{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      color:var(--main);
+      font-size:.95rem;
+      letter-spacing:.16em;
+      font-weight:700;
+      text-transform:uppercase;
+      margin-bottom:16px;
+    }
+    .eyebrow .jp{
+      letter-spacing:.08em;
+      font-size:.78rem;
+      color:#b3c79b;
+      font-weight:600;
+    }
+    .eyebrow::after{
+      content:"";
+      width:84px;
+      height:1px;
+      background:linear-gradient(90deg,var(--main),transparent);
+    }
+    h1,h2,h3,p{margin:0}
+    h1{
+      font-size:var(--hero);
+      line-height:1.35;
+      letter-spacing:.04em;
+      font-weight:700;
+    }
+    h2{
+      font-size:var(--section);
+      line-height:1.38;
+      letter-spacing:.04em;
+      font-weight:700;
+    }
+    h3{
+      font-size:var(--sub);
+      line-height:1.5;
+      letter-spacing:.03em;
+      font-weight:700;
+    }
+    p,li,dt,dd{
+      font-size:var(--body);
+      line-height:2;
+    }
+    .copy{
+      max-width:38em;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:48px;
+      padding:0 22px;
+      border-radius:999px;
+      background:var(--main);
+      color:#fff;
+      font-weight:700;
+      box-shadow:var(--shadow-sm);
+      transition:transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1), background-color .3s cubic-bezier(.4,0,.2,1);
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);background:var(--main-deep)}
+    .btn--ghost{
+      background:rgba(255,255,255,.88);
+      color:var(--main-deep);
+      border:1px solid rgba(138,199,90,.24);
+      box-shadow:none;
+    }
+
+    .site-header{
+      position:absolute;
+      inset:0 0 auto 0;
+      z-index:20;
+      padding-top:24px;
+    }
+    .header-card{
+      background:rgba(255,255,255,.84);
+      backdrop-filter:blur(8px);
+      border-radius:999px;
+      padding:18px 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      box-shadow:0 8px 30px rgba(138,199,90,.08);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      min-width:0;
+    }
+    .brand-mark{
+      width:58px;height:58px;border-radius:50%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(138,199,90,.8), transparent 42%),
+        radial-gradient(circle at 65% 35%, rgba(138,199,90,.55), transparent 30%),
+        radial-gradient(circle at 45% 68%, rgba(107,177,58,.6), transparent 32%),
+        linear-gradient(180deg,#fff,#f5fbef);
+      border:1px solid rgba(138,199,90,.18);
+      position:relative;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .brand-mark:before{
+      content:"";
+      position:absolute;
+      left:26px; top:14px;
+      width:7px; height:28px; border-radius:7px;
+      background:#7a5c3a; transform:rotate(12deg);
+      box-shadow:-9px 10px 0 -2px #7a5c3a;
+    }
+    .brand-mark:after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 18px 18px, #8ac75a 0 4px, transparent 5px),
+        radial-gradient(circle at 34px 15px, #8ac75a 0 4px, transparent 5px),
+        radial-gradient(circle at 42px 24px, #8ac75a 0 4px, transparent 5px),
+        radial-gradient(circle at 18px 32px, #8ac75a 0 4px, transparent 5px),
+        radial-gradient(circle at 35px 36px, #8ac75a 0 4px, transparent 5px);
+      opacity:.95;
+    }
+    .brand-text strong{
+      display:block;
+      font-size:1.05rem;
+      line-height:1.4;
+    }
+    .brand-text span{
+      display:block;
+      font-size:.74rem;
+      color:#666;
+      line-height:1.6;
+    }
+
+    .header-nav{
+      display:flex;
+      align-items:center;
+      gap:22px;
+      font-size:.92rem;
+      white-space:nowrap;
+    }
+    .header-nav a{transition:color .3s cubic-bezier(.4,0,.2,1)}
+    .header-nav a:hover{color:var(--main-deep)}
+    .menu-dot{
+      width:46px;height:46px;border-radius:50%;
+      background:var(--main);
+      position:relative;
+      flex:0 0 auto;
+    }
+    .menu-dot:before,.menu-dot:after,.menu-dot i{
+      content:"";position:absolute;left:12px;right:12px;height:2px;background:#fff;border-radius:2px;
+    }
+    .menu-dot:before{top:15px}
+    .menu-dot i{top:22px}
+    .menu-dot:after{top:29px}
+
+    .hero{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 15% 18%, rgba(138,199,90,.12), transparent 16%),
+        radial-gradient(circle at 80% 12%, rgba(174,220,139,.10), transparent 14%),
+        linear-gradient(180deg, #edf6fb 0%, #ffffff 38%, #f4fbe8 100%);
+      overflow:hidden;
+    }
+    .hero-cloud{
+      position:absolute; border-radius:999px; background:rgba(255,255,255,.7);
+      filter:blur(1px);
+      animation:loop 100s linear infinite;
+    }
+    .hero-cloud.c1{width:110px;height:38px;top:82px;left:12%}
+    .hero-cloud.c2{width:86px;height:30px;top:122px;right:18%;animation-duration:120s}
+    .hero-cloud.c3{width:140px;height:44px;top:210px;left:72%;animation-duration:140s}
+
+    .hero-inner{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height:100vh;
+      padding-top:140px;
+    }
+    .hero-top{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:40px;
+      align-items:center;
+      padding-bottom:32px;
+    }
+    .hero-copy p{
+      margin-top:24px;
+      max-width:34em;
+    }
+    .hero-actions{
+      display:flex;gap:16px;flex-wrap:wrap;
+      margin-top:32px;
+    }
+    .hero-visual{
+      position:relative;
+      min-height:420px;
+    }
+    .gradient-orb{
+      position:absolute;
+      inset:20px 0 0 60px;
+      border-radius:44px;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), transparent 18%),
+        linear-gradient(135deg, rgba(138,199,90,.18) 0%, rgba(255,255,255,.1) 32%, rgba(138,199,90,.35) 100%);
+      overflow:hidden;
+      box-shadow:var(--shadow-sm);
+    }
+    .gradient-orb::before{
+      content:"";
+      position:absolute;
+      width:520px;height:520px;right:-140px;top:-80px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,181,120,.85), transparent 34%),
+        radial-gradient(circle at 48% 48%, rgba(255,120,180,.72), transparent 36%),
+        radial-gradient(circle at 68% 58%, rgba(125,170,255,.72), transparent 38%),
+        radial-gradient(circle at 74% 26%, rgba(255,140,70,.86), transparent 26%);
+      filter:blur(10px);
+      opacity:.62;
+      transform:rotate(18deg);
+    }
+    .hero-photo{
+      position:absolute;
+      left:24px; right:36px; bottom:16px; top:88px;
+      border-radius:32px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#eaf5ff,#f6fbef);
+    }
+    .hero-photo img{
+      width:100%;height:100%;object-fit:cover;
+    }
+
+    .landscape{
+      position:relative;
+      margin-top:12px;
+      height:300px;
+    }
+    .hill-back,.hill-front{
+      position:absolute;left:-6%;right:-6%;
+      border-radius:50% 50% 0 0 / 22% 22% 0 0;
+    }
+    .hill-back{
+      height:180px;bottom:72px;
+      background:linear-gradient(180deg,#cae780,#a8d65a);
+    }
+    .hill-front{
+      height:220px;bottom:-12px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.18), transparent 18%),
+        radial-gradient(circle at 70% 40%, rgba(255,255,255,.15), transparent 16%),
+        linear-gradient(180deg,#b8df63 0%, #9ccc46 100%);
+    }
+    .mini-tree,.mini-house,.mini-person,.mini-bird{
+      position:absolute;bottom:105px;
+    }
+    .mini-tree{
+      width:36px;height:88px;
+      background:
+        radial-gradient(circle at 50% 18%, #76bf4b 0 20px, transparent 21px),
+        radial-gradient(circle at 32% 30%, #8ed35f 0 14px, transparent 15px),
+        radial-gradient(circle at 68% 32%, #8ed35f 0 14px, transparent 15px),
+        linear-gradient(#5a3d24,#5a3d24) 50% 80%/8px 34px no-repeat;
+    }
+    .mini-house{
+      width:74px;height:88px;border-radius:4px;
+      background:
+        linear-gradient(135deg, transparent 49%, #f3b0b0 50%) top left/50% 34px no-repeat,
+        linear-gradient(-135deg, transparent 49%, #f6c7c7 50%) top right/50% 34px no-repeat,
+        linear-gradient(#fff7f2,#fff7f2) center 40px/50px 48px no-repeat,
+        linear-gradient(#c49d7b,#c49d7b) center 62px/14px 26px no-repeat;
+    }
+    .mini-person{
+      width:18px;height:48px;
+      background:
+        radial-gradient(circle at 50% 9px, #f2c1a3 0 5px, transparent 5.5px),
+        linear-gradient(#6b8ed6,#6b8ed6) center 18px/6px 15px no-repeat,
+        linear-gradient(#404040,#404040) 5px 35px/3px 12px no-repeat,
+        linear-gradient(#404040,#404040) 10px 35px/3px 12px no-repeat;
+    }
+    .mini-bird{
+      width:22px;height:16px;
+      background:
+        radial-gradient(circle at 30% 60%, #5ec3d8 0 5px, transparent 6px),
+        radial-gradient(circle at 62% 42%, #5ec3d8 0 4px, transparent 5px);
+      animation:floatCircle 14s linear infinite;
+      offset-path:path("M0,0 C40,-30 80,30 130,0");
+    }
+
+    .news-card{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:26px;
+      width:min(980px, calc(100% - 48px));
+      background:rgba(255,255,255,.90);
+      border-radius:32px;
+      padding:28px 32px 24px;
+      box-shadow:0 18px 34px rgba(138,199,90,.12);
+      backdrop-filter:blur(8px);
+    }
+    .news-head{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      margin-bottom:20px;
+    }
+    .news-head strong{
+      color:var(--main);
+      letter-spacing:.12em;
+      font-size:1.45rem;
+    }
+    .news-head span{
+      font-size:.78rem;color:#7c7c7c;margin-left:10px;
+    }
+    .news-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+    }
+    .news-item{
+      padding-right:8px;
+      border-right:1px solid rgba(138,199,90,.16);
+    }
+    .news-item:last-child{border-right:none}
+    .tag{
+      display:inline-block;
+      font-size:.72rem;
+      color:#fff;
+      background:var(--main);
+      border-radius:999px;
+      padding:4px 10px;
+      line-height:1.3;
+      margin-bottom:10px;
+    }
+    .date{
+      display:block;
+      font-size:.75rem;color:#8a8a8a;
+      line-height:1.6;
+    }
+    .news-item p{
+      margin-top:6px;
+      line-height:1.8;
+      font-size:.9rem;
+      max-width:18em;
+    }
+
+    .concept-space{
+      display:grid;
+      grid-template-columns:1fr;
+      align-items:start;
+      min-height:70vh;
+    }
+    .concept-catch{
+      margin-top:24px;
+      color:var(--main);
+      font-size:clamp(2rem,4vw,3rem);
+      line-height:1.45;
+      letter-spacing:.06em;
+      max-width:14em;
+      font-weight:700;
+    }
+    .concept-copy{
+      margin-top:32px;
+      max-width:36em;
+    }
+
+    .wave-section{
+      background:transparent;
+      min-height:auto;
+      padding:0;
+    }
+    .wave-bg{
+      position:relative;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.18), transparent 18%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,.12), transparent 22%),
+        linear-gradient(180deg,#d1ea7f 0%, #b8de5d 100%);
+      margin:0;
+      padding:120px 0;
+      border-radius:44% 56% 46% 54% / 8% 8% 8% 8%;
+      overflow:hidden;
+    }
+    .wave-bg::before,
+    .wave-bg::after{
+      content:"";
+      position:absolute;left:-10%;right:-10%;height:120px;background:#fff;border-radius:50%;
+    }
+    .wave-bg::before{top:-70px}
+    .wave-bg::after{bottom:-70px}
+    .promise-card{
+      position:relative;
+      background:#fff;
+      border-radius:32px;
+      min-height:580px;
+      box-shadow:var(--shadow-sm);
+      overflow:hidden;
+      padding:48px 48px 0;
+    }
+    .promise-card .eyebrow{margin-bottom:24px}
+    .promise-visual{
+      position:absolute;left:0;right:0;bottom:0;height:60%;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255,255,255,.45), transparent 18%),
+        linear-gradient(180deg,#ffffff 0 34%, #8ccc58 35% 100%);
+    }
+    .promise-visual::before{
+      content:"";
+      position:absolute;left:-8%;right:-8%;top:26%;
+      height:170px;border-radius:50%;
+      background:#fff;
+    }
+    .promise-tree{
+      position:absolute;left:50%;top:38%;transform:translateX(-50%);
+      width:90px;height:140px;
+      background:
+        linear-gradient(#603a20,#603a20) center 74%/10px 44px no-repeat,
+        linear-gradient(#603a20,#603a20) 40% 58%/7px 24px no-repeat,
+        linear-gradient(#603a20,#603a20) 60% 58%/7px 24px no-repeat,
+        radial-gradient(circle at 30% 24%, #8ac75a 0 10px, transparent 11px),
+        radial-gradient(circle at 48% 16%, #8ac75a 0 12px, transparent 13px),
+        radial-gradient(circle at 66% 22%, #8ac75a 0 10px, transparent 11px),
+        radial-gradient(circle at 22% 42%, #9ad86f 0 8px, transparent 9px),
+        radial-gradient(circle at 50% 38%, #7fbe4e 0 14px, transparent 15px),
+        radial-gradient(circle at 73% 42%, #9ad86f 0 8px, transparent 9px);
+    }
+    .flower{
+      position:absolute; width:10px;height:10px; border-radius:50%;
+      background:#ef8fa1;
+      box-shadow:0 0 0 4px rgba(255,255,255,.6);
+    }
+
+    .stats-box{
+      min-height:auto;
+      padding:88px 0 64px;
+    }
+    .stats-card{
+      border:1px solid rgba(138,199,90,.26);
+      border-radius:32px;
+      background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(249,253,244,.98));
+      padding:40px;
+      box-shadow:var(--shadow-sm);
+    }
+    .stats-row{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:24px;
+      margin-top:24px;
+    }
+    .stat{
+      padding:16px 8px;
+    }
+    .stat strong{
+      display:block;
+      font-size:clamp(2rem,3vw,3rem);
+      line-height:1.2;
+      color:var(--main-deep);
+      margin-bottom:8px;
+      letter-spacing:.04em;
+    }
+    .stat span{
+      display:block;
+      font-size:.85rem;color:#666;line-height:1.7;
+    }
+
+    .cta-section{
+      min-height:auto;
+      padding:120px 0 0;
+      background:#fff;
+    }
+    .cta-card{
+      position:relative;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(245,251,237,.96));
+      border:1px solid rgba(138,199,90,.22);
+      border-radius:32px;
+      padding:48px;
+      box-shadow:var(--shadow-sm);
+      overflow:hidden;
+    }
+    .cta-card::before{
+      content:"";
+      position:absolute;
+      width:220px;height:220px;right:-60px;top:-60px;
+      background:radial-gradient(circle, rgba(138,199,90,.22), transparent 62%);
+      filter:blur(8px);
+    }
+    .cta-flex{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:40px;
+      align-items:center;
+    }
+    .cta-actions{
+      display:flex;gap:16px;flex-wrap:wrap;margin-top:24px;
+    }
+    .cta-visual{
+      position:relative;
+      min-height:280px;
+    }
+    .cta-photo-wrap{
+      position:absolute; inset:0 40px 20px 0;
+      border-radius:28px;
+      overflow:hidden;
+      background:linear-gradient(135deg,#ecf6ff,#f6faef);
+      transform:rotate(-2deg);
+    }
+    .cta-photo-wrap img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .caption-card{
+      position:absolute;
+      right:-4px; bottom:-8px;
+      background:#fff;
+      border-radius:20px;
+      padding:16px 18px;
+      width:220px;
+      box-shadow:0 12px 26px rgba(138,199,90,.16);
+    }
+    .caption-card small{display:block;color:var(--main-deep);font-weight:700;line-height:1.6}
+    .caption-card p{font-size:.88rem;line-height:1.8}
+    .blur-blob{
+      position:absolute;
+      width:180px;height:180px;border-radius:50%;
+      background:rgba(138,199,90,.28);
+      filter:blur(28px);
+      right:28px;bottom:12px;z-index:-1;
+    }
+
+    .footer{
+      position:relative;
+      min-height:auto;
+      padding:80px 0 0;
+      background:
+        linear-gradient(180deg,#fff 0 12%, transparent 12%),
+        linear-gradient(180deg,#9dd152 0%, #89c648 100%);
+      overflow:hidden;
+    }
+    .footer-top-ornaments{
+      position:absolute;left:0;right:0;top:38px;height:90px;pointer-events:none;
+    }
+    .foot-tree,.foot-house,.foot-cone,.foot-round{
+      position:absolute;bottom:0;
+    }
+    .foot-tree{
+      width:40px;height:86px;
+      background:
+        radial-gradient(circle at 32% 18%, #7ec752 0 8px, transparent 9px),
+        radial-gradient(circle at 52% 16%, #8fd560 0 10px, transparent 11px),
+        radial-gradient(circle at 70% 22%, #8fd560 0 8px, transparent 9px),
+        radial-gradient(circle at 24% 38%, #8fd560 0 8px, transparent 9px),
+        radial-gradient(circle at 56% 38%, #72bc49 0 12px, transparent 13px),
+        linear-gradient(#61401f,#61401f) center 78%/7px 30px no-repeat;
+    }
+    .foot-round{
+      width:34px;height:74px;
+      background:
+        radial-gradient(circle at 50% 26%, #8dcf55 0 16px, transparent 17px),
+        linear-gradient(#6b4c2a,#6b4c2a) center 74%/6px 24px no-repeat;
+    }
+    .foot-cone{
+      width:28px;height:70px;
+      background:
+        linear-gradient(transparent 20%, #4b9a4c 20% 36%, transparent 36%),
+        linear-gradient(transparent 32%, #3d8443 32% 54%, transparent 54%),
+        linear-gradient(transparent 46%, #2f6f38 46% 74%, transparent 74%),
+        linear-gradient(#6b4c2a,#6b4c2a) center 90%/6px 14px no-repeat;
+    }
+    .foot-house{
+      width:64px;height:74px;
+      background:
+        linear-gradient(135deg, transparent 49%, #f0b2b6 50%) top left/50% 28px no-repeat,
+        linear-gradient(-135deg, transparent 49%, #f4c9c9 50%) top right/50% 28px no-repeat,
+        linear-gradient(#fff6ef,#fff6ef) center 34px/42px 36px no-repeat,
+        linear-gradient(#c89f7a,#c89f7a) center 52px/11px 18px no-repeat;
+    }
+
+    .footer-main{
+      display:grid;
+      grid-template-columns:1.3fr 1fr 1fr 1fr;
+      gap:40px;
+      padding:110px 0 64px;
+      color:#fff;
+    }
+    .footer h3,.footer p,.footer li,.footer a{color:#fff}
+    .footer-col h3{
+      font-size:1rem;
+      margin-bottom:16px;
+      border-bottom:1px solid rgba(255,255,255,.3);
+      padding-bottom:10px;
+    }
+    .footer-col li{
+      margin-bottom:6px;
+      font-size:.92rem;
+    }
+    .clinic-name{
+      font-size:1rem;
+      font-weight:700;
+      margin-bottom:16px;
+    }
+    .footer-tel{
+      font-size:2rem;
+      line-height:1.2;
+      font-weight:700;
+      letter-spacing:.08em;
+    }
+    .footer-address{
+      margin-top:16px;
+      font-size:.92rem;
+      opacity:.95;
+    }
+    .footer-logos{
+      border-top:1px solid rgba(255,255,255,.24);
+      padding:28px 0 18px;
+      display:flex;
+      align-items:center;
+      gap:24px;
+      flex-wrap:wrap;
+      color:#f8fff2;
+      font-size:.84rem;
+    }
+    .partner{
+      display:inline-flex;align-items:center;gap:10px;
+      font-weight:700;
+    }
+    .partner-mark{
+      width:34px;height:34px;border-radius:50%;
+      background:
+        conic-gradient(from 90deg, #f3d554 0 25%, #74c548 25% 50%, #59c6d2 50% 75%, #f19797 75% 100%);
+      flex:0 0 auto;
+    }
+    .copyline{
+      font-size:.72rem;
+      color:rgba(255,255,255,.86);
+      text-align:right;
+      padding-bottom:20px;
+    }
+
+    .scroll-indicator{
+      position:absolute;right:36px;top:48%;
+      width:24px;height:72px;border:1px solid rgba(138,199,90,.45);border-radius:999px;
+      display:flex;justify-content:center;
+      background:rgba(255,255,255,.55);
+    }
+    .scroll-indicator::before{
+      content:"";
+      width:2px;height:34px;margin-top:14px;background:var(--main);
+      transform:scaleY(0);transform-origin:center top;
+      animation:scroll-bar-scale 3.2s ease infinite;
+    }
+
+    .js .reveal{
+      opacity:0;
+      transform:translateY(28px);
+      transition:opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
+    }
+    .js .reveal.is-visible{
+      opacity:1;
+      transform:none;
+    }
+    .js .hero-anim{
+      opacity:0;
+      transform:translateY(24px) scale(.98);
+      transition:opacity .9s cubic-bezier(.4,0,.2,1), transform 1.1s cubic-bezier(.2,.7,.2,1);
+    }
+    .js .hero-anim.is-visible{
+      opacity:1;
+      transform:none;
+    }
+    .delay-1{transition-delay:.1s !important}
+    .delay-2{transition-delay:.2s !important}
+    .delay-3{transition-delay:.3s !important}
+    .delay-4{transition-delay:.4s !important}
+
+    @keyframes scroll-bar-scale{
+      0%{transform:scaleY(0);transform-origin:center top}
+      15%{transform:scaleY(0);transform-origin:center top}
+      40%{transform:scaleY(1);transform-origin:center top}
+      70%{transform:scaleY(1);transform-origin:center bottom}
+      85%{transform:scaleY(0);transform-origin:center bottom}
+      100%{transform:scaleY(0);transform-origin:center bottom}
+    }
+    @keyframes loop{
+      0%{transform:translateX(0)}
+      100%{transform:translateX(120px)}
+    }
+    @keyframes floatCircle{
+      0%{offset-distance:0%}
+      100%{offset-distance:100%}
+    }
+
+    @media (max-width: 980px){
+      .header-nav{display:none}
+      .hero-top,.cta-flex,.footer-main,.stats-row,.news-grid{
+        grid-template-columns:1fr;
+      }
+      .hero-inner{padding-top:128px}
+      .hero-visual{min-height:360px}
+      .news-card{position:relative;left:auto;transform:none;bottom:auto;margin-top:-32px}
+      .landscape{height:auto;padding-bottom:260px}
+      .news-item{border-right:none;border-bottom:1px solid rgba(138,199,90,.16);padding-bottom:12px}
+      .news-item:last-child{border-bottom:none}
+      .footer-main{padding-top:140px}
+      .scroll-indicator{display:none}
+      .cta-photo-wrap{inset:0 24px 24px 0}
+      .caption-card{right:10px;bottom:-14px}
+      .stats-card,.cta-card,.promise-card{padding:32px 24px}
+    }
+
+    @media (max-width: 680px){
+      .section{min-height:auto;padding:88px 0}
+      .hero{min-height:auto}
+      .hero-inner{min-height:auto}
+      .container{width:min(calc(100% - 32px),var(--container))}
+      .header-card{padding:14px 16px}
+      .brand-text span{display:none}
+      .brand-mark{width:50px;height:50px}
+      .hero-actions,.cta-actions{flex-direction:column;align-items:flex-start}
+      .btn{width:100%}
+      .news-card{padding:24px 20px}
+      .news-head{align-items:flex-start;flex-direction:column}
+      .concept-catch{font-size:clamp(1.8rem,8vw,2.4rem)}
+      .wave-bg{padding:88px 0}
+      .promise-card{min-height:500px}
+      .footer-tel{font-size:1.6rem}
+      .copyline{text-align:left}
+    }
+  </style>
+</head>
+<body style=""><section class="hero section hero-collage" id="top" data-cestyle="コラージュヒーロー">
+  <style>
+    .hero-collage{
+      min-height:100vh;
+      max-height:110vh;
+      padding:24px 0 40px;
+      background:
+        radial-gradient(circle at 14% 16%, rgba(138,199,90,.10), transparent 18%),
+        radial-gradient(circle at 84% 12%, rgba(138,199,90,.08), transparent 16%),
+        linear-gradient(180deg, #f7fbf3 0%, #ffffff 48%, #f4faec 100%);
+      overflow:hidden;
+    }
+    .hero-collage .hero-cloud{opacity:.7}
+    .hero-collage .site-header{position:relative;padding-top:0;margin-bottom:32px}
+    .hero-collage .header-card{
+      background:rgba(255,255,255,.86);
+      border:1px solid rgba(138,199,90,.14);
+    }
+
+    .hero-collage .hero-inner{
+      min-height:auto;
+      padding-top:0;
+      display:block;
+    }
+
+    .hero-collage .hero-stage{
+      display:grid;
+      grid-template-columns:1.3fr .7fr;
+      gap:40px;
+      align-items:end;
+      min-height:calc(100vh - 180px);
+    }
+
+    .hero-collage .hero-visual{
+      min-height:auto;
+      position:relative;
+      padding:8px 0 0;
+    }
+
+    .hero-collage .collage-top{
+      display:flex;
+      gap:12px;
+      align-items:flex-end;
+      margin:0 0 -46px 40px;
+      position:relative;
+      z-index:2;
+      width:fit-content;
+      max-width:100%;
+    }
+
+    .hero-collage .mini-shot{
+      width:min(22vw, 172px);
+      aspect-ratio:1 / 1.08;
+      border:3px solid #fff;
+      border-radius:10px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#eef7e7,#f8fbf5);
+      box-shadow:0 12px 28px rgba(138,199,90,.12);
+      flex:0 0 auto;
+    }
+    .hero-collage .mini-shot.tall{transform:translateY(16px)}
+    .hero-collage .mini-shot.short{transform:translateY(-8px)}
+    .hero-collage .mini-shot img,
+    .hero-collage .main-photo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .hero-collage .main-photo{
+      width:min(720px,100%);
+      aspect-ratio:720 / 540;
+      border-radius:18px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#edf6fb,#f5faef);
+      box-shadow:0 18px 42px rgba(138,199,90,.14);
+      position:relative;
+    }
+    .hero-collage .main-photo::after{
+      content:"";
+      position:absolute;
+      inset:auto 24px 20px auto;
+      width:96px;
+      height:1px;
+      background:linear-gradient(90deg, rgba(138,199,90,.8), transparent);
+    }
+
+    .hero-collage .hero-copy{
+      color:#222;
+      padding:0 0 8px;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:24px;
+      position:relative;
+      z-index:2;
+    }
+
+    .hero-collage .copy-kicker{
+      font-size:11px;
+      letter-spacing:.18em;
+      color:var(--main-deep);
+      font-weight:700;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .hero-collage .copy-head{
+      display:flex;
+      gap:24px;
+      align-items:flex-start;
+    }
+
+    .hero-collage .copy-side{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      padding-top:8px;
+    }
+
+    .hero-collage .copy-jp{
+      font-size:11px;
+      letter-spacing:.14em;
+      color:#7e8f6a;
+      line-height:1.8;
+      white-space:nowrap;
+    }
+
+    .hero-collage h1{
+      margin:0;
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      font-size:clamp(2.4rem,4.5vw,3.5rem);
+      line-height:1.2;
+      letter-spacing:.08em;
+      font-weight:800;
+      color:#222;
+      text-shadow:0 1px 0 rgba(255,255,255,.75), 0 8px 20px rgba(255,255,255,.45);
+      max-height:540px;
+    }
+
+    .hero-collage .hero-copy p.copy{
+      max-width:22em;
+      font-size:1rem;
+      line-height:1.9;
+      letter-spacing:.02em;
+      color:#333;
+    }
+
+    .hero-collage .micro-labels{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      max-width:320px;
+    }
+
+    .hero-collage .micro-label{
+      padding:10px 12px 9px;
+      border-top:1px solid rgba(138,199,90,.28);
+      min-width:88px;
+    }
+    .hero-collage .micro-label strong,
+    .hero-collage .micro-label span{
+      display:block;
+      font-size:11px;
+      line-height:1.55;
+      letter-spacing:.12em;
+      color:#5f6d52;
+      white-space:nowrap;
+    }
+    .hero-collage .micro-label strong{
+      color:var(--main-deep);
+      font-weight:700;
+    }
+
+    .hero-collage .hero-actions{
+      margin-top:0;
+      gap:12px;
+    }
+
+    .hero-collage .hero-actions .btn{
+      min-height:46px;
+    }
+
+    .hero-collage .landscape{
+      margin-top:24px;
+      height:auto;
+      padding:0;
+      position:relative;
+    }
+
+    .hero-collage .hill-back,
+    .hero-collage .hill-front,
+    .hero-collage .mini-tree,
+    .hero-collage .mini-person,
+    .hero-collage .mini-house,
+    .hero-collage .mini-bird{
+      display:none;
+    }
+
+    .hero-collage .news-card{
+      position:relative;
+      left:auto;
+      bottom:auto;
+      transform:none;
+      width:100%;
+      margin:0;
+      padding:16px 24px;
+      border-radius:20px;
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(138,199,90,.16);
+      box-shadow:0 12px 28px rgba(138,199,90,.10);
+      backdrop-filter:blur(8px);
+    }
+
+    .hero-collage .news-head{
+      margin-bottom:12px;
+      align-items:center;
+    }
+    .hero-collage .news-head strong{
+      font-size:1.1rem;
+      color:var(--main-deep);
+      letter-spacing:.12em;
+    }
+    .hero-collage .news-head span{
+      font-size:.74rem;
+      color:#7d7d7d;
+    }
+    .hero-collage .news-head .btn{
+      min-height:34px;
+      padding:0 14px;
+      font-size:.78rem;
+    }
+
+    .hero-collage .news-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px 24px;
+    }
+    .hero-collage .news-item{
+      border-right:none;
+      padding:8px 0;
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:8px 12px;
+      align-items:start;
+      border-top:1px solid rgba(138,199,90,.12);
+    }
+    .hero-collage .news-item:nth-child(-n+2){border-top:none}
+    .hero-collage .tag{
+      margin-bottom:0;
+      font-size:.68rem;
+      padding:4px 8px;
+      align-self:start;
+    }
+    .hero-collage .date{
+      grid-column:2;
+      font-size:.72rem;
+      line-height:1.5;
+      margin-top:-2px;
+    }
+    .hero-collage .news-item p{
+      grid-column:1 / -1;
+      margin-top:0;
+      font-size:.84rem;
+      line-height:1.8;
+      max-width:none;
+      color:#3a3a3a;
+    }
+
+    .js .hero-collage .hero-anim{
+      opacity:0;
+      transform:translateY(24px);
+      transition:opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
+    }
+    .js .hero-collage .hero-anim.is-visible{
+      opacity:1;
+      transform:none;
+    }
+
+    @media (max-width: 980px){
+      .hero-collage{
+        max-height:none;
+        padding-bottom:32px;
+      }
+      .hero-collage .hero-stage{
+        grid-template-columns:1fr;
+        gap:24px;
+        min-height:auto;
+      }
+      .hero-collage .hero-copy{
+        order:1;
+      }
+      .hero-collage .hero-visual{
+        order:2;
+      }
+      .hero-collage .copy-head{
+        gap:16px;
+      }
+      .hero-collage .collage-top{
+        margin-left:24px;
+      }
+      .hero-collage .mini-shot{
+        width:min(26vw, 156px);
+      }
+    }
+
+    @media (max-width: 680px){
+      .hero-collage{
+        padding:16px 0 24px;
+      }
+      .hero-collage .site-header{
+        margin-bottom:24px;
+      }
+      .hero-collage .hero-stage{
+        gap:24px;
+      }
+      .hero-collage .copy-head{
+        align-items:flex-start;
+      }
+      .hero-collage h1{
+        writing-mode:horizontal-tb;
+        font-size:clamp(2.1rem,9vw,3rem);
+        line-height:1.38;
+        max-height:none;
+      }
+      .hero-collage .copy-side{
+        padding-top:0;
+        gap:8px;
+      }
+      .hero-collage .hero-copy p.copy{
+        max-width:none;
+      }
+      .hero-collage .micro-labels{
+        max-width:none;
+        width:100%;
+      }
+      .hero-collage .micro-label{
+        min-width:calc(50% - 6px);
+      }
+      .hero-collage .collage-top{
+        margin:0 0 -32px 16px;
+        gap:8px;
+      }
+      .hero-collage .mini-shot{
+        width:29%;
+        border-width:2px;
+      }
+      .hero-collage .news-card{
+        padding:16px;
+      }
+      .hero-collage .news-grid{
+        grid-template-columns:1fr;
+        gap:0;
+      }
+      .hero-collage .news-item:nth-child(2){
+        border-top:1px solid rgba(138,199,90,.12);
+      }
+      .hero-collage .hero-actions{
+        width:100%;
+      }
+      .hero-collage .hero-actions .btn{
+        width:100%;
+      }
+    }
+  </style>
+
+  <div class="hero-cloud c1" aria-hidden="true"></div>
+  <div class="hero-cloud c2" aria-hidden="true"></div>
+  <div class="hero-cloud c3" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div class="brand-text">
+            <strong>南青山デンタルアトリエ</strong>
+            <span>表参道の予防・審美・矯正を静かに整える歯科クリニック</span>
+          </div>
+        </div>
+        <nav class="header-nav" aria-label="グローバルナビゲーション">
+          <a href="#top">TOP</a>
+          <a href="#concept">私たちの考え</a>
+          <a href="#care">診療案内</a>
+          <a href="#promise">院内について</a>
+          <a href="#access">ご予約・アクセス</a>
+        </nav>
+        <div class="menu-dot" aria-label="メニュー"><i></i></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container hero-inner">
+    <div class="hero-stage" data-cebt="" data-cetx="91" data-cety="-7" style="translate: 91px -7px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+      <div class="hero-visual hero-anim is-visible" data-cebt="" data-cetx="-54" data-cety="-725" style="translate: -54px -725px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 865px !important;">
+        <div class="collage-top">
+          
+          
+          
+        </div>
+        <div class="main-photo" data-cebt="" data-cetx="18" data-cety="182" style="translate: 18px 182px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; width: 671px !important; max-width: none !important; min-height: 823px !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_68a39f677b.png" alt="歯科相談のイメージ" width="720" height="540" onerror="this.style.display='none'" class="" data-cebt="" data-cetx="-3" data-cety="20" style="translate: -3px 20px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; width: 671px !important; height: 530px !important; object-fit: cover !important; max-width: none !important; min-height: 743px !important;" data-cew="670.9329" data-ceh="529.8940053000001">
+        </div>
+      </div>
+
+      <div class="hero-copy hero-anim delay-1 is-visible" style="width: 211px !important; max-width: none !important;">
+        <div class="copy-kicker" data-cebt="" data-cetx="107" data-cety="-12" style="translate: 107px -12px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">Dental Atelier</div>
+
+        <div class="copy-head" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          <h1 data-cebt="" data-cetx="51" data-cety="-17" style="translate: 51px -17px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 700px !important; width: 200px !important; max-width: none !important;" class="">白さだけで終わらない。<br>噛み心地まで美しい、<br>南青山の歯科時間。</h1>
+          <div class="copy-side">
+            
+            
+          </div>
+        </div>
+
+        <p class="copy" data-cebt="" data-cetx="-2" data-cety="-213" style="translate: -2px -213px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          表参道駅B1出口から徒歩4分。南青山デンタルアトリエは、予防歯科・セラミック治療・
+          マウスピース矯正・ホワイトニングを中心に、30分刻みで丁寧に診る予約制のクリニックです。
+          平日は19:30まで、土曜も診療しています。
+        </p>
+
+        <div class="micro-labels" aria-label="診療情報">
+          <div class="micro-label">
+            <strong>OMOTESANDO</strong>
+            <span>B1 EXIT / 4 MIN</span>
+          </div>
+          <div class="micro-label">
+            <strong>APPOINTMENT</strong>
+            <span>30 MINUTES CARE</span>
+          </div>
+          <div class="micro-label">
+            <strong>OPEN HOURS</strong>
+            <span>WEEKDAY / SATURDAY</span>
+          </div>
+        </div>
+
+        <div class="hero-actions hero-anim delay-2 is-visible">
+          <a class="btn" href="#access">初診予約をする</a>
+          <a class="btn btn--ghost" href="#care">診療内容を見る</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="landscape" aria-hidden="false">
+      <div class="news-card reveal delay-2 is-visible">
+        <div class="news-head">
+          <div><strong>NEWS</strong><span>お知らせ</span></div>
+          <a class="btn btn--ghost" href="#access">すべて見る</a>
+        </div>
+        <div class="news-grid">
+          <article class="news-item">
+            <span class="tag">休診</span>
+            <span class="date">2026.07.03</span>
+            <p>7月21日(火)は院内研修のため、最終受付を17:00とさせていただきます。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">新着</span>
+            <span class="date">2026.06.14</span>
+            <p>口腔内スキャナー「iTero Lumina」を導入し、型取りの負担がさらに軽くなりました。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">診療案内</span>
+            <span class="date">2026.05.28</span>
+            <p>平日限定のオフィスホワイトニング初回コースを、8月末まで実施中です。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">地域連携</span>
+            <span class="date">2026.04.19</span>
+            <p>港区南青山三丁目の企業健診後フォロー相談を、毎週木曜に受け付けています。</p>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator" aria-hidden="true"></div>
+  </div>
+</section><section class="imp-concept-section" id="concept">
+  <style>
+    .imp-concept-section{
+      --imp-bg:#fbfaf7;
+      --imp-surface:#ffffff;
+      --imp-text:#2f342f;
+      --imp-muted:#6f756d;
+      --imp-line:rgba(146,178,107,.22);
+      --imp-brand:#92b26b;
+      --imp-brand-deep:#7f9f58;
+      --imp-shadow:0 24px 64px rgba(146,178,107,.12), 0 10px 24px rgba(60,77,54,.06);
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 12% 20%, rgba(146,178,107,.12), transparent 34%),
+        radial-gradient(circle at 88% 16%, rgba(146,178,107,.08), transparent 28%),
+        linear-gradient(120deg, #fcfbf8 0%, #f7f6f1 46%, #fcfbf8 100%);
+      background-size:140% 140%;
+      animation:imp-bg-shift 16s ease-in-out infinite alternate;
+      padding:112px 0;
+      isolation:isolate;
+    }
+
+    .imp-concept-section *{box-sizing:border-box;}
+
+    .imp-concept-section::before,
+    .imp-concept-section::after{
+      content:"";
+      position:absolute;
+      border-radius:50%;
+      pointer-events:none;
+      z-index:0;
+      filter:blur(2px);
+    }
+
+    .imp-concept-section::before{
+      width:420px;
+      height:420px;
+      top:-120px;
+      right:-120px;
+      background:radial-gradient(circle, rgba(146,178,107,.16) 0%, rgba(146,178,107,.05) 42%, transparent 68%);
+      animation:imp-float-orb-a 10s ease-in-out infinite;
+    }
+
+    .imp-concept-section::after{
+      width:340px;
+      height:340px;
+      left:-100px;
+      bottom:-80px;
+      background:radial-gradient(circle, rgba(146,178,107,.12) 0%, rgba(146,178,107,.04) 46%, transparent 72%);
+      animation:imp-float-orb-b 12s ease-in-out infinite;
+    }
+
+    .imp-concept-wrap{
+      position:relative;
+      z-index:1;
+      width:min(1200px, calc(100% - 48px));
+      margin:0 auto;
+    }
+
+    .imp-concept-grid{
+      display:grid;
+      grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);
+      gap:48px;
+      align-items:stretch;
+    }
+
+    .imp-copy-panel,
+    .imp-visual-panel{
+      position:relative;
+      background:rgba(255,255,255,.74);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.65);
+      box-shadow:var(--imp-shadow);
+      transition:transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s cubic-bezier(.22,1,.36,1), border-color .5s ease;
+    }
+
+    .imp-copy-panel{
+      border-radius:32px;
+      padding:56px;
+      overflow:hidden;
+    }
+
+    .imp-copy-panel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(180deg, rgba(146,178,107,.08), transparent 32%),
+        linear-gradient(90deg, rgba(146,178,107,.05), transparent 40%);
+      pointer-events:none;
+    }
+
+    .imp-visual-panel{
+      border-radius:32px;
+      padding:24px;
+      display:flex;
+      min-height:100%;
+      overflow:hidden;
+    }
+
+    .imp-copy-panel:hover,
+    .imp-visual-panel:hover{
+      transform:translateY(-8px);
+      box-shadow:0 34px 86px rgba(146,178,107,.18), 0 16px 40px rgba(60,77,54,.10);
+      border-color:rgba(146,178,107,.28);
+    }
+
+    .imp-eyebrow{
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      margin:0 0 24px;
+      color:var(--imp-brand-deep);
+      font-size:12px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      font-weight:600;
+    }
+
+    .imp-eyebrow::after{
+      content:"";
+      display:block;
+      width:96px;
+      height:1px;
+      background:linear-gradient(90deg, rgba(146,178,107,.55), rgba(146,178,107,0));
+      flex:none;
+    }
+
+    .imp-eyebrow .imp-jp{
+      color:#9ca491;
+      letter-spacing:.08em;
+      text-transform:none;
+      font-weight:500;
+    }
+
+    .imp-title{
+      margin:0;
+      color:var(--imp-text);
+      font-size:clamp(36px, 4.5vw, 64px);
+      line-height:1.18;
+      font-weight:700;
+      letter-spacing:.03em;
+    }
+
+    .imp-title-line{
+      display:block;
+    }
+
+    .imp-char{
+      display:inline-block;
+      opacity:0;
+      transform:translateY(72px) rotate(8deg);
+      filter:blur(8px);
+      transition:
+        opacity .8s cubic-bezier(.22,1,.36,1),
+        transform .8s cubic-bezier(.22,1,.36,1),
+        filter .8s cubic-bezier(.22,1,.36,1);
+      transition-delay:var(--imp-delay, 0s);
+      will-change:transform, opacity;
+    }
+
+    .imp-show .imp-char{
+      opacity:1;
+      transform:translateY(0) rotate(0);
+      filter:blur(0);
+    }
+
+    .imp-catch{
+      position:relative;
+      margin:32px 0 0;
+      padding:24px 24px 24px 28px;
+      border-left:3px solid rgba(146,178,107,.7);
+      color:var(--imp-brand);
+      font-size:clamp(28px, 3.2vw, 48px);
+      line-height:1.45;
+      font-weight:700;
+      letter-spacing:.03em;
+      background:linear-gradient(90deg, rgba(146,178,107,.08), rgba(146,178,107,0));
+      border-radius:0 24px 24px 0;
+    }
+
+    .imp-copy{
+      margin:32px 0 0;
+      color:var(--imp-muted);
+      font-size:16px;
+      line-height:1.95;
+      letter-spacing:.03em;
+      max-width:42em;
+    }
+
+    .imp-stat-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin:40px 0 0;
+    }
+
+    .imp-stat{
+      position:relative;
+      border:1px solid var(--imp-line);
+      border-radius:24px;
+      padding:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,.86), rgba(250,249,245,.86));
+      overflow:hidden;
+      transition:transform .45s cubic-bezier(.22,1,.36,1), box-shadow .45s cubic-bezier(.22,1,.36,1), border-color .45s ease;
+    }
+
+    .imp-stat::before{
+      content:"";
+      position:absolute;
+      inset:auto -24px -24px auto;
+      width:96px;
+      height:96px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(146,178,107,.16), transparent 70%);
+      animation:imp-pulse 6s ease-in-out infinite;
+    }
+
+    .imp-stat:hover{
+      transform:translateY(-8px);
+      border-color:rgba(146,178,107,.34);
+      box-shadow:0 22px 48px rgba(146,178,107,.16);
+    }
+
+    .imp-stat-label{
+      display:block;
+      margin:0 0 8px;
+      color:#8b9284;
+      font-size:12px;
+      letter-spacing:.12em;
+    }
+
+    .imp-stat-value{
+      display:flex;
+      align-items:flex-end;
+      gap:4px;
+      color:var(--imp-text);
+      font-size:40px;
+      line-height:1;
+      font-weight:700;
+      letter-spacing:.02em;
+    }
+
+    .imp-stat-value .imp-unit{
+      color:var(--imp-brand-deep);
+      font-size:16px;
+      line-height:1.4;
+      transform:translateY(-4px);
+    }
+
+    .imp-stat-desc{
+      margin:12px 0 0;
+      color:var(--imp-muted);
+      font-size:14px;
+      line-height:1.8;
+    }
+
+    .imp-visual-core{
+      position:relative;
+      width:100%;
+      min-height:560px;
+      border-radius:24px;
+      overflow:hidden;
+      background:
+        linear-gradient(140deg, rgba(146,178,107,.16), rgba(255,255,255,.28) 40%, rgba(146,178,107,.08)),
+        #f7f6f1;
+      display:grid;
+      align-items:end;
+      padding:32px;
+    }
+
+    .imp-visual-core::before{
+      content:"";
+      position:absolute;
+      inset:18px;
+      border-radius:20px;
+      border:1px solid rgba(146,178,107,.18);
+      pointer-events:none;
+    }
+
+    .imp-visual-orb,
+    .imp-visual-orb-b{
+      position:absolute;
+      border-radius:50%;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .imp-visual-orb{
+      width:240px;
+      height:240px;
+      top:40px;
+      right:-20px;
+      background:radial-gradient(circle, rgba(146,178,107,.22), rgba(146,178,107,.05) 50%, transparent 72%);
+      animation:imp-float-orb-c 9s ease-in-out infinite;
+    }
+
+    .imp-visual-orb-b{
+      width:180px;
+      height:180px;
+      left:24px;
+      top:120px;
+      background:radial-gradient(circle, rgba(255,255,255,.95), rgba(255,255,255,.25) 56%, transparent 76%);
+      animation:imp-float-orb-d 11s ease-in-out infinite;
+      border:1px solid rgba(146,178,107,.12);
+    }
+
+    .imp-visual-frame{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 44px,
+          rgba(146,178,107,.035) 44px,
+          rgba(146,178,107,.035) 45px
+        ),
+        repeating-linear-gradient(
+          180deg,
+          transparent 0,
+          transparent 44px,
+          rgba(146,178,107,.03) 44px,
+          rgba(146,178,107,.03) 45px
+        );
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.8));
+    }
+
+    .imp-quote-card{
+      position:relative;
+      z-index:2;
+      width:min(100%, 420px);
+      margin-left:auto;
+      padding:28px;
+      border-radius:24px;
+      background:rgba(255,255,255,.88);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.8);
+      box-shadow:0 20px 50px rgba(146,178,107,.14);
+      transition:transform .45s cubic-bezier(.22,1,.36,1), box-shadow .45s cubic-bezier(.22,1,.36,1);
+    }
+
+    .imp-quote-card:hover{
+      transform:translateY(-8px);
+      box-shadow:0 30px 70px rgba(146,178,107,.18);
+    }
+
+    .imp-quote-mark{
+      display:inline-flex;
+      width:44px;
+      height:44px;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      background:rgba(146,178,107,.12);
+      color:var(--imp-brand-deep);
+      font-size:24px;
+      line-height:1;
+      margin:0 0 16px;
+    }
+
+    .imp-quote-text{
+      margin:0;
+      color:var(--imp-text);
+      font-size:18px;
+      line-height:1.9;
+      letter-spacing:.03em;
+      font-weight:600;
+    }
+
+    .imp-quote-sub{
+      margin:16px 0 0;
+      color:var(--imp-muted);
+      font-size:13px;
+      line-height:1.9;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .imp-reveal{
+      opacity:0;
+      transform:translateY(72px);
+      filter:blur(10px);
+      transition:
+        opacity 1s cubic-bezier(.22,1,.36,1),
+        transform 1s cubic-bezier(.22,1,.36,1),
+        filter 1s cubic-bezier(.22,1,.36,1);
+      transition-delay:var(--imp-item-delay, 0s);
+      will-change:transform, opacity;
+    }
+
+    .imp-reveal.imp-show{
+      opacity:1;
+      transform:translateY(0);
+      filter:blur(0);
+    }
+
+    .imp-zoom{
+      opacity:0;
+      transform:scale(1.15);
+      filter:blur(8px);
+      transition:
+        opacity 1s cubic-bezier(.22,1,.36,1),
+        transform 1.2s cubic-bezier(.22,1,.36,1),
+        filter 1s cubic-bezier(.22,1,.36,1);
+      transition-delay:var(--imp-item-delay, 0s);
+    }
+
+    .imp-zoom.imp-show{
+      opacity:1;
+      transform:scale(1);
+      filter:blur(0);
+    }
+
+    @keyframes imp-bg-shift{
+      0%{background-position:0% 50%;}
+      100%{background-position:100% 50%;}
+    }
+
+    @keyframes imp-float-orb-a{
+      0%,100%{transform:translate3d(0,0,0);}
+      25%{transform:translate3d(-34px,24px,0);}
+      50%{transform:translate3d(-10px,52px,0);}
+      75%{transform:translate3d(22px,18px,0);}
+    }
+
+    @keyframes imp-float-orb-b{
+      0%,100%{transform:translate3d(0,0,0);}
+      33%{transform:translate3d(28px,-22px,0);}
+      66%{transform:translate3d(54px,18px,0);}
+    }
+
+    @keyframes imp-float-orb-c{
+      0%,100%{transform:translate3d(0,0,0) scale(1);}
+      35%{transform:translate3d(-26px,30px,0) scale(1.06);}
+      70%{transform:translate3d(16px,58px,0) scale(.96);}
+    }
+
+    @keyframes imp-float-orb-d{
+      0%,100%{transform:translate3d(0,0,0);}
+      30%{transform:translate3d(22px,-18px,0);}
+      60%{transform:translate3d(-10px,34px,0);}
+    }
+
+    @keyframes imp-pulse{
+      0%,100%{transform:scale(1); opacity:.65;}
+      50%{transform:scale(1.22); opacity:1;}
+    }
+
+    @media (max-width: 1024px){
+      .imp-concept-section{padding:96px 0;}
+      .imp-concept-grid{
+        grid-template-columns:1fr;
+        gap:32px;
+      }
+      .imp-copy-panel{padding:40px;}
+      .imp-visual-core{min-height:480px;}
+      .imp-quote-card{
+        width:min(100%, 440px);
+      }
+    }
+
+    @media (max-width: 640px){
+      .imp-concept-section{
+        padding:72px 0;
+      }
+      .imp-concept-wrap{
+        width:min(100% - 24px, 1200px);
+      }
+      .imp-copy-panel,
+      .imp-visual-panel{
+        border-radius:24px;
+      }
+      .imp-copy-panel{
+        padding:32px 24px;
+      }
+      .imp-visual-panel{
+        padding:16px;
+      }
+      .imp-title{
+        font-size:clamp(30px, 10vw, 44px);
+      }
+      .imp-catch{
+        margin-top:24px;
+        padding:20px 20px 20px 20px;
+        font-size:clamp(24px, 7.8vw, 34px);
+        border-radius:0 20px 20px 0;
+      }
+      .imp-copy{
+        font-size:15px;
+      }
+      .imp-stat-row{
+        grid-template-columns:1fr;
+        margin-top:32px;
+      }
+      .imp-visual-core{
+        min-height:400px;
+        padding:20px;
+      }
+      .imp-quote-card{
+        padding:24px;
+      }
+      .imp-quote-text{
+        font-size:16px;
+      }
+      .imp-eyebrow{
+        gap:12px;
+        margin-bottom:20px;
+      }
+      .imp-eyebrow::after{
+        width:56px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .imp-concept-section,
+      .imp-concept-section::before,
+      .imp-concept-section::after,
+      .imp-visual-orb,
+      .imp-visual-orb-b,
+      .imp-stat::before{
+        animation:none !important;
+      }
+      .imp-reveal,
+      .imp-zoom,
+      .imp-char{
+        transition:none !important;
+        opacity:1 !important;
+        transform:none !important;
+        filter:none !important;
+      }
+    }
+  </style>
+
+  <div class="imp-concept-wrap">
+    <div class="imp-concept-grid">
+      <div class="imp-copy-panel imp-reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter imp-show" style="--imp-item-delay: 0s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-eyebrow imp-reveal imp-show in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--imp-item-delay: .15s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <span>Concept</span>
+          <span class="imp-jp">私たちの考え</span>
+        </div>
+
+        <h2 class="imp-title imp-title-anim imp-show">
+          <span class="imp-title-line">
+            <span class="imp-char" style="--imp-delay: .00s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">削</span><span class="imp-char" style="--imp-delay: .04s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">る</span><span class="imp-char" style="--imp-delay: .08s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">前</span><span class="imp-char" style="--imp-delay: .12s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">に</span><span class="imp-char" style="--imp-delay: .16s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">、</span><span class="imp-char" style="--imp-delay: .20s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">&nbsp;</span><span class="imp-char" style="--imp-delay: .24s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">守</span><span class="imp-char" style="--imp-delay: .28s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">る</span><span class="imp-char" style="--imp-delay: .32s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">。</span>
+          </span>
+          <span class="imp-title-line">
+            <span class="imp-char" style="--imp-delay: .44s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">治</span><span class="imp-char" style="--imp-delay: .48s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">す</span><span class="imp-char" style="--imp-delay: .52s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">前</span><span class="imp-char" style="--imp-delay: .56s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">に</span><span class="imp-char" style="--imp-delay: .60s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">、</span><span class="imp-char" style="--imp-delay: .64s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">&nbsp;</span><span class="imp-char" style="--imp-delay: .68s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">整</span><span class="imp-char" style="--imp-delay: .72s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">え</span><span class="imp-char" style="--imp-delay: .76s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">る</span><span class="imp-char" style="--imp-delay: .80s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">。</span>
+          </span>
+        </h2>
+
+        <div class="imp-catch imp-reveal imp-show in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--imp-item-delay: .30s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          できるだけ削らない、<br>見た目と機能を両立する診療。
+        </div>
+
+        <p class="imp-copy imp-reveal imp-show in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--imp-item-delay: .45s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          初診カウンセリングは平均45分。見た目だけを急いで整えるのではなく、
+          歯ぐきの状態、噛み合わせ、清掃習慣、生活リズムまで一緒に確認します。
+          そのうえで、いま必要な治療と、まだ急がなくてよい処置を分けてお伝えします。
+          “長くきれいに使えること”を、南青山らしい静かな品のあるデザイン感覚で支える歯科医院です。
+        </p>
+
+        <div class="imp-stat-row">
+          <div class="imp-stat imp-reveal imp-show in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--imp-item-delay: .60s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <span class="imp-stat-label">FIRST COUNSELING</span>
+            <div class="imp-stat-value"><span class="imp-count" data-count="45">45</span><span class="imp-unit">分</span></div>
+            <p class="imp-stat-desc">初診カウンセリングは平均45分。</p>
+          </div>
+          <div class="imp-stat imp-reveal imp-show in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--imp-item-delay: .75s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <span class="imp-stat-label">TREATMENT CONCEPT</span>
+            <div class="imp-stat-value"><span class="imp-count" data-count="2">2</span><span class="imp-unit">軸</span></div>
+            <p class="imp-stat-desc">見た目と機能を両立する診療。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="imp-visual-panel imp-zoom imp-show" style="--imp-item-delay: .15s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="imp-visual-core">
+          <div class="imp-visual-frame"></div>
+          <div class="imp-visual-orb"></div>
+          <div class="imp-visual-orb-b"></div>
+
+          <div class="imp-quote-card imp-reveal imp-show in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="--imp-item-delay: .45s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="imp-quote-mark">“</div>
+            <p class="imp-quote-text">
+              削る前に、守る。<br>
+              治す前に、整える。
+            </p>
+            <p class="imp-quote-sub">Concept / 私たちの考え</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var root = document.currentScript.closest('.imp-concept-section');
+      if(!root) return;
+
+      var targets = root.querySelectorAll('.imp-reveal, .imp-zoom, .imp-title-anim');
+      var counted = false;
+
+      function showEl(el){
+        el.classList.add('imp-show');
+      }
+
+      function runCounters(){
+        if(counted) return;
+        counted = true;
+        var counters = root.querySelectorAll('.imp-count');
+        counters.forEach(function(el){
+          var end = parseFloat(el.getAttribute('data-count')) || 0;
+          var duration = 1800;
+          var startTime = null;
+
+          function tick(ts){
+            if(!startTime) startTime = ts;
+            var progress = Math.min((ts - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var current = end * eased;
+            el.textContent = Number.isInteger(end) ? Math.round(current) : current.toFixed(1);
+            if(progress < 1){
+              requestAnimationFrame(tick);
+            }else{
+              el.textContent = Number.isInteger(end) ? String(end) : end.toFixed(1);
+            }
+          }
+          requestAnimationFrame(tick);
+        });
+      }
+
+      if('IntersectionObserver' in window){
+        var io = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              showEl(entry.target);
+              if(entry.target.classList.contains('imp-title-anim')){
+                runCounters();
+              }
+              io.unobserve(entry.target);
+            }
+          });
+        }, {threshold:0.18});
+
+        targets.forEach(function(el){ io.observe(el); });
+      }else{
+        targets.forEach(showEl);
+        runCounters();
+      }
+
+      setTimeout(function(){
+        targets.forEach(showEl);
+        runCounters();
+      }, 3000);
+    })();
+  </script>
+</section><section class="wave-section">
+    <div class="wave-bg">
+      <div class="container">
+        <div class="promise-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" id="care" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="eyebrow">Care Menu <span class="jp">診療案内</span></div>
+          <h2>予防・審美・矯正を、<br>一つの流れでご案内します。</h2>
+          <p class="copy" style="margin-top:24px">
+            クリーニングだけ、セラミックだけ、と切り分けずに、口元全体の印象から逆算してご提案。
+            たとえば前歯の色が気になる方には、先に歯ぐきの炎症を整え、その後にホワイトニング、
+            必要であれば最小限の補綴へ進むなど、順番まで設計します。
+          </p>
+
+          <div class="promise-visual" aria-hidden="true">
+            <div class="promise-tree"></div>
+            <div class="flower" style="left:24%; top:46%"></div>
+            <div class="flower" style="left:28%; top:45%"></div>
+            <div class="flower" style="left:32%; top:47%"></div>
+            <div class="flower" style="left:65%; top:46%"></div>
+            <div class="flower" style="left:69%; top:45%"></div>
+            <div class="flower" style="left:73%; top:47%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section><section class="section section--white stats-box">
+    <div class="container">
+      <div class="stats-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="section-head" style="margin-bottom:24px">
+          <div class="eyebrow">Numbers <span class="jp">数字で見る医院</span></div>
+          <h2>開院9年。<br>通いやすさも、診療の質も、数字で。</h2>
+        </div>
+        <div class="stats-row">
+          <div class="stat reveal delay-1 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <strong>9年</strong>
+            <span>2017年開院。南青山三丁目で継続して診療。</span>
+          </div>
+          <div class="stat reveal delay-2 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <strong>4.8/5</strong>
+            <span>予約後アンケートの院内満足度。2025年度集計。</span>
+          </div>
+          <div class="stat reveal delay-3 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <strong>1,260件</strong>
+            <span>年間の定期メンテナンス来院件数。</span>
+          </div>
+          <div class="stat reveal delay-4 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <strong>19:30</strong>
+            <span>平日最終受付。仕事帰りにも通いやすい時間設計。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section><section class="section cta-section section--tint" id="access">
+    <div class="container">
+      <div class="cta-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="cta-flex">
+          <div>
+            <div class="eyebrow">Reserve &amp; Access <span class="jp">ご予約・アクセス</span></div>
+            <h2>初診相談は、<br>ネット予約とお電話で。</h2>
+            <p class="copy" style="margin-top:24px">
+              〒107-0062 東京都港区南青山3-14-17 エイチ・アイ南青山2F。<br>
+              東京メトロ表参道駅B1出口より徒歩4分。初診では現在のお悩み、
+              これまでの治療経験、ご予算や通院頻度までお聞きし、無理のない進め方をご案内します。
+            </p>
+            <p class="copy" style="margin-top:12px">
+              診療時間｜平日 10:00–13:30 / 15:00–19:30　土曜 9:30–15:30　日曜・祝日休診
+            </p>
+            <div class="cta-actions">
+              <a class="btn" href="#">WEB予約（24時間）</a>
+              <a class="btn btn--ghost" href="tel:03-6427-7789">03-6427-7789</a>
+            </div>
+          </div>
+
+          <div class="cta-visual">
+            <div class="blur-blob" aria-hidden="true"></div>
+            <div class="cta-photo-wrap">
+              <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="クリニック外観のイメージ" width="640" height="420" onerror="this.style.display='none'">
+            </div>
+            <div class="caption-card">
+              <small>First Visit</small>
+              <p>「説明がわかりやすくて、治療の順番に納得できた」<br>初診アンケートより</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer section" style="padding-top:0;min-height:auto">
+      <div class="footer-top-ornaments" aria-hidden="true" style="">
+        <div class="foot-tree" style="left:8%"></div>
+        <div class="foot-round" style="left:18%"></div>
+        <div class="foot-cone" style="left:29%"></div>
+        <div class="foot-cone" style="left:34%;transform:scale(.8)"></div>
+        <div class="foot-house" style="left:50%"></div>
+        <div class="foot-round" style="left:84%"></div>
+      </div>
+
+      <div class="container">
+        <div class="footer-main">
+          <div class="footer-col">
+            <div class="clinic-name">医療法人社団 M Leaf<br>南青山デンタルアトリエ</div>
+            <div class="footer-tel">03-6427-7789</div>
+            <p style="margin-top:8px">予約優先制｜平日 10:00–19:30</p>
+            <p class="footer-address">
+              〒107-0062 東京都港区南青山3-14-17 エイチ・アイ南青山2F<br>
+              表参道駅B1出口より徒歩4分
+            </p>
+          </div>
+
+          <div class="footer-col">
+            <h3>南青山デンタルアトリエ</h3>
+            <ul>
+              <li><a href="#top">TOP</a></li>
+              <li><a href="#concept">私たちの考え</a></li>
+              <li><a href="#care">診療案内</a></li>
+              <li><a href="#access">ご予約</a></li>
+              <li><a href="#access">お問い合わせ</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h3>診療内容</h3>
+            <ul>
+              <li>予防歯科・定期検診</li>
+              <li>審美セラミック治療</li>
+              <li>ホワイトニング</li>
+              <li>マウスピース矯正</li>
+              <li>歯周病ケア</li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h3>はじめての方へ</h3>
+            <ul>
+              <li>初診の流れ</li>
+              <li>費用の目安</li>
+              <li>よくあるご質問</li>
+              <li>キャンセルポリシー</li>
+              <li>プライバシーポリシー</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-logos">
+          <span class="partner"><span class="partner-mark"></span> Tokyo Oral Care Network</span>
+          <span class="partner"><span class="partner-mark"></span> 港区歯科医師会</span>
+          <span class="partner"><span class="partner-mark"></span> Oral Aesthetic Study Group</span>
+        </div>
+        <div class="copyline">© 2026 Minamiaoyama Dental Atelier. All Rights Reserved.</div>
+      </div>
+    </footer>
+  </section><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.hero-anim').forEach((el, i) => {
+        setTimeout(() => el.classList.add('is-visible'), 120 + i * 120);
+      });
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14 });
+
+      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    });
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+<div></div></body></html>

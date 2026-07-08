@@ -781,104 +781,486 @@
     }
   </style>
 </head>
-<body style=""><section class="hero section">
-    <div class="hero-cloud c1"></div>
-    <div class="hero-cloud c2"></div>
-    <div class="hero-cloud c3"></div>
+<body style=""><section class="hero section hero-collage" id="top" data-cestyle="コラージュヒーロー">
+  <style>
+    .hero-collage{
+      min-height:100vh;
+      max-height:110vh;
+      padding:24px 0 40px;
+      background:
+        radial-gradient(circle at 14% 16%, rgba(138,199,90,.10), transparent 18%),
+        radial-gradient(circle at 84% 12%, rgba(138,199,90,.08), transparent 16%),
+        linear-gradient(180deg, #f7fbf3 0%, #ffffff 48%, #f4faec 100%);
+      overflow:hidden;
+    }
+    .hero-collage .hero-cloud{opacity:.7}
+    .hero-collage .site-header{position:relative;padding-top:0;margin-bottom:32px}
+    .hero-collage .header-card{
+      background:rgba(255,255,255,.86);
+      border:1px solid rgba(138,199,90,.14);
+    }
 
-    <header class="site-header">
-      <div class="container">
-        <div class="header-card reveal in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
-          <div class="brand">
-            <div class="brand-mark" aria-hidden="true"></div>
-            <div class="brand-text">
-              <strong>南青山デンタルアトリエ</strong>
-              <span>表参道の予防・審美・矯正を静かに整える歯科クリニック</span>
-            </div>
+    .hero-collage .hero-inner{
+      min-height:auto;
+      padding-top:0;
+      display:block;
+    }
+
+    .hero-collage .hero-stage{
+      display:grid;
+      grid-template-columns:1.3fr .7fr;
+      gap:40px;
+      align-items:end;
+      min-height:calc(100vh - 180px);
+    }
+
+    .hero-collage .hero-visual{
+      min-height:auto;
+      position:relative;
+      padding:8px 0 0;
+    }
+
+    .hero-collage .collage-top{
+      display:flex;
+      gap:12px;
+      align-items:flex-end;
+      margin:0 0 -46px 40px;
+      position:relative;
+      z-index:2;
+      width:fit-content;
+      max-width:100%;
+    }
+
+    .hero-collage .mini-shot{
+      width:min(22vw, 172px);
+      aspect-ratio:1 / 1.08;
+      border:3px solid #fff;
+      border-radius:10px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#eef7e7,#f8fbf5);
+      box-shadow:0 12px 28px rgba(138,199,90,.12);
+      flex:0 0 auto;
+    }
+    .hero-collage .mini-shot.tall{transform:translateY(16px)}
+    .hero-collage .mini-shot.short{transform:translateY(-8px)}
+    .hero-collage .mini-shot img,
+    .hero-collage .main-photo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .hero-collage .main-photo{
+      width:min(720px,100%);
+      aspect-ratio:720 / 540;
+      border-radius:18px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#edf6fb,#f5faef);
+      box-shadow:0 18px 42px rgba(138,199,90,.14);
+      position:relative;
+    }
+    .hero-collage .main-photo::after{
+      content:"";
+      position:absolute;
+      inset:auto 24px 20px auto;
+      width:96px;
+      height:1px;
+      background:linear-gradient(90deg, rgba(138,199,90,.8), transparent);
+    }
+
+    .hero-collage .hero-copy{
+      color:#222;
+      padding:0 0 8px;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:24px;
+      position:relative;
+      z-index:2;
+    }
+
+    .hero-collage .copy-kicker{
+      font-size:11px;
+      letter-spacing:.18em;
+      color:var(--main-deep);
+      font-weight:700;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .hero-collage .copy-head{
+      display:flex;
+      gap:24px;
+      align-items:flex-start;
+    }
+
+    .hero-collage .copy-side{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      padding-top:8px;
+    }
+
+    .hero-collage .copy-jp{
+      font-size:11px;
+      letter-spacing:.14em;
+      color:#7e8f6a;
+      line-height:1.8;
+      white-space:nowrap;
+    }
+
+    .hero-collage h1{
+      margin:0;
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      font-size:clamp(2.4rem,4.5vw,3.5rem);
+      line-height:1.2;
+      letter-spacing:.08em;
+      font-weight:800;
+      color:#222;
+      text-shadow:0 1px 0 rgba(255,255,255,.75), 0 8px 20px rgba(255,255,255,.45);
+      max-height:540px;
+    }
+
+    .hero-collage .hero-copy p.copy{
+      max-width:22em;
+      font-size:1rem;
+      line-height:1.9;
+      letter-spacing:.02em;
+      color:#333;
+    }
+
+    .hero-collage .micro-labels{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      max-width:320px;
+    }
+
+    .hero-collage .micro-label{
+      padding:10px 12px 9px;
+      border-top:1px solid rgba(138,199,90,.28);
+      min-width:88px;
+    }
+    .hero-collage .micro-label strong,
+    .hero-collage .micro-label span{
+      display:block;
+      font-size:11px;
+      line-height:1.55;
+      letter-spacing:.12em;
+      color:#5f6d52;
+      white-space:nowrap;
+    }
+    .hero-collage .micro-label strong{
+      color:var(--main-deep);
+      font-weight:700;
+    }
+
+    .hero-collage .hero-actions{
+      margin-top:0;
+      gap:12px;
+    }
+
+    .hero-collage .hero-actions .btn{
+      min-height:46px;
+    }
+
+    .hero-collage .landscape{
+      margin-top:24px;
+      height:auto;
+      padding:0;
+      position:relative;
+    }
+
+    .hero-collage .hill-back,
+    .hero-collage .hill-front,
+    .hero-collage .mini-tree,
+    .hero-collage .mini-person,
+    .hero-collage .mini-house,
+    .hero-collage .mini-bird{
+      display:none;
+    }
+
+    .hero-collage .news-card{
+      position:relative;
+      left:auto;
+      bottom:auto;
+      transform:none;
+      width:100%;
+      margin:0;
+      padding:16px 24px;
+      border-radius:20px;
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(138,199,90,.16);
+      box-shadow:0 12px 28px rgba(138,199,90,.10);
+      backdrop-filter:blur(8px);
+    }
+
+    .hero-collage .news-head{
+      margin-bottom:12px;
+      align-items:center;
+    }
+    .hero-collage .news-head strong{
+      font-size:1.1rem;
+      color:var(--main-deep);
+      letter-spacing:.12em;
+    }
+    .hero-collage .news-head span{
+      font-size:.74rem;
+      color:#7d7d7d;
+    }
+    .hero-collage .news-head .btn{
+      min-height:34px;
+      padding:0 14px;
+      font-size:.78rem;
+    }
+
+    .hero-collage .news-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px 24px;
+    }
+    .hero-collage .news-item{
+      border-right:none;
+      padding:8px 0;
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:8px 12px;
+      align-items:start;
+      border-top:1px solid rgba(138,199,90,.12);
+    }
+    .hero-collage .news-item:nth-child(-n+2){border-top:none}
+    .hero-collage .tag{
+      margin-bottom:0;
+      font-size:.68rem;
+      padding:4px 8px;
+      align-self:start;
+    }
+    .hero-collage .date{
+      grid-column:2;
+      font-size:.72rem;
+      line-height:1.5;
+      margin-top:-2px;
+    }
+    .hero-collage .news-item p{
+      grid-column:1 / -1;
+      margin-top:0;
+      font-size:.84rem;
+      line-height:1.8;
+      max-width:none;
+      color:#3a3a3a;
+    }
+
+    .js .hero-collage .hero-anim{
+      opacity:0;
+      transform:translateY(24px);
+      transition:opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
+    }
+    .js .hero-collage .hero-anim.is-visible{
+      opacity:1;
+      transform:none;
+    }
+
+    @media (max-width: 980px){
+      .hero-collage{
+        max-height:none;
+        padding-bottom:32px;
+      }
+      .hero-collage .hero-stage{
+        grid-template-columns:1fr;
+        gap:24px;
+        min-height:auto;
+      }
+      .hero-collage .hero-copy{
+        order:1;
+      }
+      .hero-collage .hero-visual{
+        order:2;
+      }
+      .hero-collage .copy-head{
+        gap:16px;
+      }
+      .hero-collage .collage-top{
+        margin-left:24px;
+      }
+      .hero-collage .mini-shot{
+        width:min(26vw, 156px);
+      }
+    }
+
+    @media (max-width: 680px){
+      .hero-collage{
+        padding:16px 0 24px;
+      }
+      .hero-collage .site-header{
+        margin-bottom:24px;
+      }
+      .hero-collage .hero-stage{
+        gap:24px;
+      }
+      .hero-collage .copy-head{
+        align-items:flex-start;
+      }
+      .hero-collage h1{
+        writing-mode:horizontal-tb;
+        font-size:clamp(2.1rem,9vw,3rem);
+        line-height:1.38;
+        max-height:none;
+      }
+      .hero-collage .copy-side{
+        padding-top:0;
+        gap:8px;
+      }
+      .hero-collage .hero-copy p.copy{
+        max-width:none;
+      }
+      .hero-collage .micro-labels{
+        max-width:none;
+        width:100%;
+      }
+      .hero-collage .micro-label{
+        min-width:calc(50% - 6px);
+      }
+      .hero-collage .collage-top{
+        margin:0 0 -32px 16px;
+        gap:8px;
+      }
+      .hero-collage .mini-shot{
+        width:29%;
+        border-width:2px;
+      }
+      .hero-collage .news-card{
+        padding:16px;
+      }
+      .hero-collage .news-grid{
+        grid-template-columns:1fr;
+        gap:0;
+      }
+      .hero-collage .news-item:nth-child(2){
+        border-top:1px solid rgba(138,199,90,.12);
+      }
+      .hero-collage .hero-actions{
+        width:100%;
+      }
+      .hero-collage .hero-actions .btn{
+        width:100%;
+      }
+    }
+  </style>
+
+  <div class="hero-cloud c1" aria-hidden="true"></div>
+  <div class="hero-cloud c2" aria-hidden="true"></div>
+  <div class="hero-cloud c3" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-card reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div class="brand-text">
+            <strong>南青山デンタルアトリエ</strong>
+            <span>表参道の予防・審美・矯正を静かに整える歯科クリニック</span>
           </div>
-          <nav class="header-nav" aria-label="グローバルナビゲーション">
-            <a href="#top">TOP</a>
-            <a href="#concept">私たちの考え</a>
-            <a href="#care">診療案内</a>
-            <a href="#promise">院内について</a>
-            <a href="#access">ご予約・アクセス</a>
-          </nav>
-          <div class="menu-dot" aria-label="メニュー"><i></i></div>
         </div>
+        <nav class="header-nav" aria-label="グローバルナビゲーション">
+          <a href="#top">TOP</a>
+          <a href="#concept">私たちの考え</a>
+          <a href="#care">診療案内</a>
+          <a href="#promise">院内について</a>
+          <a href="#access">ご予約・アクセス</a>
+        </nav>
+        <div class="menu-dot" aria-label="メニュー"><i></i></div>
       </div>
-    </header>
-
-    <div class="container hero-inner" id="top" data-cebt="" data-cetx="-42" data-cety="-117" style="translate: -42px -117px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
-      <div class="hero-top">
-        <div class="hero-copy" data-cebt="" data-cetx="99" data-cety="13" style="translate: 99px 13px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
-          <div class="eyebrow hero-anim is-visible" data-cebt="" data-cetx="9" data-cety="3" style="translate: 9px 3px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
-            Dental Atelier
-            <span class="jp">表参道の歯科医院</span>
-          </div>
-          <h1 class="hero-anim delay-1 is-visible" style="width: 743px !important; max-width: none !important; translate: 6px -6px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="6" data-cety="-6">白さだけで終わらない。<br>噛み心地まで美しい、<br>南青山の歯科時間。</h1>
-          <p class="copy hero-anim delay-2 is-visible" data-cebt="" data-cetx="3" data-cety="-5" style="translate: 3px -5px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
-            表参道駅B1出口から徒歩4分。南青山デンタルアトリエは、予防歯科・セラミック治療・
-            マウスピース矯正・ホワイトニングを中心に、30分刻みで丁寧に診る予約制のクリニックです。
-            平日は19:30まで、土曜も診療しています。
-          </p>
-          <div class="hero-actions hero-anim delay-3 is-visible">
-            <a class="btn" href="#access">初診予約をする</a>
-            <a class="btn btn--ghost" href="#care">診療内容を見る</a>
-          </div>
-        </div>
-
-        <div class="hero-visual hero-anim delay-2 is-visible">
-          <div class="gradient-orb"></div>
-          <div class="hero-photo">
-            <img src="http://127.0.0.1:5000/uploads/up_68a39f677b.png" alt="歯科相談のイメージ" width="720" height="540" onerror="this.style.display='none'" class="">
-          </div>
-        </div>
-      </div>
-
-      <div class="landscape" aria-hidden="true" data-cebt="" data-cetx="-99" data-cety="-16" style="translate: -99px -16px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
-        
-        
-        <div class="mini-tree" style="left:7%;transform:scale(.9)"></div>
-        <div class="mini-tree" style="left:19%;transform:scale(1.2)"></div>
-        <div class="mini-person" style="left:38%"></div>
-        <div class="mini-person" style="left:51%"></div>
-        <div class="mini-house" style="left:58%"></div>
-        <div class="mini-tree" style="left:76%;transform:scale(1.05)"></div>
-        <div class="mini-tree" style="left:89%;transform:scale(.78)"></div>
-        <div class="mini-bird" style="left:76%;top:24px;bottom:auto"></div>
-
-        <div class="news-card reveal delay-2 is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" data-cebt="" data-cetx="-381" data-cety="-30" style="translate: -381px -30px !important; rotate: 0deg !important; scale: 1 0.909 !important; transform-origin: center center !important;" data-cesx="1" data-cesy="0.909">
-          <div class="news-head">
-            <div><strong>NEWS</strong><span>お知らせ</span></div>
-            <a class="btn btn--ghost" style="min-height:38px;padding:0 16px;font-size:.85rem" href="#access">すべて見る</a>
-          </div>
-          <div class="news-grid">
-            <article class="news-item">
-              <span class="tag">休診</span>
-              <span class="date">2026.07.03</span>
-              <p>7月21日(火)は院内研修のため、最終受付を17:00とさせていただきます。</p>
-            </article>
-            <article class="news-item">
-              <span class="tag">新着</span>
-              <span class="date">2026.06.14</span>
-              <p>口腔内スキャナー「iTero Lumina」を導入し、型取りの負担がさらに軽くなりました。</p>
-            </article>
-            <article class="news-item">
-              <span class="tag">診療案内</span>
-              <span class="date">2026.05.28</span>
-              <p>平日限定のオフィスホワイトニング初回コースを、8月末まで実施中です。</p>
-            </article>
-            <article class="news-item">
-              <span class="tag">地域連携</span>
-              <span class="date">2026.04.19</span>
-              <p>港区南青山三丁目の企業健診後フォロー相談を、毎週木曜に受け付けています。</p>
-            </article>
-          </div>
-        </div>
-      </div>
-      <div class="scroll-indicator" aria-hidden="true"></div>
     </div>
-  </section><section class="section section--white" id="concept">
+  </header>
+
+  <div class="container hero-inner">
+    <div class="hero-stage" data-cebt="" data-cetx="91" data-cety="-7" style="translate: 91px -7px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+      <div class="hero-visual hero-anim is-visible" data-cebt="" data-cetx="-54" data-cety="-725" style="translate: -54px -725px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 865px !important;">
+        <div class="collage-top">
+          
+          
+          
+        </div>
+        <div class="main-photo" data-cebt="" data-cetx="18" data-cety="182" style="translate: 18px 182px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; width: 671px !important; max-width: none !important; min-height: 823px !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_68a39f677b.png" alt="歯科相談のイメージ" width="720" height="540" onerror="this.style.display='none'" class="" data-cebt="" data-cetx="-3" data-cety="20" style="translate: -3px 20px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; width: 671px !important; height: 530px !important; object-fit: cover !important; max-width: none !important; min-height: 743px !important;" data-cew="670.9329" data-ceh="529.8940053000001">
+        </div>
+      </div>
+
+      <div class="hero-copy hero-anim delay-1 is-visible" style="width: 211px !important; max-width: none !important;">
+        <div class="copy-kicker" data-cebt="" data-cetx="107" data-cety="-12" style="translate: 107px -12px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">Dental Atelier</div>
+
+        <div class="copy-head" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          <h1 data-cebt="" data-cetx="51" data-cety="-17" style="translate: 51px -17px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 700px !important; width: 200px !important; max-width: none !important;" class="">白さだけで終わらない。<br>噛み心地まで美しい、<br>南青山の歯科時間。</h1>
+          <div class="copy-side">
+            
+            
+          </div>
+        </div>
+
+        <p class="copy" data-cebt="" data-cetx="-2" data-cety="-213" style="translate: -2px -213px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          表参道駅B1出口から徒歩4分。南青山デンタルアトリエは、予防歯科・セラミック治療・
+          マウスピース矯正・ホワイトニングを中心に、30分刻みで丁寧に診る予約制のクリニックです。
+          平日は19:30まで、土曜も診療しています。
+        </p>
+
+        <div class="micro-labels" aria-label="診療情報">
+          <div class="micro-label">
+            <strong>OMOTESANDO</strong>
+            <span>B1 EXIT / 4 MIN</span>
+          </div>
+          <div class="micro-label">
+            <strong>APPOINTMENT</strong>
+            <span>30 MINUTES CARE</span>
+          </div>
+          <div class="micro-label">
+            <strong>OPEN HOURS</strong>
+            <span>WEEKDAY / SATURDAY</span>
+          </div>
+        </div>
+
+        <div class="hero-actions hero-anim delay-2 is-visible">
+          <a class="btn" href="#access">初診予約をする</a>
+          <a class="btn btn--ghost" href="#care">診療内容を見る</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="landscape" aria-hidden="false">
+      <div class="news-card reveal delay-2 is-visible">
+        <div class="news-head">
+          <div><strong>NEWS</strong><span>お知らせ</span></div>
+          <a class="btn btn--ghost" href="#access">すべて見る</a>
+        </div>
+        <div class="news-grid">
+          <article class="news-item">
+            <span class="tag">休診</span>
+            <span class="date">2026.07.03</span>
+            <p>7月21日(火)は院内研修のため、最終受付を17:00とさせていただきます。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">新着</span>
+            <span class="date">2026.06.14</span>
+            <p>口腔内スキャナー「iTero Lumina」を導入し、型取りの負担がさらに軽くなりました。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">診療案内</span>
+            <span class="date">2026.05.28</span>
+            <p>平日限定のオフィスホワイトニング初回コースを、8月末まで実施中です。</p>
+          </article>
+          <article class="news-item">
+            <span class="tag">地域連携</span>
+            <span class="date">2026.04.19</span>
+            <p>港区南青山三丁目の企業健診後フォロー相談を、毎週木曜に受け付けています。</p>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator" aria-hidden="true"></div>
+  </div>
+</section><section class="section section--white" id="concept">
     <div class="container">
       <div class="concept-space">
         <div class="section-head reveal is-visible in show active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="">
@@ -981,7 +1363,7 @@
     </div>
 
     <footer class="footer section" style="padding-top:0;min-height:auto">
-      <div class="footer-top-ornaments" aria-hidden="true">
+      <div class="footer-top-ornaments" aria-hidden="true" style="">
         <div class="foot-tree" style="left:8%"></div>
         <div class="foot-round" style="left:18%"></div>
         <div class="foot-cone" style="left:29%"></div>
@@ -1044,7 +1426,7 @@
         <div class="copyline">© 2026 Minamiaoyama Dental Atelier. All Rights Reserved.</div>
       </div>
     </footer>
-  </section><div></div><div></div><div></div><div></div><div></div>
+  </section><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
   
 
   
@@ -1073,6 +1455,37 @@
       document.querySelectorAll('.reveal').forEach(el => io.observe(el));
     });
   </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!--__CE_SAFE_START__-->
 <script>
 (function(){
@@ -1139,17 +1552,4 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-</body></html>
+<div></div></body></html>
