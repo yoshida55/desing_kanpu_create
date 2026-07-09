@@ -172,5 +172,55 @@
   "anim_id": "",
   "rating": "✖",
   "ts": 1783546845
+ },
+ {
+  "file": "camp_20260710_002407_978089.html",
+  "base_id": "ff4d3da2e9eb4280",
+  "anim_id": "ff4d3da2e9eb4280",
+  "model": "openai:gpt-5.4",
+  "text_len": 1705,
+  "sections": 4,
+  "warn": true,
+  "ts": 1783610648,
+  "rating": "✖"
+ },
+ {
+  "file": "camp_20260710_003953_991480.html",
+  "base_id": "ff4d3da2e9eb4280",
+  "anim_id": "ff4d3da2e9eb4280",
+  "model": "openai:gpt-5.5",
+  "text_len": 1482,
+  "sections": 7,
+  "warn": true,
+  "ts": 1783611594,
+  "rating": "○"
+ },
+ {
+  "file": "camp_20260710_005726_135991.html",
+  "base_id": "a0f202c0d58744e1",
+  "anim_id": "a0f202c0d58744e1",
+  "model": "zai:glm-5.2",
+  "text_len": 0,
+  "sections": 0,
+  "warn": true,
+  "ts": 1783612646
+ },
+ {
+  "file": "camp_20260710_012150_615336.html",
+  "base_id": "a0f202c0d58744e1",
+  "anim_id": "a0f202c0d58744e1",
+  "model": "openai:gpt-5.5",
+  "text_len": 1887,
+  "sections": 9,
+  "warn": true,
+  "ts": 1783614110,
+  "rating": "◎"
+ },
+ {
+  "file": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js.html",
+  "base_id": "",
+  "anim_id": "",
+  "rating": "○",
+  "ts": 1783615620
  }
 ]

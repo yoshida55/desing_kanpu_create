@@ -207,7 +207,8 @@ def _call_openai(system: str, content: list) -> str:
     from openai import OpenAI
 
     hcfg = config.CONFIG.htmlgen
-    client = OpenAI(api_key=hcfg.openai_api_key, timeout=180.0, max_retries=1)
+    # gpt-5.5は180秒に収まらない回が多い（タイムアウト→リトライで二重課金になる方が損）
+    client = OpenAI(api_key=hcfg.openai_api_key, timeout=600.0, max_retries=1)
     resp = client.chat.completions.create(
         model=hcfg.openai_model,
         max_completion_tokens=16000,
@@ -291,7 +292,8 @@ def _call_zai(system: str, content: list) -> str:
 
     zcfg = config.CONFIG.zai
     client = OpenAI(
-        api_key=zcfg.api_key, base_url=zcfg.base_url, timeout=180.0, max_retries=1
+        # GLMは出力が遅く、16000トークン級のHTML一気書きが180秒に収まらないため長めに取る
+        api_key=zcfg.api_key, base_url=zcfg.base_url, timeout=600.0, max_retries=1
     )
     text = "\n\n".join(b["text"] for b in content if b.get("type") == "text")
     resp = client.chat.completions.create(
@@ -664,10 +666,14 @@ def generate_camp(
                 "   2) <img> に onerror=\"this.style.display='none'\" を付ける（失敗時にalt文字を画面に出さない）\n"
                 "- アイコンは絵文字か、シンプルな線のインラインSVGのみ（イラストは描かない）\n\n"
                 "【アニメーション（本物っぽさの肝・しっかり入れる）】\n"
-                "- スクロールで各セクションが**ふわっと出現**（fade＋少し下から上へ。複数要素は少しずつ時間差=stagger）\n"
-                "- ヒーローは**読み込み時に**見出し・画像が動いて入る（軽いズーム/スライド/フェード）\n"
-                "- ボタン・カードに**ホバーの微動**（少し浮く/影が増す/色が変わる、transitionで滑らかに）\n"
-                "- 参考がGSAP/Lenis/Swiper等を使っていれば、その**動きの種類**をCSS/素のJSで控えめに再現\n"
+                "- スクロールで各セクションが**はっきり出現**（fade＋24〜40px下から上へ・0.8〜1s。\n"
+                "  複数要素は0.1〜0.15sずつの時間差=stagger。小さすぎる動きは付けてないのと同じ）\n"
+                "- ヒーローは**読み込み時に**見出し・画像が**順番に**動いて入る（ズーム/スライド/フェードの組み合わせ）\n"
+                "- **ホバー反応をボタン・カード・リンク・ナビ・画像の全部に付ける**（浮く/影が増す/色が変わる/\n"
+                "  画像は軽くズーム、transitionで滑らかに）。本物のサイトは触るたび何かが反応する。\n"
+                "  付け忘れの多さが「動きがない」と言われる最大の原因\n"
+                "- 参考がGSAP/Lenis/Swiper等を使っていれば、その**動きの種類**をCSS/素のJSで\n"
+                "  **はっきり分かる強さで**再現（遠慮して小さくしない。カンプは動きを見せるための成果物）\n"
                 "- 上に『アニメ参照B』があれば、その**動きの種類・速さ・向き**を優先的に反映する（Aの見た目にBの動き）\n"
                 "- ★壊れても見えるように（重要）：先頭で `document.documentElement.classList.add('js')` を実行し、\n"
                 "  出現アニメの初期非表示(opacity:0)は **`html.js` が付いている時だけ** 効かせる\n"
