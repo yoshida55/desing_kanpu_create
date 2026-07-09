@@ -4136,16 +4136,20 @@ html.__ce_altmode{cursor:text}
       clientY:Math.max(10,Math.min(r.top+24, window.innerHeight-20))}));
   }
   function openQuickMenu(e){
-    var isImg=(curEl.tagName==='IMG'), multi=selEls.length>1;
+    var multi=selEls.length>1;
+    // 文字の「編集」と「追加」は1項目に統合：その要素自身が文字なら編集、余白・器・画像なら追加。
+    // 判定は「文字系タグ」または「直下に生のテキストを持つ」（子孫の文字は数えない＝器のdivを文字扱いしない）
+    var _tt=/^(P|H1|H2|H3|H4|H5|H6|A|SPAN|LI|BLOCKQUOTE|BUTTON|LABEL|STRONG|EM|B|I|TD|TH|DT|DD|FIGCAPTION|SMALL|MARK)$/;
+    var _ownTxt=[].slice.call(curEl.childNodes).some(function(n){ return n.nodeType===3 && n.textContent.trim(); });
+    var addMode=!(_tt.test(curEl.tagName) || _ownTxt);
     var qm=document.createElement('div'); qm.id='__ce_cm';
     qm.setAttribute('style','width:auto;min-width:215px;padding:4px');
     function row(id,label){ return '<button class="__ce_qi" id="'+id+'" style="display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'+label+'</button>'; }
     qm.innerHTML=(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +row('__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）')
-      +(isImg?'':row('__ce_q_txt','✏ 文字を編集'))
+      +row('__ce_q_txt','✏ 文字を追加（編集）')
       +row('__ce_q_fxrm','🚫 動きを消す')
       +row('__ce_q_rst','⟲ 位置・サイズをリセット')
-      +row('__ce_q_del','🗑 削除（Deleteキーでも）')
       +'<div style="border-top:1px solid #eee;margin:3px 6px"></div>'
       +row('__ce_q_full','⚙ すべての編集メニュー…');
     document.body.appendChild(qm);
@@ -4157,10 +4161,21 @@ html.__ce_altmode{cursor:text}
     qm.addEventListener('click',function(ev){
       var t=ev.target.closest('.__ce_qi'); if(!t) return;
       if(t.id==='__ce_q_up'){ selectParent(false); return; }
-      if(t.id==='__ce_q_txt'){ var tgt=curEl; closeMenu(); openBreakEditor(tgt); return; }
+      if(t.id==='__ce_q_txt'){
+        if(addMode){
+          // 余白（文字を持たない要素）で押した＝右クリックしたその場所に新しい文字を置いて、すぐ編集開始
+          var nd=document.createElement('div');
+          nd.textContent='ここに文字';
+          nd.setAttribute('style','position:absolute;left:'+Math.round((window.scrollX||window.pageXOffset||0)+qx)+'px;top:'+Math.round((window.scrollY||window.pageYOffset||0)+qy)+'px;z-index:'+_freeZIndex()+';font-size:32px;font-weight:700;color:#333;font-family:inherit;line-height:1.4;padding:4px 8px;white-space:nowrap');
+          document.body.appendChild(nd);
+          markDirty(); closeMenu(); openBreakEditor(nd);
+        } else {
+          var tgt=curEl; closeMenu(); openBreakEditor(tgt);
+        }
+        return;
+      }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
-      if(t.id==='__ce_q_del'){ removeSelected(); return; }
       if(t.id==='__ce_q_full'){ _bigFull=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
     });
   }
