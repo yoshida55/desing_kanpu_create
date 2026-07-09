@@ -3065,6 +3065,7 @@ html.__ce_altmode{cursor:text}
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
   // ===== 複数選択（Ctrl+右クリックで追加）＝サイズ・動き・削除をまとめて掛ける =====
   var selEls=[];  // 選択中の全要素（curEl=最後に選んだ主役。単独選択時は[curEl]と同じ）
+  var _forceEl=null;  // ⬆外側選択用：次のcontextmenuでpickTargetを使わずこの要素を選ぶ
   function eachSel(fn){ (selEls.length?selEls:(curEl?[curEl]:[])).forEach(fn); }
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
   function closeMenu(){ hideHandles(); if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} selEls.forEach(function(x){ x.classList.remove('__ce_sel'); }); selEls=[]; curAnim=null; curP={};
@@ -3517,12 +3518,21 @@ html.__ce_altmode{cursor:text}
   function showHandles(el){
     hideHandles();
     if(!el || el===document.body) return;
+    // Excelと同じ8方向。左(w)・上(n)側は「引っ張った方向に伸びる」よう、幅/高さと一緒に位置(setPos)も補正する
     var defs=[
-      {k:'e',  cur:'ew-resize',   t:'→ 横幅を伸縮'},
-      {k:'s',  cur:'ns-resize',   t:'↓ 高さを伸縮'},
-      {k:'se', cur:'nwse-resize', t:'⤡ 縦横いっぺんに伸縮'}
+      {k:'e',  cur:'ew-resize',   t:'→ 右へ伸縮'},
+      {k:'w',  cur:'ew-resize',   t:'← 左へ伸縮'},
+      {k:'s',  cur:'ns-resize',   t:'↓ 下へ伸縮'},
+      {k:'n',  cur:'ns-resize',   t:'↑ 上へ伸縮'},
+      {k:'se', cur:'nwse-resize', t:'⤡ 右下へ伸縮'},
+      {k:'nw', cur:'nwse-resize', t:'⤡ 左上へ伸縮'},
+      {k:'ne', cur:'nesw-resize', t:'⤢ 右上へ伸縮'},
+      {k:'sw', cur:'nesw-resize', t:'⤢ 左下へ伸縮'}
     ];
-    _hdls={el:el, list:[]};
+    // 複数選択なら選択した全員に■を出す（Excelと同じ＝どれが選択中か一目で分かる）
+    var targets=(selEls.length?selEls:[el]);
+    _hdls={list:[]};
+    targets.forEach(function(tgt){
     defs.forEach(function(d){
       var h=document.createElement('div');
       h.className='__ce_hdl'; h.title=d.t+'（ドラッグ・💾保存で確定）';
@@ -3531,19 +3541,36 @@ html.__ce_altmode{cursor:text}
         // 要素の移動ドラッグ(_dDown)や文字選択にイベントを渡さない＝掴んだら伸縮だけ
         ev.preventDefault(); ev.stopPropagation(); _hdlDrag=true;
         var sx=ev.clientX, sy=ev.clientY;
-        // 複数選択中は選択した全部に同じ量を掛ける（各要素の元サイズを最初に控える）
-        var bases=(selEls.length?selEls:[el]).map(function(x){ var rr=x.getBoundingClientRect(); return {el:x, w:rr.width, h:rr.height}; });
+        // 複数選択中は選択した全部に同じ量を掛ける（各要素の元サイズ・元位置を最初に控える）
+        var bases=(selEls.length?selEls:[tgt]).map(function(x){
+          var rr=x.getBoundingClientRect();
+          return {el:x, w:rr.width, h:rr.height, tx:+x.getAttribute('data-cetx')||0, ty:+x.getAttribute('data-cety')||0};
+        });
         function mv(e2){
+          var dx=e2.clientX-sx, dy=e2.clientY-sy;
           bases.forEach(function(bs){
-            if(d.k==='e'||d.k==='se'){
-              var w=Math.max(40, bs.w+(e2.clientX-sx));
+            var shx=0, shy=0;
+            if(d.k.indexOf('e')>=0){
+              var w=Math.max(40, bs.w+dx);
               bs.el.style.setProperty('width',Math.round(w)+'px','important');
               bs.el.style.setProperty('max-width','none','important');
             }
-            if(d.k==='s'||d.k==='se'){
-              var hh=Math.max(40, bs.h+(e2.clientY-sy));
+            if(d.k.indexOf('w')>=0){
+              var w2=Math.max(40, bs.w-dx);
+              bs.el.style.setProperty('width',Math.round(w2)+'px','important');
+              bs.el.style.setProperty('max-width','none','important');
+              shx=bs.w-w2;  // 左端がカーソルに付いてくるよう、増えた分だけ左へずらす
+            }
+            if(d.k.indexOf('s')>=0){
+              var hh=Math.max(40, bs.h+dy);
               bs.el.style.setProperty('min-height',Math.round(hh)+'px','important');
             }
+            if(d.k.indexOf('n')>=0){
+              var h2=Math.max(40, bs.h-dy);
+              bs.el.style.setProperty('min-height',Math.round(h2)+'px','important');
+              shy=bs.h-h2;  // 上端がカーソルに付いてくるよう、増えた分だけ上へずらす
+            }
+            if(shx||shy) setPos(bs.el, bs.tx+shx, bs.ty+shy);
           });
         }
         function up(){
@@ -3555,16 +3582,16 @@ html.__ce_altmode{cursor:text}
         document.addEventListener('mousemove',mv,true); document.addEventListener('mouseup',up,true);
       },true);
       document.body.appendChild(h);
-      _hdls.list.push({d:d, node:h});
+      _hdls.list.push({d:d, node:h, el:tgt});
+    });
     });
     (function loop(){
       if(!_hdls) return;
-      var r=_hdls.el.getBoundingClientRect();
       _hdls.list.forEach(function(x){
-        var n=x.node;
-        if(x.d.k==='e'){ n.style.left=(r.right-6)+'px'; n.style.top=(r.top+r.height/2-6)+'px'; }
-        else if(x.d.k==='s'){ n.style.left=(r.left+r.width/2-6)+'px'; n.style.top=(r.bottom-6)+'px'; }
-        else { n.style.left=(r.right-6)+'px'; n.style.top=(r.bottom-6)+'px'; }
+        var n=x.node, k=x.d.k, r=x.el.getBoundingClientRect();
+        var lx=(k.indexOf('w')>=0)?(r.left-6):((k.indexOf('e')>=0)?(r.right-6):(r.left+r.width/2-6));
+        var tp=(k.indexOf('n')>=0)?(r.top-6):((k.indexOf('s')>=0)?(r.bottom-6):(r.top+r.height/2-6));
+        n.style.left=lx+'px'; n.style.top=tp+'px';
       });
       _hdlRaf=requestAnimationFrame(loop);
     })();
@@ -3889,15 +3916,53 @@ html.__ce_altmode{cursor:text}
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
   function _inUI2(node){ var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')); }
+  var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   document.addEventListener('mousedown',function(e){
     if(e.altKey || e.button!==0 || _inUI2(e.target)) return;
     var el=pickTarget(e.target); if(!el||_undraggable(el)) return;
+    _aGrp=null;
+    var _hitSel=null;
+    if(selEls.length){
+      // 選択中（青点線）の「見た目の範囲内」を掴んだら選択中のものを動かす。
+      // DOM的に無関係な要素（文字分割アニメのspan等）が前面にかぶっていても、選択を優先して掴めるように矩形でも判定する
+      for(var i=0;i<selEls.length;i++){
+        var _sr=selEls[i].getBoundingClientRect();
+        if(selEls[i]===el || selEls[i].contains(el) ||
+           (e.clientX>=_sr.left && e.clientX<=_sr.right && e.clientY>=_sr.top && e.clientY<=_sr.bottom)){ _hitSel=selEls[i]; break; }
+      }
+    }
+    if(_hitSel){
+      el=_hitSel;
+      if(selEls.length>1) _aGrp=selEls.map(function(x){ return {el:x, ox:+x.getAttribute('data-cetx')||0, oy:+x.getAttribute('data-cety')||0}; });
+    } else if(el.tagName==='IMG'){
+      // 未選択の画像も、ぴったり包む枠があれば枠ごと掴む（右クリックの自動親選択と同じルール）
+      var _pw2=el.parentElement;
+      if(_pw2 && _pw2!==document.body && _pw2.tagName!=='HTML' && !_undraggable(_pw2)){
+        var _ri2=el.getBoundingClientRect(), _rp2=_pw2.getBoundingClientRect();
+        if(_rp2.width<=_ri2.width*1.5+40 && _rp2.height<=_ri2.height*1.5+40) el=_pw2;
+      }
+    }
     _altEl=el; _altActive=true; _aSX=e.clientX; _aSY=e.clientY;
     _aOX=+el.getAttribute('data-cetx')||0; _aOY=+el.getAttribute('data-cety')||0;
     document.body.style.userSelect='none'; e.preventDefault(); e.stopPropagation();
   },true);
-  document.addEventListener('mousemove',function(e){ if(_altActive&&_altEl) setPos(_altEl, _aOX+(e.clientX-_aSX), _aOY+(e.clientY-_aSY)); },true);
-  document.addEventListener('mouseup',function(){ if(_altActive){ _altActive=false; document.body.style.userSelect=''; _altEl=null; pushUndo(); } },true);
+  var _aMoved=false;  // 実際に動かしたか（3px超）。動かした時だけ選択を残す＝クリックだけなら従来通り解除
+  document.addEventListener('mousemove',function(e){
+    if(!_altActive||!_altEl) return;
+    var dx=e.clientX-_aSX, dy=e.clientY-_aSY;
+    if(Math.abs(dx)+Math.abs(dy)>3) _aMoved=true;
+    if(_aGrp){ _aGrp.forEach(function(g){ setPos(g.el, g.ox+dx, g.oy+dy); }); }
+    else setPos(_altEl, _aOX+dx, _aOY+dy);
+  },true);
+  document.addEventListener('mouseup',function(){
+    if(_altActive){
+      _altActive=false; document.body.style.userSelect=''; _altEl=null; pushUndo();
+      // 動かした直後はmouseup後のclickで選択が閉じてしまうので、やり過ごす（伸縮ハンドルのガードを共用）
+      // ＝ドラッグ後も選択が残り、続けて同じ「まとまり」を掴み直せる（Excelと同じ感覚）
+      if(_aGrp||_aMoved){ _hdlDrag=true; setTimeout(function(){ _hdlDrag=false; }, 80); }
+      _aGrp=null; _aMoved=false;
+    }
+  },true);
   document.addEventListener('keydown',function(e){ if(e.key==='Alt') document.documentElement.classList.add('__ce_altmode'); },true);
   document.addEventListener('keyup',function(e){ if(e.key==='Alt') document.documentElement.classList.remove('__ce_altmode'); },true);
   window.addEventListener('blur',function(){ document.documentElement.classList.remove('__ce_altmode'); });
@@ -4056,11 +4121,64 @@ html.__ce_altmode{cursor:text}
     return el;                           // 全部が膜なら元のまま（膜自体を消せるように）
   }
   // capture:true＝キャプチャ段階で先取りする。忠実クローン(元JS保持)の中に元サイト自前の
+  // ===== ブラウザ風クイックメニュー（右クリックの瞬間にカーソル位置へ・よく使う操作だけ） =====
+  // 大メニュー（従来のパネル）は「⚙ すべての編集メニュー…」から開く二段構え。
+  var _bigFull=false;  // trueのとき、次のcontextmenuは従来の大メニューを開く
+  function selectParent(fromFull){
+    var pa=curEl&&curEl.parentElement;
+    if(!pa || pa===document.body || pa.tagName==='HTML'){ if(msg) msg.textContent='これ以上外側はありません'; return; }
+    if(_undraggable(pa)){ if(msg) msg.textContent='これ以上外側はページ全体の器なので選べません'; return; }
+    if(fromFull) _bigFull=true;  // 大メニューから押した時は大メニューのまま親を開く
+    _forceEl=pa;
+    var r=pa.getBoundingClientRect();
+    pa.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,
+      clientX:Math.max(10,Math.min(r.left+r.width/2, window.innerWidth-20)),
+      clientY:Math.max(10,Math.min(r.top+24, window.innerHeight-20))}));
+  }
+  function openQuickMenu(e){
+    var isImg=(curEl.tagName==='IMG'), multi=selEls.length>1;
+    var qm=document.createElement('div'); qm.id='__ce_cm';
+    qm.setAttribute('style','width:auto;min-width:215px;padding:4px');
+    function row(id,label){ return '<button class="__ce_qi" id="'+id+'" style="display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'+label+'</button>'; }
+    qm.innerHTML=(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+      +row('__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）')
+      +(isImg?'':row('__ce_q_txt','✏ 文字を編集'))
+      +row('__ce_q_fxrm','🚫 動きを消す')
+      +row('__ce_q_rst','⟲ 位置・サイズをリセット')
+      +row('__ce_q_del','🗑 削除（Deleteキーでも）')
+      +'<div style="border-top:1px solid #eee;margin:3px 6px"></div>'
+      +row('__ce_q_full','⚙ すべての編集メニュー…');
+    document.body.appendChild(qm);
+    qm.style.left=Math.max(6,Math.min(e.clientX, window.innerWidth-qm.offsetWidth-8))+'px';
+    qm.style.top=Math.max(6,Math.min(e.clientY, window.innerHeight-qm.offsetHeight-8))+'px';
+    curMenu=qm;
+    qm.addEventListener('mouseover',function(ev){ var b2=ev.target.closest('.__ce_qi'); [].slice.call(qm.querySelectorAll('.__ce_qi')).forEach(function(x){ x.style.background=(x===b2)?'#eef4ff':'none'; }); });
+    var qx=e.clientX, qy=e.clientY;
+    qm.addEventListener('click',function(ev){
+      var t=ev.target.closest('.__ce_qi'); if(!t) return;
+      if(t.id==='__ce_q_up'){ selectParent(false); return; }
+      if(t.id==='__ce_q_txt'){ var tgt=curEl; closeMenu(); openBreakEditor(tgt); return; }
+      if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
+      if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
+      if(t.id==='__ce_q_del'){ removeSelected(); return; }
+      if(t.id==='__ce_q_full'){ _bigFull=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
+    });
+  }
   // 右クリック禁止スクリプトが残っていても、こちらを優先させて確実にメニューを開く。
   document.addEventListener('contextmenu',function(e){
-    var el=pickTarget(e.target);
+    var _wasForced=_forceEl;
+    var el=_forceEl||pickTarget(e.target); _forceEl=null;
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
-    el=_descendOverlay(el, e.clientX, e.clientY);  // 透明な膜は貫通して下の実体を掴む
+    if(!_wasForced) el=_descendOverlay(el, e.clientX, e.clientY);  // 透明な膜は貫通して下の実体を掴む（⬆外側選択のときは貫通させない）
+    // 🖼画像は「枠（親）ごと」がほぼ常に正解：親が画像をぴったり包むラッパー（figure/div等）なら
+    //   自動で親を選ぶ＝1回のドラッグで画像も裏の枠も一緒に動く。セクション等の大きな器は選ばない。
+    if(!_wasForced && el.tagName==='IMG'){
+      var _pw=el.parentElement;
+      if(_pw && _pw!==document.body && _pw.tagName!=='HTML' && !_undraggable(_pw)){
+        var _ri=el.getBoundingClientRect(), _rp=_pw.getBoundingClientRect();
+        if(_rp.width<=_ri.width*1.5+40 && _rp.height<=_ri.height*1.5+40) el=_pw;
+      }
+    }
     e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
     if(e.ctrlKey && selEls.length){
       // Ctrl+右クリック＝今の選択を保ったまま追加/解除（トグル）。メニューだけ作り直す
@@ -4073,11 +4191,18 @@ html.__ce_altmode{cursor:text}
       } else {
         selEls.push(el); el.classList.add('__ce_sel'); curEl=el;
       }
+    } else if(_wasForced && selEls.length>1 && selEls.indexOf(el)>=0){
+      // ⚙で大メニューを開き直す時（_forceElが選択済みの要素）は、複数選択をそのまま保ってメニューだけ作り直す
+      if(curMenu){ curMenu.remove(); curMenu=null; }
+      curEl=el;
     } else {
       closeMenu();
       curEl=el; el.classList.add('__ce_sel'); selEls=[el];
     }
     showHandles(curEl);  // Excel風：選択したら右端・下端・右下角に伸縮ハンドル■を出す
+    // まずはブラウザ風のクイックメニューを出す（⚙から従来の大メニューへ）
+    if(!_bigFull){ openQuickMenu(e); return; }
+    _bigFull=false;
     var sIdx=secIndexOf(curEl), d=descEl(curEl);
     el=curEl;  // 以降の処理は主役（最後に選んだ要素）を基準にする
     // 画像なら「AIなしの即差し替え」を最優先で出す（画像のAI指示は不安定なため）
@@ -4125,6 +4250,7 @@ html.__ce_altmode{cursor:text}
       +'<div class="cap">🧩 Ctrl+右クリック＝まとめて選択に追加（もう一度で外す）</div>'
       +'<div class="cap">🖱 位置を動かす（AIなし・即反映・普通にドラッグでOK／文字を選ぶ時だけAlt+ドラッグ）</div>'
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 掴んで動かす（押してから要素をドラッグ）</button>'
+      +'<button class="go2" id="__ce_cmup" style="background:#475569;margin-bottom:8px">⬆ ひとまわり外側を選ぶ（画像と枠をまとめて動かす・もう一度でさらに外側）</button>'
       +'<div class="__ce_nudge"><span class="sp"></span><button data-nx="0" data-ny="-6">↑</button><span class="sp"></span>'
       +'<button data-nx="-6" data-ny="0">←</button><button data-rst="1">⟲</button><button data-nx="6" data-ny="0">→</button>'
       +'<span class="sp"></span><button data-nx="0" data-ny="6">↓</button><span class="sp"></span></div>'
@@ -4313,6 +4439,8 @@ html.__ce_altmode{cursor:text}
     });
     m.querySelector('#__ce_cmnobg').addEventListener('click',function(){ stripDeco(curEl); });
     m.querySelector('#__ce_cmdel').addEventListener('click',function(){ removeSelected(); });
+    // ⬆ ひとまわり外側（親要素）を選び直す＝画像と裏の枠を「まとまり」として動かせる。
+    m.querySelector('#__ce_cmup').addEventListener('click',function(){ selectParent(true); });
     // 右クリック直後に自動でドラッグONにすると、cursor:moveがmousedownを奪ってしまい
     // 「文字を選んでから下線/マーカー/色」の選択操作ができなくなる（選べない＝消せない）。
     // そのため移動は「🖱 ドラッグで動かす」ボタンを押した時だけONにする（toggleDrag）。
