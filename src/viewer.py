@@ -3396,11 +3396,16 @@ html.__ce_altmode{cursor:text}
             +'<span style="opacity:.85">位置</span><button id="__ce_selhlpu" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="上へ">▲</button><button id="__ce_selhlpd" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="下へ">▼</button>'
             +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>':'')
           +'<span style="opacity:.45">｜</span><span style="opacity:.85">〰</span><input type="color" id="__ce_seludc" value="#e07856" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="点線下線の色"><button id="__ce_seludb" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="点線の下線を引く">'+(curUdot?'消す':'下線')+'</button>'
+          +'<button id="__ce_selsave" style="background:#1a7f37;border:none;color:#fff;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:700" title="変更を保存（ヘッダの💾と同じ）">💾 保存</button>'
           +'<button id="__ce_selx" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer">×</button>';
         document.body.appendChild(pop);
         pop.style.left=Math.max(8,Math.min(r.left, window.innerWidth-370))+'px';
         pop.style.top=Math.max(8, r.top-42)+'px';
         pop.querySelector('#__ce_selx').addEventListener('click', hidePop);
+        // 💾 その場で保存＝ヘッダの保存ボタンをそのまま押す（保存処理を二重に持たない）
+        pop.querySelector('#__ce_selsave').addEventListener('click', function(){
+          var sb=document.getElementById('__ce_save'); if(sb) sb.click(); hidePop();
+        });
         var thm=pop.querySelector('#__ce_selhlthm'); if(thm) thm.addEventListener('click',function(){ fxHlThick(curHl,-6); });
         var thp=pop.querySelector('#__ce_selhlthp'); if(thp) thp.addEventListener('click',function(){ fxHlThick(curHl,6); });
         var pum=pop.querySelector('#__ce_selhlpu'); if(pum) pum.addEventListener('click',function(){ fxHlPos(curHl,-4); });
@@ -3515,6 +3520,29 @@ html.__ce_altmode{cursor:text}
   // ドラッグで adjustWidth/adjustMinH と同じ「歪まない方式」(width/min-height)を連続的に当てる。
   // 位置追従はrAFループ（スクロール・要素移動・アニメ中でも正確に付いてくる＝この環境の定石）。
   var _hdls=null, _hdlRaf=0, _hdlDrag=false;  // _hdlDrag=伸縮ドラッグ直後のclickで選択が閉じるのを防ぐ
+  // 伸縮の前に「器の列割り」と「隣の要素のサイズ」を今の実寸で凍結する。
+  // grid/flexの中の要素を広げると隣の列まで一緒に動いてしまうため（例：左の画像を広げると右の文章も広がる）、
+  // 器のgrid-template-columnsと兄弟の幅を実測ピクセルで固定してから対象だけを伸縮する。
+  function _freezeSiblings(x){
+    var pa=x.parentElement; if(!pa || pa===document.body) return;
+    var cs=getComputedStyle(pa);
+    if(cs.display.indexOf('grid')>=0){
+      if(!pa.getAttribute('data-cegfz')){
+        pa.style.setProperty('grid-template-columns', cs.gridTemplateColumns, 'important');  // 実寸px列に固定
+        pa.setAttribute('data-cegfz','1');
+      }
+      x.style.setProperty('justify-self','start','important');  // 広げた分は自分の枠からはみ出す（隣を押さない）
+    } else if(cs.display.indexOf('flex')>=0){
+      [].slice.call(pa.children).forEach(function(sib){
+        if(sib===x || sib.nodeType!==1 || sib.getAttribute('data-cesfz')) return;
+        var r=sib.getBoundingClientRect(); if(!r.width) return;
+        sib.style.setProperty('flex','0 0 auto','important');
+        sib.style.setProperty('width', Math.round(r.width)+'px','important');
+        sib.setAttribute('data-cesfz','1');
+      });
+      x.style.setProperty('flex','0 0 auto','important');  // 自分のwidth指定がflex計算に負けないように
+    }
+  }
   function showHandles(el){
     hideHandles();
     if(!el || el===document.body) return;
@@ -3541,11 +3569,25 @@ html.__ce_altmode{cursor:text}
         // 要素の移動ドラッグ(_dDown)や文字選択にイベントを渡さない＝掴んだら伸縮だけ
         ev.preventDefault(); ev.stopPropagation(); _hdlDrag=true;
         var sx=ev.clientX, sy=ev.clientY;
+        (selEls.length?selEls:[tgt]).forEach(_freezeSiblings);  // 隣の列・兄弟が動かないよう先に凍結
         // 複数選択中は選択した全部に同じ量を掛ける（各要素の元サイズ・元位置を最初に控える）
         var bases=(selEls.length?selEls:[tgt]).map(function(x){
           var rr=x.getBoundingClientRect();
           return {el:x, w:rr.width, h:rr.height, tx:+x.getAttribute('data-cetx')||0, ty:+x.getAttribute('data-cety')||0};
         });
+        // 横方向だけのドラッグ（e/w）では高さを今の実寸で固定する。
+        // 中の画像は幅に合わせて縦横比で背が伸びる＝「全体がひろがって」レイアウトを押すため、
+        // 高さを止めて「見える範囲が横に広がる」動き（Excelの図形に近い感覚）にする。
+        if(d.k==='e'||d.k==='w'){
+          bases.forEach(function(bs){
+            bs.el.style.setProperty('height', Math.round(bs.h)+'px','important');
+            if(bs.el.tagName==='IMG'){
+              bs.el.style.setProperty('object-fit','cover','important');
+            } else if(bs.el.querySelector('img')){
+              bs.el.style.setProperty('overflow','hidden','important');  // 中の画像がはみ出す分は切り取り
+            }
+          });
+        }
         function mv(e2){
           var dx=e2.clientX-sx, dy=e2.clientY-sy;
           bases.forEach(function(bs){
@@ -3775,7 +3817,12 @@ html.__ce_altmode{cursor:text}
     +'var mem=[].slice.call(d.querySelectorAll(\\'[data-cegrp="\\'+g+\\'"]\\'));var idx=mem.indexOf(el);'
     +'return (g-1)*300+Math.max(0,idx)*150;}'
     // data-cedelay="ミリ秒" を要素に直接付けると、グループ計算より優先してその通りの遅れで再生する（細かい手動演出用）
-    +'function reveal(el){ function go(){ if(el.classList.contains("fxa_hl")) sweepHl(el); else el.classList.add("fxa_in"); }'
+    // ★マーカーはページ読み込み中に始めるとコマ落ちして「設定より速く引かれた」ように見える
+    //   （--hldurは正しく効いているのに、画像読み込みでrAFの描画が飛ぶ）。
+    //   → 読み込み完了(load)まで待ってから引く。文字自体は見えているので遅らせても安全。
+    +'function reveal(el){ function go(){ if(el.classList.contains("fxa_hl")){'
+    +'if(d.readyState==="complete") sweepHl(el); else window.addEventListener("load",function(){ setTimeout(function(){ sweepHl(el); },250); },{once:true});'
+    +'} else el.classList.add("fxa_in"); }'
     +'var cd=el.getAttribute("data-cedelay"); var gd=cd!=null?+cd:groupDelay(el); if(gd>0) setTimeout(go,gd); else go(); }'
     +'if(!("IntersectionObserver" in window)){all().forEach(reveal);return;}'
     +'var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){reveal(t);});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});'
@@ -3883,6 +3930,9 @@ html.__ce_altmode{cursor:text}
       el.style.removeProperty('width'); el.style.removeProperty('height'); el.style.removeProperty('object-fit'); el.style.removeProperty('max-width');
     }
     el.style.removeProperty('min-height'); el.style.removeProperty('width'); el.style.removeProperty('max-width');  // 縦の余白・横幅の増減も戻す
+    // 伸縮ハンドルが横ドラッグ時に固定した高さ・切り取り・flex/grid凍結も戻す
+    el.style.removeProperty('height'); el.style.removeProperty('object-fit'); el.style.removeProperty('overflow');
+    el.style.removeProperty('flex'); el.style.removeProperty('justify-self');
     el.removeAttribute('data-cetx'); el.removeAttribute('data-cety'); el.removeAttribute('data-cesx'); el.removeAttribute('data-cesy'); el.removeAttribute('data-cero'); el.removeAttribute('data-cebt');
     el.removeAttribute('data-cew'); el.removeAttribute('data-ceh');
     markDirty();
@@ -4137,11 +4187,12 @@ html.__ce_altmode{cursor:text}
   }
   function openQuickMenu(e){
     var multi=selEls.length>1;
-    // 文字の「編集」と「追加」は1項目に統合：その要素自身が文字なら編集、余白・器・画像なら追加。
-    // 判定は「文字系タグ」または「直下に生のテキストを持つ」（子孫の文字は数えない＝器のdivを文字扱いしない）
-    var _tt=/^(P|H1|H2|H3|H4|H5|H6|A|SPAN|LI|BLOCKQUOTE|BUTTON|LABEL|STRONG|EM|B|I|TD|TH|DT|DD|FIGCAPTION|SMALL|MARK)$/;
-    var _ownTxt=[].slice.call(curEl.childNodes).some(function(n){ return n.nodeType===3 && n.textContent.trim(); });
-    var addMode=!(_tt.test(curEl.tagName) || _ownTxt);
+    // 文字の「追加/編集」の自動分岐：中に文字があれば編集、余白（文字なし・大きな器・画像）なら追加。
+    // 文字はアニメ用ラッパーdivや1文字ずつのspanに包まれていることがあるので、子孫込み(textContent)で判定する
+    var _hasTxt=!!((curEl.textContent||'').trim());
+    var _rq=curEl.getBoundingClientRect();
+    var _tooBig=(_rq.width*_rq.height)>(window.innerWidth*window.innerHeight*0.5);  // 画面の半分超の箱＝余白扱い
+    var addMode=!_hasTxt || _tooBig || /^(SECTION|MAIN|HEADER|FOOTER|BODY|HTML|IMG)$/.test(curEl.tagName);
     var qm=document.createElement('div'); qm.id='__ce_cm';
     qm.setAttribute('style','width:auto;min-width:215px;padding:4px');
     function row(id,label){ return '<button class="__ce_qi" id="'+id+'" style="display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'+label+'</button>'; }
