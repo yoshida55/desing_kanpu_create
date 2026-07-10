@@ -1593,7 +1593,8 @@ def api_section_fav_save():
     data = request.get_json(silent=True) or {}
     try:
         entry = camp.save_section_fav(
-            data.get("html", ""), data.get("headcss", ""), data.get("name", "")
+            data.get("html", ""), data.get("headcss", ""), data.get("name", ""),
+            kind=data.get("kind", "section"),
         )
     except Exception as exc:  # noqa: BLE001
         return jsonify({"ok": False, "message": str(exc)}), 400
@@ -1858,19 +1859,20 @@ html.__ce_altmode{cursor:text}
     if(typeof setDragOn==='function'){ if(typeof curEl!=='undefined' && curEl) curEl.classList.remove('__ce_sel'); d.classList.add('__ce_sel'); setDragOn(d); }  // すぐ動かせる状態に
     msg.textContent='文字を追加しました。ドラッグで置く→右クリック→「✏ 文字を編集」で内容・色・大きさを変更（💾保存で確定）';
   });
-  // 🖼 画像を追加：今の位置に画像要素を置く→すぐドラッグで移動できる（差し替え・サイズ調整は右クリックで）。
-  function insertImageEl(url, idx){
+  // 🖼 画像を追加：画像要素を置く→すぐドラッグで移動できる（差し替え・サイズ調整は右クリックで）。
+  // px/py（ページ座標）を渡すとそこへ置く＝右クリックメニューの「ここに画像を追加」用。省略時は画面中央あたり。
+  function insertImageEl(url, idx, px, py){
     idx=idx||0;
     var img=document.createElement('img'); img.src=url;
-    var x=Math.round((window.scrollX||window.pageXOffset||0)+window.innerWidth*0.30)+idx*24;
-    var y=Math.round((window.scrollY||window.pageYOffset||0)+window.innerHeight*0.32)+idx*24;
+    var x=(px!=null?Math.round(px):Math.round((window.scrollX||window.pageXOffset||0)+window.innerWidth*0.30))+idx*24;
+    var y=(py!=null?Math.round(py):Math.round((window.scrollY||window.pageYOffset||0)+window.innerHeight*0.32))+idx*24;
     img.setAttribute('style','position:absolute;left:'+x+'px;top:'+y+'px;z-index:'+_freeZIndex()+';width:260px;height:auto;cursor:move');
     document.body.appendChild(img);
     markDirty();
     if(idx===0){ try{ img.scrollIntoView({block:'center'}); }catch(_){} }
     if(typeof setDragOn==='function'){ if(typeof curEl!=='undefined' && curEl) curEl.classList.remove('__ce_sel'); img.classList.add('__ce_sel'); setDragOn(img); }
   }
-  function openAddImagePicker(){
+  function openAddImagePicker(px, py){
     fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
       var ups=d.uploads||[];
       var items = ups.length
@@ -1883,7 +1885,7 @@ html.__ce_altmode{cursor:text}
       document.body.appendChild(ov);
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
-        var it=e.target.closest('.it'); if(it){ ov.remove(); insertImageEl(it.dataset.src); msg.textContent='画像を追加しました。ドラッグで置く（💾保存で確定）'; }
+        var it=e.target.closest('.it'); if(it){ ov.remove(); insertImageEl(it.dataset.src, 0, px, py); msg.textContent='画像を追加しました。ドラッグで置く（💾保存で確定）'; }
       });
       document.getElementById('__ce_addimgfile').addEventListener('change',function(){
         var files=this.files; if(!files||!files.length) return;
@@ -1894,7 +1896,7 @@ html.__ce_altmode{cursor:text}
           if(!dd.ok){ msg.textContent='アップロード失敗：'+(dd.message||''); return; }
           ov.remove();
           var added=(dd.uploads||[]).filter(function(u){ return !before[u.file]; });
-          added.forEach(function(u,i){ insertImageEl(u.url, i); });
+          added.forEach(function(u,i){ insertImageEl(u.url, i, px, py); });
           msg.textContent=(added.length||files.length)+'枚 画像を追加しました。ドラッグで置く（💾保存で確定）';
         }).catch(function(){ msg.textContent='通信エラー'; });
       });
@@ -2183,8 +2185,14 @@ html.__ce_altmode{cursor:text}
   }
   var esc=function(s){return String(s||'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});};
   // ①のドロップダウン(sec)で選ばれたセクション要素を返す（ページ全体=-1ならnull）
+  // 特殊値 hd=ヘッダー / ft=フッター（⭐部品保存・🔀入れ替え用）
   function curSecEl(){
-    var idx=Number(sec.value);
+    var v=sec.value;
+    if(v==='hd'||v==='ft'){
+      var tag=(v==='hd')?'header':'footer';
+      return [].slice.call(document.querySelectorAll(tag)).filter(function(x){return !x.closest('#__ce');})[0]||null;
+    }
+    var idx=Number(v);
     if(!(idx>=0)) return null;
     var els=[].slice.call(document.querySelectorAll('section')).filter(function(x){return !x.closest('#__ce');});
     return els[idx]||null;
@@ -2205,8 +2213,11 @@ html.__ce_altmode{cursor:text}
   }
   // 保存前にセクションを"素の状態"へ掃除＝編集で焼き込んだ位置・サイズ・一時クラスを外す。
   // さらに色/フォント変数をセクション自身に埋め込み、貼り先のページに依存せず表示できるようにする。
-  function cleanSection(el){
+  function cleanSection(el, selfContain){
     var c=el.cloneNode(true);
+    // 前回⭐保存で抱かせた持ち運びCSS(style[data-cepart])は一旦捨てて、今の状態から取り直す
+    // ★下のstripループがdata-ce*属性を外す前にやること（後だとセレクタで見つけられず二重に溜まる）
+    var oldPart=c.querySelector('style[data-cepart]'); if(oldPart) oldPart.remove();
     var stripCls=['__ce_sel','__ce_hl','__ce_sechl','fxa_in'];
     [].slice.call(c.querySelectorAll('*')).concat([c]).forEach(function(n){
       if(n.classList){
@@ -2223,7 +2234,79 @@ html.__ce_altmode{cursor:text}
     });
     var vars=collectRootVars();
     Object.keys(vars).forEach(function(k){ c.style.setProperty(k, vars[k]); });  // 色・フォントを自己完結させる
+    if(selfContain){
+      // ヘッダー/フッター用：効いているCSSルールを<style data-cepart>として本体に抱かせる＝
+      // 別カンプに🔀で入れても見た目がそのまま付いてくる（@scopeでこの部品の中だけに効く）
+      var st=document.createElement('style'); st.setAttribute('data-cepart','1');
+      st.textContent=partCss(el);
+      c.appendChild(st);
+    }
     return c;
+  }
+  // ★部品（ヘッダー/フッター）用：この要素に「実際に効いているCSSルールだけ」を全スタイルから抽出する。
+  //   計算済みスタイルの丸埋めは試したがNG（min-height:auto→0px化・grid列のpx固定などで
+  //   レイアウトの生きた計算が死んで崩れた）。ルールごと持ち運び、入れ替え先では@scopeで
+  //   その部品の中だけに効かせる＝レスポンシブも:hoverもそのまま生きる。
+  function partCss(el){
+    var els=[el].concat([].slice.call(el.querySelectorAll('*')));
+    function hitAny(selText){
+      return selText.split(',').some(function(s){
+        // :hover/::before等は保存の瞬間は誰にも当たっていないので、疑似部分を外した本体で判定する
+        s=s.replace(/::?[a-zA-Z-]+(\\((?:[^()]|\\([^()]*\\))*\\))?/g,'').replace(/[>+~\\s]+$/,'').trim();
+        if(!s) return true;  // ::selection など疑似だけのセレクタは念のため持っていく
+        for(var i=0;i<els.length;i++){ try{ if(els[i].matches(s)) return true; }catch(_){} }
+        return false;
+      });
+    }
+    // ★@scope内のセレクタは暗黙で「:scopeの子孫」扱い（img{}＝:scope img{}）。だから
+    //   ①ルート自身に当たるルール（.hero{…}）②ルートを先祖に使うルール（.hero .nav{…}）は
+    //   素のままでは両方とも死ぬ（①ルートは子孫でない ②ルートは先祖として数えられない・実測で確認）。
+    // → :scope に書き換えたコピーも一緒に持っていく（.hero→:scope・.hero .nav→:scope .nav）。
+    //   入れ替え先に同名クラス（.hero等）があっても、部品のstyleは文書の後ろ＝同点なら勝てる。
+    function extraSels(selText){
+      var res=[];
+      selText.split(',').forEach(function(s){
+        s=s.trim(); if(!s) return;
+        // ①セレクタ全体がルート自身に当たる → :scope（末尾の疑似は残す。.hero:hover→:scope:hover）
+        var m=s.match(/^(.*?)((?:::?[a-zA-Z-]+(?:\\([^()]*\\))?)*)$/);
+        var base=(m?m[1]:s), pseudo=(m?m[2]:'');
+        var probe=base.replace(/::?[a-zA-Z-]+(\\((?:[^()]|\\([^()]*\\))*\\))?/g,'').replace(/[>+~\\s]+$/,'').trim();
+        try{ if(probe && el.matches(probe)){ res.push(':scope'+pseudo); return; } }catch(_){}
+        // ②先頭の固まりがルート自身に当たる → その部分だけ:scopeに（.hero .nav→:scope .nav）
+        var lead=s.match(/^([^\\s>+~]+)([\\s>+~].*)$/);
+        if(lead){
+          var lp=lead[1].replace(/::?[a-zA-Z-]+(\\((?:[^()]|\\([^()]*\\))*\\))?/g,'').trim();
+          try{ if(lp && el.matches(lp)) res.push(':scope'+lead[2]); }catch(_){}
+        }
+      });
+      return res;
+    }
+    var out=[], kf=[];
+    function scan(rules, mediaTxt){
+      [].slice.call(rules||[]).forEach(function(r){
+        if(r.media && r.cssRules){ scan(r.cssRules, r.media.mediaText); return; }        // @media
+        if(r.name && r.cssRules){ kf.push(r.cssText); return; }                           // @keyframes は丸ごと（@scopeの外に置く）
+        if(!r.selectorText){ if(r.cssRules) scan(r.cssRules, mediaTxt); return; }         // @scope/@supports等の入れ物は中身だけ拾う（🔀済み部品の再⭐保存でも取りこぼさない）
+        if(!r.style) return;
+        if(r.parentStyleSheet && r.parentStyleSheet.ownerNode && r.parentStyleSheet.ownerNode.id==='fxa-css') return;  // fxaは両ページにあるので除外
+        if(hitAny(r.selectorText)){
+          out.push(mediaTxt?('@media '+mediaTxt+'{'+r.cssText+'}'):r.cssText);
+          var rs=extraSels(r.selectorText);
+          if(rs.length){ var rule=rs.join(',')+'{'+r.style.cssText+'}'; out.push(mediaTxt?('@media '+mediaTxt+'{'+rule+'}'):rule); }
+        }
+      });
+    }
+    [].slice.call(document.styleSheets).forEach(function(ss){
+      if(ss.ownerNode && /#__ce/.test(ss.ownerNode.textContent||'')) return;  // 編集UIのCSSは除外
+      var rr; try{ rr=ss.cssRules; }catch(_){ return; }
+      scan(rr);
+    });
+    // 護身用：入れ替え先に「画面基準で浮く絶対配置（親にrelative無しの.hero-media等）」があると
+    // 部品の上に被さってくる（実際に起きた）。部品ルートを relative+z-index:1 にして上に出す。
+    // 元がsticky/fixed等の部品はそのまま尊重する（staticのときだけ）。
+    if(getComputedStyle(el).position==='static') out.push(':scope{position:relative;z-index:1}');
+    // @scope（中括弧だけ・条件なし）＝「このstyleタグの親要素の中だけに効く」。部品に抱かせる用にぴったり
+    return kf.join('\\n')+'\\n@scope{\\n'+out.join('\\n')+'\\n}';
   }
   // ①で選んだセクションを画面で薄く光らせる＋そこへスクロール（どこが対象か一目で分かる）
   function highlightSelSec(){
@@ -2277,12 +2360,14 @@ html.__ce_altmode{cursor:text}
   var favBtn=document.getElementById('__ce_fav');
   if(favBtn) favBtn.addEventListener('click',function(){
     var el=curSecEl();
-    if(!el){ msg.textContent='まず①「どこを直す？」で保存したいセクションを選んでください（ページ全体は不可）'; return; }
-    var label=((sec.options[sec.selectedIndex]||{}).text||'セクション').replace(/^[0-9]+\\.\\s*/,'');
-    var name=window.prompt('このセクションを「部品」として保存します。別のカンプの同じ枠にAIなしで入れ替えできます。\\n名前をどうぞ：', label);
+    if(!el){ msg.textContent='まず①「どこを直す？」で保存したいセクション（またはヘッダー/フッター）を選んでください（ページ全体は不可）'; return; }
+    var kind=el.tagName.toLowerCase(); if(kind!=='header'&&kind!=='footer') kind='section';
+    var label=((sec.options[sec.selectedIndex]||{}).text||'セクション').replace(/^[0-9]+\\.\\s*/,'').replace(/（⭐保存・🔀入れ替え用）/,'');
+    var name=window.prompt('この'+(kind==='section'?'セクション':kind==='header'?'ヘッダー':'フッター')+'を「部品」として保存します。別のカンプの同じ枠にAIなしで入れ替えできます。\\n名前をどうぞ：', label);
     if(name===null) return;
     favBtn.disabled=true; var old=favBtn.textContent; favBtn.textContent='保存中…';
-    fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el).outerHTML,headcss:headCss(),name:name})})
+    // ヘッダー/フッターは効いているCSSルールを@scopeで抱かせて自己完結させる（selfContain=true）
+    fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el, kind!=='section').outerHTML,headcss:headCss(),name:name,kind:kind})})
     .then(function(r){return r.json();}).then(function(d){
       favBtn.disabled=false; favBtn.textContent=old;
       msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'):('保存失敗：'+(d.message||''));
@@ -2394,9 +2479,12 @@ html.__ce_altmode{cursor:text}
   var favListBtn=document.getElementById('__ce_favlist');
   if(favListBtn) favListBtn.addEventListener('click',function(){
     var target=curSecEl();
-    if(!target){ msg.textContent='まず①「どこを直す？」で入れ替える先のセクションを選んでください'; return; }
+    if(!target){ msg.textContent='まず①「どこを直す？」で入れ替える先のセクション（またはヘッダー/フッター）を選んでください'; return; }
+    // 同じ種類同士だけ出す（セクションの枠にヘッダーが入る事故を防ぐ）
+    var tKind=target.tagName.toLowerCase(); if(tKind!=='header'&&tKind!=='footer') tKind='section';
+    var tKindJp=(tKind==='section'?'セクション':tKind==='header'?'ヘッダー':'フッター');
     fetch('/api/section_fav/list').then(function(r){return r.json();}).then(function(d){
-      var favs=d.favs||[];
+      var favs=(d.favs||[]).filter(function(f){ return (f.kind||'section')===tKind; });
       var items = favs.length
         ? favs.map(function(f){
             // ★プレビューはJSを動かさないので、スクロール表示待ち(opacity:0)のままだと空に見える。
@@ -2404,9 +2492,9 @@ html.__ce_altmode{cursor:text}
             var doc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:#fff}'+(f.css||'')+' *,*::before,*::after{opacity:1 !important;visibility:visible !important;filter:none !important;clip-path:none !important;animation:none !important;transition:none !important}</style></head><body>'+f.html+'</body></html>';
             return '<div class="sit" data-id="'+f.id+'"><div class="pv"><iframe sandbox="allow-same-origin" srcdoc="'+esc(doc)+'"></iframe></div><div class="nm">'+esc(f.name||'')+'</div><button class="del" data-id="'+f.id+'" title="削除">×</button></div>';
           }).join('')
-        : '<div style="color:#999;padding:8px">まだセクションのお気に入りがありません（⭐で保存できます）</div>';
+        : '<div style="color:#999;padding:8px">まだ'+tKindJp+'のお気に入りがありません（⭐で保存できます）</div>';
       var ov=document.createElement('div'); ov.id='__ce_pk';
-      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🔀 入れ替えるセクションを選ぶ（クリックで差し替え）</h4><div class="secgr">'+items+'</div></div>';
+      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🔀 入れ替える'+tKindJp+'を選ぶ（クリックで差し替え）</h4><div class="secgr">'+items+'</div></div>';
       document.body.appendChild(ov);
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
@@ -2417,9 +2505,27 @@ html.__ce_altmode{cursor:text}
         var it=e.target.closest('.sit'); if(!it) return;
         var id=it.getAttribute('data-id');
         var f=(favs||[]).filter(function(x){return x.id===id;})[0]; if(!f) return;
+        var par=target.parentElement, ci=[].indexOf.call(par.children,target);
         target.outerHTML=f.html;   // AIなしで丸ごと差し替え
+        // ★差し替えた新要素には出現アニメの監視(IntersectionObserver)が付いていない＝
+        //   fxa_pre/reveal系が透明のまま永久に出ない（実際に起きた）。「もう見えた」状態にして表示する。
+        //   ここで付けるfxa_in/SHOWクラス/--hlwは💾保存時にcleanHtmlが必ず素に戻す＝保存後の開き直しでは普通に再生される。
+        (function(nw){
+          if(!nw) return;
+          var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+          var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+          [].slice.call(nw.querySelectorAll('*')).concat([nw]).forEach(function(n){
+            if(!n.classList) return;
+            if(n.classList.contains('fxa_pre')) n.classList.add('fxa_in');
+            if(n.classList.contains('fxa_hl')) n.style.setProperty('--hlw',100);
+            try{
+              var cs=getComputedStyle(n);
+              if((cs.opacity==='0'||cs.visibility==='hidden') && n.matches(SEL)) SHOW.forEach(function(k){ n.classList.add(k); });
+            }catch(_){}
+          });
+        })(par.children[ci]);
         ov.remove(); markDirty();
-        msg.textContent='🔀 セクションを入れ替えました。上の「💾 保存」で確定してください';
+        msg.textContent='🔀 '+tKindJp+'を入れ替えました。上の「💾 保存」で確定してください';
       });
     }).catch(function(){ msg.textContent='お気に入り一覧の取得に失敗しました'; });
   });
@@ -2545,6 +2651,11 @@ html.__ce_altmode{cursor:text}
   }
   fetch('/api/camp_sections?file='+encodeURIComponent(FILE)).then(function(r){return r.json();}).then(function(d){
     (d.sections||[]).forEach(function(s){var o=document.createElement('option');o.value=s.index;o.textContent=(s.index+1)+'. '+s.label;sec.appendChild(o);});
+    // ヘッダー/フッターも①から選べるようにする（⭐部品保存・🔀入れ替え用。AI修正は対象外＝submitでガード）
+    [['header','hd','🧢 ヘッダー（⭐保存・🔀入れ替え用）'],['footer','ft','🦶 フッター（⭐保存・🔀入れ替え用）']].forEach(function(t){
+      var el=[].slice.call(document.querySelectorAll(t[0])).filter(function(x){return !x.closest('#__ce');})[0];
+      if(el){ var o=document.createElement('option'); o.value=t[1]; o.textContent=t[2]; sec.appendChild(o); }
+    });
   }).catch(function(){});
   // アニメのプリセット（説明つき・クリックで選んだ所に適用）
   var PRESETS=[
@@ -2596,6 +2707,8 @@ html.__ce_altmode{cursor:text}
   }
   function clearSectionBusy(){ if(_busyEl){ _busyEl.classList.remove('__ce_busy'); _busyEl=null; } }
   function submit(section,instruction,keepText,styleType){
+    // ヘッダー/フッター選択はAI修正の対象外（サーバーの差し替えは<section>限定の正規表現のため）
+    if(section==='hd'||section==='ft'){ msg.textContent='ヘッダー/フッターはAI修正の対象外です（⭐で部品として保存→🔀で別カンプと入れ替えできます）'; return; }
     if(!instruction){msg.textContent='指示が空です';return;}
     // ページ全体(-1)は"全文を書き直す"＝高い(数十円)・遅い。特定箇所なら安い(数円)。
     if(Number(section)<0){
@@ -2642,6 +2755,7 @@ html.__ce_altmode{cursor:text}
   }
   go.addEventListener('click',function(){submit(sec.value,inp.value.trim());});
   sg.addEventListener('click',function(){
+    if(sec.value==='hd'||sec.value==='ft'){ msg.textContent='ヘッダー/フッターはAI改善案の対象外です（⭐部品保存・🔀入れ替えで使えます）'; return; }
     busy(true); chips.innerHTML=''; msg.textContent='この部分を見て案を考え中…（十数秒）';
     fetch('/api/camp_suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:Number(sec.value)})})
     .then(function(r){return r.json();}).then(function(d){
@@ -3405,62 +3519,25 @@ html.__ce_altmode{cursor:text}
           var exHl=ancEl.closest('.fxa_hl'); if(exHl) curHl=exHl;
           var exUd=ancEl.closest('.ceud'); if(exUd) curUdot=exUd;
         }
-        pop=document.createElement('div'); pop.id='__ce_selc';
-        pop.style.cssText='position:fixed;z-index:2147483004;background:#1d1d1f;color:#fff;border-radius:10px;padding:6px 9px;box-shadow:0 10px 30px rgba(0,0,0,.42);font-family:system-ui,sans-serif;font-size:12px;display:flex;flex-wrap:wrap;align-items:center;gap:7px;max-width:360px';
-        pop.innerHTML='<span style="opacity:.85">文字色</span><input type="color" id="__ce_selcol" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer">'
-          +'<span style="opacity:.45">｜</span><span style="opacity:.85">🖍</span><input type="color" id="__ce_selhlc" value="'+hlDefaultColor()+'" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="マーカーの色"><span id="__ce_selhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;max-width:90px">'+hlSwatchesHtml()+'</span><button id="__ce_selhl" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="蛍光ペンを引く">'+(curHl?'消す':'引く')+'</button>'
-          +(curHl?'<span style="opacity:.85">太さ</span><button id="__ce_selhlthm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">－</button><button id="__ce_selhlthp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">＋</button>'
-            +'<span style="opacity:.85">位置</span><button id="__ce_selhlpu" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="上へ">▲</button><button id="__ce_selhlpd" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="下へ">▼</button>'
-            +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>'
-            +'<span style="opacity:.85">待機</span><button id="__ce_selhlwm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="待ちを短く（-0.2秒）">－</button><button id="__ce_selhlwp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="待ちを長く（+0.2秒）＝文字が動いたあとに引きたい時">＋</button>':'')
-          +'<span style="opacity:.45">｜</span><span style="opacity:.85">〰</span><input type="color" id="__ce_seludc" value="#e07856" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="点線下線の色"><button id="__ce_seludb" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="点線の下線を引く">'+(curUdot?'消す':'下線')+'</button>'
-          +'<button id="__ce_selsave" style="background:#1a7f37;border:none;color:#fff;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:700" title="変更を保存（ヘッダの💾と同じ）">💾 保存</button>'
-          +'<button id="__ce_selx" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer">×</button>';
-        document.body.appendChild(pop);
-        pop.style.left=Math.max(8,Math.min(r.left, window.innerWidth-370))+'px';
-        pop.style.top=Math.max(8, r.top-42)+'px';
-        pop.querySelector('#__ce_selx').addEventListener('click', hidePop);
-        // 💾 その場で保存＝ヘッダの保存ボタンをそのまま押す（保存処理を二重に持たない）
-        pop.querySelector('#__ce_selsave').addEventListener('click', function(){
-          var sb=document.getElementById('__ce_save'); if(sb) sb.click(); hidePop();
-        });
-        var thm=pop.querySelector('#__ce_selhlthm'); if(thm) thm.addEventListener('click',function(){ fxHlThick(curHl,-6); });
-        var thp=pop.querySelector('#__ce_selhlthp'); if(thp) thp.addEventListener('click',function(){ fxHlThick(curHl,6); });
-        var pum=pop.querySelector('#__ce_selhlpu'); if(pum) pum.addEventListener('click',function(){ fxHlPos(curHl,-4); });
-        var pud=pop.querySelector('#__ce_selhlpd'); if(pud) pud.addEventListener('click',function(){ fxHlPos(curHl,4); });
-        var hdm=pop.querySelector('#__ce_selhldm'); if(hdm) hdm.addEventListener('click',function(){ fxHlSpeed(curHl,0.2); });
-        var hdp=pop.querySelector('#__ce_selhldp'); if(hdp) hdp.addEventListener('click',function(){ fxHlSpeed(curHl,-0.2); });
-        var hwm=pop.querySelector('#__ce_selhlwm'); if(hwm) hwm.addEventListener('click',function(){ fxHlDelay(curHl,-200); });
-        var hwp=pop.querySelector('#__ce_selhlwp'); if(hwp) hwp.addEventListener('click',function(){ fxHlDelay(curHl,200); });
-        pop.querySelector('#__ce_selcol').addEventListener('input', function(){ paint(this.value); });
-        pop.querySelector('#__ce_selhl').addEventListener('click', function(){
-          if(curHl){ removeHl(); return; }
-          highlight(pop.querySelector('#__ce_selhlc').value);
-          // マーカーを引いた直後：選び直さなくても、その場に太さ/速さボタンを出す
-          if(curHl && !pop.querySelector('#__ce_selhlthm')){
-            this.textContent='消す';
-            this.insertAdjacentHTML('afterend',
-              '<span style="opacity:.85">太さ</span><button id="__ce_selhlthm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">－</button><button id="__ce_selhlthp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">＋</button>'
-              +'<span style="opacity:.85">位置</span><button id="__ce_selhlpu" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="上へ">▲</button><button id="__ce_selhlpd" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="下へ">▼</button>'
-              +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>'
-              +'<span style="opacity:.85">待機</span><button id="__ce_selhlwm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="待ちを短く（-0.2秒）">－</button><button id="__ce_selhlwp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="待ちを長く（+0.2秒）＝文字が動いたあとに引きたい時">＋</button>');
-            pop.querySelector('#__ce_selhlthm').addEventListener('click',function(){ fxHlThick(curHl,-6); });
-            pop.querySelector('#__ce_selhlthp').addEventListener('click',function(){ fxHlThick(curHl,6); });
-            pop.querySelector('#__ce_selhlpu').addEventListener('click',function(){ fxHlPos(curHl,-4); });
-            pop.querySelector('#__ce_selhlpd').addEventListener('click',function(){ fxHlPos(curHl,4); });
-            pop.querySelector('#__ce_selhldm').addEventListener('click',function(){ fxHlSpeed(curHl,0.2); });
-            pop.querySelector('#__ce_selhldp').addEventListener('click',function(){ fxHlSpeed(curHl,-0.2); });
-            pop.querySelector('#__ce_selhlwm').addEventListener('click',function(){ fxHlDelay(curHl,-200); });
-            pop.querySelector('#__ce_selhlwp').addEventListener('click',function(){ fxHlDelay(curHl,200); });
-          }
-        });
-        pop.querySelector('#__ce_selhlc').addEventListener('input', function(){ if(curHl) highlight(this.value); });
-        hlBindSwatches(pop.querySelector('#__ce_selhlsw'), pop.querySelector('#__ce_selhlc'), function(c){ if(curHl) highlight(c); });
-        pop.querySelector('#__ce_seludb').addEventListener('click', function(){ if(curUdot) removeUnderline(); else underline(pop.querySelector('#__ce_seludc').value); });
-        pop.querySelector('#__ce_seludc').addEventListener('input', function(){ if(curUdot) underline(this.value); });
+        // ★2026-07-11：ここに出していた黒い小ポップアップは廃止（操作が2箇所に割れて分かりにくいため）。
+        //   選択はこの関数の変数(savedRange/curHl/curUdot)に覚えるだけにして、色・マーカー・下線の操作は
+        //   右クリックメニューの「✂ 選択中の文字」ブロック（window.__ceSel経由）に一本化した。
+        if(msg) msg.textContent='文字を選択中：そのまま右クリック→「✂ 選択中の文字」で色・マーカー・下線（AIなし）';
       }, 10);
     }, true);
-    document.addEventListener('scroll', hidePop, true);
+    // ※スクロールでは選択を消さない（選んでからスクロールして右クリックすることがある）
+    // 右クリックメニューから使う窓口。選択の実体(savedRange等)はこの関数の中に閉じたまま外に出さない。
+    window.__ceSel={
+      has:function(){ return !!(savedRange||curHl||curUdot); },
+      text:function(){ try{ return savedRange?String(savedRange):((curHl&&curHl.textContent)||(curUdot&&curUdot.textContent)||''); }catch(_){ return ''; } },
+      hasHl:function(){ return !!curHl; },
+      hasUd:function(){ return !!curUdot; },
+      paint:paint, highlight:highlight, underline:underline,
+      removeHl:removeHl, removeUd:removeUnderline,
+      // 色ドラッグ中の追従用＝履歴を貯めずに色だけ変える（履歴はメニュー側がchangeで1回だけ入れる）
+      recolorHl:function(c){ if(curHl){ curHl.style.setProperty('--hlc',c); fxHlReplay(curHl); markDirty(); } },
+      clear:hidePop
+    };
   })();
   // ===== 位置の直接調整（AIなし・transformで即反映）=====
   // 要素を translate で浮かせて動かす。元のtransformは data-cebt に退避して壊さない。
@@ -3733,21 +3810,51 @@ html.__ce_altmode{cursor:text}
     while(sp=el.querySelector('.imp-line,.imp-char')){ sp.replaceWith(document.createTextNode(sp.textContent||'')); }
     try{ el.normalize(); }catch(_){}
   }
+  // ===== プレビュー用イージング＝保存後のCSSと同じカーブ =====
+  // ★プレビュー(rAF手動描画)と本番(CSS transition/animation)は実装が別なので、
+  //   カーブが違うと「保存したら突然速い/形が違う」になる（実際に苦情が出た）。
+  //   本番CSSで使っている cubic-bezier をそのまま数値計算して完全一致させる。
+  function cubicBezier(x1,y1,x2,y2){
+    function cal(t,a1,a2){ return ((1-3*a2+3*a1)*t + (3*a2-6*a1))*t*t + 3*a1*t; }
+    function der(t,a1,a2){ return 3*(1-3*a2+3*a1)*t*t + 2*(3*a2-6*a1)*t + 3*a1; }
+    return function(x){
+      if(x<=0) return 0; if(x>=1) return 1;
+      var t=x;
+      for(var i=0;i<5;i++){ var e=cal(t,x1,x2)-x; var d=der(t,x1,x2); if(Math.abs(e)<1e-4||!d) break; t-=e/d; }
+      return cal(t,y1,y2);
+    };
+  }
+  var EASE=cubicBezier(.25,.1,.25,1);          // CSSの'ease'＝出現系transitionと同じ
+  var EASE_IO=cubicBezier(.42,0,.58,1);        // CSSの'ease-in-out'＝ループkeyframesと同じ
+  var EASE_SPRING=cubicBezier(.34,1.56,.64,1); // 一文字ずつ(fxa_cpre)のばねカーブと同じ
   // 文字系プレビュー（stagger/typewriter/wave）
   function playChar(el,a){
     if(el.__fxHTML==null) el.__fxHTML=el.innerHTML;
     fxUnsplit(el);  // 既に割れていても一旦プレーンに戻してから割り直す
     var spans=splitChars(el);
     if(!spans.length){ el.innerHTML=el.__fxHTML; el.__fxHTML=null; if(msg)msg.textContent='⚠ ここには文字が無いので文字アニメは使えません。画像には「ふわっと出現」「ズームイン」「ぼやけて出現」などを選んでください'; return; }
-    var stag=fxParam(a,'stag')||45, dur=fxParam(a,'dur')||(a.loop?1600:500), dist=fxParam(a,'dist')||16, amp=fxParam(a,'amp')||10, start=null;
+    var stag=fxParam(a,'stag')||45, dur=fxParam(a,'dur')||(a.loop?1600:340), dist=fxParam(a,'dist')||16, amp=fxParam(a,'amp')||10, start=null;
     function frame(ts){
       if(start===null)start=ts; var tt=ts-start;
       for(var i=0;i<spans.length;i++){ var sp=spans[i];
-        if(a.loop){ var ph=(tt/dur*2*Math.PI)-(i*0.5); sp.style.transform='translateY('+(Math.sin(ph)*amp)+'px)'; }
-        else if(a.type){ sp.style.opacity=(tt>i*stag)?1:0; }
-        else { var lt=tt-i*stag, q=lt<=0?0:Math.min(1,lt/dur); q=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2; sp.style.opacity=q; sp.style.transform='translateY('+(dist*(1-q))+'px)'; }
+        if(a.loop){
+          // 本番CSS(fxa_wave)＝上にだけ持ち上がる山型(ease-in-out)・開始は1文字90msずつ遅れる
+          var lt0=tt-i*90, s=0;
+          if(lt0>0){ var pp=(lt0%dur)/dur; s=pp<.5?EASE_IO(pp/.5):EASE_IO((1-pp)/.5); }
+          sp.style.transform='translateY('+(-amp*s)+'px)';
+        }
+        else if(a.type){
+          // 本番CSS(fxa_tw)＝1文字0.18秒(ease)でフェード＋下10px→定位置＋scale0.9→1
+          var lt1=tt-i*stag, q1=lt1<=0?0:EASE(Math.min(1,lt1/180));
+          sp.style.opacity=q1; sp.style.transform='translateY('+(10*(1-q1))+'px) scale('+(0.9+0.1*q1)+')';
+        }
+        else {
+          // 本番CSS(fxa_cpre)＝ばねカーブ(少し行き過ぎて戻る)。opacityだけ0〜1に留める
+          var lt=tt-i*stag, q=lt<=0?0:EASE_SPRING(Math.min(1,lt/dur));
+          sp.style.opacity=Math.max(0,Math.min(1,q)); sp.style.transform='translateY('+(dist*(1-q))+'px)';
+        }
       }
-      var done=a.loop?false:(tt>spans.length*stag+(a.type?80:dur+20));
+      var done=a.loop?false:(tt>spans.length*stag+(a.type?200:dur+20));
       if(!done){ el.__ceRAF=requestAnimationFrame(frame); }
       else { el.__ceRAF=null; el.innerHTML=el.__fxHTML; el.__fxHTML=null; }
     }
@@ -3766,13 +3873,18 @@ html.__ce_altmode{cursor:text}
       if(start===null) start=ts;
       var p=(ts-start)/dur, o=1, tf='';
       if(a.g==='loop'){
-        var pp=p%1, tri=pp<.5?pp*2:2-pp*2;  // 0→1→0
+        // 本番CSSのkeyframes(0%→50%→100%)と同じ「ease-in-outの山型」で往復（直線の三角波だとカクついて別物に見える）
+        var pp=p%1, tri=pp<.5?EASE_IO(pp/.5):EASE_IO((1-pp)/.5);
         if(a.dir==='ps'){ tf='scale('+(1+(fxParam(a,'amp')/100)*tri)+')'; }
         else if(a.dir==='fy'){ tf='translateY('+(-fxParam(a,'amp')*tri)+'px)'; }
-        else if(a.dir==='by'){ var bp=pp<.3?pp/.3:(pp<.6?1-(pp-.3)/.3:(pp<.8?(pp-.6)/.2*.4:(1-(pp-.8)/.2)*.4)); tf='translateY('+(-fxParam(a,'amp')*Math.max(0,bp))+'px)'; }
-        else if(a.glow){ var g=Math.round(4+18*tri); el.style.setProperty('text-shadow','0 0 '+g+'px currentColor'+(tri>.35?(',0 0 '+Math.round(g*1.7)+'px currentColor'):''),'important'); el.style.setProperty('filter','brightness('+(1+.18*tri)+')','important'); }
+        else if(a.dir==='by'){
+          // 本番CSS(fxa_bounce)＝0/30/60/80/100%の区分ごとに'ease'が掛かる
+          var bp=pp<.3?EASE(pp/.3):(pp<.6?1-EASE((pp-.3)/.3):(pp<.8?.4*EASE((pp-.6)/.2):.4*(1-EASE((pp-.8)/.2))));
+          tf='translateY('+(-fxParam(a,'amp')*Math.max(0,bp))+'px)';
+        }
+        else if(a.glow){ var g=Math.round(4+12*tri); el.style.setProperty('text-shadow','0 0 '+g+'px currentColor'+(tri>.35?(',0 0 '+Math.round(g*1.9)+'px currentColor'):''),'important'); el.style.setProperty('filter','brightness('+(1+.16*tri)+')','important'); }
       } else {
-        var q=Math.min(1,p); q=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2;  // easeInOut
+        var q=EASE(Math.min(1,p));  // 本番の transition ... ease と同じカーブ（最初速く・最後ゆっくり）
         o=q;
         if(a.dir==='y'){ tf='translateY('+(fxParam(a,'dist')*(1-q))+'px)'; }
         else if(a.dir==='xl'){ tf='translateX('+(-fxParam(a,'dist')*(1-q))+'px)'; }
@@ -3822,7 +3934,10 @@ html.__ce_altmode{cursor:text}
     // 太さ(--hlt0/--hlt1)と速さ(--hldur)は要素ごとのinlineで上書きできる（fxHlThick/fxHlSpeedが設定）。
     // 太さのデフォルトは文字の下寄り（70%〜92%）＝下線に近い位置に調整済み。
     // ページ固有CSSに background:none!important があっても、ツールで付けたマーカーを確実に表示する。
-    +'html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt1,92%),transparent var(--hlt1,92%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:clone;box-decoration-break:clone}';
+    // ★box-decoration-breakは slice（既定）を使う：帯を「1本の長い帯を行でスライスした」扱いにする＝
+    //   2行にまたがるマーカーは 1行目を引き終わってから2行目に続く（書き順の流れが出る）。
+    //   clone だと各行が独立して同時に伸びる（実際に「一緒に出て流れを感じない」と苦情が出た）。
+    +'html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt1,92%),transparent var(--hlt1,92%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:slice;box-decoration-break:slice}';
   // スクロールで画面に入ったら再生。JS無効なら全部表示（消えない保険）。"__ce"を含めない＝保存で残る。
   // ★時間トリガー(setTimeout)は使わない＝「スクロールで画面に入った時に1回だけ再生」に統一。
   //   IntersectionObserverだけで判定→発火したらunobserve（1回きり）。上部の要素は監視開始時に即発火＝読み込みで再生。
@@ -4428,6 +4543,10 @@ html.__ce_altmode{cursor:text}
         if(_rp2.width<=_ri2.width*1.5+40 && _rp2.height<=_ri2.height*1.5+40) el=_pw2;
       }
     }
+    // ★セクション/ヘッダー/フッター丸ごとは「普通のドラッグ」では動かさない（2026-07-11ガード）。
+    //   余白部分を掴んでスクロール/選択したつもりが、セクション全体に translate が付いて保存で焼き込まれ
+    //   「全ブロックが約200pxずれたカンプ」が実際にできてしまった。動かしたい時は右クリック→🖱 掴んで動かす。
+    if(!_hitSel && /^(SECTION|HEADER|FOOTER)$/.test(el.tagName)) return;
     _altEl=el; _altActive=true; _aSX=e.clientX; _aSY=e.clientY;
     _aOX=+el.getAttribute('data-cetx')||0; _aOY=+el.getAttribute('data-cety')||0;
     document.body.style.userSelect='none'; e.preventDefault(); e.stopPropagation();
@@ -4654,15 +4773,44 @@ html.__ce_altmode{cursor:text}
     var qm=document.createElement('div'); qm.id='__ce_cm';
     qm.setAttribute('style','width:auto;min-width:215px;padding:4px');
     function row(id,label){ return '<button class="__ce_qi" id="'+id+'" style="display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'+label+'</button>'; }
-    qm.innerHTML=(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    // ✂ Alt+ドラッグで文字を選択してから右クリック＝選択への操作（色・マーカー・下線）を最上部に出す
+    // （以前は選択直後に黒い小ポップアップが出ていた→2026-07-11にこのメニューへ一本化）
+    var selApiQ=window.__ceSel, selRowQ='';
+    if(selApiQ && selApiQ.has()){
+      var _stq=(selApiQ.text()||'').replace(/\\s+/g,' ').trim();
+      qm.style.minWidth='268px';
+      selRowQ='<div style="background:#fff7d6;border-bottom:1px solid #f3e2a0;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px">'
+        +'<b>✂ 選択中「'+esc(_stq.slice(0,10))+(_stq.length>10?'…':'')+'」</b>（AIなし）<br>'
+        +'<span style="opacity:.8">文字色</span><input type="color" id="__ce_q_selc" value="#e05656" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> '
+        +'🖍<input type="color" id="__ce_q_selhlc" value="'+hlDefaultColor()+'" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><button id="__ce_q_selhlb" style="background:#eab308;border:none;border-radius:5px;padding:2px 8px;cursor:pointer;font-weight:700">'+(selApiQ.hasHl()?'マーカーを消す':'マーカー')+'</button> '
+        +'〰<input type="color" id="__ce_q_seludc" value="#e07856" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><button id="__ce_q_seludb" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">'+(selApiQ.hasUd()?'下線を消す':'下線')+'</button>'
+        +'</div>';
+    }
+    qm.innerHTML=selRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +row('__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）')
       +row('__ce_q_txt','✏ 文字を追加（編集）')
+      +row('__ce_q_img','🖼 画像を追加（ここに置く）')
       +row('__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）')
       +row('__ce_q_fxrm','🚫 動きを消す')
       +row('__ce_q_rst','⟲ 位置・サイズをリセット')
       +'<div style="border-top:1px solid #eee;margin:3px 6px"></div>'
       +row('__ce_q_full','⚙ すべての編集メニュー…');
     document.body.appendChild(qm);
+    // ✂ 選択中の文字の配線（ボタンはメニューを閉じずにその場で効く）
+    if(selApiQ && qm.querySelector('#__ce_q_selc')){
+      qm.querySelector('#__ce_q_selc').addEventListener('input',function(){ selApiQ.paint(this.value); });
+      qm.querySelector('#__ce_q_selhlb').addEventListener('click',function(ev){ ev.stopPropagation();
+        if(selApiQ.hasHl()){ selApiQ.removeHl(); this.textContent='マーカー'; }
+        else{ selApiQ.highlight(qm.querySelector('#__ce_q_selhlc').value); this.textContent='マーカーを消す'; }
+      });
+      qm.querySelector('#__ce_q_selhlc').addEventListener('input',function(){ selApiQ.recolorHl(this.value); });                      // ドラッグ中は色だけ追従
+      qm.querySelector('#__ce_q_selhlc').addEventListener('change',function(){ if(selApiQ.hasHl()) hlPushColorHistory(this.value); }); // 履歴は決定時に1回だけ
+      qm.querySelector('#__ce_q_seludb').addEventListener('click',function(ev){ ev.stopPropagation();
+        if(selApiQ.hasUd()){ selApiQ.removeUd(); this.textContent='下線'; }
+        else{ selApiQ.underline(qm.querySelector('#__ce_q_seludc').value); this.textContent='下線を消す'; }
+      });
+      qm.querySelector('#__ce_q_seludc').addEventListener('input',function(){ if(selApiQ.hasUd()) selApiQ.underline(this.value); });
+    }
     qm.style.left=Math.max(6,Math.min(e.clientX, window.innerWidth-qm.offsetWidth-8))+'px';
     qm.style.top=Math.max(6,Math.min(e.clientY, window.innerHeight-qm.offsetHeight-8))+'px';
     curMenu=qm;
@@ -4684,6 +4832,7 @@ html.__ce_altmode{cursor:text}
         }
         return;
       }
+      if(t.id==='__ce_q_img'){ closeMenu(); openAddImagePicker((window.scrollX||window.pageXOffset||0)+qx, (window.scrollY||window.pageYOffset||0)+qy); return; }
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
@@ -4770,6 +4919,8 @@ html.__ce_altmode{cursor:text}
     // 単純な出現/ループ系は上の「動きを選ぶ→付ける」に一本化したのでここには出さない。
     var aiList=PRESETS.filter(function(p){return p.bg||p.ai;});
     var agh=aiList.map(function(p,i){return '<button class="ag2" data-i="'+i+'"><b>'+esc(p.b)+'</b><span>'+esc(p.d)+'</span></button>';}).join('');
+    // ※文字選択（✂）・文字編集・画像追加・飛ばす・動きを消す・外側を選ぶは
+    //   クイックメニュー（openQuickMenu）だけに置く＝同じ機能を2箇所に出さない（2026-07-11整理）
     var m=document.createElement('div'); m.id='__ce_cm';
     var mTitle=(selEls.length>1)?('🧩 '+selEls.length+'個を選択中（サイズ・動き・削除は全部に効く）'):d;
     m.innerHTML='<div class="h"><span class="t">'+esc(mTitle)+'</span><span class="c" id="__ce_cmx">✕</span></div>'
@@ -4777,7 +4928,6 @@ html.__ce_altmode{cursor:text}
       +'<div class="cap">🧩 Ctrl+右クリック＝まとめて選択に追加（もう一度で外す）</div>'
       +'<div class="cap">🖱 位置を動かす（AIなし・即反映・普通にドラッグでOK／文字を選ぶ時だけAlt+ドラッグ）</div>'
       +'<button class="go2" id="__ce_cmdrag" style="background:#0b6bcb;margin-bottom:8px">🖱 掴んで動かす（押してから要素をドラッグ）</button>'
-      +'<button class="go2" id="__ce_cmup" style="background:#475569;margin-bottom:8px">⬆ ひとまわり外側を選ぶ（画像と枠をまとめて動かす・もう一度でさらに外側）</button>'
       +'<div class="__ce_nudge"><span class="sp"></span><button data-nx="0" data-ny="-6">↑</button><span class="sp"></span>'
       +'<button data-nx="-6" data-ny="0">←</button><button data-rst="1">⟲</button><button data-nx="6" data-ny="0">→</button>'
       +'<span class="sp"></span><button data-nx="0" data-ny="6">↓</button><span class="sp"></span></div>'
@@ -4790,13 +4940,10 @@ html.__ce_altmode{cursor:text}
       +'<div class="__ce_size"><button data-mh="80">＋ 高く（余白を足す）</button><button data-mh="-80">－ 低く</button></div>'
       +'<div class="cap">⬌ 横の幅（広く/狭く・AIなし・歪まない）</div>'
       +'<div class="__ce_size"><button data-mw="80">＋ 横に広く</button><button data-mw="-80">－ 横を狭く</button></div>'
-      +'<button class="go2" id="__ce_cmbr" style="background:#0b6bcb;margin-bottom:8px">✏ 文字を編集（改行・大きさ・フォント・色／AIなし）</button>'
       +'<button class="go2" id="__ce_cmhl" style="background:#eab308;color:#1d1d1f;margin-bottom:4px">🖍 この文字にマーカー（スクロールで線が伸びる）</button>'
-      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="'+hlDefaultColor()+'" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><span id="__ce_cmhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle;margin-right:4px">'+hlSwatchesHtml()+'</span> 太さ<button id="__ce_cmhlthm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">－</button><button id="__ce_cmhlthp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">＋</button> 位置<button id="__ce_cmhlpu" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="上へ">▲</button><button id="__ce_cmhlpd" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="下へ">▼</button> 速さ<button id="__ce_cmhldm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="遅く">🐢</button><button id="__ce_cmhldp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="速く">🐇</button> 待機<button id="__ce_cmhlwm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="待ちを短く（-0.2秒）">－</button><button id="__ce_cmhlwp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="待ちを長く（+0.2秒）＝文字が動いたあとに引きたい時">＋</button><br>／ 文字を選んでから引くと「一部だけ」引ける／<a href="#" id="__ce_cmhlrm" style="color:#0b6bcb">🚫 マーカーを消す</a></div>'
+      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="'+hlDefaultColor()+'" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><span id="__ce_cmhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle;margin-right:4px">'+hlSwatchesHtml()+'</span> 太さ<button id="__ce_cmhlthm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">－</button><button id="__ce_cmhlthp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">＋</button> 位置<button id="__ce_cmhlpu" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="上へ">▲</button><button id="__ce_cmhlpd" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="下へ">▼</button> 速さ<button id="__ce_cmhldm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="遅く">🐢</button><button id="__ce_cmhldp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="速く">🐇</button> 待機<button id="__ce_cmhlwm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="待ちを短く（-0.2秒）">－</button><button id="__ce_cmhlwp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="待ちを長く（+0.2秒）＝文字が動いたあとに引きたい時">＋</button><br>／ Alt+ドラッグで文字を選んで右クリック＝「一部だけ」に引ける ／<a href="#" id="__ce_cmhlrm" style="color:#0b6bcb">🚫 マーカーを消す</a></div>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
       +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
-      +'<button class="go2" id="__ce_cmfly" style="background:#0284c7;margin-bottom:6px">🕊 線を描いて飛ばす（ルートを手描き・AIなし）</button>'
-      +'<button class="go2" id="__ce_fxrm" style="background:#888;margin-bottom:6px">🚫 この要素の動きを消す</button>'
       +'<div class="__ce_anim" id="__fx_grid">'+FX.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
       +'<div class="__fx_ctl" id="__fx_ctl" style="display:none"><div id="__fx_sl"></div><button class="go2" id="__fx_apply" style="background:#1a7f37;margin-top:2px">✅ この動きを付ける（無料・保存で残る）</button></div>'
       +'<div class="cap">🔢 グループでまとめて順番に表示（①→②→③の順で・グループ内は0.15s刻み・動きを付けた要素が対象）</div>'
@@ -4855,15 +5002,6 @@ html.__ce_altmode{cursor:text}
       if(ak){ selectFx(ak.getAttribute('data-ak'), ak); return; }
       var apl=ev.target.closest('#__fx_apply');
       if(apl){ if(!curAnim){ msg.textContent='まず上から動きを選んでください'; return; } eachSel(function(x){ applyBake(x, curAnim); }); if(selEls.length>1&&msg) msg.textContent='✅ '+selEls.length+'個にまとめて付けました（💾保存で残る）'; return; }
-      var flb=ev.target.closest('#__ce_cmfly');
-      if(flb){ var ft2=curEl; closeMenu(); startFlightDraw(ft2); return; }
-      var fxrm=ev.target.closest('#__ce_fxrm');
-      if(fxrm){
-        eachSel(removeBake); curAnim=null; curP={};
-        [].slice.call(m.querySelectorAll('#__fx_grid button')).forEach(function(b){ b.classList.remove('on'); });
-        var ctl=m.querySelector('#__fx_ctl'); if(ctl) ctl.style.display='none';
-        return;
-      }
       var gb=ev.target.closest('#__ce_grp button');
       if(gb){
         var gv=gb.getAttribute('data-grp');
@@ -4918,8 +5056,6 @@ html.__ce_altmode{cursor:text}
       var o=styleIns(i);
       applyEl(i, o.ins, 1, o.t);
     });
-    var brBtn=m.querySelector('#__ce_cmbr');
-    if(brBtn) brBtn.addEventListener('click',function(){ openBreakEditor(curEl); });
     // 🖍 この文字にマーカー：選択がいらない版。右クリックした要素の中身を .fxa_hl で丸ごと囲む
     //   →スクロールで線がスーッと伸びる（保存版でも再生）。※選択できない箇所でも確実に引ける。
     function hlWhole(el,color){
@@ -4941,7 +5077,14 @@ html.__ce_altmode{cursor:text}
     var hlB=m.querySelector('#__ce_cmhl');
     if(hlB) hlB.addEventListener('click',function(){ hlWhole(curEl, m.querySelector('#__ce_cmhlc').value); });
     var hlC=m.querySelector('#__ce_cmhlc');
-    if(hlC) hlC.addEventListener('input',function(){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',this.value); markDirty(); hlPushColorHistory(this.value); } });
+    // ドラッグ中(input)は色だけ追従。履歴は決定時(change)に1回だけ＝ドラッグ中に毎回貯めると
+    // ほぼ同じ色で履歴10枠が埋まり、色見本が「同じ色の四角の列」になってしまう（実際になった）
+    if(hlC) hlC.addEventListener('input',function(){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',this.value); markDirty(); } });
+    if(hlC) hlC.addEventListener('change',function(){
+      hlPushColorHistory(this.value);
+      var w=m.querySelector('#__ce_cmhlsw');
+      if(w){ w.innerHTML=hlSwatchesHtml(); hlBindSwatches(w, hlC, function(c){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',c); markDirty(); } }); }
+    });
     hlBindSwatches(m.querySelector('#__ce_cmhlsw'), m.querySelector('#__ce_cmhlc'), function(c){ var s=curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); if(s){ s.style.setProperty('--hlc',c); markDirty(); } });
     function _cmHlSpan(){ return curEl&&curEl.querySelector&&curEl.querySelector('.fxa_hl'); }
     var hlThm=m.querySelector('#__ce_cmhlthm'); if(hlThm) hlThm.addEventListener('click',function(){ fxHlThick(_cmHlSpan(),-6); });
@@ -4971,8 +5114,6 @@ html.__ce_altmode{cursor:text}
     });
     m.querySelector('#__ce_cmnobg').addEventListener('click',function(){ stripDeco(curEl); });
     m.querySelector('#__ce_cmdel').addEventListener('click',function(){ removeSelected(); });
-    // ⬆ ひとまわり外側（親要素）を選び直す＝画像と裏の枠を「まとまり」として動かせる。
-    m.querySelector('#__ce_cmup').addEventListener('click',function(){ selectParent(true); });
     // 右クリック直後に自動でドラッグONにすると、cursor:moveがmousedownを奪ってしまい
     // 「文字を選んでから下線/マーカー/色」の選択操作ができなくなる（選べない＝消せない）。
     // そのため移動は「🖱 ドラッグで動かす」ボタンを押した時だけONにする（toggleDrag）。

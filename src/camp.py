@@ -17,7 +17,9 @@ from __future__ import annotations
 import base64
 import io
 import json
+import os
 import re
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -947,16 +949,30 @@ def load_section_favs_meta() -> list:
     return []
 
 
+# 「読む→絞る→書く」が同時に走ると_index.jsonが混ざって壊れる（削除の連打で実際に起きた）。
+# ロックで直列化＋一時ファイル→os.replaceの安全書き込み（save_camp_htmlと同じ方式）。
+_SECTION_FAV_LOCK = threading.Lock()
+
+
 def _save_section_favs_meta(items: list) -> None:
     d = _section_fav_dir()
     d.mkdir(parents=True, exist_ok=True)
-    (d / "_index.json").write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp = d / "_index.json.tmp"
+    tmp.write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, d / "_index.json")
 
 
-def save_section_fav(html: str, headcss: str, name: str) -> dict:
-    """セクションのHTML（自己完結）を部品として保存する。"""
-    if not html or "<section" not in html.lower():
-        raise ValueError("セクションのHTMLが取得できませんでした")
+def save_section_fav(html: str, headcss: str, name: str, kind: str = "section") -> dict:
+    """セクション/ヘッダー/フッターのHTML（自己完結）を部品として保存する。
+
+    kind: "section"（既定）/ "header" / "footer"。🔀入れ替えは同じkind同士だけに出す
+    （セクションの枠にヘッダーを入れる事故を防ぐ）。
+    """
+    if kind not in ("header", "footer"):
+        kind = "section"
+    tag = {"header": "<header", "footer": "<footer"}.get(kind, "<section")
+    if not html or tag not in html.lower():
+        raise ValueError("部品のHTMLが取得できませんでした")
     d = _section_fav_dir()
     d.mkdir(parents=True, exist_ok=True)
     sid = datetime.now().strftime("sec_%Y%m%d_%H%M%S_%f")
@@ -965,12 +981,14 @@ def save_section_fav(html: str, headcss: str, name: str) -> dict:
         (d / (sid + ".css")).write_text(headcss, encoding="utf-8")
     entry = {
         "id": sid,
-        "name": (name or "").strip()[:60] or "無名のセクション",
+        "kind": kind,
+        "name": (name or "").strip()[:60] or "無名の部品",
         "created": datetime.now().isoformat(timespec="seconds"),
     }
-    meta = load_section_favs_meta()
-    meta.insert(0, entry)  # 新しいものを先頭に
-    _save_section_favs_meta(meta)
+    with _SECTION_FAV_LOCK:
+        meta = load_section_favs_meta()
+        meta.insert(0, entry)  # 新しいものを先頭に
+        _save_section_favs_meta(meta)
     return entry
 
 
@@ -997,7 +1015,8 @@ def delete_section_fav(sid: str) -> bool:
         p = d / (sid + ext)
         if p.exists():
             p.unlink()
-    _save_section_favs_meta([e for e in load_section_favs_meta() if e.get("id") != sid])
+    with _SECTION_FAV_LOCK:
+        _save_section_favs_meta([e for e in load_section_favs_meta() if e.get("id") != sid])
     return True
 
 

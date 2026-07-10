@@ -772,7 +772,7 @@
     }
   </style>
 <style id="fxa-css">html.fxa-on .fxa_pre{opacity:0;transition:opacity var(--fxa-dur,.8s) ease,transform var(--fxa-dur,.8s) ease,filter var(--fxa-dur,.8s) ease,clip-path var(--fxa-dur,.8s) ease}html.fxa-on .fxa_pre.fxa_y{transform:translateY(var(--fxa-dist,28px))}html.fxa-on .fxa_pre.fxa_xl{transform:translateX(calc(-1*var(--fxa-dist,48px)))}html.fxa-on .fxa_pre.fxa_xr{transform:translateX(var(--fxa-dist,48px))}html.fxa-on .fxa_pre.fxa_s{transform:scale(var(--fxa-scale,.86))}html.fxa-on .fxa_pre.fxa_bl{filter:blur(var(--fxa-blur,14px))}html.fxa-on .fxa_pre.fxa_ry{transform:perspective(800px) rotateY(var(--fxa-deg,90deg))}html.fxa-on .fxa_pre.fxa_clip{transform:translateY(var(--fxa-dist,40px))}html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}.fxa_ch{display:inline-block}html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,26px));transition:opacity var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1),transform var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1)}html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,32ms))}html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}@keyframes fxa_glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}@keyframes fxa_wave{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,10px)))}}.fxa_lp_pulse{animation:fxa_pulse var(--fxa-dur,1.4s) ease-in-out infinite}.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt1,92%),transparent var(--hlt1,92%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:slice;box-decoration-break:slice}</style></head>
-<body style=""><header class="hero">
+<body style=""><header class="hero" data-cebt="" data-cetx="209" data-cety="-12" style="translate: 209px -12px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
     <div class="nav">
       <div class="nav-inner">
         <div class="logo">
@@ -808,7 +808,7 @@
       
     </div>
   </header><main>
-    <section class="section white" id="about" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+    <section class="section white" id="about" data-cebt="" data-cetx="219" data-cety="-16" style="translate: 219px -16px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
       <div class="container">
         <div class="about-wrap">
           <div class="section-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
@@ -868,7 +868,7 @@
       </div>
     </section>
 
-    <section class="section white" id="service" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+    <section class="section white" id="service" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important; translate: 196px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="196" data-cety="0">
       <div class="container">
         <div class="section-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
           <div class="eyebrow">Service</div>
@@ -916,7 +916,7 @@
       </div>
     </section>
 
-    <section class="section passport" id="passport" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+    <section class="section passport" id="passport" data-cebt="" data-cetx="207" data-cety="-13" style="translate: 207px -13px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
       <div class="container">
         <div class="passport-head title-fade reveal fxa_pre fxa_y" style="--fxa-dur: 800ms; --fxa-dist: 63px; height: 201px !important; width: 928px !important; max-width: none !important; translate: 246px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="246" data-cety="0">
           <div class="eyebrow" style="padding-left:0">What is A-type</div>
@@ -947,7 +947,7 @@
       <div class="wave" data-cebt="" data-cetx="-14" data-cety="107" style="translate: -14px 107px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;"></div>
     </section>
 
-    <section class="section white" id="flow" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+    <section class="section white" id="flow" data-cebt="" data-cetx="141" data-cety="-2" style="translate: 141px -2px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
       <div class="container">
         <div class="flow-wrap">
           <div>
@@ -1005,7 +1005,7 @@
       </div>
     </section>
 
-    <section class="section soft" id="plan" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+    <section class="section soft" id="plan" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important; translate: 209px -2px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="209" data-cety="-2">
       <div class="container">
         <div class="section-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
           <div class="eyebrow">Plan</div>
@@ -1073,7 +1073,7 @@
       </div>
     </section>
 
-    <section class="section white" id="faq" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+    <section class="section white" id="faq" data-cebt="" data-cetx="202" data-cety="-13" style="translate: 202px -13px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
       <div class="container">
         <div class="faq-wrap">
           <div>
@@ -1111,7 +1111,7 @@
       </div>
     </section>
 
-    <section class="section white" id="voice" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+    <section class="section white" id="voice" data-cebt="" data-cetx="203" data-cety="-161" style="translate: 203px -161px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
       <div class="container">
         <div class="section-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
           <div class="eyebrow">Voice</div>
@@ -1189,7 +1189,7 @@
       </div>
     </section>
 
-    <section class="follow" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
+    <section class="follow" data-cebt="" data-cetx="204" data-cety="1" style="translate: 204px 1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;">
       <div class="container" data-cebt="" data-cetx="-6" data-cety="-85" style="translate: -6px -85px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
         <div class="eyebrow" style="padding-left:0">Follow us</div>
         <p style="margin: 0px auto; line-height: 1.8 !important;">日々の作業風景や空席情報を更新しています</p>
@@ -1201,7 +1201,7 @@
         <div class="footer-title title-fade reveal fxa_pre fxa_cpre" style="translate: -49px 82px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; font-size: 77.8px !important; height: 163px !important; width: 1522px !important; max-width: none !important; --fxa-dur: 840ms; --fxa-stag: 59ms; --fxa-dist: 56px;" data-cebt="" data-cetx="-49" data-cety="82"><span class="fxa_ch" style="display: inline-block; --i: 0;">さ</span><span class="fxa_ch" style="display: inline-block; --i: 1;">あ</span><span class="fxa_ch" style="display: inline-block; --i: 2;">、</span><span class="fxa_ch" style="display: inline-block; --i: 3;">一</span><span class="fxa_ch" style="display: inline-block; --i: 4;">歩</span><span class="fxa_ch" style="display: inline-block; --i: 5;">前</span><span class="fxa_ch" style="display: inline-block; --i: 6;">に</span><span class="fxa_ch" style="display: inline-block; --i: 7;">で</span><span class="fxa_ch" style="display: inline-block; --i: 8;">よ</span><span class="fxa_ch" style="display: inline-block; --i: 9;">う</span><span class="fxa_ch" style="display: inline-block; --i: 10;">！</span><span class="fxa_ch" style="display: inline-block; --i: 11;">楽</span><span class="fxa_ch" style="display: inline-block; --i: 12;">し</span><span class="fxa_ch" style="display: inline-block; --i: 13;">い</span><span class="fxa_ch" style="display: inline-block; --i: 14;">未</span><span class="fxa_ch" style="display: inline-block; --i: 15;">来</span><span class="fxa_ch" style="display: inline-block; --i: 16;">が</span><span class="fxa_ch" style="display: inline-block; --i: 17;">！</span></div>
       </div>
     </section>
-  </main><footer class="">
+  </main><footer class="" data-cebt="" data-cetx="201" data-cety="1" style="translate: 201px 1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
     <div class="container">
       <div class="logo" style="color:var(--main)">
         はたらく旅舎 みなと
