@@ -3914,6 +3914,12 @@ html.__ce_altmode{cursor:text}
     stopAnim(el); clearPreviewStyle(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);  // 2回目以降も必ずプレーン文字から＋一括改善の文字アニメを外す（上書き消え防止）
     // ★ドラッグ/拡大で付いた transition:none / animation:none を外す。これが残ると出現もループも一瞬で終わって「動かない」に見える。
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
+    // ★保険が付けた「見せるクラス」が過去の保存で焼き込まれていると、ページCSSの
+    //   .inview{opacity:1!important;transform:none!important} 等に負けて出現アニメが一切効かない
+    //   （実際に起きた：3D回転を付けても動かない）。reveal系の要素だけ、その場で外して主導権を取り戻す。
+    if(el.matches && el.matches('[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]')){
+      ['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'].forEach(function(c){ el.classList.remove(c); });
+    }
     el.style.setProperty('--fxa-dur', (fxParam(a,'dur')||800)+'ms');  // a.dは説明文なので使わない
     if(a.g==='loop'){
       if(a.dir==='ps'){ el.style.setProperty('--fxa-amp', (fxParam(a,'amp')/100)); el.classList.add('fxa_lp_pulse'); }
@@ -4528,6 +4534,15 @@ html.__ce_altmode{cursor:text}
     [].slice.call(doc.querySelectorAll('[style*="__ceax"]')).forEach(function(n){ n.style.removeProperty('animation'); });
     // 焼き込みアニメの一時「表示中」クラス(fxa_in)は外す＝保存版はスクロールで再生に戻す（付けた設定fxa_pre等は残す）
     [].slice.call(doc.querySelectorAll('.fxa_in')).forEach(function(n){ n.classList.remove('fxa_in'); });
+    // カンプ内の保険スクリプトがスクロール時に付ける「見せるクラス」16種も外す（保険は開き直せばまた動く）。
+    // ★焼き込まれると (1)開き直しても出現アニメが「最初から表示済み」になる
+    //   (2)ページCSSに .inview{opacity:1!important} 等があると、あとから付けたfxaの動きが永久に効かない
+    //   （実際に起きた：3D回転を付けても動かないカンプの犯人）。--hlw:100の焼き込み事故と同じ家系。
+    (function(){
+      var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+      var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+      [].slice.call(doc.querySelectorAll(SEL)).forEach(function(n){ if(n.classList) SHOW.forEach(function(k){ n.classList.remove(k); }); });
+    })();
     // 🖍マーカーは--hlw(0〜100)で伸び具合を持っているので、fxa_inを外すだけでは戻らない。
     // ★これを忘れると「再生し終わった状態(--hlw:100)」がそのまま保存され、次に開いた時に
     //   アニメせず最初から引かれた状態になってしまう（実際に起きたバグ）。必ず0に戻す。
