@@ -117,7 +117,7 @@ class HtmlGenConfig:
     )
     openai_api_key: str = field(default_factory=lambda: os.environ.get("OPENAI_API_KEY", ""))
     openai_model: str = field(
-        default_factory=lambda: os.environ.get("DESIGN_STOCK_OPENAI_MODEL", "gpt-5.4")
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_OPENAI_MODEL", "gpt-5.6-terra")
     )
 
     @property
