@@ -14,3 +14,11 @@ numpy>=1.26
 
 # ローカルビューア（Phase 2：検索ボックス付きUI）
 flask>=3.0
+waitress>=3.0
+
+# .env 読み込み
+python-dotenv>=1.0
+
+# カンプ生成・修正（雰囲気描写＝Claude / カンプ生成＝Claude・GPT・DeepSeek等）
+anthropic>=0.40
+openai>=1.50

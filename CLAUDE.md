@@ -591,9 +591,38 @@ FAQ・Voice・末尾の再CTA まで**10セクションの骨格が一致**。�
   2. README の手順で venv 構築（torch等インストール／playwright install chromium）
   3. `.env.example` をコピーして `.env` を作り、APIキーを入れる（または⚙設定画面から）
   4. `起動.bat` で起動
-- ※ DB・スクショ・録画・抜き出し画像は同期されない（容量大のため）。サイトの再登録は各PCで行う
-  （将来クラウド同期したくなったら、data を別ストレージに置く設計に変える）。
+- ※ DB・スクショ・録画・抜き出し画像は**このリポジトリのGitでは**同期されない（容量大のため）。
   **カンプHTML(`data/camps/`)だけは例外で同期される**（軽い＋成果物として共有したいため）。
+
+### 9.7.1 サイトライブラリ（DB・スクショ・録画・画像）をナレッジ経由で家↔会社共有（2026-07-10〜）
+
+会社PCで「登録済み：0件」になる問題（`data/`はGit対象外＝各PCに別データ）への対策として、
+保存先をナレッジフォルダ（`03_knowledge`/`50_knowledge`、こちらは別のGitリポジトリとして
+既に家↔会社で同期済み）の中へ向けられるようにした。
+
+- `src/config.py` に **`DESIGN_STOCK_LIBRARY_DIR`**（環境変数）を追加。
+  設定すると `DB_PATH` / `SCREENSHOT_DIR` / `VIDEO_DIR` / `ASSET_DIR` / `ANIM_DIR` が
+  そこに向く（未設定なら従来通り `data/` 配下）。`MOTION_DIR`/`UPLOAD_DIR`/`CAMP_DIR` は対象外
+  （motionは動画から再生成できる中間データ、campsは元々このリポジトリで同期済みのため）。
+- **会社PC設定済み**：`.env`（gitignore対象・このPC限定のファイル）に以下を設定し、
+  フォルダ `C:\Users\guest04\Desktop\高橋研三\03_knowledge\ツール\desing_kanpu_create_data\` も作成済み。
+  ```
+  DESIGN_STOCK_LIBRARY_DIR=C:\Users\guest04\Desktop\高橋研三\03_knowledge\ツール\desing_kanpu_create_data
+  ```
+- **🏠 自宅PCでやること（未実施・次回自宅で作業するときに）**：
+  1. `.env` に以下を追記する（`D:\50_knowledge` 配下に同名フォルダを作る）：
+     ```
+     DESIGN_STOCK_LIBRARY_DIR=D:\50_knowledge\ツール\desing_kanpu_create_data
+     ```
+  2. 今まで使っていた `data\design_stock.sqlite` と `data\screenshots\` `data\videos\`
+     `data\assets\` `data\anim\` の中身を、上の新フォルダへ**移動**する
+     （中身がある状態でツールを起動すれば、そのまま登録済みサイトとして読み込まれる）。
+  3. ナレッジフォルダ（`D:\50_knowledge`）側の同期手段（Git push等・普段どおりのやり方）で
+     会社PC側に反映する。会社PCは `03_knowledge` を pull すれば自動的にこのツールにも反映される
+     （`.env`の設定は変更不要・パスは既に会社PC用に設定済みのため）。
+  4. ⚠注意：スクショ・録画は画像/動画なのでナレッジのGitリポジトリの容量が増える。
+     サイト登録数が増えてきて重く感じたら、この方式をやめて外部ストレージ同期に切り替える手もある
+     （そのときは `DESIGN_STOCK_LIBRARY_DIR` の値を変えるだけで移行できる）。
 
 ## 10. 作業するときの心得（このプロジェクト固有）
 

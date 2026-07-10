@@ -18,14 +18,24 @@ from pathlib import Path
 # このファイル(src/config.py)の2つ上 = プロジェクトルート
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-SCREENSHOT_DIR = DATA_DIR / "screenshots"
-VIDEO_DIR = DATA_DIR / "videos"  # スクロール録画(アニメ参照用)
-ASSET_DIR = DATA_DIR / "assets"  # サイトから抜き出した画像
-ANIM_DIR = DATA_DIR / "anim"  # サイトから抜き出したアニメ素材(Lottie JSON等)
-MOTION_DIR = DATA_DIR / "motion"  # 録画から抜いたフレーム(AIが動きを読み取る用)
+
+# ── サイトライブラリ（DB・スクショ・録画・抜き出し画像）の保存先 ──
+# 既定はプロジェクト内 data/ 配下（従来通り）。
+# DESIGN_STOCK_LIBRARY_DIR を .env に設定すると、そこに保存先を変更できる。
+# 用途：ナレッジフォルダ(D:\50_knowledge 相当)のGit同期に乗せて、家↔会社でDBとスクショを共有する。
+# .env はPCごとに別物（git対象外）なので、家と会社でそれぞれの実パスを書けばよい。
+_library_dir_env = os.environ.get("DESIGN_STOCK_LIBRARY_DIR", "").strip()
+LIBRARY_DIR = Path(_library_dir_env) if _library_dir_env else DATA_DIR
+
+SCREENSHOT_DIR = LIBRARY_DIR / "screenshots"
+VIDEO_DIR = LIBRARY_DIR / "videos"  # スクロール録画(アニメ参照用)
+ASSET_DIR = LIBRARY_DIR / "assets"  # サイトから抜き出した画像
+ANIM_DIR = LIBRARY_DIR / "anim"  # サイトから抜き出したアニメ素材(Lottie JSON等)
+DB_PATH = LIBRARY_DIR / "design_stock.sqlite"
+
+MOTION_DIR = DATA_DIR / "motion"  # 録画から抜いたフレーム(AIが動きを読み取る用・動画から再生成できるので同期不要)
 UPLOAD_DIR = DATA_DIR / "uploads"  # ユーザーがアップロードした自前画像（カンプに使う）
-CAMP_DIR = DATA_DIR / "camps"  # 生成したカンプHTML
-DB_PATH = DATA_DIR / "design_stock.sqlite"
+CAMP_DIR = DATA_DIR / "camps"  # 生成したカンプHTML（従来通りこのGitリポジトリで同期）
 RESULTS_HTML_PATH = PROJECT_ROOT / "results.html"
 TEMPLATE_DIR = PROJECT_ROOT / "templates"
 
@@ -247,7 +257,10 @@ def update_env_file(updates: dict) -> None:
 def ensure_dirs() -> None:
     """データ用ディレクトリを用意する（無ければ作る）。"""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    VIDEO_DIR.mkdir(parents=True, exist_ok=True)
+    ASSET_DIR.mkdir(parents=True, exist_ok=True)
     ANIM_DIR.mkdir(parents=True, exist_ok=True)
     MOTION_DIR.mkdir(parents=True, exist_ok=True)
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)

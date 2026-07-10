@@ -172,6 +172,19 @@ def _to_openai_content(content: list) -> list:
     return out
 
 
+def _to_openai_responses_content(content: list) -> list:
+    """Anthropic形式の content を OpenAI Responses API 形式に変換する。"""
+    out = []
+    for block in content:
+        if block.get("type") == "text":
+            out.append({"type": "input_text", "text": block["text"]})
+        elif block.get("type") == "image":
+            src = block["source"]
+            data_url = f"data:{src['media_type']};base64,{src['data']}"
+            out.append({"type": "input_image", "image_url": data_url})
+    return out
+
+
 def _anthropic_text(msg) -> str:
     """Claudeの返答から本文テキストだけを結合して返す。
 
@@ -207,17 +220,18 @@ def _call_openai(system: str, content: list) -> str:
     from openai import OpenAI
 
     hcfg = config.CONFIG.htmlgen
-    # gpt-5.5は180秒に収まらない回が多い（タイムアウト→リトライで二重課金になる方が損）
+    # gpt-5.6系（Sol/Terra/Luna）は Responses API 専用＝chat.completionsだと
+    # 「404 model does not exist」になる（旧gpt-5.5/5.4はchat.completionsのままでも動くが、
+    # Responses APIはそれらも受け付けるので分岐せず統一する）。
+    # gpt-5.5は180秒に収まらない回が多い（タイムアウト→リトライで二重課金になる方が損）。
     client = OpenAI(api_key=hcfg.openai_api_key, timeout=600.0, max_retries=1)
-    resp = client.chat.completions.create(
+    resp = client.responses.create(
         model=hcfg.openai_model,
-        max_completion_tokens=16000,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": _to_openai_content(content)},
-        ],
+        instructions=system,
+        input=[{"role": "user", "content": _to_openai_responses_content(content)}],
+        max_output_tokens=16000,
     )
-    return resp.choices[0].message.content or ""
+    return resp.output_text or ""
 
 
 def _call_gemini(system: str, content: list) -> str:

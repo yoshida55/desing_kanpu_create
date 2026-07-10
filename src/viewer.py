@@ -362,10 +362,12 @@ def _test_key(provider: str, openai_key: str = "", anthropic_key: str = "", deep
             if not key.startswith("sk-") or "ここに" in key:
                 return False, "OpenAIキーが未入力です"
             from openai import OpenAI
-            OpenAI(api_key=key).chat.completions.create(
+            # gpt-5.6系（Sol/Terra/Luna）はResponses API専用＝chat.completionsだと404になる。
+            # Responses APIは旧モデルも受け付けるので分岐せず統一する（src/camp.py の _call_openai と同じ理由）。
+            OpenAI(api_key=key).responses.create(
                 model=h.openai_model,
-                max_completion_tokens=5,
-                messages=[{"role": "user", "content": "ok"}],
+                input="ok",
+                max_output_tokens=16,
             )
             return True, f"OpenAI（{h.openai_model}）接続OK"
         elif provider == "gemini":
