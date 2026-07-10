@@ -3070,7 +3070,7 @@ html.__ce_altmode{cursor:text}
   var _forceEl=null;  // ⬆外側選択用：次のcontextmenuでpickTargetを使わずこの要素を選ぶ
   function eachSel(fn){ (selEls.length?selEls:(curEl?[curEl]:[])).forEach(fn); }
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
-  function closeMenu(){ hideHandles(); if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} selEls.forEach(function(x){ x.classList.remove('__ce_sel'); }); selEls=[]; curAnim=null; curP={};
+  function closeMenu(){ hideHandles(); if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} selEls.forEach(function(x){ stopAnim(x); clearPreviewStyle(x); x.classList.remove('__ce_sel'); }); selEls=[]; curAnim=null; curP={};
     // メニューを閉じたらドラッグ移動モードも解除＝文字をドラッグで「選択」できるようにする（部分色付けと両立）
     if(typeof dragEl!=='undefined' && dragEl){ try{ dragEl.removeEventListener('mousedown',_dDown,true); dragEl.style.cursor=''; }catch(_){} dragEl=null; } }
   // 要素を丸ごと消す（AIなし・即反映）。ドラッグ中なら解除してから消す。保存するまでは確定しない。
@@ -4347,10 +4347,11 @@ html.__ce_altmode{cursor:text}
     var sl=document.getElementById('__fx_sl');
     if(sl){
       sl.innerHTML=a.sl.map(function(s){ return '<label>'+esc(s.l)+'<span>'+curP[s.k]+(s.u||'px')+'</span><input type="range" data-k="'+s.k+'" min="'+s.min+'" max="'+s.max+'" step="'+(s.step||1)+'" value="'+curP[s.k]+'"></label>'; }).join('');
-      sl.oninput=function(e){ var inp2=e.target.closest('input'); if(!inp2) return; var kk=inp2.getAttribute('data-k'); curP[kk]=+inp2.value; if(!_fxLast[curAnim]) _fxLast[curAnim]={}; _fxLast[curAnim][kk]=+inp2.value; _fxSaveLast(); var sd=null; for(var i=0;i<a.sl.length;i++){ if(a.sl[i].k===kk) sd=a.sl[i]; } var lb=inp2.parentNode.querySelector('span'); if(lb) lb.textContent=inp2.value+((sd&&sd.u)||'px'); playAnim(curEl,curAnim); };
+      sl.oninput=function(e){ var inp2=e.target.closest('input'); if(!inp2) return; var kk=inp2.getAttribute('data-k'); curP[kk]=+inp2.value; if(!_fxLast[curAnim]) _fxLast[curAnim]={}; _fxLast[curAnim][kk]=+inp2.value; _fxSaveLast(); var sd=null; for(var i=0;i<a.sl.length;i++){ if(a.sl[i].k===kk) sd=a.sl[i]; } var lb=inp2.parentNode.querySelector('span'); if(lb) lb.textContent=inp2.value+((sd&&sd.u)||'px'); eachSel(function(x){ playAnim(x,curAnim); }); };
     }
     var ctl=document.getElementById('__fx_ctl'); if(ctl) ctl.style.display='block';
-    playAnim(curEl,k);
+    // 🧩複数選択中は全員で再生（主役だけ動くと「他が動かない」ように見えるため）
+    eachSel(function(x){ playAnim(x,k); });
   }
   function resetPos(el){
     el.style.removeProperty('transform'); el.style.removeProperty('transform-origin'); el.style.removeProperty('animation'); el.style.removeProperty('transition');
