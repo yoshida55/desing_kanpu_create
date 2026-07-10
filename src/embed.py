@@ -45,7 +45,7 @@ def embed_all(force: bool = False, embedder: Optional[DesignEmbedder] = None) ->
     embedded, failed = 0, 0
     for i, row in enumerate(targets, start=1):
         site_id = row["id"]
-        firstview = config.PROJECT_ROOT / row["firstview_path"]
+        firstview = config.resolve_data_path(row["firstview_path"])
         log.info("[%d/%d] 埋め込み中: %s", i, len(targets), row["url"])
         if not firstview.exists():
             log.error("firstview 画像が見つかりません（撮り直しが必要）: %s", firstview)

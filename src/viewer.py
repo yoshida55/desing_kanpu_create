@@ -113,8 +113,8 @@ def _site_extra(site_id: str) -> dict:
         row = db.get_site(conn, site_id)
     if not row:
         return {"has_video": False, "libs": [], "vibe": "", "swatches": []}
-    has_video = bool(row["animation_video_path"]) and (
-        config.PROJECT_ROOT / row["animation_video_path"]
+    has_video = bool(row["animation_video_path"]) and config.resolve_data_path(
+        row["animation_video_path"]
     ).exists()
     libs = [s.strip() for s in (row["animation_libs"] or "").split(",") if s.strip()]
     return {
@@ -542,8 +542,8 @@ def api_site(site_id: str):
             tokens = _json.loads(row["design_tokens"])
         except Exception:
             tokens = {}
-    has_video = bool(row["animation_video_path"]) and (
-        config.PROJECT_ROOT / row["animation_video_path"]
+    has_video = bool(row["animation_video_path"]) and config.resolve_data_path(
+        row["animation_video_path"]
     ).exists()
     return jsonify(
         {
@@ -657,8 +657,8 @@ def api_read_motion():
         row = db.get_site(conn, site_id)
     if not row:
         return jsonify({"ok": False, "message": "見つかりません"}), 404
-    has_video = bool(row["animation_video_path"]) and (
-        config.PROJECT_ROOT / row["animation_video_path"]
+    has_video = bool(row["animation_video_path"]) and config.resolve_data_path(
+        row["animation_video_path"]
     ).exists()
     if not has_video:
         return jsonify({"ok": False, "message": "先に『🎬動き』で録画してください"}), 400
@@ -844,7 +844,7 @@ def api_sites():
             "site_id": r["id"],
             "img": f"/img/{r['id']}/firstview",
             "has_video": bool(r["animation_video_path"])
-            and (config.PROJECT_ROOT / r["animation_video_path"]).exists(),
+            and config.resolve_data_path(r["animation_video_path"]).exists(),
             "libs": [s.strip() for s in (r["animation_libs"] or "").split(",") if s.strip()],
             "vibe": r["vibe_description"] or "",
             "swatches": _swatches(r["design_tokens"]),
@@ -3242,7 +3242,8 @@ html.__ce_altmode{cursor:text}
     if(!span) return;
     span.classList.remove('fxa_in'); span.style.setProperty('--hlw',0);
     if(typeof ensureFxAssets==='function') ensureFxAssets();
-    if(window.__fxaSweepHl) window.__fxaSweepHl(span); else span.classList.add('fxa_in');
+    if(window.__fxaSweepHl) window.__fxaSweepHl(span);
+    else{ span.style.setProperty('--hlw',100); span.classList.add('fxa_in'); }
   }
   // 帯の太さ（--hlt0/--hlt1・中心は固定でそこから上下に広げ縮め）。delta%pt単位、8〜70%の範囲。
   function fxHlThick(span, delta){
@@ -3262,6 +3263,20 @@ html.__ce_altmode{cursor:text}
     span.style.setProperty('--hldur', d+'s');
     fxHlReplay(span); markDirty();
     if(msg) msg.textContent='マーカーが伸びる速さを変えました（保存で確定）';
+  }
+  // ⏳待機時間（data-cedelay・ミリ秒）。画面に入ってから引き始めるまでの待ち。
+  // 「先に文字の出現アニメ→あとから線」の順番づけ用。0.2秒刻み・0〜5秒。0なら属性ごと外す。
+  function fxHlDelay(span, delta){
+    if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return; }
+    var v=(+span.getAttribute('data-cedelay')||0)+delta;
+    v=Math.max(0,Math.min(5000,Math.round(v/100)*100));
+    if(v>0) span.setAttribute('data-cedelay',v); else span.removeAttribute('data-cedelay');
+    // その場で「待って→引く」を体感できるようにプレビューも待ってから再生（連打時は前の待ちを取り消す）
+    span.classList.remove('fxa_in'); span.style.setProperty('--hlw',0);
+    if(span.__hlDelayT) clearTimeout(span.__hlDelayT);
+    span.__hlDelayT=setTimeout(function(){ fxHlReplay(span); }, v);
+    markDirty();
+    if(msg) msg.textContent='マーカーの待機: '+(v/1000).toFixed(1)+'秒（画面に入ってから待って引く・保存で確定）';
   }
   // 帯の上下位置（--hlt0/--hlt1をまとめてずらす。太さは維持）。delta%pt単位、0〜100%からはみ出ないように収める。
   function fxHlPos(span, delta){
@@ -3330,7 +3345,7 @@ html.__ce_altmode{cursor:text}
     // 🖍 蛍光ペン：選択文字を .fxa_hl で囲む→スクロールで線が伸びる（保存版でも自動再生）。
     function highlight(color){
       hlPushColorHistory(color);
-      if(curHl){ curHl.style.setProperty('--hlc',color); markDirty(); return; }
+      if(curHl){ curHl.style.setProperty('--hlc',color); fxHlReplay(curHl); markDirty(); return; }
       if(!savedRange) return;
       try{
         var span=document.createElement('span'); span.className='fxa_hl';
@@ -3338,7 +3353,7 @@ html.__ce_altmode{cursor:text}
         try{ savedRange.surroundContents(span); }
         catch(_){ var frag=savedRange.extractContents(); span.appendChild(frag); savedRange.insertNode(span); }
         if(typeof ensureFxAssets==='function') ensureFxAssets();  // アニメCSS/監視JSを注入（保存版で動く）
-        if(window.__fxaSweepHl) window.__fxaSweepHl(span); else span.classList.add('fxa_in');  // 今すぐ線を引く（プレビュー）
+        if(window.__fxaSweepHl) window.__fxaSweepHl(span); else{ span.style.setProperty('--hlw',100); span.classList.add('fxa_in'); }  // 今すぐ線を引く（プレビュー）
         curHl=span; markDirty();
         if(msg) msg.textContent='マーカーを引きました（スクロールで線がスーッと伸びます・保存で確定）';
       }catch(err){ if(msg) msg.textContent='この範囲はマーカーを引けませんでした（別々の要素にまたがっています）'; }
@@ -3396,7 +3411,8 @@ html.__ce_altmode{cursor:text}
           +'<span style="opacity:.45">｜</span><span style="opacity:.85">🖍</span><input type="color" id="__ce_selhlc" value="'+hlDefaultColor()+'" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="マーカーの色"><span id="__ce_selhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;max-width:90px">'+hlSwatchesHtml()+'</span><button id="__ce_selhl" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="蛍光ペンを引く">'+(curHl?'消す':'引く')+'</button>'
           +(curHl?'<span style="opacity:.85">太さ</span><button id="__ce_selhlthm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">－</button><button id="__ce_selhlthp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">＋</button>'
             +'<span style="opacity:.85">位置</span><button id="__ce_selhlpu" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="上へ">▲</button><button id="__ce_selhlpd" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="下へ">▼</button>'
-            +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>':'')
+            +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>'
+            +'<span style="opacity:.85">待機</span><button id="__ce_selhlwm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="待ちを短く（-0.2秒）">－</button><button id="__ce_selhlwp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="待ちを長く（+0.2秒）＝文字が動いたあとに引きたい時">＋</button>':'')
           +'<span style="opacity:.45">｜</span><span style="opacity:.85">〰</span><input type="color" id="__ce_seludc" value="#e07856" style="width:32px;height:26px;padding:0;border:none;border-radius:5px;cursor:pointer" title="点線下線の色"><button id="__ce_seludb" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 9px;cursor:pointer" title="点線の下線を引く">'+(curUdot?'消す':'下線')+'</button>'
           +'<button id="__ce_selsave" style="background:#1a7f37;border:none;color:#fff;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:700" title="変更を保存（ヘッダの💾と同じ）">💾 保存</button>'
           +'<button id="__ce_selx" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer">×</button>';
@@ -3414,6 +3430,8 @@ html.__ce_altmode{cursor:text}
         var pud=pop.querySelector('#__ce_selhlpd'); if(pud) pud.addEventListener('click',function(){ fxHlPos(curHl,4); });
         var hdm=pop.querySelector('#__ce_selhldm'); if(hdm) hdm.addEventListener('click',function(){ fxHlSpeed(curHl,0.2); });
         var hdp=pop.querySelector('#__ce_selhldp'); if(hdp) hdp.addEventListener('click',function(){ fxHlSpeed(curHl,-0.2); });
+        var hwm=pop.querySelector('#__ce_selhlwm'); if(hwm) hwm.addEventListener('click',function(){ fxHlDelay(curHl,-200); });
+        var hwp=pop.querySelector('#__ce_selhlwp'); if(hwp) hwp.addEventListener('click',function(){ fxHlDelay(curHl,200); });
         pop.querySelector('#__ce_selcol').addEventListener('input', function(){ paint(this.value); });
         pop.querySelector('#__ce_selhl').addEventListener('click', function(){
           if(curHl){ removeHl(); return; }
@@ -3424,13 +3442,16 @@ html.__ce_altmode{cursor:text}
             this.insertAdjacentHTML('afterend',
               '<span style="opacity:.85">太さ</span><button id="__ce_selhlthm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">－</button><button id="__ce_selhlthp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer">＋</button>'
               +'<span style="opacity:.85">位置</span><button id="__ce_selhlpu" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="上へ">▲</button><button id="__ce_selhlpd" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="下へ">▼</button>'
-              +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>');
+              +'<span style="opacity:.85">速さ</span><button id="__ce_selhldm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="遅く（伸びる時間を長く）">🐢</button><button id="__ce_selhldp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="速く（伸びる時間を短く）">🐇</button>'
+              +'<span style="opacity:.85">待機</span><button id="__ce_selhlwm" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="待ちを短く（-0.2秒）">－</button><button id="__ce_selhlwp" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer" title="待ちを長く（+0.2秒）＝文字が動いたあとに引きたい時">＋</button>');
             pop.querySelector('#__ce_selhlthm').addEventListener('click',function(){ fxHlThick(curHl,-6); });
             pop.querySelector('#__ce_selhlthp').addEventListener('click',function(){ fxHlThick(curHl,6); });
             pop.querySelector('#__ce_selhlpu').addEventListener('click',function(){ fxHlPos(curHl,-4); });
             pop.querySelector('#__ce_selhlpd').addEventListener('click',function(){ fxHlPos(curHl,4); });
             pop.querySelector('#__ce_selhldm').addEventListener('click',function(){ fxHlSpeed(curHl,0.2); });
             pop.querySelector('#__ce_selhldp').addEventListener('click',function(){ fxHlSpeed(curHl,-0.2); });
+            pop.querySelector('#__ce_selhlwm').addEventListener('click',function(){ fxHlDelay(curHl,-200); });
+            pop.querySelector('#__ce_selhlwp').addEventListener('click',function(){ fxHlDelay(curHl,200); });
           }
         });
         pop.querySelector('#__ce_selhlc').addEventListener('input', function(){ if(curHl) highlight(this.value); });
@@ -3800,7 +3821,8 @@ html.__ce_altmode{cursor:text}
     //   幅は--hlw（0〜100の数値）で持ち、rAFで毎フレーム手動更新する方式にした（FX_RUNのsweepHl）。
     // 太さ(--hlt0/--hlt1)と速さ(--hldur)は要素ごとのinlineで上書きできる（fxHlThick/fxHlSpeedが設定）。
     // 太さのデフォルトは文字の下寄り（70%〜92%）＝下線に近い位置に調整済み。
-    +'.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt1,92%),transparent var(--hlt1,92%));background-repeat:no-repeat;background-size:calc(var(--hlw,0) * 1%) 100%;padding:0 .06em;-webkit-box-decoration-break:clone;box-decoration-break:clone}';
+    // ページ固有CSSに background:none!important があっても、ツールで付けたマーカーを確実に表示する。
+    +'html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt1,92%),transparent var(--hlt1,92%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:clone;box-decoration-break:clone}';
   // スクロールで画面に入ったら再生。JS無効なら全部表示（消えない保険）。"__ce"を含めない＝保存で残る。
   // ★時間トリガー(setTimeout)は使わない＝「スクロールで画面に入った時に1回だけ再生」に統一。
   //   IntersectionObserverだけで判定→発火したらunobserve（1回きり）。上部の要素は監視開始時に即発火＝読み込みで再生。
@@ -3808,8 +3830,10 @@ html.__ce_altmode{cursor:text}
     +'if(!d.querySelector(".fxa_pre,.fxa_hl")){return;}h.classList.add("fxa-on");'
     +'[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});'  // 自動修復：出現アニメ要素に焼き込まれた古いtransform(プレビュー残骸)を消す＝過去に固まった分も開くだけで直る
     // 🖍マーカーの帯を毎フレーム手動で描く（--hlw を0→100へ）。連打で二重に走らないよう世代番号(__hlGen)で古いループは自分で止める。
-    +'function sweepHl(el){var dur=parseFloat(el.style.getPropertyValue("--hldur"))||0.45;var gen=(el.__hlGen=(el.__hlGen||0)+1);var t0=null;'
-    +'function step(ts){if(el.__hlGen!==gen)return;if(t0===null)t0=ts;var p=Math.min(1,(ts-t0)/(dur*1000));var e=1+2.70158*Math.pow(p-1,3)+1.70158*Math.pow(p-1,2);'
+    // ★進捗は「実時間」でなく1フレーム最大64msの積算で進める（飛行ランタイムと同じ流儀）。
+    //   実時間だと画像読み込み中のコマ落ちで線がワープし「設定より速く引かれた」ように見える。
+    +'function sweepHl(el){var dur=parseFloat(el.style.getPropertyValue("--hldur"))||0.45;var gen=(el.__hlGen=(el.__hlGen||0)+1);var acc=0,lastTs=null;'
+    +'function step(ts){if(el.__hlGen!==gen)return;if(lastTs!==null)acc+=Math.min(64,ts-lastTs);lastTs=ts;var p=Math.min(1,acc/(dur*1000));var e=1+2.70158*Math.pow(p-1,3)+1.70158*Math.pow(p-1,2);'
     +'el.style.setProperty("--hlw",e*100);if(p<1)requestAnimationFrame(step);else el.classList.add("fxa_in");}'
     +'requestAnimationFrame(step);}'
     +'window.__fxaSweepHl=sweepHl;'
@@ -3823,7 +3847,7 @@ html.__ce_altmode{cursor:text}
     //   （--hldurは正しく効いているのに、画像読み込みでrAFの描画が飛ぶ）。
     //   → 読み込み完了(load)まで待ってから引く。文字自体は見えているので遅らせても安全。
     +'function reveal(el){ function go(){ if(el.classList.contains("fxa_hl")){'
-    +'if(d.readyState==="complete") sweepHl(el); else window.addEventListener("load",function(){ setTimeout(function(){ sweepHl(el); },250); },{once:true});'
+    +'if(d.readyState==="complete") sweepHl(el); else{var done=false,start=function(){if(done)return;done=true;sweepHl(el);};window.addEventListener("load",function(){setTimeout(start,250);},{once:true});setTimeout(start,700);}'
     +'} else el.classList.add("fxa_in"); }'
     +'var cd=el.getAttribute("data-cedelay"); var gd=cd!=null?+cd:groupDelay(el); if(gd>0) setTimeout(go,gd); else go(); }'
     +'if(!("IntersectionObserver" in window)){all().forEach(reveal);return;}'
@@ -3933,7 +3957,7 @@ html.__ce_altmode{cursor:text}
     if(!el) return;
     fxUnwrap(el);  // 自分のCSSアニメ用に包んだラッパーがあれば解除
     // 🕊 飛行ルートも外す（属性を消すとランタイムのループは次フレームで自動停止する）
-    if(el.getAttribute('data-cefly')!=null){ el.removeAttribute('data-cefly'); el.ceflyGen=(el.ceflyGen||0)+1; }
+    if(el.getAttribute('data-fxa-fly')!=null||el.getAttribute('data-cefly')!=null){ el.removeAttribute('data-fxa-fly'); el.removeAttribute('data-cefly'); el.ceflyGen=(el.ceflyGen||0)+1; }
     stopAnim(el); clearPreviewStyle(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
     markDirty();
@@ -3942,11 +3966,13 @@ html.__ce_altmode{cursor:text}
   // ===== 🕊 空飛ぶルート（線を手描き→整えて飛ばす・AIなし・無料） =====
   // 使い方：右クリック→「🕊 線を描いて飛ばす」→キャラの上から線を描く→整え方を選ぶ→
   //         ○アンカーをドラッグで微修正（右クリックで削除）→▶試す→✅付ける→💾保存。
-  // 保存はfxaと同じ焼き込み方式：要素に data-cefly(JSONのルート) を刻み、ランタイム(#cefly-run)をHTMLへ注入。
+  // 保存はfxaと同じ焼き込み方式：要素に data-fxa-fly(JSONのルート) を刻み、ランタイム(#cefly-run)をHTMLへ注入。
+  // data-ce* を削除する生成ページ固有の後処理と衝突しない名前にする。旧 data-cefly はランタイムで自動移行。
   // 座標は「要素の中心からの相対オフセット(px)」で持つ＝画面幅が変わってもルートの形は保たれる。
   // 移動は translate 個別プロパティ（ドラッグ移動と同じ流儀）＝出現アニメのtransformと奪い合わない。
   // ★ランタイム文字列に「アンダースコア2つ+ce」を含めないこと（cleanHtmlがその文字列入りscriptを保存時に消すため）。
   var FLY_RUN='(function(){if(window.ceflyOn)return;window.ceflyOn=true;var d=document;'
+    +'[].slice.call(d.querySelectorAll("[data-cefly]")).forEach(function(el){if(!el.getAttribute("data-fxa-fly"))el.setAttribute("data-fxa-fly",el.getAttribute("data-cefly"));el.removeAttribute("data-cefly");});'
     +'function dense(p,m){var out=[],i,j;'
     +'if(m==="s"||p.length<3){for(i=0;i<p.length;i++)out.push([p[i][0],p[i][1]]);}'
     +'else{var P=[p[0]].concat(p,[p[p.length-1]]);'
@@ -3958,12 +3984,12 @@ html.__ce_altmode{cursor:text}
     +'return {p:out,L:L,total:L[L.length-1]||1};}'
     +'function at(pa,dist){var L=pa.L,p=pa.p,i=1;while(i<L.length-1&&L[i]<dist)i++;var seg=L[i]-L[i-1]||1,f=(dist-L[i-1])/seg;'
     +'return {x:p[i-1][0]+(p[i][0]-p[i-1][0])*f,y:p[i-1][1]+(p[i][1]-p[i-1][1])*f,dx:p[i][0]-p[i-1][0],dy:p[i][1]-p[i-1][1]};}'
-    +'function fly(el){var cfg;try{cfg=JSON.parse(el.getAttribute("data-cefly"));}catch(e){return;}'
+    +'function fly(el){var cfg;try{cfg=JSON.parse(el.getAttribute("data-fxa-fly"));}catch(e){return;}'
     +'if(!cfg||!cfg.p||cfg.p.length<2)return;'
     +'var bx=+el.getAttribute("data-cetx")||0,by=+el.getAttribute("data-cety")||0,bro=+el.getAttribute("data-cero")||0;'
     +'var bsx=+el.getAttribute("data-cesx")||1,bsy=+el.getAttribute("data-cesy")||1;'
     +'var pa=dense(cfg.p,cfg.m),dur=cfg.d||4000,t0=null,gen=(el.ceflyGen=(el.ceflyGen||0)+1),cur=0,prevFl=false,lastTs=null;'
-    +'function step(ts){if(el.ceflyGen!==gen)return;if(el.getAttribute("data-cefly")==null)return;'
+    +'function step(ts){if(el.ceflyGen!==gen)return;if(el.getAttribute("data-fxa-fly")==null)return;'
     +'if(t0===null)t0=ts;var dt=(lastTs==null)?16:Math.min(64,ts-lastTs);lastTs=ts;'
     +'var p=(ts-t0)/dur,back=false;'
     +'if(cfg.l){p=p%2;if(p>1){p=2-p;back=true;}}else if(p>1)p=1;'
@@ -3985,7 +4011,7 @@ html.__ce_altmode{cursor:text}
     +'function start(el){var cd=el.getAttribute("data-cedelay");if(cd!=null&&+cd>0)setTimeout(function(){fly(el);},+cd);else fly(el);}'
     +'var io=("IntersectionObserver" in window)?new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){io.unobserve(en.target);start(en.target);}});},{threshold:0}):null;'
     +'window.ceflyArm=function(el){if(el.ceflyObs){start(el);return;}el.ceflyObs=1;if(io)io.observe(el);else start(el);};'
-    +'function init(){[].slice.call(d.querySelectorAll("[data-cefly]")).forEach(window.ceflyArm);}'
+    +'function init(){[].slice.call(d.querySelectorAll("[data-fxa-fly]")).forEach(window.ceflyArm);}'
     +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",init);else init();'
     +'})();';
   // ランタイム注入：既にあれば中身だけ最新版に差し替え（再実行はceflyOnガードで1回だけ＝二重再生しない）
@@ -4206,7 +4232,8 @@ html.__ce_altmode{cursor:text}
     flyStopPrev();
     var el=_fly.el, cfg=flyCfg();
     if(cfg.p.length<2){ if(msg)msg.textContent='⚠ ルートが短すぎます（もう少し長く描いてください）'; return; }
-    el.setAttribute('data-cefly', JSON.stringify(cfg));
+    el.setAttribute('data-fxa-fly', JSON.stringify(cfg));
+    el.removeAttribute('data-cefly');
     ensureFlyRun();
     markDirty(); flyEnd();
     if(window.ceflyArm) window.ceflyArm(el);  // その場で1回飛んで見せる（保存後はスクロールで画面に入った時に再生）
@@ -4304,7 +4331,7 @@ html.__ce_altmode{cursor:text}
   }
   // 既に飛行が焼き込まれたカンプを開いたら、古いランタイムを外して最新版を強制再実行
   // （二重再生はceflyGen世代番号で自動解決＝後から動いた最新版だけが生き残る）
-  if(document.querySelector('[data-cefly]')){
+  if(document.querySelector('[data-fxa-fly],[data-cefly]')){
     var _ofr=document.getElementById('cefly-run');
     if(_ofr){ _ofr.remove(); window.ceflyOn=false; }
     ensureFlyRun();
@@ -4506,7 +4533,9 @@ html.__ce_altmode{cursor:text}
     [].slice.call(doc.querySelectorAll('.fxa_hl')).forEach(function(n){ n.style.setProperty('--hlw',0); });
     // 🕊 飛行アニメ：飛んでる途中のtranslate/rotateが保存に焼き付かないよう、確定位置（data-cetx等）へ戻す。
     // ★これを忘れるとマーカーの--hlwと同じ事故（飛び終わった位置で固まった状態が保存される）が起きる。
-    [].slice.call(doc.querySelectorAll('[data-cefly]')).forEach(function(n){
+    [].slice.call(doc.querySelectorAll('[data-fxa-fly],[data-cefly]')).forEach(function(n){
+      if(n.getAttribute('data-cefly')!=null&&n.getAttribute('data-fxa-fly')==null) n.setAttribute('data-fxa-fly',n.getAttribute('data-cefly'));
+      n.removeAttribute('data-cefly');
       if(n.getAttribute('data-cetx')!=null||n.getAttribute('data-cety')!=null){ n.style.setProperty('translate',((+n.getAttribute('data-cetx'))||0)+'px '+((+n.getAttribute('data-cety'))||0)+'px','important'); }
       else{ n.style.removeProperty('translate'); }
       if(n.getAttribute('data-cero')!=null){ n.style.setProperty('rotate',((+n.getAttribute('data-cero'))||0)+'deg','important'); }
@@ -4747,7 +4776,7 @@ html.__ce_altmode{cursor:text}
       +'<div class="__ce_size"><button data-mw="80">＋ 横に広く</button><button data-mw="-80">－ 横を狭く</button></div>'
       +'<button class="go2" id="__ce_cmbr" style="background:#0b6bcb;margin-bottom:8px">✏ 文字を編集（改行・大きさ・フォント・色／AIなし）</button>'
       +'<button class="go2" id="__ce_cmhl" style="background:#eab308;color:#1d1d1f;margin-bottom:4px">🖍 この文字にマーカー（スクロールで線が伸びる）</button>'
-      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="'+hlDefaultColor()+'" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><span id="__ce_cmhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle;margin-right:4px">'+hlSwatchesHtml()+'</span> 太さ<button id="__ce_cmhlthm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">－</button><button id="__ce_cmhlthp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">＋</button> 位置<button id="__ce_cmhlpu" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="上へ">▲</button><button id="__ce_cmhlpd" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="下へ">▼</button> 速さ<button id="__ce_cmhldm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="遅く">🐢</button><button id="__ce_cmhldp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="速く">🐇</button><br>／ 文字を選んでから引くと「一部だけ」引ける／<a href="#" id="__ce_cmhlrm" style="color:#0b6bcb">🚫 マーカーを消す</a></div>'
+      +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="'+hlDefaultColor()+'" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><span id="__ce_cmhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle;margin-right:4px">'+hlSwatchesHtml()+'</span> 太さ<button id="__ce_cmhlthm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">－</button><button id="__ce_cmhlthp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">＋</button> 位置<button id="__ce_cmhlpu" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="上へ">▲</button><button id="__ce_cmhlpd" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="下へ">▼</button> 速さ<button id="__ce_cmhldm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="遅く">🐢</button><button id="__ce_cmhldp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="速く">🐇</button> 待機<button id="__ce_cmhlwm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="待ちを短く（-0.2秒）">－</button><button id="__ce_cmhlwp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="待ちを長く（+0.2秒）＝文字が動いたあとに引きたい時">＋</button><br>／ 文字を選んでから引くと「一部だけ」引ける／<a href="#" id="__ce_cmhlrm" style="color:#0b6bcb">🚫 マーカーを消す</a></div>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
       +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
       +'<button class="go2" id="__ce_cmfly" style="background:#0284c7;margin-bottom:6px">🕊 線を描いて飛ばす（ルートを手描き・AIなし）</button>'
@@ -4882,14 +4911,14 @@ html.__ce_altmode{cursor:text}
       hlPushColorHistory(color);
       // 既に丸ごとマーカー済みなら色だけ更新
       if(el.children.length===1 && el.firstChild && el.firstChild.classList && el.firstChild.classList.contains('fxa_hl')){
-        el.firstChild.style.setProperty('--hlc',color); markDirty();
+        el.firstChild.style.setProperty('--hlc',color); fxHlReplay(el.firstChild); markDirty();
         if(msg) msg.textContent='マーカーの色を変えました（保存で確定）'; return;
       }
       var span=document.createElement('span'); span.className='fxa_hl'; span.style.setProperty('--hlc',color);
       while(el.firstChild){ span.appendChild(el.firstChild); }
       el.appendChild(span);
       if(typeof ensureFxAssets==='function') ensureFxAssets();  // アニメCSS/監視JSを注入
-      if(window.__fxaSweepHl) window.__fxaSweepHl(span); else span.classList.add('fxa_in');  // 今すぐ線を引く（プレビュー）
+      if(window.__fxaSweepHl) window.__fxaSweepHl(span); else{ span.style.setProperty('--hlw',100); span.classList.add('fxa_in'); }  // 今すぐ線を引く（プレビュー）
       markDirty();
       if(msg) msg.textContent='マーカーを引きました（スクロールで線が伸びます・保存で確定／⟲戻すで取り消し）';
     }
@@ -4905,6 +4934,8 @@ html.__ce_altmode{cursor:text}
     var hlPd=m.querySelector('#__ce_cmhlpd'); if(hlPd) hlPd.addEventListener('click',function(){ fxHlPos(_cmHlSpan(),4); });
     var hlDm=m.querySelector('#__ce_cmhldm'); if(hlDm) hlDm.addEventListener('click',function(){ fxHlSpeed(_cmHlSpan(),0.2); });
     var hlDp=m.querySelector('#__ce_cmhldp'); if(hlDp) hlDp.addEventListener('click',function(){ fxHlSpeed(_cmHlSpan(),-0.2); });
+    var hlWm=m.querySelector('#__ce_cmhlwm'); if(hlWm) hlWm.addEventListener('click',function(){ fxHlDelay(_cmHlSpan(),-200); });
+    var hlWp=m.querySelector('#__ce_cmhlwp'); if(hlWp) hlWp.addEventListener('click',function(){ fxHlDelay(_cmHlSpan(),200); });
     var hlRm=m.querySelector('#__ce_cmhlrm');
     if(hlRm) hlRm.addEventListener('click',function(ev){
       ev.preventDefault();
@@ -5092,7 +5123,7 @@ def img(site_id: str, which: str):
         row = db.get_site(conn, site_id)
     if not row or not row[column]:
         abort(404)
-    path = config.PROJECT_ROOT / row[column]
+    path = config.resolve_data_path(row[column])
     if not path.exists():
         abort(404)
     return send_file(path)
@@ -5105,7 +5136,7 @@ def video(site_id: str):
         row = db.get_site(conn, site_id)
     if not row or not row["animation_video_path"]:
         abort(404)
-    path = config.PROJECT_ROOT / row["animation_video_path"]
+    path = config.resolve_data_path(row["animation_video_path"])
     if not path.exists():
         abort(404)
     return send_file(path, mimetype="video/webm")

@@ -201,7 +201,7 @@ def describe_motion(site_id: str) -> dict:
     vpath = row["animation_video_path"]
     if not vpath:
         raise RuntimeError("録画がありません。先にカード右下の『🎬動き』で録画してください。")
-    video = config.PROJECT_ROOT / vpath
+    video = config.resolve_data_path(vpath)
     if not video.exists():
         raise RuntimeError("録画ファイルが見つかりません（録り直してください）。")
 

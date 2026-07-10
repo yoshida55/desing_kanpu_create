@@ -127,7 +127,7 @@ def describe_one(
         log.warning("見つかりません: %s", site_id)
         return None
 
-    firstview = config.PROJECT_ROOT / row["firstview_path"]
+    firstview = config.resolve_data_path(row["firstview_path"])
     if not firstview.exists():
         log.error("firstview がありません: %s", firstview)
         return None

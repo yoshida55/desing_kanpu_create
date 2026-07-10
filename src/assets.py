@@ -94,7 +94,7 @@ def list_assets(site_id: str) -> list[str]:
         f for f in d.iterdir()
         if f.is_file() and f.suffix.lstrip(".").lower() in _IMG_EXT
     )
-    return [str(f.relative_to(config.PROJECT_ROOT)) for f in files]
+    return [config.data_rel_path(f) for f in files]
 
 
 def load_manifest(site_id: str) -> dict[str, str]:

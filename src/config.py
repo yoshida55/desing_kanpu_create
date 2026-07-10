@@ -40,6 +40,35 @@ RESULTS_HTML_PATH = PROJECT_ROOT / "results.html"
 TEMPLATE_DIR = PROJECT_ROOT / "templates"
 
 
+# ── DBに保存するパスの読み書き（LIBRARY_DIR対応） ──────────────
+# DBは家↔会社で共有するため絶対パスは書けない。従来どおり「data\screenshots\…」形式で
+# 記録し、実ファイルが LIBRARY_DIR（ナレッジフォルダ等）へ移動していても読み替えて解決する。
+
+
+def data_rel_path(path) -> str:
+    """DBへ書き込む相対パスを作る。LIBRARY_DIR配下のファイルも従来と同じ
+    「data\\…」形式にする（読む側の resolve_data_path が実際の場所へ読み替える）。"""
+    p = Path(path)
+    try:
+        return str(Path("data") / p.relative_to(LIBRARY_DIR))
+    except ValueError:
+        return str(p.relative_to(PROJECT_ROOT))
+
+
+def resolve_data_path(rel) -> Path:
+    """DBに保存された相対パス（例 data\\screenshots\\x.png）を実ファイルの場所へ解決する。
+    プロジェクト内に無ければ、先頭の data\\ を LIBRARY_DIR に読み替えて探す。"""
+    candidate = PROJECT_ROOT / rel
+    if LIBRARY_DIR == DATA_DIR or candidate.exists():
+        return candidate
+    parts = Path(rel).parts
+    if parts and parts[0] == "data":
+        moved = LIBRARY_DIR.joinpath(*parts[1:])
+        if moved.exists():
+            return moved
+    return candidate
+
+
 @dataclass(frozen=True)
 class CaptureConfig:
     """撮影条件。仕様 4.1 に従い固定する。"""

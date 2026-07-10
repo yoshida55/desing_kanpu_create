@@ -540,7 +540,7 @@ def generate_camp(
         if is_layout_source:
             # 全体スクショ（縦長）を渡してレイアウトの骨格を踏襲させる
             img_block = _ref_image_block(
-                config.PROJECT_ROOT / row["fullpage_path"], max_w=820, max_h=4200
+                config.resolve_data_path(row["fullpage_path"]), max_w=820, max_h=4200
             )
             head = (
                 f"# 参考{i}【★レイアウトの手本：この全体構成を忠実に踏襲する】: {row['url']}\n"
@@ -549,7 +549,7 @@ def generate_camp(
                 f"雰囲気: {vibe_txt}\nアニメのライブラリ: {libs}{token_txt}{motion_txt}"
             )
         else:
-            img_block = _ref_image_block(config.PROJECT_ROOT / row["firstview_path"])
+            img_block = _ref_image_block(config.resolve_data_path(row["firstview_path"]))
             head = f"# 参考{i}（雰囲気の補助）: {row['url']}\n雰囲気: {vibe_txt}{token_txt}{motion_txt}"
 
         content.append({"type": "text", "text": head})
@@ -1270,7 +1270,7 @@ def improve_all(filename: str, limit: int = 0, targets: list[int] | None = None,
                         json.loads(ref_row["design_tokens"]))
                 except Exception:  # noqa: BLE001
                     token_txt = ""
-            ref_img = _ref_image_block(config.PROJECT_ROOT / ref_row["firstview_path"])
+            ref_img = _ref_image_block(config.resolve_data_path(ref_row["firstview_path"]))
             if ref_img:
                 ref_blocks = [
                     {"type": "text", "text": (

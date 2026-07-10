@@ -133,7 +133,7 @@ def list_lottie(site_id: str) -> list[str]:
     if not d.exists():
         return []
     files = sorted(f for f in d.iterdir() if f.is_file() and f.suffix.lower() == ".json")
-    return [str(f.relative_to(config.PROJECT_ROOT)) for f in files]
+    return [config.data_rel_path(f) for f in files]
 
 
 def extract_animations(url: str) -> dict:
@@ -241,7 +241,7 @@ def extract_animations(url: str) -> dict:
                 seen_hash.add(h)
                 idx = len(lottie_saved)
                 (out_dir / f"lottie_{idx:02d}.json").write_bytes(data)
-                lottie_saved.append(str((out_dir / f"lottie_{idx:02d}.json").relative_to(config.PROJECT_ROOT)))
+                lottie_saved.append(config.data_rel_path(out_dir / f"lottie_{idx:02d}.json"))
             except Exception:  # noqa: BLE001
                 continue
         _lap("Lottie取得(合計)", t)

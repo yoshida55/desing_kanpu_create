@@ -624,6 +624,15 @@ FAQ・Voice・末尾の再CTA まで**10セクションの骨格が一致**。�
      サイト登録数が増えてきて重く感じたら、この方式をやめて外部ストレージ同期に切り替える手もある
      （そのときは `DESIGN_STOCK_LIBRARY_DIR` の値を変えるだけで移行できる）。
 
+- ✅ **移動後にデザイン一覧の画像が404になるバグを修正済み（2026-07-10・自宅PC移行完了）**：
+  DBのパスは共有のため相対（`data\screenshots\…`）のまま。旧コードはそれを
+  `PROJECT_ROOT` 直下でしか探さず、移動後は全スクショ404＋新規登録も
+  `relative_to(PROJECT_ROOT)` の ValueError でクラッシュする状態だった。
+  → `config.resolve_data_path()`（読み：先頭の `data\` を LIBRARY_DIR に読み替えて探す）と
+  `config.data_rel_path()`（書き：LIBRARY_DIR配下でも従来の `data\…` 形式で記録）を新設し、
+  viewer/camp/embed/vibe/motion/ingest/assets/anim の読み書き全箇所を差し替えた。
+  DBの形式は変わらないので会社PCでもそのまま動く。
+
 ## 10. 作業するときの心得（このプロジェクト固有）
 
 - まず **本ファイル → 仕様書** の順で現在地を把握する。

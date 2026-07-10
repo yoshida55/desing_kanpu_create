@@ -257,8 +257,8 @@ def _attempt_capture(
             "id": url_to_id(norm_url),
             "url": norm_url,
             "captured_at": _now_iso(),
-            "firstview_path": str(firstview_path.relative_to(config.PROJECT_ROOT)),
-            "fullpage_path": str(fullpage_path.relative_to(config.PROJECT_ROOT)),
+            "firstview_path": config.data_rel_path(firstview_path),
+            "fullpage_path": config.data_rel_path(fullpage_path),
             "viewport_w": cfg.viewport_w,
             "viewport_h": cfg.viewport_h,
             "device_scale_factor": cfg.device_scale_factor,
@@ -400,7 +400,7 @@ def capture_animation(url: str) -> Optional[str]:
     # Playwrightが付けたランダム名 → 分かりやすい名前にリネーム
     out_path.unlink(missing_ok=True)
     Path(raw_video_path).replace(out_path)
-    rel = str(out_path.relative_to(config.PROJECT_ROOT))
+    rel = config.data_rel_path(out_path)
 
     with db.connect() as conn:
         db.update_animation(conn, site_id, rel, status="video")
