@@ -3847,11 +3847,39 @@ html.__ce_altmode{cursor:text}
   // （中の要素は自分のアニメ・ホバーをそのまま保てる）。
   function fxUnwrap(el){
     var w=el&&el.parentElement;
-    if(w&&w.classList&&w.classList.contains('fxa_wrap')){ w.parentNode.insertBefore(el,w); w.remove(); }
+    if(w&&w.classList&&w.classList.contains('fxa_wrap')){
+      // position:absoluteだった要素を包んだ時は、包む際にel側へ強制したstatic化を元に戻す
+      // （戻さないと、外した後も浮かぶイラスト等が本来の絶対配置に戻らず表示位置が壊れる）。
+      if(w.dataset.fxpw==='1'){
+        ['position','left','top','right','bottom','width','height','z-index'].forEach(function(p){ el.style.removeProperty(p); });
+      }
+      w.parentNode.insertBefore(el,w); w.remove();
+    }
   }
   function fxWrap(el){
     var w=document.createElement('span'); w.className='fxa_wrap';
-    var disp=''; try{ disp=getComputedStyle(el).display; }catch(_){}
+    var cs=null; try{ cs=getComputedStyle(el); }catch(_){}
+    // position:absolute/fixedの装飾要素（浮かぶイラスト等）をそのまま素のspanで包むと、
+    // 中身は元通り絶対配置で浮いたままラッパー自身は中身を持たない0サイズの箱になる。
+    // →その0サイズの箱がクリック判定を奪ってしまい、以後その場所を右クリックしても
+    //   別の（大きな）親要素が選ばれてしまう＝「付けたはずのアニメが触れなくなる」不具合の元。
+    // 対策：ラッパー側に絶対配置と実寸を持たせ、中身はラッパーいっぱいのstaticに変える。
+    if(cs && (cs.position==='absolute' || cs.position==='fixed') && el.parentNode===el.offsetParent){
+      var ow=el.offsetWidth, oh=el.offsetHeight, ol=el.offsetLeft, ot=el.offsetTop, zi=cs.zIndex;
+      w.dataset.fxpw='1';
+      w.style.position=cs.position;
+      w.style.left=ol+'px'; w.style.top=ot+'px';
+      w.style.width=ow+'px'; w.style.height=oh+'px';
+      if(zi && zi!=='auto') w.style.zIndex=zi;
+      el.parentNode.insertBefore(w,el); w.appendChild(el);
+      el.style.setProperty('position','static','important');
+      el.style.setProperty('left','auto','important'); el.style.setProperty('top','auto','important');
+      el.style.setProperty('right','auto','important'); el.style.setProperty('bottom','auto','important');
+      el.style.setProperty('width','100%','important'); el.style.setProperty('height','100%','important');
+      el.style.setProperty('z-index','auto','important');
+      return w;
+    }
+    var disp=''; try{ disp=cs?cs.display:''; }catch(_){}
     w.style.display=(disp&&disp.indexOf('inline')===0)?'inline-block':'block';
     el.parentNode.insertBefore(w,el); w.appendChild(el); return w;
   }
@@ -3904,10 +3932,382 @@ html.__ce_altmode{cursor:text}
   function removeBake(el){
     if(!el) return;
     fxUnwrap(el);  // 自分のCSSアニメ用に包んだラッパーがあれば解除
+    // 🕊 飛行ルートも外す（属性を消すとランタイムのループは次フレームで自動停止する）
+    if(el.getAttribute('data-cefly')!=null){ el.removeAttribute('data-cefly'); el.ceflyGen=(el.ceflyGen||0)+1; }
     stopAnim(el); clearPreviewStyle(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
     markDirty();
     if(msg) msg.textContent='この要素の動きを消しました（保存で確定）';
+  }
+  // ===== 🕊 空飛ぶルート（線を手描き→整えて飛ばす・AIなし・無料） =====
+  // 使い方：右クリック→「🕊 線を描いて飛ばす」→キャラの上から線を描く→整え方を選ぶ→
+  //         ○アンカーをドラッグで微修正（右クリックで削除）→▶試す→✅付ける→💾保存。
+  // 保存はfxaと同じ焼き込み方式：要素に data-cefly(JSONのルート) を刻み、ランタイム(#cefly-run)をHTMLへ注入。
+  // 座標は「要素の中心からの相対オフセット(px)」で持つ＝画面幅が変わってもルートの形は保たれる。
+  // 移動は translate 個別プロパティ（ドラッグ移動と同じ流儀）＝出現アニメのtransformと奪い合わない。
+  // ★ランタイム文字列に「アンダースコア2つ+ce」を含めないこと（cleanHtmlがその文字列入りscriptを保存時に消すため）。
+  var FLY_RUN='(function(){if(window.ceflyOn)return;window.ceflyOn=true;var d=document;'
+    +'function dense(p,m){var out=[],i,j;'
+    +'if(m==="s"||p.length<3){for(i=0;i<p.length;i++)out.push([p[i][0],p[i][1]]);}'
+    +'else{var P=[p[0]].concat(p,[p[p.length-1]]);'
+    +'for(i=1;i<P.length-2;i++){for(j=0;j<32;j++){var t=j/32,t2=t*t,t3=t2*t;'
+    +'out.push([0.5*((2*P[i][0])+((P[i+1][0]-P[i-1][0])*t)+((2*P[i-1][0]-5*P[i][0]+4*P[i+1][0]-P[i+2][0])*t2)+((3*P[i][0]-P[i-1][0]-3*P[i+1][0]+P[i+2][0])*t3)),'
+    +'0.5*((2*P[i][1])+((P[i+1][1]-P[i-1][1])*t)+((2*P[i-1][1]-5*P[i][1]+4*P[i+1][1]-P[i+2][1])*t2)+((3*P[i][1]-P[i-1][1]-3*P[i+1][1]+P[i+2][1])*t3))]);}}'
+    +'out.push([p[p.length-1][0],p[p.length-1][1]]);}'
+    +'var L=[0];for(i=1;i<out.length;i++){var dx=out[i][0]-out[i-1][0],dy=out[i][1]-out[i-1][1];L.push(L[i-1]+Math.sqrt(dx*dx+dy*dy));}'
+    +'return {p:out,L:L,total:L[L.length-1]||1};}'
+    +'function at(pa,dist){var L=pa.L,p=pa.p,i=1;while(i<L.length-1&&L[i]<dist)i++;var seg=L[i]-L[i-1]||1,f=(dist-L[i-1])/seg;'
+    +'return {x:p[i-1][0]+(p[i][0]-p[i-1][0])*f,y:p[i-1][1]+(p[i][1]-p[i-1][1])*f,dx:p[i][0]-p[i-1][0],dy:p[i][1]-p[i-1][1]};}'
+    +'function fly(el){var cfg;try{cfg=JSON.parse(el.getAttribute("data-cefly"));}catch(e){return;}'
+    +'if(!cfg||!cfg.p||cfg.p.length<2)return;'
+    +'var bx=+el.getAttribute("data-cetx")||0,by=+el.getAttribute("data-cety")||0,bro=+el.getAttribute("data-cero")||0;'
+    +'var bsx=+el.getAttribute("data-cesx")||1,bsy=+el.getAttribute("data-cesy")||1;'
+    +'var pa=dense(cfg.p,cfg.m),dur=cfg.d||4000,t0=null,gen=(el.ceflyGen=(el.ceflyGen||0)+1),cur=0,prevFl=false,lastTs=null;'
+    +'function step(ts){if(el.ceflyGen!==gen)return;if(el.getAttribute("data-cefly")==null)return;'
+    +'if(t0===null)t0=ts;var dt=(lastTs==null)?16:Math.min(64,ts-lastTs);lastTs=ts;'
+    +'var p=(ts-t0)/dur,back=false;'
+    +'if(cfg.l){p=p%2;if(p>1){p=2-p;back=true;}}else if(p>1)p=1;'
+    +'var e=0.5-0.5*Math.cos(Math.PI*p);var d1=e*pa.total,pt=at(pa,d1);'
+    +'el.style.setProperty("translate",(bx+pt.x).toFixed(1)+"px "+(by+pt.y).toFixed(1)+"px","important");'
+    +'if(cfg.r){var aF=at(pa,Math.min(pa.total,d1+8)),aB=at(pa,Math.max(0,d1-8));'
+    +'var vx=back?(aB.x-aF.x):(aF.x-aB.x),vy=back?(aB.y-aF.y):(aF.y-aB.y),th=Math.atan2(vy,vx)*180/Math.PI;'
+    +'var st=(cfg.t==null?100:cfg.t)/100,tgt,fl=false;'
+    +'if(cfg.f){fl=Math.abs(th)>90;tgt=fl?(180-th):th;if(tgt>180)tgt-=360;}'
+    +'else{tgt=Math.atan2(vy,Math.abs(vx))*180/Math.PI;}'
+    +'tgt*=st;if(tgt>75)tgt=75;if(tgt<-75)tgt=-75;'
+    +'if(!cfg.l&&p>0.85)tgt*=(1-p)/0.15;'
+    +'if(fl!==prevFl){cur=tgt;}else{cur+=(tgt-cur)*(1-Math.exp(-dt/160));}'
+    +'prevFl=fl;'
+    +'if(cfg.f)el.style.setProperty("scale",(fl?-bsx:bsx)+" "+bsy,"important");'
+    +'el.style.setProperty("rotate",(bro+(bsx<0?-cur:cur)).toFixed(1)+"deg","important");}'
+    +'if(cfg.l||p<1)requestAnimationFrame(step);}'
+    +'requestAnimationFrame(step);}'
+    +'function start(el){var cd=el.getAttribute("data-cedelay");if(cd!=null&&+cd>0)setTimeout(function(){fly(el);},+cd);else fly(el);}'
+    +'var io=("IntersectionObserver" in window)?new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){io.unobserve(en.target);start(en.target);}});},{threshold:0}):null;'
+    +'window.ceflyArm=function(el){if(el.ceflyObs){start(el);return;}el.ceflyObs=1;if(io)io.observe(el);else start(el);};'
+    +'function init(){[].slice.call(d.querySelectorAll("[data-cefly]")).forEach(window.ceflyArm);}'
+    +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",init);else init();'
+    +'})();';
+  // ランタイム注入：既にあれば中身だけ最新版に差し替え（再実行はceflyOnガードで1回だけ＝二重再生しない）
+  function ensureFlyRun(){
+    var old=document.getElementById('cefly-run');
+    if(old){ if(old.textContent!==FLY_RUN) old.textContent=FLY_RUN; return; }
+    var sc=document.createElement('script'); sc.id='cefly-run'; sc.textContent=FLY_RUN;
+    (document.body||document.documentElement).appendChild(sc);
+  }
+  // 手描き線の間引き（Ramer-Douglas-Peucker）：epsが大きいほどアンカーが減って単純な形になる
+  function flyRdp(pts,eps){
+    if(pts.length<3) return pts.slice();
+    var out=[pts[0]];
+    (function seg(a,b){
+      var ax=pts[a][0],ay=pts[a][1],bx=pts[b][0],by=pts[b][1];
+      var dx=bx-ax,dy=by-ay,len=Math.sqrt(dx*dx+dy*dy)||1,maxD=0,idx=-1;
+      for(var i=a+1;i<b;i++){
+        var dd=Math.abs((pts[i][0]-ax)*dy-(pts[i][1]-ay)*dx)/len;
+        if(dd>maxD){maxD=dd;idx=i;}
+      }
+      if(maxD>eps){ seg(a,idx); seg(idx,b); } else { out.push(pts[b]); }
+    })(0,pts.length-1);
+    return out;
+  }
+  // アンカー列→なめらかな線（ランタイムと同じCatmull-Rom・16分割）。m==='s'なら直線つなぎ
+  function flyDense(p,m){
+    var out=[],i,j;
+    if(m==='s'||p.length<3){ for(i=0;i<p.length;i++) out.push([p[i][0],p[i][1]]); }
+    else{
+      var P=[p[0]].concat(p,[p[p.length-1]]);
+      for(i=1;i<P.length-2;i++){ for(j=0;j<32;j++){ var t=j/32,t2=t*t,t3=t2*t;
+        out.push([0.5*((2*P[i][0])+((P[i+1][0]-P[i-1][0])*t)+((2*P[i-1][0]-5*P[i][0]+4*P[i+1][0]-P[i+2][0])*t2)+((3*P[i][0]-P[i-1][0]-3*P[i+1][0]+P[i+2][0])*t3)),
+                  0.5*((2*P[i][1])+((P[i+1][1]-P[i-1][1])*t)+((2*P[i-1][1]-5*P[i][1]+4*P[i+1][1]-P[i+2][1])*t2)+((3*P[i][1]-P[i-1][1]-3*P[i+1][1]+P[i+2][1])*t3))]);
+      }}
+      out.push([p[p.length-1][0],p[p.length-1][1]]);
+    }
+    var L=[0];
+    for(i=1;i<out.length;i++){ var dx=out[i][0]-out[i-1][0],dy=out[i][1]-out[i-1][1]; L.push(L[i-1]+Math.sqrt(dx*dx+dy*dy)); }
+    return {p:out,L:L,total:L[L.length-1]||1};
+  }
+  function flyAt(pa,dist){
+    var L=pa.L,p=pa.p,i=1;
+    while(i<L.length-1&&L[i]<dist)i++;
+    var seg=L[i]-L[i-1]||1,f=(dist-L[i-1])/seg;
+    return {x:p[i-1][0]+(p[i][0]-p[i-1][0])*f, y:p[i-1][1]+(p[i][1]-p[i-1][1])*f, dx:p[i][0]-p[i-1][0], dy:p[i][1]-p[i-1][1]};
+  }
+  var _fly=null;  // 描画モードの状態（el/raw=手描き点列/anchors=整えた後の点列・すべてページ座標）
+  function flyRedraw(){
+    if(!_fly||!_fly.cv) return;
+    var cv=_fly.cv, g=cv.getContext('2d');
+    cv.width=window.innerWidth; cv.height=window.innerHeight;  // サイズ設定＝クリアも兼ねる
+    var sx=window.scrollX||0, sy=window.scrollY||0;
+    try{ var r=_fly.el.getBoundingClientRect();
+      g.strokeStyle='rgba(2,132,199,.85)'; g.setLineDash([6,4]); g.lineWidth=2;
+      g.strokeRect(r.left,r.top,r.width,r.height); g.setLineDash([]);
+    }catch(_){}
+    if(_fly.drawing&&_fly.raw.length>1){
+      g.strokeStyle='rgba(100,116,139,.8)'; g.lineWidth=2; g.beginPath();
+      g.moveTo(_fly.raw[0][0]-sx,_fly.raw[0][1]-sy);
+      for(var i=1;i<_fly.raw.length;i++) g.lineTo(_fly.raw[i][0]-sx,_fly.raw[i][1]-sy);
+      g.stroke();
+    }
+    if(_fly.anchors.length>1){
+      var pa=flyDense(_fly.anchors,_fly.mode);
+      g.strokeStyle='#0284c7'; g.lineWidth=3; g.lineJoin='round'; g.beginPath();
+      g.moveTo(pa.p[0][0]-sx,pa.p[0][1]-sy);
+      for(var k=1;k<pa.p.length;k++) g.lineTo(pa.p[k][0]-sx,pa.p[k][1]-sy);
+      g.stroke();
+      for(var a=0;a<_fly.anchors.length;a++){
+        var px=_fly.anchors[a][0]-sx, py=_fly.anchors[a][1]-sy;
+        g.beginPath(); g.arc(px,py,7,0,Math.PI*2);
+        g.fillStyle=(a===0)?'#16a34a':(a===_fly.anchors.length-1)?'#dc2626':'#fff';
+        g.fill(); g.strokeStyle='#0284c7'; g.lineWidth=2; g.stroke();
+      }
+    }
+  }
+  function flyHitAnchor(px,py){
+    for(var i=0;i<_fly.anchors.length;i++){
+      var dx=_fly.anchors[i][0]-px, dy=_fly.anchors[i][1]-py;
+      if(dx*dx+dy*dy<=144) return i;  // 半径12px以内
+    }
+    return -1;
+  }
+  function _flyBtn(id,label,bg){ return '<button id="'+id+'" style="border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-size:12.5px;color:#fff;background:'+bg+'">'+label+'</button>'; }
+  function _flyTab(k,label){
+    var on=(_fly.smooth===k);
+    return '<button data-sm="'+k+'" style="border:1px solid #cfe0fb;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700;color:'+(on?'#fff':'#1d1d1f')+';background:'+(on?'#0284c7':'#eef3ff')+'">'+label+'</button>';
+  }
+  function flyPanelHint(t){
+    if(!_fly) return;
+    _fly.pn.innerHTML='<div style="font-weight:700;margin-bottom:4px">🕊 空飛ぶルート</div>'
+      +'<div style="font-size:12.5px;color:#555;margin-bottom:8px">'+t+'</div>'
+      +_flyBtn('__ce_fly_no','✕ やめる（Esc）','#888');
+  }
+  function flyPanelFull(){
+    if(!_fly) return;
+    _fly.pn.innerHTML='<div style="font-weight:700;margin-bottom:6px">🕊 空飛ぶルート　<span style="font-weight:400;color:#888;font-size:11px">○をドラッグ＝微調整／○を右クリック＝削除</span></div>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">'
+      +'<span style="font-size:12px;color:#555">整え方</span>'
+      +_flyTab('raw','✍ そのまま')+_flyTab('smooth','〰 なめらか')+_flyTab('line','📏 直線')
+      +'<span style="font-size:12px;color:#555;margin-left:8px">速さ</span>'
+      // 速さは対数スケール（0.5〜12秒）：速い側ほどスライダーが細かく効く＝短時間の微調整がしやすい
+      +'<input type="range" id="__ce_fly_dur" min="0" max="100" step="1" value="'+Math.round(100*Math.log(_fly.dur/0.5)/Math.log(24))+'" style="width:100px;vertical-align:middle;accent-color:#0284c7">'
+      +'<span id="__ce_fly_durv" style="font-size:12px;color:#0369a1;font-weight:700;min-width:38px">'+_fly.dur+'秒</span>'
+      +'<label style="font-size:12px;color:#555;margin-left:6px;cursor:pointer"><input type="checkbox" id="__ce_fly_rot"'+(_fly.rot?' checked':'')+'> 進行方向を向く</label>'
+      +'<span style="font-size:12px;color:#555">傾き</span>'
+      +'<input type="range" id="__ce_fly_tilt" min="0" max="100" step="5" value="'+_fly.tilt+'" style="width:80px;vertical-align:middle;accent-color:#0284c7">'
+      +'<span id="__ce_fly_tiltv" style="font-size:12px;color:#0369a1;font-weight:700;min-width:34px">'+_fly.tilt+'%</span>'
+      +'<label style="font-size:12px;color:#555;cursor:pointer" title="右向きの絵のキャラ用。左向きの絵ならチェックを外す"><input type="checkbox" id="__ce_fly_flip"'+(_fly.flip?' checked':'')+'> ⇄ 左に進む時は反転</label>'
+      +'<label style="font-size:12px;color:#555;cursor:pointer"><input type="checkbox" id="__ce_fly_loop"'+(_fly.loop?' checked':'')+'> 🔁 往復ループ</label>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">'
+      +'<span style="font-size:12px;color:#555">キャラの向き（最初の姿勢）</span>'
+      +'<button id="__ce_fly_rl" style="border:1px solid #cfe0fb;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f">↺ 左に回す</button>'
+      +'<button id="__ce_fly_rr" style="border:1px solid #cfe0fb;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f">↻ 右に回す</button>'
+      +'<button id="__ce_fly_mir" style="border:1px solid #cfe0fb;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f">⇄ 左右反転</button>'
+      +'<span style="font-size:11px;color:#888">飛ぶ時の傾きはこの姿勢が基準（保存で残る）</span>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+      +_flyBtn('__ce_fly_prev','▶ 試す','#0b6bcb')
+      +_flyBtn('__ce_fly_redraw','✏ 描き直す','#64748b')
+      +_flyBtn('__ce_fly_ok','✅ 付ける（保存で残る）','#1a7f37')
+      +_flyBtn('__ce_fly_no','✕ やめる','#888')
+      +'</div>';
+  }
+  // 手ぶれならし（移動平均・端点は動かさない）。passesが多いほどツルツルになる
+  function flySmoothRaw(pts,passes){
+    var out=pts,k,i;
+    for(k=0;k<passes;k++){
+      if(out.length<3) break;
+      var s=[out[0]];
+      for(i=1;i<out.length-1;i++){ s.push([(out[i-1][0]+out[i][0]*2+out[i+1][0])/4,(out[i-1][1]+out[i][1]*2+out[i+1][1])/4]); }
+      s.push(out[out.length-1]); out=s;
+    }
+    return out;
+  }
+  function flyRefit(){
+    if(!_fly||_fly.raw.length<2) return;
+    if(_fly.smooth==='raw'){ _fly.anchors=flyRdp(flySmoothRaw(_fly.raw,1),3); _fly.mode='c'; }
+    else if(_fly.smooth==='line'){ _fly.anchors=flyRdp(flySmoothRaw(_fly.raw,2),30); _fly.mode='s'; }
+    else{
+      // なめらか：強めにならしてから、線の長さに比例した間引き＋アンカー最大8個
+      // ＝細かい手ぶれは全部消して「大きなうねり」だけ残す（手描きでも自動できれいな弧になる）
+      var base=flySmoothRaw(_fly.raw,4), total=0, i;
+      for(i=1;i<base.length;i++){ var dx=base[i][0]-base[i-1][0], dy=base[i][1]-base[i-1][1]; total+=Math.sqrt(dx*dx+dy*dy); }
+      var eps=Math.max(18, total*0.045);
+      var an=flyRdp(base,eps);
+      while(an.length>8&&eps<400){ eps*=1.5; an=flyRdp(base,eps); }
+      _fly.anchors=an; _fly.mode='c';
+    }
+    flyRedraw();
+  }
+  function flyProcess(){
+    // 描き始めがキャラの上（少し外もOK）なら、始点をキャラの中心にスナップ＝ズレずにつながる
+    var r=_fly.el.getBoundingClientRect(), sx=window.scrollX||0, sy=window.scrollY||0;
+    var rl=r.left+sx, rt=r.top+sy, p0=_fly.raw[0];
+    if(p0[0]>=rl-14&&p0[0]<=rl+r.width+14&&p0[1]>=rt-14&&p0[1]<=rt+r.height+14){
+      _fly.raw[0]=[rl+r.width/2, rt+r.height/2];
+    }
+    flyRefit(); flyPanelFull();
+  }
+  // ルートを「要素の中心からの相対オフセット」に変換した焼き込み用データ
+  function flyCfg(){
+    var el=_fly.el, r=el.getBoundingClientRect();
+    var cx=r.left+(window.scrollX||0)+r.width/2, cy=r.top+(window.scrollY||0)+r.height/2;
+    return {m:_fly.mode, d:Math.round(_fly.dur*1000), r:_fly.rot?1:0, f:_fly.flip?1:0, t:_fly.tilt, l:_fly.loop?1:0,
+      p:_fly.anchors.map(function(a){ return [Math.round(a[0]-cx), Math.round(a[1]-cy)]; })};
+  }
+  function flyStopPrev(){
+    if(_fly&&_fly.el){ _fly.el.ceflyGen=(_fly.el.ceflyGen||0)+1; clearPreviewStyle(_fly.el); }
+  }
+  // キャラ絵そのものの左右向きを反転（data-cesxの符号を反転）＝左向きの絵を右向き基準にできる
+  function flyMirror(el){
+    _cebt(el);
+    el.setAttribute('data-cesx', -((+el.getAttribute('data-cesx'))||1));
+    if(el.getAttribute('data-cesy')==null) el.setAttribute('data-cesy', 1);
+    applyTf(el);
+  }
+  // 編集画面でのプレビュー再生（ランタイムと同じ動き・rAF手動描画＝この環境で確実）
+  function flyRunLocal(el,cfg){
+    var pa=flyDense(cfg.p,cfg.m);
+    var bx=+el.getAttribute('data-cetx')||0, by=+el.getAttribute('data-cety')||0, bro=+el.getAttribute('data-cero')||0;
+    var bsx=+el.getAttribute('data-cesx')||1, bsy=+el.getAttribute('data-cesy')||1;
+    var gen=(el.ceflyGen=(el.ceflyGen||0)+1), t0=null, cur=0, prevFl=false, lastTs=null;
+    function step(ts){
+      if(el.ceflyGen!==gen) return;
+      if(t0===null)t0=ts;
+      var dt=(lastTs==null)?16:Math.min(64,ts-lastTs); lastTs=ts;
+      var p=(ts-t0)/cfg.d, back=false;
+      if(cfg.l){ p=p%2; if(p>1){p=2-p;back=true;} } else if(p>1)p=1;
+      var e2=0.5-0.5*Math.cos(Math.PI*p);
+      var d1=e2*pa.total, pt=flyAt(pa,d1);
+      el.style.setProperty('translate',(bx+pt.x).toFixed(1)+'px '+(by+pt.y).toFixed(1)+'px','important');
+      if(cfg.r){
+        // 進行方向（往復の戻りは接線を反転）へ「ジワッと」向く：
+        // 接線に即スナップだとカーブでバタつく＝不自然だったので、0.16秒の慣性で追従させる。
+        // ★接線は折れ線セグメントの向きでなく「前後±8px地点の中央差分」で取る＝区切りごとの段差が消える。
+        var aF=flyAt(pa,Math.min(pa.total,d1+8)), aB=flyAt(pa,Math.max(0,d1-8));
+        var vx=back?(aB.x-aF.x):(aF.x-aB.x), vy=back?(aB.y-aF.y):(aF.y-aB.y), th=Math.atan2(vy,vx)*180/Math.PI;
+        var st=(cfg.t==null?100:cfg.t)/100, tgt, fl=false;
+        if(cfg.f){ fl=Math.abs(th)>90; tgt=fl?(180-th):th; if(tgt>180)tgt-=360; }
+        else { tgt=Math.atan2(vy,Math.abs(vx))*180/Math.PI; }
+        tgt*=st; if(tgt>75)tgt=75; if(tgt<-75)tgt=-75;
+        if(!cfg.l&&p>0.85) tgt*=(1-p)/0.15;  // 着地前は水平に戻す（傾いたまま止まらない）
+        if(fl!==prevFl){ cur=tgt; }           // 鏡像切替の瞬間はスナップ（回転で補間すると一回転して見える）
+        else { cur+=(tgt-cur)*(1-Math.exp(-dt/160)); }
+        prevFl=fl;
+        if(cfg.f) el.style.setProperty('scale',(fl?-bsx:bsx)+' '+bsy,'important');
+        // ⇄でキャラ絵を反転している(bsx<0)場合、scaleが回転の後に掛かるため傾きが鏡写しになる→符号を戻す
+        el.style.setProperty('rotate',(bro+(bsx<0?-cur:cur)).toFixed(1)+'deg','important');
+      }
+      if(cfg.l||p<1){ requestAnimationFrame(step); }
+      else{ setTimeout(function(){ if(el.ceflyGen===gen){ clearPreviewStyle(el); flyRedraw(); } },450); }
+    }
+    requestAnimationFrame(step);
+  }
+  function flyBake(){
+    flyStopPrev();
+    var el=_fly.el, cfg=flyCfg();
+    if(cfg.p.length<2){ if(msg)msg.textContent='⚠ ルートが短すぎます（もう少し長く描いてください）'; return; }
+    el.setAttribute('data-cefly', JSON.stringify(cfg));
+    ensureFlyRun();
+    markDirty(); flyEnd();
+    if(window.ceflyArm) window.ceflyArm(el);  // その場で1回飛んで見せる（保存後はスクロールで画面に入った時に再生）
+    if(msg) msg.textContent='✅ 飛行ルートを付けました（💾変更を保存で残る・開くと画面に入った時に飛びます）';
+  }
+  function flyDown(e){
+    if(e.button!==0||!_fly) return;
+    e.preventDefault(); e.stopPropagation();
+    var px=e.clientX+(window.scrollX||0), py=e.clientY+(window.scrollY||0);
+    if(_fly.anchors.length){ var ai=flyHitAnchor(px,py); if(ai>=0){ _fly.dragIdx=ai; } return; }
+    _fly.drawing=true; _fly.raw=[[px,py]]; flyRedraw();
+  }
+  function flyMove(e){
+    if(!_fly) return;
+    var px=e.clientX+(window.scrollX||0), py=e.clientY+(window.scrollY||0);
+    if(_fly.dragIdx>=0){ _fly.anchors[_fly.dragIdx]=[px,py]; flyRedraw(); return; }
+    if(_fly.drawing){
+      var lp=_fly.raw[_fly.raw.length-1], dx=px-lp[0], dy=py-lp[1];
+      if(dx*dx+dy*dy>9){ _fly.raw.push([px,py]); flyRedraw(); }
+    }
+  }
+  function flyUp(){
+    if(!_fly) return;
+    if(_fly.dragIdx>=0){ _fly.dragIdx=-1; return; }
+    if(_fly.drawing){
+      _fly.drawing=false;
+      if(_fly.raw.length>=4){ flyProcess(); }
+      else{ _fly.raw=[]; flyPanelHint('線が短すぎました。もう一度、マウスをドラッグして線を描いてください'); }
+      flyRedraw();
+    }
+  }
+  function flyCtx(e){
+    e.preventDefault(); e.stopPropagation();
+    if(!_fly||!_fly.anchors.length) return;
+    var px=e.clientX+(window.scrollX||0), py=e.clientY+(window.scrollY||0);
+    var ai=flyHitAnchor(px,py);
+    if(ai>=0&&_fly.anchors.length>2){ _fly.anchors.splice(ai,1); flyRedraw(); }
+  }
+  function flyKey(e){ if(e.key==='Escape'){ flyStopPrev(); flyEnd(); } }
+  function flyEnd(){
+    if(!_fly) return;
+    document.removeEventListener('mousemove',flyMove,true);
+    document.removeEventListener('mouseup',flyUp,true);
+    document.removeEventListener('keydown',flyKey,true);
+    window.removeEventListener('scroll',flyRedraw,true);
+    window.removeEventListener('resize',flyRedraw);
+    _fly.cv.remove(); _fly.pn.remove();
+    _fly=null; window.__ceFlyMode=false;
+  }
+  function startFlightDraw(el){
+    if(!el){ if(msg)msg.textContent='⚠ 要素が選ばれていません（もう一度右クリックで選んでください）'; return; }
+    if(_undraggable(el)){ if(msg)msg.textContent='⚠ ページ全体の器は飛ばせません（キャラの画像など小さめの要素を右クリックしてください）'; return; }
+    if(_fly) flyEnd();
+    var cv=document.createElement('canvas'); cv.id='__ce_flyov';
+    cv.setAttribute('style','position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:2147483004;cursor:crosshair;background:rgba(15,23,42,.10)');
+    var pn=document.createElement('div'); pn.id='__ce_flypn';
+    pn.setAttribute('style','position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483005;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.28);padding:10px 14px;font-family:system-ui,sans-serif;font-size:13px;color:#1d1d1f;max-width:94vw');
+    document.body.appendChild(cv); document.body.appendChild(pn);
+    _fly={el:el, raw:[], anchors:[], smooth:'smooth', mode:'c', dur:4, rot:true, flip:true, tilt:60, loop:false, drawing:false, dragIdx:-1, cv:cv, pn:pn};
+    window.__ceFlyMode=true;
+    // パネルの操作（作り直しても効くよう委譲で1回だけ張る）
+    pn.addEventListener('click',function(ev){
+      var sm=ev.target.closest('[data-sm]');
+      if(sm){ flyStopPrev(); _fly.smooth=sm.getAttribute('data-sm'); flyRefit(); flyPanelFull(); return; }
+      var b=ev.target.closest('button'); if(!b) return;
+      // キャラの向き調整：反転中は回転が鏡写しになるので、ボタンの見た目の向きに合わせて符号を補正
+      if(b.id==='__ce_fly_rl'||b.id==='__ce_fly_rr'){
+        flyStopPrev();
+        var d15=(b.id==='__ce_fly_rr')?15:-15;
+        if(((+_fly.el.getAttribute('data-cesx'))||1)<0) d15=-d15;
+        rotateBy(_fly.el,d15); return;
+      }
+      if(b.id==='__ce_fly_mir'){ flyStopPrev(); flyMirror(_fly.el); return; }
+      if(b.id==='__ce_fly_prev'){ flyStopPrev(); flyRunLocal(_fly.el, flyCfg()); return; }
+      if(b.id==='__ce_fly_redraw'){ flyStopPrev(); _fly.raw=[]; _fly.anchors=[]; flyPanelHint('もう一度、マウスをドラッグして線を描いてください'); flyRedraw(); return; }
+      if(b.id==='__ce_fly_ok'){ flyBake(); return; }
+      if(b.id==='__ce_fly_no'){ flyStopPrev(); flyEnd(); return; }
+    });
+    pn.addEventListener('input',function(ev){
+      if(ev.target.id==='__ce_fly_dur'){ _fly.dur=Math.round(5*Math.pow(24,ev.target.value/100))/10; var v=document.getElementById('__ce_fly_durv'); if(v)v.textContent=_fly.dur+'秒'; }
+      if(ev.target.id==='__ce_fly_rot'){ _fly.rot=!!ev.target.checked; }
+      if(ev.target.id==='__ce_fly_flip'){ _fly.flip=!!ev.target.checked; }
+      if(ev.target.id==='__ce_fly_tilt'){ _fly.tilt=+ev.target.value; var tv=document.getElementById('__ce_fly_tiltv'); if(tv)tv.textContent=_fly.tilt+'%'; }
+      if(ev.target.id==='__ce_fly_loop'){ _fly.loop=!!ev.target.checked; }
+    });
+    cv.addEventListener('mousedown',flyDown,true);
+    cv.addEventListener('contextmenu',flyCtx,true);
+    document.addEventListener('mousemove',flyMove,true);
+    document.addEventListener('mouseup',flyUp,true);
+    document.addEventListener('keydown',flyKey,true);
+    window.addEventListener('scroll',flyRedraw,true);
+    window.addEventListener('resize',flyRedraw);
+    flyPanelHint('マウスをドラッグして、飛ばしたいルートの線を描いてください（キャラの上から描き始めるとつながります）。画面はホイールでスクロールできます');
+    flyRedraw();
+  }
+  // 既に飛行が焼き込まれたカンプを開いたら、古いランタイムを外して最新版を強制再実行
+  // （二重再生はceflyGen世代番号で自動解決＝後から動いた最新版だけが生き残る）
+  if(document.querySelector('[data-cefly]')){
+    var _ofr=document.getElementById('cefly-run');
+    if(_ofr){ _ofr.remove(); window.ceflyOn=false; }
+    ensureFlyRun();
   }
   // アニメ選択：ハイライト＋スライダー表示＋即プレビュー
   function selectFx(k, btn){
@@ -3967,7 +4367,7 @@ html.__ce_altmode{cursor:text}
   //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
-  function _inUI2(node){ var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')); }
+  function _inUI2(node){ if(window.__ceFlyMode) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')); }
   var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   document.addEventListener('mousedown',function(e){
     if(e.altKey || e.button!==0 || _inUI2(e.target)) return;
@@ -4088,7 +4488,7 @@ html.__ce_altmode{cursor:text}
   }
   function cleanHtml(){
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
@@ -4104,6 +4504,17 @@ html.__ce_altmode{cursor:text}
     // ★これを忘れると「再生し終わった状態(--hlw:100)」がそのまま保存され、次に開いた時に
     //   アニメせず最初から引かれた状態になってしまう（実際に起きたバグ）。必ず0に戻す。
     [].slice.call(doc.querySelectorAll('.fxa_hl')).forEach(function(n){ n.style.setProperty('--hlw',0); });
+    // 🕊 飛行アニメ：飛んでる途中のtranslate/rotateが保存に焼き付かないよう、確定位置（data-cetx等）へ戻す。
+    // ★これを忘れるとマーカーの--hlwと同じ事故（飛び終わった位置で固まった状態が保存される）が起きる。
+    [].slice.call(doc.querySelectorAll('[data-cefly]')).forEach(function(n){
+      if(n.getAttribute('data-cetx')!=null||n.getAttribute('data-cety')!=null){ n.style.setProperty('translate',((+n.getAttribute('data-cetx'))||0)+'px '+((+n.getAttribute('data-cety'))||0)+'px','important'); }
+      else{ n.style.removeProperty('translate'); }
+      if(n.getAttribute('data-cero')!=null){ n.style.setProperty('rotate',((+n.getAttribute('data-cero'))||0)+'deg','important'); }
+      else{ n.style.removeProperty('rotate'); }
+      // ⇄反転で付いたscaleも確定値へ戻す（左向きで止まった状態が保存で固まらないように）
+      if(n.getAttribute('data-cesx')!=null||n.getAttribute('data-cesy')!=null){ n.style.setProperty('scale',((+n.getAttribute('data-cesx'))||1)+' '+((+n.getAttribute('data-cesy'))||1),'important'); }
+      else{ n.style.removeProperty('scale'); }
+    });
     // ドラッグモード中だけの目印(cursor:move)は編集中の一時状態。保存に残ると次に開いた時も
     // 十字カーソルのままになり、しかもAltを押しても文字選択に譲らず固まって見える不具合の元になる。
     [].slice.call(doc.querySelectorAll('[style*="cursor: move"],[style*="cursor:move"]')).forEach(function(n){ n.style.removeProperty('cursor'); });
@@ -4201,6 +4612,7 @@ html.__ce_altmode{cursor:text}
     qm.innerHTML=(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +row('__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）')
       +row('__ce_q_txt','✏ 文字を追加（編集）')
+      +row('__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）')
       +row('__ce_q_fxrm','🚫 動きを消す')
       +row('__ce_q_rst','⟲ 位置・サイズをリセット')
       +'<div style="border-top:1px solid #eee;margin:3px 6px"></div>'
@@ -4227,6 +4639,7 @@ html.__ce_altmode{cursor:text}
         }
         return;
       }
+      if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
       if(t.id==='__ce_q_full'){ _bigFull=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
@@ -4234,6 +4647,7 @@ html.__ce_altmode{cursor:text}
   }
   // 右クリック禁止スクリプトが残っていても、こちらを優先させて確実にメニューを開く。
   document.addEventListener('contextmenu',function(e){
+    if(window.__ceFlyMode){ e.preventDefault(); return; }  // 🕊ルート描画中は右クリック＝アンカー削除（キャンバス側で処理済み）
     var _wasForced=_forceEl;
     var el=_forceEl||pickTarget(e.target); _forceEl=null;
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
@@ -4336,6 +4750,7 @@ html.__ce_altmode{cursor:text}
       +'<div class="cap" style="margin-bottom:8px">🖍 色 <input type="color" id="__ce_cmhlc" value="'+hlDefaultColor()+'" style="width:34px;height:22px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><span id="__ce_cmhlsw" style="display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle;margin-right:4px">'+hlSwatchesHtml()+'</span> 太さ<button id="__ce_cmhlthm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">－</button><button id="__ce_cmhlthp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer">＋</button> 位置<button id="__ce_cmhlpu" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="上へ">▲</button><button id="__ce_cmhlpd" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="下へ">▼</button> 速さ<button id="__ce_cmhldm" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="遅く">🐢</button><button id="__ce_cmhldp" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:1px 7px;cursor:pointer" title="速く">🐇</button><br>／ 文字を選んでから引くと「一部だけ」引ける／<a href="#" id="__ce_cmhlrm" style="color:#0b6bcb">🚫 マーカーを消す</a></div>'
       +'<button class="go2" id="__ce_cmstyle" style="background:#c026a6;margin-bottom:8px">✨ このセクションをおしゃれに（AIが一括）</button>'
       +'<div class="cap">✨ 動きを選ぶ（クリックで試す→調整→付ける・AIなし・無料）</div>'
+      +'<button class="go2" id="__ce_cmfly" style="background:#0284c7;margin-bottom:6px">🕊 線を描いて飛ばす（ルートを手描き・AIなし）</button>'
       +'<button class="go2" id="__ce_fxrm" style="background:#888;margin-bottom:6px">🚫 この要素の動きを消す</button>'
       +'<div class="__ce_anim" id="__fx_grid">'+FX.map(function(a){return '<button data-ak="'+a.k+'"><b>'+esc(a.b)+'</b><span>'+esc(a.d)+'</span></button>';}).join('')+'</div>'
       +'<div class="__fx_ctl" id="__fx_ctl" style="display:none"><div id="__fx_sl"></div><button class="go2" id="__fx_apply" style="background:#1a7f37;margin-top:2px">✅ この動きを付ける（無料・保存で残る）</button></div>'
@@ -4395,6 +4810,8 @@ html.__ce_altmode{cursor:text}
       if(ak){ selectFx(ak.getAttribute('data-ak'), ak); return; }
       var apl=ev.target.closest('#__fx_apply');
       if(apl){ if(!curAnim){ msg.textContent='まず上から動きを選んでください'; return; } eachSel(function(x){ applyBake(x, curAnim); }); if(selEls.length>1&&msg) msg.textContent='✅ '+selEls.length+'個にまとめて付けました（💾保存で残る）'; return; }
+      var flb=ev.target.closest('#__ce_cmfly');
+      if(flb){ var ft2=curEl; closeMenu(); startFlightDraw(ft2); return; }
       var fxrm=ev.target.closest('#__ce_fxrm');
       if(fxrm){
         eachSel(removeBake); curAnim=null; curP={};
