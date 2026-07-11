@@ -260,6 +260,7 @@
       gap: 1.2rem; padding: 1.6rem 1.8rem; overflow: auto;
     }
     .base_card {
+      position: relative;
       border: 1px solid #e2e2e6; border-radius: 1rem; overflow: hidden; cursor: pointer; background: #fff;
       display: flex; flex-direction: column; transition: transform .15s, box-shadow .15s, border-color .15s;
     }
@@ -579,6 +580,24 @@
       padding: 0.4rem 0.9rem;
       border-radius: 0.8rem;
     }
+    /* このサイトをベースに生成した過去カンプの評価（◎○△✖）を一発で見せるバッジ。
+       サムネ右上は既存の「🔍 詳細」ラベルと同じ位置で隠れてしまうため、色スウォッチの並びに置く。 */
+    .rate_badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      width: 2.2rem;
+      height: 2.2rem;
+      line-height: 1;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,.35);
+      flex: none;
+    }
+    /* ベース選択グリッドのカードはサムネ左上に重ねて置く（詳細ラベルが無いので衝突しない） */
+    .base_card .rate_badge { position: absolute; top: 0.6rem; left: 0.6rem; width: 2.2rem; height: 2.2rem; font-size: 1.15rem; }
     .result_body { padding: 0.9rem 1.2rem 1.1rem; }
     /* ドメイン＋済タグ＋日付を1行に（文字を詰めてスッキリ） */
     .result_head { display: flex; align-items: baseline; gap: 0.6rem; }
@@ -608,12 +627,15 @@
       border-radius: 0.6rem;
       padding: 0.2rem 0.7rem;
     }
-    /* 抽出した配色のスワッチ（細い帯で控えめに） */
+    /* 抽出した配色のスワッチ（細い帯で控えめに）＋右端に評価バッジ */
     .result_swatches {
       display: flex; /* 色のチップを横に並べる */
+      align-items: center;
+      justify-content: space-between;
       gap: 0.3rem;
       margin-top: 0.6rem;
     }
+    .result_swatches_dots { display: flex; align-items: center; gap: 0.3rem; }
     .result_swatch {
       width: 1.5rem;
       height: 1.5rem;
@@ -1360,6 +1382,22 @@
     }
     [sortSel, filterVideo, filterLib].forEach((el) => el.addEventListener("change", applyAndRender));
 
+    // このサイトをベースに生成した過去カンプの評価（◎○△✖）。一覧・ベース選択グリッドの両方で使う
+    let _baseStatsAll = {};
+    async function loadBaseStatsAll() {
+      try {
+        const d = await fetch("/api/base_stats_all").then((r) => r.json());
+        if (d.ok) _baseStatsAll = d.stats || {};
+      } catch (e) { /* バッジは飾り。失敗しても一覧表示は続ける */ }
+    }
+    const _RATE_COLOR = { "◎": "#1a7f37", "○": "#2b6cb0", "△": "#9a6700", "✖": "#c0392b" };
+    function rateBadgeHtml(siteId) {
+      const s = _baseStatsAll[siteId];
+      if (!s || !s.total) return "";  // 評価がまだ無いサイトはバッジを出さない（未評価だらけで埋まるのを防ぐ）
+      const parts = ["◎", "○", "△", "✖"].map((k) => (s.counts[k] ? `${k}${s.counts[k]}` : "")).filter(Boolean).join(" ");
+      return `<span class="rate_badge" style="background:${_RATE_COLOR[s.mark]}" title="このサイトをベースにした過去カンプの評価: ${parts}">${s.mark}</span>`;
+    }
+
     // カード1枚分のHTMLを組み立てる
     function card(hit) {
       const score = (hit.score === null || hit.score === undefined)
@@ -1382,7 +1420,12 @@
               ${hit.vibe ? `<span class="result_done" title="AIが雰囲気を言語化済み">✨済</span>` : ""}
               <span class="result_date">${(date || "").slice(5)}</span>
             </div>
-            ${(hit.swatches && hit.swatches.length) ? `<div class="result_swatches" title="抽出した配色">${hit.swatches.map((c) => `<span class="result_swatch" style="background:${c}"></span>`).join("")}</div>` : ""}
+            ${((hit.swatches && hit.swatches.length) || rateBadgeHtml(hit.site_id))
+              ? `<div class="result_swatches">
+                  <span class="result_swatches_dots" title="抽出した配色">${(hit.swatches || []).map((c) => `<span class="result_swatch" style="background:${c}"></span>`).join("")}</span>
+                  ${rateBadgeHtml(hit.site_id)}
+                </div>`
+              : ""}
             <div class="result_tools">
               <button class="result_similar" data-id="${hit.site_id}" title="この見た目に似たサイトを探す">🔍似てる</button>
               <button class="result_describe" data-id="${hit.site_id}" title="Claudeが雰囲気を言葉にして検索に効かせる">${hit.describing ? "言語化中…" : (hit.vibe ? "✨済" : "✨雰囲気")}</button>
@@ -1473,6 +1516,7 @@
 
     // text検索
     async function search() {
+      closeToolPanels();  // 設定/カンプ生成/登録パネルや詳細モーダルが開いていても、検索は一発で通す
       const q = input.value.trim();
       const top = topBox.value || 24;
       if (!q) { loadAll(); return; }
@@ -1522,9 +1566,16 @@
 
     // 設定パネル：プロバイダ・APIキーを .env に保存
     // 設定・カンプ生成・登録のパネルは同時に1つだけ開く（どれか開いたら他は閉じる）
+    // 検索・設定・カンプ生成・登録のどれかを押したら、開きっぱなしのモーダル（詳細ビュー／
+    // ベース・アニメ選択）も一緒に閉じる。モーダルはヘッダーより手前（z-index高）にいるため、
+    // 閉じておかないと検索窓や他のボタンをクリックできない状態になっていた。
     function closeToolPanels(keepSel) {
       ["#set_panel", "#camp_panel", "#add_panel"].forEach((sel) => {
         if (sel !== keepSel) { const el = document.querySelector(sel); if (el) el.classList.remove("is_open"); }
+      });
+      ["#detail_overlay", "#base_overlay", "#anim_overlay"].forEach((sel) => {
+        const el = document.querySelector(sel);
+        if (el) el.classList.remove("is_open");
       });
     }
     const setToggle = document.querySelector("#set_toggle");
@@ -1962,7 +2013,7 @@
 
     // 初期表示（登録済み一覧）
     async function loadAll() {
-      const res = await fetch("/api/sites");
+      const [res] = await Promise.all([fetch("/api/sites"), loadBaseStatsAll()]);
       const data = await res.json();
       status.textContent = `登録済み：${data.hits.length} 件（言葉で検索すると雰囲気の近い順に並びます）`;
       setHits(data.hits);
@@ -2073,6 +2124,8 @@
       trigger: "#camp_base_trigger", overlay: "#base_overlay", grid: "#base_grid", close: "#base_close",
       noneIcon: "🎲", noneName: "おまかせ", noneDesc: "ブリーフから自動で選びます", noneLabel: "おまかせ（ブリーフから自動選択）",
       onPick: async () => { campState.textContent = ""; await updatePairFit(); await updateBaseStats(); },
+      preBuild: loadBaseStatsAll,  // 開くたびに最新の評価を読み直してからバッジを出す
+      badge: (s) => rateBadgeHtml(s.site_id),
     });
     // アニメ選択：ベースが選ばれていたら相性順に並び替え＋◎○△バッジを付ける
     let _fitScores = null, _fitNear = 0.635, _fitFar = 0.56;

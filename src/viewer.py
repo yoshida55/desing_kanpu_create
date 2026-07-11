@@ -1334,6 +1334,16 @@ def api_camp_rate_get():
     return jsonify({"ok": True, "rating": quality.get_rating(fn)})
 
 
+@app.route("/api/base_stats_all")
+def api_base_stats_all():
+    """全ベース(手本)ぶんの実績をまとめて返す（一覧・ベース選択グリッドのバッジ表示用）。
+
+    site_idごとに◎○△✖の内訳と代表マークを1回のログ走査で返す。選択1件ずつ叩く
+    /api/base_stats と違い、カードが多い一覧画面でもリクエスト1回で済む。
+    """
+    return jsonify({"ok": True, "stats": quality.all_base_stats()})
+
+
 @app.route("/api/base_stats")
 def api_base_stats():
     """手本（ベース）ごとの過去実績（◎○△✖と自動判定NG）を返す。選択時のヒント用。

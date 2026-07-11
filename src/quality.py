@@ -171,6 +171,39 @@ def base_stats(base_id: str) -> dict:
     return {"counts": counts, "auto_warn": auto_warn, "total": total, "note": note}
 
 
+def _dominant_mark(counts: dict) -> str:
+    """◎○△✖の内訳を、一覧でパッと見えるバッジ用に1文字へ集約する。"""
+    good = counts.get("◎", 0) + counts.get("○", 0)
+    bad = counts.get("△", 0) + counts.get("✖", 0)
+    if good > bad:
+        return "◎" if counts.get("◎", 0) >= counts.get("○", 0) else "○"
+    if bad > good:
+        return "✖" if counts.get("✖", 0) >= counts.get("△", 0) else "△"
+    return "○"  # 同数は中立寄りに倒す
+
+
+def all_base_stats() -> dict:
+    """全ベース(手本)ぶんの実績を1回のログ走査でまとめて返す（一覧・選択グリッドのバッジ表示用）。
+
+    base_stats(base_id)をサイトの数だけ呼ぶとログを何度も読み直すことになるので、
+    こちらは1回だけ読んで集計する。手動評価が付いた行だけを対象にする
+    （自動判定NGだけの行は多数決に混ぜると分かりにくくなるため除外）。
+
+    返り値: {base_id: {"counts": {...}, "total": 3, "mark": "◎"}}
+    """
+    agg: dict[str, dict] = {}
+    for r in _load_log():
+        base_id = r.get("base_id") or ""
+        rt = r.get("rating", "")
+        if not base_id or rt not in RATINGS:
+            continue
+        agg.setdefault(base_id, {k: 0 for k in RATINGS})[rt] += 1
+    return {
+        base_id: {"counts": counts, "total": sum(counts.values()), "mark": _dominant_mark(counts)}
+        for base_id, counts in agg.items()
+    }
+
+
 def pair_stats(base_id: str, anim_id: str) -> dict:
     """ベース×アニメの「組み合わせ」の実績を集計する（base_statsの組み合わせ版）。
 
