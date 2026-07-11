@@ -354,6 +354,23 @@ def clone_site(url: str, keep_js: bool = False, use_extracted: bool = False,
         except Exception:  # noqa: BLE001
             pass
 
+        # bot判定の壁（Cloudflare等）を検出したら、解けるのを少し待って再チェック。
+        # 解けなければ「確認中...」等の中身が空のゴミページをclone_*.htmlとして
+        # 保存してしまう（＝後で⭐セクション保存が0件で無反応に見える）ので、ここで止める。
+        if ingest._looks_like_bot_wall(page):  # noqa: SLF001（ingestの内部関数を意図的に再利用）
+            say("bot壁のチェックが解けるのを待っています…")
+            for _ in range(cfg.bot_wall_clear_wait_s):
+                page.wait_for_timeout(1000)
+                if not ingest._looks_like_bot_wall(page):  # noqa: SLF001
+                    break
+            if ingest._looks_like_bot_wall(page):  # noqa: SLF001
+                browser.close()
+                raise RuntimeError(
+                    "bot判定の壁を突破できず、クローンを中止しました"
+                    "（『確認中...』等のゴミページが保存されるのを防止）。"
+                    "時間を置くか、他のツールで手動アクセスしてから再試行してください。"
+                )
+
         # 最後までスクロール＝lazy画像とJSアニメの「表示後の姿」を確定させる
         say("ページ全体を読み込み中…")
         ingest._trigger_lazy_load(page)  # noqa: SLF001（ingestの内部関数を意図的に再利用）

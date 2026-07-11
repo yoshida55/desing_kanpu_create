@@ -153,7 +153,8 @@
   "text_len": 2464,
   "sections": 12,
   "warn": false,
-  "ts": 1783466811
+  "ts": 1783466811,
+  "rating": "○"
  },
  {
   "file": "camp_20260708_084105_136213.html",
@@ -266,5 +267,12 @@
   "warn": true,
   "ts": 1783736003,
   "rating": "✖"
+ },
+ {
+  "file": "fav_20260703_223627.html",
+  "base_id": "",
+  "anim_id": "",
+  "rating": "◎",
+  "ts": 1783755619
  }
 ]

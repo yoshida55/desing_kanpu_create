@@ -895,16 +895,35 @@ def save_camp_names(meta: dict) -> None:
     _camp_names_path().write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def set_camp_name(filename: str, name: str, fav: bool = True) -> dict:
-    """カンプに表示名を付ける（お気に入り登録）。名前が空なら登録を外す。"""
+def set_camp_name(filename: str, name: str) -> dict:
+    """カンプに表示名を付ける（⭐お気に入り登録とは別・名前だけでは自動でお気に入りにしない）。
+
+    名前を空にしても、既にお気に入り登録済みならそのまま残す（削除は両方空の時だけ）。
+    """
     meta = load_camp_names()
     name = (name or "").strip()
-    if not name:
+    cur = meta.get(filename, {})
+    fav = bool(cur.get("fav"))
+    if not name and not fav:
         meta.pop(filename, None)
     else:
-        meta[filename] = {"name": name[:60], "fav": bool(fav)}
+        meta[filename] = {"name": name[:60], "fav": fav}
     save_camp_names(meta)
-    return meta.get(filename, {})
+    return meta.get(filename, {"name": "", "fav": False})
+
+
+def toggle_camp_fav(filename: str) -> dict:
+    """カンプの⭐お気に入りをトグルする（名前とは別に単独で付け外しできる）。"""
+    meta = load_camp_names()
+    cur = meta.get(filename, {})
+    name = (cur.get("name") or "").strip()
+    fav = not bool(cur.get("fav"))
+    if not name and not fav:
+        meta.pop(filename, None)
+    else:
+        meta[filename] = {"name": name[:60], "fav": fav}
+    save_camp_names(meta)
+    return meta.get(filename, {"name": "", "fav": False})
 
 
 def save_favorite(html: str, name: str) -> dict:

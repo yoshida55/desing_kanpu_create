@@ -19,6 +19,7 @@ import os
 import re
 import threading
 import uuid
+from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
@@ -1286,18 +1287,24 @@ def api_camps():
         title = (re.sub(r"\s+", " ", m.group(1)).strip() if m else "")[:60]
         st = p.stat()
         info = names.get(p.name, {})
-        items.append({
+        # ファイル名に埋め込まれた作成日時（camp_/fav_/clone_共通のYYYYMMDD_HHMMSS）を優先して
+        # 並び替えのキーにする。git経由の移行等でmtimeが全ファイル同時刻に揃ってしまっても、
+        # 本来の作成順が崩れないようにするため（mtimeだけだと順序が失われる実例が発生した）。
+        ts_m = re.search(r"(\d{8})_(\d{6})", p.name)
+        sort_key = int(ts_m.group(1) + ts_m.group(2)) if ts_m else int(datetime.fromtimestamp(st.st_mtime).strftime("%Y%m%d%H%M%S"))
+        item = {
             "file": p.name, "title": title, "mtime": st.st_mtime, "size": st.st_size,
             "name": info.get("name", ""), "fav": bool(info.get("fav")),
-        })
-    # お気に入り（名前付き）を上に、その中と外はそれぞれ新しい順
-    items.sort(key=lambda x: (0 if x["fav"] else 1, -x["mtime"]))
-    return jsonify({"camps": items})
+        }
+        items.append((item, sort_key))
+    # お気に入り（名前付き）を上に、その中と外はそれぞれ新しい順（ファイル名の日時で判定）
+    items.sort(key=lambda pair: (0 if pair[0]["fav"] else 1, -pair[1]))
+    return jsonify({"camps": [item for item, _ in items]})
 
 
 @app.route("/api/camp_name", methods=["POST"])
 def api_camp_name():
-    """カンプに名前を付けて保存する（お気に入り登録）。名前が空なら登録解除。"""
+    """カンプに名前を付ける（⭐お気に入りとは別。名前だけでは自動でお気に入りにしない）。"""
     data = request.get_json(silent=True) or {}
     fn = (data.get("file") or "").strip()
     name = (data.get("name") or "").strip()
@@ -1305,6 +1312,18 @@ def api_camp_name():
     if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
         return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
     info = camp.set_camp_name(fn, name)
+    return jsonify({"ok": True, "name": info.get("name", ""), "fav": bool(info.get("fav"))})
+
+
+@app.route("/api/camp_fav", methods=["POST"])
+def api_camp_fav():
+    """カンプの⭐お気に入りを単独でトグルする（名前は変えない）。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    info = camp.toggle_camp_fav(fn)
     return jsonify({"ok": True, "name": info.get("name", ""), "fav": bool(info.get("fav"))})
 
 
@@ -1778,6 +1797,7 @@ html.__ce_altmode{cursor:text}
     <div class="lbl plain">⭐ セクションのお気に入り（①で選んだセクションが対象・AIなし）</div>
     <button class="im" id="__ce_fav" style="background:#e8a300;color:#fff">⭐ このセクションをお気に入り</button>
     <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
+    <button class="im" id="__ce_favadd" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">➕ お気に入りからセクションを追加（場所を選ぶ）</button>
     <div class="lbl plain">🎨 おしゃれ度チェック（AIが有名サイト基準で採点＋改善点）</div>
     <button class="im" id="__ce_stylecheck" style="background:#c026a6;color:#fff">🎨 おしゃれ度をチェック</button>
     <button class="im" id="__ce_autopolish" style="background:#7c3aed;color:#fff">🎯 チェックして自動で磨く（採点→改善を一括・AI）</button>
@@ -1810,7 +1830,7 @@ html.__ce_altmode{cursor:text}
   function goHome(ev){
     if(ev) ev.stopPropagation();  // ヘッダの開閉トグルと競合させない
     if(_dirty && !confirm('保存していない変更があります。ホームに戻ると消えます。よろしいですか？')) return;
-    location.href='/';
+    location.href='/?open=camp';  // ホームの「カンプ生成」パネルを開いた状態で戻す
   }
   var homeBtn=document.getElementById('__ce_home');
   if(homeBtn) homeBtn.addEventListener('click',goHome);
@@ -5496,6 +5516,15 @@ def camp_file(filename: str):
         return send_file(path)
     html = _inject_edit_bar(path.read_text(encoding="utf-8"), filename)
     return Response(html, mimetype="text/html")
+
+
+@app.route("/camp_preview/<path:filename>")
+def camp_preview(filename: str):
+    """履歴一覧のホバープレビュー用：編集バーを注入せず生のHTMLをそのまま返す（軽量・読み取り専用）。"""
+    path = config.CAMP_DIR / filename
+    if not path.exists() or not path.is_file() or path.suffix != ".html" or path.parent != config.CAMP_DIR:
+        abort(404)
+    return send_file(path)
 
 
 @app.route("/img/<site_id>/<which>")

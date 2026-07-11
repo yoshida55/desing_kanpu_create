@@ -385,6 +385,19 @@
     .hist_row.is_fav .h_title { color: #b8530a; font-weight: 700; }
     .h_name { background: #f2f2f4; border: 1px solid #ddd; border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
     .h_name:hover { background: #e6e6e8; }
+    .h_fav { background: none; border: none; cursor: pointer; font-size: 1.4rem; line-height: 1; padding: 0 2px; }
+    .h_fav:hover { transform: scale(1.15); }
+    /* 履歴一覧のホバープレビュー（そのカンプのメインビジュアルを浮かせて表示・スクロール可） */
+    .hist_preview {
+      position: fixed; z-index: 999999; width: 420px; height: 560px;
+      background: #fff; border: 1px solid #ddd; border-radius: 12px;
+      box-shadow: 0 16px 48px rgba(0,0,0,.28); overflow: hidden;
+      opacity: 0; visibility: hidden; transform: translateY(6px);
+      transition: opacity .12s ease, transform .12s ease;
+      pointer-events: none;
+    }
+    .hist_preview.is_show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .hist_preview iframe { width: 100%; height: 100%; border: none; display: block; }
     .hist_row {
       display: flex; align-items: center; gap: 1rem; background: #fff;
       border: 1px solid #eee; border-radius: 0.8rem; padding: 0.7rem 1rem; font-size: 1.3rem;
@@ -1200,6 +1213,8 @@
       <!-- 保存済みカンプの履歴（開くと下に出る・いつでも開き直せる） -->
       <div class="camp_hist_list" id="camp_hist_list" hidden></div>
     </div>
+    <!-- 履歴の行にホバーすると出す、そのカンプのプレビュー（スクロール可・編集バー無しの軽量版） -->
+    <div class="hist_preview" id="hist_preview"><iframe id="hist_preview_frame" scrolling="yes"></iframe></div>
 
     <!-- 登録パネル：URLを入力して追加する（トグルで開く） -->
     <div class="add_panel" id="add_panel">
@@ -1885,7 +1900,7 @@
         const title = (isClone ? "📋 " : "") + _esc(c.title || c.file);
         const label = c.name ? ("⭐ " + _esc(c.name)) : title;
         const favCls = c.fav ? " is_fav" : "";
-        return `<div class="hist_row${favCls}"><span class="h_title" title="${_esc(c.name || c.title || c.file)}">${label}</span><span class="h_date">${ds}</span><button class="h_name" data-file="${c.file}" data-name="${_esc(c.name || "")}" title="名前を付けて保存">✎ 名前</button><a href="/camp/${c.file}" target="campview" rel="noopener">開く</a><button class="h_del" data-file="${c.file}" title="削除">🗑</button></div>`;
+        return `<div class="hist_row${favCls}" data-file="${c.file}"><span class="h_title" title="${_esc(c.name || c.title || c.file)}">${label}</span><span class="h_date">${ds}</span><button class="h_fav" data-file="${c.file}" title="${c.fav ? "お気に入りを外す" : "お気に入りに登録"}">${c.fav ? "⭐" : "☆"}</button><button class="h_name" data-file="${c.file}" data-name="${_esc(c.name || "")}" title="名前を付ける（お気に入りとは別）">✎ 名前</button><a href="/camp/${c.file}" target="campview" rel="noopener">開く</a><button class="h_del" data-file="${c.file}" title="削除">🗑</button></div>`;
       };
       // 左＝お気に入り、右＝それ以外を新しい順（APIが既にfav先頭・mtime降順で返す）
       const favs = camps.filter((c) => c.fav);
@@ -1900,10 +1915,56 @@
     // 起動時は履歴画面をデフォルトで開いておく（下までスクロールしなくても2列で一覧できる）
     campHistList.hidden = false;
     loadCampHistory();
+
+    // 履歴の行にホバーすると、そのカンプのメインビジュアルを浮かせてプレビュー表示（スクロール可）。
+    // 編集バー無しの軽量ルート(/camp_preview/)を使い、行のすぐ横に画面内に収まるよう出す。
+    const histPreview = document.querySelector("#hist_preview");
+    const histPreviewFrame = document.querySelector("#hist_preview_frame");
+    let hpShowTimer = null, hpHideTimer = null, hpCurFile = "";
+    function hidePreviewNow() {
+      histPreview.classList.remove("is_show");
+      hpCurFile = "";
+      histPreviewFrame.src = "about:blank";  // 隠れている間の裏読み込みを止める
+    }
+    campHistList.addEventListener("mouseover", (e) => {
+      const row = e.target.closest(".hist_row");
+      if (!row || !campHistList.contains(row)) return;
+      if (hpHideTimer) { clearTimeout(hpHideTimer); hpHideTimer = null; }
+      const file = row.dataset.file;
+      if (!file || file === hpCurFile) return;
+      if (hpShowTimer) clearTimeout(hpShowTimer);
+      hpShowTimer = setTimeout(() => {
+        const r = row.getBoundingClientRect();
+        const W = 420, H = 560, GAP = 12, PAD = 8;
+        let left = r.right + GAP;
+        if (left + W > window.innerWidth - PAD) left = r.left - W - GAP;
+        left = Math.max(PAD, Math.min(left, window.innerWidth - W - PAD));
+        let top = Math.max(PAD, Math.min(r.top, window.innerHeight - H - PAD));
+        histPreview.style.left = left + "px";
+        histPreview.style.top = top + "px";
+        if (file !== hpCurFile) { hpCurFile = file; histPreviewFrame.src = "/camp_preview/" + encodeURIComponent(file); }
+        histPreview.classList.add("is_show");
+      }, 220);  // 少し間を置いてから出す（一覧を素早くなぞった時にチラつかせないため）
+    });
+    campHistList.addEventListener("mouseout", (e) => {
+      const row = e.target.closest(".hist_row");
+      if (!row) return;
+      // 行の中の子要素間の移動では消さない（related targetが引き続き行の中にあるなら無視）
+      if (row.contains(e.relatedTarget)) return;
+      if (hpShowTimer) { clearTimeout(hpShowTimer); hpShowTimer = null; }
+      hpHideTimer = setTimeout(hidePreviewNow, 120);
+    });
     campHistList.addEventListener("click", async (e) => {
+      const favBtn = e.target.closest(".h_fav");
+      if (favBtn) {
+        try { await fetch("/api/camp_fav", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file: favBtn.dataset.file }) }); }
+        catch (err) {}
+        loadCampHistory();
+        return;
+      }
       const nameBtn = e.target.closest(".h_name");
       if (nameBtn) {
-        const name = prompt("このカンプに名前を付けて保存します（空にすると解除）\n例：ヒーロー完成版 / 配色OK版", nameBtn.dataset.name || "");
+        const name = prompt("このカンプに名前を付けます（⭐お気に入りとは別・空にすると外れます）\n例：ヒーロー完成版 / 配色OK版", nameBtn.dataset.name || "");
         if (name === null) return;
         try { await fetch("/api/camp_name", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file: nameBtn.dataset.file, name }) }); }
         catch (err) {}
@@ -2700,6 +2761,14 @@
     addBtn.addEventListener("click", register);
 
     loadAll();
+
+    // URLに ?open=camp が付いていたら「カンプ生成」パネルを自動で開く
+    // （編集画面の🏠ホームで戻った時、また一覧の先頭から探さず済むように）
+    if (new URLSearchParams(location.search).get("open") === "camp") {
+      closeToolPanels("#camp_panel");
+      campPanel.classList.add("is_open");
+      history.replaceState(null, "", location.pathname);  // リロード時に毎回開き直さないようURLを掃除
+    }
 
     // ページを開いた時、進行中/完了のカンプ生成ジョブがあれば表示を復帰する
     // （生成中にリロードしても「今どうなってるか」が分かる。複数対応）
