@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#091b25">
+  <title>NEXORA FIELD｜物流現場を、次の精度へ</title>
+  <style>
+    :root{
+      --ink:#091b25;
+      --deep:#041722;
+      --white:#fff;
+      --tint:rgba(53,68,69,.07);
+      --line:rgba(9,27,37,.15);
+      --mist:#eaf4f5;
+      --aqua:#35b9c6;
+      --shadow:0 12px 32px rgba(9,27,37,.12);
+      --radius:5px;
+      --wide:min(1440px, calc(100% - 64px));
+      --sans:"Noto Sans JP",yakuhanjp,-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--white);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:2;letter-spacing:.02em;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+    button{font:inherit}
+    .container{width:var(--wide);margin-inline:auto}
+    .eyebrow{margin:0 0 8px;font-size:11px;line-height:1.5;letter-spacing:.08em}
+    .eyebrow::before{content:"• ";font-size:13px}
+    h1,h2,h3,p{margin-top:0}
+    h1{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:300;line-height:1.3;letter-spacing:.025em}
+    h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:400;line-height:1.4;letter-spacing:.04em;margin-bottom:20px}
+    h3{font-size:1.15rem;font-weight:500;line-height:1.5;margin-bottom:8px}
+    p{max-width:38em}
+    .copy{font-size:.95rem;line-height:2.05}
+    .section-title{align-self:start}
+    .section{position:relative;padding:10vh 0;min-height:100vh;display:flex;align-items:center}
+    .section.tint{background:linear-gradient(135deg,rgba(213,241,244,.68),rgba(255,255,255,.85))}
+    .image-frame{overflow:hidden;background:linear-gradient(135deg,#94bfc6,#183a4c);border-radius:var(--radius)}
+    .image-frame img{transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s}
+    .image-frame:hover img{transform:scale(1.055)}
+    .arrow{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid currentColor;margin-left:12px;line-height:1;transition:.35s}
+    .text-link{font-size:12px;display:inline-flex;align-items:center;transition:color .3s,transform .3s}
+    .text-link:hover{color:var(--aqua);transform:translateX(6px)}
+    .text-link:hover .arrow{background:var(--aqua);border-color:var(--aqua);color:#fff}
+    .reveal{transition:opacity .9s ease,transform .9s cubic-bezier(.2,.75,.25,1)}
+    html.js .reveal{opacity:0;transform:translateY(34px)}
+    html.js .reveal.show{opacity:1;transform:none}
+    .delay-1{transition-delay:.12s}.delay-2{transition-delay:.24s}.delay-3{transition-delay:.36s}
+
+    /* header / hero */
+    .hero{height:100svh;min-height:700px;position:relative;isolation:isolate;background:#163b49;color:#fff;overflow:hidden}
+    .hero-media{position:absolute;inset:0;background:linear-gradient(100deg,rgba(2,18,27,.72) 0%,rgba(3,29,40,.4) 47%,rgba(8,68,78,.1) 100%)}
+    .hero-media img{filter:saturate(.72) contrast(1.05)}
+    .hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,22,31,.53),transparent 65%),linear-gradient(0deg,rgba(4,20,29,.32),transparent 45%)}
+    .topbar{position:absolute;z-index:3;top:16px;left:50%;transform:translateX(-50%);width:var(--wide);height:48px;border:1px solid rgba(255,255,255,.21);display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 18px}
+    .brand{font-family:Georgia,"Times New Roman",serif;font-size:20px;letter-spacing:.05em;white-space:nowrap}
+    .brand small{font-family:var(--sans);font-size:8px;letter-spacing:.16em;display:block;line-height:1;margin-top:-2px}
+    .nav{display:flex;align-items:center;gap:22px;font-size:11px}
+    .nav a{opacity:.88;transition:opacity .25s,color .25s}.nav a:hover{opacity:1;color:#b9f0f4}
+    .nav .nav-cta{padding:4px 15px;background:rgba(255,255,255,.19);border:1px solid rgba(255,255,255,.22)}
+    .hero-inner{width:var(--wide);height:100%;margin:auto;position:relative;z-index:2;display:flex;align-items:flex-end;padding-bottom:58px}
+    .hero-copy{max-width:900px}
+    .hero-copy .eyebrow{margin-bottom:18px}
+    .hero-copy h1{margin-bottom:8px;font-weight:300}
+    .hero-sub{font-size:12px;margin:0;opacity:.84}
+    .scrollmark{position:absolute;z-index:2;bottom:32px;right:calc((100% - var(--wide))/2);font-size:10px;letter-spacing:.16em;writing-mode:vertical-rl;display:flex;gap:10px;align-items:center}
+    .scrollmark::after{content:"";display:block;width:1px;height:52px;background:#fff;margin-top:10px;animation:scrollLine 1.6s ease-in-out infinite}
+    @keyframes scrollLine{50%{transform:scaleY(.35);transform-origin:bottom}}
+
+    /* introductory collage */
+    .intro{min-height:108vh}
+    .intro .container{height:100%;display:grid;grid-template-columns:1fr 1fr;align-items:center;position:relative}
+    .collage{position:relative;height:650px}
+    .collage .main-shot{position:absolute;left:6%;top:8%;width:310px;height:390px}
+    .collage .small-shot{position:absolute;left:245px;top:350px;width:190px;height:170px;transform:rotate(2deg)}
+    .collage .small-shot img{filter:grayscale(1) contrast(1.05)}
+    .collage::after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(53,185,198,.18);filter:blur(42px);left:100px;top:180px;z-index:-1}
+    .intro-words{align-self:end;margin-bottom:70px;padding-left:9%}
+    .intro-words h2{max-width:12em;margin-bottom:20px}
+    .intro-words .copy{max-width:31em}
+
+    /* concept */
+    .concept{min-height:94vh}
+    .concept .container{display:grid;grid-template-columns:42% 1fr;gap:9%;align-items:center}
+    .concept-visual{width:400px;height:500px;justify-self:center;position:relative;background:linear-gradient(135deg,#c5e6ec,#eaf5f6)}
+    .concept-visual::before{content:"NEXORA / FIELD";position:absolute;z-index:2;top:42px;left:36px;font-size:10px;letter-spacing:.1em;color:#173342}
+    .concept-visual::after{content:"";position:absolute;right:-52px;bottom:44px;width:57%;height:1px;background:var(--ink)}
+    .concept-visual img{opacity:.79;mix-blend-mode:multiply}
+    .concept-copy{padding-top:110px}
+    .concept-copy h2{font-size:clamp(1.6rem,2.6vw,2.2rem)}
+    .concept-copy p{margin-bottom:28px}
+
+    /* solutions */
+    .solutions{min-height:760px;padding:0;background:linear-gradient(110deg,#e8f6f7,#f8fcfc)}
+    .solutions .container{display:grid;grid-template-columns:44% 56%;min-height:760px}
+    .solutions-copy{padding:120px 10% 92px 7%;display:flex;flex-direction:column;justify-content:center}
+    .solutions-copy .copy{margin:26px 0 28px}
+    .solution-gallery{padding:72px 6% 72px 0;display:grid;grid-template-columns:1.25fr 1fr;grid-template-rows:180px 180px 180px;gap:14px}
+    .solution-gallery .image-frame:first-child{grid-row:1 / 3}
+    .solution-gallery .image-frame:nth-child(3){grid-row:2 / 4}
+    .solution-gallery .image-frame:nth-child(4){grid-row:3 / 4}
+    .solution-gallery .image-frame{border-radius:0;background:#b8dce1}
+    .solution-gallery img{object-fit:cover}
+
+    /* technology */
+    .technology{min-height:780px;color:#fff;background:#031927;overflow:hidden}
+    .technology::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 36% 58%,rgba(0,117,158,.45),transparent 26%),linear-gradient(100deg,#031927,#061521)}
+    .technology .container{position:relative;display:grid;grid-template-columns:46% 54%;align-items:center;gap:5%}
+    .tech-visual{height:530px;position:relative}
+    .tech-visual .image-frame{height:100%;background:#0c6076;border-radius:0}
+    .tech-visual img{opacity:.76;mix-blend-mode:screen;filter:saturate(.5) contrast(1.2)}
+    .tech-visual::after{content:"";position:absolute;inset:14% -4% 9% 20%;border:1px solid rgba(255,255,255,.16);pointer-events:none}
+    .tech-copy{position:relative;z-index:2;padding:44px;border:1px solid rgba(255,255,255,.18);background:rgba(2,20,31,.16)}
+    .tech-copy .copy{opacity:.87;margin-bottom:28px}
+    .technology .text-link{color:#fff}
+
+    /* company */
+    .company{min-height:850px}
+    .company .container{display:grid;grid-template-columns:48% 1fr;gap:7%;align-items:center}
+    .company-image{height:610px;position:relative}
+    .company-image .image-frame{height:100%;border-radius:0;background:#719ca9}
+    .caption-card{position:absolute;right:-36px;bottom:38px;width:240px;padding:18px 20px;background:#fff;color:var(--ink);box-shadow:var(--shadow);font-size:11px;line-height:1.7}
+    .caption-card strong{display:block;font-size:13px;font-weight:500;margin-top:5px}
+    .caption-card::before{content:"";position:absolute;inset:-18px 24px 16px -20px;background:rgba(53,185,198,.25);filter:blur(23px);z-index:-1}
+    .company-list{padding-top:20px}
+    .company-list h2{margin-bottom:46px}
+    .company-list a{display:flex;justify-content:space-between;align-items:center;padding:17px 3px;border-top:1px solid var(--line);font-size:14px;transition:padding .3s,color .3s,background .3s}
+    .company-list a:last-child{border-bottom:1px solid var(--line)}
+    .company-list a:hover{padding-left:12px;color:#087382;background:rgba(53,185,198,.06)}
+    .company-list span:last-child{font-size:18px;font-weight:300}
+
+    /* recruit */
+    .recruit{min-height:960px;background:linear-gradient(130deg,#33aebc,#67c8d1);color:#fff;overflow:hidden;text-align:center}
+    .recruit .container{position:relative;display:flex;min-height:760px;flex-direction:column;justify-content:center;align-items:center}
+    .recruit .section-title{align-self:center}
+    .recruit h2{margin-bottom:22px}
+    .recruit .copy{margin-inline:auto;opacity:.92}
+    .recruit .recruit-link{color:#fff;margin-top:22px}
+    .orbit{position:absolute;inset:0;pointer-events:none}
+    .orbit .mini{position:absolute;width:72px;height:72px;border-radius:4px;overflow:hidden;box-shadow:0 10px 22px rgba(9,27,37,.17)}
+    .orbit .mini:nth-child(1){top:4%;left:4%;transform:rotate(-18deg)}
+    .orbit .mini:nth-child(2){top:8%;left:22%;transform:rotate(-10deg)}
+    .orbit .mini:nth-child(3){top:5%;right:29%;transform:rotate(9deg)}
+    .orbit .mini:nth-child(4){top:18%;right:8%;transform:rotate(23deg)}
+    .orbit .mini:nth-child(5){top:39%;left:-1%;transform:rotate(-22deg)}
+    .orbit .mini:nth-child(6){top:45%;right:-2%;transform:rotate(28deg)}
+    .recruit-options{width:min(960px,94%);display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:62px;text-align:left}
+    .recruit-options a{padding:16px 18px;border:1px solid rgba(255,255,255,.34);display:grid;grid-template-columns:56px 1fr auto;gap:14px;align-items:center;transition:background .3s,transform .3s}
+    .recruit-options a:hover{background:rgba(255,255,255,.14);transform:translateY(-4px)}
+    .recruit-options .thumb{height:45px;overflow:hidden;border-radius:3px;background:#378a94}
+    .recruit-options strong{font-size:13px;font-weight:400;display:block}
+    .recruit-options small{font-size:9px;opacity:.72}
+
+    /* journal */
+    .journal{min-height:830px}
+    .journal .container{display:flex;flex-direction:column;justify-content:center}
+    .journal-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:48px}
+    .journal-track{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+    .journal-item{min-width:0;transition:transform .35s}
+    .journal-item:hover{transform:translateY(-7px)}
+    .journal-item .image-frame{height:210px;border-radius:4px;background:#88aab0}
+    .journal-item:hover img{transform:scale(1.06)}
+    .journal-meta{margin:12px 0 5px;color:#617078;font-size:10px;display:flex;justify-content:space-between}
+    .tag{border:1px solid var(--line);padding:0 5px;color:var(--ink)}
+    .journal-item h3{font-size:12px;font-weight:400;line-height:1.65}
+    .journal-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:36px;border-top:1px solid var(--line);padding-top:20px}
+    .pager{display:flex;gap:6px}.pager button{width:28px;height:28px;border:1px solid var(--line);background:#fff;color:var(--ink);transition:.25s}.pager button:hover{background:var(--ink);color:#fff}
+
+    /* news */
+    .news{min-height:600px;padding-top:8vh}
+    .news .container{display:grid;grid-template-columns:32% 1fr;align-items:start;gap:8%}
+    .news-card{width:min(350px,100%);border:1px solid var(--line);padding:18px 18px 14px;background:#fff;transition:box-shadow .35s,transform .35s}
+    .news-card:hover{box-shadow:var(--shadow);transform:translateY(-4px)}
+    .news-card time{font-size:10px;color:#617078}
+    .news-card p{font-size:12px;border-top:1px solid var(--line);margin:10px 0 0;padding-top:12px}
+    .news-card .arrowline{display:flex;justify-content:flex-end;margin-top:10px}
+    .news-all{justify-self:end;align-self:end;margin-top:210px}
+
+    /* contact/footer */
+    .contact{min-height:0;padding:0 0 0;background:var(--deep);color:#fff}
+    .contact .container{padding:72px 0 0}
+    .contact-grid{display:grid;grid-template-columns:1fr 1fr}
+    .contact-copy{min-height:360px;padding:52px 52px;background:linear-gradient(130deg,#1692a2,#57bec7);border-radius:4px 0 0 4px;display:flex;flex-direction:column;justify-content:center}
+    .contact-copy h2{margin-bottom:16px}.contact-copy .copy{font-size:12px;opacity:.93}
+    .contact-big{margin:28px 0 0;font-size:25px;font-weight:300;line-height:1.35;text-align:right}
+    .contact-big .arrow{vertical-align:middle}
+    .contact-image{min-height:360px;background:#547f8d}
+    .contact-image img{filter:saturate(.72)}
+    footer{padding:72px 0 26px;background:linear-gradient(180deg,#061d28 0%,#06242f 62%,#0c9baa 100%)}
+    .footer-grid{display:grid;grid-template-columns:1.5fr repeat(4,1fr);gap:36px;color:#fff}
+    .footer-brand{font-family:Georgia,serif;font-size:22px;line-height:1.2}
+    .footer-brand p{font-family:var(--sans);font-size:10px;line-height:1.8;margin:18px 0}
+    .footer-grid h3{font-size:11px;font-weight:400;margin:0 0 8px}
+    .footer-grid a{display:block;font-size:10px;line-height:2.05;opacity:.83;transition:opacity .2s,color .2s}.footer-grid a:hover{opacity:1;color:#a6edf2}
+    .footer-bottom{width:var(--wide);margin:56px auto 0;padding-top:16px;border-top:1px solid rgba(255,255,255,.2);display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.75)}
+
+    @media (max-width:800px){
+      :root{--wide:min(100% - 36px,1440px)}
+      body{font-size:14px}.section{min-height:auto;padding:96px 0}
+      .nav{display:none}.topbar{top:10px;height:48px}.brand{font-size:17px}
+      .hero{min-height:680px}.hero-inner{padding-bottom:80px}.hero-copy h1{max-width:9em}.scrollmark{right:18px}
+      .intro .container,.concept .container,.technology .container,.company .container,.news .container{grid-template-columns:1fr;gap:40px}
+      .intro{min-height:auto}.collage{height:450px}.collage .main-shot{left:0;width:230px;height:315px}.collage .small-shot{left:170px;top:275px;width:150px;height:135px}.intro-words{padding:0;margin:0}
+      .concept-visual{width:min(82vw,390px);height:420px}.concept-copy{padding-top:0}
+      .solutions .container{display:block;min-height:0}.solutions-copy{padding:96px 0 40px}.solution-gallery{padding:20px 0 96px;grid-template-rows:120px 120px 120px}
+      .technology .container{gap:0}.tech-visual{height:360px}.tech-copy{margin-top:-50px;margin-left:24px;padding:28px}
+      .company-image{height:430px}.caption-card{right:-8px;bottom:-20px;width:205px}.company-list{padding-top:30px}
+      .recruit{padding:88px 0}.recruit .container{min-height:730px}.orbit .mini{width:48px;height:48px}.recruit-options{grid-template-columns:1fr;margin-top:45px}.orbit .mini:nth-child(2),.orbit .mini:nth-child(3){display:none}
+      .journal-head{margin-bottom:28px}.journal-track{grid-template-columns:repeat(2,1fr);gap:18px}.journal-item .image-frame{height:145px}.journal-item:nth-child(4){display:none}
+      .news-all{margin-top:0;justify-self:start}.contact .container{width:100%;padding:0}.contact-grid{grid-template-columns:1fr}.contact-copy{padding:56px 18px;border-radius:0}.contact-image{min-height:260px}
+      footer{padding:56px 0 22px}.footer-grid{width:var(--wide);margin:auto;grid-template-columns:1fr 1fr;gap:28px}.footer-brand{grid-column:1/-1}.footer-bottom{margin-top:38px}
+    }
+  </style>
+</head>
+<body>
+  <script>document.documentElement.classList.add('js');</script>
+
+  <header class="hero" id="top">
+    <div class="hero-media">
+      <img src="http://127.0.0.1:5000/uploads/up_eefd062ac1.jpg" width="1600" height="900" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="topbar">
+      <a class="brand" href="#top">NEXORA FIELD<small>OPERATIONS LABORATORY</small></a>
+      <nav class="nav" aria-label="メインナビゲーション">
+        <a href="#about">私たちについて</a>
+        <a href="#solutions">運用設計</a>
+        <a href="#technology">技術情報</a>
+        <a href="#company">会社案内</a>
+        <a href="#recruit">採用情報</a>
+        <a href="#journal">お知らせ</a>
+        <a class="nav-cta" href="#contact">お問い合わせ</a>
+        <a href="#top">EN</a>
+      </nav>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Precision logistics, quietly advanced.</p>
+        <h1>人と現場のあいだに、<br>静かな精度を。</h1>
+        <p class="hero-sub">NEXORA FIELD / SENDAI OPERATIONS CENTER</p>
+      </div>
+    </div>
+    <div class="scrollmark">SCROLL</div>
+  </header>
+
+  <main>
+    <section class="section intro" id="about">
+      <div class="container">
+        <div class="collage reveal">
+          <div class="image-frame main-shot">
+            <img src="http://127.0.0.1:5000/uploads/up_c37c8f7a38.png" width="620" height="780" alt="物流倉庫で働くスタッフ" onerror="this.style.display='none'">
+          </div>
+          <div class="image-frame small-shot">
+            <img src="http://127.0.0.1:5000/uploads/up_9b10b98a25.png" width="380" height="340" alt="設計図に線を引く手元" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div class="intro-words reveal delay-2">
+          <p class="eyebrow">Our perspective</p>
+          <h2>荷物の先にある、<br>誰かの一日を整える。</h2>
+          <p class="copy">仙台港から半径30kmの配送網を起点に、入荷、検品、保管、出荷までをひとつの設計図として見つめます。毎日18,000点の小さな流れに、迷いのない仕組みをつくります。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section concept tint">
+      <div class="container">
+        <div class="concept-visual image-frame reveal">
+          <img src="http://127.0.0.1:5000/uploads/up_f8b7d3a516.png" width="800" height="1000" alt="未来へ飛ぶ紙飛行機のイメージ" onerror="this.style.display='none'">
+        </div>
+        <div class="concept-copy reveal delay-2">
+          <p class="eyebrow">Field note 01</p>
+          <h2>「届く」を、再設計する。</h2>
+          <p class="copy">標準化だけでは、現場は軽くなりません。棚の高さ、手の動き、午後3時の出荷量まで観察し、各拠点のリズムに合うオペレーションを組み立てます。</p>
+          <a class="text-link" href="#solutions">NEXORAの運用設計 <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="solutions" id="solutions">
+      <div class="container">
+        <div class="solutions-copy reveal">
+          <p class="eyebrow">Solutions</p>
+          <h2>現場に合わせる、<br>3つの機能。</h2>
+          <p class="copy">EC出荷、流通加工、衛生管理が必要な軽作業。品目ごとの特性を読み取り、必要な場所に必要な工程だけを置いていきます。</p>
+          <a class="text-link" href="#contact">対応サービスを相談する <span class="arrow">→</span></a>
+        </div>
+        <div class="solution-gallery reveal delay-1">
+          <div class="image-frame"><img src="http://127.0.0.1:5000/uploads/up_c10708cb7c.png" width="640" height="720" alt="衛生的な作業場" onerror="this.style.display='none'"></div>
+          <div class="image-frame"><img src="http://127.0.0.1:5000/uploads/up_7899556a14.jpg" width="400" height="360" alt="箱を組み立てる手元" onerror="this.style.display='none'"></div>
+          <div class="image-frame"><img src="http://127.0.0.1:5000/uploads/up_21d1e26c35.jpg" width="400" height="520" alt="倉庫の棚に並ぶ荷物" onerror="this.style.display='none'"></div>
+          <div class="image-frame"><img src="http://127.0.0.1:5000/uploads/up_98b10f6d3c.jpg" width="400" height="300" alt="軽作業に取り組むスタッフ" onerror="this.style.display='none'"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section technology" id="technology">
+      <div class="container">
+        <div class="tech-visual reveal">
+          <div class="image-frame">
+            <img src="http://127.0.0.1:5000/uploads/up_a18f5c2db4.png" width="760" height="900" alt="明るい工場で連携するスタッフ" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div class="tech-copy reveal delay-2">
+          <p class="eyebrow">Technology</p>
+          <h2>1分単位の記録から、<br>次の動きを読む。</h2>
+          <p class="copy">NEXORA Flowは、入出荷と作業時間を現場の言葉で可視化する運用基盤です。2025年の導入拠点では、棚卸し時間を平均28%短縮。数字を管理のためだけに使わず、働きやすさへ返します。</p>
+          <a class="text-link" href="#journal">Flowの技術ノート <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section company" id="company">
+      <div class="container">
+        <div class="company-image reveal">
+          <div class="image-frame">
+            <img src="http://127.0.0.1:5000/uploads/up_4856c07ccc.png" width="760" height="1000" alt="工場スタッフの打ち合わせ" onerror="this.style.display='none'">
+          </div>
+          <div class="caption-card">
+            「正確さは、急がせないことから。」
+            <strong>遠藤 航｜センター長</strong>
+          </div>
+        </div>
+        <div class="company-list reveal delay-2">
+          <p class="eyebrow">Company</p>
+          <h2>会社案内</h2>
+          <a href="#company"><span>代表メッセージ</span><span>→</span></a>
+          <a href="#company"><span>運営方針</span><span>→</span></a>
+          <a href="#company"><span>品質・衛生管理</span><span>→</span></a>
+          <a href="#company"><span>地域との取り組み</span><span>→</span></a>
+          <a href="#company"><span>会社概要</span><span>→</span></a>
+          <a href="#company"><span>拠点・アクセス</span><span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section recruit" id="recruit">
+      <div class="container">
+        <div class="orbit" aria-hidden="true">
+          <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_034d4c10b7.png" width="144" height="144" alt="" onerror="this.style.display='none'"></div>
+          <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_292cf87096.png" width="144" height="144" alt="" onerror="this.style.display='none'"></div>
+          <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_22a345d107.png" width="144" height="144" alt="" onerror="this.style.display='none'"></div>
+          <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_a29f0082d5.png" width="144" height="144" alt="" onerror="this.style.display='none'"></div>
+          <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_330c3f68bf.jpg" width="144" height="144" alt="" onerror="this.style.display='none'"></div>
+          <div class="mini"><img src="http://127.0.0.1:5000/uploads/up_00553e2951.png" width="144" height="144" alt="" onerror="this.style.display='none'"></div>
+        </div>
+        <div class="section-title reveal">
+          <p class="eyebrow">Recruit</p>
+          <h2>見えない場所で、<br>明日の当たり前を守る仕事。</h2>
+          <p class="copy">仙台・名取の2拠点で、現在63名が働いています。経験よりも、目の前のものを丁寧に扱う姿勢を大切にしています。</p>
+          <a class="text-link recruit-link" href="#contact">採用について聞く <span class="arrow">→</span></a>
+        </div>
+        <div class="recruit-options reveal delay-2">
+          <a href="#contact"><span class="thumb"><img src="http://127.0.0.1:5000/uploads/up_06aa20751a.png" width="112" height="90" alt="" onerror="this.style.display='none'"></span><span><strong>メンバーの声</strong><small>People &amp; Voice</small></span><span>→</span></a>
+          <a href="#contact"><span class="thumb"><img src="http://127.0.0.1:5000/uploads/up_5518e04806.jpg" width="112" height="90" alt="" onerror="this.style.display='none'"></span><span><strong>数字で見るNEXORA</strong><small>Data</small></span><span>→</span></a>
+          <a href="#contact"><span class="thumb"><img src="http://127.0.0.1:5000/uploads/up_1d00632976.jpeg" width="112" height="90" alt="" onerror="this.style.display='none'"></span><span><strong>一日の仕事</strong><small>Daily work</small></span><span>→</span></a>
+          <a href="#contact"><span class="thumb"><img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" width="112" height="90" alt="" onerror="this.style.display='none'"></span><span><strong>募集要項</strong><small>Requirements</small></span><span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section journal" id="journal">
+      <div class="container">
+        <div class="journal-head reveal">
+          <div class="section-title">
+            <p class="eyebrow">Journal</p>
+            <h2>現場からの記録</h2>
+          </div>
+          <a class="text-link" href="#journal">すべて見る <span class="arrow">→</span></a>
+        </div>
+        <div class="journal-track">
+          <article class="journal-item reveal">
+            <a href="#journal">
+              <div class="image-frame"><img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" width="440" height="420" alt="木漏れ日の並木道" onerror="this.style.display='none'"></div>
+              <div class="journal-meta"><time>2026.07.08</time><span class="tag">地域</span></div>
+              <h3>七北田川清掃、今年は42名で参加しました。</h3>
+            </a>
+          </article>
+          <article class="journal-item reveal delay-1">
+            <a href="#journal">
+              <div class="image-frame"><img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" width="440" height="420" alt="ノートPCで作業する手元" onerror="this.style.display='none'"></div>
+              <div class="journal-meta"><time>2026.06.21</time><span class="tag">技術</span></div>
+              <h3>棚番を変えずに、歩数を減らすということ。</h3>
+            </a>
+          </article>
+          <article class="journal-item reveal delay-2">
+            <a href="#journal">
+              <div class="image-frame"><img src="http://127.0.0.1:5000/uploads/up_ef630e29f1.jpg" width="440" height="420" alt="物流倉庫の梱包作業" onerror="this.style.display='none'"></div>
+              <div class="journal-meta"><time>2026.06.04</time><span class="tag">現場</span></div>
+              <h3>出荷ピーク前、15分のミーティング。</h3>
+            </a>
+          </article>
+          <article class="journal-item reveal delay-3">
+            <a href="#journal">
+              <div class="image-frame"><img src="http://127.0.0.1:5000/uploads/up_d2ba1e1955.png" width="440" height="420" alt="整ったオフィス空間" onerror="this.style.display='none'"></div>
+              <div class="journal-meta"><time>2026.05.18</time><span class="tag">拠点</span></div>
+              <h3>名取サテライト、休憩室を改装しました。</h3>
+            </a>
+          </article>
+        </div>
+        <div class="journal-bottom reveal delay-2">
+          <div class="pager"><button aria-label="前へ">←</button><button aria-label="次へ">→</button></div>
+          <a class="text-link" href="#journal">すべて見る <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section news tint">
+      <div class="container">
+        <div class="section-title reveal">
+          <p class="eyebrow">News</p>
+          <h2>お知らせ</h2>
+        </div>
+        <div class="reveal delay-1">
+          <article class="news-card">
+            <time datetime="2026-07-01">2026.07.01</time>
+            <p>夏季休業期間中の入出荷スケジュールについて。</p>
+            <div class="arrowline"><span class="arrow">→</span></div>
+          </article>
+          <a class="text-link news-all" href="#contact">お知らせ一覧 <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="contact" id="contact">
+    <div class="container">
+      <div class="contact-grid">
+        <div class="contact-copy reveal">
+          <p class="eyebrow">Contact</p>
+          <h2>お問い合わせ</h2>
+          <p class="copy">保管・出荷の見直し、拠点立ち上げのご相談など。現場の状況を伺いながら、担当者が2営業日以内にご連絡します。</p>
+          <a class="contact-big" href="mailto:hello@nexora-field.jp">Contact Us <span class="arrow">→</span></a>
+        </div>
+        <div class="contact-image reveal delay-1">
+          <img src="http://127.0.0.1:5000/uploads/up_ea7c56b396.png" width="800" height="600" alt="整った明るいオフィス" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          NEXORA FIELD
+          <p>〒983-0001 宮城県仙台市宮城野区港2-18-7<br>TEL 022-398-1680<br>受付時間｜平日 9:00–17:30</p>
+          <p>ISO 9001 / 14001<br>認証対象：物流運用・流通加工</p>
+        </div>
+        <div>
+          <h3>私たちについて</h3>
+          <a href="#about">NEXORAの視点</a>
+          <a href="#about">運用設計</a>
+          <a href="#technology">技術情報</a>
+        </div>
+        <div>
+          <h3>会社案内</h3>
+          <a href="#company">代表メッセージ</a>
+          <a href="#company">品質管理</a>
+          <a href="#company">会社概要</a>
+          <a href="#company">拠点情報</a>
+        </div>
+        <div>
+          <h3>採用情報</h3>
+          <a href="#recruit">メンバーの声</a>
+          <a href="#recruit">数字で見る</a>
+          <a href="#recruit">募集要項</a>
+        </div>
+        <div>
+          <h3>ご案内</h3>
+          <a href="#journal">ジャーナル</a>
+          <a href="#journal">お知らせ</a>
+          <a href="#contact">お問い合わせ</a>
+          <a href="#top">プライバシーポリシー</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>©2026 NEXORA FIELD Inc. All Rights Reserved.</span>
+        <span>Privacy policy</span>
+      </div>
+    </footer>
+  </section>
+
+  <script>
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.14});
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+    window.addEventListener('load',()=>{
+      document.querySelectorAll('.hero .hero-copy, .hero .topbar, .hero .scrollmark').forEach((el,i)=>{
+        el.style.opacity='0';
+        el.style.transform=i===0?'translateY(34px)':'translateY(-12px)';
+        el.style.transition=`opacity .9s ${.18+i*.16}s ease, transform .9s ${.18+i*.16}s cubic-bezier(.2,.75,.25,1)`;
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          el.style.opacity='1'; el.style.transform='translateY(0)';
+        }));
+      });
+    });
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

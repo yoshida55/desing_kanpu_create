@@ -1697,6 +1697,13 @@ _EDIT_BAR = """
 #__ce_pk .favgr .it.now{border-color:#e8a300;background:#fffaf0}
 #__ce_pk .favgr .nm{font-weight:700;font-size:13px;color:#1d1d1f}
 #__ce_pk .favgr .dt{font-size:11px;color:#888;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#__ce_pkpos{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
+#__ce_pkpos .bx{background:#fff;border-radius:12px;padding:16px;max-width:420px;width:92%;max-height:80vh;overflow:auto;font-family:system-ui,sans-serif}
+#__ce_pkpos h4{margin:0 0 12px;font-size:15px}
+#__ce_pkpos .cl{float:right;cursor:pointer;font-size:18px;font-weight:700;color:#888}
+#__ce_pkpos .poslist{display:flex;flex-direction:column;gap:6px}
+#__ce_pkpos .sit-pos{border:1px solid #e2e2e6;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#1d1d1f;background:#fff}
+#__ce_pkpos .sit-pos:hover{border-color:#e8a300;background:#fffaf0}
 #__ce_cm{position:fixed;z-index:2147483002;width:290px;max-width:92vw;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 16px 44px rgba(0,0,0,.32);font-family:system-ui,sans-serif;color:#1d1d1f;overflow:hidden}
 #__ce_cm .h{background:#1d1d1f;color:#fff;padding:9px 12px;font-size:12px;font-weight:700;display:flex;gap:6px;align-items:center}
 #__ce_cm .h .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1778,6 +1785,12 @@ html.__ce_altmode{cursor:text}
     <div class="lbl plain">🧹 全体を規則化（左右の余白・見出しを一律に揃える・明らかに違う余白は別扱い・AIなし＝一貫性UP）</div>
     <button class="im" id="__ce_normalize" style="background:#0b6e4f;color:#fff">🧹 余白・見出しを一律に揃える</button>
     <button class="im" id="__ce_btncolor" style="background:#0b6e4f;color:#fff">🎨 全ボタンをテーマ色に統一</button>
+    <div class="lbl plain">➖ 区切り線（各セクションの先頭に短い線・AIなし。不要な所は右クリック→削除）</div>
+    <div class="row" style="gap:10px;align-items:center">
+      <label style="font-size:12px;color:#555">太さ<input id="__ce_divline_h" type="number" value="2" min="1" max="20" style="width:52px;margin-left:4px"></label>
+      <label style="font-size:12px;color:#555">長さ<input id="__ce_divline_w" type="number" value="64" min="10" max="400" style="width:60px;margin-left:4px"></label>
+    </div>
+    <button class="im" id="__ce_divline" style="background:#0b6e4f;color:#fff">➖ 全セクションの先頭に区切り線を入れる</button>
     <div class="lbl plain">🤖 修正・おしゃれに使うAI（モデルは⚙設定で）</div>
     <select id="__ce_ai"><option value="anthropic">Claude</option><option value="openai">GPT</option><option value="gemini">Gemini</option><option value="deepseek">DeepSeek（激安）</option><option value="zai">GLM（Z.ai・激安）</option></select>
     <div class="lbl plain">① 範囲を選ぶ（全体／セクション）</div>
@@ -1949,6 +1962,36 @@ html.__ce_altmode{cursor:text}
   }
   // 🧹 全体を規則化：セクション余白を一律・主要見出しのサイズと行間を一律にそろえる（AIなし・一貫性UP）。
   // AI一括改善が「シンプルすぎ」になりがちな一貫性(余白/見出し)を、機械的に確実にそろえる用。
+  // ➖ 全セクションの先頭に区切り線＋見出しラベルを入れる（AIなし）。
+  // ラベルの文字は①のセクション選択と同じ「H1/H2/H3を拾う」ロジックを流用＝AI不要で自動抽出できる。
+  var divBtn=document.getElementById('__ce_divline');
+  if(divBtn) divBtn.addEventListener('click',function(){
+    var hIn=document.getElementById('__ce_divline_h'), wIn=document.getElementById('__ce_divline_w');
+    var hpx=Math.max(1,Math.min(20,Number(hIn&&hIn.value)||2));
+    var wpx=Math.max(10,Math.min(400,Number(wIn&&wIn.value)||64));
+    if(!confirm('全セクションの先頭に「太さ'+hpx+'px・長さ'+wpx+'pxの線＋見出しラベル」を入れます（AIなし）。\\n既にある区切り線は太さ/長さだけ更新されます。\\n不要な所は右クリック→🗑で個別に消せます。実行しますか？')) return;
+    var secs=[].slice.call(document.querySelectorAll('section')).filter(function(x){return !x.closest('#__ce');});
+    var n=0;
+    secs.forEach(function(s,i){
+      var exist=s.querySelector(':scope > .__ce_divline');
+      if(exist){
+        var bar=exist.querySelector('span'); if(bar){ bar.style.width=wpx+'px'; bar.style.height=hpx+'px'; }
+        n++; return;
+      }
+      var h=s.querySelector('h1,h2,h3');
+      var label=h ? (h.textContent||'').replace(/\\s+/g,' ').trim().slice(0,24) : '';  // 番号は付けない・見出しが無ければ線だけ
+      var wrap=document.createElement('div');
+      wrap.className='__ce_divline';
+      wrap.setAttribute('data-cediv','1');
+      wrap.style.cssText='display:flex;align-items:center;gap:14px;margin:0 0 20px';
+      wrap.innerHTML='<span style="display:inline-block;width:'+wpx+'px;height:'+hpx+'px;background:#c9c9c9;flex:none"></span>'
+        +(label?'<span style="font-size:13px;color:#888;letter-spacing:.05em">'+esc(label)+'</span>':'');
+      s.insertBefore(wrap, s.firstChild);
+      n++;
+    });
+    markDirty();
+    msg.textContent='➖ '+n+'件のセクションの区切り線を更新しました。不要な所は右クリック→🗑で消してください。上の「💾 保存」で確定';
+  });
   var normBtn=document.getElementById('__ce_normalize');
   if(normBtn) normBtn.addEventListener('click',function(){
     if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・セクションの上下余白 100px\\n・セクションの左右余白 → 多数派の値にそろえる（明らかに違うものはそのまま＝意図的な余白として残す）\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
@@ -2258,6 +2301,27 @@ html.__ce_altmode{cursor:text}
   // さらに色/フォント変数をセクション自身に埋め込み、貼り先のページに依存せず表示できるようにする。
   function cleanSection(el, selfContain){
     var c=el.cloneNode(true);
+    // 絶対配置(position:absolute)の子要素は、元ページ固有の入れ子（この部品の外側にある
+    // position:relativeな祖先）を位置の基準にしていることがある。別カンプに持っていくと
+    // その基準が失われ、代わりに部品自身（セクション丸ごと）が基準になってしまい、
+    // 本来は小さな飾りバッジだった要素が画面の隅に巨大にズレて出る事故が実際に起きた。
+    // → 保存の瞬間に「セクション自身を基準にした見た目の位置(px)」を実測して焼き込み、
+    //   位置の基準がどこになっても保存時の見た目を再現できるようにする。
+    (function(){
+      var baseRect=el.getBoundingClientRect();
+      var srcEls=el.querySelectorAll('*'), dstEls=c.querySelectorAll('*');
+      for(var i=0;i<srcEls.length;i++){
+        var s=srcEls[i], d=dstEls[i]; if(!d) continue;
+        var cs; try{ cs=getComputedStyle(s); }catch(_){ continue; }
+        if(cs.position!=='absolute') continue;
+        var r=s.getBoundingClientRect();
+        if(!r.width && !r.height) continue;
+        d.style.setProperty('top',(r.top-baseRect.top)+'px','important');
+        d.style.setProperty('left',(r.left-baseRect.left)+'px','important');
+        d.style.setProperty('right','auto','important');
+        d.style.setProperty('bottom','auto','important');
+      }
+    })();
     // 前回⭐保存で抱かせた持ち運びCSS(style[data-cepart])は一旦捨てて、今の状態から取り直す
     // ★下のstripループがdata-ce*属性を外す前にやること（後だとセレクタで見つけられず二重に溜まる）
     var oldPart=c.querySelector('style[data-cepart]'); if(oldPart) oldPart.remove();
@@ -2409,8 +2473,10 @@ html.__ce_altmode{cursor:text}
     var name=window.prompt('この'+(kind==='section'?'セクション':kind==='header'?'ヘッダー':'フッター')+'を「部品」として保存します。別のカンプの同じ枠にAIなしで入れ替えできます。\\n名前をどうぞ：', label);
     if(name===null) return;
     favBtn.disabled=true; var old=favBtn.textContent; favBtn.textContent='保存中…';
-    // ヘッダー/フッターは効いているCSSルールを@scopeで抱かせて自己完結させる（selfContain=true）
-    fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el, kind!=='section').outerHTML,headcss:headCss(),name:name,kind:kind})})
+    // 効いているCSSルールを@scopeで抱かせて自己完結させる（selfContain=true・種類問わず）。
+    // ★以前はセクションだけselfContain=falseだった＝別カンプ（特にクローン由来）に🔀/➕すると
+    //   持ち込み先にクラス定義が無く、レイアウトが崩れて縦に間延びする実害があった→常時trueに統一。
+    fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el, true).outerHTML,headcss:headCss(),name:name,kind:kind})})
     .then(function(r){return r.json();}).then(function(d){
       favBtn.disabled=false; favBtn.textContent=old;
       msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'):('保存失敗：'+(d.message||''));
@@ -2518,6 +2584,23 @@ html.__ce_altmode{cursor:text}
       },1200);
     }).catch(function(){ reset(); msg.textContent='通信エラー'; });
   });
+  // 差し替え/追加した新要素には出現アニメの監視(IntersectionObserver)が付いていない＝
+  // fxa_pre/reveal系が透明のまま永久に出ない（実際に起きた）。「もう見えた」状態にして表示する。
+  // ここで付けるfxa_in/SHOWクラス/--hlwは💾保存時にcleanHtmlが必ず素に戻す＝保存後の開き直しでは普通に再生される。
+  function markRevealed(nw){
+    if(!nw) return;
+    var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+    var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+    [].slice.call(nw.querySelectorAll('*')).concat([nw]).forEach(function(n){
+      if(!n.classList) return;
+      if(n.classList.contains('fxa_pre')) n.classList.add('fxa_in');
+      if(n.classList.contains('fxa_hl')) n.style.setProperty('--hlw',100);
+      try{
+        var cs=getComputedStyle(n);
+        if((cs.opacity==='0'||cs.visibility==='hidden') && n.matches(SEL)) SHOW.forEach(function(k){ n.classList.add(k); });
+      }catch(_){}
+    });
+  }
   // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
   var favListBtn=document.getElementById('__ce_favlist');
   if(favListBtn) favListBtn.addEventListener('click',function(){
@@ -2550,27 +2633,63 @@ html.__ce_altmode{cursor:text}
         var f=(favs||[]).filter(function(x){return x.id===id;})[0]; if(!f) return;
         var par=target.parentElement, ci=[].indexOf.call(par.children,target);
         target.outerHTML=f.html;   // AIなしで丸ごと差し替え
-        // ★差し替えた新要素には出現アニメの監視(IntersectionObserver)が付いていない＝
-        //   fxa_pre/reveal系が透明のまま永久に出ない（実際に起きた）。「もう見えた」状態にして表示する。
-        //   ここで付けるfxa_in/SHOWクラス/--hlwは💾保存時にcleanHtmlが必ず素に戻す＝保存後の開き直しでは普通に再生される。
-        (function(nw){
-          if(!nw) return;
-          var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
-          var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
-          [].slice.call(nw.querySelectorAll('*')).concat([nw]).forEach(function(n){
-            if(!n.classList) return;
-            if(n.classList.contains('fxa_pre')) n.classList.add('fxa_in');
-            if(n.classList.contains('fxa_hl')) n.style.setProperty('--hlw',100);
-            try{
-              var cs=getComputedStyle(n);
-              if((cs.opacity==='0'||cs.visibility==='hidden') && n.matches(SEL)) SHOW.forEach(function(k){ n.classList.add(k); });
-            }catch(_){}
-          });
-        })(par.children[ci]);
+        markRevealed(par.children[ci]);
         ov.remove(); markDirty();
         msg.textContent='🔀 '+tKindJp+'を入れ替えました。上の「💾 保存」で確定してください';
       });
     }).catch(function(){ msg.textContent='お気に入り一覧の取得に失敗しました'; });
+  });
+  // ➕ お気に入りからセクションを追加（既存を壊さず、選んだ場所に挿入・AIなし）
+  var favAddBtn=document.getElementById('__ce_favadd');
+  if(favAddBtn) favAddBtn.addEventListener('click',function(){
+    var secs=[].slice.call(document.querySelectorAll('section')).filter(function(x){return !x.closest('#__ce');});
+    if(!secs.length){ msg.textContent='追加先の目印になるセクションがまだページにありません'; return; }
+    // ステップ1：どこに追加するか選ばせる（先頭 or 各セクションの直後）
+    var posRows='<div class="sit-pos" data-pos="-1">▲ 一番上（先頭）に追加</div>'
+      +secs.map(function(s,i){
+        var hEl=s.querySelector('h1,h2,h3');
+        var lbl=(hEl?hEl.textContent:('セクション'+(i+1))).replace(/\\s+/g,' ').trim().slice(0,26);
+        return '<div class="sit-pos" data-pos="'+i+'">▼ 「'+esc(lbl||('セクション'+(i+1)))+'」の後ろに追加</div>';
+      }).join('');
+    var ovp=document.createElement('div'); ovp.id='__ce_pkpos';
+    ovp.innerHTML='<div class="bx"><span class="cl" id="__ce_pkposx">×</span><h4>➕ どこに追加しますか？</h4><div class="poslist">'+posRows+'</div></div>';
+    document.body.appendChild(ovp);
+    ovp.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pkpos'||e.target.id==='__ce_pkposx'){ ovp.remove(); return; }
+      var pit=e.target.closest('.sit-pos'); if(!pit) return;
+      var posIdx=Number(pit.getAttribute('data-pos'));
+      ovp.remove();
+      // ステップ2：追加するセクションのお気に入りを選ばせる（同じ見た目のピッカーを再利用）
+      fetch('/api/section_fav/list').then(function(r){return r.json();}).then(function(d){
+        var favs=(d.favs||[]).filter(function(f){ return (f.kind||'section')==='section'; });
+        var items=favs.length
+          ? favs.map(function(f){
+              var doc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:#fff}'+(f.css||'')+' *,*::before,*::after{opacity:1 !important;visibility:visible !important;filter:none !important;clip-path:none !important;animation:none !important;transition:none !important}</style></head><body>'+f.html+'</body></html>';
+              return '<div class="sit" data-id="'+f.id+'"><div class="pv"><iframe sandbox="allow-same-origin" srcdoc="'+esc(doc)+'"></iframe></div><div class="nm">'+esc(f.name||'')+'</div><button class="del" data-id="'+f.id+'" title="削除">×</button></div>';
+            }).join('')
+          : '<div style="color:#999;padding:8px">まだセクションのお気に入りがありません（⭐で保存できます）</div>';
+        var ov=document.createElement('div'); ov.id='__ce_pk';
+        ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>➕ 追加するセクションを選ぶ（クリックで挿入）</h4><div class="secgr">'+items+'</div></div>';
+        document.body.appendChild(ov);
+        ov.addEventListener('click',function(e){
+          if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+          var del=e.target.closest('.del');
+          if(del){ e.stopPropagation(); var did=del.getAttribute('data-id');
+            fetch('/api/section_fav/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:did})}).then(function(){ var c=del.closest('.sit'); if(c) c.remove(); });
+            return; }
+          var it=e.target.closest('.sit'); if(!it) return;
+          var id=it.getAttribute('data-id');
+          var f=(favs||[]).filter(function(x){return x.id===id;})[0]; if(!f) return;
+          var wrap=document.createElement('div'); wrap.innerHTML=f.html;
+          var newEl=wrap.firstElementChild; if(!newEl){ ov.remove(); return; }
+          if(posIdx<0){ secs[0].parentElement.insertBefore(newEl,secs[0]); }
+          else { var anchor=secs[posIdx]; anchor.parentElement.insertBefore(newEl,anchor.nextSibling); }
+          markRevealed(newEl);
+          ov.remove(); markDirty();
+          msg.textContent='➕ セクションを追加しました。上の「💾 保存」で確定してください';
+        });
+      }).catch(function(){ msg.textContent='お気に入り一覧の取得に失敗しました'; });
+    });
   });
   // その場で再生できるアニメ（AIなし）。g=種類(in/loop/char)、dir=動きの向き、sl=調整スライダー。
   // クリックで即プレビュー→スライダーで調整→「付ける」で無料で焼き込む。
