@@ -1807,8 +1807,7 @@ html.__ce_altmode{cursor:text}
     <div class="lbl plain">🎬 オープニング演出（開いた瞬間に幕→フェードで本体へ・AIなし）</div>
     <button class="im" id="__ce_op_add" style="background:#0b6bcb;color:#fff">🎬 フェードのオープニングを付ける</button>
     <button class="im" id="__ce_op_edit" style="background:#eaf2fd;color:#0b4e8a;border:1px solid #bcd8f7">👁 オープニングを出す／隠す（ロゴ・文字は右クリックで差し替え）</button>
-    <div class="lbl plain">⭐ セクションのお気に入り（①で選んだセクションが対象・AIなし）</div>
-    <button class="im" id="__ce_fav" style="background:#e8a300;color:#fff">⭐ このセクションをお気に入り</button>
+    <div class="lbl plain">⭐ セクションのお気に入り（保存は右クリック→⭐・AIなし）</div>
     <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
     <button class="im" id="__ce_favadd" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">➕ お気に入りからセクションを追加（場所を選ぶ）</button>
     <div class="lbl plain">🎨 おしゃれ度チェック（AIが有名サイト基準で採点＋改善点）</div>
@@ -2464,24 +2463,23 @@ html.__ce_altmode{cursor:text}
   if(opAddBtn) opAddBtn.addEventListener('click',addOpening);
   var opEditBtn=document.getElementById('__ce_op_edit');
   if(opEditBtn) opEditBtn.addEventListener('click',toggleOpening);
-  var favBtn=document.getElementById('__ce_fav');
-  if(favBtn) favBtn.addEventListener('click',function(){
-    var el=curSecEl();
-    if(!el){ msg.textContent='まず①「どこを直す？」で保存したいセクション（またはヘッダー/フッター）を選んでください（ページ全体は不可）'; return; }
+  // ⭐このセクションをお気に入り（右クリックメニューから呼ぶ・2026-07-12に編集バーから移設）
+  function favSaveSection(el){
+    if(!el){ msg.textContent='セクションが見つかりません（保存したいセクションの中で右クリックしてください）'; return; }
     var kind=el.tagName.toLowerCase(); if(kind!=='header'&&kind!=='footer') kind='section';
-    var label=((sec.options[sec.selectedIndex]||{}).text||'セクション').replace(/^[0-9]+\\.\\s*/,'').replace(/（⭐保存・🔀入れ替え用）/,'');
+    var h=el.querySelector('h1,h2,h3');
+    var label=(h&&(h.textContent||'').replace(/\\s+/g,' ').trim().slice(0,20))||'セクション';
     var name=window.prompt('この'+(kind==='section'?'セクション':kind==='header'?'ヘッダー':'フッター')+'を「部品」として保存します。別のカンプの同じ枠にAIなしで入れ替えできます。\\n名前をどうぞ：', label);
     if(name===null) return;
-    favBtn.disabled=true; var old=favBtn.textContent; favBtn.textContent='保存中…';
+    msg.textContent='⭐保存中…';
     // 効いているCSSルールを@scopeで抱かせて自己完結させる（selfContain=true・種類問わず）。
     // ★以前はセクションだけselfContain=falseだった＝別カンプ（特にクローン由来）に🔀/➕すると
     //   持ち込み先にクラス定義が無く、レイアウトが崩れて縦に間延びする実害があった→常時trueに統一。
     fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el, true).outerHTML,headcss:headCss(),name:name,kind:kind})})
     .then(function(r){return r.json();}).then(function(d){
-      favBtn.disabled=false; favBtn.textContent=old;
       msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'):('保存失敗：'+(d.message||''));
-    }).catch(function(){ favBtn.disabled=false; favBtn.textContent=old; msg.textContent='通信エラー'; });
-  });
+    }).catch(function(){ msg.textContent='通信エラー'; });
+  }
   // 🎨 おしゃれ度チェック：現DOMを保存→AIが有名サイト基準で採点＋改善点。結果はモーダル表示。
   function _scBar(label, n){
     var pct=Math.max(0,Math.min(100,(+n||0)*10)), col=n>=8?'#1a7f37':(n>=6?'#b8860b':'#c0392b');
@@ -3421,6 +3419,13 @@ html.__ce_altmode{cursor:text}
   // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
+    // ➖区切り線（線span＋ラベルspanの入れ物）は、入れ物ごと書き換えると線が消える（実際に起きた）
+    // → 編集対象をラベルspanに差し替える。ラベルが無い（線だけ）なら空ラベルを作ってそこを編集。
+    if(el.getAttribute && el.getAttribute('data-cediv')!=null){
+      var _lb=[].slice.call(el.querySelectorAll('span')).filter(function(s){ return (s.textContent||'').trim(); })[0];
+      if(!_lb){ _lb=document.createElement('span'); _lb.setAttribute('style','font-size:13px;color:#888;letter-spacing:.05em'); _lb.textContent='ラベル'; el.appendChild(_lb); }
+      el=_lb;
+    }
     var cur=(el.innerText||el.textContent||'').replace(/\\u200b/g,'');
     var FONTS=[
       ['','（フォントはそのまま）'],
@@ -4373,12 +4378,7 @@ html.__ce_altmode{cursor:text}
     markDirty();
     if(msg) msg.textContent='この要素の動きを消しました（保存で確定）';
   }
-  // ===== ⏱ 順番モード（AIなし・無料）：クリックした順に data-cedelay を刻んで連続演出を作る =====
-  // 使い方：右クリック→「⏱ 出す順番を決める」→出したい順に要素をクリック（もう一度で解除）→
-  //         間隔スライダーで刻み幅を調整→▶通し再生で確認→✔決定で焼き込み→💾保存で残る。
-  // マーカー(.fxa_hl)はハイライトされた文字を直接クリック＝span側にdelayが付く（ランタイムの読み先と同じ）。
-  // 素の要素（動き無し）をクリックしたら自動で「ふわっと出現」を付けてから順番に入れる。
-  var seqMode=null;
+  // ===== ⏳ 演出タイミング（AIなし・無料）＝旧⏱順番モードを一覧型に統合（2026-07-12） =====
   function seqAnimKey(el){
     var c=el.classList;
     if(c.contains('fxa_hl')) return 'hl';
@@ -4398,111 +4398,208 @@ html.__ce_altmode{cursor:text}
     if(c.contains('fxa_y')) return 'fadeup';
     return 'fade';
   }
-  function seqBadgeSync(){
-    if(!seqMode) return;
-    seqMode.badges.forEach(function(b){ b.remove(); }); seqMode.badges=[];
-    var iv=seqMode.interval;
-    seqMode.items.forEach(function(el,i){
-      var r=el.getBoundingClientRect();
-      var b=document.createElement('div');
-      b.id='__ce_seqb'+i;  // __ce系ID＝保存(cleanHtml)・undoスナップの対象外になる
-      b.setAttribute('style','position:absolute;z-index:2147483646;left:'+((window.scrollX||0)+r.left-6)+'px;top:'+((window.scrollY||0)+r.top-14)+'px;background:#7c3aed;color:#fff;font:700 11px/1.6 sans-serif;padding:1px 7px;border-radius:9px;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.35)');
-      b.textContent=(i+1)+'番 '+(i*iv)+'ms';
-      document.body.appendChild(b); seqMode.badges.push(b);
-      el.classList.add('__ce_sel');
-    });
+  // ===== ⏳ 動きの遅れ・速さ調整（AIなし・無料）：右クリック位置の動きを選んで遅らせ／速さを変える =====
+  // 右クリックしたセクション内の全アニメ（🖍マーカー・出現・カウント）を一覧に並べ、
+  // ↑↓で順番を入れ替え→「⏱上から順に刻む」でdata-cedelayを間隔刻みに自動割り当て。
+  // ⏳遅らせ（data-cedelay）と🐢速さ（--hldur/--fxa-dur）は数値入力で即反映。✖で開いた時点に復元。
+  var _dlyP=null;
+  function dlyLabel(el){
+    var k=seqAnimKey(el), def=null;
+    for(var i=0;i<FX.length;i++){ if(FX[i].k===k){ def=FX[i]; break; } }
+    var nm=(k==='hl')?'🖍 マーカー/下線':(def?def.b:'動き');
+    var tx=(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,10);
+    return nm+(tx?('「'+tx+'…」'):'');
   }
-  function seqPickEl(t){
-    // クリック地点がマーカー内ならマーカー（線）そのもの、アニメ済み要素ならその要素、素の要素なら自動でふわっと出現
-    var el=t.closest?(t.closest('.fxa_hl')||t.closest('.fxa_pre,.fxa_cnt')):null;
-    if(!el){
-      el=pickTarget(t); if(!el) return null;
-      if(!(el.classList.contains('fxa_pre')||el.classList.contains('fxa_cnt')||el.classList.contains('fxa_hl'))){
-        applyBake(el,'fadeup');
-        var host=el.closest('.fxa_pre'); if(host) el=host;  // fxWrapで包まれた場合はラッパーが本体（delayの読み先）
+  function dlyPreview(el){
+    clearTimeout(el.__dlyT);
+    var d=+el.getAttribute('data-cedelay')||0;
+    if(el.classList.contains('fxa_hl')){
+      el.classList.remove('fxa_in'); el.style.setProperty('--hlw',0);
+      el.__dlyT=setTimeout(function(){ if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); } }, d);
+    } else {
+      ensureFxAssets();
+      el.style.setProperty('transition','none','important'); el.classList.remove('fxa_in');
+      void el.offsetWidth; el.style.removeProperty('transition');
+      el.__dlyT=setTimeout(function(){ el.classList.add('fxa_in'); }, d+60);
+    }
+  }
+  function dlyClose(){ if(_dlyP){ _dlyP.remove(); _dlyP=null; } }
+  // 🧢 ページ上部のヘッダー帯（ロゴ＋ナビの横長バー）を探す。丸ごとヒーローのheaderは高さで除外
+  function findTopBar(){
+    var cs=[].slice.call(document.querySelectorAll('header, nav, [class*="nav"], [class*="header"]'));
+    for(var i=0;i<cs.length;i++){
+      var el=cs[i];
+      if(el.closest('#__ce')||(el.id&&el.id.indexOf('__ce')===0)) continue;
+      var r=el.getBoundingClientRect(), top=r.top+(window.scrollY||0);
+      if(top<260 && r.height>0 && r.height<200 && r.width>window.innerWidth*0.5){
+        // 中にほぼ同じ大きさの「既にアニメ持ちのバー」があればそちらを使う（外側と二重にしない）
+        if(!el.classList.contains('fxa_pre')){
+          var inn=el.querySelector('.fxa_pre');
+          if(inn){ var ri=inn.getBoundingClientRect(); if(ri.height>=r.height*0.6&&ri.width>=r.width*0.6) return inn; }
+        }
+        return el;
       }
     }
-    return el;
+    return null;
   }
-  function seqStart(){
-    if(seqMode) return;
-    closeMenu();
-    var p=document.createElement('div'); p.id='__ce_seqp';
-    p.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:2147483647;background:#1d1d2b;color:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);font:13px/1.7 sans-serif;min-width:360px');
-    p.innerHTML='<b>⏱ 出す順番を決める</b><span style="opacity:.75;font-size:11px;margin-left:8px">出したい順に要素をクリック（もう一度で解除）</span>'
-      +'<div style="margin-top:6px;display:flex;align-items:center;gap:8px">間隔 <input type="range" id="__ce_seqiv" min="100" max="2000" step="100" value="600" style="flex:1"><span id="__ce_seqivv">600ms</span></div>'
-      +'<div style="margin-top:8px;display:flex;gap:8px">'
-      +'<button id="__ce_seqplay" style="background:#3b82f6;color:#fff;border:none;border-radius:7px;padding:5px 12px;cursor:pointer">▶ 通し再生</button>'
-      +'<button id="__ce_seqok" style="background:#22c55e;color:#fff;border:none;border-radius:7px;padding:5px 12px;cursor:pointer;font-weight:700">✔ 決定</button>'
-      +'<button id="__ce_seqng" style="background:#555;color:#fff;border:none;border-radius:7px;padding:5px 12px;cursor:pointer">✖ やめる</button>'
-      +'</div><div style="font-size:11px;opacity:.8;margin-top:4px">素の要素をクリックすると自動で「ふわっと出現」が付きます（動きは後から右クリックで変更可）</div>';
-    document.body.appendChild(p);
-    seqMode={items:[],badges:[],timers:[],interval:600,panel:p};
-    p.querySelector('#__ce_seqiv').addEventListener('input',function(){ seqMode.interval=+this.value; p.querySelector('#__ce_seqivv').textContent=this.value+'ms'; seqBadgeSync(); });
-    p.querySelector('#__ce_seqplay').addEventListener('click',function(ev){ ev.stopPropagation(); seqPlay(); });
-    p.querySelector('#__ce_seqok').addEventListener('click',function(ev){ ev.stopPropagation(); seqFinish(true); });
-    p.querySelector('#__ce_seqng').addEventListener('click',function(ev){ ev.stopPropagation(); seqFinish(false); });
-    document.addEventListener('mousedown',seqBlock,true);
-    document.addEventListener('click',seqClick,true);
-    if(msg) msg.textContent='⏱ 順番モード：出したい順に要素をクリックしてください';
-  }
-  function seqBlock(e){ if(!seqMode||e.target.closest('#__ce_seqp')||e.target.closest('#__ce')) return; e.preventDefault(); e.stopPropagation(); }
-  function seqClick(e){
-    if(!seqMode||e.target.closest('#__ce_seqp')||e.target.closest('#__ce')) return;
-    e.preventDefault(); e.stopPropagation();
-    var el=seqPickEl(e.target); if(!el) return;
-    var ix=seqMode.items.indexOf(el);
-    if(ix>=0){ seqMode.items.splice(ix,1); el.classList.remove('__ce_sel'); }
-    else seqMode.items.push(el);
-    seqBadgeSync();
-  }
-  // 通し再生の実体：本番（保存版）と同じ「fxa_inを付け直す」方式で順に出す。
-  // ★rAFプレビュー(playAnim)は文字アニメで再分割が走り、中のマーカーspanを壊すので使わない。
-  var _seqTimers=[];
-  function seqRun(items,iv){
-    _seqTimers.forEach(clearTimeout); _seqTimers=[];
+  // ▶ 全体の流れ：そのセクション内の全アニメを、各自のdata-cedelayどおりに一斉再生（本番と同じ見え方）
+  function flowRun(scope){
     ensureFxAssets();
-    // まず全員を「再生前」の姿へ一瞬で戻す（transitionを切って隠す→戻す＝フェードアウトを見せない）
-    items.forEach(function(el){
-      if(!el.isConnected) return;
+    var els=[].slice.call(scope.querySelectorAll('.fxa_pre,.fxa_hl,.fxa_cnt'));
+    if(scope.matches&&scope.matches('.fxa_pre,.fxa_hl,.fxa_cnt')) els.unshift(scope);
+    if(!els.length) return;
+    els.forEach(function(el){
+      clearTimeout(el.__dlyT);
       if(el.classList.contains('fxa_hl')){ el.classList.remove('fxa_in'); el.style.setProperty('--hlw',0); }
-      else { stopAnim(el); clearPreviewStyle(el); el.style.setProperty('transition','none','important'); el.classList.remove('fxa_in'); }
+      else { el.style.setProperty('transition','none','important'); el.classList.remove('fxa_in'); }
     });
-    void document.body.offsetWidth;  // 隠した状態をこの場で確定
-    items.forEach(function(el){ if(el.isConnected&&!el.classList.contains('fxa_hl')) el.style.removeProperty('transition'); });
-    items.forEach(function(el,i){
-      _seqTimers.push(setTimeout(function(){
-        if(!el.isConnected) return;
+    void document.body.offsetWidth;
+    els.forEach(function(el){ if(!el.classList.contains('fxa_hl')) el.style.removeProperty('transition'); });
+    els.forEach(function(el){
+      var d=+el.getAttribute('data-cedelay')||0;
+      el.__dlyT=setTimeout(function(){
         if(el.classList.contains('fxa_hl')){ if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); } }
         else el.classList.add('fxa_in');
-      }, i*iv+80));
+      }, d+60);
     });
   }
-  function seqPlay(){ if(seqMode&&seqMode.items.length) seqRun(seqMode.items, seqMode.interval); }
-  function seqFinish(apply){
-    if(!seqMode) return;
-    _seqTimers.forEach(clearTimeout); _seqTimers=[];
-    document.removeEventListener('mousedown',seqBlock,true);
-    document.removeEventListener('click',seqClick,true);
-    var items=seqMode.items.slice(), iv=seqMode.interval;
-    // 再生途中で終えても透明のまま残らないように一旦すべて見せる
-    items.forEach(function(el){
-      el.classList.remove('__ce_sel');
-      if(el.classList.contains('fxa_hl')){ el.style.setProperty('--hlw',100); }
-      el.classList.add('fxa_in');
+  function dlyOpen(el,x,y){
+    dlyClose();
+    var scope=(el.closest&&el.closest('section,header,footer'))||document.body;
+    var items=[].slice.call(scope.querySelectorAll('.fxa_hl,.fxa_pre,.fxa_cnt'));
+    if(scope.matches&&scope.matches('.fxa_hl,.fxa_pre,.fxa_cnt')) items.unshift(scope);
+    items=items.slice(0,20);
+    if(!items.length){ if(msg) msg.textContent='このセクションに動きが見つかりません（先に「動きを選ぶ」やマーカーを付けてください）'; return; }
+    // 今の遅らせ順に並べる（同点はDOM順）＝一覧がそのまま再生順に見える
+    items=items.map(function(n,i){ return {el:n,i:i}; }).sort(function(a,b){
+      var da=+a.el.getAttribute('data-cedelay')||0, db=+b.el.getAttribute('data-cedelay')||0;
+      return (da-db)||(a.i-b.i);
+    }).map(function(o){ return o.el; });
+    // 開いた時点の値を要素ごと控える＝✖閉じるで元に戻せる（✔決定なら控えを捨てるだけ）
+    var snap=items.map(function(c){ return {el:c, d:c.getAttribute('data-cedelay'), hl:c.classList.contains('fxa_hl'), dur:c.classList.contains('fxa_hl')?c.style.getPropertyValue('--hldur'):c.style.getPropertyValue('--fxa-dur')}; });
+    var p=document.createElement('div'); p.id='__ce_dlyp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#1d1d2b;color:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);font:12.5px/1.6 sans-serif;width:440px;max-width:96vw;max-height:72vh;overflow:auto');
+    function durOf(c){ return c.classList.contains('fxa_hl')?Math.round((parseFloat(c.style.getPropertyValue('--hldur'))||0.45)*1000):(parseInt(c.style.getPropertyValue('--fxa-dur'))||800); }
+    function rowsHtml(){
+      return items.map(function(c,i){
+        return '<div class="__dlyrow" data-i="'+i+'" style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid #34344a">'
+          +'<button data-mv="-1" title="上へ" style="background:#34344a;color:#fff;border:none;border-radius:5px;width:22px;height:22px;cursor:pointer;padding:0">↑</button>'
+          +'<button data-mv="1" title="下へ" style="background:#34344a;color:#fff;border:none;border-radius:5px;width:22px;height:22px;cursor:pointer;padding:0">↓</button>'
+          +'<span class="__dlylbl" title="クリックでその要素まで移動" style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(i+1)+'. '+esc(dlyLabel(c))+'</span>'
+          +'⏳<input data-k="d" type="number" min="0" step="100" value="'+(+c.getAttribute('data-cedelay')||0)+'" style="width:62px;padding:2px 4px;border-radius:5px;border:none">'
+          +'🐢<input data-k="s" type="number" min="100" step="100" value="'+durOf(c)+'" style="width:62px;padding:2px 4px;border-radius:5px;border:none">'
+          +'<button data-pl="1" title="この動きだけ再生" style="background:#3b82f6;color:#fff;border:none;border-radius:5px;padding:2px 7px;cursor:pointer">▶</button>'
+          +'</div>';
+      }).join('');
+    }
+    p.innerHTML='<b>⏳ 動きの演出（このセクション）</b><span style="opacity:.75;font-size:11px;margin-left:6px">数字はms・変えると即反映</span>'
+      +'<div id="__ce_dlyrows" style="margin-top:6px">'+rowsHtml()+'</div>'
+      +'<div style="margin-top:8px;display:flex;align-items:center;gap:6px">間隔<input id="__ce_dlyiv" type="number" value="600" min="100" step="100" style="width:62px;padding:2px 4px;border-radius:5px;border:none">ms'
+      +'<button id="__ce_dlystep" title="上の並び順どおりに遅らせを自動で刻む" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:4px 9px;cursor:pointer">⏱ 上から順に刻む</button>'
+      +'<button id="__ce_dlyhdr" title="ページ上部のヘッダー帯に「上から降りる」を付けて、全部の後に出す" style="background:#0e7490;color:#fff;border:none;border-radius:6px;padding:4px 9px;cursor:pointer">🧢 最後にヘッダーを下ろす</button></div>'
+      +'<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'
+      +'<button id="__ce_dlyflow" style="background:#6366f1;color:#fff;border:none;border-radius:7px;padding:5px 10px;cursor:pointer">▶ 全体の流れ</button>'
+      +'<button id="__ce_dlyok" style="background:#22c55e;color:#fff;border:none;border-radius:7px;padding:5px 10px;cursor:pointer;font-weight:700">✔ 決定</button>'
+      +'<button id="__ce_dlyx" style="background:#555;color:#fff;border:none;border-radius:7px;padding:5px 10px;cursor:pointer">✖ 閉じる（元に戻す）</button>'
+      +'</div>';
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    _dlyP=p;
+    var rowsBox=p.querySelector('#__ce_dlyrows');
+    function redraw(){ rowsBox.innerHTML=rowsHtml(); }
+    function setDelay(c,v){ v=Math.max(0,Math.round(v)); if(v>0) c.setAttribute('data-cedelay',v); else c.removeAttribute('data-cedelay'); markDirty(); }
+    function setDur(c,v){ v=Math.max(100,Math.round(v)); if(c.classList.contains('fxa_hl')) c.style.setProperty('--hldur',(v/1000)+'s'); else c.style.setProperty('--fxa-dur',v+'ms'); markDirty(); }
+    rowsBox.addEventListener('input',function(ev){
+      var row=ev.target.closest('.__dlyrow'); if(!row) return;
+      var c=items[+row.getAttribute('data-i')];
+      if(ev.target.getAttribute('data-k')==='d') setDelay(c,+ev.target.value||0);
+      if(ev.target.getAttribute('data-k')==='s') setDur(c,+ev.target.value||800);
     });
-    seqMode.badges.forEach(function(b){ b.remove(); });
-    seqMode.panel.remove(); seqMode=null;
-    if(apply){
-      items.forEach(function(el,i){
-        var d=i*iv;
-        if(d>0) el.setAttribute('data-cedelay',d); else el.removeAttribute('data-cedelay');
+    rowsBox.addEventListener('click',function(ev){
+      var row=ev.target.closest('.__dlyrow'); if(!row) return;
+      var i=+row.getAttribute('data-i'), c=items[i];
+      if(ev.target.getAttribute('data-pl')){ dlyPreview(c); return; }
+      var mv=ev.target.getAttribute('data-mv');
+      if(mv){ var j=i+(+mv); if(j<0||j>=items.length) return; items.splice(i,1); items.splice(j,0,c); redraw(); return; }
+      if(ev.target.classList.contains('__dlylbl')){ try{ c.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){} c.classList.add('__ce_sel'); setTimeout(function(){ c.classList.remove('__ce_sel'); },1200); }
+    });
+    p.querySelector('#__ce_dlystep').addEventListener('click',function(){
+      var iv=Math.max(100,+p.querySelector('#__ce_dlyiv').value||600);
+      items.forEach(function(c,i){ setDelay(c,i*iv); });
+      redraw();
+      flowRun(scope);  // 刻んだ結果をすぐ通しで見せる
+    });
+    p.querySelector('#__ce_dlyhdr').addEventListener('click',function(){
+      var bar=findTopBar();
+      if(!bar){ if(msg) msg.textContent='ヘッダー帯が見つかりません（ページ上部の横長バーが対象です）'; return; }
+      applyBake(bar,'fadedown');  // 「上から降りる」を付ける（既に動きがあれば付け替え）
+      var host=bar.classList.contains('fxa_pre')?bar:(bar.closest('.fxa_pre')||bar);
+      var mx=0; items.forEach(function(c){ mx=Math.max(mx,+c.getAttribute('data-cedelay')||0); });
+      var iv=Math.max(100,+p.querySelector('#__ce_dlyiv').value||600);
+      if(items.indexOf(host)<0) items.push(host);
+      setDelay(host, mx+iv);  // いちばん最後＝全員が出そろってから降りてくる
+      redraw();
+      flowRun(scope); if(!scope.contains(host)) dlyPreview(host);
+      if(msg) msg.textContent='🧢 ヘッダーが最後（'+(mx+iv)+'ms後）に上から降りるようにしました。💾保存で残ります';
+    });
+    p.querySelector('#__ce_dlyflow').addEventListener('click',function(){ flowRun(scope); if(msg){} });
+    p.querySelector('#__ce_dlyok').addEventListener('click',function(){ dlyClose(); if(msg) msg.textContent='⏳ 演出を反映しました。💾保存で残ります'; });
+    p.querySelector('#__ce_dlyx').addEventListener('click',function(){
+      snap.forEach(function(s){
+        if(s.d!=null) s.el.setAttribute('data-cedelay',s.d); else s.el.removeAttribute('data-cedelay');
+        var prop=s.hl?'--hldur':'--fxa-dur';
+        if(s.dur) s.el.style.setProperty(prop,s.dur); else s.el.style.removeProperty(prop);
       });
-      markDirty();
-      if(msg) msg.textContent='✅ 順番を付けました（'+items.length+'個・'+iv+'ms間隔）。通しで再生します。💾保存で残ります';
-      seqRun(items,iv);  // ★決定した瞬間に1回通しで見せる（保存しなくても確認できる）
-    } else if(msg) msg.textContent='順番モードをやめました';
+      dlyClose(); if(msg) msg.textContent='⏳ 変更を取り消して閉じました';
+    });
   }
+
+  // ===== 📋 要素のコピペ（Ctrl+C / Ctrl+V・AIなし・2026-07-12） =====
+  // 右クリックで選んだ要素(curEl)をCtrl+Cでコピー→Ctrl+Vでマウス位置に貼り付け（placeFree＝レスポンシブ%配置）。
+  // セクション/ヘッダー/フッターを丸ごとコピーした時は、元の直後に複製を挿入（絶対配置にしない）。
+  // 文字入力中(input/contenteditable)や文字を選択中は何もしない＝普通のコピペを邪魔しない。
+  var _ceClip=null, _ceMX=0, _ceMY=0;
+  document.addEventListener('mousemove',function(e){ _ceMX=e.pageX; _ceMY=e.pageY; });
+  document.addEventListener('keydown',function(e){
+    if(!(e.ctrlKey||e.metaKey)) return;
+    var k=(e.key||'').toLowerCase();
+    if(k!=='c'&&k!=='v') return;
+    var ae=document.activeElement;
+    if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.isContentEditable)) return;
+    var ts=window.getSelection&&window.getSelection();
+    if(ts&&!ts.isCollapsed) return;  // 文字を選択している＝普通のテキストコピー優先
+    if(k==='c'){
+      if(!curEl||!document.contains(curEl)){ if(msg) msg.textContent='先に右クリックでコピーしたい要素を選んでください'; return; }
+      var n=curEl.cloneNode(true);
+      n.classList.remove('__ce_sel','__ce_hl','__ce_sechl');
+      _ceClip={html:n.outerHTML, tag:curEl.tagName};
+      e.preventDefault();
+      if(msg) msg.textContent='📋 コピーしました。貼り付けたい場所にマウスを置いて Ctrl+V';
+      return;
+    }
+    if(!_ceClip){ if(msg) msg.textContent='先に要素を右クリックで選んで Ctrl+C を押してください'; return; }
+    e.preventDefault();
+    var tpl=document.createElement('template'); tpl.innerHTML=_ceClip.html;
+    var nd=tpl.content.firstElementChild; if(!nd) return;
+    // ドラッグ移動の署名は複製に持ち込まない（貼った位置からさらにズレるのを防ぐ）
+    ['data-cetx','data-cety','data-cero','data-cesx','data-cesy'].forEach(function(a){ nd.removeAttribute(a); });
+    nd.style.removeProperty('translate');
+    // 出現アニメ持ちは編集中すぐ見えるように（保存時にcleanHtmlがfxa_inを外す＝本番は再生に戻る）
+    if(nd.classList.contains('fxa_pre')) nd.classList.add('fxa_in');
+    [].slice.call(nd.querySelectorAll('.fxa_pre')).forEach(function(x){ x.classList.add('fxa_in'); });
+    if(/^(SECTION|HEADER|FOOTER)$/.test(_ceClip.tag)){
+      // 丸ごと複製＝元と同じ場所の直後に差し込む（コピー元が消えていたらページ末尾）
+      var org=(curEl&&document.contains(curEl)&&curEl.tagName===_ceClip.tag)?curEl:null;
+      if(org&&org.parentElement) org.parentElement.insertBefore(nd,org.nextSibling);
+      else document.body.appendChild(nd);
+      try{ nd.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){}
+    } else {
+      placeFree(nd,_ceMX,_ceMY);  // マウス位置のセクションへ%配置＝画面幅に追従
+    }
+    markDirty();
+    if(msg) msg.textContent='📋 貼り付けました（もう一度Ctrl+Vで増やせます）。💾保存で残ります';
+  });
   // ===== 🕊 空飛ぶルート（線を手描き→整えて飛ばす・AIなし・無料） =====
   // 使い方：右クリック→「🕊 線を描いて飛ばす」→キャラの上から線を描く→整え方を選ぶ→
   //         ○アンカーをドラッグで微修正（右クリックで削除）→▶試す→✅付ける→💾保存。
@@ -4935,7 +5032,7 @@ html.__ce_altmode{cursor:text}
   //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
-  function _inUI2(node){ if(window.__ceFlyMode) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_seqp')); }
+  function _inUI2(node){ if(window.__ceFlyMode) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')); }
   var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   document.addEventListener('mousedown',function(e){
     if(e.altKey || e.button!==0 || _inUI2(e.target)) return;
@@ -5096,7 +5193,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_seqp','[id^="__ce_seqb"]'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
@@ -5217,6 +5314,70 @@ html.__ce_altmode{cursor:text}
       clientX:Math.max(10,Math.min(r.left+r.width/2, window.innerWidth-20)),
       clientY:Math.max(10,Math.min(r.top+24, window.innerHeight-20))}));
   }
+  // ===== クイックメニューの並び（ユーザーが自分で並べ替えできる・2026-07-12） =====
+  // 並びは localStorage(__ce_qmenu_layout) に ['id','sep','id'...] で保存（'sep'=区切り線）。
+  // 新しい機能IDはレイアウト未登録でも自動で末尾に出る＝機能追加してもメニューから消えない。
+  var QM_DEFS=[
+    ['__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）'],
+    ['__ce_q_txt','✏ 文字を追加（編集）'],
+    ['__ce_q_img','🖼 画像を追加（ここに置く）'],
+    ['__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）'],
+    ['__ce_q_dly','⏳ 動きの演出（順番・遅らせ・速さ）'],
+    ['__ce_q_fav','⭐ このセクションをお気に入り（部品保存）'],
+    ['__ce_q_fxrm','🚫 動きを消す'],
+    ['__ce_q_rst','⟲ 位置・サイズをリセット']
+  ];
+  function qmDefMap(){ var m={}; QM_DEFS.forEach(function(d){ m[d[0]]=d[1]; }); return m; }
+  function qmLayoutLoad(){
+    var lay=null;
+    try{ var a=JSON.parse(localStorage.getItem('__ce_qmenu_layout')||'null'); if(Array.isArray(a)&&a.length) lay=a.slice(); }catch(_){}
+    if(!lay) lay=QM_DEFS.map(function(d){ return d[0]; });
+    var m=qmDefMap();
+    lay=lay.filter(function(k){ return k==='sep'||m[k]; });          // 廃止した機能IDは飛ばす
+    QM_DEFS.forEach(function(d){ if(lay.indexOf(d[0])<0) lay.push(d[0]); });  // 新機能は末尾へ
+    return lay;
+  }
+  function qmLayoutSave(a){ try{ localStorage.setItem('__ce_qmenu_layout',JSON.stringify(a)); }catch(_){} }
+  // ⚙並べ替えモード：↑↓で移動・─区切り線の追加/削除・⟲初期に戻す・✔完了で保存
+  function qmEditMode(qm){
+    var lay=qmLayoutLoad(), m=qmDefMap();
+    function html(){
+      return '<div style="padding:6px 10px 2px;font-weight:700;font-size:12px">メニューの並べ替え（↑↓で移動）</div>'
+        +lay.map(function(k,i){
+          var lbl=(k==='sep')?'<span style="flex:1;border-top:2px dashed #bbb;margin:0 4px"></span>'
+            :'<span style="flex:1;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+m[k]+'</span>';
+          return '<div data-i="'+i+'" style="display:flex;align-items:center;gap:4px;padding:3px 8px">'
+            +'<button data-mv="-1" style="width:22px;height:20px;border:none;background:#f0f0f2;border-radius:5px;cursor:pointer;padding:0">↑</button>'
+            +'<button data-mv="1" style="width:22px;height:20px;border:none;background:#f0f0f2;border-radius:5px;cursor:pointer;padding:0">↓</button>'
+            +lbl
+            +(k==='sep'?'<button data-del="1" style="width:22px;height:20px;border:none;background:#fde8e8;color:#c00;border-radius:5px;cursor:pointer;padding:0">✕</button>':'')
+            +'</div>';
+        }).join('')
+        +'<div style="display:flex;gap:6px;padding:6px 8px;flex-wrap:wrap">'
+        +'<button id="__ce_qe_sep" style="border:1px solid #ccc;background:#fff;border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer">─ 区切り線を追加</button>'
+        +'<button id="__ce_qe_rst" style="border:1px solid #ccc;background:#fff;border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer">⟲ 初期に戻す</button>'
+        +'<button id="__ce_qe_ok" style="border:none;background:#22c55e;color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;font-weight:700">✔ 完了</button>'
+        +'</div>';
+    }
+    qm.innerHTML=html();
+    if(!qm.__qeBound){
+      qm.__qeBound=true;
+      qm.addEventListener('click',function(ev){
+        if(!qm.__qeOn) return;
+        ev.stopPropagation();
+        var t=ev.target;
+        if(t.id==='__ce_qe_sep'){ lay.push('sep'); qm.innerHTML=html(); return; }
+        if(t.id==='__ce_qe_rst'){ try{ localStorage.removeItem('__ce_qmenu_layout'); }catch(_){} lay=qmLayoutLoad(); qm.innerHTML=html(); return; }
+        if(t.id==='__ce_qe_ok'){ qmLayoutSave(lay); qm.__qeOn=false; closeMenu(); if(msg) msg.textContent='メニューの並びを保存しました（次の右クリックから反映）'; return; }
+        var rowEl=t.closest('[data-i]'); if(!rowEl) return;
+        var i=+rowEl.getAttribute('data-i');
+        if(t.getAttribute('data-del')){ lay.splice(i,1); qm.innerHTML=html(); return; }
+        var mv=t.getAttribute('data-mv');
+        if(mv){ var j=i+(+mv); if(j<0||j>=lay.length) return; var it=lay.splice(i,1)[0]; lay.splice(j,0,it); qm.innerHTML=html(); }
+      });
+    }
+    qm.__qeOn=true;
+  }
   function openQuickMenu(e){
     var multi=selEls.length>1;
     // 文字の「追加/編集」の自動分岐：中に文字があれば編集、余白（文字なし・大きな器・画像）なら追加。
@@ -5241,17 +5402,17 @@ html.__ce_altmode{cursor:text}
         +'〰<input type="color" id="__ce_q_seludc" value="#e07856" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><button id="__ce_q_seludb" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">'+(selApiQ.hasUd()?'下線を消す':'下線')+'</button>'
         +'</div>';
     }
+    var _qmM=qmDefMap();
     qm.innerHTML=selRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
-      +row('__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）')
-      +row('__ce_q_txt','✏ 文字を追加（編集）')
-      +row('__ce_q_img','🖼 画像を追加（ここに置く）')
-      +row('__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）')
-      +row('__ce_q_seq','⏱ 出す順番を決める（連続演出）')
-      +row('__ce_q_fxrm','🚫 動きを消す')
-      +row('__ce_q_rst','⟲ 位置・サイズをリセット')
+      +qmLayoutLoad().map(function(k){
+        if(k==='sep') return '<div style="border-top:1px solid #eee;margin:3px 6px"></div>';
+        return _qmM[k]?row(k,_qmM[k]):'';
+      }).join('')
       +'<div style="border-top:1px solid #eee;margin:3px 6px"></div>'
-      +row('__ce_q_full','⚙ すべての編集メニュー…');
+      +row('__ce_q_full','⚙ すべての編集メニュー…')
+      +'<div style="text-align:right;padding:0 8px 3px"><button id="__ce_q_edit" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
     document.body.appendChild(qm);
+    qm.querySelector('#__ce_q_edit').addEventListener('click',function(ev){ ev.stopPropagation(); qmEditMode(qm); });
     // ✂ 選択中の文字の配線（ボタンはメニューを閉じずにその場で効く）
     if(selApiQ && qm.querySelector('#__ce_q_selc')){
       qm.querySelector('#__ce_q_selc').addEventListener('input',function(){ selApiQ.paint(this.value); });
@@ -5290,7 +5451,8 @@ html.__ce_altmode{cursor:text}
       }
       if(t.id==='__ce_q_img'){ closeMenu(); openAddImagePicker((window.scrollX||window.pageXOffset||0)+qx, (window.scrollY||window.pageYOffset||0)+qy); return; }
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
-      if(t.id==='__ce_q_seq'){ seqStart(); return; }
+      if(t.id==='__ce_q_dly'){ var dle=curEl; closeMenu(); dlyOpen(dle,qx,qy); return; }
+      if(t.id==='__ce_q_fav'){ var fs=curEl.closest('section,header,footer'); closeMenu(); favSaveSection(fs); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
       if(t.id==='__ce_q_full'){ _bigFull=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
@@ -5299,7 +5461,6 @@ html.__ce_altmode{cursor:text}
   // 右クリック禁止スクリプトが残っていても、こちらを優先させて確実にメニューを開く。
   document.addEventListener('contextmenu',function(e){
     if(window.__ceFlyMode){ e.preventDefault(); return; }  // 🕊ルート描画中は右クリック＝アンカー削除（キャンバス側で処理済み）
-    if(seqMode){ e.preventDefault(); return; }  // ⏱順番モード中はメニューを開かない（クリック＝順番選択に専念）
     var _wasForced=_forceEl;
     var el=_forceEl||pickTarget(e.target); _forceEl=null;
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;

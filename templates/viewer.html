@@ -2762,12 +2762,12 @@
 
     loadAll();
 
-    // URLに ?open=camp が付いていたら「カンプ生成」パネルを自動で開く
-    // （編集画面の🏠ホームで戻った時、また一覧の先頭から探さず済むように）
-    if (new URLSearchParams(location.search).get("open") === "camp") {
+    // 起動時は常に「カンプ生成」パネルを開く（2026-07-12・一番よく使う画面のため既定に）
+    // ?open=none を付けたときだけ開かない（検索だけしたい時用の逃げ道）
+    if (new URLSearchParams(location.search).get("open") !== "none") {
       closeToolPanels("#camp_panel");
       campPanel.classList.add("is_open");
-      history.replaceState(null, "", location.pathname);  // リロード時に毎回開き直さないようURLを掃除
+      history.replaceState(null, "", location.pathname);
     }
 
     // ページを開いた時、進行中/完了のカンプ生成ジョブがあれば表示を復帰する
