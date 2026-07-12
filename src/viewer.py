@@ -2696,6 +2696,7 @@ html.__ce_altmode{cursor:text}
   var FX=[
     {k:'fadeup',b:'ふわっと出現',d:'下から浮かぶ',g:'in',dir:'y',sl:[{k:'dist',l:'移動量',min:6,max:140,def:28},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
     {k:'fade',b:'スッと出る',d:'フェード',g:'in',sl:[{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
+    {k:'fadedown',b:'上から降りる',d:'上からスライドイン',g:'in',dir:'yd',sl:[{k:'dist',l:'移動量',min:6,max:220,def:36},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
     {k:'left',b:'左から',d:'スライドイン',g:'in',dir:'xl',sl:[{k:'dist',l:'移動量',min:10,max:220,def:48},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
     {k:'right',b:'右から',d:'スライドイン',g:'in',dir:'xr',sl:[{k:'dist',l:'移動量',min:10,max:220,def:48},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
     {k:'zoom',b:'ズームイン',d:'拡大しながら',g:'in',dir:'s',sl:[{k:'scale',l:'開始の大きさ',min:40,max:98,def:86,u:'%'},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
@@ -4131,6 +4132,7 @@ html.__ce_altmode{cursor:text}
         var q=EASE(Math.min(1,p));  // 本番の transition ... ease と同じカーブ（最初速く・最後ゆっくり）
         o=q;
         if(a.dir==='y'){ tf='translateY('+(fxParam(a,'dist')*(1-q))+'px)'; }
+        else if(a.dir==='yd'){ tf='translateY('+(-fxParam(a,'dist')*(1-q))+'px)'; }
         else if(a.dir==='xl'){ tf='translateX('+(-fxParam(a,'dist')*(1-q))+'px)'; }
         else if(a.dir==='xr'){ tf='translateX('+(fxParam(a,'dist')*(1-q))+'px)'; }
         else if(a.dir==='s'){ var sc=fxParam(a,'scale')/100; tf='scale('+(sc+(1-sc)*q)+')'; }
@@ -4154,6 +4156,7 @@ html.__ce_altmode{cursor:text}
   // 命名は "fxa" 系（#__ce を含めない）＝保存時の掃除(cleanHtml)で消されず、そのまま残る。
   var FX_CSS='html.fxa-on .fxa_pre{opacity:0;transition:opacity var(--fxa-dur,.8s) ease,transform var(--fxa-dur,.8s) ease,filter var(--fxa-dur,.8s) ease,clip-path var(--fxa-dur,.8s) ease}'
     +'html.fxa-on .fxa_pre.fxa_y{transform:translateY(var(--fxa-dist,28px))}'
+    +'html.fxa-on .fxa_pre.fxa_yd{transform:translateY(calc(-1*var(--fxa-dist,36px)))}'
     +'html.fxa-on .fxa_pre.fxa_xl{transform:translateX(calc(-1*var(--fxa-dist,48px)))}'
     +'html.fxa-on .fxa_pre.fxa_xr{transform:translateX(var(--fxa-dist,48px))}'
     +'html.fxa-on .fxa_pre.fxa_s{transform:scale(var(--fxa-scale,.86))}'
@@ -4345,6 +4348,7 @@ html.__ce_altmode{cursor:text}
       host.style.setProperty('--fxa-dur', (fxParam(a,'dur')||800)+'ms');
       host.classList.add('fxa_pre');
       if(a.dir==='y'){ host.classList.add('fxa_y'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
+      else if(a.dir==='yd'){ host.classList.add('fxa_yd'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
       else if(a.dir==='xl'){ host.classList.add('fxa_xl'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
       else if(a.dir==='xr'){ host.classList.add('fxa_xr'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
       else if(a.dir==='s'){ host.classList.add('fxa_s'); host.style.setProperty('--fxa-scale', (fxParam(a,'scale')/100)); }
@@ -4368,6 +4372,136 @@ html.__ce_altmode{cursor:text}
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
     markDirty();
     if(msg) msg.textContent='この要素の動きを消しました（保存で確定）';
+  }
+  // ===== ⏱ 順番モード（AIなし・無料）：クリックした順に data-cedelay を刻んで連続演出を作る =====
+  // 使い方：右クリック→「⏱ 出す順番を決める」→出したい順に要素をクリック（もう一度で解除）→
+  //         間隔スライダーで刻み幅を調整→▶通し再生で確認→✔決定で焼き込み→💾保存で残る。
+  // マーカー(.fxa_hl)はハイライトされた文字を直接クリック＝span側にdelayが付く（ランタイムの読み先と同じ）。
+  // 素の要素（動き無し）をクリックしたら自動で「ふわっと出現」を付けてから順番に入れる。
+  var seqMode=null;
+  function seqAnimKey(el){
+    var c=el.classList;
+    if(c.contains('fxa_hl')) return 'hl';
+    if(c.contains('fxa_cnt')) return 'count';
+    if(c.contains('fxa_tw')) return 'typewriter';
+    if(c.contains('fxa_cpre')) return 'stagger';
+    if(c.contains('fxa_lines')) return 'lines';
+    if(c.contains('fxa_yd')) return 'fadedown';
+    if(c.contains('fxa_xl')) return 'left';
+    if(c.contains('fxa_xr')) return 'right';
+    if(c.contains('fxa_s')) return 'zoom';
+    if(c.contains('fxa_bl')) return 'blur';
+    if(c.contains('fxa_ry')) return 'flip';
+    if(c.contains('fxa_fl')) return 'pageflip';
+    if(c.contains('fxa_wp')) return 'wipe';
+    if(c.contains('fxa_clip')) return 'rise';
+    if(c.contains('fxa_y')) return 'fadeup';
+    return 'fade';
+  }
+  function seqBadgeSync(){
+    if(!seqMode) return;
+    seqMode.badges.forEach(function(b){ b.remove(); }); seqMode.badges=[];
+    var iv=seqMode.interval;
+    seqMode.items.forEach(function(el,i){
+      var r=el.getBoundingClientRect();
+      var b=document.createElement('div');
+      b.id='__ce_seqb'+i;  // __ce系ID＝保存(cleanHtml)・undoスナップの対象外になる
+      b.setAttribute('style','position:absolute;z-index:2147483646;left:'+((window.scrollX||0)+r.left-6)+'px;top:'+((window.scrollY||0)+r.top-14)+'px;background:#7c3aed;color:#fff;font:700 11px/1.6 sans-serif;padding:1px 7px;border-radius:9px;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.35)');
+      b.textContent=(i+1)+'番 '+(i*iv)+'ms';
+      document.body.appendChild(b); seqMode.badges.push(b);
+      el.classList.add('__ce_sel');
+    });
+  }
+  function seqPickEl(t){
+    // クリック地点がマーカー内ならマーカー（線）そのもの、アニメ済み要素ならその要素、素の要素なら自動でふわっと出現
+    var el=t.closest?(t.closest('.fxa_hl')||t.closest('.fxa_pre,.fxa_cnt')):null;
+    if(!el){
+      el=pickTarget(t); if(!el) return null;
+      if(!(el.classList.contains('fxa_pre')||el.classList.contains('fxa_cnt')||el.classList.contains('fxa_hl'))){
+        applyBake(el,'fadeup');
+        var host=el.closest('.fxa_pre'); if(host) el=host;  // fxWrapで包まれた場合はラッパーが本体（delayの読み先）
+      }
+    }
+    return el;
+  }
+  function seqStart(){
+    if(seqMode) return;
+    closeMenu();
+    var p=document.createElement('div'); p.id='__ce_seqp';
+    p.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:2147483647;background:#1d1d2b;color:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);font:13px/1.7 sans-serif;min-width:360px');
+    p.innerHTML='<b>⏱ 出す順番を決める</b><span style="opacity:.75;font-size:11px;margin-left:8px">出したい順に要素をクリック（もう一度で解除）</span>'
+      +'<div style="margin-top:6px;display:flex;align-items:center;gap:8px">間隔 <input type="range" id="__ce_seqiv" min="100" max="2000" step="100" value="600" style="flex:1"><span id="__ce_seqivv">600ms</span></div>'
+      +'<div style="margin-top:8px;display:flex;gap:8px">'
+      +'<button id="__ce_seqplay" style="background:#3b82f6;color:#fff;border:none;border-radius:7px;padding:5px 12px;cursor:pointer">▶ 通し再生</button>'
+      +'<button id="__ce_seqok" style="background:#22c55e;color:#fff;border:none;border-radius:7px;padding:5px 12px;cursor:pointer;font-weight:700">✔ 決定</button>'
+      +'<button id="__ce_seqng" style="background:#555;color:#fff;border:none;border-radius:7px;padding:5px 12px;cursor:pointer">✖ やめる</button>'
+      +'</div><div style="font-size:11px;opacity:.8;margin-top:4px">素の要素をクリックすると自動で「ふわっと出現」が付きます（動きは後から右クリックで変更可）</div>';
+    document.body.appendChild(p);
+    seqMode={items:[],badges:[],timers:[],interval:600,panel:p};
+    p.querySelector('#__ce_seqiv').addEventListener('input',function(){ seqMode.interval=+this.value; p.querySelector('#__ce_seqivv').textContent=this.value+'ms'; seqBadgeSync(); });
+    p.querySelector('#__ce_seqplay').addEventListener('click',function(ev){ ev.stopPropagation(); seqPlay(); });
+    p.querySelector('#__ce_seqok').addEventListener('click',function(ev){ ev.stopPropagation(); seqFinish(true); });
+    p.querySelector('#__ce_seqng').addEventListener('click',function(ev){ ev.stopPropagation(); seqFinish(false); });
+    document.addEventListener('mousedown',seqBlock,true);
+    document.addEventListener('click',seqClick,true);
+    if(msg) msg.textContent='⏱ 順番モード：出したい順に要素をクリックしてください';
+  }
+  function seqBlock(e){ if(!seqMode||e.target.closest('#__ce_seqp')||e.target.closest('#__ce')) return; e.preventDefault(); e.stopPropagation(); }
+  function seqClick(e){
+    if(!seqMode||e.target.closest('#__ce_seqp')||e.target.closest('#__ce')) return;
+    e.preventDefault(); e.stopPropagation();
+    var el=seqPickEl(e.target); if(!el) return;
+    var ix=seqMode.items.indexOf(el);
+    if(ix>=0){ seqMode.items.splice(ix,1); el.classList.remove('__ce_sel'); }
+    else seqMode.items.push(el);
+    seqBadgeSync();
+  }
+  // 通し再生の実体：本番（保存版）と同じ「fxa_inを付け直す」方式で順に出す。
+  // ★rAFプレビュー(playAnim)は文字アニメで再分割が走り、中のマーカーspanを壊すので使わない。
+  var _seqTimers=[];
+  function seqRun(items,iv){
+    _seqTimers.forEach(clearTimeout); _seqTimers=[];
+    ensureFxAssets();
+    // まず全員を「再生前」の姿へ一瞬で戻す（transitionを切って隠す→戻す＝フェードアウトを見せない）
+    items.forEach(function(el){
+      if(!el.isConnected) return;
+      if(el.classList.contains('fxa_hl')){ el.classList.remove('fxa_in'); el.style.setProperty('--hlw',0); }
+      else { stopAnim(el); clearPreviewStyle(el); el.style.setProperty('transition','none','important'); el.classList.remove('fxa_in'); }
+    });
+    void document.body.offsetWidth;  // 隠した状態をこの場で確定
+    items.forEach(function(el){ if(el.isConnected&&!el.classList.contains('fxa_hl')) el.style.removeProperty('transition'); });
+    items.forEach(function(el,i){
+      _seqTimers.push(setTimeout(function(){
+        if(!el.isConnected) return;
+        if(el.classList.contains('fxa_hl')){ if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); } }
+        else el.classList.add('fxa_in');
+      }, i*iv+80));
+    });
+  }
+  function seqPlay(){ if(seqMode&&seqMode.items.length) seqRun(seqMode.items, seqMode.interval); }
+  function seqFinish(apply){
+    if(!seqMode) return;
+    _seqTimers.forEach(clearTimeout); _seqTimers=[];
+    document.removeEventListener('mousedown',seqBlock,true);
+    document.removeEventListener('click',seqClick,true);
+    var items=seqMode.items.slice(), iv=seqMode.interval;
+    // 再生途中で終えても透明のまま残らないように一旦すべて見せる
+    items.forEach(function(el){
+      el.classList.remove('__ce_sel');
+      if(el.classList.contains('fxa_hl')){ el.style.setProperty('--hlw',100); }
+      el.classList.add('fxa_in');
+    });
+    seqMode.badges.forEach(function(b){ b.remove(); });
+    seqMode.panel.remove(); seqMode=null;
+    if(apply){
+      items.forEach(function(el,i){
+        var d=i*iv;
+        if(d>0) el.setAttribute('data-cedelay',d); else el.removeAttribute('data-cedelay');
+      });
+      markDirty();
+      if(msg) msg.textContent='✅ 順番を付けました（'+items.length+'個・'+iv+'ms間隔）。通しで再生します。💾保存で残ります';
+      seqRun(items,iv);  // ★決定した瞬間に1回通しで見せる（保存しなくても確認できる）
+    } else if(msg) msg.textContent='順番モードをやめました';
   }
   // ===== 🕊 空飛ぶルート（線を手描き→整えて飛ばす・AIなし・無料） =====
   // 使い方：右クリック→「🕊 線を描いて飛ばす」→キャラの上から線を描く→整え方を選ぶ→
@@ -4801,7 +4935,7 @@ html.__ce_altmode{cursor:text}
   //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
-  function _inUI2(node){ if(window.__ceFlyMode) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')); }
+  function _inUI2(node){ if(window.__ceFlyMode) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_seqp')); }
   var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   document.addEventListener('mousedown',function(e){
     if(e.altKey || e.button!==0 || _inUI2(e.target)) return;
@@ -4962,7 +5096,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_seqp','[id^="__ce_seqb"]'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
@@ -5112,6 +5246,7 @@ html.__ce_altmode{cursor:text}
       +row('__ce_q_txt','✏ 文字を追加（編集）')
       +row('__ce_q_img','🖼 画像を追加（ここに置く）')
       +row('__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）')
+      +row('__ce_q_seq','⏱ 出す順番を決める（連続演出）')
       +row('__ce_q_fxrm','🚫 動きを消す')
       +row('__ce_q_rst','⟲ 位置・サイズをリセット')
       +'<div style="border-top:1px solid #eee;margin:3px 6px"></div>'
@@ -5155,6 +5290,7 @@ html.__ce_altmode{cursor:text}
       }
       if(t.id==='__ce_q_img'){ closeMenu(); openAddImagePicker((window.scrollX||window.pageXOffset||0)+qx, (window.scrollY||window.pageYOffset||0)+qy); return; }
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
+      if(t.id==='__ce_q_seq'){ seqStart(); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
       if(t.id==='__ce_q_full'){ _bigFull=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
@@ -5163,6 +5299,7 @@ html.__ce_altmode{cursor:text}
   // 右クリック禁止スクリプトが残っていても、こちらを優先させて確実にメニューを開く。
   document.addEventListener('contextmenu',function(e){
     if(window.__ceFlyMode){ e.preventDefault(); return; }  // 🕊ルート描画中は右クリック＝アンカー削除（キャンバス側で処理済み）
+    if(seqMode){ e.preventDefault(); return; }  // ⏱順番モード中はメニューを開かない（クリック＝順番選択に専念）
     var _wasForced=_forceEl;
     var el=_forceEl||pickTarget(e.target); _forceEl=null;
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
