@@ -381,5 +381,27 @@
   "warn": true,
   "ts": 1783858335,
   "rating": "◎"
+ },
+ {
+  "file": "camp_20260712_212155_956667.html",
+  "base_id": "a0f202c0d58744e1",
+  "anim_id": "",
+  "model": "openai:gpt-5.6-terra",
+  "text_len": 1591,
+  "sections": 8,
+  "warn": true,
+  "ts": 1783858915,
+  "rating": "△"
+ },
+ {
+  "file": "camp_20260712_212544_380118.html",
+  "base_id": "a0f202c0d58744e1",
+  "anim_id": "",
+  "model": "zai:glm-5v-turbo",
+  "text_len": 1938,
+  "sections": 9,
+  "warn": true,
+  "ts": 1783859144,
+  "rating": "△"
  }
 ]

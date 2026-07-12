@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXORA | 日常を彩る、選び抜かれた暮らし道具</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #ffffff;
+            --color-bg-tint: #f7fdf9;
+            --color-primary: #22b573;
+            --color-primary-light: #e5ff9e;
+            --color-dark: #221814;
+            --color-text: #221814;
+            --color-text-muted: #6b635f;
+            --color-accent: #22b573;
+            --font-main: "Zen Kaku Gothic New", sans-serif;
+            --container-max: 1200px;
+            --space-xs: 8px;
+            --space-sm: 16px;
+            --space-md: 24px;
+            --space-lg: 40px;
+            --space-xl: 64px;
+            --space-xxl: 96px;
+            --shadow-card: 0 4px 20px rgba(34, 181, 115, 0.08);
+            --shadow-hover: 0 12px 32px rgba(34, 181, 115, 0.15);
+            --radius-sm: 4px;
+            --radius-full: 50%;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--color-text);
+            background: var(--color-bg);
+            line-height: 1.9;
+            font-size: 16px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html.js .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        html.js .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        /* Container */
+        .container {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(34, 181, 115, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--color-dark);
+        }
+
+        .logo span {
+            color: var(--color-primary);
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .nav-link {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--color-text);
+            position: relative;
+            padding: 4px 0;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-header {
+            background: var(--color-primary);
+            color: white;
+            padding: 10px 28px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-header:hover {
+            background: #1d9a62;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 181, 115, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f7fdf9 50%, #e5ff9e33 100%);
+            padding-top: 72px;
+            overflow: hidden;
+        }
+
+        .hero-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xxl);
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content {
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .hero-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: var(--space-md);
+            padding: 6px 16px;
+            background: rgba(34, 181, 115, 0.1);
+            border-radius: var(--radius-full);
+        }
+
+        .hero-title {
+            font-size: clamp(2.2rem, 5vw, 3.6rem);
+            font-weight: 700;
+            line-height: 1.25;
+            letter-spacing: 0.02em;
+            margin-bottom: var(--space-lg);
+            color: var(--color-dark);
+        }
+
+        .hero-title br {
+            display: block;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            line-height: 2;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-xl);
+            max-width: 480px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            padding: 16px 40px;
+            border-radius: var(--radius-full);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: #1d9a62;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(34, 181, 115, 0.25);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-dark);
+            padding: 16px 40px;
+            border-radius: var(--radius-full);
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: 2px solid var(--color-dark);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-dark);
+            color: white;
+        }
+
+        .hero-visual {
+            position: relative;
+            animation: fadeInRight 1s ease 0.3s both;
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-hover);
+        }
+
+        .hero-image-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(34, 181, 115, 0.15), transparent);
+            z-index: 1;
+        }
+
+        .hero-image {
+            width: 100%;
+            aspect-ratio: 4/5;
+            object-fit: cover;
+            transition: transform 8s ease;
+        }
+
+        .hero-image-wrapper:hover .hero-image {
+            transform: scale(1.05);
+        }
+
+        .hero-float-card {
+            position: absolute;
+            background: white;
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-card);
+            animation: floating-y 3s ease-in-out infinite;
+        }
+
+        .hero-float-card.card-1 {
+            bottom: 60px;
+            left: -40px;
+            z-index: 10;
+        }
+
+        .hero-float-card.card-2 {
+            top: 40px;
+            right: -30px;
+            z-index: 10;
+        }
+
+        .float-card-label {
+            font-size: 0.7rem;
+            color: var(--color-primary);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .float-card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+
+        /* Decorative Elements */
+        .deco-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+        }
+
+        .deco-circle.c1 {
+            width: 400px;
+            height: 400px;
+            background: var(--color-primary);
+            top: -100px;
+            right: -100px;
+        }
+
+        .deco-circle.c2 {
+            width: 200px;
+            height: 200px;
+            background: var(--color-primary-light);
+            bottom: 50px;
+            left: 10%;
+        }
+
+        /* Section Common */
+        section {
+            position: relative;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: var(--space-sm);
+            display: block;
+        }
+
+        .section-title {
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            font-weight: 700;
+            line-height: 1.35;
+            letter-spacing: 0.03em;
+            color: var(--color-dark);
+            margin-bottom: var(--space-md);
+        }
+
+        .section-desc {
+            font-size: 1rem;
+            line-height: 2;
+            color: var(--color-text-muted);
+            max-width: 520px;
+        }
+
+        /* Brand Story Section */
+        .brand-story {
+            padding: calc(var(--space-xxl) * 2) 0;
+            background: var(--color-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: var(--space-xxl);
+            align-items: center;
+        }
+
+        .brand-images {
+            position: relative;
+            height: 600px;
+        }
+
+        .brand-img-main {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 75%;
+            height: 70%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            z-index: 2;
+        }
+
+        .brand-img-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .brand-img-main:hover img {
+            transform: scale(1.05);
+        }
+
+        .brand-img-sub {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 65%;
+            height: 55%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-hover);
+            z-index: 3;
+        }
+
+        .brand-img-sub img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .brand-accent-shape {
+            position: absolute;
+            top: 50%;
+            right: 10%;
+            width: 200px;
+            height: 200px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            opacity: 0.08;
+            z-index: 1;
+        }
+
+        .brand-content {
+            padding-left: var(--space-xl);
+        }
+
+        .brand-text {
+            margin-top: var(--space-lg);
+        }
+
+        .brand-text p {
+            margin-bottom: var(--space-md);
+            line-height: 2;
+            color: var(--color-text-muted);
+        }
+
+        .brand-stats {
+            display: flex;
+            gap: var(--space-xl);
+            margin-top: var(--space-xl);
+            padding-top: var(--space-xl);
+            border-top: 1px solid rgba(34, 181, 115, 0.15);
+        }
+
+        .stat-item {
+            text-align: left;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: var(--space-lg);
+            padding: 14px 32px;
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        /* Features Section */
+        .features {
+            padding: calc(var(--space-xxl) * 2) 0;
+            background: var(--color-bg-tint);
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: calc(var(--space-xxl) * 1.5);
+        }
+
+        .features-header .section-desc {
+            margin: 0 auto;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xxl);
+        }
+
+        .feature-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xxl);
+            align-items: center;
+        }
+
+        .feature-item:nth-child(even) {
+            direction: rtl;
+        }
+
+        .feature-item:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .feature-visual {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #e5ff9e33, #22b57311);
+        }
+
+        .feature-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .feature-visual:hover img {
+            transform: scale(1.06);
+        }
+
+        .feature-number {
+            position: absolute;
+            top: var(--space-md);
+            left: var(--space-md);
+            font-size: 4rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .feature-content h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            color: var(--color-dark);
+            line-height: 1.4;
+        }
+
+        .feature-content p {
+            color: var(--color-text-muted);
+            line-height: 2;
+            margin-bottom: var(--space-md);
+        }
+
+        .feature-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            padding: 6px 16px;
+            background: white;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            color: var(--color-primary);
+            font-weight: 500;
+            border: 1px solid rgba(34, 181, 115, 0.2);
+        }
+
+        /* Products Section */
+        .products {
+            padding: calc(var(--space-xxl) * 2) 0;
+            background: var(--color-bg);
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: var(--space-xxl);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-lg);
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            box-shadow: var(--shadow-card);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .product-image {
+            aspect-ratio: 1;
+            overflow: hidden;
+            background: var(--color-bg-tint);
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.08);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: var(--space-md);
+            left: var(--space-md);
+            background: var(--color-primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .product-info {
+            padding: var(--space-lg);
+        }
+
+        .product-category {
+            font-size: 0.75rem;
+            color: var(--color-primary);
+            font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-dark);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            line-height: 1.7;
+            margin-bottom: var(--space-md);
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+
+        .product-price span {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--color-text-muted);
+        }
+
+        .btn-cart {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cart:hover {
+            background: #1d9a62;
+            transform: scale(1.1);
+        }
+
+        /* Voice Section */
+        .voice {
+            padding: calc(var(--space-xxl) * 2) 0;
+            background: var(--color-dark);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('http://127.0.0.1:5000/uploads/up_18a7a902ba.png') center/cover no-repeat;
+            opacity: 0.08;
+        }
+
+        .voice-header {
+            text-align: center;
+            margin-bottom: var(--space-xxl);
+            position: relative;
+            z-index: 2;
+        }
+
+        .voice-header .section-label {
+            color: var(--color-primary-light);
+        }
+
+        .voice-header .section-title {
+            color: white;
+        }
+
+        .voice-slider {
+            position: relative;
+            z-index: 2;
+        }
+
+        .voice-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: var(--space-xxl);
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .voice-quote {
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+            line-height: 1.8;
+            font-weight: 300;
+            margin-bottom: var(--space-lg);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .voice-quote::before {
+            content: '"';
+            font-size: 4rem;
+            color: var(--color-primary);
+            line-height: 1;
+            display: block;
+            margin-bottom: var(--space-md);
+            font-family: Georgia, serif;
+        }
+
+        .voice-author {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .voice-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--color-primary);
+        }
+
+        .voice-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .voice-meta h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .voice-meta p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .voice-nav {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+        }
+
+        .voice-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .voice-btn:hover {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        /* About / Team Section */
+        .about {
+            padding: calc(var(--space-xxl) * 2) 0;
+            background: var(--color-bg-tint);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: var(--space-xxl);
+            align-items: start;
+        }
+
+        .about-content {
+            position: sticky;
+            top: 120px;
+        }
+
+        .team-gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .team-photo {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 3/4;
+            background: white;
+        }
+
+        .team-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .team-photo:hover img {
+            transform: scale(1.05);
+        }
+
+        .team-photo:nth-child(1) { margin-top: 0; }
+        .team-photo:nth-child(2) { margin-top: var(--space-xl); }
+        .team-photo:nth-child(3) { margin-top: calc(var(--space-xl) * -1); }
+        .team-photo:nth-child(4) { margin-top: 0; }
+
+        .photo-caption {
+            position: absolute;
+            bottom: 0;
+            right: -10px;
+            background: white;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-card);
+            max-width: 180px;
+            transform: translateY(50%);
+            z-index: 10;
+        }
+
+        .photo-caption h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-dark);
+            margin-bottom: 4px;
+        }
+
+        .photo-caption p {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Numbers Section */
+        .numbers {
+            padding: calc(var(--space-xxl) * 1.5) 0;
+            background: var(--color-primary);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .numbers::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            top: -200px;
+            right: -100px;
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-xl);
+            position: relative;
+            z-index: 2;
+        }
+
+        .number-item {
+            text-align: center;
+            padding: var(--space-lg);
+        }
+
+        .number-value {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .number-value .unit {
+            font-size: 0.4em;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        .number-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        /* Welfare / Benefits Section */
+        .benefits {
+            padding: calc(var(--space-xxl) * 2) 0;
+            background: white;
+            position: relative;
+        }
+
+        .benefits-header {
+            text-align: center;
+            margin-bottom: var(--space-xxl);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-md);
+        }
+
+        .benefit-card {
+            background: var(--color-bg-tint);
+            border-radius: 16px;
+            padding: var(--space-xl) var(--space-lg);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--color-primary);
+            border-radius: 0 0 4px 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .benefit-card:hover::before {
+            opacity: 1;
+        }
+
+        .benefit-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto var(--space-md);
+            background: white;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .benefit-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-dark);
+            margin-bottom: 8px;
+        }
+
+        .benefit-desc {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            line-height: 1.7;
+        }
+
+        /* Entry CTA Section */
+        .entry {
+            padding: calc(var(--space-xxl) * 2) 0;
+            background: linear-gradient(180deg, var(--color-bg-tint) 0%, #e5ff9e33 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .entry-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xxl);
+            align-items: center;
+        }
+
+        .entry-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .entry-visual {
+            position: relative;
+        }
+
+        .entry-image-main {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-hover);
+        }
+
+        .entry-image-main img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+        }
+
+        .entry-deco {
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 150px;
+            height: 150px;
+            background: var(--color-primary-light);
+            border-radius: 50%;
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .entry-steps {
+            margin-top: var(--space-xl);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: white;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+        }
+
+        .step-item:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: var(--color-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            font-size: 0.95rem;
+            color: var(--color-text);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--color-dark);
+            color: white;
+            padding: calc(var(--space-xxl) * 1.5) 0 var(--space-xl);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            gap: var(--space-xxl);
+            margin-bottom: var(--space-xxl);
+        }
+
+        .footer-brand p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin-top: var(--space-md);
+            max-width: 280px;
+        }
+
+        .footer-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            color: var(--color-primary-light);
+            letter-spacing: 0.05em;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-primary-light);
+            padding-left: 4px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: var(--space-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes floating-y {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes loopBgX {
+            0% { background-position: left 100000px top; }
+            100% { background-position: left 0px top; }
+        }
+
+        /* Marquee */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            padding: var(--space-lg) 0;
+            background: var(--color-primary-light);
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: loopBgX 30s linear infinite;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 700;
+            color: var(--color-primary);
+            letter-spacing: 0.1em;
+        }
+
+        .marquee-content span {
+            margin-right: 80px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-inner {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-desc {
+                margin: 0 auto var(--space-xl);
+            }
+
+            .hero-actions {
+                justify-content: center;
+            }
+
+            .hero-visual {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .brand-grid,
+            .about-grid,
+            .entry-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-content {
+                padding-left: 0;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .benefits-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .numbers-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                display: none;
+            }
+
+            .feature-item {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-item:nth-child(even) {
+                direction: ltr;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-gallery {
+                grid-template-columns: 1fr;
+                max-width: 320px;
+                margin: 0 auto;
+            }
+
+            .team-photo:nth-child(2),
+            .team-photo:nth-child(3) {
+                margin-top: 0;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-xl);
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: var(--space-md);
+                text-align: center;
+            }
+
+            .hero-float-card {
+                display: none;
+            }
+        }
+
+        /* Stagger delays */
+        .stagger-1 { transition-delay: 0.1s; }
+        .stagger-2 { transition-delay: 0.2s; }
+        .stagger-3 { transition-delay: 0.3s; }
+        .stagger-4 { transition-delay: 0.4s; }
+        .stagger-5 { transition-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-inner">
+            <a href="#" class="logo">NEX<span>ORA</span></a>
+            <nav class="nav">
+                <a href="#story" class="nav-link">Brand Story</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#products" class="nav-link">Products</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="btn-header">Shop Now</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Marquee -->
+    <div class="marquee-container">
+        <div class="marquee-content">
+            <span>CRAFTED WITH CARE</span>
+            <span>SUSTAINABLE LIVING</span>
+            <span>JAPANESE ARTISANSHIP</span>
+            <span>DAILY INSPIRATION</span>
+            <span>CRAFTED WITH CARE</span>
+            <span>SUSTAINABLE LIVING</span>
+            <span>JAPANESE ARTISANSHIP</span>
+            <span>DAILY INSPIRATION</span>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="deco-circle c1"></div>
+        <div class="deco-circle c2"></div>
+        <div class="container hero-inner">
+            <div class="hero-content">
+                <span class="hero-label">Est. 2012 — Tokyo, Japan</span>
+                <h1 class="hero-title">
+                    この仕事で<br>
+                    自分をつくる<br>
+                    地域をつくる
+                </h1>
+                <p class="hero-desc">
+                    選び抜かれた素材と、職人の手仕事が織りなす暮らし道具。
+                    毎日の何気ない瞬間を、少しだけ豊かにする——そんな想いを形にしています。
+                </p>
+                <div class="hero-actions">
+                    <a href="#products" class="btn-primary">
+                        コレクションを見る
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="#story" class="btn-secondary">私たちの物語</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image-wrapper">
+                    <img src="http://127.0.0.1:5000/uploads/up_04b676c6fb.jpg" alt="NEXORA Lifestyle" class="hero-image" onerror="this.style.display='none'">
+                </div>
+                <div class="hero-float-card card-1">
+                    <div class="float-card-label">取扱アイテム</div>
+                    <div class="float-card-value">340+</div>
+                </div>
+                <div class="hero-float-card card-2">
+                    <div class="float-card-label">顧客満足度</div>
+                    <div class="float-card-value">98%</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brand Story -->
+    <section class="brand-story" id="story">
+        <div class="container brand-grid">
+            <div class="brand-images animate-on-scroll">
+                <div class="brand-img-main">
+                    <img src="http://127.0.0.1:5000/uploads/up_18537fbb29.png" alt="チームミーティング" onerror="this.style.display='none'">
+                </div>
+                <div class="brand-img-sub">
+                    <img src="http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg" alt="オフィス風景" onerror="this.style.display='none'">
+                </div>
+                <div class="brand-accent-shape"></div>
+            </div>
+            <div class="brand-content animate-on-scroll stagger-2">
+                <span class="section-label">Our Philosophy</span>
+                <h2 class="section-title">会社を知る<br><small style="font-weight:400;font-size:0.6em;color:var(--color-text-muted);letter-spacing:0;">COMPANY</small></h2>
+                <div class="brand-text">
+                    <p>
+                        NEXORAは2012年、東京・世田谷区で小さな工房としてスタートしました。
+                        「ものづくりを通じて、人と地域をつなぎたい」——創業者・佐藤健一のその想いから、
+                        すべては始まりました。
+                    </p>
+                    <p>
+                        私たちは日本全国の職人とパートナーシップを組み、
+                        伝統的な技法と現代的なデザインを融合させた製品を届けています。
+                        一つひとつの製品には、作り手の顔と物語があります。
+                    </p>
+                </div>
+                <div class="brand-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">年の歴史</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">47</div>
+                        <div class="stat-label">都道府県の職人</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">28K</div>
+                        <div class="stat-label">お客様</div>
+                    </div>
+                </div>
+                <a href="#" class="btn-outline">
+                    会社概要を見る
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="features-header animate-on-scroll">
+                <span class="section-label">Why Choose Us</span>
+                <h2 class="section-title">仕事を知る<br><small style="font-weight:400;font-size:0.6em;color:var(--color-text-muted);letter-spacing:0;">BUSINESS</small></h2>
+                <p class="section-desc">
+                    私たちが大切にしている3つの価値。
+                    それは「誠実さ」「継続」「共創」です。
+                </p>
+            </div>
+            <div class="feature-list">
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-visual">
+                        <span class="feature-number">01</span>
+                        <img src="http://127.0.0.1:5000/uploads/up_39990e1195.png" alt="誠実な対応" onerror="this.style.display='none'">
+                    </div>
+                    <div class="feature-content">
+                        <h3>誠実なものづくりへの姿勢</h3>
+                        <p>
+                            短期的な利益ではなく、長期的な信頼関係を築くことを最優先しています。
+                            材料の調達から製造、検品まで、すべての工程に目を配り、
+                            お客様に安心してお使いいただける品質を追求します。
+                        </p>
+                        <div class="feature-tags">
+                            <span class="tag">品質管理</span>
+                            <span class="tag">トレーサビリティ</span>
+                            <span class="tag">アフターサービス</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-visual">
+                        <span class="feature-number">02</span>
+                        <img src="http://127.0.0.1:5000/uploads/up_c37c8f7a38.png" alt="継続的な改善" onerror="this.style.display='none'">
+                    </div>
+                    <div class="feature-content">
+                        <h3>地域の魅力を知る、伝える</h3>
+                        <p>
+                            日本各地に息づく伝統工芸や地域産業に光を当て、
+                            その魅力を現代のライフスタイルに合わせて再解釈します。
+                            職人との対話を重ねながら、互いに高め合う関係性を築いています。
+                        </p>
+                        <div class="feature-tags">
+                            <span class="tag">地域連携</span>
+                            <span class="tag">職人ネットワーク</span>
+                            <span class="tag">文化継承</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-visual">
+                        <span class="feature-number">03</span>
+                        <img src="http://127.0.0.1:5000/uploads/up_7742b7c774.png" alt="共創の未来" onerror="this.style.display='none'">
+                    </div>
+                    <div class="feature-content">
+                        <h3>サステナブルな未来へ</h3>
+                        <p>
+                            環境負荷を最小限に抑えた生産プロセス、
+                            長く愛用できるデザイン、そして包装資材の削減——
+                            サステナビリティは私たちの活動の根幹にあります。
+                        </p>
+                        <div class="feature-tags">
+                            <span class="tag">エコ素材</span>
+                            <span class="tag">ロングライフ</span>
+                            <span class="tag">SDGs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section class="products" id="products">
+        <div class="container">
+            <div class="products-header animate-on-scroll">
+                <div>
+                    <span class="section-label">Collection</span>
+                    <h2 class="section-title">人気の商品<br><small style="font-weight:400;font-size:0.55em;color:var(--color-text-muted);letter-spacing:0;">PRODUCTS</small></h2>
+                </div>
+                <a href="#" class="btn-outline">すべて見る</a>
+            </div>
+            <div class="products-grid">
+                <article class="product-card animate-on-scroll stagger-1">
+                    <div class="product-image">
+                        <span class="product-badge">Best Seller</span>
+                        <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="手工芸マグカップ" onerror="this.style.display='none'">
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">Tableware</div>
+                        <h3 class="product-name">有田焼 手引きマグカップ</h3>
+                        <p class="product-desc">陶芸家・田中匠の手による一点物。温かみのある手触り。</p>
+                        <div class="product-footer">
+                            <div class="product-price">¥4,400 <span>税込</span></div>
+                            <button class="btn-cart" aria-label="カートに追加">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+                <article class="product-card animate-on-scroll stagger-2">
+                    <div class="product-image">
+                        <span class="product-badge">New</span>
+                        <img src="http://127.0.0.1:5000/uploads/up_889764147f.webp" alt="ランチボックス" onerror="this.style.display='none'">
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">Lifestyle</div>
+                        <h3 class="product-name">桐製 弁当箱 小</h3>
+                        <p class="product-desc">秋田の伝統工芸。湿度調整機能でご飯をおいしく保ちます。</p>
+                        <div class="product-footer">
+                            <div class="product-price">¥6,600 <span>税込</span></div>
+                            <button class="btn-cart" aria-label="カートに追加">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+                <article class="product-card animate-on-scroll stagger-3">
+                    <div class="product-image">
+                        <img src="http://127.0.0.1:5000/uploads/up_3a159df441.jpg" alt="手作りアクセサリー" onerror="this.style.display='none'">
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">Accessory</div>
+                        <h3 class="product-name">革紐編みキーホルダー</h3>
+                        <p class="product-desc">栃木レザー使用。経年変化を楽しめる大人の小物。</p>
+                        <div class="product-footer">
+                            <div class="product-price">¥2,750 <span>税込</span></div>
+                            <button class="btn-cart" aria-label="カートに追加">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Voice -->
+    <section class="voice">
+        <div class="container">
+            <div class="voice-header animate-on-scroll">
+                <span class="section-label">Customer Voice</span>
+                <h2 class="section-title">お客様の声<br><small style="font-weight:400;font-size:0.55em;opacity:0.6;letter-spacing:0;">CROSS TALK</small></h2>
+            </div>
+            <div class="voice-slider animate-on-scroll stagger-2">
+                <div class="voice-card">
+                    <p class="voice-quote">
+                        引っ越しの際にセットで購入しました。毎朝のコーヒータイムが、
+                        まるでカフェにいるような特別な時間に変わりました。
+                        手触りの良さはもちろん、使い込むほどに味が出てくるのが本当に素敵です。
+                    </p>
+                    <div class="voice-author">
+                        <div class="voice-avatar">
+                            <img src="http://127.0.0.1:5000/uploads/up_abd04ea9b6.webp" alt="お客様の声" onerror="this.style.display='none'">
+                        </div>
+                        <div class="voice-meta">
+                            <h4>山田 美咲 様</h4>
+                            <p>東京都渋谷区 / 30代 / 会社員</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="voice-nav">
+                <button class="voice-btn" aria-label="前のお客様の声">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <button class="voice-btn" aria-label="次のお客様の声">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Team -->
+    <section class="about" id="about">
+        <div class="container about-grid">
+            <div class="about-content animate-on-scroll">
+                <span class="section-label">Our People</span>
+                <h2 class="section-title">働く人を知る<br><small style="font-weight:400;font-size:0.55em;color:var(--color-text-muted);letter-spacing:0;">TEAM</small></h2>
+                <p class="section-desc" style="margin-top:var(--space-md);">
+                    NEXORAのチームは、多様な背景を持つ28名のメンバーで構成されています。
+                    各々の専門性を活かし、一つの製品を通じてお客様に笑顔を届けています。
+                </p>
+                <div style="margin-top:var(--space-xl);padding:var(--space-lg);background:white;border-radius:12px;box-shadow:var(--shadow-card);">
+                    <h4 style="font-size:1rem;margin-bottom:8px;color:var(--color-dark);">
+                        土木の知識ゼロから、<br>頼られる存在になったんだ。
+                    </h4>
+                    <p style="font-size:0.85rem;color:var(--color-text-muted);line-height:1.8;">
+                        —— 商品開発部 / 入社5年目<br>
+                        <span style="color:var(--color-primary);">鈴木 拓海</span>
+                    </p>
+                </div>
+            </div>
+            <div class="team-gallery animate-on-scroll stagger-2">
+                <div class="team-photo">
+                    <img src="http://127.0.0.1:5000/uploads/up_07d8e0124b.png" alt="チームメンバー" onerror="this.style.display='none'">
+                    <div class="photo-caption">
+                        <h4>佐藤 健一</h4>
+                        <p>代表取締役</p>
+                    </div>
+                </div>
+                <div class="team-photo">
+                    <img src="http://127.0.0.1:5000/uploads/up_7652703473.png" alt="チームメンバー" onerror="this.style.display='none'">
+                </div>
+                <div class="team-photo">
+                    <img src="http://127.0.0.5000/uploads/up_8d3e1352d5.png" alt="チームメンバー" onerror="this.style.display='none'">
+                </div>
+                <div class="team-photo">
+                    <img src="http://127.0.0.1:5000/uploads/up_16c3c60eb4.png" alt="チームメンバー" onerror="this.style.display='none'">
+                    <div class="photo-caption">
+                        <h4>高橋 美穂</h4>
+                        <p>デザイン統括</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Numbers -->
+    <section class="numbers">
+        <div class="container numbers-grid">
+            <div class="number-item animate-on-scroll stagger-1">
+                <div class="number-value"><span class="counter" data-target="12">0</span><span class="unit">年</span></div>
+                <div class="number-label">創業以来の歴史</div>
+            </div>
+            <div class="number-item animate-on-scroll stagger-2">
+                <div class="number-value"><span class="counter" data-target="340">0</span><span class="unit">+</span></div>
+                <div class="number-label">取扱アイテム数</div>
+            </div>
+            <div class="number-item animate-on-scroll stagger-3">
+                <div class="number-value"><span class="counter" data-target="98">0</span><span class="unit">%</span></div>
+                <div class="number-label">顧客満足度</div>
+            </div>
+            <div class="number-item animate-on-scroll stagger-4">
+                <div class="number-value"><span class="counter" data-target="47">0</span><span class="unit">都道府県</span></div>
+                <div class="number-label">提携職人数</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits -->
+    <section class="benefits">
+        <div class="container">
+            <div class="benefits-header animate-on-scroll">
+                <span class="section-label">Welfare</span>
+                <h2 class="section-title">働く環境を知る<br><small style="font-weight:400;font-size:0.55em;color:var(--color-text-muted);letter-spacing:0;">WELFARE</small></h2>
+                <p class="section-desc" style="margin:var(--space-md) auto 0;">
+                    私たちが提供するのは、単なる商品だけではありません。<br>
+                    それを使う皆様の日々の暮らしを、より豊かにする体験です。
+                </p>
+            </div>
+            <div class="benefits-grid">
+                <div class="benefit-card animate-on-scroll stagger-1">
+                    <div class="benefit-icon">🌿</div>
+                    <h4 class="benefit-title">サステナブル配送</h4>
+                    <p class="benefit-desc">再利用可能な梱包材と、カーボンオフセット配送を実施</p>
+                </div>
+                <div class="benefit-card animate-on-scroll stagger-2">
+                    <div class="benefit-icon">🎁</div>
+                    <h4 class="benefit-title">ラッピング無料</h4>
+                    <p class="benefit-desc">ギフト用に美しい和紙ラッピングを無料で承ります</p>
+                </div>
+                <div class="benefit-card animate-on-scroll stagger-3">
+                    <div class="benefit-icon">🔄</div>
+                    <h4 class="benefit-title">返品保証30日間</h4>
+                    <p class="benefit-desc">ご不満の場合は無条件で返品・交換に応じます</p>
+                </div>
+                <div class="benefit-card animate-on-scroll stagger-4">
+                    <div class="benefit-icon">💬</div>
+                    <h4 class="benefit-title">専任コンサル</h4>
+                    <p class="benefit-desc">ギフト選びや用途に合わせた丁寧なご相談を承ります</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Entry CTA -->
+    <section class="entry" id="contact">
+        <div class="container entry-inner">
+            <div class="entry-content animate-on-scroll">
+                <span class="section-label">Get Started</span>
+                <h2 class="section-title">まずは<br>お気軽にどうぞ<br><small style="font-weight:400;font-size:0.55em;color:var(--color-text-muted);letter-spacing:0;">ENTRY</small></h2>
+                <p class="section-desc" style="margin-top:var(--space-md);">
+                    ご購入のご相談、法人様向けのご提案、<br>
+                    メディア関連のお問い合わせなど、<br>
+                    お気軽にお問い合わせください。
+                </p>
+                <div class="entry-steps">
+                    <div class="step-item">
+                        <span class="step-number">1</span>
+                        <span class="step-text">フォームよりお問い合わせ</span>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">2</span>
+                        <span class="step-text">担当者より2営業日以内にご返信</span>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">3</span>
+                        <span class="step-text">ご希望に合わせてご案内</span>
+                    </div>
+                </div>
+                <a href="#" class="btn-primary" style="margin-top:var(--space-xl);">
+                    お問い合わせフォーム
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+            <div class="entry-visual animate-on-scroll stagger-2">
+                <div class="entry-deco"></div>
+                <div class="entry-image-main">
+                    <img src="http://127.0.0.1:5000/uploads/up_e832d00e50.png" alt="お問い合わせ" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo" style="color:white;">
+                        NEX<span style="color:var(--color-primary-light);">ORA</span>
+                    </div>
+                    <p>
+                        選び抜かれた暮らし道具で、<br>
+                        毎日を少しだけ豊かに。<br>
+                        東京から日本全国へ、<br>
+                        聴き手の顔が見えるものづくりを。
+                    </p>
+                </div>
+                <div>
+                    <h4 class="footer-title">About</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">会社概要</a></li>
+                        <li><a href="#">採用情報</a></li>
+                        <li><a href="#">ニュース</a></li>
+                        <li><a href="#">ブログ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">よくある質問</a></li>
+                        <li><a href="#">配送について</a></li>
+                        <li><a href="#">返品・交換</a></li>
+                        <li><a href="#">お問い合わせ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">特定商取引法</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                        <li><a href="#">利用規約</a></li>
+                        <li><a href="#">サイトマップ</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copy">&copy; 2024 NEXORA Co., Ltd. All Rights Reserved.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="LINE">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.58 2 10c0 2.91 1.82 5.47<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+</body>
+</html>
