@@ -2407,7 +2407,9 @@ html.__ce_altmode{cursor:text}
         [].slice.call(n.classList).forEach(function(cl){ if(cl.indexOf('__ceax_')===0) n.classList.remove(cl); });
       }
       var edited=false;
-      if(n.attributes){ [].slice.call(n.attributes).forEach(function(a){ if(a.name.indexOf('data-ce')===0){ edited=true; n.removeAttribute(a.name); } }); }
+      // data-cedelay（⏳遅らせ・順番の演出タイミング）は「動きの一部」なので部品に残す。
+      // それ以外のdata-ce*（ドラッグ署名data-cetx等）は編集の内部印なので外す。
+      if(n.attributes){ [].slice.call(n.attributes).forEach(function(a){ if(a.name.indexOf('data-ce')===0 && a.name!=='data-cedelay'){ edited=true; n.removeAttribute(a.name); } }); }
       if(n.style){
         ['animation','transition'].forEach(function(p){ n.style.removeProperty(p); });      // 一時アニメは常に除去
         if(edited){ ['transform','transform-origin','width','height','max-width','object-fit','opacity','filter'].forEach(function(p){ n.style.removeProperty(p); }); }  // 編集で動かした要素だけサイズ・位置も戻す
