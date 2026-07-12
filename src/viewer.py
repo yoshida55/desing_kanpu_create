@@ -3463,7 +3463,7 @@ html.__ce_altmode{cursor:text}
     ov.addEventListener('click',function(e){
       if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
       if(e.target.id==='__ce_brapply'){
-        stopAnim(el);
+        stopAnim(el); clearPreviewStyle(el);  // プレビュー途中の半透明・ズレたopacity/transformが残らないよう元へ戻す
         el.innerHTML=esc(ta.value).replace(/\\n/g,'<br>');
         markDirty();
         msg.textContent='改行を反映しました。「💾 保存」で確定できます';
@@ -3663,6 +3663,7 @@ html.__ce_altmode{cursor:text}
       if(msg) msg.textContent='点線の下線を消しました（保存で確定）';
     }
     document.addEventListener('mouseup', function(e){
+      if(e.button!==0) return;  // ★右クリックのmouseupで覚えた選択(savedRange)を消さない＝「✂選択中」がメニューで効かなくなる事故の防止
       if(inUI(e.target)) return;  // 編集UI上の操作は無視
       setTimeout(function(){
         var sel=window.getSelection();
@@ -3908,10 +3909,35 @@ html.__ce_altmode{cursor:text}
   function fxDef(k){ for(var i=0;i<FX.length;i++){ if(FX[i].k===k) return FX[i]; } return null; }
   function fxParam(a,key){ if(curP[key]!=null) return curP[key]; for(var i=0;i<a.sl.length;i++){ if(a.sl[i].k===key) return a.sl[i].def; } return 0; }
   // プレビューで当てた一時styleを消し、確定状態（位置など）に戻す
+  // プレビューが書き換えるインラインstyleのプロパティ一覧（開始時に控える・終了時に戻す）
+  var _PREV_PROPS=['opacity','filter','clip-path','text-shadow','animation','transition','transform','translate','rotate','scale','transform-origin'];
+  // プレビュー開始時：要素の「元のインラインstyle」を1回だけ控える（連続プレビューでも最初の状態を保つ）
+  function snapPreviewStyle(el){
+    if(!el||el.__cePrevSt) return;
+    var o={};
+    _PREV_PROPS.forEach(function(p){ var v=el.style.getPropertyValue(p); o[p]=v?{v:v,pri:el.style.getPropertyPriority(p)}:null; });
+    el.__cePrevSt=o;
+  }
+  // ★2026-07-12 復元方式に変更：旧方式（無条件でopacity等をremoveProperty）は、昔の保存で
+  //   焼き込まれた保険の opacity:1!important まで消してしまい、.reveal系の要素が右クリック→
+  //   閉じるだけで隠れ状態へ落ちる＝「下に動いて消える」事故の原因だった。
+  //   プレビューをしていない要素には何もしない。した要素は控えた元の値へ戻す。
   function clearPreviewStyle(el){
     if(!el) return;
-    ['opacity','filter','clip-path','text-shadow','animation'].forEach(function(p){ el.style.removeProperty(p); });
-    // 位置・拡大・回転・退避のどれかが編集されていたら、その確定変形を戻す（拡大だけでも消えないように）
+    if(el.__cePrevSt){
+      var snap=el.__cePrevSt; el.__cePrevSt=null;
+      _PREV_PROPS.forEach(function(p){ var s=snap[p]; if(s){ el.style.setProperty(p, s.v, s.pri||''); } else { el.style.removeProperty(p); } });
+    }
+    // 位置・拡大・回転・退避のどれかが編集されていたら、その確定変形を当て直す（拡大だけでも消えないように）
+    var edited=['data-cetx','data-cety','data-cesx','data-cesy','data-cero','data-cebt'].some(function(a){ return el.getAttribute(a)!=null; });
+    if(edited){ applyTf(el); }
+  }
+  // 焼き込み前の完全掃除（旧clearPreviewStyle相当）：保険が焼き込んだ opacity:1!important 等の残骸も
+  // 消してから付ける＝残すと隠れ状態(.fxa_pre)にならず「アニメを付けたのに動かない」になる。
+  function purgeInlineFx(el){
+    if(!el) return;
+    el.__cePrevSt=null;
+    ['opacity','filter','clip-path','text-shadow','animation','transition'].forEach(function(p){ el.style.removeProperty(p); });
     var edited=['data-cetx','data-cety','data-cesx','data-cesy','data-cero','data-cebt'].some(function(a){ return el.getAttribute(a)!=null; });
     if(edited){ applyTf(el); } else { ['transform','translate','rotate','scale'].forEach(function(p){ el.style.removeProperty(p); }); }
   }
@@ -4110,7 +4136,11 @@ html.__ce_altmode{cursor:text}
     if(!el){ if(msg)msg.textContent='⚠ 要素が選ばれていません（もう一度右クリックで選んでください）'; return; }
     var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ 未対応の動き：'+k; return; }
     stopAnim(el);
+    snapPreviewStyle(el);  // 元のインラインstyleを控える（終了・中断時にclearPreviewStyleが復元する）
     el.style.setProperty('animation','none','important');  // プレビュー中は要素自身のCSSアニメを止める（RAFのtransformが上書きされないように）
+    // ★ページCSSのtransition（.reveal系の0.9s等）や焼き込み済みfxa_preのtransitionが生きていると、
+    //   rAFの毎フレーム書き込みが1テンポ遅れて「試しても動かない」ように見える → プレビュー中だけ無効化
+    el.style.setProperty('transition','none','important');
     var base=el.getAttribute('data-cebt')||'';  // 元の変形(回転など)は保つ。移動はtranslate個別プロパティ側に乗るのでここには含めない
     if(msg) msg.textContent='▶ 再生「'+a.b+'」（スライダーで調整→「付ける」で確定）';
     if(a.g==='char'){ playChar(el,a); return; }
@@ -4305,7 +4335,7 @@ html.__ce_altmode{cursor:text}
     var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ まず動きを選んでください'; return; }
     ensureFxAssets();
     fxUnwrap(el);  // 既存の出現ラッパーがあれば解除して素の要素に戻す（付け直し対応）
-    stopAnim(el); clearPreviewStyle(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);  // 2回目以降も必ずプレーン文字から＋一括改善の文字アニメを外す（上書き消え防止）
+    stopAnim(el); purgeInlineFx(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);  // 2回目以降も必ずプレーン文字から＋一括改善の文字アニメを外す（上書き消え防止）
     // ★ドラッグ/拡大で付いた transition:none / animation:none を外す。これが残ると出現もループも一瞬で終わって「動かない」に見える。
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
     // ★保険が付けた「見せるクラス」が過去の保存で焼き込まれていると、ページCSSの
@@ -4818,7 +4848,7 @@ html.__ce_altmode{cursor:text}
       p:_fly.anchors.map(function(a){ return [Math.round(a[0]-cx), Math.round(a[1]-cy)]; })};
   }
   function flyStopPrev(){
-    if(_fly&&_fly.el){ _fly.el.ceflyGen=(_fly.el.ceflyGen||0)+1; clearPreviewStyle(_fly.el); }
+    if(_fly&&_fly.el){ _fly.el.ceflyGen=(_fly.el.ceflyGen||0)+1; purgeInlineFx(_fly.el); }
   }
   // キャラ絵そのものの左右向きを反転（data-cesxの符号を反転）＝左向きの絵を右向き基準にできる
   function flyMirror(el){
@@ -4861,7 +4891,7 @@ html.__ce_altmode{cursor:text}
         el.style.setProperty('rotate',(bro+(bsx<0?-cur:cur)).toFixed(1)+'deg','important');
       }
       if(cfg.l||p<1){ requestAnimationFrame(step); }
-      else{ setTimeout(function(){ if(el.ceflyGen===gen){ clearPreviewStyle(el); flyRedraw(); } },450); }
+      else{ setTimeout(function(){ if(el.ceflyGen===gen){ purgeInlineFx(el); flyRedraw(); } },450); }
     }
     requestAnimationFrame(step);
   }
@@ -5303,6 +5333,7 @@ html.__ce_altmode{cursor:text}
   // ===== ブラウザ風クイックメニュー（右クリックの瞬間にカーソル位置へ・よく使う操作だけ） =====
   // 大メニュー（従来のパネル）は「⚙ すべての編集メニュー…」から開く二段構え。
   var _bigFull=false;  // trueのとき、次のcontextmenuは従来の大メニューを開く
+  var _bigFxFocus=false;  // trueのとき、大メニューを開いた直後に「✨動きを選ぶ」グリッドへ自動スクロール＋ハイライト
   function selectParent(fromFull){
     var pa=curEl&&curEl.parentElement;
     if(!pa || pa===document.body || pa.tagName==='HTML'){ if(msg) msg.textContent='これ以上外側はありません'; return; }
@@ -5321,6 +5352,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）'],
     ['__ce_q_txt','✏ 文字を追加（編集）'],
     ['__ce_q_img','🖼 画像を追加（ここに置く）'],
+    ['__ce_q_fx','✨ 動きを付ける（アニメを選ぶ）'],
     ['__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）'],
     ['__ce_q_dly','⏳ 動きの演出（順番・遅らせ・速さ）'],
     ['__ce_q_fav','⭐ このセクションをお気に入り（部品保存）'],
@@ -5450,6 +5482,7 @@ html.__ce_altmode{cursor:text}
         return;
       }
       if(t.id==='__ce_q_img'){ closeMenu(); openAddImagePicker((window.scrollX||window.pageXOffset||0)+qx, (window.scrollY||window.pageYOffset||0)+qy); return; }
+      if(t.id==='__ce_q_fx'){ _bigFull=true; _bigFxFocus=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
       if(t.id==='__ce_q_dly'){ var dle=curEl; closeMenu(); dlyOpen(dle,qx,qy); return; }
       if(t.id==='__ce_q_fav'){ var fs=curEl.closest('section,header,footer'); closeMenu(); favSaveSection(fs); return; }
@@ -5591,6 +5624,17 @@ html.__ce_altmode{cursor:text}
       m.style.top=Math.max(10,Math.min(e.clientY, window.innerHeight-mh-10))+'px';
     }
     curMenu=m;
+    // ✨クイックメニューの「動きを付ける」から来た時＝動きグリッドまで自動スクロール＋一瞬光らせて場所を教える
+    if(_bigFxFocus){
+      _bigFxFocus=false;
+      var _fbd=m.querySelector('.bd2'), _fg=m.querySelector('#__fx_grid');
+      if(_fbd && _fg){
+        var _fcap=_fg.previousElementSibling||_fg;  // 見出し「✨動きを選ぶ」ごと見せる
+        _fbd.scrollTop=Math.max(0, _fcap.getBoundingClientRect().top - _fbd.getBoundingClientRect().top + _fbd.scrollTop - 6);
+        _fg.style.outline='3px solid #c026a6'; _fg.style.outlineOffset='2px'; _fg.style.borderRadius='8px';
+        setTimeout(function(){ try{ _fg.style.outline=''; _fg.style.outlineOffset=''; }catch(_){} },1600);
+      }
+    }
     // このメニュー(パネル)自体も、黒いヘッダ部分を掴んで動かせる
     (function(){
       var mh=m.querySelector('.h'); mh.style.cursor='move';

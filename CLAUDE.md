@@ -599,6 +599,19 @@ data/  screenshots/ videos/ assets/ camps/ design_stock.sqlite （いずれもgi
   ⚠既存の`data/camps/clone_*.html`の中にこのパターンで保存された空クローンが残っている場合があるので、
   ⭐が無反応な時はまず`/api/camp_sections?file=<ファイル名>`でセクション数が0でないか疑うとよい。
 
+### ✅ ⑱ 「要素が下に動いて消える」「複数選択のアニメプレビューが動かない」「✂文字選択が効かない」→ 解決（2026-07-12）
+- 3件同根の修正（viewer.py・すべて実測で確認済み）：
+  1. **clearPreviewStyleを復元方式に**：旧実装は要素の元インラインstyle（昔の保険が焼き込んだ
+     `opacity:1!important`等）まで無条件削除→右クリック→閉じるだけで.reveal系が隠れ状態へ落ちて
+     「下に動いて消える」。→ プレビュー開始時に控えて(snapPreviewStyle)終了時に復元。
+     焼き込み(applyBake)と🕊飛行だけは完全掃除（purgeInlineFx）＝保険の残骸が残ると
+     「アニメを付けたのに隠れず動かない」ため。
+  2. **プレビュー(playAnim)中はtransitionを無効化**：ページCSSの.reveal系transition(0.9s等)が
+     生きていると毎フレーム描画が1テンポ遅れ「試しても動かない」ように見えた。
+  3. **文字選択の記憶(savedRange)が右クリックのmouseupで消えていた**→左ボタン以外は無視。
+- ⚠検証時の注意：Claude Codeのブラウザペインは rAF / IntersectionObserver / CSS transition /
+  smooth scroll が一切動かない（スクショもタイムアウト）＝アニメ関係の見た目検証は実ブラウザで行うこと。
+
 ---
 
 ## 8. 環境・前提
