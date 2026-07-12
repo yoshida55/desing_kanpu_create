@@ -403,5 +403,27 @@
   "warn": true,
   "ts": 1783859144,
   "rating": "△"
+ },
+ {
+  "file": "camp_20260712_221944_553767.html",
+  "base_id": "b7a130f2bc9f5e88",
+  "anim_id": "",
+  "model": "openai:gpt-5.6-terra",
+  "text_len": 1918,
+  "sections": 8,
+  "warn": true,
+  "ts": 1783862384,
+  "rating": "✖"
+ },
+ {
+  "file": "camp_20260712_222228_436389.html",
+  "base_id": "b7a130f2bc9f5e88",
+  "anim_id": "",
+  "model": "openai:gpt-5.6-terra",
+  "text_len": 1942,
+  "sections": 8,
+  "warn": true,
+  "ts": 1783862548,
+  "rating": "△"
  }
 ]

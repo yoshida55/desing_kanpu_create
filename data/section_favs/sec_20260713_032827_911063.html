@@ -1,0 +1,83 @@
+<section class="banner section reveal show in is-visible active visible in-view inview animated revealed aos-animate is-inview is-show reveal-show show-up on enter" style="transform: none; opacity: 1 !important; --blue: #0071b9; --blue-soft: #b2d4ea; --blue-pale: #e9f5ff; --yellow: #f2e018; --text: #333333; --bg: #ffffff; --bg-soft: #fafafa; --shadow: 5px 5px 10px 0 rgba(174,174,174,.1); --radius: 8px; --container: 1440px; --serif: &quot;Times New Roman&quot;, serif; --sans: -apple-system,BlinkMacSystemFont,&quot;Hiragino Sans&quot;,&quot;Yu Gothic&quot;,&quot;Meiryo&quot;,sans-serif;">
+      <div class="container">
+        <div class="banner-box">
+          <div class="banner-content">
+            <div>
+              <h2 class="banner-title">LinkWorksで、<br>安心して働く準備を始める。</h2>
+              <div class="banner-form">
+                <div>
+                  <div class="banner-note">カンタン1分 / 相談無料 / オンライン対応</div>
+                  <div style="font-family:var(--sans);font-weight:800;color:var(--blue);font-size:20px;margin-top:4px">見学予約・資料請求はこちら</div>
+                </div>
+                <span class="badge">LINEで予約する</span>
+              </div>
+            </div>
+            <div class="banner-illust">
+              <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="紙飛行機" width="180" height="180" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </div>
+    <style data-cepart="1">@keyframes heroCopy { 
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes heroVisual { 
+  0% { opacity: 0; transform: translateY(20px) scale(0.975); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes fxa_pulse { 
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(calc(1 + var(--fxa-amp,.06))); }
+}
+@keyframes fxa_float { 
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(calc(-1*var(--fxa-amp,12px))); }
+}
+@keyframes fxa_bounce { 
+  0%, 100% { transform: translateY(0px); }
+  30% { transform: translateY(calc(-1*var(--fxa-amp,18px))); }
+  60% { transform: translateY(0px); }
+  80% { transform: translateY(calc(-.4*var(--fxa-amp,18px))); }
+}
+@keyframes fxa_glow { 
+  0%, 100% { text-shadow: currentcolor 0px 0px 4px; filter: brightness(1); }
+  50% { text-shadow: currentcolor 0px 0px 16px, currentcolor 0px 0px 30px; filter: brightness(1.16); }
+}
+@keyframes fxa_wave { 
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(calc(-1*var(--fxa-amp,10px))); }
+}
+@keyframes fxa_wipeband { 
+  0% { transform: translateX(-101%); }
+  45% { transform: translateX(0px); }
+  100% { transform: translateX(101%); }
+}
+@scope{
+:root { --blue: #0071b9; --blue-soft: #b2d4ea; --blue-pale: #e9f5ff; --yellow: #f2e018; --text: #333333; --bg: #ffffff; --bg-soft: #fafafa; --shadow: 5px 5px 10px 0 rgba(174,174,174,.1); --radius: 8px; --container: 1440px; --serif: "Times New Roman", serif; --sans: -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Meiryo",sans-serif; }
+* { box-sizing: border-box; }
+:scope{box-sizing: border-box;}
+img { max-width: 100%; display: block; }
+.container { width: min(calc(100% - 32px),var(--container)); margin: 0px auto; }
+.section { position: relative; }
+:scope{position: relative;}
+.banner { padding: 28px 0px 76px; }
+:scope{padding: 28px 0px 76px;}
+.banner-box { position: relative; background: var(--blue); border-radius: 10px; padding: 28px 34px; box-shadow: var(--shadow); overflow: hidden; }
+.banner-box::before { content: ""; position: absolute; inset: auto -60px -70px auto; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.28), transparent 60%); }
+.banner-content { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: center; }
+.banner-title { color: rgb(255, 255, 255); font-family: var(--sans); font-size: 28px; font-weight: 800; line-height: 1.4; margin: 0px 0px 12px; }
+.banner-form { background: rgb(255, 255, 255); border-radius: 10px; padding: 18px; display: flex; gap: 14px; align-items: center; justify-content: space-between; min-height: 92px; }
+.banner-note { font-family: var(--sans); font-size: 11px; color: rgb(110, 129, 144); }
+.badge { display: inline-block; border-radius: 999px; background: rgb(25, 191, 63); color: rgb(255, 255, 255); padding: 10px 18px; font-family: var(--sans); font-size: 12px; font-weight: 800; }
+.banner-illust { display: flex; justify-content: flex-end; align-items: end; gap: 8px; }
+.banner-illust img { width: 180px; height: 180px; object-fit: contain; }
+.reveal { }
+:scope{}
+html.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s, transform 0.9s; }
+:scope{opacity: 0; transform: translateY(24px); transition: opacity 0.9s, transform 0.9s;}
+html.js .reveal.show { opacity: 1; transform: none; }
+:scope{opacity: 1; transform: none;}
+@media (max-width: 1100px){.hero-grid, .about-grid, .banner-content, .passport-cards, .plan-main, .faq-wrap, .timeline, .flow-grid, .plan-top { grid-template-columns: 1fr; }}
+@media (max-width: 720px){.banner-title { font-size: 24px; }}
+}</style></section>

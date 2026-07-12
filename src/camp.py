@@ -122,6 +122,20 @@ _REVIEW_FALLBACK = _SAFE_START + """
 """ + _SAFE_END
 
 
+def _embed_base_meta(html: str, site_id: str) -> str:
+    """カンプHTMLに「どのベースサイトから生まれたか」を<meta name="ce-base">として刻む。
+
+    📚お手本パネル（viewer._EDIT_BAR）がこれを読んでベースのスクショ・類似例・AIアドバイスに使う。
+    DOM丸ごと保存(cleanHtml)でもheadのmetaは残るので、以後ずっと引き継がれる。
+    """
+    html = re.sub(r'<meta name="ce-base"[^>]*>\s*', "", html)
+    return re.sub(
+        r"(<head[^>]*>)",
+        lambda m: m.group(1) + f'<meta name="ce-base" content="{site_id}">',
+        html, count=1,
+    )
+
+
 def _finalize_html(html: str) -> str:
     """生成HTMLを安全に仕上げる。
 
@@ -748,6 +762,8 @@ def generate_camp(
 
     raw, used_model = _call_llm(_SYSTEM, content)
     html = _finalize_html(_strip_html(raw))
+    if base_site_id:
+        html = _embed_base_meta(html, base_site_id)  # 📚お手本パネルが「元のベース」を思い出せるように刻む
 
     config.CAMP_DIR.mkdir(parents=True, exist_ok=True)
     # 同時生成でも衝突しないよう microsecond まで入れて一意にする

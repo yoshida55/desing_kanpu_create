@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ひだまりリンク｜暮らしと働く時間を、ともに整える</title>
+<script>document.documentElement.classList.add('js');</script>
+<style>
+:root{
+  --ink:#3d3732;--text:#6e6965;--paper:#fff;--tint:#f2efec;--pink:#ed828b;
+  --line:rgba(110,105,101,.17);--shadow:0 14px 34px rgba(104,86,76,.10);
+  --strong:0 20px 48px rgba(104,86,76,.16);
+  --ease:cubic-bezier(.16,1,.3,1);--max:950px;
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--paper);color:var(--text);font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;font-size:15px;line-height:2;letter-spacing:.02em}
+a{color:inherit;text-decoration:none} img{display:block;max-width:100%}
+.container{width:min(var(--max),calc(100% - 48px));margin:auto}
+.section{position:relative;padding:120px 0;overflow:hidden}.section.tint{background:var(--tint)}
+.section-head{margin:0 0 48px}.eyebrow{display:block;color:var(--pink);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;line-height:1.3;margin-bottom:8px;font-weight:700}
+h1,h2,h3,p{margin:0}h1{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.34;letter-spacing:.05em;font-weight:500;color:var(--ink)}
+h2{font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.38;letter-spacing:.04em;font-weight:500;color:var(--ink)}
+h3{font-size:1.14rem;line-height:1.55;color:var(--ink);font-weight:600}p{max-width:38em}
+.button,.round-button{transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s ease,color .3s ease}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:16px;min-height:52px;padding:0 25px;border-radius:999px;background:var(--pink);color:white;font-size:.84rem;font-weight:700;letter-spacing:.06em;box-shadow:0 10px 22px rgba(237,130,139,.25)}
+.button:hover{transform:translateY(-3px);box-shadow:0 16px 29px rgba(237,130,139,.35);background:#e87580}.button.arrow::after{content:"→";font-size:1.1rem}.round-button{width:48px;height:48px;border:0;border-radius:50%;background:#71675e;color:#fff;display:grid;place-items:center;cursor:pointer}.round-button:hover{transform:translateY(-3px) rotate(-8deg);box-shadow:var(--shadow)}
+/* header */
+.header{height:76px;display:flex;align-items:center;position:absolute;z-index:10;top:0;width:100%;background:rgba(255,255,255,.83);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.7)}
+.header .container{display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:700;line-height:1}.brand-mark{position:relative;width:29px;height:29px;border:2px solid var(--ink);border-radius:50% 48% 52% 45%;transform:rotate(-14deg)}.brand-mark:after{content:"";position:absolute;width:8px;height:8px;background:var(--pink);border-radius:50%;right:-4px;top:-4px}.brand small{font-weight:400;font-size:.62rem;letter-spacing:.08em;display:block;margin-top:3px}.nav{display:flex;align-items:center;gap:18px;font-size:.72rem;color:var(--ink)}.nav a{transition:color .25s}.nav a:hover{color:var(--pink)}.nav .contact-mini{background:var(--pink);color:#fff;padding:8px 15px;border-radius:999px}
+/* hero */
+.hero{min-height:790px;padding:128px 0 64px;position:relative;overflow:hidden;display:flex;align-items:center}.hero .container{position:relative;z-index:2}.hero-grid{display:grid;grid-template-columns:.82fr 1.18fr;align-items:center;gap:34px}.hero-copy{padding:42px 0}.hero-copy .eyebrow{color:var(--text)}.hero-copy p{margin-top:25px;font-size:.95rem}.hero-copy .button{margin-top:31px;background:#71675e}.hero-photo{height:540px;border-radius:96px 18px 88px 18px;overflow:hidden;background:linear-gradient(135deg,#b9ddd9,#f7d2c3);box-shadow:var(--shadow);position:relative}.hero-photo img{height:100%;width:100%;object-fit:cover;animation:ken 9s ease-in-out infinite alternate}.hero-photo:after{content:"";inset:0;position:absolute;background:linear-gradient(120deg,rgba(255,255,255,.15),transparent 55%)}.hero-note{position:absolute;background:rgba(255,255,255,.91);padding:17px 22px;bottom:38px;left:-34px;line-height:1.45;border-radius:5px;box-shadow:var(--shadow);color:var(--ink);font-size:.87rem}.hero-note b{display:block;font-size:1.12rem;font-weight:500;margin-top:3px}.blob{position:absolute;z-index:1;filter:blur(.2px);opacity:.8;animation:float 6s ease-in-out infinite alternate}.blob.a{width:280px;height:210px;background:#9ee4ea;border-radius:48% 52% 44% 56%;left:-100px;top:190px}.blob.b{width:230px;height:270px;background:#f8b38d;border-radius:56% 44% 55% 45%;right:-58px;top:100px;animation-delay:-2s}.blob.c{width:210px;height:145px;background:#f3abc7;border-radius:59% 41% 61% 39%;right:12%;bottom:30px;animation-delay:-4s}
+/* concept */
+.concept{padding-top:110px}.concept-box{min-height:500px;padding:64px 78px;position:relative;display:grid;grid-template-columns:1fr 1fr;gap:66px;align-items:center;background:#faf8f5;border-radius:100px 42px 96px 42px}.concept-diagram{height:300px;display:grid;place-items:center;position:relative}.orbit{width:220px;height:150px;border:1px solid #e6b5b8;border-radius:50%;transform:rotate(-25deg);position:absolute}.orbit:after{content:"";position:absolute;inset:-13px 57px;border:1px solid #b7dddc;border-radius:50%}.orbit-text{position:relative;display:flex;gap:35px;color:var(--ink);font-size:1.2rem;line-height:1.2;text-align:center}.orbit-text span small{font-size:.6rem;display:block;color:var(--text);margin-top:8px}.concept-copy p{margin-top:20px}.mini-link{margin-top:25px;display:inline-flex;align-items:center;gap:10px;font-size:.8rem;color:var(--ink);border-bottom:1px solid var(--ink);transition:color .3s}.mini-link:hover{color:var(--pink);border-color:var(--pink)}
+/* service */
+.services{min-height:100vh}.service-feature{display:grid;grid-template-columns:1.08fr .92fr;gap:0;align-items:center;margin:58px 0 84px}.service-feature.reverse{grid-template-columns:.92fr 1.08fr}.service-feature.reverse .service-image{order:2}.service-feature.reverse .service-copy{order:1}.service-image{height:335px;border-radius:54px 18px 54px 18px;overflow:hidden;position:relative;background:#c6e5e4}.service-image img{width:100%;height:100%;object-fit:cover;transition:transform .55s var(--ease)}.service-feature:hover img{transform:scale(1.055)}.service-copy{padding:36px 42px;background:#fff;border-radius:5px;box-shadow:0 0 0 1px rgba(110,105,101,.08)}.service-copy h3{color:#ca7480;font-size:1.38rem;letter-spacing:.06em}.service-copy .sub{font-size:.73rem;color:var(--ink);margin:2px 0 15px}.service-copy p{font-size:.82rem;line-height:1.9}.badge{position:absolute;z-index:2;right:20px;top:-20px;width:79px;height:79px;border-radius:50%;display:grid;place-items:center;text-align:center;line-height:1.45;font-size:.65rem;background:#f3ce41;color:var(--ink);transform:rotate(7deg)}
+.grid-services{display:grid;grid-template-columns:1fr 1fr;gap:44px 28px}.small-service{display:block}.small-service figure{margin:0;height:205px;position:relative;overflow:hidden;border-radius:28px 9px 28px 9px;background:#eadac7}.small-service img{height:100%;width:100%;object-fit:cover;transition:transform .4s var(--ease)}.small-service:hover img{transform:scale(1.06)}.small-service h3{color:#709fb4;margin-top:13px}.small-service p{font-size:.76rem;line-height:1.85;margin-top:5px}.tag{position:absolute;top:0;left:0;background:#f1d84d;padding:3px 9px;font-size:.6rem;color:var(--ink);line-height:1.4}
+/* garden */
+.garden{padding-top:36px}.garden-banner{height:185px;position:relative;border-radius:5px;overflow:hidden;background:#d9d0c8;display:grid;place-items:center;color:#5e7251;text-align:center}.garden-banner img{position:absolute;width:100%;height:100%;object-fit:cover;opacity:.38;filter:saturate(.75)}.garden-banner:after{content:"";inset:0;position:absolute;background:rgba(255,255,255,.34)}.garden-banner div{z-index:1;position:relative}.garden-banner h2{color:#647c56;font-size:2rem}.garden-banner small{display:block;background:#f3d542;color:var(--ink);margin:5px auto 0;width:max-content;padding:2px 12px;font-weight:700}
+/* voice */
+.voice{min-height:680px}.voice-top{display:flex;justify-content:space-between;align-items:end;margin-bottom:44px}.voice-top .section-head{margin:0}.voice-control{display:flex;align-items:center;gap:15px;font-size:.77rem;color:var(--ink)}.carousel{overflow:hidden;margin-right:calc((950px - 100vw)/2)}.track{display:flex;gap:22px;transition:transform .5s ease-in-out}.voice-card{flex:0 0 360px;min-height:205px;background:white;border-radius:5px;padding:25px;box-shadow:0 0 0 1px rgba(110,105,101,.07);position:relative}.voice-card:before{content:"“";font-family:Georgia,serif;color:#efbdc2;font-size:3rem;line-height:.6;position:absolute;top:25px;right:20px}.voice-card .voice-label{font-size:.67rem;color:#c4747e;border-left:3px solid var(--pink);padding-left:8px}.voice-card h3{font-size:.92rem;margin:13px 0 10px}.voice-card p{font-size:.75rem;line-height:1.75}.voice-card .person{font-size:.65rem;margin-top:12px;color:#999}
+/* place */
+.place{min-height:780px;padding:0;display:flex;align-items:center;background:#b9b1a7 url("http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png") center/cover fixed}.place:before{content:"";position:absolute;inset:0;background:rgba(69,59,52,.22)}.place .container{position:relative;z-index:1;padding:110px 0 72px}.place .section-head h2,.place .section-head .eyebrow{color:#fff}.search-panel{background:rgba(255,255,255,.95);padding:44px 56px;border-radius:42px 42px 5px 5px;box-shadow:var(--strong)}.search-row{display:grid;grid-template-columns:145px 1fr;padding:15px 0;border-bottom:1px solid var(--line)}.search-row:last-of-type{border:0}.search-row b{font-size:.8rem;color:var(--ink)}.checks{display:flex;flex-wrap:wrap;gap:7px 17px;font-size:.76rem}.checks label{white-space:nowrap}.checks input{accent-color:var(--pink)}.search-input{display:flex;align-items:center;border-bottom:1px solid var(--ink);padding:15px 0 7px;gap:10px}.search-input input{border:0;background:none;outline:0;width:100%;font:inherit;font-size:.77rem}
+.contact-panel{margin:55px auto 0;max-width:760px;background:#faf8f5;padding:32px 43px;border-radius:48px 48px 48px 10px;display:flex;align-items:center;justify-content:space-between;gap:24px}.contact-panel h3{font-family:Georgia,"Noto Serif JP",serif;color:#ca8b8d;font-size:1.4rem;font-style:italic;font-weight:400}.contact-panel p{font-size:.72rem;line-height:1.7}.phone{font-family:Georgia,serif;font-size:1.85rem;color:var(--ink);white-space:nowrap;line-height:1}
+/* news */
+.info{padding-bottom:95px}.info-grid{display:grid;grid-template-columns:210px 1fr;gap:48px;margin-bottom:80px}.info-side h2{font-size:2rem}.info-side .mini-link{margin-top:25px}.news-list{border-top:1px solid var(--line)}.news-row{display:grid;grid-template-columns:100px 75px 1fr;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:.74rem;color:var(--ink)}.news-row time{color:#999;font-size:.67rem}.news-row em{font-style:normal;font-size:.62rem;padding:1px 7px;border-radius:99px;background:var(--tint);width:max-content}.column-list{border:1px solid var(--line);border-radius:5px;overflow:hidden}.column-row{display:grid;grid-template-columns:135px 1fr;gap:18px;min-height:95px;padding:13px;border-bottom:1px solid var(--line);transition:background .3s}.column-row:last-child{border:0}.column-row:hover{background:#faf8f5}.column-row figure{margin:0;background:#d7e3e2;overflow:hidden}.column-row img{width:100%;height:100%;object-fit:cover;transition:transform .3s}.column-row:hover img{transform:scale(1.06)}.column-row small{font-size:.64rem;color:#999}.column-row h3{font-size:.82rem;margin-top:4px}
+/* flow */
+.banners{padding-top:25px}.banner-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.banner-card{height:205px;overflow:hidden;position:relative;border-radius:35px 8px 35px 8px;background:#b9d6d6;color:#fff}.banner-card img{width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease);filter:brightness(.79)}.banner-card:hover img{transform:scale(1.07)}.banner-card span{position:absolute;left:30px;bottom:27px;font-size:1.65rem;line-height:1.2;font-family:Georgia,"Noto Serif JP",serif}.banner-card small{display:block;font:normal .7rem "Noto Sans JP",sans-serif;margin-top:5px}.accent-dots{position:absolute;width:165px;height:120px;background:#a5e6ef;border-radius:51% 49% 43% 57%;bottom:-44px;left:30%;z-index:-1;transform:rotate(-14deg)}
+/* footer */
+.footer-cta{margin-top:108px;padding:42px 0;background:#71675e;color:#fff}.footer-cta .container{display:flex;align-items:center;justify-content:space-between;gap:25px}.footer-cta h2{color:#fff;font-size:1.55rem}.footer-cta p{font-size:.76rem;opacity:.8;margin-top:5px}.footer-cta .button{background:var(--pink);white-space:nowrap}.footer{border-top:3px solid #56799d;padding:47px 0 28px}.footer-top{display:flex;justify-content:space-between;align-items:flex-start;gap:40px}.footer-phone{font-family:Georgia,serif;color:var(--ink);font-size:1.6rem}.footer-phone small{display:block;font-family:"Noto Sans JP",sans-serif;color:var(--text);font-size:.61rem}.footer-links{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-top:39px;padding-top:27px;border-top:1px solid var(--line);font-size:.69rem}.footer-links b{color:var(--ink);font-size:.72rem}.footer-links a{display:block;margin-top:7px;transition:color .2s}.footer-links a:hover{color:var(--pink)}.copyright{font-size:.58rem;color:#aaa;text-align:center;margin-top:45px}
+.top{position:fixed;right:22px;bottom:22px;z-index:30;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .3s ease,transform .3s ease}.top.show{opacity:1;pointer-events:auto;transform:none}
+@keyframes float{to{transform:translateY(-22px) scale(1.08) rotate(5deg)}}@keyframes ken{to{transform:scale(1.08)}} 
+html.js .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s var(--ease),transform .8s var(--ease)}html.js .reveal.left{transform:translateX(-22px)}html.js .reveal.right{transform:translateX(22px)}html.js .reveal.visible{opacity:1;transform:none}.delay1{transition-delay:.1s!important}.delay2{transition-delay:.2s!important}.delay3{transition-delay:.3s!important}
+html.js .hero-copy>*{opacity:0;transform:translateY(25px);animation:heroIn .8s var(--ease) forwards}.hero-copy .eyebrow{animation-delay:.12s}.hero-copy h1{animation-delay:.24s}.hero-copy p{animation-delay:.38s}.hero-copy .button{animation-delay:.52s}html.js .hero-photo{opacity:0;transform:translateX(38px) scale(.96);animation:photoIn 1s .35s var(--ease) forwards}@keyframes heroIn{to{opacity:1;transform:none}}@keyframes photoIn{to{opacity:1;transform:none}}
+@media(max-width:760px){
+ body{font-size:14px}.container{width:min(100% - 32px,var(--max))}.section{padding:78px 0;min-height:auto}.header{height:64px}.nav{display:none}.hero{min-height:auto;padding:98px 0 42px}.hero-grid,.concept-box,.service-feature,.service-feature.reverse,.info-grid{grid-template-columns:1fr}.hero-copy{padding:20px 0}.hero-photo{height:355px;border-radius:58px 14px 58px 14px}.hero-note{left:14px;bottom:17px}.concept-box{padding:42px 27px;border-radius:58px 20px}.concept-diagram{height:190px;order:2}.service-feature{gap:0;margin:40px 0 58px}.service-feature.reverse .service-image,.service-feature.reverse .service-copy{order:initial}.service-image{height:260px}.service-copy{padding:26px 22px}.grid-services{gap:34px 16px}.small-service figure{height:145px}.garden-banner{height:165px}.voice-top{align-items:start;gap:20px}.carousel{margin-right:-16px}.voice-card{flex-basis:295px}.place .container{padding:75px 0 42px}.search-panel{padding:27px 21px;border-radius:28px 28px 5px 5px}.search-row{grid-template-columns:1fr;gap:7px}.contact-panel{padding:27px 24px;display:block}.contact-panel .phone{margin:18px 0}.info-grid{gap:24px;margin-bottom:54px}.footer-cta{margin-top:70px}.footer-cta .container,.footer-top{display:block}.footer-cta .button{margin-top:20px}.footer-links{grid-template-columns:1fr 1fr;gap:20px}.banner-grid{gap:16px}.banner-card{height:155px}.banner-card span{left:17px;bottom:17px;font-size:1.2rem}.news-row{grid-template-columns:76px 62px 1fr;font-size:.67rem}.column-row{grid-template-columns:95px 1fr}.blob.a{left:-145px}.blob.b{right:-115px}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="container">
+    <a class="brand" href="#"><span class="brand-mark"></span><span>ひだまりリンク<small>CARE &amp; WORK SUPPORT</small></span></a>
+    <nav class="nav">
+      <a href="#about">私たちについて</a><a href="#service">支援サービス</a><a href="#voice">利用者の声</a><a href="#place">事業所を探す</a><a href="#news">お知らせ</a><a href="#contact" class="contact-mini">見学・相談のご予約</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <span class="blob a"></span><span class="blob b"></span><span class="blob c"></span>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">HIDAMARI LINK / SENDAI</span>
+        <h1>できることが、<br>今日またひとつ<br>増えていく。</h1>
+        <p>仙台市内6拠点。暮らしの相談から働く準備まで、あなたのペースに合わせて、毎日の小さな前進を一緒に見つけます。</p>
+        <a href="#service" class="button arrow">支援サービスを見る</a>
+      </div>
+      <div class="hero-photo">
+        <img src="http://127.0.0.1:5000/uploads/up_00553e2951.png" width="760" height="540" alt="" onerror="this.style.display='none'">
+        <div class="hero-note">予約なしでも、まずはご相談を。<b>見学は平日 10:00〜16:00</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section concept" id="about">
+  <div class="container">
+    <div class="concept-box reveal">
+      <div class="concept-diagram reveal left">
+        <span class="orbit"></span>
+        <div class="orbit-text"><span>暮らし<small>住まい・日常</small></span><span>仕事<small>学び・就労</small></span></div>
+      </div>
+      <div class="concept-copy">
+        <span class="eyebrow">Our promise / 私たちの約束</span>
+        <h2>暮らしと仕事の間に、<br>安心できる居場所を。</h2>
+        <p>ひだまりリンクは、就労継続支援・生活訓練・相談支援をひとつの窓口でつなぐチームです。仕事だけを急がず、通院、家計、住まいのことも含めて、これからの生活を一緒に組み立てます。</p>
+        <a class="mini-link" href="#">ひだまりリンクが大切にしていること　→</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section services" id="service">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Service / 支援サービス</span>
+      <h2>一人ひとりの「次の一歩」に。</h2>
+    </div>
+
+    <article class="service-feature reveal">
+      <div class="service-image left">
+        <span class="badge">最寄駅から<br>徒歩5分</span>
+        <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" width="520" height="335" alt="" onerror="this.style.display='none'">
+      </div>
+      <div class="service-copy right delay1">
+        <h3>ひだまり相談室</h3><p class="sub">特定相談支援・計画相談支援</p>
+        <p>「何から相談すればいいか分からない」から始めて大丈夫です。担当の相談員が、福祉サービスの申請、通院や家族との調整まで、必要な支援を一緒に整理します。</p>
+        <a href="#" class="mini-link">相談支援について　→</a>
+      </div>
+    </article>
+
+    <article class="service-feature reverse reveal">
+      <div class="service-image right delay1">
+        <span class="badge">送迎は<br>3ルート運行</span>
+        <img src="http://127.0.0.1:5000/uploads/up_55f655b5cb.png" width="520" height="335" alt="" onerror="this.style.display='none'">
+      </div>
+      <div class="service-copy left">
+        <h3>ひだまりワークス</h3><p class="sub">就労継続支援B型・生活訓練</p>
+        <p>箱づくり、データ入力、地域店舗の清掃など、20種類以上の仕事を用意。週1日・午前だけから、生活リズムと自信をゆっくり整えていけます。</p>
+        <a href="#" class="mini-link">働く準備を知る　→</a>
+      </div>
+    </article>
+
+    <div class="grid-services">
+      <a href="#" class="small-service reveal">
+        <figure><span class="tag">生活訓練</span><img src="http://127.0.0.1:5000/uploads/up_5e27f78625.png" width="440" height="250" alt="" onerror="this.style.display='none'"></figure>
+        <h3>くらしの練習室　→</h3><p>料理、金銭管理、外出の練習。自分で選べる毎日のために。</p>
+      </a>
+      <a href="#" class="small-service reveal delay1">
+        <figure><span class="tag">居住支援</span><img src="http://127.0.0.1:5000/uploads/up_8de5068d7d.png" width="440" height="250" alt="" onerror="this.style.display='none'"></figure>
+        <h3>住まいサポート　→</h3><p>部屋探しから入居後の困りごとまで、地域とつなぎます。</p>
+      </a>
+      <a href="#" class="small-service reveal delay2">
+        <figure><span class="tag">就労移行</span><img src="http://127.0.0.1:5000/uploads/up_3996f78e40.png" width="440" height="250" alt="" onerror="this.style.display='none'"></figure>
+        <h3>キャリア・ラボ　→</h3><p>PC訓練と職場体験を通じて、一般就労への準備を。</p>
+      </a>
+      <a href="#" class="small-service reveal delay3">
+        <figure><span class="tag">定着支援</span><img src="http://127.0.0.1:5000/uploads/up_7beb56fdd8.png" width="440" height="250" alt="" onerror="this.style.display='none'"></figure>
+        <h3>はたらく伴走室　→</h3><p>就職後も月1回の面談で、仕事の続けやすさを考えます。</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section garden">
+  <div class="container">
+    <a class="garden-banner reveal" href="#">
+      <img src="http://127.0.0.1:5000/uploads/up_5af5bf188f.png" width="950" height="185" alt="" onerror="this.style.display='none'">
+      <div><small>地域とつながる月1回のマーケット</small><h2>Hidamari Garden</h2><span>作品づくり・販売・小さな出会い　→</span></div>
+    </a>
+  </div>
+</section>
+
+<section class="section tint voice" id="voice">
+  <div class="container">
+    <div class="voice-top reveal">
+      <div class="section-head"><span class="eyebrow">Voice / 利用者の声</span><h2>通い始めて変わったこと。</h2></div>
+      <div class="voice-control"><button class="round-button" id="prev" aria-label="前へ">←</button><span id="pager">1 / 5</span><button class="round-button" id="next" aria-label="次へ">→</button></div>
+    </div>
+    <div class="carousel reveal delay1">
+      <div class="track" id="track">
+        <article class="voice-card"><span class="voice-label">WORKS</span><h3>週2日から、電車に乗れるように。</h3><p>最初は送迎を使っていました。今は自分で通えて、帰りにコンビニへ寄る余裕もできました。</p><span class="person">青葉区・Kさん / 28歳</span></article>
+        <article class="voice-card"><span class="voice-label">LIVING</span><h3>「困った」を言える場所ができた。</h3><p>住まいの更新や病院のことを一人で抱え込まなくなりました。相談員さんがいて安心です。</p><span class="person">若林区・Mさん / 34歳</span></article>
+        <article class="voice-card"><span class="voice-label">CAREER</span><h3>初めての職場見学、緊張したけれど。</h3><p>面接の練習を何度もして、パン屋さんで週3日働き始めました。</p><span class="person">太白区・Rさん / 22歳</span></article>
+        <article class="voice-card"><span class="voice-label">WORKS</span><h3>手を動かす時間が、好きになった。</h3><p>ラベル貼りを任せてもらい、月末に達成感を感じています。</p><span class="person">宮城野区・Sさん / 41歳</span></article>
+        <article class="voice-card"><span class="voice-label">LIVING</span><h3>家族との話し方も変わりました。</h3><p>月に一度の面談が、家での会話のきっかけになっています。</p><span class="person">泉区・Nさん / 31歳</span></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="place" id="place">
+  <div class="container">
+    <div class="section-head reveal"><span class="eyebrow">Place / 事業所を探す</span><h2>通える場所から、はじめよう。</h2></div>
+    <div class="search-panel reveal">
+      <div class="search-row"><b>エリアで探す</b><div class="checks"><label><input type="checkbox"> 青葉区</label><label><input type="checkbox"> 宮城野区</label><label><input type="checkbox"> 若林区</label><label><input type="checkbox"> 太白区</label><label><input type="checkbox"> 泉区</label><label><input type="checkbox"> 名取市</label></div></div>
+      <div class="search-row"><b>サービスで探す</b><div class="checks"><label><input type="checkbox"> 相談支援</label><label><input type="checkbox"> 就労継続支援B型</label><label><input type="checkbox"> 就労移行支援</label><label><input type="checkbox"> 生活訓練</label><label><input type="checkbox"> 定着支援</label></div></div>
+      <div class="search-input">⌕ <input aria-label="事業所検索" placeholder="事業所名・駅名で検索する"></div>
+    </div>
+    <div class="contact-panel reveal delay1" id="contact">
+      <div><h3>Contact us</h3><p>ご家族からのご相談、見学予約もこちらから。<br>平日10:00〜18:00、土曜は月2回開所しています。</p></div>
+      <div class="phone">022-794-8210<small>受付時間｜平日 9:00–18:00</small></div>
+      <a href="#" class="button">見学・相談を予約する</a>
+    </div>
+  </div>
+</section>
+
+<section class="section info" id="news">
+  <div class="container">
+    <div class="info-grid">
+      <div class="info-side reveal"><span class="eyebrow">News / お知らせ</span><h2>お知らせ</h2><a href="#" class="mini-link">一覧へ　→</a></div>
+      <div class="news-list">
+        <a href="#" class="news-row reveal"><time>2026.07.08</time><em>お知らせ</em><span>ひだまりワークス長町、8月1日（金）見学会を開催します。</span></a>
+        <a href="#" class="news-row reveal delay1"><time>2026.06.24</time><em>イベント</em><span>七夕まつり期間中の「Hidamari Garden」出店について。</span></a>
+        <a href="#" class="news-row reveal delay2"><time>2026.06.03</time><em>採用情報</em><span>相談支援専門員・職業指導員の募集を更新しました。</span></a>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-side reveal"><span class="eyebrow">Column / コラム</span><h2>日々のノート</h2><a href="#" class="mini-link">一覧へ　→</a></div>
+      <div class="column-list reveal">
+        <a href="#" class="column-row"><figure><img src="http://127.0.0.1:5000/uploads/up_3a159df441.jpg" width="135" height="80" alt="" onerror="this.style.display='none'"></figure><div><small>2026.07.02　ひだまりワークス長町</small><h3>注文が入るまで。アクセサリー検品チームの午後</h3></div></a>
+        <a href="#" class="column-row"><figure><img src="http://127.0.0.1:5000/uploads/up_04b676c6fb.jpg" width="135" height="80" alt="" onerror="this.style.display='none'"></figure><div><small>2026.06.19　ひだまり相談室</small><h3>6月の見学会レポート：はじめての一歩を応援します</h3></div></a>
+      </div>
+    </div>
+    <div class="banners">
+      <span class="accent-dots"></span>
+      <div class="banner-grid">
+        <a href="#" class="banner-card reveal"><img src="http://127.0.0.1:5000/uploads/up_48d9130f53.png" width="460" height="205" alt="" onerror="this.style.display='none'"><span>Flow →<small>ご利用までの流れ</small></span></a>
+        <a href="#" class="banner-card reveal delay1"><img src="http://127.0.0.1:5000/uploads/up_7742b7c774.png" width="460" height="205" alt="" onerror="this.style.display='none'"><span>Company →<small>私たちについて</small></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<section class="footer-cta">
+  <div class="container">
+    <div><h2>迷っている今も、相談のタイミングです。</h2><p>仙台市内・近郊の見学、制度についてのご質問もお気軽に。</p></div>
+    <a href="#contact" class="button arrow">無料相談を予約する</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <a class="brand" href="#"><span class="brand-mark"></span><span>ひだまりリンク<small>CARE &amp; WORK SUPPORT</small></span></a>
+      <div><div class="footer-phone">022-794-8210<small>受付時間｜平日 9:00–18:00 ／ 土曜 10:00–16:00</small></div></div>
+      <a href="#contact" class="button">見学・相談を予約する</a>
+    </div>
+    <div class="footer-links">
+      <div><b>支援サービス</b><a href="#">ひだまり相談室</a><a href="#">ひだまりワークス</a><a href="#">生活訓練</a><a href="#">就労移行支援</a></div>
+      <div><b>ひだまりリンクについて</b><a href="#">私たちの約束</a><a href="#">スタッフ紹介</a><a href="#">事業所一覧</a><a href="#">採用情報</a></div>
+      <div><b>はじめての方へ</b><a href="#">ご利用までの流れ</a><a href="#">よくある質問</a><a href="#">利用料金について</a><a href="#">資料請求</a></div>
+      <div><b>運営情報</b><a href="#">お知らせ</a><a href="#">日々のノート</a><a href="#">仙台市青葉区本町2-8-14</a><a href="#">プライバシーポリシー</a></div>
+    </div>
+    <p class="copyright">© 2026 HIDAMARI LINK SOCIAL WELFARE CORPORATION</p>
+  </div>
+</footer>
+<button class="round-button top" id="top" aria-label="ページ上部へ">↑</button>
+
+<script>
+const reveals=document.querySelectorAll('.reveal');
+const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}}),{threshold:.13});
+reveals.forEach(el=>io.observe(el));
+
+const track=document.getElementById('track'),pager=document.getElementById('pager');
+let current=0,total=5;
+function move(n){current=(n+total)%total;let w=window.innerWidth<760?317:382;track.style.transform=`translateX(-${current*w}px)`;pager.textContent=`${current+1} / ${total}`;}
+document.getElementById('next').onclick=()=>move(current+1);
+document.getElementById('prev').onclick=()=>move(current-1);
+setInterval(()=>move(current+1),5200);
+
+const top=document.getElementById('top');
+window.addEventListener('scroll',()=>top.classList.toggle('show',scrollY>600),{passive:true});
+top.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

@@ -673,6 +673,70 @@ def api_read_motion():
     return jsonify({"ok": True, "site_id": site_id})
 
 
+# 📚お手本パネルの💡アドバイス：手順を「ツールの機能名」だけで書かせる＝ユーザーが自分の手で
+# 再現できる（修正と勉強を兼ねる）。コードは書かせない。テキストのみ＝修正エンジンで安い。
+_ADVICE_SYSTEM = (
+    "あなたはWebデザインの先生。生徒が作ったカンプの1セクションを見て、"
+    "『このツールで自分の手で出来る操作』だけを使った改善手順を日本語で出す。\n"
+    "使ってよい操作（この名前のまま書く）：\n"
+    "・動きを付ける：ふわっと出現／上から降りる／左から／右から／ズームイン／ぼやけて出現／3Dフリップ／"
+    "せり上がり／一文字ずつ／タイプライター／波打ち／ネオングロー／脈打つ／ゆらゆら／バウンド／行マスク／"
+    "カーテンワイプ／カーテン開き(左から)／カーテン開き(真ん中)／📖ページめくり／🔢カウントアップ\n"
+    "・🖍マーカー（文字に蛍光ペン・太さ/速さ/色を調整できる）\n"
+    "・⏳動きの演出（順番・遅らせ・速さ＝『上から順に0.3秒刻み』のような指定）\n"
+    "・🎨セクションの背景色を変える\n"
+    "・🖼写真を加工（白フチで囲む／はみ出しキャプションカード／背景の飾りグラデ）\n"
+    "・✏文字を編集（大きさ・行間・フォント・色・縦書き・点線下線）\n"
+    "・位置・サイズ・余白の調整（＋高く/－低く・横幅・移動）\n"
+    "出力形式：番号リストで5〜8個。各行は「対象（どの文字・画像か具体的な文言で）→ 操作 →（なぜ良くなるか1行）」。\n"
+    "ベース情報があれば、その雰囲気・動き・配色に寄せる提案を最優先にする。\n"
+    "コードは書かない。リスト以外の前置き・まとめも書かない。"
+)
+
+
+@app.route("/api/section_advice", methods=["POST"])
+def api_section_advice():
+    """📚お手本パネル：セクション1つ分の演出・見た目の改善手順をAIに出させる（テキストのみ）。"""
+    data = request.get_json(silent=True) or {}
+    sec_html = (data.get("html") or "").strip()
+    if not sec_html:
+        return jsonify({"ok": False, "message": "セクションが取れませんでした（セクション内で右クリックしてください）"}), 400
+    sec_html = sec_html[:8000]
+    base_txt = ""
+    base_id = (data.get("base") or "").strip()
+    if base_id:
+        with db.connect() as conn:
+            row = db.get_site(conn, base_id)
+        if row:
+            parts = [f"■ベースサイト（このカンプの手本・寄せる先）: {row['url']}"]
+            if row["vibe_description"]:
+                parts.append("雰囲気: " + row["vibe_description"][:200])
+            if row["design_tokens"]:
+                try:
+                    from . import tokens as tokens_mod
+                    parts.append("デザイントークン:\n" + tokens_mod.tokens_to_prompt(_json.loads(row["design_tokens"])))
+                except Exception:  # noqa: BLE001
+                    pass
+            if row["motion_spec"]:
+                try:
+                    mt = motion.motion_to_prompt(_json.loads(row["motion_spec"]))
+                    if mt:
+                        parts.append("動きの仕様（録画から読み取り）:\n" + mt)
+                except Exception:  # noqa: BLE001
+                    pass
+            base_txt = "\n".join(parts) + "\n\n"
+    try:
+        txt, used = camp._call_llm(
+            _ADVICE_SYSTEM,
+            [{"type": "text", "text": base_txt + "■生徒のセクションHTML:\n" + sec_html}],
+            provider=config.CONFIG.htmlgen.edit_provider,
+        )
+    except Exception as exc:  # noqa: BLE001
+        log.exception("演出アドバイスに失敗")
+        return jsonify({"ok": False, "message": str(exc)[:200]}), 500
+    return jsonify({"ok": True, "advice": (txt or "").strip()[:4000], "model": used})
+
+
 @app.route("/anim/<site_id>/<path:filename>")
 def anim_file(site_id: str, filename: str):
     """抜き出したLottie JSONを返す。"""
@@ -1684,8 +1748,9 @@ _EDIT_BAR = """
 #__ce .ag span{font-size:11px;color:#7a7a80;font-weight:400}
 .__ce_hl{outline:3px solid #ff8a00 !important;outline-offset:2px;cursor:pointer !important}
 .__ce_sechl{outline:3px solid #e8a300 !important;outline-offset:-3px;box-shadow:0 0 0 3px rgba(232,163,0,.2) inset !important}
-#__ce_pk{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
-#__ce_pk .bx{background:#fff;border-radius:12px;padding:16px;max-width:640px;width:92%;max-height:80vh;overflow:auto;font-family:system-ui,sans-serif}
+#__ce_pk{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center}
+#__ce_pk .bx{background:#fff;border-radius:12px;padding:16px;max-width:640px;width:92%;max-height:80vh;overflow:auto;font-family:system-ui,sans-serif;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+#__ce_pk h4{cursor:move;user-select:none}
 #__ce_pk h4{margin:0 0 12px;font-size:15px}
 #__ce_pk .secgr{display:grid;grid-template-columns:repeat(auto-fill,160px);gap:10px;justify-content:center}
 #__ce_pk .sit{position:relative;width:160px;border:1px solid #e2e2e6;border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
@@ -2722,6 +2787,8 @@ html.__ce_altmode{cursor:text}
     // ▼2026-07-11追加（全部AIなし）。lines=行マスク／wp=カーテンワイプ／fl=ページめくり／cnt=数字カウント
     {k:'lines',b:'行マスク',d:'行ごとに下からせり上がる',g:'lines',sl:[{k:'dur',l:'速さ',min:300,max:1600,def:700,u:'ms'},{k:'stag',l:'行の間隔',min:40,max:400,def:130,u:'ms'}]},
     {k:'wipe',b:'カーテンワイプ',d:'色帯が走って現れる',g:'in',dir:'wp',sl:[{k:'dur',l:'速さ',min:300,max:2000,def:800,u:'ms'}]},
+    {k:'curtain',b:'カーテン開き(左から)',d:'左端から幕が開く',g:'in',dir:'cl',sl:[{k:'dur',l:'速さ',min:300,max:2200,def:900,u:'ms'}]},
+    {k:'curtainc',b:'カーテン開き(真ん中)',d:'真ん中から左右へ開く',g:'in',dir:'cc',sl:[{k:'dur',l:'速さ',min:300,max:2200,def:900,u:'ms'}]},
     {k:'pageflip',b:'📖 ページめくり',d:'本をめくるように現れる',g:'in',dir:'fl',sl:[{k:'deg',l:'めくれ角度',min:40,max:120,def:80,u:'°'},{k:'dur',l:'速さ',min:300,max:2200,def:900,u:'ms'}]},
     {k:'count',b:'🔢 カウントアップ',d:'数字が0から増えて止まる',g:'cnt',sl:[{k:'dur',l:'速さ',min:400,max:3000,def:1200,u:'ms'}]}
   ];
@@ -3338,6 +3405,135 @@ html.__ce_altmode{cursor:text}
       if(e.target.id==='__ce_pdsetbg'){ ov.remove(); openPicker({el:el, type:'bg', fresh:true}); return; }
       if(e.target.id==='__ce_pdwater'){ ov.remove(); openBgPicker(imgEl, sIdx); return; }
     });
+  }
+  // 🖱 #__ce_pk系パネル（写真加工・文字編集・画像選択など全部）を、見出し(h4)を掴んでドラッグ移動
+  //   できるようにする（委譲＝どのパネルにも自動で効く）。背後のプレビューを見たい時に避けられる。
+  document.addEventListener('mousedown',function(e){
+    if(e.button!==0) return;
+    var h=e.target.closest&&e.target.closest('#__ce_pk h4'); if(!h) return;
+    var ov=h.closest('#__ce_pk'), bx=ov&&ov.querySelector('.bx'); if(!bx) return;
+    var r=bx.getBoundingClientRect(), sx=e.clientX, sy=e.clientY;
+    bx.style.position='fixed'; bx.style.left=r.left+'px'; bx.style.top=r.top+'px'; bx.style.margin='0';
+    e.preventDefault();
+    function mv(ev){
+      bx.style.left=Math.max(0,Math.min(r.left+(ev.clientX-sx), window.innerWidth-80))+'px';
+      bx.style.top=Math.max(0,Math.min(r.top+(ev.clientY-sy), window.innerHeight-40))+'px';
+    }
+    function up(){ document.removeEventListener('mousemove',mv,true); document.removeEventListener('mouseup',up,true); }
+    document.addEventListener('mousemove',mv,true); document.addEventListener('mouseup',up,true);
+  },true);
+  // ===== 📚 お手本と演出アドバイス（修正しながら勉強する用・2026-07-13） =====
+  // ベース（このカンプの元になったサイト）のスクショ・似た雰囲気の登録サイト・⭐部品を見比べながら、
+  // 💡AIから「ツールの機能名で書かれた改善手順」をもらう。適用はユーザーが自分の手で＝操作と理屈を覚える。
+  function refBaseId(){ var m=document.querySelector('meta[name="ce-base"]'); return m?(m.getAttribute('content')||''):''; }
+  function refSetBase(id){
+    var m=document.querySelector('meta[name="ce-base"]');
+    if(!m){ m=document.createElement('meta'); m.setAttribute('name','ce-base'); (document.head||document.documentElement).appendChild(m); }
+    m.setAttribute('content', id); markDirty();
+  }
+  function refOpen(secEl){
+    var ov=document.createElement('div'); ov.id='__ce_pk';
+    ov.innerHTML='<div class="bx" style="max-width:760px"><span class="cl" id="__ce_pkx">×</span><h4>📚 お手本と演出アドバイス（タイトルを掴んで移動できます）</h4>'
+      +'<div id="__ce_refbase"></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:12px 0 6px">🔍 似た雰囲気のお手本（クリックで全体スクショを別タブ表示）</div>'
+      +'<div id="__ce_refsim" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;font-size:12px;color:#888">読み込み中…</div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:12px 0 6px">⭐ 保存済みのお気に入り部品（別タブで開いて見比べる）</div>'
+      +'<div id="__ce_reffav" style="display:flex;gap:6px;flex-wrap:wrap;font-size:12px;color:#888">読み込み中…</div>'
+      +'<div style="border-top:1px solid #eee;margin:14px 0 10px"></div>'
+      +'<button class="go2" id="__ce_refadv" style="background:#4b2ea8"'+(secEl?'':' disabled')+'>💡 このセクションの演出アドバイスをもらう（AI・数円）</button>'
+      +(secEl?'':'<div style="font-size:11px;color:#c00;margin-top:4px">※セクションの中で右クリックすると、そのセクション向けのアドバイスが出せます</div>')
+      +'<div id="__ce_refadvout" style="display:none;white-space:pre-wrap;font-size:13px;line-height:1.9;background:#f7f5ff;border:1px solid #ddd2f7;border-radius:9px;padding:10px 12px;margin-top:8px"></div>'
+      +'</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){ if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); } });
+    function renderLinkGrid(){
+      var g=ov.querySelector('#__ce_reflinkgrid'); if(!g) return;
+      g.style.display='flex';
+      g.innerHTML='<span style="font-size:12px;color:#888">読み込み中…</span>';
+      fetch('/api/sites').then(function(r){return r.json();}).then(function(d){
+        var arr=(d&&(d.sites||d.hits||d.items))||(Array.isArray(d)?d:[]);
+        if(!arr.length){ g.innerHTML='<span style="font-size:12px;color:#888">登録サイトがありません</span>'; return; }
+        g.innerHTML=arr.map(function(s){
+          var sid=s.id||s.site_id; if(!sid) return '';
+          var host=''; try{ host=new URL(s.url).hostname.replace(/^www\\./,''); }catch(_){ host=(s.url||'').slice(0,20); }
+          return '<div data-sid="'+sid+'" style="width:104px;cursor:pointer;text-align:center">'
+            +'<img src="/img/'+sid+'/firstview" style="width:100%;border:2px solid #ddd;border-radius:8px;display:block" loading="lazy">'
+            +'<div style="font-size:10px;color:#666;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+esc(host)+'</div></div>';
+        }).join('');
+        g.addEventListener('click',function(ev){
+          var c=ev.target.closest('[data-sid]'); if(!c) return;
+          refSetBase(c.getAttribute('data-sid'));
+          renderBase();
+          if(msg) msg.textContent='🔗 ベースをひも付けました（💾保存で残ります）';
+        });
+      }).catch(function(){ g.innerHTML='<span style="font-size:12px;color:#c00">読み込み失敗</span>'; });
+    }
+    function renderBase(){
+      var bid=refBaseId(), bx=ov.querySelector('#__ce_refbase');
+      if(!bid){
+        bx.innerHTML='<div style="font-size:12px;color:#888;margin:0 0 6px">このカンプはまだ「元になったベース」が記録されていません（今後の新規生成では自動で記録されます）。</div>'
+          +'<button class="go2" id="__ce_reflink" style="background:#0b6bcb;margin:0">🔗 ベースサイトをひも付ける（ストックから選ぶ）</button>'
+          +'<div id="__ce_reflinkgrid" style="display:none;flex-wrap:wrap;gap:6px;max-height:34vh;overflow:auto;margin-top:8px"></div>';
+      } else {
+        bx.innerHTML='<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:0 0 6px">🎨 ベースサイト（このカンプの手本）'
+          +'<button id="__ce_reflink" style="margin-left:8px;font-size:11px;border:1px solid #ccc;background:#fff;border-radius:6px;padding:1px 8px;cursor:pointer">🔗 変更</button></div>'
+          +'<div style="max-height:42vh;overflow:auto;border:1px solid #eee;border-radius:9px"><img src="/img/'+bid+'/fullpage" style="width:100%;display:block" loading="lazy"></div>'
+          +'<div id="__ce_reflinkgrid" style="display:none;flex-wrap:wrap;gap:6px;max-height:34vh;overflow:auto;margin-top:8px"></div>';
+      }
+      var lb=bx.querySelector('#__ce_reflink');
+      if(lb) lb.addEventListener('click',function(){ renderLinkGrid(); });
+      loadSim(bid);
+    }
+    function loadSim(bid){
+      var sim=ov.querySelector('#__ce_refsim');
+      if(!bid){ sim.innerHTML='<span>ベースをひも付けると、似た雰囲気のお手本がここに並びます</span>'; return; }
+      fetch('/api/similar?id='+encodeURIComponent(bid)+'&top=6').then(function(r){return r.json();}).then(function(d){
+        var arr=(d&&(d.results||d.hits||d.items))||(Array.isArray(d)?d:[]);
+        arr=arr.filter(function(s){ return (s.id||s.site_id)!==bid; });
+        if(!arr.length){ sim.innerHTML='<span>似た例が見つかりませんでした</span>'; return; }
+        sim.innerHTML=arr.map(function(s){
+          var sid=s.id||s.site_id; if(!sid) return '';
+          var host=''; try{ host=new URL(s.url).hostname.replace(/^www\\./,''); }catch(_){ host=''; }
+          return '<a href="/img/'+sid+'/fullpage" target="_blank" style="flex:0 0 104px;text-decoration:none;text-align:center">'
+            +'<img src="/img/'+sid+'/firstview" style="width:100%;border:1px solid #ddd;border-radius:8px;display:block" loading="lazy">'
+            +'<span style="font-size:10px;color:#666">'+esc(host)+'</span></a>';
+        }).join('');
+      }).catch(function(){ sim.innerHTML='<span style="color:#c00">読み込み失敗</span>'; });
+    }
+    // ⭐お気に入り部品（fav_*.html）を別タブリンクで並べる
+    fetch('/api/camps').then(function(r){return r.json();}).then(function(d){
+      var arr=(d&&(d.items||d.camps))||(Array.isArray(d)?d:[]);
+      arr=arr.filter(function(x){ return x.file&&x.file.indexOf('fav_')===0; }).slice(0,20);
+      var fv=ov.querySelector('#__ce_reffav');
+      if(!arr.length){ fv.innerHTML='<span>まだありません（右クリック→⭐このセクションをお気に入り で貯まります）</span>'; return; }
+      fv.innerHTML=arr.map(function(x){
+        var nm=x.name||x.title||x.file;
+        return '<a href="/camp/'+encodeURIComponent(x.file)+'" target="_blank" style="text-decoration:none;background:#fff7e0;border:1px solid #f0dfa8;border-radius:7px;padding:3px 9px;color:#7a5c00">⭐ '+esc((''+nm).slice(0,18))+'</a>';
+      }).join('');
+    }).catch(function(){ var fv=ov.querySelector('#__ce_reffav'); if(fv) fv.innerHTML='<span style="color:#c00">読み込み失敗</span>'; });
+    // 💡 AIアドバイス（テキストのみ＝修正エンジンで安く。適用はユーザーの手＝勉強を兼ねる）
+    var advBtn=ov.querySelector('#__ce_refadv');
+    if(secEl) advBtn.addEventListener('click',function(){
+      var out=ov.querySelector('#__ce_refadvout');
+      advBtn.disabled=true; advBtn.textContent='💡 AIが考えています…（10〜30秒）';
+      var sh='';
+      try{
+        var cl=secEl.cloneNode(true);
+        [].slice.call(cl.querySelectorAll('script,style')).forEach(function(n){ n.remove(); });
+        [].slice.call(cl.querySelectorAll('*')).forEach(function(n){ if(n.id&&n.id.indexOf('__ce')===0) n.remove(); });
+        sh=cl.outerHTML;
+      }catch(_){ sh=secEl.outerHTML; }
+      fetch('/api/section_advice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:sh, base:refBaseId(), file:FILE})})
+      .then(function(r){return r.json();}).then(function(d){
+        advBtn.disabled=false; advBtn.textContent='💡 もう一度アドバイスをもらう（AI・数円）';
+        out.style.display='block';
+        out.textContent=d.ok?d.advice:('失敗：'+(d.message||''));
+      }).catch(function(){
+        advBtn.disabled=false; advBtn.textContent='💡 このセクションの演出アドバイスをもらう（AI・数円）';
+        out.style.display='block'; out.textContent='通信エラー';
+      });
+    });
+    renderBase();
   }
   // ===== 右クリックで、その要素に直接アニメ/指示/改善案を出す =====
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
@@ -4185,6 +4381,8 @@ html.__ce_altmode{cursor:text}
         else if(a.dir==='bl'){ el.style.setProperty('filter','blur('+(fxParam(a,'blur')*(1-q))+'px)','important'); }
         else if(a.dir==='ry'){ tf='perspective(800px) rotateY('+(fxParam(a,'deg')*(1-q))+'deg)'; }
         else if(a.dir==='fl'){ tf='perspective(1200px) rotateY('+(fxParam(a,'deg')*(1-q))+'deg)'; }  // 📖ページめくり（軸は左端＝上で設定済み）
+        else if(a.dir==='cl'){ o=1; el.style.setProperty('clip-path','inset(0 '+((1-q)*100).toFixed(2)+'% 0 0)','important'); }  // カーテン開き＝フェードせず左から開く
+        else if(a.dir==='cc'){ o=1; var _ci=((1-q)*50).toFixed(2); el.style.setProperty('clip-path','inset(0 '+_ci+'% 0 '+_ci+'%)','important'); }  // 真ん中から左右へ開く（舞台の幕）
         else if(a.dir==='clip'){ tf='translateY('+(fxParam(a,'dist')*(1-q))+'px)'; }  // せり上がり＝下からスッと上へ＋フェード（clip-pathは使わない＝半分で止まらない）
       }
       if(!a.glow){ el.style.setProperty('opacity',o,'important'); }
@@ -4233,6 +4431,10 @@ html.__ce_altmode{cursor:text}
     +'@keyframes fxa_wipeband{0%{transform:translateX(-101%)}45%{transform:translateX(0)}100%{transform:translateX(101%)}}'
     // ▼📖ページめくり：左端を軸に、立てたページ（rotateY）が開いて倒れてくる＋フェード
     +'html.fxa-on .fxa_pre.fxa_fl{transform-origin:left center;transform:perspective(1200px) rotateY(var(--fxa-deg,80deg))}'
+    // ▼カーテン開き：色帯なしで、中身がclip-pathでスッと開く（フェードしない＝幕が開く見た目）
+    //   cl=左端から右へ／cc=真ん中から左右へ（舞台の幕）。開き切りはどちらも共通の .fxa_in が担当
+    +'html.fxa-on .fxa_pre.fxa_cl{opacity:1;clip-path:inset(0 100% 0 0)}'
+    +'html.fxa-on .fxa_pre.fxa_cc{opacity:1;clip-path:inset(0 50% 0 50%)}'
     +'.fxa_lp_pulse{animation:fxa_pulse var(--fxa-dur,1.4s) ease-in-out infinite}'
     +'.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}'
     +'.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}'
@@ -4402,6 +4604,8 @@ html.__ce_altmode{cursor:text}
       else if(a.dir==='ry'){ host.classList.add('fxa_ry'); host.style.setProperty('--fxa-deg', fxParam(a,'deg')+'deg'); }
       else if(a.dir==='fl'){ host.classList.add('fxa_fl'); host.style.setProperty('--fxa-deg', fxParam(a,'deg')+'deg'); }
       else if(a.dir==='wp'){ host.classList.add('fxa_wp'); }
+      else if(a.dir==='cl'){ host.classList.add('fxa_cl'); }
+      else if(a.dir==='cc'){ host.classList.add('fxa_cc'); }
       else if(a.dir==='clip'){ host.classList.add('fxa_clip'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
       host.classList.add('fxa_in');
     }
@@ -4435,6 +4639,8 @@ html.__ce_altmode{cursor:text}
     if(c.contains('fxa_ry')) return 'flip';
     if(c.contains('fxa_fl')) return 'pageflip';
     if(c.contains('fxa_wp')) return 'wipe';
+    if(c.contains('fxa_cl')) return 'curtain';
+    if(c.contains('fxa_cc')) return 'curtainc';
     if(c.contains('fxa_clip')) return 'rise';
     if(c.contains('fxa_y')) return 'fadeup';
     return 'fade';
@@ -5306,10 +5512,18 @@ html.__ce_altmode{cursor:text}
   function applyEl(sIdx, instruction, keepText, styleType){ closeMenu(); box.classList.remove('min'); submit(sIdx, instruction, keepText, styleType); }
   // 掴んだ要素が「1文字ずつ分割されたspan」などインラインの断片なら、
   // 内包する見出し/段落などのブロックまで親を上る（見出し全体をまとめて選べる）。
+  // 「文字を持たない飾りspan」（浮遊する丸・図形など）は文字の断片ではなく1つの部品＝親へ上らず本人を掴む
+  function _isGraphicInline(el){
+    if((el.textContent||'').trim()) return false;             // 文字がある＝文字の断片扱いのまま
+    var st; try{ st=getComputedStyle(el); }catch(_){ return false; }
+    if(st.position==='absolute'||st.position==='fixed') return true;   // 浮かせてある飾り
+    if(st.backgroundColor!=='rgba(0, 0, 0, 0)'||st.backgroundImage!=='none') return true;  // 色/画像を持つ飾り
+    return false;
+  }
   function pickTarget(el){
     var INLINE={SPAN:1,B:1,I:1,EM:1,STRONG:1,SMALL:1,MARK:1,U:1,FONT:1,WBR:1,BR:1};
     var cur=el, hops=0;
-    while(cur && cur.parentElement && cur!==document.body && hops<10 && INLINE[cur.tagName]){
+    while(cur && cur.parentElement && cur!==document.body && hops<10 && INLINE[cur.tagName] && !_isGraphicInline(cur)){
       cur=cur.parentElement; hops++;
     }
     return cur||el;
@@ -5366,6 +5580,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_fx','✨ 動きを付ける（アニメを選ぶ）'],
     ['__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）'],
     ['__ce_q_dly','⏳ 動きの演出（順番・遅らせ・速さ）'],
+    ['__ce_q_ref','📚 お手本を見る（ベース・似た例・アドバイス）'],
     ['__ce_q_fav','⭐ このセクションをお気に入り（部品保存）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
     ['__ce_q_rst','⟲ 位置・サイズをリセット']
@@ -5376,7 +5591,7 @@ html.__ce_altmode{cursor:text}
     try{ var a=JSON.parse(localStorage.getItem('__ce_qmenu_layout')||'null'); if(Array.isArray(a)&&a.length) lay=a.slice(); }catch(_){}
     if(!lay) lay=QM_DEFS.map(function(d){ return d[0]; });
     var m=qmDefMap();
-    lay=lay.filter(function(k){ return k==='sep'||m[k]; });          // 廃止した機能IDは飛ばす
+    lay=lay.filter(function(k){ return k==='sep'||k.indexOf('sep:')===0||m[k]; });  // 廃止した機能IDは飛ばす（sep:ラベル付き区切りは残す）
     QM_DEFS.forEach(function(d){ if(lay.indexOf(d[0])<0) lay.push(d[0]); });  // 新機能は末尾へ
     return lay;
   }
@@ -5385,15 +5600,17 @@ html.__ce_altmode{cursor:text}
   function qmEditMode(qm){
     var lay=qmLayoutLoad(), m=qmDefMap();
     function html(){
-      return '<div style="padding:6px 10px 2px;font-weight:700;font-size:12px">メニューの並べ替え（↑↓で移動）</div>'
+      return '<div style="padding:6px 10px 2px;font-weight:700;font-size:12px">メニューの並べ替え（↑↓で移動・区切り線には見出しを書ける）</div>'
         +lay.map(function(k,i){
-          var lbl=(k==='sep')?'<span style="flex:1;border-top:2px dashed #bbb;margin:0 4px"></span>'
+          var isSep=(k==='sep'||k.indexOf('sep:')===0);
+          var lbl=isSep
+            ?'<input data-seplb="1" value="'+esc(k.indexOf('sep:')===0?k.slice(4):'')+'" placeholder="─ 見出し（任意・例：アニメ系）" style="flex:1;min-width:0;font-size:11px;color:#666;border:1px dashed #bbb;border-radius:5px;padding:2px 6px;font-family:inherit">'
             :'<span style="flex:1;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+m[k]+'</span>';
           return '<div data-i="'+i+'" style="display:flex;align-items:center;gap:4px;padding:3px 8px">'
             +'<button data-mv="-1" style="width:22px;height:20px;border:none;background:#f0f0f2;border-radius:5px;cursor:pointer;padding:0">↑</button>'
             +'<button data-mv="1" style="width:22px;height:20px;border:none;background:#f0f0f2;border-radius:5px;cursor:pointer;padding:0">↓</button>'
             +lbl
-            +(k==='sep'?'<button data-del="1" style="width:22px;height:20px;border:none;background:#fde8e8;color:#c00;border-radius:5px;cursor:pointer;padding:0">✕</button>':'')
+            +(isSep?'<button data-del="1" style="width:22px;height:20px;border:none;background:#fde8e8;color:#c00;border-radius:5px;cursor:pointer;padding:0">✕</button>':'')
             +'</div>';
         }).join('')
         +'<div style="display:flex;gap:6px;padding:6px 8px;flex-wrap:wrap">'
@@ -5405,6 +5622,14 @@ html.__ce_altmode{cursor:text}
     qm.innerHTML=html();
     if(!qm.__qeBound){
       qm.__qeBound=true;
+      // 区切り線の見出し入力＝打った瞬間にlayへ同期（↑↓で再描画されても消えないように）
+      qm.addEventListener('input',function(ev){
+        if(!qm.__qeOn) return;
+        var t=ev.target; if(!t.getAttribute||!t.getAttribute('data-seplb')) return;
+        var rowEl=t.closest('[data-i]'); if(!rowEl) return;
+        var v=(t.value||'').trim();
+        lay[+rowEl.getAttribute('data-i')]='sep'+(v?(':'+v):'');
+      });
       qm.addEventListener('click',function(ev){
         if(!qm.__qeOn) return;
         ev.stopPropagation();
@@ -5449,6 +5674,12 @@ html.__ce_altmode{cursor:text}
     qm.innerHTML=selRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmLayoutLoad().map(function(k){
         if(k==='sep') return '<div style="border-top:1px solid #eee;margin:3px 6px"></div>';
+        if(k.indexOf('sep:')===0){
+          // 見出し付き区切り線＝線の真ん中に小さいグレー文字（どんなグループか一目で分かる）
+          return '<div style="display:flex;align-items:center;gap:6px;margin:4px 8px;font-size:10px;color:#9a9aa0">'
+            +'<span style="flex:1;border-top:1px solid #eee"></span><span>'+esc(k.slice(4))+'</span>'
+            +'<span style="flex:1;border-top:1px solid #eee"></span></div>';
+        }
         return _qmM[k]?row(k,_qmM[k]):'';
       }).join('')
       +'<div style="border-top:1px solid #eee;margin:3px 6px"></div>'
@@ -5496,6 +5727,7 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_fx'){ _bigFull=true; _bigFxFocus=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
       if(t.id==='__ce_q_dly'){ var dle=curEl; closeMenu(); dlyOpen(dle,qx,qy); return; }
+      if(t.id==='__ce_q_ref'){ var rse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); refOpen(rse); return; }
       if(t.id==='__ce_q_fav'){ var fs=curEl.closest('section,header,footer'); closeMenu(); favSaveSection(fs); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }

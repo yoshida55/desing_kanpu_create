@@ -98,6 +98,35 @@
     .tool_camp:hover { background: #ffe9d6; }
     .tool_add  { color: #0066cc; background: #eaf2fb;  border: 1px solid #c7ddf5; }
     .tool_add:hover  { background: #dceafb; }
+    .tool_fav  { color: #7a5c00; background: #fff7e0;  border: 1px solid #f0dfa8; }
+    .tool_fav:hover  { background: #ffefc2; }
+    /* ⭐お気に入り一覧＝保存したセクション部品をミニプレビューでずらっと見る（クリックで開く） */
+    .fav_overlay { position: fixed; inset: 0; z-index: 900; background: rgba(0,0,0,.35);
+      display: none; align-items: flex-start; justify-content: center; overflow: auto; padding: 4vh 2vw; }
+    .fav_overlay.on { display: flex; }
+    .fav_box { background: #fff; border-radius: 14px; padding: 16px 20px 20px;
+      width: min(1240px, 96vw); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .fav_head { display: flex; align-items: center; gap: 10px; }
+    .fav_head h3 { margin: 0; font-size: 1.6rem; }
+    .fav_head small { color: #999; }
+    .fav_tab { border: 1px solid #ddd; background: #f5f5f7; border-radius: 999px;
+      padding: 4px 14px; cursor: pointer; font-size: 1.2rem; color: #666; }
+    .fav_tab.on { background: #fff3d6; border-color: #f0d38a; color: #8a5a00; font-weight: 700; }
+    .fav_close { margin-left: auto; border: none; background: #eee; border-radius: 8px;
+      width: 30px; height: 30px; cursor: pointer; font-size: 1.4rem; }
+    .fav_close:hover { background: #ddd; }
+    .fav_grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 12px; }
+    .fav_card { position: relative; border: 1px solid #e2e2e6; border-radius: 10px; overflow: hidden; background: #fff; cursor: pointer; }
+    .fav_card:hover { border-color: #7aa7e8; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+    .fav_del { position: absolute; top: 6px; right: 6px; z-index: 2; border: none;
+      background: rgba(255,255,255,.92); border-radius: 8px; width: 28px; height: 28px;
+      cursor: pointer; font-size: 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+    .fav_del:hover { background: #ffe3e3; }
+    .fav_thumb { width: 100%; height: 195px; overflow: hidden; position: relative; background: #f6f6f8; }
+    .fav_thumb iframe { width: 1200px; height: 840px; transform: scale(0.24); transform-origin: 0 0; border: 0; pointer-events: none; }
+    .fav_thumb::after { content: ""; position: absolute; inset: 0; }  /* クリックをカード側で確実に受ける */
+    .fav_name { padding: 7px 10px; font-size: 1.25rem; font-weight: 700; color: #333;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     /* トグルで開くパネルは中央寄せ・詰めた余白で表示 */
     .set_panel, .camp_panel, .add_panel { max-width: 90rem; margin: 0.8rem auto 0; }
     /* 設定内の区切り（言語化ブロックを軽く分ける） */
@@ -1063,6 +1092,7 @@
         autofocus>
       <input class="search_top" type="number" id="top" value="24" min="1" max="100" title="表示件数">
       <button class="search_button" id="go">検索</button>
+      <button class="tool_btn tool_fav" id="fav_toggle">⭐ お気に入り一覧</button>
       <button class="tool_btn tool_set" id="set_toggle">⚙ 設定</button>
       <button class="tool_btn tool_camp" id="camp_toggle">🎨 カンプ生成</button>
       <button class="tool_btn tool_add" id="add_toggle">＋ 登録</button>
@@ -1230,6 +1260,20 @@
       </div>
     </div>
   </header>
+
+  <!-- ⭐お気に入り一覧：⭐を付けた全カンプ（fav_*スナップ含む）を一覧表示 -->
+  <div class="fav_overlay" id="fav_overlay">
+    <div class="fav_box">
+      <div class="fav_head">
+        <h3>⭐ お気に入り一覧</h3>
+        <button class="fav_tab on" id="fav_tab_sec">🧩 セクション部品</button>
+        <button class="fav_tab" id="fav_tab_camp">📄 カンプ丸ごと</button>
+        <small>カードをクリックで開く</small>
+        <button class="fav_close" id="fav_close">×</button>
+      </div>
+      <div class="fav_grid" id="fav_grid"></div>
+    </div>
+  </div>
 
   <p class="result_status" id="status">登録済みのサイトを表示しています。</p>
   <div class="list_tools">
@@ -1595,6 +1639,97 @@
         if (el) el.classList.remove("is_open");
       });
     }
+    // ⭐お気に入り一覧：タブで「🧩セクション部品（sec_*）」と「📄カンプ丸ごと（⭐付き）」を切り替え。
+    // iframeはsandbox（スクリプト無効）＝出現アニメの初期非表示が働かず全部見えた状態で写る＝プレビューに最適
+    const favToggle = document.querySelector("#fav_toggle");
+    const favOverlay = document.querySelector("#fav_overlay");
+    const favTabSec = document.querySelector("#fav_tab_sec");
+    const favTabCamp = document.querySelector("#fav_tab_camp");
+    let favMode = "sec";      // 今どちらのタブを見ているか
+    let favSecCache = [];     // セクション部品（クリックで大きく開く時に使う）
+    // セクション部品のプレビューHTML（JSが動かない分、出現待ちのopacity:0を全部見える状態に強制）
+    function favSecDoc(f) {
+      return '<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:#fff}' + (f.css || "") + ' *,*::before,*::after{opacity:1 !important;visibility:visible !important;filter:none !important;clip-path:none !important;animation:none !important;transition:none !important}</style></head><body>' + f.html + "</body></html>";
+    }
+    async function loadFavGrid(mode) {
+      favMode = mode;
+      favTabSec.classList.toggle("on", mode === "sec");
+      favTabCamp.classList.toggle("on", mode === "camp");
+      const grid = document.querySelector("#fav_grid");
+      grid.innerHTML = '<div style="color:#888">読み込み中…</div>';
+      try {
+        if (mode === "sec") {
+          const d = await fetch("/api/section_fav/list").then((r) => r.json());
+          favSecCache = d.favs || [];
+          if (!favSecCache.length) {
+            grid.innerHTML = '<div style="color:#888">まだセクション部品がありません。カンプ編集画面で右クリック→「⭐ このセクションをお気に入り」で貯まります。</div>';
+            return;
+          }
+          const kindMark = { header: "🧢", footer: "🦶" };
+          grid.innerHTML = favSecCache.map((f) => `
+            <div class="fav_card" data-id="${f.id}" title="クリックで大きく見る">
+              <button class="fav_del" title="この部品を削除する（元に戻せません）">🗑</button>
+              <div class="fav_thumb"><iframe sandbox="allow-same-origin" scrolling="no" data-secid="${f.id}"></iframe></div>
+              <div class="fav_name">${kindMark[f.kind] || "🧩"} ${escapeHtml(f.name || f.id)}</div>
+            </div>`).join("");
+          // srcdocを属性文字列で書くと中の「"」で切れて真っ白になるため、プロパティで直接入れる
+          grid.querySelectorAll("iframe[data-secid]").forEach((ifr) => {
+            const f = favSecCache.find((x) => x.id === ifr.dataset.secid);
+            if (f) ifr.srcdoc = favSecDoc(f);
+          });
+        } else {
+          const d = await fetch("/api/camps").then((r) => r.json());
+          const favs = (d.camps || []).filter((x) => x.fav);
+          if (!favs.length) {
+            grid.innerHTML = '<div style="color:#888">まだお気に入りがありません。カンプ履歴の☆を押すと貯まります。</div>';
+            return;
+          }
+          grid.innerHTML = favs.map((x) => `
+            <div class="fav_card" data-file="${x.file}" title="クリックで開く">
+              <button class="fav_del" title="お気に入りから外す（ファイルは残る）">🗑</button>
+              <div class="fav_thumb"><iframe src="/camp_preview/${encodeURIComponent(x.file)}" loading="lazy" scrolling="no" sandbox="allow-same-origin"></iframe></div>
+              <div class="fav_name">⭐ ${x.name || x.title || x.file}</div>
+            </div>`).join("");
+        }
+      } catch (e) {
+        grid.innerHTML = '<div style="color:#c00">読み込みに失敗しました</div>';
+      }
+    }
+    favToggle.addEventListener("click", () => { favOverlay.classList.add("on"); loadFavGrid("sec"); });
+    favTabSec.addEventListener("click", () => loadFavGrid("sec"));
+    favTabCamp.addEventListener("click", () => loadFavGrid("camp"));
+    favOverlay.addEventListener("click", async (e) => {
+      if (e.target === favOverlay || e.target.id === "fav_close") { favOverlay.classList.remove("on"); return; }
+      if (e.target.closest(".fav_tab")) return;  // タブは上のリスナーが処理
+      const card = e.target.closest(".fav_card");
+      if (!card) return;
+      const name = card.querySelector(".fav_name")?.textContent?.replace(/^[⭐🧩🧢🦶]\s*/, "").trim() || "";
+      if (favMode === "sec") {
+        const f = favSecCache.find((x) => x.id === card.dataset.id);
+        // 🗑＝部品ファイルごと削除（こちらは完全削除なので、はっきり警告する）
+        if (e.target.closest(".fav_del")) {
+          if (!window.confirm("部品「" + name + "」を削除しますか？\n⚠ こちらは完全削除です（元に戻せません）")) return;
+          try {
+            await fetch("/api/section_fav/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: card.dataset.id }) });
+            card.remove();
+          } catch { alert("通信に失敗しました"); }
+          return;
+        }
+        if (f) { const w = window.open("", "_blank"); w.document.write(favSecDoc(f)); w.document.close(); }
+        return;
+      }
+      // 🗑＝⭐を外して一覧から消す（HTMLファイル自体は履歴に残る＝履歴の☆で戻せる）
+      if (e.target.closest(".fav_del")) {
+        if (!window.confirm("「" + (name || card.dataset.file) + "」をお気に入りから外しますか？\n（ファイルは消えません。履歴の☆でいつでも戻せます）")) return;
+        try {
+          const r = await fetch("/api/camp_fav", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file: card.dataset.file }) }).then((x) => x.json());
+          if (r.ok) { card.remove(); loadCampHistory?.(); }
+          else alert(r.message || "外せませんでした");
+        } catch { alert("通信に失敗しました"); }
+        return;
+      }
+      window.open("/camp/" + encodeURIComponent(card.dataset.file), "_blank");
+    });
     const setToggle = document.querySelector("#set_toggle");
     const setPanel = document.querySelector("#set_panel");
     const setMsg = document.querySelector("#set_msg");
