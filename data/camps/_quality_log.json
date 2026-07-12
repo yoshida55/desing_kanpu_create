@@ -306,5 +306,80 @@
   "sections": 6,
   "warn": true,
   "ts": 1783813411
+ },
+ {
+  "file": "camp_20260712_124210_878813.html",
+  "base_id": "435e009fe5b5e628",
+  "anim_id": "",
+  "model": "openai:gpt-5.6-luna",
+  "text_len": 1862,
+  "sections": 11,
+  "warn": true,
+  "ts": 1783827730,
+  "rating": "✖"
+ },
+ {
+  "file": "camp_20260712_124752_784337.html",
+  "base_id": "ff4d3da2e9eb4280",
+  "anim_id": "",
+  "model": "openai:gpt-5.6-sol",
+  "text_len": 2720,
+  "sections": 11,
+  "warn": false,
+  "ts": 1783828072,
+  "rating": "✖"
+ },
+ {
+  "file": "camp_20260712_205257_354629.html",
+  "base_id": "87ce36c2f82e11e0",
+  "anim_id": "",
+  "model": "zai:glm-5v-turbo",
+  "text_len": 1467,
+  "sections": 7,
+  "warn": true,
+  "ts": 1783857177
+ },
+ {
+  "file": "camp_20260712_205535_698210.html",
+  "base_id": "87ce36c2f82e11e0",
+  "anim_id": "",
+  "model": "openai:gpt-5.6-terra",
+  "text_len": 1136,
+  "sections": 7,
+  "warn": true,
+  "ts": 1783857335
+ },
+ {
+  "file": "camp_20260712_205654_694296.html",
+  "base_id": "87ce36c2f82e11e0",
+  "anim_id": "",
+  "model": "zai:glm-5v-turbo",
+  "text_len": 1785,
+  "sections": 10,
+  "warn": true,
+  "ts": 1783857414,
+  "rating": "✖"
+ },
+ {
+  "file": "camp_20260712_210952_346984.html",
+  "base_id": "b7a130f2bc9f5e88",
+  "anim_id": "",
+  "model": "zai:glm-5v-turbo",
+  "text_len": 1889,
+  "sections": 9,
+  "warn": true,
+  "ts": 1783858192,
+  "rating": "△"
+ },
+ {
+  "file": "camp_20260712_211215_718537.html",
+  "base_id": "b7a130f2bc9f5e88",
+  "anim_id": "",
+  "model": "openai:gpt-5.6-terra",
+  "text_len": 1912,
+  "sections": 9,
+  "warn": true,
+  "ts": 1783858335,
+  "rating": "◎"
  }
 ]

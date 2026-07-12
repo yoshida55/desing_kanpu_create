@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ひなた幼稚園｜みんなの「できた」が育つ場所</title>
+<script>document.documentElement.classList.add('js');</script>
+<style>
+  :root{
+    --ink:#3d3732;
+    --body:#6e6965;
+    --cream:#f2efec;
+    --paper:#fff;
+    --coral:#ed828b;
+    --yellow:#f4c548;
+    --sky:#9bdce1;
+    --leaf:#aacd93;
+    --line:rgba(61,55,50,.12);
+    --soft-shadow:0 12px 32px rgba(126,103,92,.10);
+    --float-shadow:0 24px 56px rgba(126,103,92,.16);
+    --radius:5px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--body);
+    font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans",YuGothic,Meiryo,sans-serif;
+    font-size:15px;line-height:2;letter-spacing:.02em;overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  img{display:block;width:100%;height:100%;object-fit:cover}
+  .container{width:min(950px,calc(100% - 48px));margin:auto}
+  .section{position:relative;padding:120px 0;min-height:100vh;display:flex;align-items:center;overflow:hidden}
+  .section.tint{background:linear-gradient(135deg,#f8f6f3 0%,var(--cream) 100%)}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b847e;margin:0 0 6px;font-weight:700}
+  .section-title{font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.35;letter-spacing:.04em;color:var(--ink);margin:0 0 18px;font-weight:500}
+  .section-lead{max-width:38em;margin:0;font-size:.96rem}
+  .arrow{
+    width:42px;height:42px;border-radius:50%;display:inline-grid;place-items:center;
+    background:#71665c;color:white;font-size:18px;transition:.35s ease;
+  }
+  .arrow:hover{transform:translateX(7px) rotate(-12deg);background:var(--coral);box-shadow:var(--soft-shadow)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    min-height:48px;padding:0 24px;border-radius:999px;background:var(--coral);color:#fff;
+    font-size:13px;font-weight:700;transition:.3s ease;border:0;cursor:pointer;
+  }
+  .btn:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(237,130,139,.3);background:#e97580}
+  .btn.dark{background:#71665c}.btn.dark:hover{background:#514942}
+  .blob{position:absolute;z-index:0;filter:blur(.2px);opacity:.68;border-radius:53% 47% 63% 37% / 44% 56% 44% 56%}
+  .blob.coral{background:var(--coral)}.blob.sky{background:var(--sky)}.blob.yellow{background:#ffbb78}.blob.leaf{background:var(--leaf)}
+  .photo{background:linear-gradient(135deg,#c9e9e8,#f8d6c8);overflow:hidden;position:relative;border-radius:28px}
+  .photo img{transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+  .photo:hover img{transform:scale(1.06)}
+  .photo:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.1),transparent 45%);pointer-events:none}
+
+  /* header */
+  header{
+    position:absolute;left:0;top:0;width:100%;z-index:10;padding:16px 0;
+  }
+  .nav{width:min(1120px,calc(100% - 40px));margin:auto;display:flex;align-items:center;gap:24px}
+  .brand{color:var(--ink);font-weight:800;line-height:1;letter-spacing:.08em;white-space:nowrap;font-size:18px}
+  .brand small{font-size:8px;letter-spacing:.12em;display:block;margin-top:6px;color:var(--body)}
+  .brand i{display:inline-block;width:9px;height:9px;background:var(--coral);border-radius:50%;margin-right:4px;box-shadow:12px 1px 0 var(--yellow),24px 0 0 var(--leaf),36px 1px 0 var(--sky)}
+  .nav-links{margin-left:auto;display:flex;align-items:center;gap:18px;font-size:11px;color:var(--ink)}
+  .nav-links a{transition:.25s}.nav-links a:hover{color:var(--coral);transform:translateY(-2px)}
+  .nav .btn{min-height:35px;padding:0 15px;font-size:10px}
+
+  /* hero */
+  .hero{min-height:780px;padding:112px 0 64px;display:flex;align-items:center;position:relative;overflow:hidden}
+  .hero .container{position:relative;z-index:1;width:min(1100px,calc(100% - 48px))}
+  .hero-art{width:88%;height:580px;margin-left:auto;background:linear-gradient(145deg,#ccecf0,#f8d7ca);border-radius:100px 24px 100px 24px;overflow:hidden;position:relative}
+  .hero-art img{object-position:center;filter:saturate(.88)}
+  .hero-copy{position:absolute;left:1%;top:40%;z-index:2}
+  .hero-copy h1{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.35;letter-spacing:.05em;color:var(--ink);font-weight:500;margin:0}
+  .hero-copy h1 span{display:block;background:rgba(255,255,255,.93);width:max-content;padding:2px 13px;margin:4px 0}
+  .hero-copy .en{font-family:Georgia,serif;color:var(--coral);font-size:19px;letter-spacing:.12em;margin:12px 0 0 12px}
+  .hero .blob.sky{width:290px;height:210px;left:-105px;top:140px;transform:rotate(-20deg)}
+  .hero .blob.coral{width:250px;height:190px;right:-80px;bottom:76px;transform:rotate(24deg)}
+  .hero .blob.leaf{width:100px;height:84px;left:5%;bottom:70px}
+  .hero-scroll{position:absolute;bottom:24px;right:0;font-size:10px;letter-spacing:.16em;color:#8b847e;writing-mode:vertical-rl}
+
+  /* message */
+  .message-box{background:rgba(255,255,255,.62);border-radius:70px 20px 80px 35px;padding:72px 86px;display:grid;grid-template-columns:.9fr 1.1fr;gap:64px;position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.8)}
+  .message-box:before{content:"";position:absolute;width:90px;height:75px;left:-42px;bottom:90px;background:#b9a0db;border-radius:50% 44% 55% 40%;opacity:.7}
+  .message-diagram{display:grid;place-items:center;text-align:center}
+  .rings{width:220px;height:145px;position:relative}
+  .ring{position:absolute;border:1px solid #e6b9bd;width:120px;height:120px;border-radius:50%;top:10px;display:grid;place-items:center;font-size:11px;color:var(--ink)}
+  .ring:first-child{left:10px}.ring:last-child{right:10px;border-color:#a6d9d8}
+  .ring b{font-family:Georgia,serif;font-size:21px;font-weight:400;display:block;color:var(--coral)}
+  .message-copy .section-title{font-size:clamp(1.6rem,3vw,2.15rem)}
+  .message-copy p{max-width:33em;font-size:13px;margin:0 0 20px}
+
+  /* service */
+  .service{display:block;min-height:auto;padding:130px 0}
+  .service-head{text-align:left;margin-bottom:70px}
+  .feature-row{display:grid;grid-template-columns:1.06fr .94fr;gap:42px;align-items:center;margin:0 0 72px;position:relative}
+  .feature-row.reverse{grid-template-columns:.94fr 1.06fr}
+  .feature-row.reverse .feature-photo{order:2}
+  .feature-photo{height:295px}
+  .feature-photo:before{content:"";position:absolute;width:125px;height:125px;z-index:-1;left:-28px;top:-20px;background:#f4aab2;border-radius:48% 52% 44% 56%;filter:blur(1px)}
+  .reverse .feature-photo:before{background:#ffb67f;left:auto;right:-28px;top:-22px}
+  .feature-text{padding:8px 14px}
+  .feature-text h3{font-size:clamp(1.35rem,2.2vw,1.85rem);line-height:1.35;color:#bd7c84;font-weight:500;margin:0 0 5px;letter-spacing:.05em}
+  .feature-text h3.blue{color:#76b9bd}
+  .feature-text .sub{font-size:11px;color:var(--ink);margin:0 0 15px;font-weight:700}
+  .feature-text p{font-size:12px;line-height:1.95;margin:0 0 18px}
+  .round-label{position:absolute;right:-12px;top:-18px;width:76px;height:76px;border-radius:50%;background:#f9d83d;display:grid;place-items:center;text-align:center;color:#5e5130;font-size:9px;line-height:1.4;font-weight:700;z-index:2}
+  .reverse .round-label{left:-12px;right:auto}
+  .service-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px 32px}
+  .service-item .photo{height:192px;border-radius:20px 38px 20px 20px}
+  .service-item:nth-child(2) .photo,.service-item:nth-child(3) .photo{border-radius:38px 20px 20px 20px}
+  .tag{display:inline-block;padding:2px 9px;background:#f6d749;border-radius:3px;font-size:9px;color:#66552e;margin:10px 0 5px}
+  .service-item h4{font-size:1.1rem;color:#699fa3;margin:0;line-height:1.5;font-weight:500}
+  .service-item h4 span{font-size:12px;margin-left:5px}
+  .service-item p{font-size:11px;line-height:1.85;margin:5px 0 0}
+
+  /* garden */
+  .garden-banner{margin-top:90px;height:245px;border-radius:8px;overflow:hidden;position:relative;background:#dceae2}
+  .garden-banner img{filter:brightness(1.1) saturate(.65);opacity:.68}
+  .garden-banner:after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.35)}
+  .garden-copy{position:absolute;z-index:2;inset:0;display:grid;place-content:center;text-align:center;color:var(--ink)}
+  .garden-copy h3{font-size:clamp(1.8rem,4vw,2.8rem);margin:4px 0;font-weight:500;letter-spacing:.08em}
+  .garden-copy p{margin:0;font-size:12px;font-weight:700}
+
+  /* voice */
+  .voice{min-height:auto;padding:115px 0;background:var(--cream)}
+  .voice-layout{display:grid;grid-template-columns:250px 1fr;gap:48px;align-items:start}
+  .voice-controls{display:flex;align-items:center;gap:20px;font-size:11px;margin-top:22px}
+  .voice-track{display:flex;gap:20px;overflow:hidden;padding:18px 2px 24px}
+  .voice-card{min-width:300px;background:#fff;padding:28px 24px;border-radius:5px;box-shadow:var(--soft-shadow);transition:.35s}
+  .voice-card:hover{transform:translateY(-8px);box-shadow:var(--float-shadow)}
+  .voice-card .person{display:flex;gap:12px;align-items:center}
+  .avatar{width:42px;height:42px;border-radius:50%;background:#f1ece4;display:grid;place-items:center;font-size:20px}
+  .voice-card .category{display:inline-block;padding:2px 7px;font-size:9px;color:white;background:var(--coral);margin-bottom:4px}
+  .voice-card:nth-child(2) .category{background:#6fc2c9}
+  .voice-card h4{font-size:12px;color:var(--ink);margin:0;line-height:1.5}
+  .voice-card p{font-size:11px;line-height:1.8;margin:16px 0 0}
+
+  /* place */
+  .place{min-height:820px;padding:0;display:block;background:#d7d1c9;position:relative}
+  .place-bg{position:absolute;inset:0;background:linear-gradient(rgba(61,55,50,.08),rgba(61,55,50,.08)),url("https://picsum.photos/seed/nursery-building-japan/1600/900") center/cover}
+  .place-title{position:relative;z-index:1;padding:92px 0 125px;color:#fff}
+  .place-title .eyebrow,.place-title .section-title{color:#fff}
+  .finder{position:relative;z-index:2;width:min(950px,calc(100% - 48px));margin:-30px auto 0;background:#fff;border-radius:22px 22px 0 0;padding:50px 58px 45px;box-shadow:var(--float-shadow)}
+  .finder-grid{display:grid;grid-template-columns:130px 1fr;gap:20px 28px}
+  .finder-label{font-size:12px;color:var(--ink);font-weight:700;border-right:1px solid var(--line)}
+  .finder-options{display:flex;gap:11px 18px;flex-wrap:wrap;font-size:11px;line-height:1.5}
+  .check:before{content:"";display:inline-block;width:12px;height:12px;border:1px solid #aaa;margin-right:5px;vertical-align:-2px}
+  .finder-search{grid-column:1/-1;margin-top:16px;border-bottom:1px solid var(--ink);padding:8px 0;display:flex;justify-content:space-between;font-size:11px;color:var(--ink)}
+
+  /* contact */
+  .contact-section{min-height:auto;padding:105px 0 80px}
+  .contact-box{padding:46px 72px;background:linear-gradient(135deg,#faf9f7,var(--cream));border-radius:54px 20px 54px 20px;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;position:relative}
+  .contact-box:after{content:"";position:absolute;width:66px;height:55px;border-radius:48% 52% 45% 55%;background:#b89bdb;right:-34px;bottom:-26px;opacity:.7}
+  .contact-box h2{font-family:Georgia,serif;color:#d28b91;font-size:24px;font-weight:400;font-style:italic;margin:0 0 2px}
+  .contact-box p{font-size:12px;line-height:1.8;margin:0;max-width:34em}
+  .tel{font-size:clamp(1.55rem,3vw,2.2rem);font-family:Georgia,serif;color:var(--ink);line-height:1.2;margin:0 0 6px}
+  .hours{font-size:10px;margin:0 0 12px}
+
+  /* news and journal */
+  .news{min-height:auto;padding:100px 0 76px}
+  .split-list{display:grid;grid-template-columns:220px 1fr;gap:52px}
+  .list-title .section-title{margin-bottom:6px}
+  .more{display:flex;gap:10px;align-items:center;font-size:11px;margin-top:24px}
+  .news-list{border-top:1px solid var(--line)}
+  .news-item{display:grid;grid-template-columns:100px 70px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px;line-height:1.55;transition:.25s}
+  .news-item:hover{color:var(--coral);padding-left:8px}
+  .news-item time{color:#999}.news-type{font-size:9px;background:#eee9e3;text-align:center;height:max-content;padding:2px}
+  .journal{min-height:auto;padding:60px 0 118px}
+  .journal-box{border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .journal-item{display:grid;grid-template-columns:150px 1fr;gap:18px;padding:14px;border-bottom:1px solid var(--line);min-height:104px;transition:.3s}
+  .journal-item:last-child{border:0}.journal-item:hover{background:#faf8f6}
+  .journal-thumb{height:76px;background:#dce9e6;overflow:hidden}
+  .journal-item h4{font-size:12px;color:var(--ink);margin:3px 0;line-height:1.55}
+  .journal-item p,.journal-item time{font-size:10px;line-height:1.6;margin:0;color:#999}
+
+  /* bottom cards + footer */
+  .bottom-links{min-height:auto;padding:40px 0 120px}
+  .visual-links{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+  .visual-link{height:210px;border-radius:25px 25px 8px 25px;position:relative;overflow:hidden;background:#d5e8e6;transition:.4s}
+  .visual-link:nth-child(2){border-radius:25px 8px 25px 25px;background:#f1cfb5}
+  .visual-link:hover{transform:translateY(-8px);box-shadow:var(--float-shadow)}
+  .visual-link:hover img{transform:scale(1.07)}
+  .visual-link:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(61,55,50,.28),transparent)}
+  .visual-link div{position:absolute;z-index:1;left:32px;bottom:28px;color:#fff}
+  .visual-link h3{font-size:1.7rem;font-weight:400;margin:0;line-height:1.2}.visual-link p{font-size:11px;margin:4px 0}
+  footer{border-top:3px solid #476b91;padding:36px 0 24px;background:#fff}
+  .footer-top{display:flex;justify-content:space-between;gap:30px;align-items:center;padding-bottom:27px}
+  .footer-tel{font-family:Georgia,serif;color:var(--ink);font-size:22px}.footer-tel small{font-family:inherit;font-size:9px;display:block;color:var(--body)}
+  .footer-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;border-top:1px solid var(--line);padding-top:26px;font-size:10px;line-height:2}
+  .footer-nav b{font-size:11px;color:var(--ink)}.footer-nav a{display:block;transition:.2s}.footer-nav a:hover{color:var(--coral);transform:translateX(3px)}
+  .copy{text-align:center;color:#aaa;font-size:9px;margin:35px 0 0}
+
+  /* animated */
+  html.js .reveal{opacity:0;transform:translateY(34px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+  html.js .reveal.show{opacity:1;transform:none}
+  html.js .hero-copy{opacity:0;transform:translateX(-42px)}
+  html.js .hero-art{opacity:0;transform:translateX(45px) scale(.96)}
+  html.js .hero-copy,html.js .hero-art{transition:1s cubic-bezier(.2,.75,.2,1)}
+  html.js .hero.ready .hero-copy,html.js .hero.ready .hero-art{opacity:1;transform:none}
+  .d1{transition-delay:.12s!important}.d2{transition-delay:.24s!important}.d3{transition-delay:.36s!important}
+
+  @media(max-width:760px){
+    body{font-size:14px}.container{width:min(100% - 32px,950px)}.section{min-height:auto;padding:88px 0}
+    .nav{width:calc(100% - 28px)}.nav-links{display:none}.brand{font-size:16px}
+    .hero{min-height:680px;padding-top:100px}.hero-art{width:96%;height:450px;border-radius:70px 18px 70px 18px}.hero-copy{left:0;top:45%}.hero-copy h1{font-size:2.25rem}.hero-scroll{display:none}
+    .message-box{grid-template-columns:1fr;padding:45px 30px;gap:25px;border-radius:44px 16px}.message-diagram{order:2}
+    .service{padding:90px 0}.service-head{margin-bottom:45px}.feature-row,.feature-row.reverse{grid-template-columns:1fr;gap:18px;margin-bottom:58px}.feature-row.reverse .feature-photo{order:0}.feature-photo{height:240px}.service-grid{gap:42px 18px}.service-item .photo{height:145px}
+    .voice-layout,.split-list{grid-template-columns:1fr;gap:18px}.voice{padding:88px 0}.voice-track{margin-right:-16px}.place{min-height:700px}.finder{padding:34px 25px}.finder-grid{grid-template-columns:1fr;gap:13px}.finder-label{border:0}.finder-search{margin-top:10px}
+    .contact-box{padding:38px 29px;grid-template-columns:1fr}.news-item{grid-template-columns:76px 60px 1fr;gap:7px}.journal-item{grid-template-columns:100px 1fr;gap:12px}.journal-thumb{height:66px}
+    .visual-links{grid-template-columns:1fr;gap:20px}.footer-top{display:block}.footer-top .btn{margin-top:16px}.footer-nav{grid-template-columns:1fr 1fr;gap:20px}.footer-tel{margin-top:15px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <nav class="nav">
+    <a class="brand" href="#"><i></i>HINATA<small>ひなた幼稚園　｜　東京都三鷹市</small></a>
+    <div class="nav-links">
+      <a href="#message">園について</a><a href="#program">保育とくらし</a><a href="#voice">保護者の声</a>
+      <a href="#place">園舎・アクセス</a><a href="#news">お知らせ</a>
+      <a class="btn" href="#contact">見学予約・お問い合わせ</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <span class="blob sky"></span><span class="blob coral"></span><span class="blob leaf"></span>
+    <div class="container">
+      <div class="hero-art">
+        <img src="https://picsum.photos/seed/children-garden-play/1300/800" width="1300" height="800" alt="" onerror="this.style.display='none'">
+      </div>
+      <div class="hero-copy">
+        <h1><span>今日の「やってみたい」が、</span><span>明日の自信になる。</span></h1>
+        <p class="en">HINATA KINDERGARTEN</p>
+      </div>
+      <span class="hero-scroll">SCROLL</span>
+    </div>
+  </section>
+
+  <section class="section tint" id="message">
+    <span class="blob yellow" style="width:100px;height:74px;left:4%;bottom:72px;transform:rotate(-20deg)"></span>
+    <div class="container reveal">
+      <div class="message-box">
+        <div class="message-diagram">
+          <div class="rings">
+            <div class="ring"><span><b>Play</b>あそぶ</span></div>
+            <div class="ring"><span><b>Grow</b>そだつ</span></div>
+          </div>
+          <p style="font-size:11px;margin:0">あそびと育ちのあいだに<br><b style="font-size:18px;color:var(--ink);letter-spacing:.1em">HINATA</b></p>
+        </div>
+        <div class="message-copy">
+          <p class="eyebrow">Message　｜　園の想い</p>
+          <h2 class="section-title">一人ひとりのペースで、<br>笑顔の根っこを育てます。</h2>
+          <p>ひなた幼稚園は、三鷹市井の頭で1988年から子どもたちを見守ってきました。急がせず、比べず、まずは「おもしろそう」と思える出会いを大切にしています。</p>
+          <p>自然のなかの発見も、友だちとの小さな衝突も、先生と一緒に考える時間に。毎日の積み重ねが、自分で選び、進む力になります。</p>
+          <a href="#program" class="arrow" aria-label="園の想いを詳しく見る">→</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="service" id="program">
+    <div class="container">
+      <div class="service-head reveal">
+        <p class="eyebrow">Our Days　｜　保育とくらし</p>
+        <h2 class="section-title">毎日にある、たくさんの<br>「できた」の瞬間。</h2>
+        <p class="section-lead">7:30から18:30まで。遊び、食事、休息、対話の時間をゆるやかにつなぎ、子どもが自分らしく過ごせる一日をつくります。</p>
+      </div>
+
+      <article class="feature-row reveal">
+        <div class="feature-photo photo">
+          <img src="https://picsum.photos/seed/kids-painting-class/850/560" width="850" height="560" alt="" onerror="this.style.display='none'">
+          <span class="round-label">年少〜年長<br>異年齢の時間も</span>
+        </div>
+        <div class="feature-text">
+          <h3>ひなたの一日</h3>
+          <p class="sub">7:30 登園　｜　9:30 あそび　｜　14:00 降園</p>
+          <p>朝は好きな遊びから一日が始まります。園庭の泥だんご、光の入るアトリエ、季節の絵本。週3回の「森の日」には、井の頭公園まで歩いて出かけます。</p>
+          <a href="#flow" class="arrow" aria-label="一日の流れを見る">→</a>
+        </div>
+      </article>
+
+      <article class="feature-row reverse reveal">
+        <div class="feature-photo photo">
+          <img src="https://picsum.photos/seed/children-lunch-table/850/560" width="850" height="560" alt="" onerror="this.style.display='none'">
+          <span class="round-label">管理栄養士<br>献立監修</span>
+        </div>
+        <div class="feature-text">
+          <h3 class="blue">みんなで囲む、給食</h3>
+          <p class="sub">園内調理　｜　アレルギー個別対応</p>
+          <p>だしの香りがする温かな給食を、園内のキッチンでつくります。除去食・代替食は栄養士と担任が確認し、献立表は毎月20日にアプリでお知らせします。</p>
+          <a href="#contact" class="arrow" aria-label="給食について相談する">→</a>
+        </div>
+      </article>
+
+      <div class="service-grid">
+        <article class="service-item reveal">
+          <div class="photo"><img src="https://picsum.photos/seed/children-outdoor-running/640/420" width="640" height="420" alt="" onerror="this.style.display='none'"></div>
+          <span class="tag">3〜5歳児</span><h4>そら組・にじ組 <span>→</span></h4>
+          <p>年齢を越えて遊ぶ午後の時間。年上の姿を見て、憧れが自然に育ちます。</p>
+        </article>
+        <article class="service-item reveal d1">
+          <div class="photo"><img src="https://picsum.photos/seed/nursery-nap-room/640/420" width="640" height="420" alt="" onerror="this.style.display='none'"></div>
+          <span class="tag">預かり保育</span><h4>ひなたステイ <span>→</span></h4>
+          <p>朝7:30から夕方18:30まで。ゆったり過ごせる専用のお部屋があります。</p>
+        </article>
+        <article class="service-item reveal d2">
+          <div class="photo"><img src="https://picsum.photos/seed/child-music-play/640/420" width="640" height="420" alt="" onerror="this.style.display='none'"></div>
+          <span class="tag">年長児対象</span><h4>ことばと表現 <span>→</span></h4>
+          <p>音、色、からだを使って、思ったことを自分の言葉で表す時間です。</p>
+        </article>
+        <article class="service-item reveal d3">
+          <div class="photo"><img src="https://picsum.photos/seed/parent-teacher-meeting/640/420" width="640" height="420" alt="" onerror="this.style.display='none'"></div>
+          <span class="tag">保護者サポート</span><h4>子育て相談室 <span>→</span></h4>
+          <p>月2回、臨床心理士が在室。小さな気がかりからお話しいただけます。</p>
+        </article>
+      </div>
+
+      <a class="garden-banner reveal" href="#place">
+        <img src="https://picsum.photos/seed/kindergarten-garden-sunlight/1200/420" width="1200" height="420" alt="" onerror="this.style.display='none'">
+        <div class="garden-copy">
+          <p>地域にひらく、もうひとつの居場所</p>
+          <h3>HINATA Garden</h3>
+          <p>未就園児クラス・土曜ひろば・子育て講座</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="voice" id="voice">
+    <div class="container voice-layout">
+      <div class="reveal">
+        <p class="eyebrow">Voice　｜　保護者の声</p>
+        <h2 class="section-title">子どもたちの<br>まなざしから。</h2>
+        <p class="section-lead">通い始めて見えてきた、ご家庭での小さな変化を伺いました。</p>
+        <div class="voice-controls"><span class="arrow">←</span><span>02 / 05</span><span class="arrow">→</span></div>
+      </div>
+      <div class="voice-track reveal d1">
+        <article class="voice-card">
+          <div class="person"><div class="avatar">◯</div><div><span class="category">年中・あおい組</span><h4>「明日も泥だんごをつくる！」</h4></div></div>
+          <p>以前は朝の支度に時間がかかっていた娘が、自分で時計を見ながら動くように。先生が待ってくれる安心感があるのだと思います。</p>
+        </article>
+        <article class="voice-card">
+          <div class="person"><div class="avatar">◯</div><div><span class="category">年長・ほし組</span><h4>兄弟で園の話をしています</h4></div></div>
+          <p>行事が「見せるため」だけでなく、子どもたちのやりたいことから育っていくところが、この園らしいと感じています。</p>
+        </article>
+        <article class="voice-card">
+          <div class="person"><div class="avatar">◯</div><div><span class="category">年少・もも組</span><h4>食べられるものが増えました</h4></div></div>
+          <p>給食の先生が直接声をかけてくださり、苦手だった野菜も少しずつ口にできるようになりました。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="place" id="place">
+    <div class="place-bg"></div>
+    <div class="container place-title reveal">
+      <p class="eyebrow">Place　｜　園舎・アクセス</p>
+      <h2 class="section-title">光と木の香りに、<br>子どもたちの声が響く園舎。</h2>
+    </div>
+    <div class="finder reveal d1">
+      <div class="finder-grid">
+        <div class="finder-label">園の場所から探す</div>
+        <div class="finder-options"><span class="check">三鷹市井の頭</span><span class="check">吉祥寺駅から徒歩12分</span><span class="check">井の頭公園まで徒歩6分</span></div>
+        <div class="finder-label">園の安心を知る</div>
+        <div class="finder-options"><span class="check">防犯カメラ・オートロック</span><span class="check">AED設置</span><span class="check">看護師による月1回の健康相談</span><span class="check">災害用備蓄 3日分</span></div>
+        <div class="finder-search"><span>⌕　見学・資料請求について知りたい</span><strong>検索する　→</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section" id="contact">
+    <div class="container reveal">
+      <div class="contact-box">
+        <div>
+          <h2>Come and see us.</h2>
+          <p>見学は平日10:00と15:30の2回。お子さまと一緒でも、保護者の方だけでも大丈夫です。ベビーカー置き場・授乳室もご用意しています。</p>
+        </div>
+        <div>
+          <p class="tel">0422-18-0720</p>
+          <p class="hours">受付時間　平日 9:00〜17:00　｜　土曜見学 月2回</p>
+          <a class="btn" href="#">見学予約・お問い合わせ　→</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="news" id="news">
+    <div class="container split-list">
+      <div class="list-title reveal">
+        <p class="eyebrow">News　｜　お知らせ</p>
+        <h2 class="section-title">園からの<br>お便り。</h2>
+        <a href="#" class="more"><span class="arrow">→</span> 一覧へ</a>
+      </div>
+      <div class="news-list reveal d1">
+        <a class="news-item" href="#"><time>2026.07.08</time><span class="news-type">募集</span><span>2027年度 入園説明会（9月6日・13日）の予約受付を開始しました。</span></a>
+        <a class="news-item" href="#"><time>2026.07.01</time><span class="news-type">行事</span><span>7月18日（金）「夕涼みひなた祭り」を開催します。</span></a>
+        <a class="news-item" href="#"><time>2026.06.20</time><span class="news-type">給食</span><span>7月の献立表・アレルギー対応表を公開しました。</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="journal tint">
+    <div class="container split-list">
+      <div class="list-title reveal">
+        <p class="eyebrow">Journal　｜　ひなた日記</p>
+        <h2 class="section-title">今日の園を、<br>少しだけ。</h2>
+        <a href="#" class="more"><span class="arrow">→</span> 一覧へ</a>
+      </div>
+      <div class="journal-box reveal d1">
+        <a class="journal-item" href="#">
+          <div class="journal-thumb"><img src="https://picsum.photos/seed/kids-leaf-collection/300/180" width="300" height="180" alt="" onerror="this.style.display='none'"></div>
+          <div><time>2026.07.02　｜　そら組</time><h4>雨あがりの園庭で見つけた、7つの色。</h4><p>水たまりのまわりに集まって、光の見え方を話しました。</p></div>
+        </a>
+        <a class="journal-item" href="#">
+          <div class="journal-thumb"><img src="https://picsum.photos/seed/children-baking-cookies/300/180" width="300" height="180" alt="" onerror="this.style.display='none'"></div>
+          <div><time>2026.06.25　｜　給食室</time><h4>とうもろこしの皮むき、今年も大盛況です。</h4><p>ひげの手ざわりまで、じっくり確かめました。</p></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bottom-links">
+    <div class="container visual-links">
+      <a class="visual-link reveal" href="#flow">
+        <img src="https://picsum.photos/seed/teacher-parent-talk/760/460" width="760" height="460" alt="" onerror="this.style.display='none'">
+        <div><h3>Flow →</h3><p>入園までの流れ</p></div>
+      </a>
+      <a class="visual-link reveal d1" href="#">
+        <img src="https://picsum.photos/seed/kindergarten-season-crafts/760/460" width="760" height="460" alt="" onerror="this.style.display='none'">
+        <div><h3>Calendar →</h3><p>年間行事・園のくらし</p></div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer id="flow">
+  <div class="container">
+    <div class="footer-top">
+      <a class="brand" href="#"><i></i>HINATA<small>学校法人 井の頭学園　ひなた幼稚園</small></a>
+      <div class="footer-tel">0422-18-0720<small>受付時間　平日 9:00〜17:00（祝日を除く）</small></div>
+      <a class="btn" href="#contact">見学予約・お問い合わせ</a>
+    </div>
+    <div class="footer-nav">
+      <div><b>ひなた幼稚園について</b><a href="#message">園の想い</a><a href="#place">園舎・アクセス</a><a href="#">園長ごあいさつ</a></div>
+      <div><b>保育とくらし</b><a href="#program">一日の流れ</a><a href="#">給食・アレルギー対応</a><a href="#">年間行事</a></div>
+      <div><b>ご入園をお考えの方へ</b><a href="#flow">入園までの流れ</a><a href="#contact">見学予約</a><a href="#">募集要項・保育料</a></div>
+      <div><b>ひなたからのお知らせ</b><a href="#news">お知らせ</a><a href="#">ひなた日記</a><a href="#">個人情報保護方針</a></div>
+    </div>
+    <p class="copy">© 2026 HINATA KINDERGARTEN. ALL RIGHTS RESERVED.</p>
+  </div>
+</footer>
+
+<script>
+  window.addEventListener('load',()=>document.querySelector('.hero').classList.add('ready'));
+  const observer=new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('show');observer.unobserve(entry.target)}});
+  },{threshold:.13});
+  document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

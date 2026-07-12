@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORI NO CAMP | 森のキャンプ場</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #fcfaf3;
+            --bg-white: #ffffff;
+            --brand-green: #00a145;
+            --brand-green-light: #e8f5ec;
+            --accent-yellow: #ffe100;
+            --text-dark: #111111;
+            --text-white: #ffffff;
+            --shadow-card: rgba(61, 63, 69, 0.24) 1px 2px 8px 0px;
+            --shadow-hover: rgba(0, 161, 69, 0.18) 4px 12px 24px 0px;
+            --container-max: 1400px;
+            --space-xs: 8px;
+            --space-sm: 16px;
+            --space-md: 24px;
+            --space-lg: 40px;
+            --space-xl: 64px;
+            --space-xxl: 96px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Sans", sans-serif;
+            color: var(--text-dark);
+            background-color: var(--bg-cream);
+            line-height: 1.9;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        html.js .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), 
+                        transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        html.js .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(252, 250, 243, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 161, 69, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        header.scrolled {
+            box-shadow: var(--shadow-card);
+        }
+
+        .header-inner {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: var(--space-sm) var(--space-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--brand-green);
+            text-decoration: none;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        nav a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            position: relative;
+            padding: var(--space-xs) 0;
+            transition: color 0.3s ease;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--brand-green);
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--brand-green);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            background: var(--brand-green) !important;
+            color: white !important;
+            padding: 12px 28px !important;
+            border-radius: 50px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .nav-cta::after {
+            display: none !important;
+        }
+
+        .nav-cta:hover {
+            background: #008c3c !important;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #a8d8ea 0%, #6bb8d6 50%, #4a9db5 100%);
+            overflow: hidden;
+            padding-top: 80px;
+        }
+
+        .hero-bg-pattern {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.15) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 20%, rgba(255,225,0,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: var(--container-max);
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xxl);
+            align-items: center;
+        }
+
+        .hero-text {
+            color: white;
+        }
+
+        .hero-label {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            margin-bottom: var(--space-md);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: 0.03em;
+            margin-bottom: var(--space-md);
+        }
+
+        .hero-title span {
+            display: block;
+            color: var(--accent-yellow);
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            line-height: 2;
+            opacity: 0.95;
+            max-width: 480px;
+            margin-bottom: var(--space-xl);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.35s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #008c3c;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0,161,69,0.35);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 2px solid rgba(255,255,255,0.6);
+            transition: all 0.35s ease;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: white;
+            transform: translateY(-3px);
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-image-circle {
+            width: 520px;
+            height: 520px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            border: 8px solid rgba(255,255,255,0.3);
+        }
+
+        .hero-image-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .hero-image-circle:hover img {
+            transform: scale(1.05);
+        }
+
+        .hero-float-badge {
+            position: absolute;
+            bottom: 30px;
+            right: -20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .badge-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--brand-green-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .badge-text {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .badge-text strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--brand-green);
+        }
+
+        /* Gallery Section */
+        .gallery-section {
+            padding: var(--space-xxl) 0;
+            position: relative;
+            background: var(--bg-white);
+        }
+
+        .gallery-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-md);
+            grid-auto-flow: dense;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-item:nth-child(1) { grid-column: span 1; grid-row: span 2; }
+        .gallery-item:nth-child(2) { grid-column: span 2; }
+        .gallery-item:nth-child(3) { grid-column: span 1; }
+        .gallery-item:nth-child(4) { grid-column: span 1; grid-row: span 1; transform: translateY(60px); }
+
+        .gallery-item:hover {
+            transform: scale(1.03) translateY(0) !important;
+            z-index: 2;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+
+        /* Topics Section */
+        .topics-section {
+            padding: var(--space-xxl) 0;
+            background: var(--bg-cream);
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            color: var(--brand-green);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: var(--space-sm);
+            display: block;
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            line-height: 1.3;
+            color: var(--text-dark);
+        }
+
+        .topics-container {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: var(--space-xl);
+        }
+
+        .news-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: all 0.35s ease;
+            cursor: pointer;
+        }
+
+        .news-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .news-card-image {
+            aspect-ratio: 16/10;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e8f5ec 0%, #c8e6d0 100%);
+        }
+
+        .news-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .news-card:hover .news-card-image img {
+            transform: scale(1.08);
+        }
+
+        .news-card-body {
+            padding: var(--space-md);
+        }
+
+        .news-date {
+            font-size: 0.8rem;
+            color: var(--brand-green);
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .news-date::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--brand-green);
+            border-radius: 50%;
+        }
+
+        .news-title {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.6;
+            color: var(--text-dark);
+        }
+
+        .faq-list {
+            background: white;
+            border-radius: 20px;
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-card);
+        }
+
+        .faq-item {
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: var(--space-md) 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            transition: color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            color: var(--brand-green);
+        }
+
+        .faq-toggle {
+            width: 32px;
+            height: 32px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding-top: var(--space-sm);
+        }
+
+        /* Category Section */
+        .category-section {
+            padding: var(--space-xxl) 0;
+            background: var(--bg-white);
+        }
+
+        .category-intro {
+            max-width: var(--container-max);
+            margin: 0 auto var(--space-xl);
+            padding: 0 var(--space-md);
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: var(--space-xl);
+            align-items: start;
+        }
+
+        .category-nav {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            position: sticky;
+            top: 120px;
+        }
+
+        .category-nav-btn {
+            padding: 14px 20px;
+            border-radius: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: white;
+            color: var(--text-dark);
+        }
+
+        .category-nav-btn.active,
+        .category-nav-btn:hover {
+            background: var(--brand-green);
+            color: white;
+            border-color: var(--brand-green);
+        }
+
+        .category-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .category-block {
+            border-radius: 24px;
+            padding: var(--space-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-block.play { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); }
+        .category-block.experience { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); }
+        .category-block.eat { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); }
+        .category-block.stay { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); }
+        .category-block.enjoy { background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%); }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .category-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .category-subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            margin-left: auto;
+        }
+
+        .category-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+        }
+
+        .category-item {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.35s ease;
+            cursor: pointer;
+        }
+
+        .category-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .category-item-image {
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .category-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .category-item:hover .category-item-image img {
+            transform: scale(1.08);
+        }
+
+        .category-item-body {
+            padding: var(--space-sm) var(--space-md) var(--space-md);
+        }
+
+        .category-item-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .item-arrow {
+            margin-left: auto;
+            color: var(--brand-green);
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .category-item:hover .item-arrow {
+            transform: translateX(4px);
+        }
+
+        /* Feature Banner */
+        .feature-banner {
+            background: var(--brand-green);
+            padding: var(--space-xxl) 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-bg-pattern {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .feature-content {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .feature-badge {
+            display: inline-block;
+            background: white;
+            color: var(--brand-green);
+            padding: 10px 28px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-lg);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .feature-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: white;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: var(--space-md);
+        }
+
+        .feature-desc {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            line-height: 2;
+            max-width: 650px;
+            margin: 0 auto var(--space-xl);
+        }
+
+        .feature-stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1;
+            color: var(--accent-yellow);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: var(--space-xs);
+        }
+
+        /* Access Section */
+        .access-section {
+            padding: var(--space-xxl) 0;
+            background: var(--bg-cream);
+        }
+
+        .access-container {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xl);
+            align-items: start;
+        }
+
+        .access-info {
+            background: white;
+            border-radius: 24px;
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-card);
+        }
+
+        .access-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .access-detail {
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+
+        .access-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .access-value {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .access-map {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            aspect-ratio: 4/3;
+            background: #ddd;
+            position: relative;
+        }
+
+        .access-map iframe,
+        .access-map img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--brand-green) 0%, #007a33 100%);
+            padding: var(--space-xxl) 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,225,0,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-title {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            color: white;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            line-height: 1.3;
+        }
+
+        .cta-desc {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            margin-bottom: var(--space-xl);
+            line-height: 1.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .btn-large {
+            background: white;
+            color: var(--brand-green);
+            padding: 20px 48px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.35s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .btn-large:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+        }
+
+        .btn-outline-white {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline-white:hover {
+            background: white;
+            color: var(--brand-green);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-dark);
+            color: white;
+            padding: var(--space-xxl) 0 var(--space-lg);
+        }
+
+        .footer-inner {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        .footer-main {
+            display: grid;
+            grid-template-columns: 1.5fr 2fr 1fr 1fr;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-xl);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-brand .logo {
+            color: white;
+            margin-bottom: var(--space-md);
+        }
+
+        .footer-brand p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            line-height: 1.8;
+            max-width: 300px;
+        }
+
+        .footer-links h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            color: var(--accent-yellow);
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .footer-contact {
+            text-align: right;
+        }
+
+        .footer-contact h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            color: var(--accent-yellow);
+        }
+
+        .contact-tel {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: var(--space-xs);
+            display: block;
+        }
+
+        .contact-hours {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+        }
+
+        .copyright {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .social-links {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .social-link {
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .social-link:hover {
+            background: var(--brand-green);
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-text {
+                order: 2;
+            }
+
+            .hero-image-wrapper {
+                order: 1;
+            }
+
+            .hero-image-circle {
+                width: 380px;
+                height: 380px;
+            }
+
+            .hero-desc {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-float-badge {
+                bottom: 10px;
+                right: 20px;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .gallery-item:nth-child(1),
+            .gallery-item:nth-child(2),
+            .gallery-item:nth-child(3),
+            .gallery-item:nth-child(4) {
+                grid-column: span 1;
+                grid-row: span 1;
+                transform: none !important;
+            }
+
+            .topics-container {
+                grid-template-columns: 1fr;
+            }
+
+            .category-intro {
+                grid-template-columns: 1fr;
+            }
+
+            .category-nav {
+                position: static;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .category-items {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .access-container {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-main {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .footer-contact {
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-image-circle {
+                width: 280px;
+                height: 280px;
+            }
+
+            .news-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .category-items {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-stats {
+                gap: var(--space-lg);
+            }
+
+            .footer-main {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Animation Delays */
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+        .delay-4 { transition-delay: 0.4s; }
+        .delay-5 { transition-delay: 0.5s; }
+
+        /* Hero Animations */
+        html.js .hero-label { animation: fadeSlideUp 0.8s 0.2s both; }
+        html.js .hero-title { animation: fadeSlideUp 0.8s 0.4s both; }
+        html.js .hero-desc { animation: fadeSlideUp 0.8s 0.6s both; }
+        html.js .hero-buttons { animation: fadeSlideUp 0.8s 0.8s both; }
+        html.js .hero-image-circle { animation: scaleIn 1s 0.3s both; }
+        html.js .hero-float-badge { animation: floatIn 0.8s 1s both; }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="header-inner">
+            <a href="#" class="logo">
+                <span class="logo-icon">M</span>
+                MORI NO CAMP
+            </a>
+            <nav>
+                <a href="#about">施設紹介</a>
+                <a href="#programs">プログラム</a>
+                <a href="#access">アクセス</a>
+                <a href="#faq">よくある質問</a>
+                <a href="#reserve" class="nav-cta">予約する</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="about">
+            <div class="hero-bg-pattern"></div>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <span class="hero-label">NAGANO PREFECTURE / SINCE 2012</span>
+                    <h1 class="hero-title">
+                        森の中で<br><span>自由な時間を</span>
+                    </h1>
+                    <p class="hero-desc">
+                        標高1,200mの高原に広がるキャンプ場。清涼な空気、満天の星空、
+                        新鮮な山菜料理。家族連れからソロキャンパーまで、
+                        あなただけの特別な思い出をお届けします。
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#reserve" class="btn-primary">
+                            空き状況を確認
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                        <a href="#programs" class="btn-secondary">プログラムを見る</a>
+                    </div>
+                </div>
+                <div class="hero-image-wrapper">
+                    <div class="hero-image-circle">
+                        <img src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="キャンプ場の風景" onerror="this.style.display='none'">
+                    </div>
+                    <div class="hero-float-badge">
+                        <div class="badge-icon">⛺</div>
+                        <div class="badge-text">
+                            <strong>残り8区画</strong>
+                            今週末の空き
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section class="gallery-section">
+            <div class="gallery-grid">
+                <div class="gallery-item animate-on-scroll delay-1">
+                    <img src="http://127.0.0.1:5000/uploads/up_18537fbb29.png" alt="ファミリーキャンプ" onerror="this.style.display='none'">
+                </div>
+                <div class="gallery-item animate-on-scroll delay-2">
+                    <img src="http://127.0.0.1:5000/uploads/up_1fec5875b4.webp" alt="キャンプ場入口" onerror="this.style.display='none'">
+                </div>
+                <div class="gallery-item animate-on-scroll delay-3">
+                    <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="スタッフ紹介" onerror="this.style.display='none'">
+                </div>
+                <div class="gallery-item animate-on-scroll delay-4">
+                    <img src="http://127.0.0.1:5000/uploads/up_330c3f68bf.jpg" alt="作業風景" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </section>
+
+        <!-- Topics Section -->
+        <section class="topics-section" id="faq">
+            <div class="section-header animate-on-scroll">
+                <span class="section-label">TOPICS</span>
+                <h2 class="section-title">お知らせ・よくある質問</h2>
+            </div>
+            <div class="topics-container">
+                <div class="news-cards">
+                    <article class="news-card animate-on-scroll delay-1">
+                        <div class="news-card-image">
+                            <img src="http://127.0.0.1:5000/uploads/up_e8de64dd49.png" alt="夏休みキャンペーン" onerror="this.style.display='none'">
+                        </div>
+                        <div class="news-card-body">
+                            <time class="news-date">2025.07.15</time>
+                            <h3 class="news-title">夏休み期間中の早期割引キャンペーン実施中。最大20%OFFでご利用いただけます。</h3>
+                        </div>
+                    </article>
+                    <article class="news-card animate-on-scroll delay-2">
+                        <div class="news-card-image">
+                            <img src="http://127.0.0.1:5000/uploads/up_f8218770e2.png" alt="新プログラム開始" onerror="this.style.display='none'">
+                        </div>
+                        <div class="news-card-body">
+                            <time class="news-date">2025.07.01</time>
+                            <h3 class="news-title">「星空観察会」新プログラムスタート。天体望遠鏡3台完備で本格的な観測が可能です。</h3>
+                        </div>
+                    </article>
+                    <article class="news-card animate-on-scroll delay-3">
+                        <div class="news-card-image">
+                            <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="設備改修完了" onerror="this.style.display='none'">
+                        </div>
+                        <div class="news-card-body">
+                            <time class="news-date">2025.06.20</time>
+                            <h3 class="news-title">シャワー棟の全面改修が完了。温水シャワー24時間利用可能になりました。</h3>
+                        </div>
+                    </article>
+                    <article class="news-card animate-on-scroll delay-4">
+                        <div class="news-card-image">
+                            <img src="http://127.0.0.1:5000/uploads/up_889764147f.webp" alt="イベント情報" onerror="this.style.display='none'">
+                        </div>
+                        <div class="news-card-body">
+                            <time class="news-date">2025.06.10</time>
+                            <h3 class="news-title">8月23日「森の音楽祭」開催決定。地元アーティストによるライブ演奏を予定しています。</h3>
+                        </div>
+                    </article>
+                </div>
+                <div class="faq-list animate-on-scroll delay-2">
+                    <div class="faq-item active">
+                        <div class="faq-question">
+                            <span>初心者でも大丈夫ですか？</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            はい、もちろん！テントや寝袋などのレンタル用品を完備しております。スタッフがテントの立て方から火のおこし方まで丁寧にサポートいたします。お気軽にお越しください。
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>ペットの同伴は可能ですか？</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            可能です。犬・猫ともに同伴OKですが、首輪やリードの着用、以及び周囲への配慮をお願いしております。ペット専用スペースもご用意しています。
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>最寄り駅からのアクセス方法は？</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            JR中央線「信濃大町駅」より当キャンプ場まで無料送迎バスを運行しております。事前予約制で、所要約25分です。詳細はアクセスページをご確認ください。
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>キャンセルポリシーについて教えてください</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            利用日の7日前までなら手数料無料でキャンセル可能です。3〜6日前は50%、前日および当日は100%のキャンセル料が発生いたします。悪天候の場合は別途対応させていただきます。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Category Section -->
+        <section class="category-section" id="programs">
+            <div class="section-header animate-on-scroll">
+                <span class="section-label">PROGRAMS</span>
+                <h2 class="section-title">楽しみ方ガイド</h2>
+            </div>
+            <div class="category-intro">
+                <nav class="category-nav animate-on-scroll">
+                    <button class="category-nav-btn active" data-category="play">遊ぶ</button>
+                    <button class="category-nav-btn" data-category="experience">体験する</button>
+                    <button class="category-nav-btn" data-category="eat">食べる</button>
+                    <button class="category-nav-btn" data-category="stay">泊まる</button>
+                    <button class="category-nav-btn" data-category="enjoy">体験する</button>
+                </nav>
+                <div class="category-content">
+                    <div class="category-block play animate-on-scroll delay-1" id="play">
+                        <div class="category-header">
+                            <div class="category-icon">🎯</div>
+                            <h3 class="category-name">遊ぶ</h3>
+                            <span class="category-subtitle">PLAY</span>
+                        </div>
+                        <div class="category-items">
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_228a3682a1.png" alt="アーチェリー" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">アーチェリー<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_292cf87096.png" alt="サイクリング" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">マウンテンバイク<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_39990e1195.png" alt="SUP" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">SUP / カヤック<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="category-block experience animate-on-scroll delay-2" id="experience">
+                        <div class="category-header">
+                            <div class="category-icon">🌿</div>
+                            <h3 class="category-name">体験する</h3>
+                            <span class="category-subtitle">EXPERIENCE</span>
+                        </div>
+                        <div class="category-items">
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_3a159df441.jpg" alt="クラフト" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">ネイチャークラフト<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_3996f78e40.png" alt="料理教室" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">アウトドア料理教室<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="category-block eat animate-on-scroll delay-3" id="eat">
+                        <div class="category-header">
+                            <div class="category-icon">🍳</div>
+                            <h3 class="category-name">食べる</h3>
+                            <span class="category-subtitle">EAT</span>
+                        </div>
+                        <div class="category-items">
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_889764147f.webp" alt="BBQ" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">BBQコーナー<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="カフェ" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">Sea Side Cafe / 森のカフェ<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_cc6c33e328.png" alt="ランチ" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">ピクニックランチ弁当<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="category-block stay animate-on-scroll delay-4" id="stay">
+                        <div class="category-header">
+                            <div class="category-icon">⛺</div>
+                            <h3 class="category-name">泊まる</h3>
+                            <span class="category-subtitle">STAY</span>
+                        </div>
+                        <div class="category-items">
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_2ce42b270d.png" alt="オートキャンプ" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">オートキャンプ場<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_c9c262ef683.png" alt="コテージ" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">コテージ<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg" alt="グランピング" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">グランピングテント<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="category-block enjoy animate-on-scroll delay-5" id="enjoy">
+                        <div class="category-header">
+                            <div class="category-icon">✨</div>
+                            <h3 class="category-name">体験する</h3>
+                            <span class="category-subtitle">ENJOY</span>
+                        </div>
+                        <div class="category-items">
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_9e76cfe5f6.png" alt="星空観察" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">星空観察会<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_897ad11709.png" alt="ヨガ" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">モーニングヨガ<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_a67b19cd17.png" alt="ワークショップ" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">ナチュラルワークショップ<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-item-image">
+                                    <img src="http://127.0.0.1:5000/uploads/up_abd04ea9b6.webp" alt="散策" onerror="this.style.display='none'">
+                                </div>
+                                <div class="category-item-body">
+                                    <h4 class="category-item-title">自然散策道<span class="item-arrow">→</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Banner -->
+        <section class="feature-banner">
+            <div class="feature-bg-pattern"></div>
+            <div class="feature-content animate-on-scroll">
+                <span class="feature-badge">MORI NO CAMP GUIDE</span>
+                <h2 class="feature-title">はじめての<br>あそびかた</h2>
+                <p class="feature-desc">
+                    初めての方でも安心して楽しめるよう、スタッフが丁寧にサポート。
+                    テントの設営から焚き火の楽しみ方まで、
+                    キャンプの基本をわかりやすくご案内します。
+                </p>
+                <div class="feature-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">13年</div>
+                        <div class="stat-label">運営実績</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">52,000人</div>
+                        <div class="stat-label">累計来場者数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-label">満足度</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Access Section -->
+        <section class="access-section" id="access">
+            <div class="section-header animate-on-scroll">
+                <span class="section-label">ACCESS</span>
+                <h2 class="section-title">アクセス</h2>
+            </div>
+            <div class="access-container">
+                <div class="access-info animate-on-scroll delay-1">
+                    <h3 class="access-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        施設情報
+                    </h3>
+                    <div class="access-detail">
+                        <div class="access-label">住所</div>
+                        <div class="access-value">長野県大町市平森ノ上 1234-56</div>
+                    </div>
+                    <div class="access-detail">
+                        <div class="access-label">電話番号</div>
+                        <div class="access-value">0261-22-3456</div>
+                    </div>
+                    <div class="access-detail">
+                        <div class="access-label">営業期間</div>
+                        <div class="access-value">4月下旬 〜 11月上旬（冬季閉鎖）</div>
+                    </div>
+                    <div class="access-detail">
+                        <div class="access-label">チェックイン / アウト</div>
+                        <div class="access-value">14:00 〜 11:00</div>
+                    </div>
+                    <div class="access-detail">
+                        <div class="access-label">駐車場</div>
+                        <div class="access-value">200台収容 / 無料</div>
+                    </div>
+                    <div style="margin-top: var(--space-md);">
+                        <a href="#reserve" class="btn-primary" style="width: 100%; justify-content: center;">
+                            詳細を見る
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="access-map animate-on-scroll delay-2">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3238.1234567890!2d137.85!3d36.45!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDI3JzAwLjAiTiAxMzdCsDUxJzAwLjAiRQ!5e0!3m2!1sja!2sjp!4v1234567890" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="border:0;"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section" id="reserve">
+            <div class="cta-content animate-on-scroll">
+                <h2 class="cta-title">さあ、森へ行こう</h2>
+                <p class="cta-desc">
+                    オンライン予約で簡単に空き状況が確認できます。<br>
+                    ご不明な点があれば、お気軽にお電話ください。
+                </p>
+                <div class="cta-buttons">
+                    <a href="#" class="btn-large">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        予約カレンダーを見る
+                    </a>
+                    <a href="tel:0261223456" class="btn-large btn-outline-white">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                        電話で問い合わせ
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <span class="logo-icon">M</span>
+                        MORI NO CAMP
+                    </a>
+                    <p>
+                        長野県大町市にある大自然に囲まれたキャンプ場。<br>
+                        都市の喧騒を離れて、心身ともにリフレッシュできる場所を提供しています。
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <h4>施設について</h4>
+                    <ul>
+                        <li><a href="#">施設概要</a></li>
+                        <li><a href="#">料金一覧</a></li>
+                        <li><a href="#">アクセス</a></li>
+                        <li><a href="#">周辺観光</a></li>
+                        <li><a href="#">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>プログラム</h4>
+                    <ul>
+                        <li><a href="#">遊ぶ</a></li>
+                        <li><a href="#">体験する</a></li>
+                        <li><a href="#">食べる</a></li>
+                        <li><a href="#">泊まる</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>お問い合わせ</h4>
+                    <a href="tel:0261223456" class="contact-tel">0261-22-3456</a>
+                    <p class="contact-hours">受付時間：9:00 〜 18:00<br>（年中無休）</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="copyright">&copy; 2025 MORI NO CAMP All Rights Reserved.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Facebook">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="LINE">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 5.813 2 10.5c0 2.65 1.453 5.016 3.73 6.574.168.112.27.293.27.49 0 .04-.004.08-.012.118-.156.77-.46 2.178-.474 2.232-.02.076-.04.152.02.214.06.062.146.07.216.04.09-.038 2.38-1.54 3.124-2.04.108-.072.235-.11.365-.11.066 0 .132.008.196.026C10.194 18.348 11.078 18.5 12 18.5c5.523 0 10-3.813 10-8.5S17.523 2 12 2z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+</body>
+</html>

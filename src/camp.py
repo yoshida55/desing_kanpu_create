@@ -298,11 +298,17 @@ def _call_deepseek(system: str, content: list) -> str:
     return resp.choices[0].message.content or ""
 
 
+def _zai_is_vision(model: str) -> bool:
+    """GLMのV系（画像対応）モデルか判定。glm-5v-turbo / glm-4.6v 等 → True、glm-5.2 等 → False。"""
+    return bool(re.search(r"\dv(\b|-)", model.lower()))
+
+
 def _call_zai(system: str, content: list) -> str:
     """GLM（Zhipu / Z.ai・OpenAI互換）でHTMLを生成。
 
-    ★実測確認済み：glm-5.2 のAPIは画像非対応（画像を送るとエラー400）。よってテキストのみ送る。
-      画像対応のGLM-V系モデルを使うなら、ここを画像込み(_to_openai_content)に変える。
+    ★glm-5.2 等のテキスト専用モデルは画像非対応（送るとエラー400・実測＆公式仕様）→テキストのみ送る。
+      glm-5v-turbo 等のV系（画像対応）は手本スクショも画像込み(_to_openai_content)で送る＝
+      ベースの"らしさ"が乗る（5V-TurboはDesign2Code特化）。
     """
     from openai import OpenAI
 
@@ -311,13 +317,16 @@ def _call_zai(system: str, content: list) -> str:
         # GLMは出力が遅く、16000トークン級のHTML一気書きが180秒に収まらないため長めに取る
         api_key=zcfg.api_key, base_url=zcfg.base_url, timeout=600.0, max_retries=1
     )
-    text = "\n\n".join(b["text"] for b in content if b.get("type") == "text")
+    if _zai_is_vision(zcfg.model):
+        user_content: object = _to_openai_content(content)
+    else:
+        user_content = "\n\n".join(b["text"] for b in content if b.get("type") == "text")
     resp = client.chat.completions.create(
         model=zcfg.model,
         max_tokens=16000,
         messages=[
             {"role": "system", "content": system},
-            {"role": "user", "content": text},
+            {"role": "user", "content": user_content},
         ],
     )
     return resp.choices[0].message.content or ""
@@ -374,10 +383,12 @@ def _pick_refs_no_model(brief: str, n: int) -> list[str]:
     return [r["id"] for r in ranked[:n]]
 
 
-def _anim_ref_block(anim_ref_id: str) -> Optional[dict]:
-    """アニメ参照B：そのサイトの抜き出したアニメ素材を、生成プロンプト用の指示にする。
+def _anim_ref_block(anim_ref_id: str, role: str = "B") -> Optional[dict]:
+    """アニメ参照：そのサイトの抜き出したアニメ素材を、生成プロンプト用の指示にする。
 
-    mix & match の核。Bの"動きの種類"を（丸写しではなく）雰囲気として寄せさせる。
+    role="B"    … mix & match の核。Bの"動きの種類"を（丸写しではなく）雰囲気として寄せさせる。
+    role="base" … ベース自身の素材（Aの見た目にAの動き）。同じサイトなので遠慮なく再現させる。
+                  ＝「元サイトは凝った演出なのに生成すると単純フェードだけ」対策（2026-07-12）。
     """
     with db.connect() as conn:
         row = db.get_site(conn, anim_ref_id)
@@ -401,12 +412,20 @@ def _anim_ref_block(anim_ref_id: str) -> Optional[dict]:
     libs = row["animation_libs"] or "(検出なし)"
     if not anim_txt and not motion_txt and libs == "(検出なし)":
         return None
-    parts = [
-        f"# アニメ参照B【動きの種類はこのサイトに寄せる】: {row['url']}",
-        "この“動きの傾向”をCSS/素のJSで**控えめに再現**する"
-        "（コードの丸写しではなく、種類・速さ・向きの雰囲気を寄せる）。",
-        f"使用ライブラリ: {libs}",
-    ]
+    if role == "base":
+        parts = [
+            f"# ベースサイト自身の動きの素材【見た目と一緒に演出も再現する】: {row['url']}",
+            "手本サイト自身の動きなので遠慮はいらない。下の素材の**種類・速さ・向きをそのまま**"
+            "CSS/素のJSで再現する（単純なフェードだけに丸めない）。",
+            f"使用ライブラリ: {libs}",
+        ]
+    else:
+        parts = [
+            f"# アニメ参照B【動きの種類はこのサイトに寄せる】: {row['url']}",
+            "この“動きの傾向”をCSS/素のJSで**控えめに再現**する"
+            "（コードの丸写しではなく、種類・速さ・向きの雰囲気を寄せる）。",
+            f"使用ライブラリ: {libs}",
+        ]
     if motion_txt:
         parts.append("■録画から読み取った動きの仕様（最優先で寄せる）:\n" + motion_txt)
     if anim_txt:
@@ -574,6 +593,15 @@ def generate_camp(
             if fit_block:
                 content.append({"type": "text", "text": fit_block})
 
+    # ②'+ ベース自身のアニメ素材（抜き出し済み/録画読み取り済みなら自動で使う）
+    #   ＝「元サイトは凝った演出なのに、生成カンプは単純フェードだけ」の対策。
+    #   別のアニメ参照Bを指定した時はBを優先（Aの見た目にBの動き）＝こちらは足さない。
+    if base_site_id and not anim_ref_id:
+        self_blk = _anim_ref_block(base_site_id, role="base")
+        if self_blk:
+            content.append(self_blk)
+            log.info("ベース自身のアニメ素材を生成プロンプトに注入")
+
     # ②'' ユーザー提供の実画像があれば、それを優先的に使わせる
     up_block = uploads_prompt_block()
     if up_block:
@@ -691,6 +719,12 @@ def generate_camp(
                 "- 参考がGSAP/Lenis/Swiper等を使っていれば、その**動きの種類**をCSS/素のJSで\n"
                 "  **はっきり分かる強さで**再現（遠慮して小さくしない。カンプは動きを見せるための成果物）\n"
                 "- 上に『アニメ参照B』があれば、その**動きの種類・速さ・向き**を優先的に反映する（Aの見た目にBの動き）\n"
+                "- ★fade＋スライドの出現**だけ**で終わらせない（それは最低ライン）。上に動きの材料\n"
+                "  （動きの仕様・CSSアニメ素材・ライブラリ名）があればそこから、無ければ次の中から、\n"
+                "  **凝った演出を最低2種類**、目立つ場所（ヒーロー・実績・帯）に入れる：\n"
+                "  ロゴ/キーワードの無限横流し(marquee)／見出しの1文字ずつ出現／背景と前景の速度差パララックス\n"
+                "  (CSSのbackground-attachment:fixed か transformの割合スクロール)／数字のカウントアップ(素のJS)／\n"
+                "  画像のゆっくりズーム(Ken Burns)／SVG線画が描かれていく(stroke-dashoffset)\n"
                 "- ★壊れても見えるように（重要）：先頭で `document.documentElement.classList.add('js')` を実行し、\n"
                 "  出現アニメの初期非表示(opacity:0)は **`html.js` が付いている時だけ** 効かせる\n"
                 "  （JSが無効/失敗でも中身は必ず見える）。IntersectionObserverで画面入り時に表示クラスを付ける\n\n"

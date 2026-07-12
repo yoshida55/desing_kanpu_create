@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>仙台市｜杜の都、これからの暮らし</title>
+<style>
+:root{
+  --blue:#0252e5;
+  --cyan:#16b7e8;
+  --ink:#4c5d67;
+  --pale:#e2edef;
+  --yellow:#fdd23c;
+  --white:#fff;
+  --shadow:0 14px 36px rgba(2,82,229,.12);
+  --strong-shadow:0 24px 60px rgba(2,82,229,.22);
+  --max:1120px;
+  --radius:34px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);background:var(--white);
+  font-family:"Noto Sans JP","Yu Gothic",YuGothic,Arial,sans-serif;
+  line-height:2;letter-spacing:.02em;
+}
+img{display:block;max-width:100%;object-fit:cover}
+a{color:inherit;text-decoration:none;transition:.35s ease}
+.container{width:min(var(--max),calc(100% - 48px));margin-inline:auto}
+.section{
+  position:relative;min-height:100vh;padding:112px 0;
+  display:flex;align-items:center;overflow:hidden;
+}
+.tint{background:#f4f8f9}
+.blue-section{color:var(--white);background:linear-gradient(155deg,#0757e6 0%,#09afe2 100%)}
+.blue-section .section-label,.blue-section .section-title{color:var(--white)}
+.section-head{margin-bottom:48px;max-width:620px}
+.section-label{
+  display:block;color:var(--blue);font-size:.9rem;font-weight:700;
+  letter-spacing:.15em;line-height:1.4;text-transform:uppercase;margin-bottom:10px
+}
+.section-title{
+  color:var(--blue);font-size:clamp(1.6rem,3vw,2.4rem);
+  line-height:1.35;letter-spacing:.04em;margin:0 0 18px;font-weight:800
+}
+.lead{font-size:1rem;max-width:38em;margin:0}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:12px;
+  min-height:54px;padding:12px 26px;border-radius:50px;
+  background:var(--blue);color:var(--white);font-weight:700;
+  border:1px solid transparent;box-shadow:var(--shadow);transition:.35s ease
+}
+.btn:hover{transform:translateY(-5px);background:#003dc0;box-shadow:var(--strong-shadow)}
+.btn.light{background:var(--white);color:var(--blue)}
+.btn.light:hover{background:var(--yellow);color:var(--ink)}
+.eyebrow{font-size:.78rem;letter-spacing:.16em;font-weight:700;color:var(--blue)}
+.reveal{transition:opacity .9s ease,transform .9s ease}
+html.js .reveal{opacity:0;transform:translateY(34px)}
+html.js .reveal.is-visible{opacity:1;transform:none}
+.delay-1{transition-delay:.12s!important}.delay-2{transition-delay:.24s!important}
+.delay-3{transition-delay:.36s!important}.delay-4{transition-delay:.48s!important}
+.image-wrap{
+  position:relative;overflow:visible;background:linear-gradient(145deg,#d8eef2,#0876e7);
+  border-radius:var(--radius);isolation:isolate
+}
+.image-wrap:before{
+  content:"";position:absolute;inset:18px -18px -18px 18px;
+  background:rgba(253,210,60,.55);filter:blur(18px);z-index:-1;border-radius:28px
+}
+.image-wrap img{width:100%;height:100%;border-radius:var(--radius);transition:transform .6s ease}
+.image-wrap:hover img{transform:scale(1.045)}
+.caption-card{
+  position:absolute;right:-34px;bottom:-28px;background:var(--white);
+  color:var(--ink);padding:20px 24px;border-radius:20px;box-shadow:var(--strong-shadow);
+  max-width:250px;line-height:1.65
+}
+.caption-card strong{display:block;color:var(--blue);font-size:1.05rem;line-height:1.5}
+header{
+  position:absolute;z-index:5;top:18px;left:0;right:0;color:var(--white)
+}
+.nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;border:1px solid rgba(255,255,255,.35);
+  border-radius:8px;background:rgba(9,27,37,.12);backdrop-filter:blur(12px)
+}
+.brand{font-family:Georgia,serif;font-size:1.15rem;letter-spacing:.04em}
+.nav-links{display:flex;align-items:center;gap:24px;font-size:.8rem}
+.nav-links a:hover{color:var(--yellow);transform:translateY(-2px)}
+.nav-cta{padding:7px 16px;border:1px solid rgba(255,255,255,.7);border-radius:4px}
+.hero{
+  min-height:100vh;color:var(--white);
+  background:linear-gradient(135deg,#064fd9 0%,#04b8e7 100%)
+}
+.hero:after{
+  content:"";position:absolute;width:720px;height:280px;right:-120px;bottom:-130px;
+  background:var(--pale);border-radius:50% 50% 0 0;opacity:.9
+}
+.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:.9fr 1.1fr;gap:72px;align-items:center}
+.hero-copy h1{
+  font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.3;letter-spacing:.04em;
+  margin:18px 0 24px;color:var(--white)
+}
+.hero-copy p{max-width:35em;margin:0 0 30px}
+.hero-kicker{font-size:.8rem;letter-spacing:.18em;font-weight:700}
+.hero-art{height:520px;transform:rotate(2deg)}
+.hero-art img{height:100%;border-radius:42% 8px 42% 8px}
+html.js .hero-copy>*{opacity:0;transform:translateY(26px);animation:heroIn .9s ease forwards}
+html.js .hero-copy>*:nth-child(2){animation-delay:.18s}
+html.js .hero-copy>*:nth-child(3){animation-delay:.34s}
+html.js .hero-copy>*:nth-child(4){animation-delay:.5s}
+html.js .hero-art{opacity:0;transform:translate(30px,12px) rotate(2deg);animation:heroArt 1.1s .35s ease forwards}
+@keyframes heroIn{to{opacity:1;transform:none}}
+@keyframes heroArt{to{opacity:1;transform:rotate(2deg)}}
+
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:90px;align-items:center}
+.intro-copy{padding-left:8vw}
+.intro-copy p{max-width:34em}
+.intro-image{height:420px}
+.intro-image img{height:100%}
+.mini-note{margin-top:28px;padding:18px 24px;border-left:4px solid var(--yellow);background:#fff;border-radius:4px}
+
+.issues-intro{text-align:center;max-width:600px;margin:0 auto 50px}
+.issue-map{position:relative;max-width:860px;height:330px;margin:0 auto}
+.issue-core{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:230px;height:120px;border-radius:50%;background:var(--yellow);
+  color:var(--ink);display:flex;align-items:center;justify-content:center;
+  text-align:center;font-weight:800;line-height:1.6;box-shadow:var(--shadow)
+}
+.issue-pill{
+  position:absolute;padding:15px 24px;border-radius:50px;background:var(--white);
+  color:var(--blue);font-weight:700;box-shadow:var(--shadow);transition:.35s
+}
+.issue-pill:hover{transform:translateY(-8px) rotate(-3deg);box-shadow:var(--strong-shadow)}
+.p1{left:5%;top:12%}.p2{right:4%;top:8%}.p3{left:12%;bottom:10%}.p4{right:12%;bottom:7%}
+.p5{left:50%;top:0;transform:translateX(-50%)}.p6{left:50%;bottom:0;transform:translateX(-50%)}
+.p5:hover,.p6:hover{transform:translateX(-50%) translateY(-8px) rotate(-3deg)}
+
+.voices{background:var(--white)}
+.voice-stack{display:grid;grid-template-columns:1.1fr .9fr;gap:68px;align-items:center}
+.voice-list{display:grid;gap:18px}
+.voice{
+  display:grid;grid-template-columns:72px 1fr;gap:20px;align-items:center;
+  padding:20px 24px;background:#f4f8f9;border-radius:18px;transition:.35s
+}
+.voice:hover{transform:translateX(8px);box-shadow:var(--shadow);background:var(--white)}
+.voice-no{font-size:1.5rem;font-weight:800;color:var(--blue)}
+.voice h3{font-size:1.1rem;line-height:1.5;margin:0;color:var(--blue)}
+.voice p{margin:4px 0 0;font-size:.92rem;line-height:1.75}
+.voice-photo{height:430px;transform:rotate(-3deg)}
+.voice-photo img{height:100%}
+
+.support{background:var(--pale)}
+.support-box{
+  background:var(--white);border-radius:40px;padding:68px 8%;
+  display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;
+  box-shadow:var(--shadow)
+}
+.support-box h2{font-size:clamp(1.6rem,3vw,2.4rem);color:var(--blue);line-height:1.35;margin:0 0 18px}
+.support-stats{display:flex;gap:12px;margin:28px 0}
+.stat-chip{padding:14px 18px;border-radius:14px;background:#e8f2f4}
+.stat-chip strong{display:block;color:var(--blue);font-size:1.35rem;line-height:1.3}
+.support-photo{height:250px}
+.support-photo img{height:100%;border-radius:25px}
+
+.programs{background:linear-gradient(145deg,#064fd9,#0cb7e4);color:#fff}
+.program-layout{display:grid;grid-template-columns:.7fr 1.3fr;gap:70px;align-items:center}
+.programs .section-title{color:#fff}
+.program-list{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.program{
+  min-height:150px;padding:24px;border-radius:28px;background:rgba(255,255,255,.13);
+  border:1px solid rgba(255,255,255,.3);transition:.35s
+}
+.program:hover{background:var(--white);color:var(--blue);transform:translateY(-8px);box-shadow:var(--strong-shadow)}
+.program strong{display:block;color:var(--yellow);font-size:1.15rem;margin-bottom:5px}
+.program:hover strong{color:var(--blue)}
+.program p{font-size:.9rem;line-height:1.75;margin:0}
+
+.numbers{background:#f4f8f9}
+.number-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:80px;align-items:center}
+.number-big{font-size:clamp(5rem,13vw,10rem);font-weight:800;line-height:.9;color:var(--blue);letter-spacing:-.07em}
+.number-big small{font-size:1.2rem;letter-spacing:.05em;color:var(--ink)}
+.number-text{max-width:34em}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:38px}
+.metric{background:#fff;border-radius:24px;padding:26px 20px;box-shadow:var(--shadow);transition:.35s}
+.metric:hover{transform:translateY(-7px);box-shadow:var(--strong-shadow)}
+.metric b{display:block;color:var(--blue);font-size:2.5rem;line-height:1.1}
+.metric span{font-size:.82rem}
+
+.message{background:var(--white)}
+.message-grid{display:grid;grid-template-columns:360px 1fr;gap:90px;align-items:center}
+.portrait{height:470px;transform:rotate(3deg)}
+.portrait img{height:100%;border-radius:46% 46% 12px 12px}
+.message-copy p{max-width:38em}
+
+.about{background:var(--pale)}
+.about-panel{background:#fff;border-radius:36px;padding:48px 8%;box-shadow:var(--shadow)}
+.about-row{display:grid;grid-template-columns:150px 1fr;gap:30px;padding:18px 0;border-bottom:1px solid #d9e5e8}
+.about-row:last-child{border-bottom:0}
+.about-row dt{color:var(--blue);font-weight:800}
+.about-row dd{margin:0;max-width:38em}
+
+.faq{background:var(--pale)}
+.faq-box{background:#fff;border-radius:34px;padding:18px 6%;box-shadow:var(--shadow)}
+details{border-bottom:1px solid #d9e5e8;padding:22px 0}
+details:last-child{border-bottom:0}
+summary{cursor:pointer;color:var(--blue);font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:20px}
+summary:after{content:"＋";font-size:1.4rem;line-height:1}
+details[open] summary:after{content:"−"}
+details p{max-width:38em;margin:14px 0 0;padding-left:20px}
+
+.final-cta{min-height:58vh;color:#fff;background:linear-gradient(135deg,#0252e5,#0bb4e5)}
+.cta-layout{display:flex;justify-content:space-between;align-items:center;gap:50px}
+.final-cta h2{font-size:clamp(1.8rem,4vw,3rem);line-height:1.35;color:#fff;margin:0 0 18px}
+.final-cta p{max-width:35em}
+footer{background:#0346bd;color:#fff;padding:50px 0 28px}
+.footer-top{display:flex;justify-content:space-between;gap:50px;align-items:flex-start}
+.footer-brand{font-family:Georgia,serif;font-size:1.4rem}
+.footer-nav{display:flex;gap:24px;flex-wrap:wrap;font-size:.85rem}
+.footer-nav a:hover{color:var(--yellow)}
+.footer-bottom{margin-top:46px;padding-top:20px;border-top:1px solid rgba(255,255,255,.28);display:flex;justify-content:space-between;font-size:.75rem}
+
+@media(max-width:800px){
+  .container{width:min(var(--max),calc(100% - 32px))}
+  .section{min-height:auto;padding:88px 0}
+  .hero{min-height:100svh;padding-top:110px}
+  .nav-links{display:none}
+  .hero-grid,.intro-grid,.voice-stack,.support-box,.program-layout,.number-layout,.message-grid{grid-template-columns:1fr;gap:42px}
+  .hero-art{height:360px;order:-1}
+  .intro-copy{padding-left:0}
+  .intro-image,.voice-photo{height:300px}
+  .issue-map{height:390px;transform:scale(.88);transform-origin:center}
+  .support-box{padding:38px 24px}
+  .program-list{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr 1fr}
+  .message-grid{gap:30px}.portrait{height:330px;width:230px}
+  .about-panel{padding:28px 22px}.about-row{grid-template-columns:100px 1fr;gap:15px}
+  .cta-layout,.footer-top,.footer-bottom{display:block}
+  .cta-layout .btn{margin-top:22px}.footer-nav{margin-top:24px}
+  .footer-bottom{margin-top:32px}.footer-bottom span{display:block;margin-top:8px}
+  .caption-card{right:-8px;bottom:-18px}
+}
+@media(max-width:480px){
+  .hero-copy h1{font-size:2.35rem}
+  .section{padding:72px 0}
+  .issue-pill{padding:11px 15px;font-size:.8rem}
+  .p1{left:0}.p2{right:0}.p3{left:0}.p4{right:0}
+  .metrics{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js');</script>
+
+<header>
+  <div class="container">
+    <nav class="nav">
+      <a href="#" class="brand">Sendai City / 仙台市</a>
+      <div class="nav-links">
+        <a href="#about">仙台市について</a>
+        <a href="#programs">取り組み</a>
+        <a href="#numbers">数字で見る仙台</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#contact" class="nav-cta">お問い合わせ</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="section hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="hero-kicker">WELCOME TO SENDAI / 2025</span>
+      <h1>杜の都で、<br>暮らしの明日をつくる。</h1>
+      <p>青葉通から七北田公園まで。仙台市は、自然と都市の近さを活かしながら、子育て・仕事・学びの選択肢を広げています。</p>
+      <a class="btn light" href="#about">仙台市を知る <span>→</span></a>
+    </div>
+    <div class="image-wrap hero-art">
+      <img src="http://127.0.0.1:5000/uploads/up_9e76cfe5f6.png" alt="青空と緑を背景にした仙台の明るい未来" width="760" height="620" onerror="this.style.display='none'">
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container intro-grid">
+    <div class="intro-copy reveal">
+      <div class="section-head">
+        <span class="section-label">Our City</span>
+        <h2 class="section-title">人と緑が近い、<br>仙台という選択。</h2>
+        <p class="lead">人口約109万人、7つの区、広瀬川と青葉山。大都市の便利さと、歩いて感じる季節の豊かさが一つのまちにあります。</p>
+      </div>
+      <div class="mini-note">仙台駅から青葉山まで地下鉄東西線で約9分。通勤も休日も、まちの風景が途切れません。</div>
+    </div>
+    <div class="image-wrap intro-image reveal delay-2">
+      <img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" alt="木漏れ日が心地よい仙台の並木道" width="680" height="520" onerror="this.style.display='none'">
+    </div>
+  </div>
+</section>
+
+<section class="section blue-section">
+  <div class="container">
+    <div class="issues-intro reveal">
+      <span class="section-label">What We Care</span>
+      <h2 class="section-title">暮らしのそばにある、<br>6つのまちのテーマ。</h2>
+      <p>仙台市は、市民一人ひとりの声を起点に、日々の安心と未来の可能性を考えています。</p>
+    </div>
+    <div class="issue-map reveal delay-2">
+      <div class="issue-core">SENDAI<br>暮らしの中心</div>
+      <div class="issue-pill p1">子育て・教育</div>
+      <div class="issue-pill p2">防災・安心</div>
+      <div class="issue-pill p3">みどり・環境</div>
+      <div class="issue-pill p4">働く・産業</div>
+      <div class="issue-pill p5">文化・交流</div>
+      <div class="issue-pill p6">健康・福祉</div>
+    </div>
+  </div>
+</section>
+
+<section class="section voices">
+  <div class="container voice-stack">
+    <div>
+      <div class="section-head reveal">
+        <span class="section-label">Everyday Voices</span>
+        <h2 class="section-title">市民の声から、<br>まちの答えを。</h2>
+        <p>駅前のベンチ、保育所への道、商店街の朝。ささやかな実感を、施策の起点に変えていきます。</p>
+      </div>
+      <div class="voice-list">
+        <article class="voice reveal delay-1">
+          <span class="voice-no">01</span>
+          <div><h3>「歩いて行ける公園が増えた」</h3><p>青葉区・30代／子育て世帯</p></div>
+        </article>
+        <article class="voice reveal delay-2">
+          <span class="voice-no">02</span>
+          <div><h3>「学び直しの相談先が見つかった」</h3><p>宮城野区・40代／会社員</p></div>
+        </article>
+        <article class="voice reveal delay-3">
+          <span class="voice-no">03</span>
+          <div><h3>「地域の顔が見えるようになった」</h3><p>若林区・60代／地域活動参加者</p></div>
+        </article>
+      </div>
+    </div>
+    <div class="image-wrap voice-photo reveal delay-2">
+      <img src="http://127.0.0.1:5000/uploads/up_4bbbe0fee7.png" alt="緑あふれる仙台の明るいオフィス" width="600" height="650" onerror="this.style.display='none'">
+      <div class="caption-card"><strong>声が、まちを動かす。</strong>市民協働推進課<br><small>City Dialogue 2025</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="section support">
+  <div class="container">
+    <div class="support-box reveal">
+      <div>
+        <span class="section-label">City Support</span>
+        <h2>困ったときに、<br>すぐ相談できる仙台へ。</h2>
+        <p>子育て、仕事、住まい、健康。窓口・電話・オンラインで、担当者が一緒に整理します。</p>
+        <div class="support-stats">
+          <div class="stat-chip"><strong>24h</strong>オンライン申請</div>
+          <div class="stat-chip"><strong>7区</strong>身近な窓口</div>
+        </div>
+        <a href="#contact" class="btn">相談窓口を見る →</a>
+      </div>
+      <div class="image-wrap support-photo reveal delay-2">
+        <img src="http://127.0.0.1:5000/uploads/up_00553e2951.png" alt="笑顔で相談に応じる女性スタッフ" width="620" height="360" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section programs blue-section" id="programs">
+  <div class="container program-layout">
+    <div class="reveal">
+      <span class="section-label">Key Programs</span>
+      <h2 class="section-title">今、仙台が<br>進めていること。</h2>
+      <p>大きな計画だけでなく、暮らしの手触りが変わる取り組みを、地域とともに進めています。</p>
+    </div>
+    <div class="program-list">
+      <article class="program reveal delay-1"><strong>01 / Green Loop</strong><p>定禅寺通から西公園へ、歩行者と緑が主役になる通りを整備。</p></article>
+      <article class="program reveal delay-2"><strong>02 / Sendai Care</strong><p>妊娠期から18歳まで、相談窓口を切れ目なくつなぐ支援。</p></article>
+      <article class="program reveal delay-3"><strong>03 / Local Works</strong><p>地域企業と若者をつなぐ、年間420件の仕事・創業相談。</p></article>
+      <article class="program reveal delay-4"><strong>04 / Resilience</strong><p>東日本大震災の経験を次世代へ伝え、災害に強い地域を育てる。</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section numbers" id="numbers">
+  <div class="container number-layout">
+    <div class="reveal">
+      <span class="section-label">Numbers</span>
+      <div class="number-big">109<small>万人</small></div>
+      <p class="number-text">東北の暮らしと経済を支える、仙台市の人口。2024年10月時点の住民基本台帳をもとにした数字です。</p>
+    </div>
+    <div class="reveal delay-2">
+      <div class="metrics">
+        <div class="metric"><b>7</b><span>行政区</span></div>
+        <div class="metric"><b>32%</b><span>市域に占める森林</span></div>
+        <div class="metric"><b>1889</b><span>市制施行年</span></div>
+      </div>
+      <div class="mini-note">仙台駅から市役所までは徒歩約15分。都心の中にも、広瀬川や青葉山の自然が息づいています。</div>
+    </div>
+  </div>
+</section>
+
+<section class="section message">
+  <div class="container message-grid">
+    <div class="image-wrap portrait reveal">
+      <img src="http://127.0.0.1:5000/uploads/up_07d8e0124b.png" alt="穏やかな表情の仙台市職員" width="500" height="650" onerror="this.style.display='none'">
+      <div class="caption-card"><strong>対話から、実行へ。</strong>仙台市長<br><small>Message from City Hall</small></div>
+    </div>
+    <div class="message-copy reveal delay-2">
+      <div class="section-head">
+        <span class="section-label">Message</span>
+        <h2 class="section-title">市長からのメッセージ</h2>
+        <p>仙台には、震災からの復興を支えた人のつながりと、未来を試す自由な空気があります。</p>
+      </div>
+      <p>変化の早い時代だからこそ、行政だけで答えを決めるのではなく、現場で暮らす皆さまと考え、試し、確かめることを大切にしています。小さな声を見過ごさず、次の世代が誇れるまちへ。一歩ずつ、着実に進めます。</p>
+      <a class="btn" href="#contact">市長メッセージ全文 →</a>
+    </div>
+  </div>
+</section>
+
+<section class="section about" id="about">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-label">About Sendai</span>
+      <h2 class="section-title">仙台市について</h2>
+      <p>市政の基本情報と、各種手続きへの入口をご案内します。</p>
+    </div>
+    <div class="about-panel reveal delay-1">
+      <dl>
+        <div class="about-row"><dt>市役所</dt><dd>〒980-8671 宮城県仙台市青葉区国分町3-7-1</dd></div>
+        <div class="about-row"><dt>代表電話</dt><dd>022-261-1111（平日 8:30〜17:00）</dd></div>
+        <div class="about-row"><dt>市の木</dt><dd>ケヤキ。定禅寺通の並木は、仙台を象徴する景観の一つです。</dd></div>
+        <div class="about-row"><dt>市政情報</dt><dd>各区役所、公共施設、オープンデータ、入札・契約に関する情報をご覧いただけます。</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="section faq" id="faq">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-label">Q&A</span>
+      <h2 class="section-title">よくあるご質問</h2>
+      <p>手続きや暮らしに関する、よくあるお問い合わせをまとめています。</p>
+    </div>
+    <div class="faq-box reveal delay-1">
+      <details><summary>転入届はどこで提出できますか？</summary><p>お住まいの区の区役所戸籍住民課で受け付けています。転入した日から14日以内にお越しください。</p></details>
+      <details><summary>子育ての相談は予約が必要ですか？</summary><p>電話相談は予約不要です。面談やオンライン相談は各区の子育て支援窓口から予約できます。</p></details>
+      <details><summary>粗大ごみの申し込み方法を教えてください。</summary><p>インターネットまたは粗大ごみ受付センター（022-716-5301）からお申し込みください。</p></details>
+      <details><summary>市政への意見を送ることはできますか？</summary><p>市公式サイトの「市民の声」フォームから、いつでもご意見をお寄せいただけます。</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="section final-cta" id="contact">
+  <div class="container cta-layout reveal">
+    <div>
+      <span class="section-label">Contact Sendai</span>
+      <h2>あなたの声を、<br>仙台のこれからへ。</h2>
+      <p>手続きのご相談、市政へのご意見、取材のお問い合わせはこちらから。</p>
+    </div>
+    <a href="mailto:info@city.sendai.jp" class="btn light">お問い合わせる <span>→</span></a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">Sendai City</div>
+        <p>宮城県仙台市<br>杜の都から、暮らしの未来へ。</p>
+      </div>
+      <nav class="footer-nav">
+        <a href="#about">仙台市について</a>
+        <a href="#programs">取り組み</a>
+        <a href="#numbers">数字で見る仙台</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#contact">お問い合わせ</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <span>© Sendai City. All Rights Reserved.</span>
+      <span>代表電話 022-261-1111　平日 8:30〜17:00</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    }
+  });
+},{threshold:.14});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

@@ -1,0 +1,1452 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="仙台市青葉区・青葉こもれび幼稚園。少人数保育と自然体験を大切にする幼稚園です。見学予約を受付中。">
+  <title>青葉こもれび幼稚園｜仙台市青葉区</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --paper:#fefff8;
+      --white:#fff;
+      --tint:#f7f9ef;
+      --green:#1a6d1d;
+      --green-dark:#124f2b;
+      --ink:#3f2e1a;
+      --muted:#6f7569;
+      --yellow:#ffe45e;
+      --line:rgba(26,109,29,.16);
+      --shadow-soft:0 16px 40px rgba(26,109,29,.10);
+      --shadow-float:0 24px 64px rgba(26,109,29,.16);
+      --container:min(1800px,calc(100% - 80px));
+      --inner:min(1240px,calc(100% - 80px));
+      --font:"Noto Sans JP","游ゴシック Medium","Yu Gothic Medium",YuGothic,"Hiragino Sans","ヒラギノ角ゴ ProN",Meiryo,sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:var(--paper);
+      font-family:var(--font);
+      font-size:16px;
+      line-height:2;
+      letter-spacing:.02em;
+      overflow-x:hidden;
+    }
+    body.is-transitioning{cursor:progress}
+    img{display:block;max-width:100%}
+    a{color:inherit;text-decoration:none}
+    button,input,select,textarea{font:inherit}
+    ::selection{color:var(--green-dark);background:var(--yellow)}
+
+    .page-shell{
+      position:relative;
+      overflow:hidden;
+    }
+    .container{width:var(--container);margin-inline:auto}
+    .inner{width:var(--inner);margin-inline:auto}
+    .section{
+      position:relative;
+      min-height:100vh;
+      padding:12vh 0;
+      display:flex;
+      align-items:center;
+    }
+    .section--tint{background:var(--tint)}
+    .section--white{background:var(--white)}
+    .section__body{width:100%}
+
+    .eyebrow{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:0 0 8px;
+      color:var(--green);
+      font-size:.78rem;
+      line-height:1.4;
+      letter-spacing:.15em;
+      text-transform:uppercase;
+    }
+    .eyebrow::before{
+      width:30px;
+      height:1px;
+      background:currentColor;
+      content:"";
+    }
+    .section-title{
+      margin:0;
+      color:var(--green);
+      font-size:clamp(1.6rem,3vw,2.4rem);
+      line-height:1.38;
+      letter-spacing:.04em;
+      font-weight:600;
+    }
+    .section-title .marker{
+      box-shadow:inset 0 -8px 0 var(--yellow);
+    }
+    .lead-title{
+      margin:0;
+      font-size:clamp(2.2rem,5vw,3.6rem);
+      line-height:1.34;
+      letter-spacing:.045em;
+      font-weight:600;
+    }
+    .subhead{
+      margin:0;
+      color:var(--green);
+      font-size:1.2rem;
+      line-height:1.55;
+      letter-spacing:.04em;
+      font-weight:600;
+    }
+    p{margin:0}
+    .body-copy{
+      max-width:38em;
+      font-size:.98rem;
+      line-height:2.05;
+    }
+    .note{color:var(--muted);font-size:.84rem}
+
+    .image-frame{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(135deg,#e9f1e4,#d8e6dc);
+    }
+    .image-frame img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s ease;
+    }
+    .image-frame:hover img{
+      transform:scale(1.045);
+      filter:saturate(1.05);
+    }
+
+    .site-header{
+      position:fixed;
+      z-index:100;
+      top:16px;
+      left:50%;
+      width:min(1760px,calc(100% - 32px));
+      height:72px;
+      padding:0 14px 0 22px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border:1px solid rgba(255,255,255,.72);
+      border-radius:100px;
+      background:rgba(254,255,248,.84);
+      box-shadow:0 12px 36px rgba(26,109,29,.08);
+      backdrop-filter:blur(18px);
+      transform:translateX(-50%);
+      transition:background .3s ease,box-shadow .3s ease;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:max-content;
+      color:var(--green-dark);
+    }
+    .brand:hover .brand__mark{transform:rotate(-8deg) scale(1.06)}
+    .brand__mark{
+      width:42px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      border-radius:48% 52% 57% 43%;
+      color:var(--green-dark);
+      background:var(--yellow);
+      font:600 1.1rem/1 Georgia,serif;
+      transition:transform .35s ease;
+    }
+    .brand__name{font-size:.9rem;line-height:1.35;font-weight:600;letter-spacing:.08em}
+    .brand__name small{display:block;font-size:.57rem;font-weight:400;letter-spacing:.13em}
+    .global-nav{
+      display:flex;
+      align-items:center;
+      gap:22px;
+      color:var(--green-dark);
+      font-size:.76rem;
+      line-height:1.3;
+    }
+    .global-nav a{
+      position:relative;
+      padding:12px 0;
+      transition:color .25s ease;
+    }
+    .global-nav a::after{
+      position:absolute;
+      right:0;
+      bottom:6px;
+      left:0;
+      height:1px;
+      background:var(--green);
+      content:"";
+      transform:scaleX(0);
+      transform-origin:right;
+      transition:transform .3s ease;
+    }
+    .global-nav a:hover::after{transform:scaleX(1);transform-origin:left}
+    .header-cta,.button{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      min-height:48px;
+      padding:0 24px;
+      border:1px solid var(--green);
+      border-radius:100px;
+      color:#fff;
+      background:var(--green);
+      font-weight:600;
+      transition:transform .3s ease,box-shadow .3s ease,background .3s ease;
+    }
+    .header-cta:hover,.button:hover{
+      transform:translateY(-3px);
+      background:var(--green-dark);
+      box-shadow:var(--shadow-float);
+    }
+    .button--light{
+      color:var(--green);
+      border-color:#fff;
+      background:#fff;
+    }
+    .button--light:hover{color:#fff;background:var(--green-dark)}
+    .menu-button{display:none}
+
+    .floating-book{
+      position:fixed;
+      z-index:95;
+      right:20px;
+      bottom:20px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 18px;
+      border-radius:100px;
+      color:#fff;
+      background:var(--green);
+      box-shadow:var(--shadow-float);
+      font-size:.85rem;
+      line-height:1.35;
+      transition:transform .3s ease,background .3s ease;
+    }
+    .floating-book:hover{transform:translateY(-5px) rotate(-1deg);background:var(--green-dark)}
+    .floating-book span{display:block}
+    .floating-book small{display:block;font-size:.66rem;font-weight:400}
+
+    /* Hero */
+    .hero{
+      min-height:100vh;
+      padding:120px 0 64px;
+      background:
+        radial-gradient(circle at 88% 21%,rgba(26,109,29,.08),transparent 24%),
+        linear-gradient(180deg,var(--paper),#fff);
+    }
+    .hero__layout{
+      position:relative;
+      min-height:calc(100vh - 184px);
+    }
+    .hero__main{
+      position:absolute;
+      left:1%;
+      bottom:5%;
+      width:69%;
+      height:78%;
+      border-radius:42% 58% 49% 51% / 58% 45% 55% 42%;
+      box-shadow:var(--shadow-soft);
+    }
+    .hero__main::after{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg,rgba(9,27,37,.30),transparent 55%);
+      content:"";
+      pointer-events:none;
+    }
+    .hero__main img{object-position:center 52%}
+    .hero__small{
+      position:absolute;
+      z-index:2;
+      top:1%;
+      right:2%;
+      width:31%;
+      height:35%;
+      border:8px solid var(--paper);
+      border-radius:52% 48% 46% 54% / 51% 58% 42% 49%;
+      box-shadow:var(--shadow-soft);
+      transform:rotate(2deg);
+    }
+    .hero__small img{object-position:center}
+    .hero__copy{
+      position:absolute;
+      z-index:4;
+      left:4%;
+      bottom:12%;
+      color:#fff;
+    }
+    .hero__copy .hero-kicker{
+      display:inline-block;
+      margin-bottom:14px;
+      padding:4px 14px;
+      color:var(--green-dark);
+      background:rgba(255,255,255,.94);
+      font-size:.78rem;
+      letter-spacing:.12em;
+    }
+    .hero__copy .lead-title span{
+      display:table;
+      margin-top:8px;
+      padding:2px 14px 4px;
+      color:var(--green-dark);
+      background:rgba(255,255,255,.94);
+    }
+    .hero__plate{
+      position:absolute;
+      z-index:3;
+      right:5%;
+      top:43%;
+      width:260px;
+      padding:38px 28px;
+      color:var(--green-dark);
+      background:var(--yellow);
+      clip-path:polygon(6% 7%,93% 2%,100% 89%,8% 98%);
+      transform:rotate(-2deg);
+      transition:transform .4s ease;
+    }
+    .hero__plate:hover{transform:rotate(1deg) translateY(-6px)}
+    .hero__plate strong{display:block;font:500 1.6rem/1.25 Georgia,serif}
+    .hero__plate small{font-size:.75rem}
+    .hero__facts{
+      position:absolute;
+      z-index:5;
+      right:3%;
+      bottom:5%;
+      width:31%;
+      padding:20px 24px;
+      border-radius:12px;
+      background:rgba(255,255,255,.94);
+      box-shadow:var(--shadow-soft);
+      font-size:.82rem;
+      line-height:1.8;
+    }
+    .hero__facts b{color:var(--green)}
+    .scribble{
+      position:absolute;
+      width:110px;
+      height:55px;
+      border-top:2px solid rgba(26,109,29,.45);
+      border-radius:50%;
+      transform:rotate(-14deg);
+    }
+    .hero .scribble{right:29%;bottom:2%}
+
+    html.js .hero__copy,
+    html.js .hero__main,
+    html.js .hero__small,
+    html.js .hero__plate,
+    html.js .hero__facts{
+      opacity:0;
+    }
+    html.js.is-ready .hero__main{animation:heroIn 1.15s .1s both cubic-bezier(.2,.8,.2,1)}
+    html.js.is-ready .hero__small{animation:heroSmall 1s .42s both cubic-bezier(.2,.8,.2,1)}
+    html.js.is-ready .hero__copy{animation:copyIn .9s .65s both ease-out}
+    html.js.is-ready .hero__plate{animation:copyIn .9s .88s both ease-out}
+    html.js.is-ready .hero__facts{animation:copyIn .9s 1.02s both ease-out}
+    @keyframes heroIn{from{opacity:0;transform:scale(1.08) translateY(24px)}to{opacity:1;transform:none}}
+    @keyframes heroSmall{from{opacity:0;transform:rotate(8deg) translateX(60px) scale(.92)}to{opacity:1;transform:rotate(2deg)}}
+    @keyframes copyIn{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:none}}
+
+    /* Philosophy */
+    .philosophy__grid{
+      display:grid;
+      grid-template-columns:minmax(0,1.18fr) minmax(320px,.72fr);
+      gap:96px;
+      align-items:start;
+    }
+    .philosophy__copy{padding:24px 0 0 6%}
+    .philosophy__copy .body-copy{margin-top:32px}
+    .philosophy__statement{
+      margin-top:40px;
+      max-width:22em;
+      color:var(--green);
+      font-size:1.2rem;
+      line-height:1.8;
+      font-weight:600;
+    }
+    .philosophy__photos{
+      display:flex;
+      flex-direction:column;
+      gap:48px;
+      padding-right:8%;
+    }
+    .philosophy__photos .image-frame:first-child{
+      width:86%;
+      height:390px;
+      margin-left:auto;
+      border-radius:12px;
+      transform:rotate(1.5deg);
+    }
+    .philosophy__photos .image-frame:last-child{
+      width:68%;
+      height:250px;
+      margin-left:4%;
+      border-radius:12px;
+      transform:rotate(-2deg);
+    }
+    .caption-card{
+      position:absolute;
+      z-index:2;
+      right:-32px;
+      bottom:-28px;
+      width:210px;
+      padding:18px 20px;
+      border-radius:12px;
+      background:#fff;
+      box-shadow:var(--shadow-float);
+      font-size:.78rem;
+      line-height:1.75;
+      transform:rotate(-1deg);
+    }
+    .caption-card strong{display:block;color:var(--green);font-size:.86rem}
+    .photo-blob{
+      position:absolute;
+      z-index:-1;
+      right:-30px;
+      bottom:-20px;
+      width:180px;
+      height:130px;
+      border-radius:50%;
+      background:rgba(255,228,94,.45);
+      filter:blur(24px);
+    }
+
+    /* Panorama */
+    .panorama{
+      padding:12vh 0 22vh;
+      background:var(--white);
+    }
+    .panorama__image{
+      width:min(1640px,calc(100% - 64px));
+      height:min(58vw,720px);
+      margin:auto;
+      border-radius:12px;
+    }
+    .panorama__image img{object-position:center}
+    .panorama__cut{
+      position:absolute;
+      right:-2px;
+      bottom:-2px;
+      width:26%;
+      height:22%;
+      background:var(--white);
+    }
+    .panorama__label{
+      position:absolute;
+      left:4%;
+      bottom:5%;
+      padding:14px 20px;
+      border-radius:100px;
+      color:var(--green);
+      background:#fff;
+      box-shadow:var(--shadow-soft);
+      font-size:.78rem;
+    }
+
+    /* Childcare / schedule */
+    .childcare{padding-top:16vh}
+    .childcare__intro{
+      display:grid;
+      grid-template-columns:.72fr 1.28fr;
+      gap:96px;
+      align-items:start;
+    }
+    .childcare__intro .body-copy{margin-top:36px}
+    .vertical-copy{
+      margin:64px 0 0 32px;
+      color:var(--ink);
+      font-size:1.2rem;
+      line-height:1.8;
+      letter-spacing:.12em;
+      writing-mode:vertical-rl;
+    }
+    .day-flow{
+      margin-top:72px;
+      border-top:1px solid var(--line);
+    }
+    .day-row{
+      display:grid;
+      grid-template-columns:100px 1fr 1.3fr;
+      gap:32px;
+      padding:20px 8px;
+      align-items:center;
+      border-bottom:1px solid var(--line);
+      transition:padding .3s ease,background .3s ease;
+    }
+    .day-row:hover{
+      padding-left:18px;
+      background:rgba(255,255,255,.72);
+    }
+    .day-row time{color:var(--green);font-size:1.15rem;font-weight:600}
+    .day-row strong{font-size:1.05rem}
+    .day-row span{color:var(--muted);font-size:.9rem}
+
+    .childcare__photos{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:64px;
+      margin-top:88px;
+    }
+    .childcare__photo:nth-child(2){margin-top:56px}
+    .childcare__photo .image-frame{height:420px;border-radius:12px}
+    .childcare__photo:first-child .image-frame{transform:rotate(-1deg)}
+    .childcare__photo:last-child .image-frame{transform:rotate(1.5deg)}
+    .childcare__photo figcaption{
+      margin-top:24px;
+      text-align:center;
+      color:var(--green);
+      font-size:1.1rem;
+    }
+    .childcare__photo p{
+      margin:10px auto 0;
+      max-width:33em;
+      text-align:center;
+      font-size:.9rem;
+    }
+
+    /* Origins */
+    .origins__layout{
+      display:grid;
+      grid-template-columns:.45fr 1.55fr;
+      gap:72px;
+      align-items:end;
+    }
+    .origins__bird{
+      width:130px;
+      margin:0 0 24px;
+      background:transparent;
+    }
+    .origins__bird img{width:100%;height:auto;object-fit:contain}
+    .origins__essay{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:24px;
+      min-height:500px;
+      padding-right:4%;
+      align-items:start;
+    }
+    .vertical-text{
+      margin:0 auto;
+      max-height:470px;
+      line-height:2.15;
+      letter-spacing:.08em;
+      writing-mode:vertical-rl;
+      text-orientation:upright;
+      font-size:.92rem;
+    }
+    .vertical-text--title{
+      color:var(--green);
+      font-size:1.35rem;
+      font-weight:600;
+    }
+    .principal{
+      margin-top:96px;
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:80px;
+      align-items:center;
+    }
+    .principal__photo{
+      height:500px;
+      border-radius:12px;
+      overflow:visible;
+    }
+    .principal__photo img{border-radius:12px}
+    .principal__message .body-copy{margin-top:28px}
+    .signature{
+      margin-top:24px;
+      color:var(--green);
+      font-family:Georgia,var(--font);
+      font-size:1.1rem;
+    }
+
+    /* Safety and meals */
+    .care-details__top{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:0;
+      margin-top:64px;
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+    }
+    .care-item{
+      min-height:260px;
+      padding:40px;
+      border-right:1px solid var(--line);
+      transition:background .3s ease,transform .3s ease;
+    }
+    .care-item:last-child{border-right:0}
+    .care-item:hover{background:#fff;transform:translateY(-6px)}
+    .care-item__no{
+      display:block;
+      margin-bottom:20px;
+      color:var(--green);
+      font:400 2.4rem/1 Georgia,serif;
+    }
+    .care-item p{margin-top:16px;font-size:.9rem}
+    .meal-safety{
+      margin-top:96px;
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:80px;
+      align-items:center;
+    }
+    .meal-safety__image{height:540px;border-radius:12px}
+    .detail-list{margin-top:32px;border-top:1px solid var(--line)}
+    .detail-list div{
+      display:grid;
+      grid-template-columns:140px 1fr;
+      gap:24px;
+      padding:18px 0;
+      border-bottom:1px solid var(--line);
+      font-size:.9rem;
+    }
+    .detail-list dt{color:var(--green);font-weight:600}
+    .detail-list dd{margin:0}
+
+    /* Events */
+    .events__layout{
+      display:grid;
+      grid-template-columns:.58fr 1.42fr;
+      gap:88px;
+      align-items:start;
+    }
+    .event-list{border-top:1px solid var(--line)}
+    .event-row{
+      display:grid;
+      grid-template-columns:74px 1fr 1.2fr;
+      gap:28px;
+      padding:24px 8px;
+      border-bottom:1px solid var(--line);
+      transition:background .3s ease,padding .3s ease;
+    }
+    .event-row:hover{padding-left:20px;background:rgba(255,255,255,.72)}
+    .event-row b{color:var(--green);font:400 1.7rem/1 Georgia,serif}
+    .event-row strong{font-size:1.05rem}
+    .event-row span{color:var(--muted);font-size:.88rem}
+    .events__photo{
+      height:430px;
+      margin-top:72px;
+      border-radius:12px;
+      transform:rotate(-1deg);
+    }
+
+    /* Numbers */
+    .numbers{
+      min-height:72vh;
+      color:#fff;
+      background:var(--green-dark);
+    }
+    .numbers .eyebrow,.numbers .section-title{color:#fff}
+    .number-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:0;
+      margin-top:64px;
+      border-top:1px solid rgba(255,255,255,.24);
+      border-bottom:1px solid rgba(255,255,255,.24);
+    }
+    .number{
+      padding:48px 30px;
+      border-right:1px solid rgba(255,255,255,.24);
+    }
+    .number:last-child{border-right:0}
+    .number strong{
+      display:block;
+      margin-bottom:14px;
+      color:var(--yellow);
+      font:400 clamp(2.2rem,5vw,3.6rem)/1 Georgia,serif;
+    }
+    .number span{font-size:.9rem}
+
+    /* Admission */
+    .admission__layout{
+      display:grid;
+      grid-template-columns:.7fr 1.3fr;
+      gap:96px;
+      align-items:start;
+    }
+    .admission-flow{counter-reset:flow;border-top:1px solid var(--line)}
+    .flow-row{
+      counter-increment:flow;
+      display:grid;
+      grid-template-columns:70px 1fr 170px;
+      gap:24px;
+      align-items:center;
+      padding:26px 8px;
+      border-bottom:1px solid var(--line);
+      transition:padding .3s ease,background .3s ease;
+    }
+    .flow-row:hover{padding-left:18px;background:#fff}
+    .flow-row::before{
+      content:"0" counter(flow);
+      color:var(--green);
+      font:400 1.45rem/1 Georgia,serif;
+    }
+    .flow-row strong{font-size:1.08rem}
+    .flow-row span{color:var(--muted);font-size:.85rem}
+    .admission-note{
+      margin-top:40px;
+      padding:24px 28px;
+      border-radius:12px;
+      background:#fff;
+      box-shadow:var(--shadow-soft);
+      font-size:.9rem;
+    }
+
+    /* Gallery */
+    .gallery-section{padding-bottom:16vh}
+    .gallery-main{
+      height:min(62vw,760px);
+      margin-top:64px;
+      border-radius:12px;
+    }
+    .gallery-main img{object-position:center}
+    .gallery-strip{
+      display:grid;
+      grid-template-columns:.65fr 1.35fr;
+      width:72%;
+      margin:80px 0 0 5%;
+      background:linear-gradient(135deg,#e8f0e6,#d8e6dc);
+    }
+    .gallery-strip .image-frame{height:280px;border-radius:0}
+    .gallery-strip .image-frame:first-child{transform:translateY(24px) rotate(-1deg)}
+    .gallery-strip .image-frame:last-child{transform:rotate(1deg)}
+    .gallery-link{
+      display:flex;
+      justify-content:flex-end;
+      margin:48px 10% 0 0;
+    }
+    .text-link{
+      position:relative;
+      color:var(--green);
+      font-size:.9rem;
+    }
+    .text-link::after{
+      display:block;
+      width:100%;
+      height:1px;
+      background:currentColor;
+      content:"";
+      transition:transform .3s ease;
+      transform-origin:left;
+    }
+    .text-link:hover::after{transform:scaleX(.45)}
+
+    /* CTA */
+    .cta-section{
+      min-height:78vh;
+      padding:14vh 0;
+      background:var(--paper);
+    }
+    .cta-band{
+      position:relative;
+      padding:72px 7%;
+      overflow:hidden;
+      border-radius:12px;
+      color:#fff;
+      background:var(--green);
+    }
+    .cta-band::after{
+      position:absolute;
+      right:-80px;
+      top:-160px;
+      width:440px;
+      height:440px;
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:50%;
+      content:"";
+    }
+    .cta-band .eyebrow,.cta-band .section-title{color:#fff}
+    .cta-band__layout{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:64px;
+    }
+    .cta-band p{max-width:40em;margin-top:24px}
+    .cta-actions{
+      position:relative;
+      z-index:2;
+      display:flex;
+      flex-wrap:wrap;
+      gap:16px;
+    }
+
+    /* Footer */
+    .site-footer{
+      padding:88px 0 40px;
+      color:#fff;
+      background:#09251a;
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr;
+      gap:80px;
+    }
+    .footer-brand{font-size:1.25rem;letter-spacing:.08em}
+    .footer-brand small{display:block;margin-top:8px;font-size:.7rem;color:rgba(255,255,255,.6)}
+    .footer-address{
+      margin-top:32px;
+      color:rgba(255,255,255,.75);
+      font-size:.86rem;
+      line-height:2;
+    }
+    .footer-tel{
+      display:inline-block;
+      margin-top:20px;
+      color:var(--yellow);
+      font:400 1.45rem/1.4 Georgia,serif;
+      transition:transform .3s ease;
+    }
+    .footer-tel:hover{transform:translateX(5px)}
+    .footer-nav h3{
+      margin:0 0 20px;
+      color:var(--yellow);
+      font-size:.82rem;
+      letter-spacing:.12em;
+    }
+    .footer-nav a{
+      display:block;
+      width:max-content;
+      margin:10px 0;
+      color:rgba(255,255,255,.78);
+      font-size:.84rem;
+      transition:color .25s ease,transform .25s ease;
+    }
+    .footer-nav a:hover{color:#fff;transform:translateX(5px)}
+    .footer-bottom{
+      display:flex;
+      justify-content:space-between;
+      gap:24px;
+      margin-top:72px;
+      padding-top:24px;
+      border-top:1px solid rgba(255,255,255,.15);
+      color:rgba(255,255,255,.5);
+      font-size:.7rem;
+    }
+
+    /* Scroll animation */
+    html.js [data-reveal]{
+      opacity:0;
+      transform:translateY(36px);
+      transition:
+        opacity .9s cubic-bezier(.2,.7,.2,1),
+        transform .9s cubic-bezier(.2,.7,.2,1);
+      transition-delay:var(--delay,0s);
+    }
+    html.js [data-reveal="left"]{transform:translateX(-40px)}
+    html.js [data-reveal="right"]{transform:translateX(40px)}
+    html.js [data-reveal].is-visible{opacity:1;transform:none}
+
+    @media (prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+      html.js [data-reveal]{opacity:1;transform:none}
+    }
+
+    @media (max-width:1100px){
+      :root{
+        --container:calc(100% - 48px);
+        --inner:calc(100% - 64px);
+      }
+      .global-nav{display:none}
+      .menu-button{
+        display:grid;
+        width:46px;
+        height:46px;
+        padding:0;
+        place-items:center;
+        border:0;
+        border-radius:50%;
+        color:#fff;
+        background:var(--green);
+      }
+      .menu-button span,.menu-button::before,.menu-button::after{
+        width:18px;
+        height:1px;
+        background:currentColor;
+        content:"";
+      }
+      .menu-button span{display:block}
+      .menu-button.is-open span{opacity:0}
+      .menu-button.is-open::before{position:absolute;transform:rotate(45deg)}
+      .menu-button.is-open::after{position:absolute;transform:rotate(-45deg)}
+      .global-nav.is-open{
+        position:absolute;
+        top:82px;
+        right:0;
+        left:0;
+        display:flex;
+        padding:30px;
+        flex-direction:column;
+        border-radius:24px;
+        background:var(--paper);
+        box-shadow:var(--shadow-float);
+      }
+      .hero__main{width:78%;height:72%}
+      .hero__small{width:34%;height:30%}
+      .hero__plate{right:2%;width:220px}
+      .hero__facts{width:38%}
+      .philosophy__grid{gap:56px}
+      .philosophy__copy{padding-left:0}
+      .care-item{padding:32px 24px}
+      .origins__essay{gap:12px}
+    }
+
+    @media (max-width:760px){
+      :root{
+        --container:calc(100% - 32px);
+        --inner:calc(100% - 32px);
+      }
+      body{font-size:15px}
+      .section{min-height:auto;padding:96px 0}
+      .site-header{top:8px;height:62px}
+      .brand__mark{width:36px;height:36px}
+      .header-cta{display:none}
+      .floating-book{
+        right:10px;
+        bottom:10px;
+        padding:12px 15px;
+      }
+      .floating-book small{display:none}
+
+      .hero{min-height:900px;padding-top:86px}
+      .hero__layout{min-height:800px}
+      .hero__main{
+        top:130px;
+        left:0;
+        bottom:auto;
+        width:100%;
+        height:500px;
+        border-radius:34% 66% 44% 56% / 40% 44% 56% 60%;
+      }
+      .hero__small{
+        top:15px;
+        right:-5%;
+        width:48%;
+        height:190px;
+        border-width:5px;
+      }
+      .hero__copy{left:5%;bottom:165px}
+      .hero__copy .lead-title{font-size:clamp(2rem,9vw,3rem)}
+      .hero__plate{
+        top:auto;
+        right:2%;
+        bottom:30px;
+        width:180px;
+        padding:26px 22px;
+      }
+      .hero__plate strong{font-size:1.2rem}
+      .hero__facts{
+        right:auto;
+        left:2%;
+        bottom:18px;
+        width:55%;
+        padding:15px;
+      }
+      .hero .scribble{display:none}
+
+      .philosophy__grid,
+      .childcare__intro,
+      .origins__layout,
+      .principal,
+      .meal-safety,
+      .events__layout,
+      .admission__layout,
+      .footer-grid{
+        grid-template-columns:1fr;
+        gap:56px;
+      }
+      .philosophy__photos{padding-right:0}
+      .philosophy__photos .image-frame:first-child{width:90%;height:330px}
+      .philosophy__photos .image-frame:last-child{width:70%;height:220px}
+      .caption-card{right:-10px;width:190px}
+      .panorama{padding:80px 0 120px}
+      .panorama__image{width:calc(100% - 32px);height:520px}
+      .panorama__cut{width:34%;height:18%}
+
+      .vertical-copy{display:none}
+      .day-row{
+        grid-template-columns:72px 1fr;
+        gap:12px;
+      }
+      .day-row span{grid-column:2}
+      .childcare__photos{grid-template-columns:1fr;gap:56px}
+      .childcare__photo:nth-child(2){margin-top:0}
+      .childcare__photo .image-frame{height:330px}
+
+      .origins__essay{
+        grid-template-columns:repeat(3,1fr);
+        min-height:570px;
+        overflow:hidden;
+      }
+      .origins__essay .vertical-text:nth-child(n+4){display:none}
+      .principal__photo{height:420px}
+
+      .care-details__top{grid-template-columns:1fr}
+      .care-item{min-height:auto;border-right:0;border-bottom:1px solid var(--line)}
+      .care-item:last-child{border-bottom:0}
+      .meal-safety__image{height:400px}
+      .detail-list div{grid-template-columns:100px 1fr}
+
+      .event-row{
+        grid-template-columns:54px 1fr;
+        gap:18px;
+      }
+      .event-row span{grid-column:2}
+      .events__photo{height:320px}
+
+      .number-grid{grid-template-columns:1fr 1fr}
+      .number:nth-child(2){border-right:0}
+      .number:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,.24)}
+      .number{padding:32px 20px}
+
+      .flow-row{grid-template-columns:50px 1fr}
+      .flow-row span{grid-column:2}
+      .gallery-main{height:520px}
+      .gallery-strip{width:90%;grid-template-columns:1fr;margin-left:0}
+      .gallery-strip .image-frame{height:230px}
+      .gallery-strip .image-frame:first-child{transform:translate(18px,10px) rotate(-1deg)}
+      .gallery-link{margin-right:0}
+
+      .cta-band{padding:56px 28px}
+      .cta-band__layout{align-items:flex-start;flex-direction:column}
+      .cta-actions{width:100%}
+      .cta-actions .button{width:100%}
+      .footer-grid{gap:48px}
+      .footer-bottom{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+<div class="page-shell" data-barba="wrapper">
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="青葉こもれび幼稚園 ホーム">
+      <span class="brand__mark">K</span>
+      <span class="brand__name">青葉こもれび幼稚園<small>AOBA KOMOREBI KINDERGARTEN</small></span>
+    </a>
+    <nav class="global-nav" id="globalNav" aria-label="メインナビゲーション">
+      <a href="#philosophy">園の想い</a>
+      <a href="#childcare">園での一日</a>
+      <a href="#events">年間行事</a>
+      <a href="#safety">給食・安全</a>
+      <a href="#admission">入園案内</a>
+      <a href="#access">アクセス</a>
+      <a class="header-cta" href="#visit">見学予約</a>
+    </nav>
+    <button class="menu-button" type="button" aria-controls="globalNav" aria-expanded="false" aria-label="メニューを開く"><span></span></button>
+  </header>
+
+  <a class="floating-book" href="#visit">
+    <span>園見学を予約<small>平日 9:00–17:00／電話受付</small></span>
+    <b>→</b>
+  </a>
+
+  <main data-barba="container" data-barba-namespace="home">
+    <section class="hero" id="top">
+      <div class="container hero__layout">
+        <div class="image-frame hero__main">
+          <img src="https://picsum.photos/seed/kindergartenplay/1500/980" width="1500" height="980" alt="園庭で元気に遊ぶ子どもたち" onerror="this.style.display='none'">
+        </div>
+        <div class="image-frame hero__small">
+          <img src="https://picsum.photos/seed/childhandsnature/720/500" width="720" height="500" alt="自然に触れる子どもの手元" onerror="this.style.display='none'">
+        </div>
+        <div class="hero__copy">
+          <span class="hero-kicker">仙台市青葉区・3歳から5歳の少人数保育</span>
+          <h1 class="lead-title">
+            <span>よく遊び、よく気づき、</span>
+            <span>自分のことばで話せる子へ。</span>
+          </h1>
+        </div>
+        <aside class="hero__plate">
+          <strong>Aoba Komorebi</strong>
+          <small>森と暮らす、ちいさな幼稚園</small>
+        </aside>
+        <div class="hero__facts">
+          <b>2027年度 園児募集</b><br>
+          1クラス18名／地下鉄北四番丁駅から徒歩7分<br>
+          見学日：毎週 火・木 10:15〜
+        </div>
+        <span class="scribble" aria-hidden="true"></span>
+      </div>
+    </section>
+
+    <section class="section section--white" id="philosophy">
+      <div class="inner section__body philosophy__grid">
+        <div class="philosophy__copy">
+          <div data-reveal>
+            <p class="eyebrow">Our Philosophy</p>
+            <h2 class="section-title"><span class="marker">こもれびの教育</span></h2>
+          </div>
+          <p class="philosophy__statement" data-reveal style="--delay:.1s">
+            先回りしすぎず、見放さない。<br>
+            子どもの「やってみたい」を待てる場所。
+          </p>
+          <div class="body-copy" data-reveal style="--delay:.2s">
+            <p>青葉こもれび幼稚園は、仙台市青葉区柏木で1998年に開園しました。園児108名に対して教職員26名。担任だけでなく、絵画・音楽・運動の専任講師が日々の小さな発見を見守ります。</p>
+            <br>
+            <p>朝は桜の園庭で泥だんごをつくり、昼は園内調理の温かな給食を囲み、午後は絵本や木工へ。正解を急ぐより、「どうしてだろう」と立ち止まる時間を大切にしています。</p>
+          </div>
+          <p class="philosophy__statement" data-reveal style="--delay:.3s">暮らしに根をはり、季節に手をのばす。</p>
+          <p class="body-copy" data-reveal style="--delay:.4s">園から徒歩6分の「台原こもれび森」へ週2回出かけます。葉の匂い、雨上がりの土、冬の冷たい空気。五感で受け取った経験を、ことばや絵や遊びへつなげます。</p>
+        </div>
+
+        <div class="philosophy__photos">
+          <div class="image-frame" data-reveal="right">
+            <img src="https://picsum.photos/seed/classroomfriends/760/900" width="760" height="900" alt="明るい保育室で過ごす子どもたち" onerror="this.style.display='none'">
+          </div>
+          <div class="image-frame" data-reveal="right" style="--delay:.15s">
+            <span class="photo-blob" aria-hidden="true"></span>
+            <img src="https://picsum.photos/seed/kindergartenportrait/640/520" width="640" height="520" alt="園で穏やかに過ごす園児" onerror="this.style.display='none'">
+            <div class="caption-card">
+              「できた」より、夢中になった時間を。
+              <strong>園長　佐伯 朋子</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section panorama">
+      <div class="section__body">
+        <div class="image-frame panorama__image" data-reveal>
+          <img src="https://picsum.photos/seed/forestkindergarten/1800/900" width="1800" height="900" alt="緑に囲まれた幼稚園の屋外活動" onerror="this.style.display='none'">
+          <span class="panorama__label">毎週火・金曜日は、森へ出かける日。</span>
+          <span class="panorama__cut" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tint childcare" id="childcare">
+      <div class="inner section__body">
+        <div class="childcare__intro">
+          <div data-reveal>
+            <p class="eyebrow">Our Day</p>
+            <h2 class="section-title"><span class="marker">園での一日</span></h2>
+            <p class="vertical-copy">たっぷり遊び、ゆっくり育つ。</p>
+          </div>
+          <div>
+            <p class="subhead" data-reveal>時計どおりではなく、子どもの集中に合わせて。</p>
+            <p class="body-copy" data-reveal style="--delay:.1s">登園後の90分は、自分で遊びを選ぶ時間です。片づけや着替えも、できる範囲を少しずつ。活動の切り替えは声かけとピアノの音で穏やかに知らせます。</p>
+
+            <div class="day-flow">
+              <div class="day-row" data-reveal><time>8:30</time><strong>登園・自由遊び</strong><span>園庭、制作、積み木から自分で選びます。</span></div>
+              <div class="day-row" data-reveal><time>10:10</time><strong>クラスの時間</strong><span>絵本、音楽、運動、森の散歩など。</span></div>
+              <div class="day-row" data-reveal><time>11:45</time><strong>園内調理の給食</strong><span>献立とアレルゲンはアプリで事前配信。</span></div>
+              <div class="day-row" data-reveal><time>13:00</time><strong>午後の遊び</strong><span>年少児は休息スペースも利用できます。</span></div>
+              <div class="day-row" data-reveal><time>14:00</time><strong>降園</strong><span>預かり保育は18:00まで対応します。</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="childcare__photos">
+          <figure class="childcare__photo" data-reveal="left">
+            <div class="image-frame">
+              <img src="https://picsum.photos/seed/kindergartenplayroom/900/650" width="900" height="650" alt="遊びに夢中になる子どもたち" onerror="this.style.display='none'">
+            </div>
+            <figcaption>「みまもり」の時間</figcaption>
+            <p>答えを渡す前に、あと30秒待ってみる。試行錯誤の続きを大人が奪わないための約束です。</p>
+          </figure>
+          <figure class="childcare__photo" data-reveal="right">
+            <div class="image-frame">
+              <img src="https://picsum.photos/seed/teacherchildren/900/650" width="900" height="650" alt="先生と子どもが向き合う保育風景" onerror="this.style.display='none'">
+            </div>
+            <figcaption>「かかわり」の時間</figcaption>
+            <p>小さな変化を言葉にし、その子のうれしさや困りごとをクラス全体で受け止めます。</p>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--white" id="message">
+      <div class="inner section__body">
+        <div class="origins__layout">
+          <div data-reveal>
+            <div class="image-frame origins__bird">
+              <img src="http://127.0.0.1:5000/uploads/up_f04018458e.png" width="260" height="180" alt="水彩風の青い小鳥" onerror="this.style.display='none'">
+            </div>
+            <p class="eyebrow">Our Origins</p>
+            <h2 class="section-title"><span class="marker">園の原点</span></h2>
+          </div>
+          <div class="origins__essay" data-reveal="right">
+            <p class="vertical-text">昨日まで怖かった木にも、今日はそっと手を触れてみる。その一歩を急かさずに待つことが、私たちの仕事です。</p>
+            <p class="vertical-text">泥で汚れた袖も、言い合いになった午後も、子どもが自分の世界を広げている途中の大切な時間。</p>
+            <p class="vertical-text">友だちと違っていていい。できない日は助けを借りていい。毎日の暮らしの中で覚えてほしいことです。</p>
+            <p class="vertical-text">保護者の方と一緒に悩み、昨日とは少し違う今日を見つける園でありたいと思っています。</p>
+            <p class="vertical-text vertical-text--title">おおらかに<br>こまやかに<br>さりげなく</p>
+          </div>
+        </div>
+
+        <div class="principal">
+          <div class="image-frame principal__photo" data-reveal="left">
+            <span class="photo-blob" aria-hidden="true"></span>
+            <img src="http://127.0.0.1:5000/uploads/up_7baf91717c.png" width="900" height="1000" alt="相談者に優しく微笑みかける園長" onerror="this.style.display='none'">
+            <div class="caption-card">
+              一人ひとりの「今日」を、家庭と園でつなぎます。
+              <strong>園長　佐伯 朋子</strong>
+            </div>
+          </div>
+          <div class="principal__message" data-reveal="right">
+            <p class="eyebrow">Principal’s Message</p>
+            <h2 class="section-title"><span class="marker">園長から、ご家族へ</span></h2>
+            <p class="body-copy">初めて集団生活へ送り出す朝は、子どもだけでなく保護者の方にも不安があるものです。泣いて登園した日も、まずは玄関でその気持ちを受け止めます。</p>
+            <p class="body-copy">連絡アプリだけで完結させず、担任が表情や遊びの様子を自分の言葉でお伝えします。家庭と園が同じ方向を見ることが、子どもの安心につながると考えています。</p>
+            <p class="signature">Tomoko Saeki — Principal</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tint" id="safety">
+      <div class="inner section__body">
+        <div data-reveal>
+          <p class="eyebrow">Meals &amp; Safety</p>
+          <h2 class="section-title"><span class="marker">給食と安全への備え</span></h2>
+        </div>
+
+        <div class="care-details__top">
+          <article class="care-item" data-reveal>
+            <span class="care-item__no">01</span>
+            <h3 class="subhead">毎朝8時の園内点検</h3>
+            <p>遊具・門扉・保育室・避難経路を開園前に確認。点検記録は職員室で30日間共有します。</p>
+          </article>
+          <article class="care-item" data-reveal style="--delay:.12s">
+            <span class="care-item__no">02</span>
+            <h3 class="subhead">ICタグで登降園管理</h3>
+            <p>保護者登録済みのICタグで時刻を記録。予定外のお迎えは、本人確認後に引き渡します。</p>
+          </article>
+          <article class="care-item" data-reveal style="--delay:.24s">
+            <span class="care-item__no">03</span>
+            <h3 class="subhead">月1回の避難訓練</h3>
+            <p>地震・火災・不審者を想定し、年12回実施。AED研修は全教職員が毎年受講します。</p>
+          </article>
+        </div>
+
+        <div class="meal-safety">
+          <div class="image-frame meal-safety__image" data-reveal="left">
+            <img src="http://127.0.0.1:5000/uploads/up_889764147f.webp" width="1200" height="900" alt="栄養バランスを考えた昼食" onerror="this.style.display='none'">
+          </div>
+          <div data-reveal="right">
+            <p class="eyebrow">School Lunch</p>
+            <h3 class="section-title">顔が見える、園内調理。</h3>
+            <p class="body-copy" style="margin-top:24px">管理栄養士が旬の食材を使って献立を作成。だしは昆布と鰹節から取り、月2回は宮城県産の野菜を子どもたちが洗う「お手伝い給食」を行います。</p>
+            <dl class="detail-list">
+              <div><dt>アレルギー</dt><dd>医師の指示書に基づき、専用トレー・色別食器で除去食を提供</dd></div>
+              <div><dt>誤配膳対策</dt><dd>調理員・担任による氏名と献立のダブルチェック</dd></div>
+              <div><dt>献立公開</dt><dd>毎月25日に翌月分を保護者アプリへ配信</dd></div>
+              <div><dt>給食費</dt><dd>月額5,800円／おやつ・行事食を含む</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--white" id="events">
+      <div class="inner section__body events__layout">
+        <div data-reveal>
+          <p class="eyebrow">Annual Events</p>
+          <h2 class="section-title"><span class="marker">季節を手渡す、年間行事</span></h2>
+          <p class="body-copy" style="margin-top:28px">見せるための練習を重ねるより、子ども自身が準備から楽しめる行事へ。保護者参加日は年間6日です。</p>
+          <div class="image-frame events__photo">
+            <img src="https://picsum.photos/seed/kindergartenevent/800/620" width="800" height="620" alt="季節の行事を楽しむ子どもたち" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div class="event-list">
+          <div class="event-row" data-reveal><b>4</b><strong>はじめましての会</strong><span>園庭で親子一緒に草花探し。</span></div>
+          <div class="event-row" data-reveal><b>6</b><strong>森の遠足</strong><span>年長児は地下鉄に乗って青葉の森へ。</span></div>
+          <div class="event-row" data-reveal><b>7</b><strong>夕涼み会</strong><span>手づくり提灯と園庭コンサート。</span></div>
+          <div class="event-row" data-reveal><b>10</b><strong>こもれび運動の日</strong><span>競争だけでなく、親子の協力遊びも。</span></div>
+          <div class="event-row" data-reveal><b>12</b><strong>冬の音楽会</strong><span>楽器と物語を子どもたちが選びます。</span></div>
+          <div class="event-row" data-reveal><b>2</b><strong>つくる展</strong><span>一年分の絵や木工作品を園舎全体に展示。</span></div>
+          <div class="event-row" data-reveal><b>3</b><strong>巣立ちの日</strong><span>年長児38名を全園児で送り出します。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section numbers">
+      <div class="inner section__body">
+        <div data-reveal>
+          <p class="eyebrow">Komorebi in Numbers</p>
+          <h2 class="section-title">数字で見る、青葉こもれび幼稚園</h2>
+        </div>
+        <div class="number-grid">
+          <div class="number" data-reveal><strong>27年</strong><span>仙台市青葉区で続けてきた保育</span></div>
+          <div class="number" data-reveal style="--delay:.1s"><strong>108名</strong><span>全園児数／各学年2クラス</span></div>
+          <div class="number" data-reveal style="--delay:.2s"><strong>5.2名</strong><span>教職員1人あたりの園児数</span></div>
+          <div class="number" data-reveal style="--delay:.3s"><strong>100%</strong><span>AED・救命講習の職員受講率</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tint" id="admission">
+      <div class="inner section__body admission__layout">
+        <div data-reveal>
+          <p class="eyebrow">Admission</p>
+          <h2 class="section-title"><span class="marker">入園までの流れ</span></h2>
+          <p class="body-copy" style="margin-top:28px">まずは普段の保育をご覧ください。説明会用に整えた一日ではなく、子どもたちがいつも通り過ごす午前中をご案内します。</p>
+          <div class="admission-note">
+            <strong class="subhead">2027年度 募集人数</strong><br>
+            3年保育 36名／2年保育 若干名<br>
+            願書配布：2026年10月1日から
+          </div>
+        </div>
+        <div class="admission-flow">
+          <div class="flow-row" data-reveal><strong>Webまたは電話で見学予約</strong><span>所要時間：約1分</span></div>
+          <div class="flow-row" data-reveal><strong>園見学・個別相談</strong><span>毎週 火・木 10:15</span></div>
+          <div class="flow-row" data-reveal><strong>入園願書のお渡し</strong><span>10月1日から</span></div>
+          <div class="flow-row" data-reveal><strong>親子面談</strong><span>約20分・考査なし</span></div>
+          <div class="flow-row" data-reveal><strong>入園手続き・制服採寸</strong><span>11月下旬</span></div>
+          <div class="flow-row" data-reveal><strong>一日入園</strong><span>2027年2月予定</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--white gallery-section" id="access">
+      <div class="container section__body">
+        <div class="inner" data-reveal>
+          <p class="eyebrow">Our Place</p>
+          <h2 class="section-title"><span class="marker">光と木の園舎</span></h2>
+        </div>
+        <div class="image-frame gallery-main" data-reveal>
+          <img src="http://127.0.0.1:5000/uploads/up_618be62623.png" width="1800" height="1000" alt="明るく整った幼稚園の室内空間" onerror="this.style.display='none'">
+        </div>
+        <div class="gallery-strip">
+          <div class="image-frame" data-reveal="left">
+            <img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" width="800" height="600" alt="園へ続く木漏れ日の並木道" onerror="this.style.display='none'">
+          </div>
+          <div class="image-frame" data-reveal="right">
+            <img src="http://127.0.0.1:5000/uploads/up_9c262ef683.png" width="1200" height="700" alt="清潔感のある明るい室内" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div class="gallery-link">
+          <a class="text-link" href="#visit">〒981-0933 仙台市青葉区柏木2-8-14　アクセスを見る →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta-section" id="visit">
+      <div class="inner section__body">
+        <div class="cta-band" data-reveal>
+          <div class="cta-band__layout">
+            <div>
+              <p class="eyebrow">Visit Our Kindergarten</p>
+              <h2 class="section-title">いつもの午前を、見にきませんか。</h2>
+              <p>見学は毎週火・木曜日の10:15から約45分。お子さまと一緒でも、保護者の方だけでも参加できます。個別のアレルギー対応や預かり保育についてもご相談ください。</p>
+            </div>
+            <div class="cta-actions">
+              <a class="button button--light" href="mailto:visit@example.jp">園見学を予約する →</a>
+              <a class="button button--light" href="tel:0225550188">022-555-0188</a>
+            </div>
+          </div>
+          <p class="note" style="margin-top:22px;color:rgba(255,255,255,.76)">電話受付：平日 9:00〜17:00（土日祝・年末年始を除く）</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">青葉こもれび幼稚園<small>AOBA KOMOREBI KINDERGARTEN</small></div>
+          <address class="footer-address">
+            学校法人こもれび学園<br>
+            〒981-0933 宮城県仙台市青葉区柏木2-8-14<br>
+            地下鉄南北線「北四番丁駅」北2出口から徒歩7分<br>
+            駐車場8台・駐輪場あり
+          </address>
+          <a class="footer-tel" href="tel:0225550188">022-555-0188</a>
+          <p class="note">電話受付 平日 9:00〜17:00</p>
+        </div>
+        <nav class="footer-nav" aria-label="園について">
+          <h3>ABOUT</h3>
+          <a href="#philosophy">園の想い</a>
+          <a href="#message">園長挨拶</a>
+          <a href="#childcare">園での一日</a>
+          <a href="#events">年間行事</a>
+          <a href="#safety">給食・安全対策</a>
+        </nav>
+        <nav class="footer-nav" aria-label="入園案内">
+          <h3>INFORMATION</h3>
+          <a href="#admission">入園までの流れ</a>
+          <a href="#visit">園見学予約</a>
+          <a href="#access">アクセス</a>
+          <a href="#">預かり保育・料金</a>
+          <a href="#">採用情報</a>
+          <a href="#">プライバシーポリシー</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Aoba Komorebi Kindergarten.</span>
+        <span>宮城県認可幼稚園／施設型給付園</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script src="https://unpkg.com/@barba/core"></script><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+</body>
+</html>

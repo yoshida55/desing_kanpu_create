@@ -205,12 +205,13 @@ class DeepSeekConfig:
 class ZaiConfig:
     """GLM（Zhipu / Z.ai）。OpenAI互換APIなので base_url 差し替えで使う。
 
-    最新は glm-5.2（フラグシップ）。テキスト生成/修正向け（画像は送らない前提）。
+    既定は glm-5v-turbo（画像対応・Design2Code特化）＝手本スクショを渡せる。
+    glm-5.2 / glm-4.6 はテキスト専用（画像を送ると400）＝修正向け。V系かはcamp._zai_is_visionが自動判定。
     """
 
     api_key: str = field(default_factory=lambda: os.environ.get("ZAI_API_KEY", ""))
     model: str = field(
-        default_factory=lambda: os.environ.get("DESIGN_STOCK_ZAI_MODEL", "glm-5.2")
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_ZAI_MODEL", "glm-5v-turbo")
     )
     base_url: str = field(
         default_factory=lambda: os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/paas/v4/")

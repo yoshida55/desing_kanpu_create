@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORI CAMP | 森のキャンプフィールド</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #fcfaf3;
+            --bg-white: #ffffff;
+            --brand-green: #00a145;
+            --brand-green-light: #e8f5ec;
+            --accent-yellow: #ffe100;
+            --text-dark: #111111;
+            --text-white: #ffffff;
+            --shadow-card: rgba(61, 63, 69, 0.24) 1px 2px 8px 0px;
+            --shadow-hover: rgba(0, 161, 69, 0.18) 0 12px 32px 0px;
+            --container-max: 1400px;
+            --font-main: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", 游ゴシック, YuGothic, sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--text-dark);
+            background-color: var(--bg-cream);
+            line-height: 1.9;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        /* Typography System */
+        h1 { font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.25; letter-spacing: 0.04em; }
+        h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); line-height: 1.35; letter-spacing: 0.03em; }
+        h3 { font-size: 1.2rem; line-height: 1.45; letter-spacing: 0.02em; }
+        p { max-width: 42em; line-height: 2; }
+        
+        .section-label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--brand-green);
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .container {
+            width: 90%;
+            max-width: var(--container-max);
+            margin: 0 auto;
+        }
+
+        /* Animations */
+        html.js .animate-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        html.js .animate-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html.js .animate-in {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 1rem 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--brand-green);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            font-weight: 500;
+            position: relative;
+            padding: 0.25rem 0;
+            transition: color 0.3s;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--brand-green);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--brand-green);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cta-btn {
+            background: var(--brand-green);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,161,69,0.25);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,161,69,0.35);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e8f5ec 0%, #fcfaf3 50%, #fff9e6 100%);
+            padding-top: 80px;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            width: 100%;
+            max-width: var(--container-max);
+            padding: 0 5%;
+        }
+
+        .hero-text {
+            z-index: 2;
+        }
+
+        .hero-text h1 {
+            color: var(--brand-green);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-text p {
+            font-size: 1.1rem;
+            color: #444;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-circle {
+            width: 480px;
+            height: 480px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 8px solid white;
+            box-shadow: var(--shadow-hover);
+            position: relative;
+            background: linear-gradient(135deg, #a8d5ba 0%, #00a145 100%);
+        }
+
+        .hero-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero-circle::before {
+            content: '';
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            border: 2px dashed var(--brand-green);
+            opacity: 0.3;
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .floating-badge {
+            position: absolute;
+            bottom: 40px;
+            right: -20px;
+            background: var(--accent-yellow);
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-card);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Gallery Section */
+        .gallery-section {
+            padding: 8rem 0;
+            background: var(--bg-white);
+            position: relative;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            margin-top: 4rem;
+        }
+
+        .gallery-item {
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #e0e0e0, #c0c0c0);
+            transition: transform 0.4s, box-shadow 0.4s;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.08);
+        }
+
+        .gallery-item:nth-child(1) { grid-column: span 4; grid-row: span 2; }
+        .gallery-item:nth-child(2) { grid-column: span 5; }
+        .gallery-item:nth-child(3) { grid-column: span 3; }
+        .gallery-item:nth-child(4) { grid-column: span 4; }
+        .gallery-item:nth-child(5) { grid-column: span 4; grid-row: span 1; }
+
+        /* Topics Section */
+        .topics-section {
+            padding: 8rem 0;
+            background: var(--bg-cream);
+        }
+
+        .topics-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .topic-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: all 0.4s;
+            cursor: pointer;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .topic-image {
+            aspect-ratio: 16/10;
+            overflow: hidden;
+            background: linear-gradient(135deg, #c8e6c9, #81c784);
+        }
+
+        .topic-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .topic-card:hover .topic-image img {
+            transform: scale(1.08);
+        }
+
+        .topic-content {
+            padding: 1.5rem;
+        }
+
+        .topic-date {
+            font-size: 0.85rem;
+            color: var(--brand-green);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .topic-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .topic-excerpt {
+            font-size: 0.92rem;
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .topic-tag {
+            display: inline-block;
+            background: var(--brand-green-light);
+            color: var(--brand-green);
+            padding: 0.35rem 1rem;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 8rem 0;
+            background: var(--bg-white);
+        }
+
+        .faq-list {
+            max-width: 800px;
+            margin: 4rem auto 0;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1.5rem 0;
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: color 0.3s;
+        }
+
+        .faq-question:hover {
+            color: var(--brand-green);
+        }
+
+        .faq-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--brand-green);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            color: #555;
+            line-height: 1.9;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding-top: 1rem;
+        }
+
+        /* Category Sections */
+        .category-section {
+            padding: 6rem 0;
+        }
+
+        .category-play { background: #eaf4fd; }
+        .category-stay { background: #fce4ec; }
+        .category-eat { background: #fff8e1; }
+        .category-experience { background: #e8f5e9; }
+
+        .category-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .category-main-img {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            aspect-ratio: 3/4;
+            background: linear-gradient(135deg, #d0d0d0, #b0b0b0);
+        }
+
+        .category-main-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .category-content h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .category-subtitle {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .category-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .category-item {
+            background: rgba(255,255,255,0.7);
+            border-radius: 16px;
+            padding: 1.25rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .category-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-card);
+            background: white;
+        }
+
+        .category-item-img {
+            aspect-ratio: 4/3;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #e0e0e0, #d0d0d0);
+        }
+
+        .category-item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .category-item-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .category-item-desc {
+            font-size: 0.82rem;
+            color: #777;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--brand-green);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Promo Banner */
+        .promo-banner {
+            background: var(--brand-green);
+            padding: 6rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .promo-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle at 20% 80%, rgba(255,225,0,0.15) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+
+        .promo-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .promo-content h2 {
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .promo-content p {
+            color: rgba(255,255,255,0.9);
+            margin: 0 auto 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .promo-box {
+            background: white;
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .promo-box::before {
+            content: '🏕️';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3rem;
+            background: var(--accent-yellow);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .promo-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px dashed #e0e0e0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--brand-green);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Access Section */
+        .access-section {
+            padding: 8rem 0;
+            background: var(--bg-cream);
+        }
+
+        .access-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 4rem;
+            align-items: stretch;
+        }
+
+        .access-info {
+            background: white;
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .access-info h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .info-list {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .info-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            min-width: 100px;
+            color: var(--brand-green);
+        }
+
+        .map-container {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 3px solid var(--brand-green);
+            background: #e8f5ec;
+            min-height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .map-placeholder {
+            text-align: center;
+            color: var(--brand-green);
+        }
+
+        .map-pin {
+            font-size: 4rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Footer */
+        footer {
+            background: var(--brand-green);
+            color: white;
+            padding: 5rem 0 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--accent-yellow);
+        }
+
+        .footer-brand p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+        }
+
+        .footer-col h4 {
+            font-size: 1rem;
+            margin-bottom: 1.25rem;
+            color: var(--accent-yellow);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col li {
+            margin-bottom: 0.65rem;
+        }
+
+        .footer-col a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 0.92rem;
+            transition: color 0.3s, padding-left 0.3s;
+            display: inline-block;
+        }
+
+        .footer-col a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-link {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            background: var(--accent-yellow);
+            color: var(--brand-green);
+            transform: translateY(-3px);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .mobile-menu-btn span {
+            display: block;
+            width: 26px;
+            height: 3px;
+            background: var(--text-dark);
+            margin: 5px 0;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 3rem;
+            }
+
+            .hero-circle {
+                width: 350px;
+                height: 350px;
+            }
+
+            .floating-badge {
+                right: 20px;
+                bottom: 20px;
+            }
+
+            .category-layout {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+
+            .category-items {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .access-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links, .cta-btn.desktop-only {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero-circle {
+                width: 280px;
+                height: 280px;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .gallery-item:nth-child(1),
+            .gallery-item:nth-child(2),
+            .gallery-item:nth-child(3),
+            .gallery-item:nth-child(4),
+            .gallery-item:nth-child(5) {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+
+            .category-items {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+        }
+
+        /* Stagger Animation Delays */
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+        .delay-4 { transition-delay: 0.4s; }
+        .delay-5 { transition-delay: 0.5s; }
+
+        /* Image fallback backgrounds */
+        .img-fallback {
+            background: linear-gradient(135deg, #c8e6c9 0%, #81c784 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 4L4 14h4v12h6v-8h4v8h6V14h4L16 4z" fill="#00a145"/>
+                    </svg>
+                    MORI CAMP
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#about">施設について</a></li>
+                    <li><a href="#plans">プラン</a></li>
+                    <li><a href="#access">アクセス</a></li>
+                    <li><a href="#faq">よくある質問</a></li>
+                </ul>
+                <a href="#contact" class="cta-btn desktop-only">予約する</a>
+                <button class="mobile-menu-btn" aria-label="メニュー">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text animate-in">
+                <span class="section-label">Welcome to Nature</span>
+                <h1>森で過ごす<br>特別なひととき</h1>
+                <p>山梨県北杜市の標高1,000mに位置する大自然の中で、<br>家族や仲間との思い出を刻むキャンプフィールド。<br>星空を見上げながら、焚き火の暖かさに包まれて。</p>
+                <a href="#plans" class="cta-btn">プランを見る</a>
+            </div>
+            <div class="hero-image-wrapper animate-in delay-2">
+                <div class="hero-circle">
+                    <img src="http://127.0.0.1:5000/uploads/up_18537fbb29.png" alt="キャンプを楽しむ家族" onerror="this.style.display='none'">
+                </div>
+                <div class="floating-badge">
+                    <strong style="display:block;font-size:1.1rem;">2024年営業中</strong>
+                    <small style="color:#555;">4月〜11月</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section">
+        <div class="container">
+            <div class="animate-in">
+                <span class="section-label">Gallery</span>
+                <h2>森の情景</h2>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item animate-in delay-1">
+                    <img src="http://127.0.0.1:5000/uploads/up_18a7a902ba.png" alt="青空とキャンプ場" onerror="this.style.display='none'">
+                </div>
+                <div class="gallery-item animate-in delay-2">
+                    <img src="http://127.0.0.1:5000/uploads/up_20739dc678.jpg" alt="スタッフたち" onerror="this.style.display='none'">
+                </div>
+                <div class="gallery-item animate-in delay-3">
+                    <img src="http://127.0.0.1:5000/uploads/up_05d8e0cf8e.png" alt="木漏れ日" onerror="this.style.display='none'">
+                </div>
+                <div class="gallery-item animate-in delay-4">
+                    <img src="http://127.0.0.1:5000/uploads/up_330c3f68bf.jpg" alt="作業風景" onerror="this.style.display='none'">
+                </div>
+                <div class="gallery-item animate-in delay-5">
+                    <img src="http://127.0.0.1:5000/uploads/up_abd04ea9b6.webp" alt="笑顔のスタッフ" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Topics Section -->
+    <section class="topics-section" id="about">
+        <div class="container">
+            <div class="topics-header animate-in">
+                <span class="section-label">Topics & News</span>
+                <h2>お知らせ</h2>
+            </div>
+            <div class="topics-grid">
+                <article class="topic-card animate-in delay-1">
+                    <div class="topic-image">
+                        <img src="http://127.0.0.1:5000/uploads/up_2ce42b270d.png" alt="夏休みキャンプイベント" onerror="this.style.display='none'">
+                    </div>
+                    <div class="topic-content">
+                        <time class="topic-date">2024.07.15</time>
+                        <h3 class="topic-title">夏休み特別イベント「星空観察会」開催決定！</h3>
+                        <p class="topic-excerpt">天体望遠鏡を用意して、夏の大三角や天の川を観察。専門ガイドが解説します。</p>
+                        <span class="topic-tag">イベント</span>
+                    </div>
+                </article>
+                <article class="topic-card animate-in delay-2">
+                    <div class="topic-image">
+                        <img src="http://127.0.0.1:5000/uploads/up_3996f78e40.png" alt="BBQセット新登場" onerror="this.style.display='none'">
+                    </div>
+                    <div class="topic-content">
+                        <time class="topic-date">2024.07.01</time>
+                        <h3 class="topic-title">新メニュー：地元産野菜たっぷりBBQセット登場</h3>
+                        <p class="topic-excerpt">北杜市農家直送の新鮮野菜を使った、ヘルシーでボリューム満点のBBQセット。</p>
+                        <span class="topic-tag">グルメ</span>
+                    </div>
+                </article>
+                <article class="topic-card animate-in delay-3">
+                    <div class="topic-image">
+                        <img src="http://127.0.0.1:5000/uploads/up_889764147f.webp" alt="グランピング" onerror="this.style.display='none'">
+                    </div>
+                    <div class="topic-content">
+                        <time class="topic-date">2024.06.20</time>
+                        <h3 class="topic-title">【人気】グランピングコース予約受付開始</h3>
+                        <p class="topic-excerpt">テント設営不要、寝具完備。初心者でも気軽に本格キャンプを楽しめます。</p>
+                        <span class="topic-tag">プラン</span>
+                    </div>
+                </article>
+                <article class="topic-card animate-in delay-4">
+                    <div class="topic-image">
+                        <img src="http://127.0.0.1:5000/uploads/up_612cac1589.jpg" alt="ペット同伴OK" onerror="this.style.display='none'">
+                    </div>
+                    <div class="topic-content">
+                        <time class="topic-date">2024.06.01</time>
+                        <h3 class="topic-title">ペット同伴エリア拡張のお知らせ</h3>
+                        <p class="topic-excerpt">愛犬・愛猫と一緒にキャンプを楽しめる専用エリアを2倍に拡張しました。</p>
+                        <span class="topic-tag">施設</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <div style="text-align:center;" class="animate-in">
+                <span class="section-label">FAQ</span>
+                <h2>よくあるご質問</h2>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item animate-in delay-1">
+                    <div class="faq-question">
+                        <span>キャンプ道具は持っていく必要がありますか？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        レンタル用品（テント、寝具、BBQ用具）を充実させておりますので、手ぶらでのご来場も可能です。詳細はプランページをご確認ください。
+                    </div>
+                </div>
+                <div class="faq-item animate-in delay-2">
+                    <div class="faq-question">
+                        <span>最寄り駅からのアクセス方法を教えてください</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        小淵沢駅より車で約15分。当館の無料シャトルバスも運行しております（要予約）。詳しくはアクセスページをご覧ください。
+                    </div>
+                </div>
+                <div class="faq-item animate-in delay-3">
+                    <div class="faq-question">
+                        <span>子供連れでも安心ですか？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        はい、お子様向けの遊具広場や安全な芝生エリアを完備しています。また、託児サービスも有料にて承っております。
+                    </div>
+                </div>
+                <div class="faq-item animate-in delay-4">
+                    <div class="faq-question">
+                        <span>悪天候時のキャンセルポリシーは？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        利用日の3日前までならキャンセル料無料。当日の荒天の場合は全額返金対応いたします。
+                    </div>
+                </div>
+                <div class="faq-item animate-in delay-5">
+                    <div class="faq-question">
+                        <span>チェックイン・チェックアウト時間は？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        チェックインは14:00〜、チェックアウトは翌日11:00までとなります。早朝到着の場合は事前にお問い合わせください。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category: Play -->
+    <section class="category-section category-play" id="play">
+        <div class="container">
+            <div class="category-layout">
+                <div class="category-main-img animate-in">
+                    <img src="http://127.0.0.1:5000/uploads/up_292cf87096.png" alt="アクティビティ" onerror="this.style.display='none'">
+                </div>
+                <div class="category-content animate-in delay-2">
+                    <span class="category-badge">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        遊ぶ PLAY
+                    </span>
+                    <h2>自然と触れ合う<br>アクティビティ</h2>
+                    <p class="category-subtitle">四季折々の山梨の大自然で、心身ともにリフレッシュ</p>
+                    <div class="category-items">
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_110aebebef.png" alt="ハイキング" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">森林ハイキング</div>
+                            <div class="category-item-desc">初心者OK / 約2時間</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_529f508e17.png" alt="カヌー" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">湖畔カヌー体験</div>
+                            <div class="category-item-desc">隣接の西湖で / 1組限定</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_f8b7d3a516.png" alt="サイクリング" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">MTBサイクリング</div>
+                            <div class="category-item-desc">貸出自転車あり</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category: Stay -->
+    <section class="category-section category-stay" id="stay">
+        <div class="container">
+            <div class="category-layout">
+                <div class="category-main-img animate-in">
+                    <img src="http://127.0.0.1:5000/uploads/up_b7d741dcb5.jpg" alt="宿泊施設" onerror="this.style.display='none'">
+                </div>
+                <div class="category-content animate-in delay-2">
+                    <span class="category-badge">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>
+                        泊まる STAY
+                    </span>
+                    <h2>星空の下で<br>心地よい眠りを</h2>
+                    <p class="category-subtitle">テントからログハウスまで、好みに合わせて選べる宿泊形態</p>
+                    <div class="category-items">
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_c1a12c00de.png" alt="オートキャンプ" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">オートキャンプサイト</div>
+                            <div class="category-item-desc">58区画 / 駐車隣接</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_acb5719efd.webp" alt="グランピング" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">グランピングコテージ</div>
+                            <div class="category-item-desc">6棟 / 最大6名収容</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_e8dbf0a2c6.png" alt="ログハウス" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">ログハウス</div>
+                            <div class="category-item-desc">3棟 / 完全個室</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category: Eat -->
+    <section class="category-section category-eat" id="eat">
+        <div class="container">
+            <div class="category-layout">
+                <div class="category-main-img animate-in">
+                    <img src="http://127.0.0.1:5000/uploads/up_0459b99c39.png" alt="食事" onerror="this.style.display='none'">
+                </div>
+                <div class="category-content animate-in delay-2">
+                    <span class="category-badge">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
+                        食べる EAT
+                    </span>
+                    <h2>山の恵みを<br>味わう食卓</h2>
+                    <p class="category-subtitle">地元食材を使った、キャンプならではの美味しい時間</p>
+                    <div class="category-items">
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_ca0295279d.jpg" alt="BBQ" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">BBQセット</div>
+                            <div class="category-item-desc">2人〜10人用あり</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_889764147f.webp" alt="朝食" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">モーニングバフェ</div>
+                            <div class="category-item-desc">7:00〜9:30</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_cc6c33e328.png" alt="ピザ窯" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">石窯ピザ</div>
+                            <div class="category-item-desc">週末限定 / 要予約</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category: Experience -->
+    <section class="category-section category-experience" id="experience">
+        <div class="container">
+            <div class="category-layout">
+                <div class="category-main-img animate-in">
+                    <img src="http://127.0.0.1:5000/uploads/up_3a159df441.jpg" alt="体験" onerror="this.style.display='none'">
+                </div>
+                <div class="category-content animate-in delay-2">
+                    <span class="category-badge">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        体験する EXPERIENCE
+                    </span>
+                    <h2>手作りの楽しみ<br>ワークショップ</h2>
+                    <p class="category-subtitle">思い出に残る作品を持ち帰る、参加型プログラム</p>
+                    <div class="category-items">
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_dd928401e8.jpg" alt="クラフト" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">木工クラフト</div>
+                            <div class="category-item-desc">フォーク作り等</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_78c6a0d3e7.jpg" alt="料理教室" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">アウトドア料理教室</div>
+                            <div class="category-item-desc">ダッチオーブン等</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_3475673acc.png" alt="自然観察" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">自然観察会</div>
+                            <div class="category-item-desc">植物・昆虫・鳥類</div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-item-img">
+                                <img src="http://127.0.0.1:5000/uploads/up_9716d3c39a.webp" alt="星空" onerror="this.style.display='none'">
+                            </div>
+                            <div class="category-item-title">星空写真撮影会</div>
+                            <div class="category-item-desc">三脚レンタルあり</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promo Banner -->
+    <section class="promo-banner">
+        <div class="container">
+            <div class="promo-content animate-in">
+                <span class="section-label" style="color:var(--accent-yellow)">Special Campaign</span>
+                <h2>はじめての方<br>お得なスターターパック</h2>
+                <p>初めてMORI CAMPをご利用される方限定。テント設営から片付けまで、スタッフが完全サポート。道具を持っていなくても、すぐにキャンプを始められます。</p>
+                <div class="promo-box">
+                    <h3 style="color:var(--brand-green);margin-bottom:1rem;">ファミリースターターパック</h3>
+                    <p style="color:#555;margin-bottom:0;">4名様まで / 一泊二日 / 食事付き</p>
+                    <div class="promo-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">28,000<span style="font-size:1rem;">円〜</span></span>
+                            <span class="stat-label">通常価格より20%OFF</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">3,847</span>
+                            <span class="stat-label">利用者数（累計）</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">98%</span>
+                            <span class="stat-label">再利用率</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Access Section -->
+    <section class="access-section" id="access">
+        <div class="container">
+            <div class="access-layout">
+                <div class="access-info animate-in">
+                    <span class="section-label">Access</span>
+                    <h2>アクセス</h2>
+                    <p style="margin-top:1rem;color:#666;">山梨県北杜市の高原地帯に位置。都心から車で約2時間、電車＋シャトルバスでも便利にアクセスできます。</p>
+                    <ul class="info-list">
+                        <li>
+                            <span class="info-label">住所</span>
+                            <span>〒407-0501 山梨県北杜市清里町高原1234-56</span>
+                        </li>
+                        <li>
+                            <span class="info-label">電話</span>
+                            <span>0551-XX-XXXX（9:00〜18:00）</span>
+                        </li>
+                        <li>
+                            <span class="info-label">駐車場</span>
+                            <span>200台完備 / 無料</span>
+                        </li>
+                        <li>
+                            <span class="info-label">最寄り駅</span>
+                            <span>小淵沢駅より車で15分 / シャトルバス有（要予約）</span>
+                        </li>
+                        <li>
+                            <span class="info-label">営業期間</span>
+                            <span>4月上旬〜11月下旬（冬季はクローズ）</span>
+                        </li>
+                    </ul>
+                    <a href="#" class="cta-btn" style="display:inline-block;margin-top:2rem;">詳細を見る</a>
+                </div>
+                <div class="map-container animate-in delay-2">
+                    <div class="map-placeholder">
+                        <div class="map-pin">📍</div>
+                        <p style="margin-top:1rem;font-weight:600;">Google Mapsで開く</p>
+                        <small style="opacity:0.7;">実際の地図データはここに表示されます</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>MORI CAMP</h3>
+                    <p>山梨県北杜市にある大自然に囲まれたキャンプフィールド。<br>家族、友人、大切な人との思い出を、<br>星空の下で刻んでください。</p>
+                </div>
+                <div class="footer-col">
+                    <h4>施設について</h4>
+                    <ul>
+                        <li><a href="#">施設概要</a></li>
+                        <li><a href="#">アクセス</a></li>
+                        <li><a href="#">周辺観光</a></li>
+                        <li><a href="#">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ご予約</h4>
+                    <ul>
+                        <li><a href="#">料金一覧</a></li>
+                        <li><a href="#">空き状況確認</a></li>
+                        <li><a href="#">オンライン予約</a></li>
+                        <li><a href="#">キャンセルポリシー</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>その他</h4>
+                    <ul>
+                        <li><a href="#">採用情報</a></li>
+                        <li><a href="#">企業様へ</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                        <li><a href="#">特定商取引法に基づく表記</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 MORI CAMP All Rights Reserved.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="LINE">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .344-.282.629-.63.63H12.66c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63h-1.755v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629H13.18v1.125h1.755c.348 0 .629.283.629.629zm-5.425 0c0 .344-.282.629-.63.63H7.235c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.348 0 .63.285.63.63v3.51h1.755c.348 0 .629.283.629.629zM4.39 8.108v4.771c0 .344-.282.629-.63.629-.348 0-.63-.285-.63-.629V8.108c0-.345.282-.63.63-.63.348 0 .63.285.63.63zM12 0C5.372 0 0 5.373 0 12c0 3.314 1.343 6.315 3.515 8.488.246.245.618.315.94.178l.09-.045c.31-.155.47-.497.385-.83-.105-.405-.158-.825-.158-1.256V8.108c0-.986.798-1.784 1.784-1.784h9.5c.986 0 1.784.798 1.784 1.784v10.427c0 .43-.053.85-.157 1.255-.086.333.074.675.384.83l.09.045c.322.137.694.067.94-.178A11.974 11.974 0 0024 12c0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Enable JS detection for animations
+        document.documentElement.classList.add('js');
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                const isActive = item.classList.contains('active');
+                
+                // Close all other items
+                document.querySelectorAll('.faq-item').forEach(faq => {
+                    faq.classList.remove('active');
+                });
+                
+                // Toggle current item
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const headerOffset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Hero entrance animation
+        window.addEventListener('load', () => {
+            document.querySelector('.hero-text').classList.add('visible');
+            setTimeout(() => {
+                document.querySelector('.hero-image-wrapper').classList.add('visible');
+            }, 300);
+        });
+    </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>

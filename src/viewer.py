@@ -962,6 +962,15 @@ def _camp_set(job_id: str, **kw) -> None:
         j.update(kw)
 
 
+# 進捗メッセージに出すエンジン名。表に無いプロバイダはそのまま出す（"Claude"に化けさせない）
+_PROV_LABELS = {"anthropic": "Claude", "openai": "GPT", "gemini": "Gemini",
+                "deepseek": "DeepSeek", "zai": "GLM"}
+
+
+def _prov_label(provider: str) -> str:
+    return _PROV_LABELS.get(provider, provider or "AI")
+
+
 def _run_camp_job(job_id: str, brief: str, base_site_id: str, anim_ref_id: str = "") -> None:
     """バックグラウンドでカンプを生成（参考選び＋Claude/GPT）。複数同時に走ってよい。
 
@@ -994,8 +1003,7 @@ def _run_camp_job(job_id: str, brief: str, base_site_id: str, anim_ref_id: str =
                         db.update_anim_snippets(conn, anim_ref_id, _json.dumps(snip, ensure_ascii=False))
                 except Exception:
                     log.exception("アニメ抽出に失敗（続行）")
-        prov = {"openai": "GPT", "gemini": "Gemini", "deepseek": "DeepSeek"}.get(
-            config.CONFIG.htmlgen.provider, "Claude")
+        prov = _prov_label(config.CONFIG.htmlgen.provider)
         # ベース×アニメ両指定なら相性を一言添える（生成には _pair_fit_block が自動で効く）
         fit_note = ""
         if base_site_id and anim_ref_id:
@@ -1109,7 +1117,7 @@ def _run_edit_job(job_id: str, fn: str, section: int, instruction: str, keep_tex
     """バックグラウンドでカンプを部分編集する（生成ジョブ一覧に相乗り）。"""
     try:
         _ep = config.CONFIG.htmlgen.edit_provider
-        prov = {"openai": "GPT", "gemini": "Gemini", "deepseek": "DeepSeek"}.get(_ep, "Claude")
+        prov = _prov_label(_ep)
         scope = "全体" if section is None or section < 0 else f"セクション{section + 1}"
         _camp_set(job_id, phase=f"{prov}が{scope}を直しています…")
         result = camp.edit_camp_section(fn, section, instruction, keep_text=keep_text, style_type=style_type)
@@ -1895,6 +1903,9 @@ html.__ce_altmode{cursor:text}
       return false;
     });
     el.style.position='absolute';
+    // ★z-index必須：カンプの.container等がz-index:2を持つことが多く、無指定(auto)だと
+    //   貼り付け/追加した要素がその下に潜り「重なった場所で二度と掴めない」（Ctrl+V貼り付けで実際に発生）
+    if(!el.style.zIndex) el.style.zIndex=_freeZIndex();
     if(!host){  // セクションの外（ページ余白）だけは従来どおりbody基準
       el.style.left=Math.round(pageX)+'px'; el.style.top=Math.round(pageY)+'px';
       document.body.appendChild(el); return el;

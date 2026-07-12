@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>森と湖のキャンプフィールド｜MORI NO HI</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --paper:#fcfaf3; --white:#fff; --ink:#111; --green:#00a145; --yellow:#ffe100;
+      --mint:#edf9f1; --blue:#eaf4ff; --line:rgba(0,161,69,.18);
+      --shadow:0 12px 32px rgba(0,120,64,.12); --float:0 18px 42px rgba(0,105,57,.19);
+      --max:1180px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--white);color:var(--ink);font-family:"Zen Kaku Gothic New","Noto Sans JP","Hiragino Sans",sans-serif;font-size:16px;line-height:1.95;letter-spacing:.025em;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    img{display:block;max-width:100%}
+    .container{width:min(var(--max),calc(100% - 64px));margin:auto}
+    .eyebrow{display:block;color:var(--green);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;line-height:1.3;margin-bottom:8px}
+    h1,h2,h3,p{margin:0}
+    h1{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.32;letter-spacing:.05em}
+    h2{font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.38;letter-spacing:.04em}
+    h3{font-size:1.15rem;line-height:1.5;letter-spacing:.03em}
+    p{font-size:.96rem}
+    .copy{max-width:38em;color:#36423c}
+    .round{border-radius:20px 0 20px 0}
+    .photo{overflow:hidden;background:linear-gradient(145deg,#b8d7bc,#62a9b0)}
+    .photo img{width:100%;height:100%;object-fit:cover;transition:transform .65s cubic-bezier(.2,.7,.2,1),filter .5s}
+    .photo:hover img{transform:scale(1.07);filter:saturate(1.1)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;border-radius:999px;padding:13px 22px;background:var(--green);color:#fff;font-size:.86rem;font-weight:800;line-height:1;transition:.3s;box-shadow:0 8px 18px rgba(0,161,69,.2)}
+    .btn:hover{transform:translateY(-4px);background:#00883a;box-shadow:var(--float)}
+    .arrow{width:21px;height:21px;border-radius:50%;display:inline-grid;place-items:center;background:var(--yellow);color:var(--ink);font-size:.9rem}
+    .reveal{transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+    html.js .reveal{opacity:0;transform:translateY(34px)}
+    html.js .reveal.show{opacity:1;transform:none}
+    .d1{transition-delay:.12s}.d2{transition-delay:.24s}.d3{transition-delay:.36s}
+
+    /* header */
+    .notice{height:27px;background:#ffe982;text-align:center;font-size:.62rem;line-height:27px;letter-spacing:.08em}
+    header{height:73px;background:#fff;position:absolute;z-index:5;top:27px;left:0;right:0;border-bottom:1px solid rgba(0,0,0,.04)}
+    .head-inner{height:100%;width:min(1540px,calc(100% - 48px));margin:auto;display:flex;align-items:center;justify-content:space-between}
+    .logo{line-height:1;font-weight:900;color:var(--green);font-size:1.1rem;letter-spacing:-.03em}
+    .logo small{display:block;color:#111;font-size:.5rem;letter-spacing:.11em;margin-top:5px}
+    .nav{display:flex;align-items:center;gap:25px;font-size:.73rem;font-weight:700}
+    .nav a{transition:.25s}.nav a:hover{color:var(--green);transform:translateY(-2px)}
+    .menu{height:47px;width:47px;display:grid;place-content:center;background:var(--green);color:#fff;border-radius:50%;font-size:.58rem;font-weight:800;transition:.3s}.menu:hover{transform:rotate(8deg) scale(1.08)}
+
+    /* hero */
+    .hero{position:relative;height:min(760px,100vh);min-height:610px;overflow:hidden;background:#76b9cb;padding-top:100px}
+    .hero-bg{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,53,80,.17),rgba(0,161,69,.03)),url("https://picsum.photos/seed/lakeside-camp-japan/1800/1000") center/cover;transform:scale(1.04);animation:heroZoom 1.8s ease-out forwards}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.04) 30%,rgba(0,35,30,.3))}
+    .hero-inner{position:relative;z-index:1;height:100%;width:min(1400px,100%);margin:auto}
+    .hero-arch{position:absolute;width:min(680px,62vw);height:630px;left:50%;transform:translateX(-50%);bottom:-135px;border-radius:360px 360px 0 0;overflow:hidden;background:#bfdde5;border:18px solid rgba(234,244,255,.55);box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+    .hero-arch img{width:100%;height:100%;object-fit:cover;filter:saturate(.92)}
+    .hero-copy{position:absolute;z-index:2;bottom:70px;left:clamp(24px,7vw,120px);color:#fff}
+    .hero-copy p{font-size:.82rem;font-weight:800;margin-bottom:10px}
+    .hero-title{white-space:nowrap;font-weight:900;font-size:clamp(2.8rem,6.5vw,7rem);line-height:.9;letter-spacing:.04em;text-shadow:0 2px 12px rgba(0,0,0,.14)}
+    .hero-title span{font-size:.45em;display:block;margin:14px 0 0 8px;letter-spacing:.18em}
+    .hero-cta{position:absolute;z-index:3;right:8%;bottom:54px;background:#fff;border-radius:999px;padding:8px;box-shadow:var(--shadow)}
+    .hero-cta .btn{padding:12px 17px;font-size:.74rem}
+    @keyframes heroZoom{to{transform:scale(1)}}
+    html.js .hero-copy,html.js .hero-arch,html.js .hero-cta{opacity:0}
+    html.js .hero.loaded .hero-copy{animation:inLeft .8s .35s forwards}
+    html.js .hero.loaded .hero-arch{animation:inUp 1s .15s forwards}
+    html.js .hero.loaded .hero-cta{animation:inUp .7s .8s forwards}
+    @keyframes inLeft{from{opacity:0;transform:translate(-40px,20px)}to{opacity:1;transform:none}}
+    @keyframes inUp{from{opacity:0;transform:translateY(48px)}to{opacity:1;transform:none}}
+
+    /* scattered intro */
+    .intro{min-height:100vh;padding:150px 0 110px;position:relative;overflow:hidden}
+    .intro-head{width:min(var(--max),calc(100% - 64px));margin:0 auto;max-width:760px;transform:translateX(-120px)}
+    .intro-head .copy{margin-top:16px}
+    .scatter{width:min(1300px,100%);height:610px;margin:30px auto 0;position:relative}
+    .scatter .photo{position:absolute;box-shadow:var(--shadow)}
+    .s1{width:260px;height:180px;left:0;top:100px}.s2{width:250px;height:195px;right:7%;top:25px}.s3{width:120px;height:85px;left:15%;top:300px}.s4{width:135px;height:105px;right:13%;top:265px}.s5{width:82px;height:60px;right:34%;top:205px}
+    .note{position:absolute;left:50%;top:393px;max-width:310px;font-size:.78rem;color:#54635a}
+    .note b{color:var(--green)}
+    /* topics */
+    .topics{min-height:100vh;padding:110px 0;background:var(--paper);position:relative;overflow:hidden}
+    .topics:before,.topics:after{content:"";position:absolute;width:75%;height:90px;background:#fff;border-radius:50%;top:-44px}.topics:before{left:-10%}.topics:after{right:-15%;top:auto;bottom:-45px}
+    .section-head{margin-bottom:35px}
+    .topic-row{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;overflow:hidden}
+    .topic-card{min-width:0;transition:.35s}.topic-card:hover{transform:translateY(-7px)}
+    .topic-card .photo{height:142px;border-radius:14px}
+    .topic-card p{font-size:.72rem;font-weight:700;line-height:1.7;margin-top:10px;color:#176d42}
+    .plus{float:right;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:.9rem;margin-top:-4px}
+    .news{max-width:700px;margin:56px auto 0;border-top:1px solid var(--line)}
+    .news a{display:grid;grid-template-columns:115px 1fr 25px;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:.76rem;transition:.3s}
+    .news a:hover{padding-left:10px;color:var(--green)}.news time{color:var(--green);font-size:.65rem}.news i{font-style:normal;width:20px;height:20px;color:#fff;background:var(--green);border-radius:50%;display:grid;place-items:center}
+    /* category shortcut with massive whitespace */
+    .shortcuts{min-height:100vh;padding:155px 0 90px;display:flex;align-items:flex-end}
+    .shortcut-row{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+    .shortcut{padding:7px;background:#eef9fb;border-radius:12px;transition:.35s}.shortcut:nth-child(2){background:#e6f8f7}.shortcut:nth-child(3){background:#fff0d5}.shortcut:nth-child(4){background:#eaf7ed}.shortcut:nth-child(5){background:#e7f7cc}
+    .shortcut:hover{transform:translateY(-9px) rotate(-1deg);box-shadow:var(--shadow)}
+    .shortcut .photo{height:110px;border-radius:8px}.shortcut b{display:block;margin:7px 4px 0;color:#2585a9;font-size:.9rem;line-height:1.2}.shortcut small{margin:0 4px;color:#2585a9;font-size:.53rem;font-weight:bold}
+
+    /* detailed zones */
+    .zones{min-height:100vh;padding:100px 0;background:#fff}
+    .zone-layout{display:grid;grid-template-columns:340px 1fr;gap:55px;align-items:start}
+    .zone-feature{position:sticky;top:32px}
+    .zone-feature .photo{height:520px;border-radius:20px 0 20px 0}
+    .zones-list{display:grid;gap:16px}
+    .zone{padding:22px 24px;border-radius:0 20px 20px 0}.zone.play{background:var(--blue)}.zone.rest{background:#dff5f4}.zone.eat{background:#fff0d4}.zone.stay{background:#e8f5ea}.zone.experience{background:#e5f6cd}
+    .zone-title{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}.zone-title h3{color:#137eae}.zone.rest h3{color:#1a9994}.zone.eat h3{color:#d87600}.zone.stay h3{color:#00896b}.zone.experience h3{color:#5aaf27}.zone-title small{font-size:.55rem;color:#64746b;font-weight:800}
+    .mini-list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .mini{font-size:.62rem;font-weight:700;line-height:1.45}.mini .photo{height:78px;border-radius:9px;margin-bottom:6px}.mini:hover img{transform:scale(1.08)}
+
+    /* book */
+    .book{min-height:600px;padding:100px 0;display:flex;align-items:center}
+    .book-panel{background:var(--green);min-height:365px;border-radius:20px 0 20px 0;position:relative;overflow:hidden;display:grid;place-items:center}
+    .book-panel:before,.book-panel:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(255,225,0,.13)}.book-panel:before{left:-80px;top:-90px}.book-panel:after{right:-70px;bottom:-120px}
+    .book-in{position:relative;text-align:center;background:var(--paper);padding:45px min(8vw,110px);border-radius:50% 50% 22px 22px;box-shadow:var(--shadow)}
+    .book-in p{color:var(--green);font-size:.69rem;font-weight:800}.book-in h2{color:var(--green);margin:4px 0 15px}.book-in .btn{background:#111}.book-in .btn:hover{background:#333}
+
+    /* access */
+    .access-wrap{background:linear-gradient(175deg,#fff 0 50%,var(--green) 50%);padding:115px 0 0}
+    .access{background:var(--paper);padding:48px;border-radius:0 20px 20px 20px;display:grid;grid-template-columns:1fr 1.08fr;gap:50px}
+    .access h2{font-size:1.55rem;margin-bottom:16px}.access p{font-size:.83rem}.address{margin-top:18px;color:#176d42;font-size:.76rem;font-weight:700}
+    .map{min-height:285px;border:2px solid #29965b;border-radius:16px;background:linear-gradient(135deg,rgba(234,244,255,.8),rgba(255,255,255,.4));position:relative;overflow:hidden}
+    .map:before,.map:after{content:"";position:absolute;background:rgba(0,161,69,.15);border-radius:999px;transform:rotate(-25deg)}.map:before{width:140%;height:20px;left:-20%;top:45%}.map:after{height:140%;width:16px;left:50%;top:-20%}
+    .pin{position:absolute;z-index:2;left:49%;top:42%;width:32px;height:32px;border-radius:50% 50% 50% 0;background:var(--green);transform:rotate(-45deg);box-shadow:var(--shadow)}.pin:after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:var(--yellow);top:10px;left:10px}
+    footer{background:var(--green);color:#fff;padding:65px 0 40px;min-height:500px}
+    .foot-grid{display:grid;grid-template-columns:1.2fr repeat(3,1fr);gap:35px}.foot-logo{color:#fff;font-size:2rem}.foot-logo small{color:#fff}.foot-col h3{font-size:.78rem;margin-bottom:12px}.foot-col a{display:block;border-bottom:1px solid rgba(255,255,255,.3);padding:5px 0;font-size:.67rem;transition:.25s}.foot-col a:hover{padding-left:7px;color:var(--yellow)}
+    .foot-bottom{margin-top:52px;display:flex;justify-content:space-between;align-items:end;font-size:.61rem;color:rgba(255,255,255,.8)}.to-top{height:42px;width:42px;border:0;border-radius:50%;background:#fff;color:var(--green);font-size:.6rem;font-weight:bold;cursor:pointer;transition:.3s}.to-top:hover{transform:translateY(-5px);box-shadow:var(--float)}
+
+    @media(max-width:800px){
+      .container{width:min(100% - 36px,var(--max))}.nav{display:none}.hero{min-height:620px}.hero-arch{width:78vw;height:520px}.hero-copy{bottom:86px;left:22px}.hero-title{white-space:normal}.hero-cta{right:18px;bottom:25px}.intro-head{transform:none}.scatter{height:500px}.s1{left:3%;width:180px;height:130px}.s2{right:3%;width:175px;height:140px}.s3{left:7%;top:280px}.s4{right:5%;top:300px}.s5{display:none}.note{left:35%;top:410px}.topic-row{display:flex;overflow:auto;padding-bottom:14px}.topic-card{min-width:170px}.shortcut-row{grid-template-columns:repeat(5,145px);overflow:auto;padding-bottom:12px}.zone-layout{grid-template-columns:1fr}.zone-feature{position:relative;top:0}.zone-feature .photo{height:270px}.mini-list{grid-template-columns:repeat(2,1fr)}.access{grid-template-columns:1fr;padding:30px;gap:30px}.foot-grid{grid-template-columns:1fr 1fr}.shortcuts{min-height:620px;padding-top:100px}.intro,.topics,.zones{min-height:auto;padding-top:90px;padding-bottom:90px}
+    }
+  </style>
+</head>
+<body>
+  <div class="notice">2026年 夏の予約受付中　｜　湖畔サイトは7月18日よりオープン</div>
+  <header>
+    <div class="head-inner">
+      <a class="logo" href="#">MORI NO HI<small>LAKE SIDE CAMP FIELD</small></a>
+      <nav class="nav">
+        <a href="#about">森について</a><a href="#topics">お知らせ</a><a href="#stay">泊まる</a><a href="#play">遊ぶ</a><a href="#access">アクセス</a><a href="#book">予約する</a>
+      </nav>
+      <a href="#book" class="menu">MENU</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="top">
+      <div class="hero-bg"></div>
+      <div class="hero-inner">
+        <div class="hero-arch"><img src="https://picsum.photos/seed/family-camp-lake/900/1100" width="900" height="1100" alt="" onerror="this.style.display='none'"></div>
+        <div class="hero-copy">
+          <p>水際で、朝を待つ。</p>
+          <div class="hero-title">MORI NO HI<br>OUTDOOR LIFE<span>森と湖のキャンプフィールド</span></div>
+        </div>
+        <div class="hero-cta"><a href="#book" class="btn">空き状況を見る <span class="arrow">→</span></a></div>
+      </div>
+    </section>
+
+    <section class="intro" id="about">
+      <div class="intro-head reveal">
+        <span class="eyebrow">About the field</span>
+        <h2>焚き火のそばに、<br>余白のある週末を。</h2>
+        <p class="copy">山梨県北杜市、標高820m。白樺の林を抜けると、小さな湖が現れます。MORI NO HIは、区画を詰め込みすぎない全42サイトのキャンプフィールドです。</p>
+      </div>
+      <div class="scatter">
+        <div class="photo round s1 reveal d1"><img src="https://picsum.photos/seed/tent-breakfast/600/420" width="600" height="420" alt="" onerror="this.style.display='none'"></div>
+        <div class="photo round s2 reveal d2"><img src="https://picsum.photos/seed/camp-lake-view/600/450" width="600" height="450" alt="" onerror="this.style.display='none'"></div>
+        <div class="photo round s3 reveal d3"><img src="https://picsum.photos/seed/camp-coffee/300/220" width="300" height="220" alt="" onerror="this.style.display='none'"></div>
+        <div class="photo round s4 reveal d2"><img src="https://picsum.photos/seed/camping-kids/300/220" width="300" height="220" alt="" onerror="this.style.display='none'"></div>
+        <div class="photo round s5 reveal d3"><img src="https://picsum.photos/seed/kayak-lake/220/160" width="220" height="160" alt="" onerror="this.style.display='none'"></div>
+        <p class="note reveal d3"><b>01 / FIELD NOTE</b><br>消灯は22:00。聞こえるのは、薪がはぜる音と、岸辺を撫でる風だけです。</p>
+      </div>
+    </section>
+
+    <section class="topics" id="topics">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Topics</span>
+          <h2>森からのお知らせ</h2>
+        </div>
+        <div class="topic-row reveal d1">
+          <a href="#" class="topic-card"><div class="photo"><img src="https://picsum.photos/seed/camp-tent-summer/400/280" width="400" height="280" alt="" onerror="this.style.display='none'"></div><p><span class="plus">+</span>2026.07.12<br>湖畔オートサイト、夏季営業のお知らせ</p></a>
+          <a href="#" class="topic-card"><div class="photo"><img src="https://picsum.photos/seed/campfire-night/400/280" width="400" height="280" alt="" onerror="this.style.display='none'"></div><p><span class="plus">+</span>2026.07.05<br>土曜限定「焚き火バー」開催します</p></a>
+          <a href="#" class="topic-card"><div class="photo"><img src="https://picsum.photos/seed/forest-walk-camp/400/280" width="400" height="280" alt="" onerror="this.style.display='none'"></div><p><span class="plus">+</span>2026.06.28<br>朝7時の森歩き、参加予約受付中</p></a>
+          <a href="#" class="topic-card"><div class="photo"><img src="https://picsum.photos/seed/camping-dog/400/280" width="400" height="280" alt="" onerror="this.style.display='none'"></div><p><span class="plus">+</span>2026.06.15<br>犬連れデイキャンプのご案内</p></a>
+          <a href="#" class="topic-card"><div class="photo"><img src="https://picsum.photos/seed/camp-breakfast-woods/400/280" width="400" height="280" alt="" onerror="this.style.display='none'"></div><p><span class="plus">+</span>2026.06.01<br>地元パン店の朝便、はじまります</p></a>
+        </div>
+        <div class="news reveal d2">
+          <a href="#"><time>2026.05.20</time><span>8月9日〜16日の予約枠を追加しました。</span><i>+</i></a>
+          <a href="#"><time>2026.05.03</time><span>レンタルテント「Mori Set」内容変更のお知らせ。</span><i>+</i></a>
+          <a href="#"><time>2026.04.18</time><span>雨の日に楽しめるクラフト小屋が完成しました。</span><i>+</i></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="shortcuts">
+      <div class="container">
+        <div class="shortcut-row reveal">
+          <a class="shortcut" href="#play"><div class="photo"><img src="https://picsum.photos/seed/canoe-outdoor/320/220" width="320" height="220" alt="" onerror="this.style.display='none'"></div><b>遊ぶ</b><small>PLAY</small></a>
+          <a class="shortcut" href="#play"><div class="photo"><img src="https://picsum.photos/seed/camp-friends/320/220" width="320" height="220" alt="" onerror="this.style.display='none'"></div><b>触れ合う</b><small>CONNECT</small></a>
+          <a class="shortcut" href="#play"><div class="photo"><img src="https://picsum.photos/seed/camp-food-table/320/220" width="320" height="220" alt="" onerror="this.style.display='none'"></div><b>食べる</b><small>EAT</small></a>
+          <a class="shortcut" href="#stay"><div class="photo"><img src="https://picsum.photos/seed/cabin-forest/320/220" width="320" height="220" alt="" onerror="this.style.display='none'"></div><b>泊まる</b><small>STAY</small></a>
+          <a class="shortcut" href="#play"><div class="photo"><img src="https://picsum.photos/seed/camp-workshop/320/220" width="320" height="220" alt="" onerror="this.style.display='none'"></div><b>体験する</b><small>EXPERIENCE</small></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="zones" id="play">
+      <div class="container zone-layout">
+        <div class="zone-feature reveal">
+          <span class="eyebrow">Field guide</span>
+          <h2>森で過ごす、<br>五つの時間。</h2>
+          <p class="copy" style="margin:16px 0 28px">道具を持ち込む日も、手ぶらの日も。季節ごとに少しずつ表情を変える、フィールドの楽しみ方です。</p>
+          <div class="photo"><img src="https://picsum.photos/seed/camp-family-tent/600/900" width="600" height="900" alt="" onerror="this.style.display='none'"></div>
+        </div>
+        <div class="zones-list reveal d1">
+          <div class="zone play"><div class="zone-title"><h3>遊ぶ</h3><small>PLAY</small></div><div class="mini-list"><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/lake-fishing/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>レイクフィッシング</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/camp-sup/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>朝のSUPクルーズ</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/forest-bike/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>森のサイクリング</a></div></div>
+          <div class="zone rest"><div class="zone-title"><h3>触れ合う</h3><small>CONNECT</small></div><div class="mini-list"><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/campfire-talk/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>焚き火シェア会</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/stargazing-camp/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>星空ガイドツアー</a></div></div>
+          <div class="zone eat"><div class="zone-title"><h3>食べる</h3><small>EAT</small></div><div class="mini-list"><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/camp-curry/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>森のスパイスカレー</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/camp-bakery/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>朝焼きパン便</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/outdoor-dinner/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>湖畔の夕ごはん</a></div></div>
+          <div class="zone stay" id="stay"><div class="zone-title"><h3>泊まる</h3><small>STAY</small></div><div class="mini-list"><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/tent-site-lake/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>湖畔オートサイト</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/camp-cottage/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>森のキャビン</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/glamping-tent/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>手ぶらテント泊</a></div></div>
+          <div class="zone experience"><div class="zone-title"><h3>体験する</h3><small>EXPERIENCE</small></div><div class="mini-list"><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/woodcraft-camp/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>木のスプーンづくり</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/camp-coffee-roast/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>焙煎コーヒー教室</a><a class="mini" href="#"><div class="photo"><img src="https://picsum.photos/seed/forest-herb/280/180" width="280" height="180" alt="" onerror="this.style.display='none'"></div>野草観察会</a></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="book" id="book">
+      <div class="container">
+        <div class="book-panel reveal">
+          <div class="book-in">
+            <p>MORI NO HI RESERVATION</p>
+            <h2>次の週末、<br>火を囲みませんか。</h2>
+            <p style="color:#4a6656;margin-bottom:18px">2026年7月の空きサイトを、カレンダーからご確認いただけます。</p>
+            <a href="#" class="btn">予約カレンダーへ <span class="arrow">→</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="access-wrap" id="access">
+      <section class="access container reveal">
+        <div>
+          <span class="eyebrow">Access</span>
+          <h2>アクセス</h2>
+          <p class="copy">中央自動車道「須玉IC」から約24分。JR小淵沢駅からは、土・日・祝のみ予約制の送迎車を運行しています。</p>
+          <p class="address">〒408-0315 山梨県北杜市白州町白須 1847-3</p>
+          <a href="#" class="btn" style="margin-top:20px">送迎の予約・詳細 <span class="arrow">→</span></a>
+        </div>
+        <div class="map"><div class="pin"></div></div>
+      </section>
+      <footer>
+        <div class="container">
+          <div class="foot-grid">
+            <div><a class="logo foot-logo" href="#">MORI NO HI<small>LAKE SIDE CAMP FIELD</small></a><p style="font-size:.68rem;margin-top:22px">受付 9:00–17:00<br>休場日：毎週水曜日（8月を除く）</p></div>
+            <div class="foot-col"><h3>過ごす</h3><a href="#play">遊ぶ</a><a href="#play">触れ合う</a><a href="#play">食べる</a><a href="#stay">泊まる</a><a href="#play">体験する</a></div>
+            <div class="foot-col"><h3>ご案内</h3><a href="#about">森について</a><a href="#topics">お知らせ</a><a href="#book">ご予約</a><a href="#access">アクセス</a><a href="#">よくある質問</a></div>
+            <div class="foot-col"><h3>Information</h3><a href="#">利用規約</a><a href="#">キャンセルポリシー</a><a href="#">プライバシーポリシー</a><a href="#">採用情報</a><a href="tel:0551450810">0551-45-0810</a></div>
+          </div>
+          <div class="foot-bottom"><span>© 2026 MORI NO HI CAMP FIELD.</span><button class="to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">TOP ↑</button></div>
+        </div>
+      </footer>
+    </div>
+  </main>
+  <script>
+    window.addEventListener('load',()=>document.querySelector('.hero').classList.add('loaded'));
+    const observer=new IntersectionObserver((entries)=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');observer.unobserve(e.target)}}),{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+  </script>
+<!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body>
+</html>
