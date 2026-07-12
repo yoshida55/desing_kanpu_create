@@ -2721,7 +2721,18 @@ html.__ce_altmode{cursor:text}
       {name:'🖤 ダーク（黒ベース）', html:
         '<header style="'+H+'display:flex;align-items:center;justify-content:space-between;padding:20px 4%;background:#14181f">'
         +'<div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:.06em">'+esc(name)+'</div>'
-        +'<nav style="display:flex;gap:28px;align-items:center">'+navHtml('rgba(255,255,255,.88)',14)+'</nav></header>'}
+        +'<nav style="display:flex;gap:28px;align-items:center">'+navHtml('rgba(255,255,255,.88)',14)+'</nav></header>'},
+      // 💊 LinkWorks(business.html)の実CSSから数値採取：白88%+blur・薄青枠・大影・明朝リンク・ピルCTA
+      {name:'💊 カプセルナビ（浮遊ピル・LinkWorks風）', html:(function(){
+        var pill='background:rgba(255,255,255,.92);border:1px solid rgba(220,226,239,.7);border-radius:999px;box-shadow:0 12px 34px rgba(7,16,38,.12);';
+        var lk=links.filter(function(t){ return t.indexOf('問い合わせ')<0 && t.indexOf('お問合せ')<0 && t.toLowerCase().indexOf('contact')<0; });
+        if(!lk.length) lk=['ホーム','サービス','会社概要'];
+        var nv=lk.map(function(t){ return '<a href="#" style="color:#06122d;text-decoration:none;font-size:14px;font-weight:700;padding:10px 18px;border-radius:999px;font-family:\\'Shippori Mincho\\',\\'Zen Old Mincho\\',serif;white-space:nowrap">'+esc(t)+'</a>'; }).join('');
+        return '<header style="'+H+'display:flex;align-items:flex-start;justify-content:space-between;padding:24px 3%;background:transparent">'
+          +'<div style="'+pill+'padding:14px 28px;font-size:20px;font-weight:800;color:#111;letter-spacing:.02em">'+esc(name)+'</div>'
+          +'<nav style="'+pill+'display:flex;align-items:center;gap:2px;padding:8px">'+nv
+          +'<a href="#" style="background:'+accent+';color:#fff;padding:12px 24px;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap;font-family:\\'Shippori Mincho\\',\\'Zen Old Mincho\\',serif">お問い合わせ</a></nav></header>';
+      })()}
     ];
   }
   // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
