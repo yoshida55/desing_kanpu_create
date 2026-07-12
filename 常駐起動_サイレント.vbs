@@ -1,7 +1,21 @@
-' ãƒ‡ã‚¶ã‚¤ãƒ³ã‚¹ãƒˆãƒƒã‚¯å¸¸é§èµ·å‹•ï¼ˆé»’ã„çª“ãªã—ãƒ»ãƒ–ãƒ©ã‚¦ã‚¶ã‚‚é–‹ã‹ãªã„ï¼‰
-' Windowsã‚¹ã‚¿ãƒ¼ãƒˆã‚¢ãƒƒãƒ—ã«ç½®ãã¨PCèµ·å‹•æ™‚ã«è‡ªå‹•ã§ã‚µãƒ¼ãƒãƒ¼ãŒç«‹ã¡ä¸ŠãŒã‚Šã€
-' Chromeæ‹¡å¼µã®å³ã‚¯ãƒªãƒƒã‚¯ä¿å­˜ãŒã„ã¤ã§ã‚‚ä½¿ãˆã‚‹ã€‚
-' æ‰‹å‹•ã§ç”»é¢ã‚’è¦‹ãŸã„ã¨ãã¯ä»Šã¾ã§ã©ãŠã‚Š èµ·å‹•.batï¼ˆã“ã¡ã‚‰ã¯ãƒ–ãƒ©ã‚¦ã‚¶ãŒé–‹ãï¼‰ã€‚
+' ƒfƒUƒCƒ“ƒXƒgƒbƒNí’“‹N“®i•‚¢‘‹‚È‚µEƒuƒ‰ƒEƒU‚àŠJ‚©‚È‚¢j
+' ‰ÆPCE‰ïĞPC‚Ç‚¿‚ç‚Å‚àA‰º‚ÌŒó•â‚©‚çÀİ‚·‚éƒtƒHƒ‹ƒ_‚ğ©“®‚Å‘I‚ñ‚Å‹N“®‚·‚éB
+' ‰ïĞPC‚ÌƒpƒX‚ªˆá‚¤ê‡‚Í candidates ‚Ì Array ‚É1s’Ç‹L‚·‚é‚¾‚¯‚ÅOKB
+Option Explicit
+Dim fso, sh, base, p, candidates
+candidates = Array( _
+  "D:\99_AIƒ\ƒtƒg\86_ƒfƒUƒCƒ“ƒJƒ“ƒvì¬ƒc[ƒ‹_claude", _
+  "C:\Users\guest04\Desktop\‚‹´Œ¤O\99_AIƒ\ƒtƒg\86_ƒfƒUƒCƒ“ƒJƒ“ƒvì¬ƒc[ƒ‹_claude", _
+  "C:\Users\guest04\Desktop\‚‹´Œ¤O\86_ƒfƒUƒCƒ“ƒJƒ“ƒvì¬ƒc[ƒ‹_claude" )
+Set fso = CreateObject("Scripting.FileSystemObject")
+base = ""
+For Each p In candidates
+  If fso.FileExists(p & "\venv\Scripts\python.exe") Then
+    base = p
+    Exit For
+  End If
+Next
+If base = "" Then WScript.Quit
 Set sh = CreateObject("WScript.Shell")
-sh.CurrentDirectory = "D:\99_AIã‚½ãƒ•ãƒˆ\86_ãƒ‡ã‚¶ã‚¤ãƒ³ã‚«ãƒ³ãƒ—ä½œæˆãƒ„ãƒ¼ãƒ«_claude"
-sh.Run """D:\99_AIã‚½ãƒ•ãƒˆ\86_ãƒ‡ã‚¶ã‚¤ãƒ³ã‚«ãƒ³ãƒ—ä½œæˆãƒ„ãƒ¼ãƒ«_claude\venv\Scripts\python.exe"" cli.py serve --no-preload --no-open", 0, False
+sh.CurrentDirectory = base
+sh.Run """" & base & "\venv\Scripts\python.exe"" cli.py serve --no-preload --no-open", 0, False
