@@ -2675,6 +2675,55 @@ html.__ce_altmode{cursor:text}
       }catch(_){}
     });
   }
+  // 🧢 デフォルトヘッダー集（AIなし・無料）：⭐が貯まってなくても選べる標準ヘッダー5種。
+  // サイト名とメニュー文言は「今のヘッダー」から流用し、色はテーマ色を自動採用＝どのカンプでも馴染む。
+  function presetHeaders(target){
+    // テーマ色：--accent系のCSS変数 → よく使われているボタン背景色 → 紺 の順で採用
+    var accent='';
+    ['--accent','--brand','--primary','--main','--theme','--key'].some(function(v){ var c=(getComputedStyle(document.documentElement).getPropertyValue(v)||'').trim(); if(c){accent=c;return true;} return false; });
+    if(!accent){
+      var freq={};
+      [].forEach.call(document.querySelectorAll('a.btn,button,.btn,.cta,.button'),function(el){ var bg=getComputedStyle(el).backgroundColor||''; if(bg && !/rgba?\\(0, 0, 0, 0\\)|transparent/.test(bg)){ freq[bg]=(freq[bg]||0)+1; } });
+      var best=null,bn=0; Object.keys(freq).forEach(function(k){ if(freq[k]>bn){bn=freq[k];best=k;} });
+      accent=best||'#1f3a5f';
+    }
+    // サイト名：今のヘッダーのロゴ/見出し → ページタイトル の順
+    var name='';
+    try{ var lg=target.querySelector('.logo,[class*="logo"],h1,strong,a'); if(lg) name=(lg.textContent||'').replace(/\\s+/g,' ').trim().slice(0,24); }catch(_){}
+    if(!name) name=((document.title||'').split(/[|｜]/)[0]||'').trim().slice(0,24)||'SITE NAME';
+    // メニュー：今のヘッダーのリンク文言を流用（2〜12文字・重複除去・最大5個）
+    var links=[];
+    try{ [].slice.call(target.querySelectorAll('a')).forEach(function(a){ var t=(a.textContent||'').replace(/\\s+/g,' ').trim(); if(t && t.length>=2 && t.length<=12 && t!==name && links.indexOf(t)<0) links.push(t); }); }catch(_){}
+    links=links.slice(0,5);
+    if(links.length<2) links=['ホーム','サービス','料金','お問い合わせ'];
+    function navHtml(color,size){ return links.map(function(t){ return '<a href="#" style="color:'+color+';text-decoration:none;font-size:'+size+'px;font-weight:600;letter-spacing:.02em">'+esc(t)+'</a>'; }).join(''); }
+    var H='position:relative;z-index:50;font-family:inherit;';
+    return [
+      {name:'🤍 シンプル白（左ロゴ・右メニュー）', html:
+        '<header style="'+H+'display:flex;align-items:center;justify-content:space-between;padding:18px 4%;background:#fff;border-bottom:1px solid rgba(0,0,0,.08)">'
+        +'<div style="font-size:20px;font-weight:800;color:#1a1a1a;letter-spacing:.04em">'+esc(name)+'</div>'
+        +'<nav style="display:flex;gap:26px;align-items:center">'+navHtml('#333',14)+'</nav></header>'},
+      {name:'🎯 中央ロゴ（メニュー下段）', html:
+        '<header style="'+H+'text-align:center;padding:22px 4% 14px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08)">'
+        +'<div style="font-size:24px;font-weight:800;color:#1a1a1a;letter-spacing:.1em">'+esc(name)+'</div>'
+        +'<nav style="display:flex;gap:30px;justify-content:center;margin-top:12px">'+navHtml('#444',13)+'</nav></header>'},
+      {name:'🔘 CTAボタン付き（テーマ色）', html:
+        '<header style="'+H+'display:flex;align-items:center;justify-content:space-between;padding:14px 4%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06)">'
+        +'<div style="font-size:20px;font-weight:800;color:'+accent+';letter-spacing:.04em">'+esc(name)+'</div>'
+        +'<div style="display:flex;gap:24px;align-items:center"><nav style="display:flex;gap:24px;align-items:center">'+navHtml('#333',14)+'</nav>'
+        +'<a href="#" style="background:'+accent+';color:#fff;padding:10px 22px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;white-space:nowrap">お問い合わせ</a></div></header>'},
+      {name:'📞 上帯付き（テーマ色の細帯）', html:
+        '<header style="'+H+'background:#fff;border-bottom:1px solid rgba(0,0,0,.08)">'
+        +'<div style="background:'+accent+';color:#fff;font-size:12px;padding:6px 4%;text-align:right;letter-spacing:.05em">お気軽にご相談ください（平日 9:00〜18:00）</div>'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 4%">'
+        +'<div style="font-size:20px;font-weight:800;color:#1a1a1a;letter-spacing:.04em">'+esc(name)+'</div>'
+        +'<nav style="display:flex;gap:26px;align-items:center">'+navHtml('#333',14)+'</nav></div></header>'},
+      {name:'🖤 ダーク（黒ベース）', html:
+        '<header style="'+H+'display:flex;align-items:center;justify-content:space-between;padding:20px 4%;background:#14181f">'
+        +'<div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:.06em">'+esc(name)+'</div>'
+        +'<nav style="display:flex;gap:28px;align-items:center">'+navHtml('rgba(255,255,255,.88)',14)+'</nav></header>'}
+    ];
+  }
   // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
   var favListBtn=document.getElementById('__ce_favlist');
   if(favListBtn) favListBtn.addEventListener('click',function(){
@@ -2685,6 +2734,7 @@ html.__ce_altmode{cursor:text}
     var tKindJp=(tKind==='section'?'セクション':tKind==='header'?'ヘッダー':'フッター');
     fetch('/api/section_fav/list').then(function(r){return r.json();}).then(function(d){
       var favs=(d.favs||[]).filter(function(f){ return (f.kind||'section')===tKind; });
+      var presets=(tKind==='header')?presetHeaders(target):[];   // 🧢標準ヘッダー（⭐が無くても選べる）
       var items = favs.length
         ? favs.map(function(f){
             // ★プレビューはJSを動かさないので、スクロール表示待ち(opacity:0)のままだと空に見える。
@@ -2692,7 +2742,14 @@ html.__ce_altmode{cursor:text}
             var doc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:#fff}'+(f.css||'')+' *,*::before,*::after{opacity:1 !important;visibility:visible !important;filter:none !important;clip-path:none !important;animation:none !important;transition:none !important}</style></head><body>'+f.html+'</body></html>';
             return '<div class="sit" data-id="'+f.id+'"><div class="pv"><iframe sandbox="allow-same-origin" srcdoc="'+esc(doc)+'"></iframe></div><div class="nm">'+esc(f.name||'')+'</div><button class="del" data-id="'+f.id+'" title="削除">×</button></div>';
           }).join('')
-        : '<div style="color:#999;padding:8px">まだ'+tKindJp+'のお気に入りがありません（⭐で保存できます）</div>';
+        : (presets.length ? '' : '<div style="color:#999;padding:8px">まだ'+tKindJp+'のお気に入りがありません（⭐で保存できます）</div>');
+      if(presets.length){
+        items += '<div style="grid-column:1/-1;font-size:12.5px;font-weight:700;color:#8a5a00;background:#fff3d6;border-radius:6px;padding:6px 10px">🧢 標準ヘッダー（サイト名・メニュー・色はこのページに自動で合わせ済み）</div>'
+          + presets.map(function(p,i){
+              var doc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:#fff}</style></head><body>'+p.html+'</body></html>';
+              return '<div class="sit" data-preset="'+i+'"><div class="pv"><iframe sandbox="allow-same-origin" srcdoc="'+esc(doc)+'"></iframe></div><div class="nm">'+esc(p.name)+'</div></div>';
+            }).join('');
+      }
       var ov=document.createElement('div'); ov.id='__ce_pk';
       ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🔀 入れ替える'+tKindJp+'を選ぶ（クリックで差し替え）</h4><div class="secgr">'+items+'</div></div>';
       document.body.appendChild(ov);
@@ -2703,6 +2760,16 @@ html.__ce_altmode{cursor:text}
           fetch('/api/section_fav/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:did})}).then(function(){ var c=del.closest('.sit'); if(c) c.remove(); });
           return; }
         var it=e.target.closest('.sit'); if(!it) return;
+        // 🧢標準ヘッダーのカード＝プリセットHTMLで差し替え（⭐保存分と同じ流儀）
+        if(it.hasAttribute('data-preset')){
+          var pp=presets[+it.getAttribute('data-preset')]; if(!pp) return;
+          var par2=target.parentElement, ci2=[].indexOf.call(par2.children,target);
+          target.outerHTML=pp.html;
+          markRevealed(par2.children[ci2]);
+          ov.remove(); markDirty();
+          msg.textContent='🧢 標準ヘッダー「'+pp.name+'」に入れ替えました。上の「💾 保存」で確定してください';
+          return;
+        }
         var id=it.getAttribute('data-id');
         var f=(favs||[]).filter(function(x){return x.id===id;})[0]; if(!f) return;
         var par=target.parentElement, ci=[].indexOf.call(par.children,target);
