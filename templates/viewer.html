@@ -287,6 +287,9 @@
     .base_grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
       gap: 1.2rem; padding: 1.6rem 1.8rem; overflow: auto;
+      /* ★行の高さは中身どおりに固定＝一画面に収めようとして行が32px等に圧縮され、
+         サムネが「薄い帯」になる崩れの防止（はみ出す分はスクロールで見る） */
+      grid-auto-rows: max-content; align-content: start;
     }
     .base_card {
       position: relative;
@@ -1225,6 +1228,7 @@
       <!-- 生成する／自分の画像を使う／履歴 を1行に（下の一覧を広く見せる） -->
       <div class="camp_actions">
         <button class="camp_button" id="camp_button">🎨 生成する</button>
+        <button class="camp_up_toggle" id="camp_clone_btn" title="選んだベースの実サイトをそのまま吸い出してカンプ化（AIなし・無料）">📋 ベースを忠実クローン</button>
         <button class="camp_up_toggle" id="cu_toggle">🖼 自分の画像を使う</button>
         <span class="camp_state" id="camp_state"></span>
         <button class="camp_hist_toggle" id="camp_hist_toggle" style="margin-left:auto">🗂 生成した履歴</button>
@@ -2666,6 +2670,34 @@
         if (d.file) { status.textContent = "クローン完了！カンプ用タブで開きます"; window.open("/camp/" + encodeURIComponent(d.file), "campview"); }
       };
       setTimeout(wait, 1500);
+    });
+    // 📋 カンプ生成画面からの忠実クローン：🎨ベースで選んだサイトをそのままクローンする
+    // （今までは検索カード→詳細ビューの中にしか導線が無かった。中身は#detail_cloneと同じAPI）
+    document.querySelector("#camp_clone_btn").addEventListener("click", async () => {
+      const id = document.querySelector("#camp_base").value;
+      const st = document.querySelector("#camp_state");
+      const btn = document.querySelector("#camp_clone_btn");
+      if (!id) { st.textContent = "先に🎨ベースでサイトを選んでください（「おまかせ」はクローン先が決まらないため使えません）"; return; }
+      const keepJs = confirm("元サイトのJS（本物のアニメ）も残しますか？\n\nOK = 残す（GSAP等の演出が動く可能性あり。ただし壊れて表示が乱れるサイトもある）\nキャンセル = 残さない（安全。代わりにスクロール出現アニメを自動注入）");
+      btn.disabled = true; btn.textContent = "クローン中…";
+      try {
+        const res = await fetch("/api/clone_site", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, keep_js: keepJs }),
+        });
+        const data = await res.json();
+        if (!data.ok) { btn.disabled = false; btn.textContent = "📋 ベースを忠実クローン"; st.textContent = data.message || "クローンを開始できませんでした"; return; }
+        const wait = async () => {
+          const d = await fetch("/api/clone_site/status").then((r) => r.json());
+          if (d.site_id) { btn.textContent = "クローン中… " + (d.phase || ""); setTimeout(wait, 1500); return; }
+          btn.disabled = false; btn.textContent = "📋 ベースを忠実クローン";
+          if (d.error) { st.textContent = "クローン失敗: " + d.error; return; }
+          if (d.file) { st.textContent = "クローン完了！カンプ用タブで開きます"; window.open("/camp/" + encodeURIComponent(d.file), "campview"); }
+        };
+        setTimeout(wait, 1500);
+      } catch (_) {
+        btn.disabled = false; btn.textContent = "📋 ベースを忠実クローン"; st.textContent = "通信エラー";
+      }
     });
     // アニメ抜き出しの進捗バー（経過秒を出しつつ、目安に対して伸ばす＝終わりが見える）
     let _animProgTimer = null;
