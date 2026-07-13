@@ -1857,6 +1857,8 @@ html.__ce_altmode{cursor:text}
     <button class="im" id="__ce_nodeco" style="background:#f2f2f4;color:#1d1d1f;border:1px solid #ddd">🚫 背景の飾り（わっか等）を消す</button>
     <div class="lbl plain">🧹 全体を規則化（左右の余白・見出しを一律に揃える・明らかに違う余白は別扱い・AIなし＝一貫性UP）</div>
     <button class="im" id="__ce_normalize" style="background:#0b6e4f;color:#fff">🧹 余白・見出しを一律に揃える</button>
+    <div class="lbl plain">📍 動かした跡の一覧（ドラッグ移動を1個ずつ確認して選んで戻す・わざと動かした所は残せる・AIなし）</div>
+    <button class="im" id="__ce_unshift" style="background:#a04b00;color:#fff">📍 動かした跡を一覧で見る</button>
     <button class="im" id="__ce_btncolor" style="background:#0b6e4f;color:#fff">🎨 全ボタンをテーマ色に統一</button>
     <div class="lbl plain">➖ 区切り線（各セクションの先頭に短い線・AIなし。不要な所は右クリック→削除）</div>
     <div class="row" style="gap:10px;align-items:center">
@@ -2035,6 +2037,84 @@ html.__ce_altmode{cursor:text}
       });
     }).catch(function(){msg.textContent='画像一覧の取得に失敗';});
   }
+  // ===== 🖼 スライドショー（画像が次々切り替わる・AIなし） =====
+  // 右クリックした画像の場所で、選んだ画像を「間隔◯秒・フェード◯秒」で自動フェード切り替え。
+  // 仕組み＝元サイトのJSはコピーせず、自前のミニ実行スクリプト(#__sl_run)を「中身」として焼き込む
+  // （オープニング演出の#__op_runと同じ流儀＝保存すれば単体HTMLでも動く）。
+  // ⚠命名注意：スクリプト本文・ラッパー属性に「__ce」「data-ce」を含めないこと。
+  //   保存時の掃除がscriptを/__ce/で除去し、⭐部品保存がdata-ce*属性を剥がすため（実装済みの仕様）。
+  //   だから data-slshow / data-slint / data-sldur / __sl_run という名前にしてある。
+  var SL_RUN='(function(){function boot(){var ws=document.querySelectorAll("[data-slshow]");for(var i=0;i<ws.length;i++)(function(w){if(w.__slOn)return;w.__slOn=1;var imgs=[].slice.call(w.querySelectorAll("img"));if(imgs.length<2)return;var iv=parseInt(w.getAttribute("data-slint"))||4000;var du=parseInt(w.getAttribute("data-sldur"))||1200;var cur=0;for(var j=0;j<imgs.length;j++){imgs[j].style.transition="opacity "+(du/1000)+"s";imgs[j].style.setProperty("opacity",j===0?"1":"0","important");}setInterval(function(){cur=(cur+1)%imgs.length;for(var k=0;k<imgs.length;k++)imgs[k].style.setProperty("opacity",k===cur?"1":"0","important");},iv);})(ws[i]);}window.__slBoot=boot;if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();})();';
+  function ensureSlRun(){
+    if(!document.getElementById('__sl_run')){
+      var s=document.createElement('script'); s.id='__sl_run'; s.textContent=SL_RUN;
+      document.body.appendChild(s);   // createElementで足すと今すぐ実行される＝編集画面でもその場で動き出す
+    }
+    if(window.__slBoot) window.__slBoot();
+  }
+  function slideMake(el){
+    // すでにスライドショーの中で押された → 解除（1枚目の画像だけ残す）
+    var w0=el&&el.closest&&el.closest('[data-slshow]');
+    if(w0){
+      if(!confirm('この場所のスライドショーを解除して、1枚目の画像だけに戻しますか？')) return;
+      var base=w0.querySelector('img');
+      if(base){ base.style.removeProperty('opacity'); base.style.removeProperty('transition'); w0.parentNode.insertBefore(base,w0); }
+      w0.remove(); markDirty();
+      msg.textContent='🖼 スライドショーを解除しました（💾保存で確定）';
+      return;
+    }
+    if(!el||el.tagName!=='IMG'){ msg.textContent='スライドショーにしたい画像の上で右クリックしてください'; return; }
+    var iv=parseFloat(window.prompt('切り替えの間隔（秒）＝1枚を見せる時間','4')); if(isNaN(iv)) return; iv=Math.max(1,Math.min(60,iv));
+    var fd=parseFloat(window.prompt('フェードの長さ（秒）＝「ゆっくり切り替わる」なら2〜3がおすすめ','1.2')); if(isNaN(fd)) return; fd=Math.max(0.2,Math.min(10,fd));
+    fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
+      var ups=d.uploads||[];
+      if(!ups.length){ msg.textContent='アップロード画像がまだありません。先に「🖼 画像を追加」からアップロードしてください'; return; }
+      var picked=[];
+      var items=ups.map(function(u){return '<div class="it" data-src="'+u.url+'" style="position:relative"><img src="'+u.url+'"><span>'+esc(u.caption||u.file)+'</span><b data-badge="1" style="display:none;position:absolute;left:6px;top:6px;background:#1a7f37;color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px"></b></div>';}).join('');
+      var ov=document.createElement('div'); ov.id='__ce_pk';
+      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🖼 スライドショーにする画像を順番にクリック（右クリックした今の画像が1枚目・選んだ順に続く）</h4>'
+        +'<div class="gr">'+items+'</div>'
+        +'<button class="go2" id="__ce_slok" style="display:block;width:100%;background:#1a7f37;margin-top:10px">✔ この順番でスライドショー化（0枚選択中）</button></div>';
+      document.body.appendChild(ov);
+      var okb=ov.querySelector('#__ce_slok');
+      ov.addEventListener('click',function(e){
+        if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+        var it=e.target.closest('.it');
+        if(it){
+          var src=it.getAttribute('data-src'), ix=picked.indexOf(src);
+          if(ix>-1) picked.splice(ix,1); else picked.push(src);
+          [].forEach.call(ov.querySelectorAll('.it'),function(x){
+            var b=x.querySelector('[data-badge]'), n=picked.indexOf(x.getAttribute('data-src'));
+            if(b){ b.style.display=n>-1?'block':'none'; b.textContent=n>-1?String(n+2):''; }   // +2＝今の画像が1枚目だから
+            x.style.outline=n>-1?'3px solid #1a7f37':'';
+          });
+          okb.textContent='✔ この順番でスライドショー化（'+picked.length+'枚選択中）';
+          return;
+        }
+        if(e.target.id==='__ce_slok'){
+          if(!picked.length){ alert('切り替え先の画像を1枚以上クリックで選んでください'); return; }
+          ov.remove();
+          var disp=''; try{ disp=getComputedStyle(el).display; }catch(_){}
+          var br=''; try{ br=getComputedStyle(el).borderRadius; }catch(_){}
+          var wrap=document.createElement('span');
+          wrap.setAttribute('data-slshow','1');
+          wrap.setAttribute('data-slint',Math.round(iv*1000));
+          wrap.setAttribute('data-sldur',Math.round(fd*1000));
+          // 元画像を包む：元画像がそのまま大きさの基準（下敷き）になり、追加画像は上に重ねて絶対配置
+          wrap.style.cssText='position:relative;display:'+((disp==='inline'||disp==='inline-block')?'inline-block':'block')+';max-width:100%;line-height:0';
+          el.parentNode.insertBefore(wrap,el); wrap.appendChild(el);
+          picked.forEach(function(u){
+            var im=document.createElement('img'); im.src=u;
+            im.setAttribute('style','position:absolute;inset:0;width:100% !important;height:100% !important;object-fit:cover;margin:0;opacity:0'+(br&&br!=='0px'?(';border-radius:'+br):''));
+            wrap.appendChild(im);
+          });
+          ensureSlRun();
+          markDirty();
+          msg.textContent='🖼 スライドショーにしました（間隔'+iv+'秒・フェード'+fd+'秒・全'+(picked.length+1)+'枚）。解除＝同じ画像を右クリック→同じボタン。💾保存で確定';
+        }
+      });
+    }).catch(function(){ msg.textContent='通信エラー（アップロード一覧が取れませんでした）'; });
+  }
   // 🧹 全体を規則化：セクション余白を一律・主要見出しのサイズと行間を一律にそろえる（AIなし・一貫性UP）。
   // AI一括改善が「シンプルすぎ」になりがちな一貫性(余白/見出し)を、機械的に確実にそろえる用。
   // ➖ 全セクションの先頭に区切り線＋見出しラベルを入れる（AIなし）。
@@ -2164,6 +2244,90 @@ html.__ce_altmode{cursor:text}
     });
     markDirty();
     msg.textContent='規則化：上下余白 '+secN+'／左右余白 '+lrN+'件そろえ・'+lrSkip+'件は別扱い／中身の箱幅 '+wN+'件そろえ'+(wSkip?('・'+wSkip+'件は別扱い'):'')+'／見出し '+hN+'／本文行間 '+pN+'／影 '+shN+' 箇所をそろえました（💾保存で確定・⟲で戻せる）';
+  });
+  // 📍 動かした跡の一覧：ドラッグ移動（data-cetx/cety）を一覧パネルで見せて、選んで元に戻す。
+  // 全部自動で戻すと「わざと動かした位置」まで消えて困る（ユーザー要望）ため、
+  // 1行=1要素で移動量を見せ、行クリックで場所を確認しながら1個ずつ or 全部を選んで戻す方式。
+  // うっかりドラッグの跡が積み重なると、要素が重なったりoverflow:hiddenのセクション境界で
+  // 切られたりして「アニメで動いている間に隠れる」ズレになる（camp_20260710の実事故）。
+  var unshiftBtn=document.getElementById('__ce_unshift');
+  if(unshiftBtn) unshiftBtn.addEventListener('click',function(){
+    var oldP=document.getElementById('__ce_shp'); if(oldP) oldP.remove();
+    var moved=[].slice.call(document.querySelectorAll('[data-cetx],[data-cety]')).filter(function(el){
+      if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_shp'))) return false;
+      return ((+el.getAttribute('data-cetx'))||0)!==0 || ((+el.getAttribute('data-cety'))||0)!==0;
+    });
+    if(!moved.length){ msg.textContent='ドラッグで動かした跡は見つかりませんでした'; return; }
+    // 開いた時点の値を控える＝✖閉じるで全部元どおりにできる
+    var snap=moved.map(function(el){ return {el:el, tx:+el.getAttribute('data-cetx')||0, ty:+el.getAttribute('data-cety')||0}; });
+    function shpLabel(el){
+      var t=el.tagName.toLowerCase();
+      var tx=(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,12);
+      if(!tx) tx=(t==='img')?'画像':(String(el.className).split(' ')[0]||'');
+      return '<'+t+'>'+(tx?('「'+tx+'…」'):'');
+    }
+    function amount(o){ var a=[]; if(o.tx) a.push((o.tx>0?'→':'←')+Math.abs(o.tx)+'px'); if(o.ty) a.push((o.ty>0?'↓':'↑')+Math.abs(o.ty)+'px'); return a.join(' '); }
+    function secName(el){
+      var s=el.closest('section,header,footer'); if(!s) return 'ページ直下';
+      if(s.tagName==='HEADER') return '🧢 ヘッダー';
+      if(s.tagName==='FOOTER') return '🦶 フッター';
+      var h=s.querySelector('h1,h2,h3');
+      return h?(h.textContent||'').replace(/\\s+/g,' ').trim().slice(0,14):'セクション';
+    }
+    function resetOne(o){
+      o.el.setAttribute('data-cetx',0); o.el.setAttribute('data-cety',0); applyTf(o.el);
+      // 移動以外の編集も無い要素は、跡（0値のinlineと内部印）ごときれいに消す
+      if(!((+o.el.getAttribute('data-cero'))||0) && ((+o.el.getAttribute('data-cesx'))||1)===1 && ((+o.el.getAttribute('data-cesy'))||1)===1 && !o.el.getAttribute('data-cebt')){
+        o.el.style.removeProperty('translate'); o.el.style.removeProperty('rotate'); o.el.style.removeProperty('scale'); o.el.style.removeProperty('transform-origin');
+        ['data-cetx','data-cety','data-cesx','data-cesy','data-cero','data-cebt'].forEach(function(a){ o.el.removeAttribute(a); });
+      }
+    }
+    function restoreOne(o){ o.el.setAttribute('data-cetx',o.tx); o.el.setAttribute('data-cety',o.ty); applyTf(o.el); }
+    var p=document.createElement('div'); p.id='__ce_shp';
+    p.setAttribute('style','position:fixed;right:14px;top:64px;z-index:2147483647;background:#1d1d2b;color:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);font:12.5px/1.6 sans-serif;width:430px;max-width:96vw;max-height:72vh;overflow:auto');
+    var rows='', lastSec=null;
+    snap.forEach(function(o,i){
+      var sn=secName(o.el);
+      if(sn!==lastSec){ rows+='<div style="margin-top:6px;padding:2px 0;color:#9ad;font-weight:700;border-bottom:1px solid #46466a">📄 '+esc(sn)+'</div>'; lastSec=sn; }
+      rows+='<div class="__shprow" data-i="'+i+'" style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #34344a">'
+        +'<span title="クリックでその要素の場所を表示" style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(shpLabel(o.el))+'</span>'
+        +'<span style="color:#fbbf24;flex:none">'+amount(o)+'</span>'
+        +'<button data-rs="1" style="background:#dc2626;color:#fff;border:none;border-radius:5px;padding:2px 8px;cursor:pointer;flex:none">⟲ 戻す</button>'
+        +'</div>';
+    });
+    p.innerHTML='<b>📍 動かした跡の一覧（'+snap.length+'件）</b>'
+      +'<div style="opacity:.75;font-size:11px">行クリック＝その場所を表示して確認／「⟲戻す」＝その要素だけ動かす前の位置へ（もう一度押すと復元）。<br>わざと動かした所はそのまま残してOK</div>'
+      +'<div id="__ce_shprows" style="margin-top:4px">'+rows+'</div>'
+      +'<div style="margin-top:10px;display:flex;gap:6px">'
+      +'<button id="__ce_shpall" style="background:#7f1d1d;color:#fff;border:none;border-radius:7px;padding:5px 10px;cursor:pointer">⟲ 全部戻す</button>'
+      +'<span style="flex:1"></span>'
+      +'<button id="__ce_shpok" style="background:#16a34a;color:#fff;border:none;border-radius:7px;padding:5px 12px;cursor:pointer">✔ 決定</button>'
+      +'<button id="__ce_shpx" style="background:#555;color:#fff;border:none;border-radius:7px;padding:5px 12px;cursor:pointer">✖ 閉じる（開いた時に戻す）</button>'
+      +'</div>';
+    document.body.appendChild(p);
+    var done={};
+    p.addEventListener('click',function(ev){
+      var t=ev.target;
+      if(t.id==='__ce_shpok'){ p.remove(); markDirty(); msg.textContent='📍 決定しました（💾保存で確定・⟲で戻せる）'; return; }
+      if(t.id==='__ce_shpx'){ snap.forEach(function(o,i){ if(done[i]) restoreOne(o); }); p.remove(); msg.textContent='📍 開いた時点の位置に戻して閉じました'; return; }
+      if(t.id==='__ce_shpall'){
+        if(!confirm('一覧の '+snap.length+' 件を全部「動かす前の位置」に戻します。よろしいですか？\\n（やり過ぎたら「✖ 閉じる」で開いた時点に戻せます）')) return;
+        snap.forEach(function(o,i){ if(!done[i]){ resetOne(o); done[i]=1; } });
+        [].forEach.call(p.querySelectorAll('.__shprow'),function(r){ r.style.opacity='.45'; var b=r.querySelector('button'); if(b){ b.textContent='済(押すと復元)'; b.style.background='#374151'; } });
+        return;
+      }
+      var row=t.closest?t.closest('.__shprow'):null; if(!row) return;
+      var i=+row.getAttribute('data-i'), o=snap[i]; if(!o) return;
+      if(t.getAttribute&&t.getAttribute('data-rs')){
+        if(done[i]){ restoreOne(o); done[i]=0; row.style.opacity='1'; t.textContent='⟲ 戻す'; t.style.background='#dc2626'; }
+        else { resetOne(o); done[i]=1; row.style.opacity='.45'; t.textContent='済(押すと復元)'; t.style.background='#374151'; }
+        return;
+      }
+      // 行クリック：その要素の場所へスクロールして一瞬光らせる（どれのことか確認できる）
+      try{ o.el.scrollIntoView({block:'center'}); }catch(_){}
+      var oldOl=o.el.style.outline; o.el.style.outline='3px solid #f59e0b';
+      setTimeout(function(){ o.el.style.outline=oldOl||''; },1200);
+    });
   });
   // 🎨 全ボタンをテーマ色に統一：CTAの色バラつき（ブランド感の弱さ）をAIなしで一発解消。
   // 主要ボタン＝テーマ色で塗り／secondary系＝同色の枠線、に統一する。
@@ -2495,7 +2659,25 @@ html.__ce_altmode{cursor:text}
         var lead=s.match(/^([^\\s>+~]+)([\\s>+~].*)$/);
         if(lead){
           var lp=lead[1].replace(/::?[a-zA-Z-]+(\\((?:[^()]|\\([^()]*\\))*\\))?/g,'').trim();
-          try{ if(lp && el.matches(lp)) res.push(':scope'+lead[2]); }catch(_){}
+          try{ if(lp && el.matches(lp)){ res.push(':scope'+lead[2]); return; } }catch(_){}
+        }
+        // ③セレクタの前半が「ルートより上の先祖」に当たる（例：.slick-initialized .slick-slide）
+        //   → 部品として切り出すと先祖ごと消えて二度と当たらない。実例：本物サイト由来のslickスライダーで
+        //   「.slick-initialized .slick-slide{display:block}」が死に、全スライドがdisplay:noneのまま＝真っ白部品。
+        //   前半を:scopeに置き換えたコピーを足す（後半が部品の中の要素に実際に当たる時だけ・子/隣接の切れ目は対象外）。
+        var toks=s.split(/\\s+/);
+        for(var k=1;k<toks.length;k++){
+          if(/^[>+~]$/.test(toks[k-1])||/^[>+~]$/.test(toks[k])) continue;
+          var aP=toks.slice(0,k).join(' ').replace(/::?[a-zA-Z-]+(\\((?:[^()]|\\([^()]*\\))*\\))?/g,'').trim();
+          var aR=toks.slice(k).join(' ');
+          var aRp=aR.replace(/::?[a-zA-Z-]+(\\((?:[^()]|\\([^()]*\\))*\\))?/g,'').replace(/[>+~\\s]+$/,'').trim();
+          if(!aP||!aRp) continue;
+          var anc=el.parentElement, hitAnc=false;
+          while(anc && anc.nodeType===1){ try{ if(anc.matches(aP)){ hitAnc=true; break; } }catch(_){ break; } anc=anc.parentElement; }
+          if(!hitAnc) continue;
+          var hitIn=false;
+          for(var j=0;j<els.length;j++){ try{ if(els[j].matches(aRp)){ hitIn=true; break; } }catch(_){} }
+          if(hitIn){ res.push(':scope '+aR); break; }
         }
       });
       return res;
@@ -5394,7 +5576,7 @@ html.__ce_altmode{cursor:text}
   //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
-  function _inUI2(node){ if(window.__ceFlyMode) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')); }
+  function _inUI2(node){ if(window.__ceFlyMode) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')); }
   var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   document.addEventListener('mousedown',function(e){
     if(e.altKey || e.button!==0 || _inUI2(e.target)) return;
@@ -5555,7 +5737,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
@@ -5580,6 +5762,11 @@ html.__ce_altmode{cursor:text}
     // ★これを忘れると「再生し終わった状態(--hlw:100)」がそのまま保存され、次に開いた時に
     //   アニメせず最初から引かれた状態になってしまう（実際に起きたバグ）。必ず0に戻す。
     [].slice.call(doc.querySelectorAll('.fxa_hl')).forEach(function(n){ n.style.setProperty('--hlw',0); });
+    // 🖼 スライドショー：保存の瞬間に何枚目が表示中でも、保存版は必ず1枚目から始める
+    // （--hlw焼き込み事故と同じ家系の予防。スクリプトが動かない場所＝サムネ等でも1枚目が見える）
+    [].slice.call(doc.querySelectorAll('[data-slshow]')).forEach(function(w){
+      [].slice.call(w.querySelectorAll('img')).forEach(function(im,i){ im.style.setProperty('opacity', i===0?'1':'0', 'important'); });
+    });
     // 🕊 飛行アニメ：飛んでる途中のtranslate/rotateが保存に焼き付かないよう、確定位置（data-cetx等）へ戻す。
     // ★これを忘れるとマーカーの--hlwと同じ事故（飛び終わった位置で固まった状態が保存される）が起きる。
     [].slice.call(doc.querySelectorAll('[data-fxa-fly],[data-cefly]')).forEach(function(n){
@@ -5692,6 +5879,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）'],
     ['__ce_q_txt','✏ 文字を追加（編集）'],
     ['__ce_q_img','🖼 画像を追加（ここに置く）'],
+    ['__ce_q_slide','🖼 スライドショー（画像が次々切り替わる）'],
     ['__ce_q_fx','✨ 動きを付ける（アニメを選ぶ）'],
     ['__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）'],
     ['__ce_q_dly','⏳ 動きの演出（順番・遅らせ・速さ）'],
@@ -5839,6 +6027,7 @@ html.__ce_altmode{cursor:text}
         return;
       }
       if(t.id==='__ce_q_img'){ closeMenu(); openAddImagePicker((window.scrollX||window.pageXOffset||0)+qx, (window.scrollY||window.pageYOffset||0)+qy); return; }
+      if(t.id==='__ce_q_slide'){ var sle=curEl; closeMenu(); slideMake(sle); return; }
       if(t.id==='__ce_q_fx'){ _bigFull=true; _bigFxFocus=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
       if(t.id==='__ce_q_dly'){ var dle=curEl; closeMenu(); dlyOpen(dle,qx,qy); return; }
