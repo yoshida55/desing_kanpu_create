@@ -803,20 +803,31 @@ def api_clone_site():
     """
     data = request.get_json(silent=True) or {}
     site_id = (data.get("id") or "").strip()
+    raw_url = (data.get("url") or "").strip()
     keep_js = bool(data.get("keep_js"))
     use_extracted = bool(data.get("use_extracted"))
-    with db.connect() as conn:
-        row = db.get_site(conn, site_id)
-    if not row:
-        return jsonify({"ok": False, "message": "見つかりません"}), 404
-    if use_extracted and not assets.list_assets(site_id):
-        return jsonify({"ok": False, "message": "先に『🖼画像を抜き出す』で画像を抜き出してください"}), 400
+    if site_id:
+        with db.connect() as conn:
+            row = db.get_site(conn, site_id)
+        if not row:
+            return jsonify({"ok": False, "message": "見つかりません"}), 404
+        url = row["url"]
+        if use_extracted and not assets.list_assets(site_id):
+            return jsonify({"ok": False, "message": "先に『🖼画像を抜き出す』で画像を抜き出してください"}), 400
+    elif raw_url.startswith(("http://", "https://")):
+        # 🌐 URL直指定クローン（Chrome拡張の右クリック用）：登録していないサイトでもOK。
+        # 抽出済み画像の再利用はsite_idが無いと引けないので、URL直のときは常にその場DL。
+        url = raw_url
+        site_id = "direct"
+        use_extracted = False
+    else:
+        return jsonify({"ok": False, "message": "見つかりません（idかurlを指定してください）"}), 404
     with _CLONE_LOCK:
         if _CLONING.get("site_id") is not None:
             return jsonify({"ok": False, "message": "別のクローンが進行中です"}), 409
         _CLONING.update({"site_id": site_id, "phase": "開始しています…", "file": None, "error": None})
-    log.info("クローンジョブ開始: %s (keep_js=%s, use_extracted=%s)", row["url"], keep_js, use_extracted)
-    threading.Thread(target=_run_clone_job, args=(site_id, row["url"], keep_js, use_extracted), daemon=True).start()
+    log.info("クローンジョブ開始: %s (keep_js=%s, use_extracted=%s)", url, keep_js, use_extracted)
+    threading.Thread(target=_run_clone_job, args=(site_id, url, keep_js, use_extracted), daemon=True).start()
     return jsonify({"ok": True, "site_id": site_id})
 
 

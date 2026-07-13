@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "デザインストック：右クリックでクローン",
+  "version": "1.0",
+  "description": "見ているサイトを右クリックで86ツール（127.0.0.1:5000）に忠実クローンし、完成したら自動でタブを開く",
+  "permissions": ["contextMenus", "alarms"],
+  "host_permissions": ["http://127.0.0.1:5000/*"],
+  "action": { "default_title": "クローンの状態（…=作成中 / ×=失敗）" },
+  "background": { "service_worker": "background.js" }
+}
