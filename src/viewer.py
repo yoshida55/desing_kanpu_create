@@ -2069,12 +2069,12 @@ html.__ce_altmode{cursor:text}
   });
   var normBtn=document.getElementById('__ce_normalize');
   if(normBtn) normBtn.addEventListener('click',function(){
-    if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・セクションの上下余白 100px\\n・セクションの左右余白 → 多数派の値にそろえる（明らかに違うものはそのまま＝意図的な余白として残す）\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
+    if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・セクションの上下余白 100px\\n・セクションの左右余白 → 多数派の値にそろえる（左右別々に判定・明らかに違うものはそのまま＝意図的な余白として残す）\\n・中身の箱（.container等）の幅も多数派にそろえる（右端のズレを解消）\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
     function _skip(el){ return el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')); }
     // カード等の小見出し・小さい文字は対象外（そこまで大きく/広くすると崩れるため）
     function _inCard(el){ var n=el; while(n && n!==document.body){ var c=(n.className&&n.className.toString())||''; if(/card|item|bubble|benefit|badge|chip|tag|nav|menu|footer|col/i.test(c)) return true; n=n.parentElement; } return false; }
     var secN=0, hN=0, pN=0;
-    var secEls=[], lrVals=[];
+    var secEls=[], lVals=[], rVals=[];
     [].forEach.call(document.querySelectorAll('section'),function(s){
       if(_skip(s)) return;
       s.style.setProperty('padding-top','100px','important');
@@ -2082,22 +2082,57 @@ html.__ce_altmode{cursor:text}
       s.style.setProperty('margin-top','0','important');
       s.style.setProperty('margin-bottom','0','important');
       secEls.push(s);
-      try{ lrVals.push(parseFloat(getComputedStyle(s).paddingLeft)||0); }catch(_){ lrVals.push(0); }
+      try{ var _cs=getComputedStyle(s); lVals.push(parseFloat(_cs.paddingLeft)||0); rVals.push(parseFloat(_cs.paddingRight)||0); }
+      catch(_){ lVals.push(0); rVals.push(0); }
       secN++;
     });
-    // 左右の余白：フルブリード(0px)のヒーロー等が混ざるとバラバラに見えるので「多数派の値」にそろえる。
-    // ただし現在値が多数派とかけ離れているセクションは、意図した余白とみなして触らずに残す（別扱い）。
+    // 左右の余白：左と右を別々に測って別々に判定する（旧実装は左しか測っておらず「右だけ違う」を見逃していた）。
+    // フルブリード(0px)のヒーロー等が混ざるとバラバラに見えるので「多数派の値」にそろえる。
+    // ただし現在値が多数派とかけ離れている側は、意図した余白とみなして触らずに残す（別扱い）。
     var lrN=0, lrSkip=0;
-    if(lrVals.length){
-      var sorted=lrVals.slice().sort(function(a,b){return a-b;});
+    if(secEls.length){
+      var sorted=lVals.concat(rVals).sort(function(a,b){return a-b;});
       var target=Math.max(24, Math.round(sorted[Math.floor(sorted.length/2)]));   // 中央値（最低24px）
       var tol=Math.max(16, target*0.35);   // これ以上離れていたら「明らかに余白が違う」として除外
       secEls.forEach(function(s,i){
-        if(Math.abs(lrVals[i]-target)<=tol){
-          s.style.setProperty('padding-left',target+'px','important');
-          s.style.setProperty('padding-right',target+'px','important');
-          lrN++;
-        } else { lrSkip++; }
+        var okL=Math.abs(lVals[i]-target)<=tol, okR=Math.abs(rVals[i]-target)<=tol;
+        if(okL) s.style.setProperty('padding-left',target+'px','important');
+        if(okR) s.style.setProperty('padding-right',target+'px','important');
+        if(okL&&okR) lrN++; else lrSkip++;
+      });
+    }
+    // 中身の箱の幅もそろえる＝「右端が揃わない」の主犯対策。セクションのpaddingを揃えても、
+    // 中の.container等（max-width持ちの中央寄せ箱）の幅がセクションごとに違うと右端の通り位置がズレる。
+    // 実測幅の多数派（中央値）にmax-widthを統一。中央寄せでない箱・かけ離れた幅は意図とみなして触らない。
+    var wraps=[], wVals=[], wN=0, wSkip=0;
+    secEls.forEach(function(s){
+      var sr, csS; try{ sr=s.getBoundingClientRect(); csS=getComputedStyle(s); }catch(_){ return; }
+      var innerW=sr.width-(parseFloat(csS.paddingLeft)||0)-(parseFloat(csS.paddingRight)||0);
+      var best=null, bw=0;
+      [].forEach.call(s.children,function(c){
+        if(c.nodeType!==1||_skip(c)) return;
+        if(c.className && String(c.className).indexOf('__ce')>-1) return;
+        var r; try{ r=c.getBoundingClientRect(); }catch(_){ return; }
+        if(r.width<320||r.height<10) return;                              // 小物は箱ではない
+        if(r.width>=innerW-8) return;                                     // 幅いっぱい＝paddingで揃済み・対象外
+        if(Math.abs((r.left-sr.left)-(sr.right-r.right))>24) return;      // 中央寄せでない＝意図した片寄せは触らない
+        if(r.width>bw){ bw=r.width; best=c; }
+      });
+      if(best){ wraps.push(best); wVals.push(bw); }
+    });
+    if(wVals.length>=2){
+      var ws=wVals.slice().sort(function(a,b){return a-b;});
+      var wTarget=Math.round(ws[Math.floor(ws.length/2)]);
+      var wTol=Math.max(24, wTarget*0.15);   // 幅が15%以上違う箱は意図した狭さ/広さとして残す
+      wraps.forEach(function(w,i){
+        if(Math.abs(wVals[i]-wTarget)>wTol){ wSkip++; return; }
+        w.style.setProperty('max-width',wTarget+'px','important');
+        w.style.setProperty('margin-left','auto','important');
+        w.style.setProperty('margin-right','auto','important');
+        // 今より広げる必要がある箱はwidth:100%で伸ばす（border-boxの箱だけ＝padding分のはみ出し防止）
+        var csW=null; try{ csW=getComputedStyle(w); }catch(_){}
+        if(wVals[i]<wTarget-2 && csW && csW.boxSizing==='border-box'){ w.style.setProperty('width','100%','important'); }
+        wN++;
       });
     }
     // 見出し：サイズ＋太さも一律（H1=太字700／H2・H3=セミボールド600）
@@ -2128,7 +2163,7 @@ html.__ce_altmode{cursor:text}
       if(bs && bs!=='none'){ el.style.setProperty('box-shadow',STD_SHADOW,'important'); shN++; }
     });
     markDirty();
-    msg.textContent='規則化：上下余白 '+secN+'／左右余白 '+lrN+'件そろえ・'+lrSkip+'件は別扱い／見出し '+hN+'／本文行間 '+pN+'／影 '+shN+' 箇所をそろえました（💾保存で確定・⟲で戻せる）';
+    msg.textContent='規則化：上下余白 '+secN+'／左右余白 '+lrN+'件そろえ・'+lrSkip+'件は別扱い／中身の箱幅 '+wN+'件そろえ'+(wSkip?('・'+wSkip+'件は別扱い'):'')+'／見出し '+hN+'／本文行間 '+pN+'／影 '+shN+' 箇所をそろえました（💾保存で確定・⟲で戻せる）';
   });
   // 🎨 全ボタンをテーマ色に統一：CTAの色バラつき（ブランド感の弱さ）をAIなしで一発解消。
   // 主要ボタン＝テーマ色で塗り／secondary系＝同色の枠線、に統一する。
