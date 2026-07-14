@@ -154,6 +154,22 @@ class HtmlGenConfig:
             os.environ.get("DESIGN_STOCK_HTML_PROVIDER", "anthropic"),
         )
     )
+    # advice_provider＝📚お手本アドバイスに使うエンジン（未指定なら修正エンジンと同じ）。
+    # アドバイスは出力が短い＝上位モデルでも1回数円なので、ここだけGPT等に上げられる。
+    advice_provider: str = field(
+        default_factory=lambda: os.environ.get(
+            "DESIGN_STOCK_ADVICE_PROVIDER",
+            os.environ.get(
+                "DESIGN_STOCK_EDIT_PROVIDER",
+                os.environ.get("DESIGN_STOCK_HTML_PROVIDER", "anthropic"),
+            ),
+        )
+    )
+    # advice_model＝アドバイス専用のモデル上書き（空ならそのエンジンの既定モデルを使う）。
+    # 例：DESIGN_STOCK_ADVICE_MODEL=gpt-5.6-sol
+    advice_model: str = field(
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_ADVICE_MODEL", "")
+    )
     openai_api_key: str = field(default_factory=lambda: os.environ.get("OPENAI_API_KEY", ""))
     openai_model: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_OPENAI_MODEL", "gpt-5.6-terra")
