@@ -1126,30 +1126,29 @@
           <div style="flex:1;min-width:150px">
             <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:3px">🧐 指摘する（目あり）</div>
             <select class="set_input set_input_s" id="set_advice_provider" style="width:100%">
-              <option value="openai">GPT</option><option value="anthropic">Claude</option><option value="gemini">Gemini</option>
+              <option value="openai">GPT</option><option value="anthropic">Claude</option><option value="gemini">Gemini</option><option value="codex">Codex（ChatGPT定額・追加0円）</option>
             </select>
-            <input class="set_input" id="set_advice_model" list="dcq_model_list" placeholder="モデルID（空＝既定）" style="width:100%;margin-top:3px;box-sizing:border-box">
+            <input class="set_input" id="set_advice_model" list="dcq_ml_adv" placeholder="モデルID（空＝既定）" style="width:100%;margin-top:3px;box-sizing:border-box">
+            <datalist id="dcq_ml_adv"></datalist>
           </div>
           <div style="flex:1;min-width:150px">
             <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:3px">🔧 修正する</div>
             <select class="set_input set_input_s" id="set_fix_provider" style="width:100%">
-              <option value="anthropic">Claude</option><option value="openai">GPT</option><option value="gemini">Gemini</option><option value="deepseek">DeepSeek</option><option value="zai">GLM</option>
+              <option value="anthropic">Claude</option><option value="openai">GPT</option><option value="gemini">Gemini</option><option value="deepseek">DeepSeek</option><option value="zai">GLM</option><option value="codex">Codex（ChatGPT定額・追加0円）</option>
             </select>
-            <div style="font-size:10px;color:#999;margin-top:3px">＝上の「修正エンジン」と同じ。モデルは各エンジンのモデル欄</div>
+            <input class="set_input" id="set_fix_model" list="dcq_ml_fix" placeholder="モデルID（空＝既定）" style="width:100%;margin-top:3px;box-sizing:border-box">
+            <datalist id="dcq_ml_fix"></datalist>
+            <div style="font-size:10px;color:#999;margin-top:3px">指摘どおり直す専用（上の修正エンジンとは別）</div>
           </div>
           <div style="flex:1;min-width:150px">
             <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:3px">✅ 評価する（目あり）</div>
             <select class="set_input set_input_s" id="set_recheck_provider" style="width:100%">
-              <option value="openai">GPT</option><option value="anthropic">Claude</option><option value="gemini">Gemini</option>
+              <option value="openai">GPT</option><option value="anthropic">Claude</option><option value="gemini">Gemini</option><option value="codex">Codex（ChatGPT定額・追加0円）</option>
             </select>
-            <input class="set_input" id="set_recheck_model" list="dcq_model_list" placeholder="モデルID（空＝既定）" style="width:100%;margin-top:3px;box-sizing:border-box">
+            <input class="set_input" id="set_recheck_model" list="dcq_ml_rc" placeholder="モデルID（空＝既定）" style="width:100%;margin-top:3px;box-sizing:border-box">
+            <datalist id="dcq_ml_rc"></datalist>
           </div>
         </div>
-        <datalist id="dcq_model_list">
-          <option value="gpt-5.6-sol"></option><option value="gpt-5.6-terra"></option><option value="gpt-5.6-luna"></option>
-          <option value="claude-opus-4-8"></option><option value="claude-sonnet-5"></option><option value="claude-haiku-4-5"></option>
-          <option value="gemini-3.1-flash"></option><option value="gemini-3.1-flash-lite"></option>
-        </datalist>
       </div>
       <div class="set_row">
         <span class="set_label">Claudeモデル</span>
@@ -1781,9 +1780,12 @@
       // 🧐デザイン指摘の3役
       const advP = document.querySelector("#set_advice_provider"); if (advP) advP.value = s.advice_provider || "openai";
       const advM = document.querySelector("#set_advice_model"); if (advM) advM.value = s.advice_model || "";
-      const fixP = document.querySelector("#set_fix_provider"); if (fixP) fixP.value = s.edit_provider || s.provider;
+      const fixP = document.querySelector("#set_fix_provider"); if (fixP) fixP.value = s.dcfix_provider || s.edit_provider || s.provider;
+      const fixM = document.querySelector("#set_fix_model"); if (fixM) fixM.value = s.dcfix_model || "";
       const rcP = document.querySelector("#set_recheck_provider"); if (rcP) rcP.value = s.recheck_provider || s.advice_provider || "openai";
       const rcM = document.querySelector("#set_recheck_model"); if (rcM) rcM.value = s.recheck_model || "";
+      // エンジンに合わせてモデル候補（datalist）と入力可否を揃える
+      ["#set_advice_provider", "#set_fix_provider", "#set_recheck_provider"].forEach(dcqModelUI);
       document.querySelector("#set_openai_model").value = s.openai_model || "";
       if (s.anthropic_model) document.querySelector("#set_anthropic_model").value = s.anthropic_model;
       if (s.gemini_model) document.querySelector("#set_gemini_model").value = s.gemini_model;
@@ -1889,10 +1891,35 @@
       });
     });
 
+    // 🧐デザイン指摘の3役：エンジンごとに出すモデル候補（datalist）を切り替える。
+    // gemini/deepseek/zaiはモデル欄が効かない（それぞれ下の共通モデル欄で指定する作り）＝入力を封印して案内。
+    const DCQ_MODELS = {
+      openai: ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"],
+      codex: ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"],  // codexは軽いモデルほど5時間枠が長持ち
+      anthropic: ["claude-opus-4-8", "claude-sonnet-5", "claude-haiku-4-5"],
+      gemini: [], deepseek: [], zai: [],
+    };
+    const DCQ_MODEL_LOCK = { gemini: "↓のGeminiモデル欄で指定", deepseek: "↓のDeepSeekモデル欄で指定", zai: "↓のGLMモデル欄で指定" };
+    // provider選択 → [モデル入力, 保存キー, datalist id]
+    const DCQ_PAIR = {
+      "#set_advice_provider": ["#set_advice_model", "advice_model", "dcq_ml_adv"],
+      "#set_fix_provider": ["#set_fix_model", "dcfix_model", "dcq_ml_fix"],
+      "#set_recheck_provider": ["#set_recheck_model", "recheck_model", "dcq_ml_rc"],
+    };
+    function dcqModelUI(selSel) {
+      const pair = DCQ_PAIR[selSel];
+      const sel = document.querySelector(selSel), inp = document.querySelector(pair[0]), dl = document.getElementById(pair[2]);
+      if (!sel || !inp || !dl) return;
+      const prov = sel.value;
+      dl.innerHTML = (DCQ_MODELS[prov] || []).map((m) => `<option value="${m}"></option>`).join("");
+      if (DCQ_MODEL_LOCK[prov]) { inp.disabled = true; inp.placeholder = DCQ_MODEL_LOCK[prov]; }
+      else { inp.disabled = false; inp.placeholder = "モデルID（空＝既定）"; }
+    }
     // 🧐デザイン指摘の3役も、変えた瞬間に自動保存
     [["#set_advice_provider", "advice_provider", "🧐指摘するAI"],
      ["#set_advice_model", "advice_model", "🧐指摘モデル"],
-     ["#set_fix_provider", "edit_provider", "🔧修正するAI"],
+     ["#set_fix_provider", "dcfix_provider", "🔧修正するAI"],
+     ["#set_fix_model", "dcfix_model", "🔧修正モデル"],
      ["#set_recheck_provider", "recheck_provider", "✅評価するAI"],
      ["#set_recheck_model", "recheck_model", "✅評価モデル"]].forEach((t) => {
       const elm = document.querySelector(t[0]);
@@ -1901,6 +1928,12 @@
         setMsg.textContent = t[2] + "を保存中…";
         try {
           const body = {}; body[t[1]] = elm.value;
+          // エンジンを変えたら、前のエンジン用モデルの残りかすを消して既定に戻す（誤設定防止）
+          if (DCQ_PAIR[t[0]]) {
+            const inp = document.querySelector(DCQ_PAIR[t[0]][0]);
+            if (inp) { inp.value = ""; body[DCQ_PAIR[t[0]][1]] = ""; }
+            dcqModelUI(t[0]);
+          }
           await fetch("/api/settings", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
@@ -2052,7 +2085,7 @@
         });
         const data = await res.json();
         if (!data.ok) { campState.textContent = data.message; return; }
-        _campLocal[data.job_id] = { start: Date.now(), brief };
+        _campLocal[data.job_id] = { start: Date.now(), brief, mine: 1 };  // mine=このタブが開始＝完了時に自動で開く
         campState.textContent = "生成を開始しました（下に進捗が出ます／続けて別の生成もできます）";
         renderCampJobs({});      // すぐに「開始中」カードを出す
         startCampPoller();
@@ -2209,7 +2242,9 @@
         // 完了したジョブはカードを残さない（自動でカンプを開く＋履歴に入る）。進行中とエラーだけ表示。
         // ただし品質チェックの警告（内容が薄い＝ハズレ回）が付いた完了は、警告カードとして残す。
         if (j.state === "done") {
-          if (!_campOpened[id]) { _campOpened[id] = 1; window.open("/camp/" + j.file, "campview"); loadCampHistory(); }
+          // 自動で開くのは「このタブが自分で始めたジョブ」だけ。カンプタブ内の修正(kind=edit)は
+          // そのタブ自身が完了時に開き直すので、ここで開くと二重＝タブが増える（ユーザー報告で発覚）。
+          if (!_campOpened[id]) { _campOpened[id] = 1; if (_campLocal[id]?.mine) window.open("/camp/" + j.file, "campview"); loadCampHistory(); }
           if (j.quality_warn) {
             if (!el) { el = document.createElement("div"); el.id = "cj_" + id; campJobs.prepend(el); }
             el.className = "camp_job is_warn";
@@ -2267,7 +2302,7 @@
         body: JSON.stringify({ file, section: Number(section), instruction }),
       }).then((r) => r.json()).then((data) => {
         if (!data.ok) { campState.textContent = data.message; return; }
-        _campLocal[data.job_id] = { start: Date.now(), brief: "部分編集: " + instruction.slice(0, 24) };
+        _campLocal[data.job_id] = { start: Date.now(), brief: "部分編集: " + instruction.slice(0, 24), mine: 1 };  // ホーム発の修正＝完了時にcampviewタブで開く（毎回同じタブを再利用）
         campState.textContent = "部分編集を開始しました（下に進捗が出ます）";
         renderCampJobs({}); startCampPoller();
       }).catch((e) => { campState.textContent = "通信エラー：" + e; });
@@ -3007,7 +3042,7 @@
         const jobs = data.jobs || {};
         if (!Object.keys(jobs).length) return;
         Object.keys(jobs).forEach((id) => {
-          if (!_campLocal[id]) _campLocal[id] = { start: Date.now(), brief: jobs[id].brief };
+          if (!_campLocal[id]) _campLocal[id] = { start: Date.now(), brief: jobs[id].brief, mine: jobs[id].kind === "edit" ? 0 : 1 };  // 修正ジョブはカンプタブ自身が開くので自動オープンしない
           if (jobs[id].state !== "running") _campOpened[id] = 1;  // 既に終わってた分は自動で開かない
         });
         campPanel.classList.add("is_open");

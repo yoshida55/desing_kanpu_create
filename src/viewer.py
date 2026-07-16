@@ -307,6 +307,8 @@ def api_settings_get():
             "advice_model": "" if h.advice_model == "default" else h.advice_model,
             "recheck_provider": h.recheck_provider or h.advice_provider,
             "recheck_model": "" if h.recheck_model == "default" else h.recheck_model,
+            "dcfix_provider": h.dcfix_provider,
+            "dcfix_model": "" if h.dcfix_model == "default" else h.dcfix_model,
             "openai_model": h.openai_model,
             "anthropic_model": v.model,
             "openai_set": h.openai_enabled,
@@ -452,6 +454,9 @@ def _provider_ready(provider: str) -> bool:
         return config.CONFIG.deepseek.enabled
     if provider == "zai":
         return config.CONFIG.zai.enabled
+    if provider == "codex":
+        import shutil as _sh
+        return _sh.which("codex") is not None  # CLIが入っていればOK（課金はChatGPT定額枠）
     return config.CONFIG.vibe.enabled
 
 
@@ -490,17 +495,22 @@ def api_settings_post():
         updates["DESIGN_STOCK_HTML_PROVIDER"] = data["provider"]
     if data.get("edit_provider") in ("anthropic", "openai", "gemini", "deepseek", "zai"):
         updates["DESIGN_STOCK_EDIT_PROVIDER"] = data["edit_provider"]
-    # 🧐デザイン指摘の3役（指摘・評価はスクショを見るので画像対応エンジンのみ）
-    if data.get("advice_provider") in ("anthropic", "openai", "gemini"):
+    # 🧐デザイン指摘の3役（指摘・評価はスクショを見るので画像対応エンジンのみ。codexも画像OK）
+    if data.get("advice_provider") in ("anthropic", "openai", "gemini", "codex"):
         updates["DESIGN_STOCK_ADVICE_PROVIDER"] = data["advice_provider"]
-    if data.get("recheck_provider") in ("anthropic", "openai", "gemini"):
+    if data.get("recheck_provider") in ("anthropic", "openai", "gemini", "codex"):
         updates["DESIGN_STOCK_RECHECK_PROVIDER"] = data["recheck_provider"]
+    # 🔧指摘どおりに直す専用エンジン（テキスト仕事＝deepseek/zaiもOK・カンプ修正エンジンとは別枠）
+    if data.get("dcfix_provider") in ("anthropic", "openai", "gemini", "deepseek", "zai", "codex"):
+        updates["DESIGN_STOCK_DCFIX_PROVIDER"] = data["dcfix_provider"]
     # モデル欄は「空に戻す＝既定モデル」を許すため、空文字を "default" として保存する
     # （update_env_fileは空文字を「変更しない」と扱う仕様＝APIキー消し防止のため）
     if "advice_model" in data:
         updates["DESIGN_STOCK_ADVICE_MODEL"] = (data.get("advice_model") or "").strip() or "default"
     if "recheck_model" in data:
         updates["DESIGN_STOCK_RECHECK_MODEL"] = (data.get("recheck_model") or "").strip() or "default"
+    if "dcfix_model" in data:
+        updates["DESIGN_STOCK_DCFIX_MODEL"] = (data.get("dcfix_model") or "").strip() or "default"
     if (data.get("openai_model") or "").strip():
         updates["DESIGN_STOCK_OPENAI_MODEL"] = data["openai_model"].strip()
     if (data.get("anthropic_model") or "").strip():
@@ -838,11 +848,203 @@ def api_design_critique():
         {"type": "text", "text": body_txt},
     ]
     try:
+        camp.TASK_LABEL = "recheck" if (mode == "recheck" and prev) else "critique"
         txt, used = camp._call_llm(system, content, provider=provider, model=model)
     except Exception as exc:  # noqa: BLE001
         log.exception("デザイン指摘に失敗")
         return jsonify({"ok": False, "message": str(exc)[:200]}), 500
+    finally:
+        camp.TASK_LABEL = "misc"
     return jsonify({"ok": True, "critique": (txt or "").strip()[:4000], "model": used})
+
+
+# ===== 🌙 自動ブラッシュアップ：🧐指摘→🔧修正を全セクションに自動で回す =====
+# 人間がボタンを2回押していた流れ（指摘をもらう→この指摘どおりに直して）を、指定周回数だけ自動化。
+# 暴走・高額の防止（設計で保証）：
+#   ・周回数はforループの回数で固定＝「直るまで回り続ける」構造がそもそも存在しない
+#   ・上限は brushup_max_rounds（.envの DESIGN_STOCK_BRUSHUP_MAX_ROUNDS・既定3）でクランプ
+#   ・実行前に /api/brushup_estimate が過去実測ベースの見積もり円を返し、UIが確認ダイアログを出す
+#   ・途中版は作業用コピー1ファイルに上書き＝修正のたびにファイルもタブも増えない。元カンプは無傷
+# 見本の注入：カンプの <meta name="ce-base"> からベースサイトのスクショ・トークン・雰囲気文を取り、
+# 指摘AIに毎回見せる＝「AIの好み」ではなく「ユーザーが選んだ手本」を物差しにする。
+
+
+def _brushup_base_ctx(html: str) -> dict | None:
+    """ce-baseメタ→ベースサイトの見本素材（firstviewスクショ・トークン・雰囲気）を集める。無ければNone。"""
+    m = re.search(r'<meta\b[^>]*name=["\']ce-base["\'][^>]*>', html, re.I)
+    if not m:
+        return None
+    c = re.search(r'content=["\']([^"\']+)["\']', m.group(0))
+    if not c:
+        return None
+    with db.connect() as conn:
+        row = db.get_site(conn, c.group(1).strip())
+    if not row:
+        return None
+    parts = [f"■見本（このカンプの手本サイト・寄せる先）: {row['url']}"]
+    if row["vibe_description"]:
+        parts.append("雰囲気: " + row["vibe_description"][:200])
+    if row["design_tokens"]:
+        try:
+            from . import tokens as tokens_mod
+            parts.append("デザイントークン:\n" + tokens_mod.tokens_to_prompt(_json.loads(row["design_tokens"])))
+        except Exception:  # noqa: BLE001
+            pass
+    ctx: dict = {"txt": "\n".join(parts), "img": None, "mime": "image/png"}
+    try:
+        fp = config.resolve_data_path(row["firstview_path"])
+        if fp.exists():
+            ctx["img"] = fp.read_bytes()
+            ctx["mime"] = "image/jpeg" if fp.suffix.lower() in (".jpg", ".jpeg") else "image/png"
+    except Exception:  # noqa: BLE001
+        pass
+    return ctx
+
+
+def _run_brushup_job(job_id: str, fn: str, rounds: int, secs: list[int] | None = None) -> None:
+    """🌙自動磨き本体：作業コピー1つを作り、(指摘→修正)×セクション×周回で上書きしていく。
+
+    secs＝磨くセクション番号（0始まり）の絞り込み。None/空なら全セクション。
+    テスト時に「2セクションだけ」のような小さい実行ができる（Codexの枠・API課金の節約）。
+    """
+    try:
+        h = config.CONFIG.htmlgen
+        src_html = (config.CAMP_DIR / fn).read_text(encoding="utf-8")
+        work = f"camp_{datetime.now().strftime('%Y%m%d_%H%M%S')}_brush.html"
+        (config.CAMP_DIR / work).write_text(src_html, encoding="utf-8")
+        base = _brushup_base_ctx(src_html)
+        # エンジン：指摘＝advice（画像必須・deepseek/zaiはopenaiへ退避）／修正＝dcfix（無ければ修正エンジン）
+        adv_p = h.advice_provider if h.advice_provider not in ("deepseek", "zai") else "openai"
+        adv_m = None if h.advice_model in ("", "default") else h.advice_model
+        fix_p = h.dcfix_provider or h.edit_provider
+        fix_m = h.dcfix_model if h.dcfix_provider else ""
+        skipped: list[str] = []
+        for r in range(rounds):  # ★回数固定ループ＝これ以上は物理的に回らない
+            n = len(list(camp._SEC_RE.finditer((config.CAMP_DIR / work).read_text(encoding="utf-8"))))
+            targets = [i for i in (secs or range(n)) if 0 <= i < n]
+            done_cnt = 0
+            for i in targets:
+                done_cnt += 1
+                tag = f"{r + 1}周目S{i + 1}"
+                _camp_set(job_id, phase=f"🌙 {r + 1}/{rounds}周目 セクション{i + 1}（{done_cnt}/{len(targets)}）：🧐指摘中…")
+                try:
+                    shot = spec.shot_part(work, "section", i)
+                except Exception:  # noqa: BLE001
+                    log.exception("自動磨き: スクショ失敗 %s", tag)
+                    skipped.append(tag + "(スクショ失敗)")
+                    continue
+                mm = list(camp._SEC_RE.finditer((config.CAMP_DIR / work).read_text(encoding="utf-8")))
+                if i >= len(mm):
+                    break
+                content: list = [{"type": "image", "source": {
+                    "type": "base64", "media_type": "image/jpeg",
+                    "data": _b64.b64encode(shot).decode("ascii"),
+                }}]
+                body = "■このセクション（1枚目の画像）の指摘をする。参考にHTMLも渡す:\n" + mm[i].group(0)[:8000]
+                if base:
+                    if base.get("img"):
+                        content.append({"type": "image", "source": {
+                            "type": "base64", "media_type": base["mime"],
+                            "data": _b64.b64encode(base["img"]).decode("ascii"),
+                        }})
+                        body += ("\n\n■2枚目の画像＝このカンプの見本（手本サイト）。"
+                                 "指摘は自分の好みではなく、この見本の雰囲気・密度・余白感に近づける方向で出すこと。"
+                                 "見本に無い装飾（角丸カード・影・グラデ等）を新たに足す提案は禁止。")
+                    body += "\n\n" + base["txt"]
+                content.append({"type": "text", "text": body})
+                try:
+                    camp.TASK_LABEL = "brushup_critique"
+                    critique, _u = camp._call_llm(_CRITIQUE_SYSTEM, content, provider=adv_p, model=adv_m)
+                except Exception:  # noqa: BLE001
+                    log.exception("自動磨き: 指摘失敗 %s", tag)
+                    skipped.append(tag + "(指摘失敗)")
+                    continue
+                _camp_set(job_id, phase=f"🌙 {r + 1}/{rounds}周目 セクション{i + 1}（{done_cnt}/{len(targets)}）：🔧修正中…")
+                ins = ("以下のデザイン指摘リストのとおりに、このセクションを修正して。\n"
+                       "・指摘に書かれた数値（px・色コード・行間など）をそのまま正確に使う\n"
+                       "・指摘されていない部分のデザインは変えない\n"
+                       "・文章・画像は1つも消さない\n\n" + (critique or "").strip()[:4000])
+                try:
+                    camp.TASK_LABEL = "brushup_fix"
+                    camp.edit_camp_section(work, i, ins, keep_text=True,
+                                           provider=fix_p, model=fix_m, out_name=work)
+                except Exception:  # noqa: BLE001
+                    # テキスト保全ゲートで中止など＝このセクションは触らず次へ（壊れた版は書かれない）
+                    log.exception("自動磨き: 修正スキップ %s", tag)
+                    skipped.append(tag + "(修正スキップ)")
+                    continue
+        note = ("一部スキップ: " + "、".join(skipped[:6])) if skipped else ""
+        _camp_set(job_id, state="done", file=work, message=note)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("自動磨きに失敗")
+        _camp_set(job_id, state="error", message=str(exc))
+    finally:
+        camp.TASK_LABEL = "misc"
+
+
+@app.route("/api/brushup_estimate")
+def api_brushup_estimate():
+    """🌙自動磨きの見積もり（円）。過去の実測平均×セクション数×周回数＝使うほど正確になる。"""
+    from . import pricing
+    fn = (request.args.get("file") or "").strip()
+    max_r = config.CONFIG.htmlgen.brushup_max_rounds
+    try:
+        rounds = max(1, min(int(request.args.get("rounds") or 2), max_r))
+    except Exception:  # noqa: BLE001
+        rounds = min(2, max_r)
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    n = len(list(camp._SEC_RE.finditer(p.read_text(encoding="utf-8"))))
+    if n == 0:
+        return jsonify({"ok": False, "message": "セクションが見つかりません（<section>が無いカンプは対象外）"}), 400
+    # codexエンジンぶんはChatGPT定額枠＝0円で見積もる
+    h = config.CONFIG.htmlgen
+    adv_p = h.advice_provider if h.advice_provider not in ("deepseek", "zai") else "openai"
+    fix_p = h.dcfix_provider or h.edit_provider
+    per = (0.0 if adv_p == "codex" else pricing.avg_yen("brushup_critique")) \
+        + (0.0 if fix_p == "codex" else pricing.avg_yen("brushup_fix"))
+    return jsonify({"ok": True, "sections": n, "rounds": rounds, "max_rounds": max_r,
+                    "adv_engine": adv_p, "fix_engine": fix_p,
+                    "per_sec_yen": round(per, 1), "yen": int(round(n * rounds * per))})
+
+
+@app.route("/api/auto_brushup", methods=["POST"])
+def api_auto_brushup():
+    """🌙自動磨きを開始（非同期ジョブ）。kind=editなのでホーム画面が勝手にタブを開かない。"""
+    h = config.CONFIG.htmlgen
+    adv_p = h.advice_provider if h.advice_provider not in ("deepseek", "zai") else "openai"
+    fix_p = h.dcfix_provider or h.edit_provider
+    if not _provider_ready(adv_p):
+        return jsonify({"ok": False, "message": "指摘エンジン（" + adv_p + "）が使えません（APIキーまたはCodex CLIを確認）"}), 400
+    if not _provider_ready(fix_p):
+        return jsonify({"ok": False, "message": "修正エンジン（" + fix_p + "）が使えません（APIキーまたはCodex CLIを確認）"}), 400
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    try:
+        rounds = max(1, min(int(data.get("rounds") or 2), h.brushup_max_rounds))
+    except Exception:  # noqa: BLE001
+        rounds = min(2, h.brushup_max_rounds)
+    # 磨くセクションの絞り込み（1始まりで来る→0始まりへ。空なら全部）
+    secs: list[int] = []
+    try:
+        secs = sorted({int(x) - 1 for x in (data.get("secs") or []) if int(x) >= 1})
+    except Exception:  # noqa: BLE001
+        secs = []
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    with _CAMP_LOCK:
+        running = sum(1 for j in _CAMP_JOBS.values() if j.get("state") == "running")
+        if running >= _CAMP_MAX:
+            return jsonify({"ok": False, "message": f"同時処理は最大{_CAMP_MAX}件までです（少し待って）"}), 429
+        job_id = uuid.uuid4().hex
+        _CAMP_JOBS[job_id] = {"state": "running", "kind": "edit",
+                              "brief": f"🌙自動磨き {rounds}周" + (f"（S{','.join(str(s + 1) for s in secs)}）" if secs else ""),
+                              "phase": "開始しています…"}
+    log.info("自動磨きジョブ開始[%s]: %s rounds=%s secs=%s", job_id[:6], fn, rounds, secs or "全部")
+    threading.Thread(target=_run_brushup_job, args=(job_id, fn, rounds, secs), daemon=True).start()
+    return jsonify({"ok": True, "job_id": job_id})
 
 
 @app.route("/anim/<site_id>/<path:filename>")
@@ -1296,18 +1498,30 @@ def api_swap_image():
     return jsonify({"ok": True, **result})
 
 
-def _run_edit_job(job_id: str, fn: str, section: int, instruction: str, keep_text: bool = False, style_type: str = "") -> None:
-    """バックグラウンドでカンプを部分編集する（生成ジョブ一覧に相乗り）。"""
+def _run_edit_job(job_id: str, fn: str, section: int, instruction: str, keep_text: bool = False, style_type: str = "", engine: str = "") -> None:
+    """バックグラウンドでカンプを部分編集する（生成ジョブ一覧に相乗り）。
+
+    engine="dcfix"＝🧐指摘の🔧修正専用エンジン（未設定ならカンプ修正エンジンに退避）。
+    """
     try:
-        _ep = config.CONFIG.htmlgen.edit_provider
+        h = config.CONFIG.htmlgen
+        if engine == "dcfix":
+            _ep = h.dcfix_provider or h.edit_provider
+            _model = h.dcfix_model if h.dcfix_provider else ""
+        else:
+            _ep, _model = h.edit_provider, ""
         prov = _prov_label(_ep)
         scope = "全体" if section is None or section < 0 else f"セクション{section + 1}"
         _camp_set(job_id, phase=f"{prov}が{scope}を直しています…")
-        result = camp.edit_camp_section(fn, section, instruction, keep_text=keep_text, style_type=style_type)
+        camp.TASK_LABEL = "edit"
+        result = camp.edit_camp_section(fn, section, instruction, keep_text=keep_text, style_type=style_type,
+                                        provider=_ep, model=_model)
         _camp_set(job_id, state="done", **result)
     except Exception as exc:  # noqa: BLE001
         log.exception("部分編集に失敗")
         _camp_set(job_id, state="error", message=str(exc))
+    finally:
+        camp.TASK_LABEL = "misc"
 
 
 @app.route("/api/edit_camp", methods=["POST"])
@@ -1328,15 +1542,18 @@ def api_edit_camp():
         return jsonify({"ok": False, "message": "修正指示を入れてください"}), 400
     keep_text = bool(data.get("keep_text"))  # ✨おしゃれ化など「中身は変えない」系＝テキスト保全ゲートON
     style_type = str(data.get("style_type") or "").strip()[:40]  # 使った型名→data-cestyleで刻印（型のページ内重複防止）
+    engine = "dcfix" if data.get("engine") == "dcfix" else ""  # 🧐指摘の🔧修正だけ専用エンジンを使う
     with _CAMP_LOCK:
         running = sum(1 for j in _CAMP_JOBS.values() if j.get("state") == "running")
         if running >= _CAMP_MAX:
             return jsonify({"ok": False, "message": f"同時処理は最大{_CAMP_MAX}件までです（少し待って）"}), 429
         job_id = uuid.uuid4().hex
-        _CAMP_JOBS[job_id] = {"state": "running", "brief": f"部分編集: {instruction[:24]}", "phase": "開始しています…"}
+        # kind="edit"＝修正ジョブの目印。ホーム画面はこれを自動で別タブに開かない
+        # （修正はカンプタブ自身が完了時に同じタブで開き直す＝タブが増えない）。
+        _CAMP_JOBS[job_id] = {"state": "running", "kind": "edit", "brief": f"部分編集: {instruction[:24]}", "phase": "開始しています…"}
     log.info("部分編集ジョブ開始[%s]: %s section=%s keep_text=%s style=%s / %s", job_id[:6], fn, section, keep_text, style_type, instruction)
     threading.Thread(
-        target=_run_edit_job, args=(job_id, fn, section, instruction, keep_text, style_type), daemon=True
+        target=_run_edit_job, args=(job_id, fn, section, instruction, keep_text, style_type, engine), daemon=True
     ).start()
     return jsonify({"ok": True, "job_id": job_id})
 
@@ -3366,7 +3583,7 @@ html.__ce_altmode{cursor:text}
     try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(_){}
   }
   function clearSectionBusy(){ if(_busyEl){ _busyEl.classList.remove('__ce_busy'); _busyEl=null; } }
-  function submit(section,instruction,keepText,styleType){
+  function submit(section,instruction,keepText,styleType,engine){
     // ヘッダー/フッター選択はAI修正の対象外（サーバーの差し替えは<section>限定の正規表現のため）
     if(section==='hd'||section==='ft'){ msg.textContent='ヘッダー/フッターはAI修正の対象外です（⭐で部品として保存→🔀で別カンプと入れ替えできます）'; return; }
     if(!instruction){msg.textContent='指示が空です';return;}
@@ -3382,7 +3599,7 @@ html.__ce_altmode{cursor:text}
     //   AIはファイルを読んで直すので、保存しないと「以前の状態」に対してかかり手修正が戻ってしまう。
     flushThen(function(){
       msg.textContent='生成中…';
-      fetch('/api/edit_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:Number(section),instruction:instruction,keep_text:keepText?1:0,style_type:styleType||''})})
+      fetch('/api/edit_camp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,section:Number(section),instruction:instruction,keep_text:keepText?1:0,style_type:styleType||'',engine:engine||''})})
       .then(function(r){return r.json();}).then(function(d){
         if(!d.ok){msg.textContent='失敗：'+d.message;busy(false);hideToast();clearSectionBusy();return;}
         poll(d.job_id);
@@ -3415,6 +3632,34 @@ html.__ce_altmode{cursor:text}
       else if(j.state==='done'){setToast('✅ できました。開きます…');msg.textContent='できました。開きます…';location.href='/camp/'+j.file;}
       else{msg.textContent='失敗：'+(j.message||'');busy(false);hideToast();clearSectionBusy();}
     }).catch(function(){setTimeout(function(){poll(id,miss+1);},1500);});
+  }
+  // ===== 🌙 自動磨き：🧐指摘→🔧修正を全セクションに自動で数周（回数指定・見積もり確認つき） =====
+  // 周回数はサーバー側で上限クランプ（DESIGN_STOCK_BRUSHUP_MAX_ROUNDS・既定3）＝暴走しない。
+  // 元カンプは無傷＝磨きは新しい作業ファイル1つに上書きされ、完了したらそれを同じタブで開く。
+  function brushOpen(){
+    fetch('/api/brushup_estimate?file='+encodeURIComponent(FILE)+'&rounds=2')
+    .then(function(x){return x.json();}).then(function(d){
+      if(!d.ok){ alert('見積もりできません：'+(d.message||'')); return; }
+      var r=prompt('🌙 自動磨き＝AIが「指摘→修正」を自動で回します。\\n何周磨きますか？（1〜'+d.max_rounds+'・おすすめ2）\\n※上限'+d.max_rounds+'周で必ず止まります（暴走しません）','2');
+      if(r===null) return;
+      var rounds=Math.max(1,Math.min(parseInt(r,10)||2,d.max_rounds));
+      // 磨くセクションの絞り込み（テストは「1,2」のように2つだけ→消費が小さい）
+      var sIn=prompt('磨くセクション番号（1始まり・カンマ区切り）\\n例: 1,2 ＝最初の2つだけ／空欄＝全部（全'+d.sections+'セクション）','');
+      if(sIn===null) return;
+      var secs=(sIn||'').split(',').map(function(s){return parseInt(s.trim(),10);}).filter(function(v){return v>=1&&v<=d.sections;});
+      var cnt=secs.length||d.sections;
+      var yen=Math.round(d.per_sec_yen*cnt*rounds);
+      var engTxt='指摘: '+d.adv_engine+' ／ 修正: '+d.fix_engine+((d.adv_engine==='codex'||d.fix_engine==='codex')?'（codex＝ChatGPT定額枠・追加0円）':'');
+      if(!confirm('🌙 見積もり\\n・対象: '+(secs.length?('セクション '+secs.join(',')):('全'+d.sections+'セクション'))+'\\n・周回数: '+rounds+'\\n・エンジン: '+engTxt+'\\n・予想料金: 約'+yen+'円（過去の実測から自動計算）\\n\\n元のカンプは無傷で残り、磨き版は別ファイル1つに上書きされていきます。\\n時間は1セクション1周あたり1〜2分くらいかかります。実行しますか？')) return;
+      showToast('🌙 自動磨きを開始しています…');
+      flushThen(function(){
+        fetch('/api/auto_brushup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,rounds:rounds,secs:secs})})
+        .then(function(x){return x.json();}).then(function(d2){
+          if(!d2.ok){ hideToast(); alert('開始できませんでした：'+(d2.message||'')); return; }
+          poll(d2.job_id);
+        }).catch(function(){ hideToast(); alert('通信エラー'); });
+      });
+    }).catch(function(){ alert('通信エラー（サーバーは起動していますか？）'); });
   }
   go.addEventListener('click',function(){submit(sec.value,inp.value.trim());});
   sg.addEventListener('click',function(){
@@ -4053,7 +4298,7 @@ html.__ce_altmode{cursor:text}
         +'・指摘されていない部分のデザインは変えない\\n'
         +'・文章・画像は1つも消さない\\n\\n'+cur.t;
       ov.remove();
-      submit(idx, ins, true);
+      submit(idx, ins, true, '', 'dcfix');  // 🔧指摘の修正は専用エンジン（⚙設定の3役・カンプ修正エンジンとは別）
     });
     // ✅直ったか確認＝前回の指摘だけを✅❌判定（新しい指摘は出ない）。安いモデル(Luna)で約2円
     chkBtn.addEventListener('click',function(ev){
@@ -6146,6 +6391,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_dly','⏳ 動きの演出（順番・遅らせ・速さ）'],
     ['__ce_q_ref','📚 お手本を見る（ベース・似た例・アドバイス）'],
     ['__ce_q_dcq','🧐 デザイン指摘をもらう（プロの目・AI数円）'],
+    ['__ce_q_brush','🌙 自動磨き（指摘→修正を自動で数周・AI課金）'],
     ['__ce_q_fav','⭐ このセクションをお気に入り（部品保存）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
     ['__ce_q_rst','⟲ 位置・サイズをリセット']
@@ -6295,6 +6541,7 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_dly'){ var dle=curEl; closeMenu(); dlyOpen(dle,qx,qy); return; }
       if(t.id==='__ce_q_ref'){ var rse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); refOpen(rse); return; }
       if(t.id==='__ce_q_dcq'){ var dse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); dcqOpen(dse); return; }
+      if(t.id==='__ce_q_brush'){ closeMenu(); brushOpen(); return; }
       if(t.id==='__ce_q_fav'){ var fs=curEl.closest('section,header,footer'); closeMenu(); favSaveSection(fs); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }

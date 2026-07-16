@@ -185,6 +185,20 @@ class HtmlGenConfig:
     recheck_model: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_RECHECK_MODEL", "gpt-5.6-luna")
     )
+    # dcfix_provider＝🧐デザイン指摘の「🔧修正する」専用エンジン（未指定ならカンプ修正エンジンと同じ）。
+    # 指摘文どおりに直すだけ＝テキスト仕事なので deepseek/zai もOK。
+    dcfix_provider: str = field(
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_DCFIX_PROVIDER", "")
+    )
+    # dcfix_model＝修正専用のモデル上書き（openai/anthropicのみ）。"default"＝そのエンジンの既定モデル。
+    dcfix_model: str = field(
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_DCFIX_MODEL", "")
+    )
+    # brushup_max_rounds＝🌙自動磨きの周回数の上限（暴走防止のフタ）。
+    # 実測の知見：3周を超えても良くならず「AIっぽい無難」に収束するだけ＝既定3。
+    brushup_max_rounds: int = field(
+        default_factory=lambda: int(os.environ.get("DESIGN_STOCK_BRUSHUP_MAX_ROUNDS", "3") or 3)
+    )
     openai_api_key: str = field(default_factory=lambda: os.environ.get("OPENAI_API_KEY", ""))
     openai_model: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_OPENAI_MODEL", "gpt-5.6-terra")

@@ -217,6 +217,21 @@ def _anthropic_text(msg) -> str:
     return "".join(getattr(b, "text", "") for b in msg.content)
 
 
+# 直近のAI呼び出しの実測トークン数（各_call_*が上書き→_call_llmが費用ログに記録）。
+# TASK_LABEL は呼び出し元が用途を入れる（"brushup_fix"等・費用ログの分類と見積もり学習に使う）。
+# スレッドをまたぐとラベルがズレる可能性はあるが、費用ログはベストエフォートの記録なので割り切る。
+LAST_USAGE = {"in": 0, "out": 0}
+TASK_LABEL = "misc"
+
+
+def _set_usage(tok_in, tok_out) -> None:
+    try:
+        LAST_USAGE["in"] = int(tok_in or 0)
+        LAST_USAGE["out"] = int(tok_out or 0)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def _call_anthropic(system: str, content: list, model: str | None = None) -> str:
     from anthropic import Anthropic
 
@@ -229,6 +244,10 @@ def _call_anthropic(system: str, content: list, model: str | None = None) -> str
         system=system,
         messages=[{"role": "user", "content": content}],
     )
+    try:
+        _set_usage(msg.usage.input_tokens, msg.usage.output_tokens)
+    except Exception:  # noqa: BLE001
+        pass
     return _anthropic_text(msg)
 
 
@@ -247,6 +266,10 @@ def _call_openai(system: str, content: list, model: str | None = None) -> str:
         input=[{"role": "user", "content": _to_openai_responses_content(content)}],
         max_output_tokens=16000,
     )
+    try:
+        _set_usage(resp.usage.input_tokens, resp.usage.output_tokens)
+    except Exception:  # noqa: BLE001
+        pass
     return resp.output_text or ""
 
 
@@ -284,6 +307,8 @@ def _call_gemini(system: str, content: list) -> str:
     )
     with urllib.request.urlopen(req, timeout=150) as resp:
         data = json.loads(resp.read().decode("utf-8"))
+    u = data.get("usageMetadata") or {}
+    _set_usage(u.get("promptTokenCount"), u.get("candidatesTokenCount"))
     cand = data["candidates"][0]
     return "".join(p.get("text", "") for p in cand["content"]["parts"])
 
@@ -309,6 +334,10 @@ def _call_deepseek(system: str, content: list) -> str:
             {"role": "user", "content": text},
         ],
     )
+    try:
+        _set_usage(resp.usage.prompt_tokens, resp.usage.completion_tokens)
+    except Exception:  # noqa: BLE001
+        pass
     return resp.choices[0].message.content or ""
 
 
@@ -343,7 +372,58 @@ def _call_zai(system: str, content: list) -> str:
             {"role": "user", "content": user_content},
         ],
     )
+    try:
+        _set_usage(resp.usage.prompt_tokens, resp.usage.completion_tokens)
+    except Exception:  # noqa: BLE001
+        pass
     return resp.choices[0].message.content or ""
+
+
+def _call_codex(system: str, content: list, model: str | None = None) -> str:
+    """Codex CLI（ChatGPT定額プラン）で生成。APIキー不要＝追加課金ゼロ（5時間ごとの枠制）。
+
+    codex exec を1回叩き、最終メッセージをファイル(-o)で受け取る。
+    画像はtempファイルに書き出して -i で渡せる（🧐指摘のスクショもOK）。
+    事前準備：`npm i -g @openai/codex` → `codex login`（ChatGPTアカウントでログイン・ブラウザが開く）。
+    """
+    import shutil as _sh
+    import subprocess
+    import tempfile
+
+    exe = _sh.which("codex")
+    if not exe:
+        raise RuntimeError("Codex CLIが見つかりません（npm i -g @openai/codex → codex login が必要）")
+    texts = [b["text"] for b in content if b.get("type") == "text"]
+    # codex execにはsystem指定が無いのでプロンプト先頭に混ぜる
+    prompt = system + "\n\n" + "\n\n".join(texts)
+    with tempfile.TemporaryDirectory(prefix="ce_codex_") as td:
+        # read-onlyサンドボックス＋作業dirはtemp＝このリポジトリのファイルを触らせない
+        # 思考力はmediumに固定（config.tomlがultraでも上書き）＝1通あたりの枠消費と待ち時間を節約。
+        # 指摘・修正はmediumで十分（ultraはコード開発向けの深い思考＝ここではオーバースペック）。
+        args = [exe, "exec", "--skip-git-repo-check", "--sandbox", "read-only", "-C", td,
+                "-c", 'model_reasoning_effort="medium"']
+        if model:
+            args += ["-m", model]
+        n = 0
+        for b in content:
+            if b.get("type") == "image":
+                n += 1
+                ext = ".png" if "png" in (b["source"].get("media_type") or "") else ".jpg"
+                ip = Path(td) / f"img{n}{ext}"
+                ip.write_bytes(base64.b64decode(b["source"]["data"]))
+                args += ["-i", str(ip)]
+        outp = Path(td) / "last.md"
+        args += ["-o", str(outp), prompt]
+        r = subprocess.run(args, capture_output=True, text=True, timeout=600,
+                           encoding="utf-8", errors="replace")
+        txt = outp.read_text(encoding="utf-8") if outp.exists() else ""
+        if not txt.strip():
+            err = ((r.stderr or "") + (r.stdout or ""))[-400:]
+            low = err.lower()
+            if "usage limit" in low or "rate limit" in low or "quota" in low:
+                raise RuntimeError("Codexの利用枠を使い切りました（5時間ごとに回復・少し待ってから再実行）")
+            raise RuntimeError("Codexから返答が取れませんでした: " + err)
+        return txt
 
 
 def _call_llm(system: str, content: list, provider: str | None = None,
@@ -357,25 +437,39 @@ def _call_llm(system: str, content: list, provider: str | None = None,
     """
     hcfg = config.CONFIG.htmlgen
     provider = provider or hcfg.provider
+    LAST_USAGE["in"] = LAST_USAGE["out"] = 0
     if provider == "openai":
         if not hcfg.openai_enabled:
             raise RuntimeError("OPENAI_API_KEY が未設定です（.env を確認）")
-        return _call_openai(system, content, model=model), f"openai:{model or hcfg.openai_model}"
-    if provider == "gemini":
+        text, used = _call_openai(system, content, model=model), f"openai:{model or hcfg.openai_model}"
+    elif provider == "gemini":
         if not config.CONFIG.gemini.enabled:
             raise RuntimeError("GEMINI_API_KEY が未設定です（.env を確認）")
-        return _call_gemini(system, content), f"gemini:{config.CONFIG.gemini.model}"
-    if provider == "deepseek":
+        text, used = _call_gemini(system, content), f"gemini:{config.CONFIG.gemini.model}"
+    elif provider == "deepseek":
         if not config.CONFIG.deepseek.enabled:
             raise RuntimeError("DEEPSEEK_API_KEY が未設定です（.env を確認）")
-        return _call_deepseek(system, content), f"deepseek:{config.CONFIG.deepseek.model}"
-    if provider == "zai":
+        text, used = _call_deepseek(system, content), f"deepseek:{config.CONFIG.deepseek.model}"
+    elif provider == "zai":
         if not config.CONFIG.zai.enabled:
             raise RuntimeError("ZAI_API_KEY が未設定です（.env を確認）")
-        return _call_zai(system, content), f"zai:{config.CONFIG.zai.model}"
-    if not config.CONFIG.vibe.enabled:
-        raise RuntimeError("ANTHROPIC_API_KEY が未設定です（.env を確認）")
-    return _call_anthropic(system, content, model=model), f"anthropic:{model or config.CONFIG.vibe.model}"
+        text, used = _call_zai(system, content), f"zai:{config.CONFIG.zai.model}"
+    elif provider == "codex":
+        # ChatGPT定額プラン枠で動く＝APIキー不要・追加課金ゼロ。usageは取れないので費用記録は0円扱い。
+        # モデルは gpt-5.6-sol/terra/luna 等をそのまま指定できる（軽いモデルほど5時間枠が長持ち：
+        # Plusの目安 Sol=15〜90通/Terra=20〜110通/Luna=50〜280通）。未指定なら~/.codex/config.tomlの既定。
+        text, used = _call_codex(system, content, model=model), f"codex:{model or 'default'}"
+    else:
+        if not config.CONFIG.vibe.enabled:
+            raise RuntimeError("ANTHROPIC_API_KEY が未設定です（.env を確認）")
+        text, used = _call_anthropic(system, content, model=model), f"anthropic:{model or config.CONFIG.vibe.model}"
+    # 実測トークン×料金表で実費を記録（見積もりが実績で賢くなる）。失敗しても本処理は止めない。
+    try:
+        from . import pricing
+        pricing.record(TASK_LABEL, provider, used, LAST_USAGE["in"], LAST_USAGE["out"])
+    except Exception:  # noqa: BLE001
+        pass
+    return text, used
 
 
 def _pick_refs_no_model(brief: str, n: int) -> list[str]:
@@ -1495,7 +1589,8 @@ def _content_losses(old_frag: str, new_frag: str) -> list:
 
 
 def edit_camp_section(filename: str, section_index: int, instruction: str,
-                      keep_text: bool = False, style_type: str = "") -> dict:
+                      keep_text: bool = False, style_type: str = "",
+                      provider: str = "", model: str = "", out_name: str = "") -> dict:
     """指定セクションだけを依頼どおり直す（速い）。section_index<0 は全体編集（遅い）。
 
     keep_text=True（✨おしゃれ化など「中身は変えない」系）のときはテキスト保全ゲートを通す。
@@ -1506,6 +1601,9 @@ def edit_camp_section(filename: str, section_index: int, instruction: str,
     instruction = (instruction or "").strip()
     if not instruction:
         raise ValueError("修正指示が空です")
+    # provider/model＝呼び出し側の上書き（🧐指摘の🔧修正など）。未指定なら従来どおり修正エンジン。
+    _prov = provider or config.CONFIG.htmlgen.edit_provider
+    _model = None if model in ("", "default") else model
     html = (config.CAMP_DIR / filename).read_text(encoding="utf-8")
     matches = list(_SEC_RE.finditer(html))
     whole = section_index is None or section_index < 0 or not matches or section_index >= len(matches)
@@ -1519,7 +1617,7 @@ def edit_camp_section(filename: str, section_index: int, instruction: str,
             "指示に無い所は変えない。トーン・配色・フォントは維持。\n\n"
             f"# 依頼\n{instruction}{up_txt}\n\n# 現在のHTML\n{html}\n\n返答はHTMLだけ。"
         )}]
-        raw, used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
+        raw, used = _call_llm(_EDIT_SYSTEM, content, provider=_prov, model=_model)
         new_html = _finalize_html(_strip_html(raw))
     else:
         m = matches[section_index]
@@ -1538,7 +1636,7 @@ def edit_camp_section(filename: str, section_index: int, instruction: str,
             "  親要素にグラデ/色backgroundを敷き、<img>に onerror=\"this.style.display='none'\" を付けて空表示を防ぐ（絵は手描きしない）\n"
             "- 返答は HTML だけ。説明やマークダウンの前置きは書かない"
         )}]
-        raw, used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
+        raw, used = _call_llm(_EDIT_SYSTEM, content, provider=_prov, model=_model)
         new_section = _strip_fragment(raw)
         if keep_text:
             # テキスト保全ゲート：欠落を機械照合→名指しで1回だけ自動リトライ
@@ -1551,7 +1649,7 @@ def edit_camp_section(filename: str, section_index: int, instruction: str,
                     "これらを**一字一句すべて含めて**、同じ依頼どおりのセクションHTMLを出力し直してください。"
                     "デザインを簡素にしてでも中身を全部残すことを優先。返答はHTMLだけ。"
                 )})
-                raw2, used = _call_llm(_EDIT_SYSTEM, content, provider=config.CONFIG.htmlgen.edit_provider)
+                raw2, used = _call_llm(_EDIT_SYSTEM, content, provider=_prov, model=_model)
                 cand = _strip_fragment(raw2)
                 losses2 = _content_losses(section_html, cand)
                 if len(losses2) < len(losses):
@@ -1573,9 +1671,17 @@ def edit_camp_section(filename: str, section_index: int, instruction: str,
         new_html = _finalize_html(new_html)
 
     config.CAMP_DIR.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-    out = config.CAMP_DIR / f"camp_{ts}.html"
-    out.write_text(new_html, encoding="utf-8")
+    if out_name:
+        # out_name指定＝そのファイルに上書き（🌙自動磨きが作業用コピー1つに書き続ける用）。
+        # 途中クラッシュで半壊しないよう tmp→os.replace の安全方式（save_camp_htmlと同じ）。
+        out = config.CAMP_DIR / out_name
+        tmp = out.with_suffix(".html.tmp")
+        tmp.write_text(new_html, encoding="utf-8")
+        os.replace(tmp, out)
+    else:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        out = config.CAMP_DIR / f"camp_{ts}.html"
+        out.write_text(new_html, encoding="utf-8")
     log.info("カンプを部分編集: %s → %s (section=%s)", filename, out.name, section_index)
     return {"file": out.name, "model": used, "edited_section": -1 if whole else section_index}
 
