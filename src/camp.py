@@ -413,9 +413,11 @@ def _call_codex(system: str, content: list, model: str | None = None) -> str:
                 ip.write_bytes(base64.b64decode(b["source"]["data"]))
                 args += ["-i", str(ip)]
         outp = Path(td) / "last.md"
-        args += ["-o", str(outp), prompt]
+        # プロンプトは引数ではなくstdinで渡す（"-"＝stdinから読む指定）。
+        # 引数渡しだとWindowsで最初の改行から後ろが届かない／長文(CSS+HTML)は起動自体が失敗する。
+        args += ["-o", str(outp), "-"]
         r = subprocess.run(args, capture_output=True, text=True, timeout=600,
-                           encoding="utf-8", errors="replace")
+                           encoding="utf-8", errors="replace", input=prompt)
         txt = outp.read_text(encoding="utf-8") if outp.exists() else ""
         if not txt.strip():
             err = ((r.stderr or "") + (r.stdout or ""))[-400:]
