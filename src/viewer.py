@@ -14,6 +14,7 @@ CLI都度起動だと毎回モデル読込の数秒を待つが、ビューア�
 
 from __future__ import annotations
 
+import base64 as _b64
 import json as _json
 import os
 import re
@@ -735,6 +736,96 @@ def api_section_advice():
         log.exception("演出アドバイスに失敗")
         return jsonify({"ok": False, "message": str(exc)[:200]}), 500
     return jsonify({"ok": True, "advice": (txt or "").strip()[:4000], "model": used})
+
+
+# 🧐デザイン指摘：スクショ（見た目）＋HTMLをプロ基準で採点させ、指摘4つを数値つきで返す。
+# ポイント＝画像を渡すこと（テキストだけだとAIは見た目を見られない＝当たり障りない感想になる）。
+_CRITIQUE_SYSTEM = (
+    "あなたは経験豊富なアートディレクター。Webデザインカンプの1セクションの"
+    "スクリーンショット（実際の見た目）とHTMLを見て、デザインの問題点を指摘する。\n"
+    "採点基準（この物差しで見る）：\n"
+    "・余白：8pxの倍数か／要素間の近接（関係が近いものほど近く）／見出し上下の余白は2:1\n"
+    "・文字：階層が4段以内で明確か／日本語本文の行間1.9〜2.1／1行38字以内／サイズのジャンプ率\n"
+    "・色：70(ベース):25(サブ):5(アクセント)の比率／コントラスト（薄すぎる文字）／色数の締まり\n"
+    "・構図：視線の流れ／均等な箱並びの単調さ／写真と文字の重なりの処理／揃え（グリッド）\n"
+    "・コピー：抽象的なスローガンになっていないか（具体的な数字・固有名詞があるか）\n"
+    "出力ルール（厳守）：\n"
+    "・指摘はちょうど4つ。効果が大きい順。\n"
+    "・各指摘は3行以内で「①どこ（要素の文言で特定） ②何が問題 ③どう直す（px/色コード等の数値で）」。\n"
+    "・読み手はデザイン初心者。専門用語には直後に（かっこ）で短い説明を添える。"
+    "例：行間1.9（文字サイズの1.9倍の高さ）／#222（ほぼ黒のこげ茶色）／余白24px（指1本分くらいの隙間）。\n"
+    "・褒め言葉・前置き・まとめは書かない。コードも書かない。\n"
+    "・形式：「1. 【場所】問題 → 直し方」の番号リスト。"
+)
+
+
+# ✅直ったか確認：前回の指摘リストだけを判定させる（新しい指摘の追加を禁止）。
+# 指摘モードは「必ず4つ出せ」なので何回でも新ネタを探してくる＝終わらない。
+# 確認モードを分けることで「全部✅→卒業」ができる。判定だけなので安いモデル(Luna)で十分。
+_RECHECK_SYSTEM = (
+    "あなたはアートディレクター。以前あなたが出したデザイン指摘のリストと、"
+    "修正後のセクションのスクリーンショット＋HTMLを見比べて、各指摘が直ったかを判定する。\n"
+    "ルール（厳守）：\n"
+    "・判定するのは前回の指摘リストの項目だけ。新しい指摘は絶対に追加しない。\n"
+    "・前回と同じ番号順に、各項目を1〜2行で：「✅ 直りました」／"
+    "「⚠ あと少し（何が足りないか具体的に1行）」／「❌ まだ（何が変わっていないか1行）」\n"
+    "・全項目が✅なら最後に「🎉 全部直りました！このセクションは合格です」と1行足す。\n"
+    "・前置き・まとめ・コード・新しい提案は書かない。"
+)
+
+
+@app.route("/api/design_critique", methods=["POST"])
+def api_design_critique():
+    """🧐デザイン指摘：セクションのスクショを撮り、画像対応AIに指摘4つを出させる。
+
+    スクショは保存済みファイルから撮る（未保存の編集は写らない＝フロントで保存を促す）。
+    エンジンは advice_provider（画像非対応のdeepseek/zaiならopenaiに退避）、
+    モデルは advice_model で上書きできる（例：DESIGN_STOCK_ADVICE_MODEL=gpt-5.6-sol）。
+    """
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    kind = (data.get("kind") or "section").strip()
+    idx = int(data.get("idx") or 0)
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    if kind not in ("section", "header", "footer"):
+        return jsonify({"ok": False, "message": "対象はセクション/ヘッダー/フッターだけです"}), 400
+    try:
+        shot = spec.shot_part(fn, kind, idx)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("デザイン指摘のスクショに失敗")
+        return jsonify({"ok": False, "message": "スクショ失敗：" + str(exc)[:150]}), 500
+    sec_html = (data.get("html") or "").strip()[:8000]
+    hcfg = config.CONFIG.htmlgen
+    provider = hcfg.advice_provider
+    if provider in ("deepseek", "zai"):
+        provider = "openai"  # 画像を送れないエンジンでは見た目を指摘できない
+    # モード分岐：recheck＝前回の指摘だけを✅❌判定（安いモデル）／通常＝指摘4つ（上位モデル）
+    mode = (data.get("mode") or "").strip()
+    prev = (data.get("prev") or "").strip()[:4000]
+    if mode == "recheck" and prev:
+        system = _RECHECK_SYSTEM
+        body_txt = "■前回の指摘リスト:\n" + prev + "\n\n■修正後のセクションの見た目は上の画像。参考にHTMLも渡す:\n" + sec_html
+        # recheck_modelはOpenAIのモデルIDなので、他エンジン使用時はadvice_modelにフォールバック
+        model = (hcfg.recheck_model if provider == "openai" else "") or hcfg.advice_model or None
+    else:
+        system = _CRITIQUE_SYSTEM
+        body_txt = "■このセクションの見た目（スクショ）は上の画像。参考にHTMLも渡す:\n" + sec_html
+        model = hcfg.advice_model or None
+    content = [
+        {"type": "image", "source": {
+            "type": "base64", "media_type": "image/jpeg",
+            "data": _b64.b64encode(shot).decode("ascii"),
+        }},
+        {"type": "text", "text": body_txt},
+    ]
+    try:
+        txt, used = camp._call_llm(system, content, provider=provider, model=model)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("デザイン指摘に失敗")
+        return jsonify({"ok": False, "message": str(exc)[:200]}), 500
+    return jsonify({"ok": True, "critique": (txt or "").strip()[:4000], "model": used})
 
 
 @app.route("/anim/<site_id>/<path:filename>")
@@ -3266,6 +3357,9 @@ html.__ce_altmode{cursor:text}
     if(Number(section)<0){
       if(!confirm('⚠ これは「ページ全体を書き直す」修正です。\\n時間がかかり、料金も高め（数十円〜）になります。\\n\\n特定の場所だけ直すなら【キャンセル】して、\\n・①で直すセクションを選ぶ か\\n・直したい所を右クリック\\nすると安く（数円）速く直せます。\\n\\nこのままページ全体を直しますか？')) { msg.textContent='キャンセルしました（①でセクションを選ぶと安いです）'; return; }
     }
+    // 🧐指摘の記憶の引っ越しメモ：AI修正は「新しい版ファイル」を作るので、完了後に
+    // 新ファイル側へ指摘の記憶をコピーするための出発点を残す（受け取りは読み込み時の_mvブロック）
+    try{ localStorage.setItem('__ce_dcq_mv', JSON.stringify({from:FILE, ts:Date.now()})); }catch(_){}
     busy(true); msg.textContent='今の状態を保存中…'; showToast('AIが直しています…（十数秒〜）'); markSectionBusy(section);
     // ★AIに渡す前に、今の見た目（移動・手修正・焼き込みアニメ）をディスクへ保存する。
     //   AIはファイルを読んで直すので、保存しないと「以前の状態」に対してかかり手修正が戻ってしまう。
@@ -3842,6 +3936,145 @@ html.__ce_altmode{cursor:text}
       });
     });
     renderBase();
+  }
+  // ===== 🧐デザイン指摘：セクションのスクショをAIに見せて指摘4つ（数値つき・効果順） =====
+  // 指摘の記憶の引っ越し（受け取り側）：AI修正で新しい版ファイルに移った直後なら、
+  // 前の版の指摘の記憶を新ファイル名のキーへコピーする＝修正後も同じ指摘で✅確認できる。
+  try{
+    var _mv=JSON.parse(localStorage.getItem('__ce_dcq_mv')||'null');
+    if(_mv&&_mv.from&&_mv.from!==FILE&&(Date.now()-(_mv.ts||0))<600000){
+      var _ma=JSON.parse(localStorage.getItem('__ce_dcq')||'{}')||{};
+      var _mch=false;
+      Object.keys(_ma).forEach(function(k){
+        if(k.indexOf(_mv.from+'|')===0){
+          var nk=FILE+k.slice(_mv.from.length);
+          if(!_ma[nk]){ _ma[nk]=_ma[k]; _mch=true; }
+        }
+      });
+      if(_mch) localStorage.setItem('__ce_dcq',JSON.stringify(_ma));
+    }
+    if(_mv) localStorage.removeItem('__ce_dcq_mv');
+  }catch(_){}
+  function dcqOpen(secEl){
+    if(!secEl){ if(msg) msg.textContent='セクションの中で右クリックしてください'; return; }
+    var kind=secEl.tagName.toLowerCase(), idx=0;
+    if(kind==='section'){
+      // サーバー側(shot_part)と同じ数え方＝「入れ子でないsection」の中での順番
+      var secs=[].slice.call(document.querySelectorAll('section')).filter(function(s){ return !s.parentElement.closest('section'); });
+      idx=secs.indexOf(secEl);
+      if(idx<0){ if(msg) msg.textContent='このセクションは対象外です（入れ子セクション）'; return; }
+    }
+    // 前回の指摘の記憶（localStorage・セクションごと）＝うっかり閉じても再課金なしで見返せる
+    var dcqKey=FILE+'|'+kind+'|'+idx;
+    function dcqAll(){ try{ var a=JSON.parse(localStorage.getItem('__ce_dcq')||'{}'); return (a&&typeof a==='object')?a:{}; }catch(_){ return {}; } }
+    function dcqStore(text,model){ try{ var a=dcqAll(); a[dcqKey]={t:text,m:model,d:new Date().toLocaleString('ja-JP')}; localStorage.setItem('__ce_dcq',JSON.stringify(a)); }catch(_){} }
+    function dcqDel(){ try{ var a=dcqAll(); delete a[dcqKey]; localStorage.setItem('__ce_dcq',JSON.stringify(a)); }catch(_){} }
+    var ov=document.createElement('div'); ov.id='__ce_pk';
+    ov.innerHTML='<div class="bx" style="max-width:640px"><span class="cl" id="__ce_dcqx">×</span><h4>🧐 デザイン指摘（プロの目線・指摘4つ）</h4>'
+      +(_dirty?'<div style="font-size:12px;color:#c00;background:#fde8e8;border-radius:7px;padding:6px 10px;margin-bottom:8px">⚠ 未保存の変更があります。スクショは保存済みの状態で撮るので、先に💾保存してから実行してください（今のままだと古い見た目に指摘が付きます）</div>':'')
+      +'<div style="font-size:12px;color:#666;margin-bottom:8px">このセクションのスクショを撮ってAIに見せ、「どこを・なぜ・どう直すか（数値つき）」を効果の大きい順に4つ出します。余白・文字階層・色比率・構図・コピーの5観点で採点します。</div>'
+      +'<button class="go2" id="__ce_dcqgo" style="background:#0b6bcb;margin:0">🧐 指摘をもらう（AI・約10円／20〜60秒）</button>'
+      +'<div id="__ce_dcqout" style="display:none;white-space:pre-wrap;font-size:13px;line-height:1.9;background:#f2f7ff;border:1px solid #cfe0f7;border-radius:9px;padding:10px 12px;margin-top:8px"></div>'
+      +'<div id="__ce_dcqchkout" style="display:none;white-space:pre-wrap;font-size:13px;line-height:1.9;background:#f2fbf4;border:1px solid #bfe6c8;border-radius:9px;padding:10px 12px;margin-top:8px"></div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap">'
+      +'<div id="__ce_dcqmdl" style="display:none;font-size:10.5px;color:#999;flex:1"></div>'
+      +'<button id="__ce_dcqfix" style="display:none;border:none;background:#0b6bcb;color:#fff;border-radius:6px;padding:2px 10px;font-size:11px;cursor:pointer;font-weight:700">🔧 この指摘どおりに直して（AI・数円）</button>'
+      +'<button id="__ce_dcqchk" style="display:none;border:1px solid #9ed0a8;background:#f2fbf4;color:#1a7a33;border-radius:6px;padding:2px 9px;font-size:11px;cursor:pointer;font-weight:700">✅ 直ったか確認（安いAI・約2円）</button>'
+      +'<button id="__ce_dcqdel" style="display:none;border:1px solid #e0b4b4;background:#fff5f5;color:#c00;border-radius:6px;padding:2px 9px;font-size:11px;cursor:pointer">🗑 この指摘を削除</button>'
+      +'</div></div>';
+    // 指摘を見ながら後ろのページを直せるように：暗幕なし＋外側は素通し（クリックが下に届く）。
+    // 閉じるのは✕だけ＝ドラッグや別要素の選択で消えない（h4掴みで移動は従来どおり）。
+    var oldPk=document.getElementById('__ce_pk'); if(oldPk) oldPk.remove();  // 重なり防止
+    ov.style.pointerEvents='none'; ov.style.background='transparent';
+    document.body.appendChild(ov);
+    var bx=ov.querySelector('.bx'); bx.style.pointerEvents='auto';
+    ov.addEventListener('click',function(e){ if(e.target.id==='__ce_dcqx'){ ov.remove(); } });
+    var go=ov.querySelector('#__ce_dcqgo'), out=ov.querySelector('#__ce_dcqout'),
+        md=ov.querySelector('#__ce_dcqmdl'), delBtn=ov.querySelector('#__ce_dcqdel'),
+        chkBtn=ov.querySelector('#__ce_dcqchk'), chkOut=ov.querySelector('#__ce_dcqchkout'),
+        fixBtn=ov.querySelector('#__ce_dcqfix');
+    // セクションHTMLのスナップショット（編集UIの断片を除いて送る）＝指摘・確認の両方で使う
+    function dcqSecHtml(){
+      try{
+        var cl=secEl.cloneNode(true);
+        [].slice.call(cl.querySelectorAll('script,style')).forEach(function(n){ n.remove(); });
+        [].slice.call(cl.querySelectorAll('*')).forEach(function(n){ if(n.id&&n.id.indexOf('__ce')===0) n.remove(); });
+        return cl.outerHTML;
+      }catch(_){ return secEl.outerHTML; }
+    }
+    function dcqShow(text,label){
+      out.style.display='block'; out.textContent=text;
+      md.style.display='block'; md.textContent=label||'';
+      delBtn.style.display='inline-block';
+      chkBtn.style.display='inline-block';
+      if(kind==='section') fixBtn.style.display='inline-block';  // AI修正は<section>だけ対象（サーバー仕様）
+    }
+    var dcqSaved=dcqAll()[dcqKey];
+    if(dcqSaved&&dcqSaved.t){
+      dcqShow(dcqSaved.t,'前回の指摘（'+(dcqSaved.d||'')+'・'+(dcqSaved.m||'')+'）※表示は無料');
+      go.textContent='🧐 新しく指摘をもらい直す（AI・約10円）';
+      if(dcqSaved.r){ chkOut.style.display='block'; chkOut.textContent='✅ 確認結果（'+(dcqSaved.rd||'')+'）\\n'+dcqSaved.r; }
+    }
+    delBtn.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      dcqDel();
+      out.style.display='none'; md.style.display='none'; delBtn.style.display='none';
+      chkBtn.style.display='none'; chkOut.style.display='none'; fixBtn.style.display='none';
+      go.textContent='🧐 指摘をもらう（AI・約10円／20〜60秒）';
+      if(msg) msg.textContent='保存していた指摘を削除しました';
+    });
+    // 🔧この指摘どおりに直す＝指摘文をそのまま修正エンジンへ（px・色コードはAIには一番正確な指示）。
+    // submit()が「今のDOMを保存→AI修正→進捗トースト→完了で開き直し」まで全部やる。
+    // keep_text=ON＝✨おしゃれ化と同じテキスト保全ゲート（文章・画像が消えたら自動リトライ→中止）
+    fixBtn.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var cur=dcqAll()[dcqKey];
+      if(!cur||!cur.t){ if(msg) msg.textContent='先に🧐指摘をもらってください'; return; }
+      if(!confirm('AIがこの指摘をまとめて直します（セクション修正・数円）。\\n終わったらページが開き直されます。実行しますか？')) return;
+      var ins='以下のデザイン指摘リストのとおりに、このセクションを修正して。\\n'
+        +'・指摘に書かれた数値（px・色コード・行間など）をそのまま正確に使う\\n'
+        +'・指摘されていない部分のデザインは変えない\\n'
+        +'・文章・画像は1つも消さない\\n\\n'+cur.t;
+      ov.remove();
+      submit(idx, ins, true);
+    });
+    // ✅直ったか確認＝前回の指摘だけを✅❌判定（新しい指摘は出ない）。安いモデル(Luna)で約2円
+    chkBtn.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var cur=dcqAll()[dcqKey];
+      if(!cur||!cur.t){ if(msg) msg.textContent='先に🧐指摘をもらってください'; return; }
+      if(_dirty && !confirm('未保存の変更があります。スクショは保存済みの状態で撮るので、先に💾保存してから確認するのが正確です。このまま実行しますか？')) return;
+      chkBtn.disabled=true; chkBtn.textContent='✅ AIが見比べています…（20〜40秒）';
+      fetch('/api/design_critique',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE, kind:kind, idx:idx, html:dcqSecHtml(), mode:'recheck', prev:cur.t})})
+      .then(function(r){return r.json();}).then(function(d){
+        chkBtn.disabled=false; chkBtn.textContent='✅ 直ったか確認（安いAI・約2円）';
+        chkOut.style.display='block';
+        if(d.ok){
+          var when=new Date().toLocaleString('ja-JP');
+          chkOut.textContent='✅ 確認結果（'+when+'）\\n'+d.critique;
+          try{ var a2=dcqAll(); if(a2[dcqKey]){ a2[dcqKey].r=d.critique; a2[dcqKey].rd=when; localStorage.setItem('__ce_dcq',JSON.stringify(a2)); } }catch(_){}
+        } else { chkOut.textContent='失敗：'+(d.message||''); }
+      }).catch(function(){
+        chkBtn.disabled=false; chkBtn.textContent='✅ 直ったか確認（安いAI・約2円）';
+        chkOut.style.display='block'; chkOut.textContent='通信エラー';
+      });
+    });
+    go.addEventListener('click',function(){
+      go.disabled=true; go.textContent='🧐 スクショを撮ってAIが見ています…（20〜60秒）';
+      fetch('/api/design_critique',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE, kind:kind, idx:idx, html:dcqSecHtml()})})
+      .then(function(r){return r.json();}).then(function(d){
+        go.disabled=false; go.textContent='🧐 もう一度指摘をもらう（AI・約10円）';
+        if(d.ok){
+          dcqStore(d.critique,d.model||'');           // 新しい指摘＝古い確認結果(r)もここでリセットされる
+          chkOut.style.display='none';
+          dcqShow(d.critique,'使ったAI: '+(d.model||''));
+        }
+        else{ out.style.display='block'; out.textContent='失敗：'+(d.message||''); }
+      }).catch(function(){
+        go.disabled=false; go.textContent='🧐 指摘をもらう（AI・約10円／20〜60秒）';
+        out.style.display='block'; out.textContent='通信エラー';
+      });
+    });
   }
   // ===== 右クリックで、その要素に直接アニメ/指示/改善案を出す =====
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
@@ -5895,6 +6128,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）'],
     ['__ce_q_dly','⏳ 動きの演出（順番・遅らせ・速さ）'],
     ['__ce_q_ref','📚 お手本を見る（ベース・似た例・アドバイス）'],
+    ['__ce_q_dcq','🧐 デザイン指摘をもらう（プロの目・AI数円）'],
     ['__ce_q_fav','⭐ このセクションをお気に入り（部品保存）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
     ['__ce_q_rst','⟲ 位置・サイズをリセット']
@@ -6043,6 +6277,7 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
       if(t.id==='__ce_q_dly'){ var dle=curEl; closeMenu(); dlyOpen(dle,qx,qy); return; }
       if(t.id==='__ce_q_ref'){ var rse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); refOpen(rse); return; }
+      if(t.id==='__ce_q_dcq'){ var dse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); dcqOpen(dse); return; }
       if(t.id==='__ce_q_fav'){ var fs=curEl.closest('section,header,footer'); closeMenu(); favSaveSection(fs); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
@@ -6573,34 +6808,55 @@ def video(site_id: str):
     return send_file(path, mimetype="video/webm")
 
 
-def serve(host: str = "127.0.0.1", port: int = 5000, preload: bool = True) -> None:
+def serve(host: str = "127.0.0.1", port: int = 5000, preload: bool = True, dev: bool = False) -> None:
     """ビューアを起動する。preload=True で起動時にモデルを読み込んでおく。
 
     preload=False（--no-preload・このPCの推奨）でも、起動して少し経ったら
     バックグラウンドでこっそり読み込む＝初回検索の「遅い」を体感ゼロに近づける。
     読み込みがメモリ不足で失敗しても握りつぶす（従来どおり初回検索時に再挑戦される）。
+
+    dev=True（--dev）＝開発モード：.py を保存すると自動でサーバが再起動する。
+    手で Ctrl+C → 起動し直しが不要になる。モデル先読みは再起動のたびに重くなるので
+    しない（初回検索時に読む）。templates/viewer.html は毎リクエスト読み直す作りなので
+    元々ブラウザのF5だけで反映される＝再起動対象はPythonだけでよい。
     """
-    db.init_db()
-    if preload:
-        log.info("モデルを先読みします（起動後の初回検索を速くするため）…")
-        _EMBEDDER.load()
+    def _boot():
+        db.init_db()
+        if dev:
+            pass  # 開発モードは先読みなし（再起動が速いことを優先）
+        elif preload:
+            log.info("モデルを先読みします（起動後の初回検索を速くするため）…")
+            _EMBEDDER.load()
+        else:
+            def _warmup():
+                import time as _time
+                _time.sleep(5)  # まず画面を開ける方を優先。落ち着いてから読み込む
+                try:
+                    log.info("モデルをバックグラウンドで先読み中…（初回検索を速くするため）")
+                    _EMBEDDER.load()
+                    log.info("モデル先読み完了。検索はすぐ返ります")
+                except Exception:  # noqa: BLE001
+                    log.exception("バックグラウンド先読みに失敗（初回検索時に再挑戦します）")
+            threading.Thread(target=_warmup, daemon=True).start()
+        log.info("ビューア起動: http://%s:%d  （Ctrl+C で停止）", host, port)
+        # Flask開発サーバは POST + keep-alive で接続が切れて「Failed to fetch」になりやすい。
+        # 頑丈な waitress（本番品質のWSGIサーバ）で配信する。複数スレッドで並行処理もOK。
+        try:
+            from waitress import serve as waitress_serve
+            waitress_serve(app, host=host, port=port, threads=8, channel_timeout=300)
+        except ImportError:
+            log.warning("waitress が無いので開発サーバで起動します")
+            app.run(host=host, port=port, debug=False, use_reloader=False, threaded=True)
+
+    if dev:
+        # werkzeug（Flask同梱）のリローダで包む＝importしている全.pyを監視し、
+        # 保存を検知したらプロセスごと再起動する。waitressのまま使えるのが利点
+        # （Flask開発サーバに切り替えると Failed to fetch 問題が再発するため）。
+        try:
+            from werkzeug._reloader import run_with_reloader
+        except ImportError:  # 古いwerkzeugは公開APIにある
+            from werkzeug.serving import run_with_reloader
+        log.info("開発モード: .py を保存すると自動で再起動します")
+        run_with_reloader(_boot)
     else:
-        def _warmup():
-            import time as _time
-            _time.sleep(5)  # まず画面を開ける方を優先。落ち着いてから読み込む
-            try:
-                log.info("モデルをバックグラウンドで先読み中…（初回検索を速くするため）")
-                _EMBEDDER.load()
-                log.info("モデル先読み完了。検索はすぐ返ります")
-            except Exception:  # noqa: BLE001
-                log.exception("バックグラウンド先読みに失敗（初回検索時に再挑戦します）")
-        threading.Thread(target=_warmup, daemon=True).start()
-    log.info("ビューア起動: http://%s:%d  （Ctrl+C で停止）", host, port)
-    # Flask開発サーバは POST + keep-alive で接続が切れて「Failed to fetch」になりやすい。
-    # 頑丈な waitress（本番品質のWSGIサーバ）で配信する。複数スレッドで並行処理もOK。
-    try:
-        from waitress import serve as waitress_serve
-        waitress_serve(app, host=host, port=port, threads=8, channel_timeout=300)
-    except ImportError:
-        log.warning("waitress が無いので開発サーバで起動します")
-        app.run(host=host, port=port, debug=False, use_reloader=False, threaded=True)
+        _boot()

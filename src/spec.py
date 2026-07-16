@@ -360,6 +360,59 @@ def build_spec(filename: str) -> dict:
     return {"file": spec_name, "sections": len(data["sections"]), "items": items}
 
 
+def shot_part(filename: str, kind: str = "section", idx: int = 0) -> bytes:
+    """カンプの部品1つ（section/header/footer）だけをJPEGで撮って返す（🧐デザイン指摘用）。
+
+    build_spec と同じ流儀：file://で開く→下までスクロールしてアニメ・lazyloadを発火→
+    保険スクリプトの強制表示(2.2〜2.5秒)を待つ→要素単位でスクショ。
+    idx は「入れ子でない<section>」の中での順番（フロント側と同じ数え方）。
+    """
+    src = config.CAMP_DIR / filename
+    if not src.exists():
+        raise FileNotFoundError(f"カンプが見つかりません: {filename}")
+    cfg = config.CONFIG.capture
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(viewport={"width": cfg.viewport_w, "height": cfg.viewport_h})
+        page = context.new_page()
+        page.set_default_navigation_timeout(cfg.nav_timeout_ms)
+        try:
+            page.goto(src.resolve().as_uri(), wait_until="domcontentloaded")
+            try:
+                page.wait_for_load_state("networkidle", timeout=cfg.networkidle_timeout_ms)
+            except PWTimeout:
+                pass  # ダミー写真(外部URL)が遅くても進める
+            page.evaluate(
+                """async () => {
+                    const h = document.documentElement.scrollHeight;
+                    for (let y = 0; y < h; y += 700) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 90)); }
+                }"""
+            )
+            page.wait_for_timeout(_SETTLE_MS)
+            page.evaluate("() => window.scrollTo(0, 0)")
+            handle = page.evaluate_handle(
+                """([kind, idx]) => {
+                    if (kind === 'section') {
+                      const secs = [...document.querySelectorAll('section')]
+                        .filter(s => !s.parentElement.closest('section'));
+                      return secs[idx] || null;
+                    }
+                    const el = document.querySelector(kind);   // header / footer
+                    return (el && !el.closest('section')) ? el : null;
+                }""",
+                [kind, idx],
+            )
+            el = handle.as_element()
+            if el is None:
+                raise RuntimeError(f"部品が見つかりません（{kind} #{idx}）。保存し直してから試してください")
+            el.scroll_into_view_if_needed()
+            page.wait_for_timeout(200)
+            return el.screenshot(type="jpeg", quality=80)
+        finally:
+            context.close()
+            browser.close()
+
+
 def _read_title(path: Path) -> str:
     """カンプの<title>を拾う（仕様書の見出し用）。"""
     import re

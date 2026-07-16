@@ -103,7 +103,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
         import webbrowser
 
         threading.Timer(1.5, lambda: webbrowser.open(url)).start()
-    viewer.serve(host=args.host, port=args.port, preload=not args.no_preload)
+    viewer.serve(host=args.host, port=args.port, preload=not args.no_preload, dev=args.dev)
     return 0
 
 
@@ -149,6 +149,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_serve.add_argument("--port", type=int, default=5000, help="待ち受けポート")
     p_serve.add_argument("--no-open", action="store_true", help="ブラウザを自動で開かない")
     p_serve.add_argument("--no-preload", action="store_true", help="起動時のモデル先読みをしない")
+    p_serve.add_argument("--dev", action="store_true", help="開発モード（.py保存で自動再起動）")
     p_serve.set_defaults(func=cmd_serve)
 
     return parser

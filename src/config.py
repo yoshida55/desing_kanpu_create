@@ -170,6 +170,11 @@ class HtmlGenConfig:
     advice_model: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_ADVICE_MODEL", "")
     )
+    # recheck_model＝🧐デザイン指摘の「✅直ったか確認」専用モデル（openai用）。
+    # 確認は前回の指摘を✅❌判定するだけ＝安いモデルで十分（LunaはSolの1/5の値段）。
+    recheck_model: str = field(
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_RECHECK_MODEL", "gpt-5.6-luna")
+    )
     openai_api_key: str = field(default_factory=lambda: os.environ.get("OPENAI_API_KEY", ""))
     openai_model: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_OPENAI_MODEL", "gpt-5.6-terra")

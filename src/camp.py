@@ -217,14 +217,14 @@ def _anthropic_text(msg) -> str:
     return "".join(getattr(b, "text", "") for b in msg.content)
 
 
-def _call_anthropic(system: str, content: list) -> str:
+def _call_anthropic(system: str, content: list, model: str | None = None) -> str:
     from anthropic import Anthropic
 
     vcfg = config.CONFIG.vibe
     # 制限時間を付ける（固まっても180秒で諦めてエラー→「永遠に続く」を防ぐ）
     client = Anthropic(api_key=vcfg.api_key, timeout=180.0, max_retries=1)
     msg = client.messages.create(
-        model=vcfg.model,
+        model=model or vcfg.model,
         max_tokens=16000,
         system=system,
         messages=[{"role": "user", "content": content}],
@@ -232,7 +232,7 @@ def _call_anthropic(system: str, content: list) -> str:
     return _anthropic_text(msg)
 
 
-def _call_openai(system: str, content: list) -> str:
+def _call_openai(system: str, content: list, model: str | None = None) -> str:
     from openai import OpenAI
 
     hcfg = config.CONFIG.htmlgen
@@ -242,7 +242,7 @@ def _call_openai(system: str, content: list) -> str:
     # gpt-5.5は180秒に収まらない回が多い（タイムアウト→リトライで二重課金になる方が損）。
     client = OpenAI(api_key=hcfg.openai_api_key, timeout=600.0, max_retries=1)
     resp = client.responses.create(
-        model=hcfg.openai_model,
+        model=model or hcfg.openai_model,
         instructions=system,
         input=[{"role": "user", "content": _to_openai_responses_content(content)}],
         max_output_tokens=16000,
@@ -346,18 +346,21 @@ def _call_zai(system: str, content: list) -> str:
     return resp.choices[0].message.content or ""
 
 
-def _call_llm(system: str, content: list, provider: str | None = None) -> tuple[str, str]:
+def _call_llm(system: str, content: list, provider: str | None = None,
+              model: str | None = None) -> tuple[str, str]:
     """指定プロバイダでHTMLを生成。返り値は (本文, 使ったモデル表示)。
 
     provider を渡さなければ「生成用エンジン」(htmlgen.provider)を使う。
     修正時は provider=htmlgen.edit_provider を渡して別エンジンにできる。
+    model を渡すと、そのプロバイダの既定モデルを上書きできる（openai/anthropicのみ対応。
+    例：デザイン指摘だけ gpt-5.6-sol にする＝config.HtmlGenConfig.advice_model の配線先）。
     """
     hcfg = config.CONFIG.htmlgen
     provider = provider or hcfg.provider
     if provider == "openai":
         if not hcfg.openai_enabled:
             raise RuntimeError("OPENAI_API_KEY が未設定です（.env を確認）")
-        return _call_openai(system, content), f"openai:{hcfg.openai_model}"
+        return _call_openai(system, content, model=model), f"openai:{model or hcfg.openai_model}"
     if provider == "gemini":
         if not config.CONFIG.gemini.enabled:
             raise RuntimeError("GEMINI_API_KEY が未設定です（.env を確認）")
@@ -372,7 +375,7 @@ def _call_llm(system: str, content: list, provider: str | None = None) -> tuple[
         return _call_zai(system, content), f"zai:{config.CONFIG.zai.model}"
     if not config.CONFIG.vibe.enabled:
         raise RuntimeError("ANTHROPIC_API_KEY が未設定です（.env を確認）")
-    return _call_anthropic(system, content), f"anthropic:{config.CONFIG.vibe.model}"
+    return _call_anthropic(system, content, model=model), f"anthropic:{model or config.CONFIG.vibe.model}"
 
 
 def _pick_refs_no_model(brief: str, n: int) -> list[str]:
