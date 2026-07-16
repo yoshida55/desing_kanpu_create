@@ -1119,6 +1119,38 @@
         <label class="set_radio"><input type="radio" name="edit_provider" value="deepseek"> DeepSeek（激安）</label>
         <label class="set_radio"><input type="radio" name="edit_provider" value="zai"> GLM（Z.ai）</label>
       </div>
+      <!-- 🧐デザイン指摘の3役（横一列・変えた瞬間に自動保存） -->
+      <div class="set_row" style="align-items:flex-start">
+        <span class="set_label">🧐 デザイン指摘の3役<br><small style="color:#999">右クリック→🧐の担当</small></span>
+        <div style="display:flex;gap:12px;flex:1;flex-wrap:wrap">
+          <div style="flex:1;min-width:150px">
+            <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:3px">🧐 指摘する（目あり）</div>
+            <select class="set_input set_input_s" id="set_advice_provider" style="width:100%">
+              <option value="openai">GPT</option><option value="anthropic">Claude</option><option value="gemini">Gemini</option>
+            </select>
+            <input class="set_input" id="set_advice_model" list="dcq_model_list" placeholder="モデルID（空＝既定）" style="width:100%;margin-top:3px;box-sizing:border-box">
+          </div>
+          <div style="flex:1;min-width:150px">
+            <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:3px">🔧 修正する</div>
+            <select class="set_input set_input_s" id="set_fix_provider" style="width:100%">
+              <option value="anthropic">Claude</option><option value="openai">GPT</option><option value="gemini">Gemini</option><option value="deepseek">DeepSeek</option><option value="zai">GLM</option>
+            </select>
+            <div style="font-size:10px;color:#999;margin-top:3px">＝上の「修正エンジン」と同じ。モデルは各エンジンのモデル欄</div>
+          </div>
+          <div style="flex:1;min-width:150px">
+            <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:3px">✅ 評価する（目あり）</div>
+            <select class="set_input set_input_s" id="set_recheck_provider" style="width:100%">
+              <option value="openai">GPT</option><option value="anthropic">Claude</option><option value="gemini">Gemini</option>
+            </select>
+            <input class="set_input" id="set_recheck_model" list="dcq_model_list" placeholder="モデルID（空＝既定）" style="width:100%;margin-top:3px;box-sizing:border-box">
+          </div>
+        </div>
+        <datalist id="dcq_model_list">
+          <option value="gpt-5.6-sol"></option><option value="gpt-5.6-terra"></option><option value="gpt-5.6-luna"></option>
+          <option value="claude-opus-4-8"></option><option value="claude-sonnet-5"></option><option value="claude-haiku-4-5"></option>
+          <option value="gemini-3.1-flash"></option><option value="gemini-3.1-flash-lite"></option>
+        </datalist>
+      </div>
       <div class="set_row">
         <span class="set_label">Claudeモデル</span>
         <select class="set_input set_input_s" id="set_anthropic_model">
@@ -1746,6 +1778,12 @@
       const s = await fetch("/api/settings").then((r) => r.json());
       document.querySelectorAll('input[name="provider"]').forEach((r) => { r.checked = (r.value === s.provider); });
       document.querySelectorAll('input[name="edit_provider"]').forEach((r) => { r.checked = (r.value === (s.edit_provider || s.provider)); });
+      // 🧐デザイン指摘の3役
+      const advP = document.querySelector("#set_advice_provider"); if (advP) advP.value = s.advice_provider || "openai";
+      const advM = document.querySelector("#set_advice_model"); if (advM) advM.value = s.advice_model || "";
+      const fixP = document.querySelector("#set_fix_provider"); if (fixP) fixP.value = s.edit_provider || s.provider;
+      const rcP = document.querySelector("#set_recheck_provider"); if (rcP) rcP.value = s.recheck_provider || s.advice_provider || "openai";
+      const rcM = document.querySelector("#set_recheck_model"); if (rcM) rcM.value = s.recheck_model || "";
       document.querySelector("#set_openai_model").value = s.openai_model || "";
       if (s.anthropic_model) document.querySelector("#set_anthropic_model").value = s.anthropic_model;
       if (s.gemini_model) document.querySelector("#set_gemini_model").value = s.gemini_model;
@@ -1847,6 +1885,28 @@
             body: JSON.stringify(body),
           });
           setMsg.textContent = t[2] + "モデルを「" + label + "」に設定しました";
+        } catch (e) { setMsg.textContent = "保存失敗：" + e; }
+      });
+    });
+
+    // 🧐デザイン指摘の3役も、変えた瞬間に自動保存
+    [["#set_advice_provider", "advice_provider", "🧐指摘するAI"],
+     ["#set_advice_model", "advice_model", "🧐指摘モデル"],
+     ["#set_fix_provider", "edit_provider", "🔧修正するAI"],
+     ["#set_recheck_provider", "recheck_provider", "✅評価するAI"],
+     ["#set_recheck_model", "recheck_model", "✅評価モデル"]].forEach((t) => {
+      const elm = document.querySelector(t[0]);
+      if (!elm) return;
+      elm.addEventListener("change", async () => {
+        setMsg.textContent = t[2] + "を保存中…";
+        try {
+          const body = {}; body[t[1]] = elm.value;
+          await fetch("/api/settings", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          setMsg.textContent = t[2] + "を「" + (elm.value || "既定") + "」に設定しました";
+          if (t[1] === "edit_provider") loadSettings();  // 上の修正エンジンのラジオも揃える
         } catch (e) { setMsg.textContent = "保存失敗：" + e; }
       });
     });

@@ -303,6 +303,10 @@ def api_settings_get():
         {
             "provider": h.provider,
             "edit_provider": h.edit_provider,
+            "advice_provider": h.advice_provider,
+            "advice_model": "" if h.advice_model == "default" else h.advice_model,
+            "recheck_provider": h.recheck_provider or h.advice_provider,
+            "recheck_model": "" if h.recheck_model == "default" else h.recheck_model,
             "openai_model": h.openai_model,
             "anthropic_model": v.model,
             "openai_set": h.openai_enabled,
@@ -486,6 +490,17 @@ def api_settings_post():
         updates["DESIGN_STOCK_HTML_PROVIDER"] = data["provider"]
     if data.get("edit_provider") in ("anthropic", "openai", "gemini", "deepseek", "zai"):
         updates["DESIGN_STOCK_EDIT_PROVIDER"] = data["edit_provider"]
+    # 🧐デザイン指摘の3役（指摘・評価はスクショを見るので画像対応エンジンのみ）
+    if data.get("advice_provider") in ("anthropic", "openai", "gemini"):
+        updates["DESIGN_STOCK_ADVICE_PROVIDER"] = data["advice_provider"]
+    if data.get("recheck_provider") in ("anthropic", "openai", "gemini"):
+        updates["DESIGN_STOCK_RECHECK_PROVIDER"] = data["recheck_provider"]
+    # モデル欄は「空に戻す＝既定モデル」を許すため、空文字を "default" として保存する
+    # （update_env_fileは空文字を「変更しない」と扱う仕様＝APIキー消し防止のため）
+    if "advice_model" in data:
+        updates["DESIGN_STOCK_ADVICE_MODEL"] = (data.get("advice_model") or "").strip() or "default"
+    if "recheck_model" in data:
+        updates["DESIGN_STOCK_RECHECK_MODEL"] = (data.get("recheck_model") or "").strip() or "default"
     if (data.get("openai_model") or "").strip():
         updates["DESIGN_STOCK_OPENAI_MODEL"] = data["openai_model"].strip()
     if (data.get("anthropic_model") or "").strip():
@@ -798,21 +813,23 @@ def api_design_critique():
         return jsonify({"ok": False, "message": "スクショ失敗：" + str(exc)[:150]}), 500
     sec_html = (data.get("html") or "").strip()[:8000]
     hcfg = config.CONFIG.htmlgen
-    provider = hcfg.advice_provider
-    if provider in ("deepseek", "zai"):
-        provider = "openai"  # 画像を送れないエンジンでは見た目を指摘できない
     # モード分岐：recheck＝前回の指摘だけを✅❌判定（安いモデル）／通常＝指摘4つ（上位モデル）
     mode = (data.get("mode") or "").strip()
     prev = (data.get("prev") or "").strip()[:4000]
     if mode == "recheck" and prev:
         system = _RECHECK_SYSTEM
         body_txt = "■前回の指摘リスト:\n" + prev + "\n\n■修正後のセクションの見た目は上の画像。参考にHTMLも渡す:\n" + sec_html
-        # recheck_modelはOpenAIのモデルIDなので、他エンジン使用時はadvice_modelにフォールバック
-        model = (hcfg.recheck_model if provider == "openai" else "") or hcfg.advice_model or None
+        provider = hcfg.recheck_provider or hcfg.advice_provider
+        model = hcfg.recheck_model
     else:
         system = _CRITIQUE_SYSTEM
         body_txt = "■このセクションの見た目（スクショ）は上の画像。参考にHTMLも渡す:\n" + sec_html
-        model = hcfg.advice_model or None
+        provider = hcfg.advice_provider
+        model = hcfg.advice_model
+    if provider in ("deepseek", "zai"):
+        provider = "openai"  # 画像を送れないエンジンでは見た目を指摘・評価できない
+    if model in ("", "default"):
+        model = None  # "default"＝そのエンジンの既定モデル（設定画面で空に戻した状態）
     content = [
         {"type": "image", "source": {
             "type": "base64", "media_type": "image/jpeg",

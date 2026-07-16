@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 import re
+import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -170,8 +171,17 @@ class HtmlGenConfig:
     advice_model: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_ADVICE_MODEL", "")
     )
+    # recheck_provider＝「✅直ったか確認」のエンジン（未指定ならアドバイスと同じ）。
+    # 画像を見る仕事なので実質 openai / anthropic / gemini から選ぶ。
+    recheck_provider: str = field(
+        default_factory=lambda: os.environ.get(
+            "DESIGN_STOCK_RECHECK_PROVIDER",
+            os.environ.get("DESIGN_STOCK_ADVICE_PROVIDER", ""),
+        )
+    )
     # recheck_model＝🧐デザイン指摘の「✅直ったか確認」専用モデル（openai用）。
     # 確認は前回の指摘を✅❌判定するだけ＝安いモデルで十分（LunaはSolの1/5の値段）。
+    # 値が "default" のときは「そのエンジンの既定モデル」を意味する（設定画面で空に戻す用）。
     recheck_model: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_RECHECK_MODEL", "gpt-5.6-luna")
     )
@@ -275,6 +285,10 @@ def reload() -> None:
 
 ENV_PATH = PROJECT_ROOT / ".env"
 
+# .env は「全行読む→丸ごと書き直す」方式なので、2つの保存が同時に走ると
+# 後の書き込みが先の変更を消す（実際に設定画面の連続変更で発生）。ロックで直列化する。
+_ENV_LOCK = threading.Lock()
+
 
 def update_env_file(updates: dict) -> None:
     """.env の指定キーを更新（無ければ追記）。他の行はそのまま残す。
@@ -285,24 +299,25 @@ def update_env_file(updates: dict) -> None:
     updates = {k: v for k, v in updates.items() if v not in (None, "")}
     if not updates:
         return
-    lines = ENV_PATH.read_text(encoding="utf-8").splitlines() if ENV_PATH.exists() else []
-    done = set()
-    out = []
-    for line in lines:
-        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)=", line)
-        if m and m.group(1) in updates:
-            key = m.group(1)
-            out.append(f"{key}={updates[key]}")
-            done.add(key)
-        else:
-            out.append(line)
-    for key, val in updates.items():
-        if key not in done:
-            out.append(f"{key}={val}")
-    ENV_PATH.write_text("\n".join(out) + "\n", encoding="utf-8")
-    # 動いているプロセスにも反映
-    for key, val in updates.items():
-        os.environ[key] = str(val)
+    with _ENV_LOCK:
+        lines = ENV_PATH.read_text(encoding="utf-8").splitlines() if ENV_PATH.exists() else []
+        done = set()
+        out = []
+        for line in lines:
+            m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)=", line)
+            if m and m.group(1) in updates:
+                key = m.group(1)
+                out.append(f"{key}={updates[key]}")
+                done.add(key)
+            else:
+                out.append(line)
+        for key, val in updates.items():
+            if key not in done:
+                out.append(f"{key}={val}")
+        ENV_PATH.write_text("\n".join(out) + "\n", encoding="utf-8")
+        # 動いているプロセスにも反映
+        for key, val in updates.items():
+            os.environ[key] = str(val)
 
 
 def ensure_dirs() -> None:
