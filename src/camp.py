@@ -79,14 +79,17 @@ _REVIEW_FALLBACK = _SAFE_START + """
   var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
   var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
   function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  // ★data-cedelay（⏳演出の遅らせ）を尊重して見せる。ここが即表示だと、fxa側が遅らせを守っても
+  //   ページCSSの .reveal.in{...!important} が先に全部見せてしまい「全要素が同時に出る」（実際に起きた）
+  function showD(el){ var d=+el.getAttribute('data-cedelay')||0; if(d>0){ setTimeout(function(){ show(el); }, d); } else show(el); }
   function run(){
     var els=document.querySelectorAll(SEL);
     if(els.length && ('IntersectionObserver' in window)){
       var io=new IntersectionObserver(function(es){
-        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+        es.forEach(function(e){ if(e.isIntersecting){ showD(e.target); io.unobserve(e.target);} });
       }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
       els.forEach(function(el){ io.observe(el); });
-    } else if(els.length){ els.forEach(show); }
+    } else if(els.length){ els.forEach(showD); }
     // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
     // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
     // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
@@ -460,7 +463,8 @@ def _call_llm(system: str, content: list, provider: str | None = None,
         # ChatGPT定額プラン枠で動く＝APIキー不要・追加課金ゼロ。usageは取れないので費用記録は0円扱い。
         # モデルは gpt-5.6-sol/terra/luna 等をそのまま指定できる（軽いモデルほど5時間枠が長持ち：
         # Plusの目安 Sol=15〜90通/Terra=20〜110通/Luna=50〜280通）。未指定なら~/.codex/config.tomlの既定。
-        text, used = _call_codex(system, content, model=model), f"codex:{model or 'default'}"
+        _cm = model or (hcfg.codex_model if hcfg.codex_model not in ("", "default") else None)
+        text, used = _call_codex(system, content, model=_cm), f"codex:{_cm or 'default'}"
     else:
         if not config.CONFIG.vibe.enabled:
             raise RuntimeError("ANTHROPIC_API_KEY が未設定です（.env を確認）")
@@ -1592,7 +1596,8 @@ def _content_losses(old_frag: str, new_frag: str) -> list:
 
 def edit_camp_section(filename: str, section_index: int, instruction: str,
                       keep_text: bool = False, style_type: str = "",
-                      provider: str = "", model: str = "", out_name: str = "") -> dict:
+                      provider: str = "", model: str = "", out_name: str = "",
+                      ref_b64: str = "", ref_mime: str = "image/jpeg") -> dict:
     """指定セクションだけを依頼どおり直す（速い）。section_index<0 は全体編集（遅い）。
 
     keep_text=True（✨おしゃれ化など「中身は変えない」系）のときはテキスト保全ゲートを通す。
@@ -1603,6 +1608,23 @@ def edit_camp_section(filename: str, section_index: int, instruction: str,
     instruction = (instruction or "").strip()
     if not instruction:
         raise ValueError("修正指示が空です")
+    # 📷 見本画像つき修正：見本の「構図」を読み取って寄せる（文言・素材はコピーしない）
+    ref_block: list = []
+    if ref_b64:
+        ref_block = [{"type": "image", "source": {"type": "base64", "media_type": ref_mime or "image/jpeg",
+                                                  "data": ref_b64}}]
+        instruction = (
+            "【見本画像あり】添付画像は「寄せたい見本」のスクリーンショット。"
+            "構図（見出しの位置と大きさ・色面や曲線の形・要素の並び方・余白のとり方）を読み取り、"
+            "今の中身をその構図に組み替える。\n"
+            "・見本の文言や写真をコピーしない（構図・雰囲気だけ真似る）\n"
+            "・今ある文章・画像は、指示が無い限り1つも消さない\n"
+            "・色面や曲線はCSS（background/clip-path/border-radius/SVG）で描いてよい\n"
+            "・★新しい写真を勝手に追加しない（picsum/loremflickr等のダミー写真は禁止）。"
+            "使ってよい画像は「このセクションに今ある画像」と「使える実画像（アップロード素材）」だけ。"
+            "素材が足りない部分は写真で埋めず、色面・図形・余白で表現する\n\n"
+            "# ユーザーの依頼\n" + instruction
+        )
     # provider/model＝呼び出し側の上書き（🧐指摘の🔧修正など）。未指定なら従来どおり修正エンジン。
     _prov = provider or config.CONFIG.htmlgen.edit_provider
     _model = None if model in ("", "default") else model
@@ -1614,7 +1636,7 @@ def edit_camp_section(filename: str, section_index: int, instruction: str,
 
     if whole:
         # 全体編集：HTML全部を渡して直す（確実だが遅い）
-        content = [{"type": "text", "text": (
+        content = ref_block + [{"type": "text", "text": (
             "次のLP全体を、依頼どおり**最小限だけ**直してHTML全体を返してください。"
             "指示に無い所は変えない。トーン・配色・フォントは維持。\n\n"
             f"# 依頼\n{instruction}{up_txt}\n\n# 現在のHTML\n{html}\n\n返答はHTMLだけ。"
@@ -1626,7 +1648,7 @@ def edit_camp_section(filename: str, section_index: int, instruction: str,
         section_html = m.group(0)
         style_m = re.search(r"<style\b[^>]*>.*?</style>", html, flags=re.DOTALL | re.IGNORECASE)
         style_ctx = style_m.group(0) if style_m else "(なし)"
-        content = [{"type": "text", "text": (
+        content = ref_block + [{"type": "text", "text": (
             "指定セクションだけを依頼どおり直してください。全体のトーン・配色・フォントは保つ。\n\n"
             f"# ページ全体のCSS（参考・むやみに変えない）\n{style_ctx}\n\n"
             f"# 直す対象セクション（このHTMLだけを直す）\n{section_html}\n\n"

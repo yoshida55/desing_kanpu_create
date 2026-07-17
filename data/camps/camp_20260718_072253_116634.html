@@ -1,0 +1,3493 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js"><head><meta name="ce-base" content="a0f202c0d58744e1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js');</script>
+<title>みどりワークス仙台｜就労継続支援A型</title>
+<meta name="description" content="仙台駅東口から徒歩7分。週1日から相談できる就労継続支援A型事業所「みどりワークス仙台」のご案内です。">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap');
+
+:root{
+  --green:#22b573;
+  --green-dark:#137c55;
+  --mint:#effaf4;
+  --mint-2:#dff5e9;
+  --lime:#e5ff9e;
+  --ink:#221814;
+  --white:#fff;
+  --line:rgba(19,124,85,.17);
+  --shadow:0 12px 32px rgba(25,117,80,.12);
+  --shadow-strong:0 24px 64px rgba(25,117,80,.18);
+  --container:min(1440px,calc(100% - 80px));
+  --hero:clamp(2.2rem,5vw,3.6rem);
+  --section:clamp(1.6rem,3vw,2.4rem);
+  --small:clamp(1.1rem,1.6vw,1.25rem);
+  --body:clamp(.95rem,1.1vw,1rem);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:var(--white);
+  font-family:"Zen Kaku Gothic New",sans-serif;
+  font-size:var(--body);
+  line-height:2;
+  letter-spacing:.02em;
+  overflow-x:hidden;
+}
+body.loading{overflow:hidden}
+img{display:block;width:100%;height:100%;object-fit:cover}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit}
+::selection{background:var(--lime);color:var(--ink)}
+
+.loader{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:grid;
+  place-items:center;
+  background:var(--mint);
+  transition:opacity .5s ease-out,visibility .5s ease-out;
+}
+.loader.is-hidden{opacity:0;visibility:hidden}
+.loader-piece,
+.puzzle{
+  width:54px;
+  aspect-ratio:1;
+  background:var(--green);
+  border-radius:6px;
+  clip-path:polygon(0 0,36% 0,36% 11%,43% 18%,57% 18%,64% 11%,64% 0,100% 0,100% 36%,89% 36%,82% 43%,82% 57%,89% 64%,100% 64%,100% 100%,64% 100%,64% 89%,57% 82%,43% 82%,36% 89%,36% 100%,0 100%,0 64%,11% 64%,18% 57%,18% 43%,11% 36%,0 36%);
+}
+.loader-piece{animation:loaderPulse 1.2s ease-in-out infinite}
+@keyframes loaderPulse{
+  0%,100%{transform:rotate(0) scale(1)}
+  50%{transform:rotate(15deg) scale(1.1)}
+}
+
+.site-header{
+  position:fixed;
+  z-index:100;
+  top:16px;
+  left:50%;
+  width:min(1408px,calc(100% - 32px));
+  min-height:64px;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 12px 10px 24px;
+  border:1px solid rgba(19,124,85,.14);
+  border-radius:8px;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(18px);
+  transition:box-shadow .3s,background .3s;
+}
+.site-header.scrolled{background:rgba(255,255,255,.97);box-shadow:var(--shadow)}
+.logo{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  font-weight:900;
+  line-height:1.25;
+  letter-spacing:.06em;
+}
+.logo-mark{
+  width:29px;
+  aspect-ratio:1;
+  background:var(--green);
+  border-radius:4px 10px 4px 10px;
+  transform:rotate(-8deg);
+}
+.logo small{
+  display:block;
+  color:var(--green-dark);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.13em;
+}
+.nav{display:flex;align-items:center;gap:28px}
+.nav a{
+  position:relative;
+  font-size:13px;
+  font-weight:700;
+}
+.nav a:not(.header-cta)::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:100%;
+  bottom:-5px;
+  height:2px;
+  background:var(--green);
+  transition:right .3s;
+}
+.nav a:not(.header-cta):hover::after{right:0}
+.header-cta,.button{
+  display:inline-flex;
+  min-height:48px;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  padding:0 24px;
+  border:1px solid var(--green);
+  border-radius:4px;
+  background:var(--green);
+  color:var(--white);
+  font-weight:700;
+  line-height:1.4;
+  transition:transform .3s,box-shadow .3s,background .3s,color .3s;
+}
+.header-cta:hover,.button:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow-strong);
+  background:var(--green-dark);
+}
+.button.light{
+  border-color:var(--white);
+  background:var(--white);
+  color:var(--green-dark);
+}
+.button.accent{
+  border-color:var(--lime);
+  background:var(--lime);
+  color:var(--ink);
+}
+.button .arrow{font-size:1.2em;transition:transform .3s}
+.button:hover .arrow{transform:translateX(5px)}
+
+.mobile-button{
+  display:none;
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:4px;
+  background:var(--green);
+  color:white;
+  font-size:20px;
+}
+
+.container{width:var(--container);margin-inline:auto}
+.section{
+  position:relative;
+  min-height:100vh;
+  padding:12vh 0;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+}
+.section.tint{background:var(--mint)}
+.section-inner{width:100%}
+.eyebrow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:0 0 16px;
+  color:var(--green-dark);
+  font-size:12px;
+  font-weight:900;
+  line-height:1.4;
+  letter-spacing:.17em;
+  text-transform:uppercase;
+}
+.eyebrow::before{
+  content:"";
+  width:28px;
+  height:2px;
+  background:var(--green);
+}
+.section-title{
+  max-width:720px;
+  margin:0 0 24px;
+  font-size:var(--section);
+  line-height:1.35;
+  letter-spacing:.04em;
+}
+.lead{
+  max-width:38em;
+  margin:0;
+  line-height:2;
+}
+.vertical-label{
+  position:absolute;
+  right:24px;
+  top:15%;
+  padding:12px 7px;
+  border:1px solid var(--ink);
+  background:white;
+  font-weight:900;
+  line-height:1.15;
+  letter-spacing:.15em;
+  writing-mode:vertical-rl;
+}
+.outline-word{
+  position:absolute;
+  z-index:0;
+  color:transparent;
+  font-size:clamp(5rem,12vw,11rem);
+  font-weight:900;
+  line-height:.8;
+  letter-spacing:.04em;
+  -webkit-text-stroke:1px rgba(19,124,85,.16);
+  pointer-events:none;
+}
+
+html.js .reveal{
+  opacity:0;
+  transform:translateY(32px);
+}
+html.js .reveal.from-left{transform:translateX(-40px)}
+html.js .reveal.from-right{transform:translateX(40px)}
+html.js .reveal.zoom{transform:scale(1.1)}
+.reveal{
+  transition:opacity .85s ease-out,transform .85s ease-out;
+  transition-delay:var(--delay,0s);
+}
+.reveal.is-visible{opacity:1!important;transform:none!important}
+
+.hero{
+  min-height:100svh;
+  padding:112px 0 48px;
+  background:
+    radial-gradient(circle at 15% 70%,rgba(229,255,158,.8),transparent 25%),
+    linear-gradient(155deg,var(--white) 0 35%,var(--mint) 35% 100%);
+}
+.hero-grid{
+  position:relative;
+  width:var(--container);
+  min-height:calc(100svh - 160px);
+  margin:auto;
+  display:grid;
+  grid-template-columns:.83fr 1.17fr;
+  align-items:center;
+  gap:64px;
+}
+.hero-copy{position:relative;z-index:3;padding-left:4vw}
+.hero-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:24px;
+  color:var(--green-dark);
+  font-size:13px;
+  font-weight:900;
+}
+.hero-kicker::before{
+  content:"";
+  width:36px;
+  height:2px;
+  background:var(--green);
+}
+.hero h1{
+  margin:0;
+  font-size:var(--hero);
+  line-height:1.34;
+  letter-spacing:.05em;
+}
+.hero h1 span{
+  display:block;
+  width:max-content;
+  margin-bottom:8px;
+  padding:0 .18em .08em;
+  background:white;
+}
+html.js .hero h1 span{
+  opacity:0;
+  transform:translateY(20px);
+}
+body.ready .hero h1 span{
+  opacity:1;
+  transform:none;
+  transition:opacity .6s ease-out,transform .6s ease-out;
+}
+body.ready .hero h1 span:nth-child(2){transition-delay:.15s}
+body.ready .hero h1 span:nth-child(3){transition-delay:.3s}
+.hero-text{max-width:31em;margin:32px 0;line-height:2}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap}
+.hero-note{
+  margin-top:20px;
+  color:var(--green-dark);
+  font-size:13px;
+  font-weight:700;
+}
+.hero-visual{
+  position:relative;
+  height:min(73vh,720px);
+  min-height:520px;
+}
+.hero-panel{
+  position:absolute;
+  inset:4% 0 0 4%;
+  overflow:hidden;
+  border-radius:4px;
+  background:linear-gradient(145deg,#cfeee0,#8dd7bc);
+  clip-path:polygon(8% 0,100% 0,100% 90%,75% 96%,45% 90%,0 100%,0 10%);
+}
+html.js .hero-panel{opacity:0;transform:scale(.95)}
+body.ready .hero-panel{
+  opacity:1;
+  transform:scale(1);
+  transition:opacity 1s ease-out,transform 1s ease-out;
+}
+.hero-panel img{
+  filter:saturate(.78) contrast(.95);
+  transition:transform 1.2s ease;
+  animation:kenBurns 14s ease-in-out infinite alternate;
+}
+.hero-panel:hover img{transform:scale(1.06)}
+@keyframes kenBurns{to{transform:scale(1.06)}}
+.hero-card{
+  position:absolute;
+  right:-16px;
+  bottom:5%;
+  width:min(320px,48%);
+  padding:24px;
+  border-left:5px solid var(--lime);
+  background:white;
+  box-shadow:var(--shadow-strong);
+}
+html.js .hero-card{opacity:0;transform:translateX(30px)}
+body.ready .hero-card{
+  opacity:1;
+  transform:none;
+  transition:opacity 1s .3s ease-out,transform 1s .3s ease-out;
+}
+.hero-card strong{display:block;font-size:var(--small);line-height:1.6}
+.hero-card small{color:var(--green-dark)}
+.cloud{
+  position:absolute;
+  z-index:1;
+  width:150px;
+  height:32px;
+  border-radius:50%;
+  background:rgba(255,255,255,.72);
+  filter:blur(4px);
+  animation:cloudLoop 20s linear infinite;
+}
+.cloud.c1{top:17%;left:-8%}
+.cloud.c2{top:77%;left:45%;animation-delay:-9s;transform:scale(.6)}
+@keyframes cloudLoop{
+  from{translate:-100px 0}
+  to{translate:850px 0}
+}
+.hero-piece{position:absolute;z-index:2;width:46px}
+.hero-piece.p1{left:0;bottom:16%;background:var(--lime);animation:floating 3s ease-in-out infinite}
+.hero-piece.p2{right:7%;top:1%;transform:rotate(18deg);animation:floating 3s -1.5s ease-in-out infinite}
+@keyframes floating{50%{translate:0 -10px}}
+
+.intro{background:white}
+.intro-layout{
+  display:grid;
+  grid-template-columns:.7fr 1.3fr;
+  gap:11vw;
+  align-items:start;
+}
+.intro-heading{
+  position:sticky;
+  top:160px;
+}
+.intro-copy{padding-top:14vh}
+.intro-copy p{
+  max-width:36em;
+  margin:0 0 40px;
+  font-size:1.04rem;
+}
+.promise{
+  margin-top:64px;
+  padding:32px 0;
+  border-block:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  gap:24px;
+}
+.promise strong{font-size:var(--small);line-height:1.6}
+.promise span{color:var(--green-dark);font-weight:700}
+
+.about{background:var(--mint)}
+.about .outline-word{left:-1%;top:13%}
+.about-layout{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9vw;
+  align-items:center;
+}
+.photo-stack{
+  position:relative;
+  min-height:640px;
+}
+.photo-frame{
+  position:absolute;
+  overflow:hidden;
+  background:linear-gradient(135deg,#d5f3e5,#9cd9c0);
+  box-shadow:var(--shadow);
+}
+.photo-frame img{transition:transform .6s,filter .6s}
+.photo-frame:hover img{transform:scale(1.055);filter:saturate(1.05)}
+.photo-frame.large{inset:0 18% 16% 0}
+.photo-frame.small{
+  right:0;
+  bottom:0;
+  width:45%;
+  height:42%;
+  transform:rotate(3deg);
+  border:8px solid white;
+}
+.caption-card{
+  position:absolute;
+  right:-20px;
+  bottom:13%;
+  width:260px;
+  padding:24px;
+  background:white;
+  box-shadow:var(--shadow-strong);
+  line-height:1.7;
+}
+.caption-card::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-24px;
+  border-radius:50%;
+  background:rgba(34,181,115,.28);
+  filter:blur(28px);
+}
+.caption-card strong{display:block;margin-bottom:8px}
+.caption-card small{color:var(--green-dark)}
+.about-copy{padding-top:80px}
+.about-list{margin-top:48px}
+.about-row{
+  display:grid;
+  grid-template-columns:72px 1fr;
+  gap:24px;
+  padding:24px 0;
+  border-top:1px solid var(--line);
+}
+.about-row:last-child{border-bottom:1px solid var(--line)}
+.about-row b{
+  color:var(--green);
+  font-size:1.5rem;
+  line-height:1.3;
+}
+.about-row h3{margin:0 0 6px;font-size:var(--small);line-height:1.5}
+.about-row p{max-width:34em;margin:0;font-size:.95rem}
+
+.numbers{
+  min-height:auto;
+  padding:88px 0;
+  background:var(--green);
+  color:white;
+}
+.number-layout{
+  display:grid;
+  grid-template-columns:1.2fr 2.8fr;
+  gap:7vw;
+  align-items:end;
+}
+.numbers .eyebrow{color:white}
+.numbers .eyebrow::before{background:var(--lime)}
+.numbers .section-title{margin:0}
+.number-list{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  border-left:1px solid rgba(255,255,255,.35);
+}
+.number-item{
+  min-height:150px;
+  padding:8px 24px;
+  border-right:1px solid rgba(255,255,255,.35);
+}
+.number-item strong{
+  display:block;
+  color:var(--lime);
+  font-size:clamp(2.2rem,4vw,4rem);
+  font-weight:900;
+  line-height:1.1;
+}
+.number-item span{font-size:13px;font-weight:700}
+.number-item small{display:block;margin-top:12px;opacity:.8;line-height:1.7}
+
+.daily{background:white}
+.daily-layout{
+  display:grid;
+  grid-template-columns:.82fr 1.18fr;
+  gap:9vw;
+  align-items:center;
+}
+.daily-image{
+  position:relative;
+  height:700px;
+  margin-left:-5vw;
+  overflow:hidden;
+  background:linear-gradient(135deg,#d5f3e5,#a0d6c1);
+}
+.daily-image img{transition:transform .7s}
+.daily-image:hover img{transform:scale(1.04)}
+.daily-label{
+  position:absolute;
+  top:40px;
+  right:0;
+  padding:15px 10px;
+  background:white;
+  writing-mode:vertical-rl;
+  font-weight:900;
+  letter-spacing:.15em;
+}
+.timeline{margin-top:40px}
+.time-row{
+  display:grid;
+  grid-template-columns:78px 1fr;
+  gap:24px;
+  padding:18px 0;
+  border-top:1px solid var(--line);
+  transition:padding-left .3s,background .3s;
+}
+.time-row:last-child{border-bottom:1px solid var(--line)}
+.time-row:hover{padding-left:12px;background:var(--mint)}
+.time-row time{color:var(--green-dark);font-weight:900}
+.time-row strong{display:block;line-height:1.5}
+.time-row p{margin:4px 0 0;font-size:.91rem;line-height:1.7}
+
+.voice{
+  background:linear-gradient(110deg,var(--mint) 0 72%,white 72%);
+}
+.voice .outline-word{right:-2%;top:14%}
+.voice-header{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:64px;
+  align-items:end;
+  margin-bottom:64px;
+}
+.voice-stage{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:24px;
+  min-height:580px;
+}
+.voice-main{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#cbeade,#86ccb1);
+}
+.voice-main img{transition:transform .7s}
+.voice-main:hover img{transform:scale(1.045)}
+.voice-quote{
+  position:absolute;
+  left:40px;
+  bottom:40px;
+  max-width:430px;
+  padding:32px;
+  background:rgba(255,255,255,.94);
+  box-shadow:var(--shadow);
+}
+.voice-quote p{margin:0 0 16px;font-size:var(--small);font-weight:700;line-height:1.8}
+.voice-quote small{color:var(--green-dark);font-weight:700}
+.voice-side{
+  display:grid;
+  grid-template-rows:1fr 1fr;
+  gap:24px;
+}
+.voice-mini{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#d8f2e6,#a9d8c5);
+  cursor:pointer;
+}
+.voice-mini img{filter:saturate(.78);transition:transform .6s,filter .6s}
+.voice-mini:hover img{transform:scale(1.06);filter:saturate(1)}
+.voice-mini figcaption{
+  position:absolute;
+  inset:auto 16px 16px;
+  padding:16px 18px;
+  background:white;
+  font-weight:700;
+  line-height:1.65;
+}
+.voice-mini figcaption small{display:block;color:var(--green-dark)}
+
+.news{background:white}
+.news-layout{
+  display:grid;
+  grid-template-columns:.68fr 1.32fr;
+  gap:10vw;
+  align-items:start;
+}
+.news-heading{position:sticky;top:150px}
+.news-list{border-top:1px solid var(--ink)}
+.news-item{
+  display:grid;
+  grid-template-columns:130px 1fr 40px;
+  gap:24px;
+  align-items:center;
+  padding:28px 8px;
+  border-bottom:1px solid var(--line);
+  transition:padding-left .3s,background .3s;
+}
+.news-item:hover{padding-left:20px;background:var(--mint)}
+.news-item time{font-size:13px;color:var(--green-dark);font-weight:700}
+.news-item strong{font-size:var(--small);line-height:1.6}
+.news-item i{
+  display:grid;
+  width:36px;
+  aspect-ratio:1;
+  place-items:center;
+  border:1px solid var(--green);
+  border-radius:50%;
+  color:var(--green);
+  font-style:normal;
+  transition:background .3s,color .3s,transform .3s;
+}
+.news-item:hover i{background:var(--green);color:white;transform:translateX(4px)}
+.news-more{margin-top:40px}
+
+.support{background:var(--mint)}
+.support-layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9vw;
+  align-items:center;
+}
+.support-copy{order:1}
+.support-photo{
+  order:2;
+  position:relative;
+  height:660px;
+  background:linear-gradient(135deg,#d5f3e5,#9fdac2);
+}
+.support-photo img{transition:transform .7s}
+.support-photo:hover img{transform:scale(1.04)}
+.support-piece{
+  position:absolute;
+  width:54px;
+  right:-20px;
+  top:20%;
+  background:var(--lime);
+}
+.fee-box{
+  margin-top:40px;
+  padding:28px 32px;
+  border:1px solid var(--green);
+  background:white;
+}
+.fee-box strong{display:block;margin-bottom:8px;font-size:var(--small)}
+.fee-box p{margin:0}
+.checks{
+  margin:32px 0 0;
+  padding:0;
+  list-style:none;
+}
+.checks li{
+  position:relative;
+  padding:14px 0 14px 34px;
+  border-bottom:1px solid var(--line);
+  font-weight:700;
+}
+.checks li::before{
+  content:"";
+  position:absolute;
+  left:4px;
+  top:23px;
+  width:13px;
+  height:7px;
+  border-left:3px solid var(--green);
+  border-bottom:3px solid var(--green);
+  transform:rotate(-45deg);
+}
+
+.marquee{
+  overflow:hidden;
+  padding:26px 0;
+  border-block:1px solid var(--line);
+  background:white;
+}
+.marquee-track{
+  display:flex;
+  width:max-content;
+  animation:marqueeRight 12s linear infinite;
+}
+.marquee span{
+  padding-right:5vw;
+  color:transparent;
+  font-size:clamp(2.6rem,6vw,6rem);
+  font-weight:900;
+  line-height:1;
+  letter-spacing:.05em;
+  white-space:nowrap;
+  -webkit-text-stroke:1px var(--green);
+}
+@keyframes marqueeRight{
+  from{transform:translateX(-50%)}
+  to{transform:translateX(0)}
+}
+
+.entry{
+  position:relative;
+  min-height:100vh;
+  padding:14vh 0 0;
+  overflow:hidden;
+  background:var(--white);
+}
+.entry-head{
+  position:relative;
+  z-index:5;
+  width:var(--container);
+  margin:auto;
+  text-align:left;
+}
+.entry-title{
+  margin:0;
+  font-size:clamp(3.8rem,11vw,10rem);
+  line-height:.85;
+  letter-spacing:.02em;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(34,181,115,.4);
+}
+.entry-sub{
+  max-width:620px;
+  margin:32px 0 0;
+  font-size:var(--section);
+  font-weight:900;
+  line-height:1.5;
+}
+.entry-actions{display:flex;gap:16px;margin-top:32px;flex-wrap:wrap}
+.entry-note{margin:18px 0 0;color:var(--green-dark);font-weight:700}
+.entry-piece{
+  position:absolute;
+  z-index:3;
+  width:48px;
+  animation:floating 3s ease-in-out infinite;
+}
+.entry-piece.e1{top:24%;right:12%;background:var(--lime)}
+.entry-piece.e2{top:42%;left:7%;animation-delay:-1.3s}
+.wave{
+  position:absolute;
+  left:-5%;
+  width:110%;
+  border-radius:50% 50% 0 0;
+  will-change:transform;
+}
+.wave.one{z-index:1;bottom:245px;height:230px;background:#bcebd8}
+.wave.two{z-index:2;bottom:195px;height:190px;background:#74d2ab}
+.wave.three{z-index:3;bottom:130px;height:180px;background:var(--green)}
+
+.footer{
+  position:relative;
+  z-index:5;
+  margin-top:280px;
+  padding:64px 0 32px;
+  background:var(--green-dark);
+  color:white;
+}
+.footer-grid{
+  display:grid;
+  grid-template-columns:1.25fr .75fr .75fr;
+  gap:8vw;
+}
+.footer .logo{margin-bottom:24px}
+.footer .logo-mark{background:var(--lime)}
+.footer .logo small{color:var(--lime)}
+.footer-address{font-style:normal;font-size:14px;line-height:2}
+.footer-address a{font-size:1.35rem;font-weight:900}
+.footer h3{
+  margin:0 0 16px;
+  color:var(--lime);
+  font-size:13px;
+  letter-spacing:.14em;
+}
+.footer-nav{display:grid;gap:10px;font-size:14px}
+.footer-nav a:hover{color:var(--lime)}
+.footer-bottom{
+  margin-top:48px;
+  padding-top:24px;
+  border-top:1px solid rgba(255,255,255,.2);
+  display:flex;
+  justify-content:space-between;
+  gap:24px;
+  font-size:11px;
+  opacity:.8;
+}
+
+@media(max-width:980px){
+  :root{--container:min(100% - 40px,760px)}
+  .nav{display:none}
+  .mobile-button{display:block}
+  .hero-grid{grid-template-columns:1fr;gap:24px;padding-top:64px}
+  .hero-copy{padding-left:0}
+  .hero-visual{height:58vh;min-height:440px}
+  .intro-layout,.about-layout,.daily-layout,.news-layout,.support-layout{
+    grid-template-columns:1fr;
+    gap:64px;
+  }
+  .intro-heading,.news-heading{position:relative;top:auto}
+  .intro-copy{padding-top:0}
+  .photo-stack{min-height:590px}
+  .about-copy{padding-top:0}
+  .number-layout{grid-template-columns:1fr}
+  .number-list{border-top:1px solid rgba(255,255,255,.35)}
+  .voice-header{grid-template-columns:1fr}
+  .voice-stage{grid-template-columns:1fr;min-height:auto}
+  .voice-main{height:580px}
+  .voice-side{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .voice-mini{height:300px}
+  .support-photo{order:1;height:560px}
+  .support-copy{order:2}
+}
+@media(max-width:640px){
+  :root{--container:calc(100% - 32px)}
+  body{line-height:1.9}
+  .site-header{top:8px;width:calc(100% - 16px);padding-left:16px}
+  .logo{font-size:13px}
+  .section{min-height:auto;padding:96px 0}
+  .vertical-label{display:none}
+  .hero{padding-top:96px}
+  .hero-grid{min-height:auto}
+  .hero h1 span{width:auto}
+  .hero-text{margin:24px 0}
+  .hero-actions,.entry-actions{display:grid}
+  .button{width:100%}
+  .hero-visual{height:480px;min-height:0;margin-top:24px}
+  .hero-panel{inset:0}
+  .hero-card{right:-4px;bottom:-12px;width:76%;padding:18px}
+  .intro-layout{gap:40px}
+  .promise{display:block}
+  .promise span{display:block;margin-top:8px}
+  .photo-stack{min-height:480px}
+  .photo-frame.large{inset:0 8% 18% 0}
+  .photo-frame.small{width:48%;height:35%}
+  .caption-card{right:-4px;bottom:10%;width:230px;padding:18px}
+  .number-list{grid-template-columns:1fr 1fr}
+  .number-item{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.35)}
+  .daily-image{height:460px;margin:0}
+  .voice-stage{display:block}
+  .voice-main{height:540px}
+  .voice-quote{left:16px;right:16px;bottom:16px;padding:22px}
+  .voice-side{display:block}
+  .voice-mini{height:280px;margin-top:16px}
+  .news-item{grid-template-columns:1fr 36px;gap:8px 16px}
+  .news-item time{grid-column:1/-1}
+  .support-photo{height:460px}
+  .fee-box{padding:24px}
+  .entry{padding-top:100px}
+  .entry-sub{font-size:1.5rem}
+  .footer{margin-top:220px}
+  .footer-grid{grid-template-columns:1fr;gap:40px}
+  .footer-bottom{display:block}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+  html.js .reveal{opacity:1;transform:none}
+}
+</style>
+<style id="ce_deco_css">.ce_emph{position:relative;display:inline-block;padding:0 1.5em;}.ce_emph::before,.ce_emph::after{content:"";position:absolute;top:var(--ce-emphy,26%);width:var(--ce-emphw,3px);height:var(--ce-emphh,0.72em);background:var(--ce-emphc,#f0c14b);border-radius:2px;}.ce_emph::before{left:.15em;transform:rotate(-30deg);box-shadow:0.5em 0.3em 0 var(--ce-emphc,#f0c14b);}.ce_emph::after{right:.15em;transform:rotate(30deg);box-shadow:-0.5em 0.3em 0 var(--ce-emphc,#f0c14b);}.ce_bubble{position:relative;display:inline-block;padding:.45em 1.1em;border:2px solid currentColor;border-radius:999px;}.ce_bubble::before{content:"";position:absolute;left:1.4em;bottom:-0.64em;border:0.33em solid transparent;border-top-color:currentColor;}.ce_bubble::after{content:"";position:absolute;left:1.4em;bottom:-0.36em;border:0.33em solid transparent;border-top-color:var(--ce-bubblebg,#fff);}</style></head>
+<body class="ready" style="">
+<div class="loader is-hidden" aria-hidden="true">
+  <div class="loader-piece"></div>
+</div>
+
+<header class="site-header">
+  <a class="logo" href="#top" aria-label="みどりワークス仙台 トップへ">
+    <span class="logo-mark"></span>
+    <span>みどりワークス仙台<small>就労継続支援 A型事業所</small></span>
+  </a>
+  <nav class="nav" aria-label="メインナビゲーション">
+    <a href="#about">私たちについて</a>
+    <a href="#day">1日の流れ</a>
+    <a href="#voice">利用者の声</a>
+    <a href="#news">お知らせ</a>
+    <a href="#support">利用案内</a>
+    <a class="header-cta" href="#entry">見学を申し込む</a>
+  </nav>
+  <button class="mobile-button" type="button" aria-label="メニューを開く">☰</button>
+</header>
+
+<main id="top">
+  <div class="coverPortal" style="--fa-style-family-brands: &quot;Font Awesome 6 Brands&quot;; --fa-font-brands: normal 400 1em/1 &quot;Font Awesome 6 Brands&quot;; --fa-font-duotone: normal 900 1em/1 &quot;Font Awesome 6 Duotone&quot;; --fa-font-light: normal 300 1em/1 &quot;Font Awesome 6 Pro&quot;; --fa-font-regular: normal 400 1em/1 &quot;Font Awesome 6 Pro&quot;; --fa-font-solid: normal 900 1em/1 &quot;Font Awesome 6 Pro&quot;; --fa-style-family-classic: &quot;Font Awesome 6 Pro&quot;; --fa-font-thin: normal 100 1em/1 &quot;Font Awesome 6 Pro&quot;; --fa-font-duotone-regular: normal 400 1em/1 &quot;Font Awesome 6 Duotone&quot;; --fa-font-duotone-light: normal 300 1em/1 &quot;Font Awesome 6 Duotone&quot;; --fa-style-family-duotone: &quot;Font Awesome 6 Duotone&quot;; --fa-font-duotone-thin: normal 100 1em/1 &quot;Font Awesome 6 Duotone&quot;; --fa-font-sharp-solid: normal 900 1em/1 &quot;Font Awesome 6 Sharp&quot;; --fa-font-sharp-regular: normal 400 1em/1 &quot;Font Awesome 6 Sharp&quot;; --fa-font-sharp-light: normal 300 1em/1 &quot;Font Awesome 6 Sharp&quot;; --fa-style-family-sharp: &quot;Font Awesome 6 Sharp&quot;; --fa-font-sharp-thin: normal 100 1em/1 &quot;Font Awesome 6 Sharp&quot;; --fa-font-sharp-duotone-solid: normal 900 1em/1 &quot;Font Awesome 6 Sharp Duotone&quot;; --fa-font-sharp-duotone-regular: normal 400 1em/1 &quot;Font Awesome 6 Sharp Duotone&quot;; --fa-font-sharp-duotone-light: normal 300 1em/1 &quot;Font Awesome 6 Sharp Duotone&quot;; --fa-style-family-sharp-duotone: &quot;Font Awesome 6 Sharp Duotone&quot;; --fa-font-sharp-duotone-thin: normal 100 1em/1 &quot;Font Awesome 6 Sharp Duotone&quot;; --wp-block-synced-color: #7a00df; --wp-block-synced-color--rgb: 122,0,223; --wp-bound-block-color: #7a00df; --wp-editor-canvas-background: #ddd; --wp-admin-theme-color: #007cba; --wp-admin-theme-color--rgb: 0,124,186; --wp-admin-theme-color-darker-10: #006ba1; --wp-admin-theme-color-darker-10--rgb: 0,107,160.5; --wp-admin-theme-color-darker-20: #005a87; --wp-admin-theme-color-darker-20--rgb: 0,90,135; --wp-admin-border-width-focus: 2px; --wp--preset--font-size--normal: 20px; --wp--preset--font-size--huge: 96px; --wp-internal-comment: &quot;Placeholder for wp_hoist_late_printed_styles() to replace with the global-styles printed at wp_footer.&quot;; --wp--preset--aspect-ratio--square: 1; --wp--preset--aspect-ratio--4-3: 4/3; --wp--preset--aspect-ratio--3-4: 3/4; --wp--preset--aspect-ratio--3-2: 3/2; --wp--preset--aspect-ratio--2-3: 2/3; --wp--preset--aspect-ratio--16-9: 16/9; --wp--preset--aspect-ratio--9-16: 9/16; --wp--preset--color--black: #000000; --wp--preset--color--cyan-bluish-gray: #abb8c3; --wp--preset--color--white: #FFFFFF; --wp--preset--color--pale-pink: #f78da7; --wp--preset--color--vivid-red: #cf2e2e; --wp--preset--color--luminous-vivid-orange: #ff6900; --wp--preset--color--luminous-vivid-amber: #fcb900; --wp--preset--color--light-green-cyan: #7bdcb5; --wp--preset--color--vivid-green-cyan: #00d084; --wp--preset--color--pale-cyan-blue: #8ed1fc; --wp--preset--color--vivid-cyan-blue: #0693e3; --wp--preset--color--vivid-purple: #9b51e0; --wp--preset--color--dark-gray: #28303D; --wp--preset--color--gray: #39414D; --wp--preset--color--green: #D1E4DD; --wp--preset--color--blue: #D1DFE4; --wp--preset--color--purple: #D1D1E4; --wp--preset--color--red: #E4D1D1; --wp--preset--color--orange: #E4DAD1; --wp--preset--color--yellow: #EEEADD; --wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%); --wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%); --wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%); --wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%); --wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%); --wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%); --wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%); --wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%); --wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%); --wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%); --wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%); --wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%); --wp--preset--gradient--purple-to-yellow: linear-gradient(160deg, #D1D1E4 0%, #EEEADD 100%); --wp--preset--gradient--yellow-to-purple: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); --wp--preset--gradient--green-to-yellow: linear-gradient(160deg, #D1E4DD 0%, #EEEADD 100%); --wp--preset--gradient--yellow-to-green: linear-gradient(160deg, #EEEADD 0%, #D1E4DD 100%); --wp--preset--gradient--red-to-yellow: linear-gradient(160deg, #E4D1D1 0%, #EEEADD 100%); --wp--preset--gradient--yellow-to-red: linear-gradient(160deg, #EEEADD 0%, #E4D1D1 100%); --wp--preset--gradient--purple-to-red: linear-gradient(160deg, #D1D1E4 0%, #E4D1D1 100%); --wp--preset--gradient--red-to-purple: linear-gradient(160deg, #E4D1D1 0%, #D1D1E4 100%); --wp--preset--font-size--small: 18px; --wp--preset--font-size--medium: 20px; --wp--preset--font-size--large: 24px; --wp--preset--font-size--x-large: 42px; --wp--preset--font-size--extra-small: 16px; --wp--preset--font-size--extra-large: 40px; --wp--preset--font-size--gigantic: 144px; --wp--preset--spacing--20: 0.44rem; --wp--preset--spacing--30: 0.67rem; --wp--preset--spacing--40: 1rem; --wp--preset--spacing--50: 1.5rem; --wp--preset--spacing--60: 2.25rem; --wp--preset--spacing--70: 3.38rem; --wp--preset--spacing--80: 5.06rem; --wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2); --wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4); --wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2); --wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0); --wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0); translate: 11.9531px 118px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; margin-top: 60px !important;" data-cebt="" data-cetx="11.953125" data-cety="118">
+        <div class="coverImg" style="translate: -2.46948px -49px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="-2.469482421875" data-cety="-49">
+		<img src="http://127.0.0.1:5000/uploads/processed_ChatGPT Image 2026年7月18日 00_56_59.png" class="coverPc noTap" alt="働く希望であふれる社会へ" style="inset: 152px auto auto 300.016px !important;">
+		<img src="clone_visst_co_jp_20260718_011535_js_files/110bfd283022.png" class="coverSp noTap" alt="働く希望であふれる社会へ" style="">
+        <section class="curved imp" style="translate: -13px 748px !important; rotate: 0deg !important; scale: 1 !important; inset: 900px auto auto -15.9844px !important;">
+  <style>
+    .curved {
+      --curve-green: #0d9a82;
+      --curve-yellow: #f7c52f;
+      --ink: #222222;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      min-height: 760px;
+      padding: 72px 24px 0;
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    .curved__inner {
+      position: relative;
+      z-index: 3;
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .curved__heading {
+      margin: 0;
+      font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      font-size: clamp(44px, 5.4vw, 76px);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      transform: rotate(-1.2deg);
+    }
+
+    .curved__heading span {
+      position: relative;
+      display: inline-block;
+    }
+
+    .curved__heading span::after {
+      position: absolute;
+      right: 2%;
+      bottom: -3px;
+      left: 2%;
+      z-index: -1;
+      height: 10px;
+      background: var(--curve-yellow);
+      content: "";
+      transform: rotate(-1.4deg);
+    }
+
+    .curved__lead {
+      margin: 24px 0 0;
+      font-size: 16px;
+      line-height: 1.9;
+      letter-spacing: 0.08em;
+    }
+
+    .curved__scene {
+      position: relative;
+      z-index: 3;
+      width: min(1220px, 100%);
+      margin: 56px auto 0;
+      padding: 0 16px;
+      background: transparent;
+    }
+
+    .curved__scene img {
+      display: block;
+      width: 100%;
+      height: 410px;
+      margin: 0 auto;
+      object-fit: contain;
+      object-position: center bottom;
+      filter: drop-shadow(0 16px 20px rgba(13, 154, 130, 0.16));
+    }
+
+    .curved__wave {
+      position: absolute;
+      right: -10%;
+      bottom: -210px;
+      left: -10%;
+      z-index: 1;
+      height: 510px;
+      background: var(--curve-green);
+      border-radius: 48% 52% 0 0 / 22% 28% 0 0;
+      transform: rotate(-2.2deg);
+    }
+
+    .curved__wave::before {
+      position: absolute;
+      top: -34px;
+      right: 9%;
+      left: 9%;
+      height: 96px;
+      border-top: 8px solid var(--curve-yellow);
+      border-radius: 50%;
+      content: "";
+      opacity: 0.95;
+      transform: rotate(2.6deg);
+    }
+
+    .curved__dot {
+      position: absolute;
+      z-index: 2;
+      border-radius: 50%;
+      background: var(--curve-yellow);
+    }
+
+    .curved__dot--left {
+      bottom: 190px;
+      left: clamp(24px, 8vw, 128px);
+      width: 16px;
+      height: 16px;
+    }
+
+    .curved__dot--right {
+      right: clamp(32px, 10vw, 160px);
+      bottom: 250px;
+      width: 12px;
+      height: 12px;
+    }
+
+    @media (max-width: 767px) {
+      .curved {
+        min-height: 620px;
+        padding: 56px 20px 0;
+      }
+
+      .curved__heading {
+        font-size: clamp(34px, 10vw, 50px);
+        line-height: 1.38;
+        letter-spacing: 0.04em;
+      }
+
+      .curved__heading span::after {
+        bottom: -2px;
+        height: 7px;
+      }
+
+      .curved__lead {
+        margin-top: 16px;
+        font-size: 14px;
+      }
+
+      .curved__scene {
+        width: calc(100% + 32px);
+        margin-top: 40px;
+        margin-left: -16px;
+        padding: 0;
+      }
+
+      .curved__scene img {
+        height: 280px;
+      }
+
+      .curved__wave {
+        bottom: -132px;
+        height: 320px;
+        border-radius: 50% 50% 0 0 / 15% 17% 0 0;
+      }
+
+      .curved__wave::before {
+        top: -22px;
+        height: 56px;
+        border-top-width: 6px;
+      }
+
+      .curved__dot--left {
+        bottom: 116px;
+      }
+
+      .curved__dot--right {
+        bottom: 154px;
+      }
+    }
+  </style>
+
+  <div class="curved__inner">
+    <h2 class="curved__heading" style="translate: 383px 124px !important; rotate: 2deg !important; scale: 1 !important;"><span>ともに働く、これから。</span></h2>
+    <p class="curved__lead" style="translate: -134.917px 35.4061px !important; rotate: 0deg !important; scale: 1 !important;">一人ひとりの笑顔と力が、あたらしい毎日をつくります。</p>
+  </div>
+
+  <span class="curved__dot curved__dot--left" aria-hidden="true" style="inset: 1191.91px auto auto 111.496px !important;"></span>
+  <span class="curved__dot curved__dot--right" aria-hidden="true" style="inset: 987.896px auto auto 1618.01px !important;"></span>
+
+  <style>
+    section.curved.imp {
+      --imp-accent: #168c7a;
+      --imp-accent-soft: rgba(22, 140, 122, 0.12);
+      --imp-ink: #263633;
+      min-height: auto !important;
+      padding: clamp(96px, 12vw, 160px) 24px !important;
+      color: var(--imp-ink) !important;
+      background:
+        radial-gradient(circle at 12% 22%, rgba(22, 140, 122, 0.10) 0 64px, transparent 65px),
+        radial-gradient(circle at 88% 78%, rgba(22, 140, 122, 0.08) 0 96px, transparent 97px),
+        linear-gradient(145deg, #ffffff 0%, #f4faf8 100%) !important;
+    }
+
+    section.curved.imp::before,
+    section.curved.imp::after {
+      position: absolute;
+      z-index: 0;
+      content: "";
+      pointer-events: none;
+    }
+
+    section.curved.imp::before {
+      top: 48px;
+      right: clamp(24px, 8vw, 120px);
+      width: clamp(112px, 15vw, 184px);
+      aspect-ratio: 1;
+      border: 2px solid rgba(22, 140, 122, 0.14);
+      border-radius: 42% 58% 54% 46%;
+      animation: imp-float 7s ease-in-out infinite;
+    }
+
+    section.curved.imp::after {
+      bottom: -88px;
+      left: -5%;
+      width: 110%;
+      height: 176px;
+      border-radius: 50% 50% 0 0 / 56% 56% 0 0;
+      background: rgba(22, 140, 122, 0.08);
+    }
+
+    section.imp .curved__inner {
+      z-index: 3 !important;
+      box-sizing: border-box;
+      width: min(960px, 100%) !important;
+      padding: clamp(48px, 7vw, 80px) clamp(24px, 6vw, 72px) !important;
+      border: 1px solid rgba(22, 140, 122, 0.10);
+      border-radius: 32px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow:
+        0 24px 64px rgba(22, 140, 122, 0.12),
+        0 8px 24px rgba(22, 140, 122, 0.07);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    section.imp .curved__heading {
+      margin: 0 !important;
+      color: var(--imp-ink) !important;
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif !important;
+      font-size: clamp(40px, 5.6vw, 72px) !important;
+      font-weight: 700 !important;
+      line-height: 1.35 !important;
+      letter-spacing: 0.06em !important;
+      translate: none !important;
+      rotate: none !important;
+      scale: none !important;
+      transform: none !important;
+      animation: imp-enter 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    section.imp .curved__heading span {
+      position: relative !important;
+      display: inline !important;
+      padding-bottom: 8px;
+      background: linear-gradient(transparent 76%, rgba(22, 140, 122, 0.18) 76%);
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+
+    section.imp .curved__heading span::after {
+      display: none !important;
+    }
+
+    section.imp .curved__lead {
+      max-width: 680px;
+      margin: 32px auto 0 !important;
+      color: #52615e !important;
+      font-size: clamp(16px, 1.6vw, 18px) !important;
+      font-weight: 500;
+      line-height: 1.9 !important;
+      letter-spacing: 0.06em !important;
+      translate: none !important;
+      rotate: none !important;
+      scale: none !important;
+      transform: none !important;
+      animation: imp-enter 0.8s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    section.imp .curved__dot {
+      z-index: 2 !important;
+      border-radius: 50% !important;
+      background: var(--imp-accent) !important;
+      box-shadow: 0 8px 20px rgba(22, 140, 122, 0.16);
+      opacity: 0.72;
+      animation: imp-float 5s ease-in-out infinite;
+    }
+
+    section.imp .curved__dot--left {
+      bottom: 80px !important;
+      left: clamp(24px, 8vw, 128px) !important;
+      width: 16px !important;
+      height: 16px !important;
+    }
+
+    section.imp .curved__dot--right {
+      top: 88px !important;
+      right: clamp(32px, 10vw, 160px) !important;
+      bottom: auto !important;
+      width: 12px !important;
+      height: 12px !important;
+      animation-delay: -2s;
+    }
+
+    section.imp .curved__scene {
+      margin-top: 64px !important;
+    }
+
+    section.imp .curved__scene img {
+      border-radius: 24px;
+      filter: drop-shadow(0 16px 24px rgba(22, 140, 122, 0.14)) !important;
+    }
+
+    section.imp .curved__wave {
+      background: var(--imp-accent) !important;
+    }
+
+    section.imp .curved__wave::before {
+      border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    @keyframes imp-enter {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes imp-float {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-12px) rotate(4deg);
+      }
+    }
+
+    @media (max-width: 767px) {
+      section.curved.imp {
+        padding: 72px 20px 96px !important;
+        background:
+          radial-gradient(circle at 8% 16%, rgba(22, 140, 122, 0.09) 0 40px, transparent 41px),
+          linear-gradient(145deg, #ffffff 0%, #f4faf8 100%) !important;
+      }
+
+      section.curved.imp::before {
+        top: 32px;
+        right: -32px;
+        width: 112px;
+      }
+
+      section.curved.imp::after {
+        bottom: -48px;
+        height: 112px;
+      }
+
+      section.imp .curved__inner {
+        padding: 48px 24px !important;
+        border-radius: 24px;
+      }
+
+      section.imp .curved__heading {
+        font-size: clamp(34px, 10vw, 48px) !important;
+        line-height: 1.4 !important;
+        letter-spacing: 0.04em !important;
+      }
+
+      section.imp .curved__lead {
+        margin-top: 24px !important;
+        font-size: 15px !important;
+        line-height: 1.9 !important;
+      }
+
+      section.imp .curved__dot--left {
+        bottom: 48px !important;
+      }
+
+      section.imp .curved__dot--right {
+        top: 48px !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      section.imp .curved__heading,
+      section.imp .curved__lead,
+      section.imp .curved__dot,
+      section.curved.imp::before {
+        animation: none !important;
+      }
+    }
+  </style>
+</section>
+        
+        </div>
+
+        <div class="message" data-cebt="" data-cetx="-2.469482421875" data-cety="71.8125" style="translate: -2.46948px 71.8125px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; position: relative !important; z-index: -1 !important; margin-top: -60px !important; min-height: 167px !important;">
+			あらゆる人の「働く希望」が絶えない地域を、<br>
+			子どもたちが自分らしく生きられる社会を、<br class="pcNone">
+			共に、つくろう。
+			
+        </div>
+
+
+
+    <style data-cepart="1">@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@-webkit-keyframes UpAnime { 
+  0% { opacity: 1; transform: translateY(0px); }
+  100% { opacity: 0; transform: translateY(-100px); }
+}
+@keyframes UpAnime { 
+  0% { opacity: 1; transform: translateY(0px); }
+  100% { opacity: 0; transform: translateY(-100px); }
+}
+@-webkit-keyframes DownAnime { 
+  0% { opacity: 0; transform: translateY(-100px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}
+@keyframes DownAnime { 
+  0% { opacity: 0; transform: translateY(-100px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}
+@-webkit-keyframes fadezoom { 
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+@keyframes fadezoom { 
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+@-webkit-keyframes fadeIn { 
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes fadeIn { 
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@-webkit-keyframes blink { 
+  50% { opacity: 1; }
+}
+@keyframes blink { 
+  50% { opacity: 1; }
+}
+@-webkit-keyframes load7 { 
+  0%, 80%, 100% { box-shadow: 0px 2.5em 0px -1.3em; }
+  40% { box-shadow: 0px 2.5em 0px 0px; }
+}
+@keyframes load7 { 
+  0%, 80%, 100% { box-shadow: 0px 2.5em 0px -1.3em; }
+  40% { box-shadow: 0px 2.5em 0px 0px; }
+}
+@-webkit-keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes fa-beat { 
+  0%, 90% { transform: scale(1); }
+  45% { transform: scale(var(--fa-beat-scale,1.25)); }
+}
+@keyframes fa-bounce { 
+  0% { transform: scale(1) translateY(0px); }
+  10% { transform: scale(var(--fa-bounce-start-scale-x,1.1),var(--fa-bounce-start-scale-y,.9)) translateY(0); }
+  30% { transform: scale(var(--fa-bounce-jump-scale-x,.9),var(--fa-bounce-jump-scale-y,1.1)) translateY(var(--fa-bounce-height,-.5em)); }
+  50% { transform: scale(var(--fa-bounce-land-scale-x,1.05),var(--fa-bounce-land-scale-y,.95)) translateY(0); }
+  57% { transform: scale(1) translateY(var(--fa-bounce-rebound,-.125em)); }
+  64% { transform: scale(1) translateY(0px); }
+  100% { transform: scale(1) translateY(0px); }
+}
+@keyframes fa-fade { 
+  50% { opacity: var(--fa-fade-opacity,.4); }
+}
+@keyframes fa-beat-fade { 
+  0%, 100% { opacity: var(--fa-beat-fade-opacity,.4); transform: scale(1); }
+  50% { opacity: 1; transform: scale(var(--fa-beat-fade-scale,1.125)); }
+}
+@keyframes fa-flip { 
+  50% { transform: rotate3d(var(--fa-flip-x,0),var(--fa-flip-y,1),var(--fa-flip-z,0),var(--fa-flip-angle,-180deg)); }
+}
+@keyframes fa-shake { 
+  0% { transform: rotate(-15deg); }
+  4% { transform: rotate(15deg); }
+  8%, 24% { transform: rotate(-18deg); }
+  12%, 28% { transform: rotate(18deg); }
+  16% { transform: rotate(-22deg); }
+  20% { transform: rotate(22deg); }
+  32% { transform: rotate(-12deg); }
+  36% { transform: rotate(12deg); }
+  40%, 100% { transform: rotate(0deg); }
+}
+@keyframes fa-spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1turn); }
+}
+@keyframes spin { 
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes blink { 
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes aslAnFadeInDrop { 
+  0% { opacity: 0; transform: translate(0px, -50px); }
+  100% { opacity: 1; transform: translate(0px, 0px); }
+}
+@-webkit-keyframes aslAnFadeInDrop { 
+  0% { opacity: 0; transform: translate(0px, -50px); }
+  100% { opacity: 1; transform: translate(0px, 0px); }
+}
+@keyframes aslAnFadeOutDrop { 
+  0% { opacity: 1; transform: translate(0px, 0px); }
+  100% { opacity: 0; transform: translate(0px, -50px); }
+}
+@-webkit-keyframes aslAnFadeOutDrop { 
+  0% { opacity: 1; transform: translate(0px, 0px); }
+  100% { opacity: 0; transform: translate(0px, -50px); }
+}
+@-webkit-keyframes rotate-simple { 
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes rotate-simple { 
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes lds-ellipsis1 { 
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+@keyframes lds-ellipsis3 { 
+  0% { transform: scale(1); }
+  100% { transform: scale(0); }
+}
+@keyframes lds-ellipsis2 { 
+  0% { transform: translate(0px, 0px); }
+  100% { transform: translate(24px, 0px); }
+}
+@-webkit-keyframes bgslide { 
+  0% { background-position-x: 0px; }
+  100% { background-position-x: -200%; }
+}
+@keyframes bgslide { 
+  0% { background-position-x: 0px; }
+  100% { background-position-x: -200%; }
+}
+@keyframes fxa_pulse { 
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(calc(1 + var(--fxa-amp,.06))); }
+}
+@keyframes fxa_float { 
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(calc(-1*var(--fxa-amp,12px))); }
+}
+@keyframes fxa_bounce { 
+  0%, 100% { transform: translateY(0px); }
+  30% { transform: translateY(calc(-1*var(--fxa-amp,18px))); }
+  60% { transform: translateY(0px); }
+  80% { transform: translateY(calc(-.4*var(--fxa-amp,18px))); }
+}
+@keyframes fxa_glow { 
+  0%, 100% { text-shadow: currentcolor 0px 0px 4px; filter: brightness(1); }
+  50% { text-shadow: currentcolor 0px 0px 16px, currentcolor 0px 0px 30px; filter: brightness(1.16); }
+}
+@keyframes fxa_wave { 
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(calc(-1*var(--fxa-amp,10px))); }
+}
+@keyframes fxa_wipeband { 
+  0% { transform: translateX(-101%); }
+  45% { transform: translateX(0px); }
+  100% { transform: translateX(101%); }
+}
+@keyframes imp-enter { 
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}
+@keyframes imp-float { 
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(4deg); }
+}
+@scope{
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+*, ::before, ::after { box-sizing: border-box; border-style: solid; border-width: 0px; }
+:scope{box-sizing: border-box; border-style: solid; border-width: 0px;}
+p, table, blockquote, address, pre, iframe, form, figure, dl { margin: 0px; line-height: 180%; text-align: justify; }
+h1, h2, h3, h4, h5, h6 { font-size: inherit; line-height: inherit; font-weight: inherit; margin: 0px; }
+a { background-color: transparent; text-decoration: none; color: inherit; }
+img, embed, object, iframe { vertical-align: bottom; }
+::-webkit-file-upload-button { appearance: button; font: inherit; }
+.pcNone { display: none; }
+@media screen and (max-width: 599px){.pcNone { display: inline; }}
+.noTap { pointer-events: none; }
+::selection { background-color: rgba(173, 64, 77, 0.2); }
+::-webkit-scrollbar { width: 20px; }
+::-webkit-scrollbar-track { border-radius: 2px; background-color: rgb(245, 245, 245); box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 6px inset; }
+::-webkit-scrollbar-thumb { background-color: rgb(153, 153, 153); border-left: 1px solid rgb(245, 245, 245); border-right: 1px solid rgb(245, 245, 245); border-radius: 2px; box-shadow: rgba(255, 255, 255, 0.3) 0px 0px 0px 1px; }
+:host, :root { --fa-style-family-brands: "Font Awesome 6 Brands"; --fa-font-brands: normal 400 1em/1 "Font Awesome 6 Brands"; }
+:host, :root { --fa-font-duotone: normal 900 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-light: normal 300 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-regular: normal 400 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-solid: normal 900 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-style-family-classic: "Font Awesome 6 Pro"; --fa-font-thin: normal 100 1em/1 "Font Awesome 6 Pro"; }
+:host, :root { --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-style-family-duotone: "Font Awesome 6 Duotone"; --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 6 Duotone"; }
+:host, :root { --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-style-family-sharp: "Font Awesome 6 Sharp"; --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 6 Sharp"; }
+:host, :root { --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:host, :root { --fa-style-family-sharp-duotone: "Font Awesome 6 Sharp Duotone"; --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 6 Sharp Duotone"; }
+:root { --wp-block-synced-color: #7a00df; --wp-block-synced-color--rgb: 122,0,223; --wp-bound-block-color: var(--wp-block-synced-color); --wp-editor-canvas-background: #ddd; --wp-admin-theme-color: #007cba; --wp-admin-theme-color--rgb: 0,124,186; --wp-admin-theme-color-darker-10: #006ba1; --wp-admin-theme-color-darker-10--rgb: 0,107,160.5; --wp-admin-theme-color-darker-20: #005a87; --wp-admin-theme-color-darker-20--rgb: 0,90,135; --wp-admin-border-width-focus: 2px; }
+@media (min-resolution: 192dpi){:root { --wp-admin-border-width-focus: 1.5px; }}
+:root { --wp--preset--font-size--normal: 16px; --wp--preset--font-size--huge: 42px; }
+:where(figure) { margin: 0px 0px 1em; }
+:root { --wp-internal-comment: "Placeholder for wp_hoist_late_printed_styles() to replace with the block styles printed at wp_footer."; }
+:root { --wp-internal-comment: "Placeholder for wp_hoist_late_printed_styles() to replace with the global-styles printed at wp_footer."; }
+.coverPortal { width: 100%; }
+:scope{width: 100%;}
+.coverPortal .coverImg { height: 550px; position: relative; }
+:scope .coverImg{height: 550px; position: relative;}
+@media (max-width: 1200px){.coverPortal .coverImg { height: 42vw; }}
+@media (max-width: 1200px){:scope .coverImg{height: 42vw;}}
+@media (max-width: 599px){.coverPortal .coverImg { height: 100vw; margin: 20px 0px 0px; }}
+@media (max-width: 599px){:scope .coverImg{height: 100vw; margin: 20px 0px 0px;}}
+.coverPortal .coverImg img { width: 96%; max-width: 1200px; line-height: 100%; vertical-align: bottom; padding: 0px; position: absolute; top: 0px; left: 0px; right: 0px; margin: auto; z-index: 100; }
+:scope .coverImg img{width: 96%; max-width: 1200px; line-height: 100%; vertical-align: bottom; padding: 0px; position: absolute; top: 0px; left: 0px; right: 0px; margin: auto; z-index: 100;}
+@media screen and (max-width: 599px){.coverPortal .coverImg img { max-width: 94%; }}
+@media screen and (max-width: 599px){:scope .coverImg img{max-width: 94%;}}
+@media screen and (max-width: 599px){.coverPortal .coverImg img.coverPc { display: none; }}
+@media screen and (max-width: 599px){:scope .coverImg img.coverPc{display: none;}}
+@media (min-width: 599px){.coverPortal .coverImg img.coverSp { display: none; }}
+@media (min-width: 599px){:scope .coverImg img.coverSp{display: none;}}
+.coverPortal .coverImg .curved { position: absolute; width: 100%; height: 400px; top: 0px; left: 0px; z-index: 50; background: rgb(255, 255, 255); border-bottom-left-radius: 50% 20%; border-bottom-right-radius: 50% 20%; }
+:scope .coverImg .curved{position: absolute; width: 100%; height: 400px; top: 0px; left: 0px; z-index: 50; background: rgb(255, 255, 255); border-bottom-left-radius: 50% 20%; border-bottom-right-radius: 50% 20%;}
+@media (max-width: 1200px){.coverPortal .coverImg .curved { height: 32vw; }}
+@media (max-width: 1200px){:scope .coverImg .curved{height: 32vw;}}
+@media (max-width: 599px){.coverPortal .coverImg .curved { height: 70vw; }}
+@media (max-width: 599px){:scope .coverImg .curved{height: 70vw;}}
+.coverPortal .message { color: rgb(255, 255, 255); background: rgb(16, 163, 135); text-align: center; padding: 20px 0px; line-height: 160%; }
+:scope .message{color: rgb(255, 255, 255); background: rgb(16, 163, 135); text-align: center; padding: 20px 0px; line-height: 160%;}
+.coverPortal .message .btnWhite { width: 240px; height: 60px; display: block; font-size: 22px; color: rgb(173, 64, 77); background-color: rgb(255, 255, 255); margin: 30px auto 20px; text-align: center; line-height: 60px; border-radius: 15px; font-family: "Kosugi Maru", sans-serif; }
+:scope .message .btnWhite{width: 240px; height: 60px; display: block; font-size: 22px; color: rgb(173, 64, 77); background-color: rgb(255, 255, 255); margin: 30px auto 20px; text-align: center; line-height: 60px; border-radius: 15px; font-family: "Kosugi Maru", sans-serif;}
+:root { --wp--preset--aspect-ratio--square: 1; --wp--preset--aspect-ratio--4-3: 4/3; --wp--preset--aspect-ratio--3-4: 3/4; --wp--preset--aspect-ratio--3-2: 3/2; --wp--preset--aspect-ratio--2-3: 2/3; --wp--preset--aspect-ratio--16-9: 16/9; --wp--preset--aspect-ratio--9-16: 9/16; --wp--preset--color--black: #000000; --wp--preset--color--cyan-bluish-gray: #abb8c3; --wp--preset--color--white: #FFFFFF; --wp--preset--color--pale-pink: #f78da7; --wp--preset--color--vivid-red: #cf2e2e; --wp--preset--color--luminous-vivid-orange: #ff6900; --wp--preset--color--luminous-vivid-amber: #fcb900; --wp--preset--color--light-green-cyan: #7bdcb5; --wp--preset--color--vivid-green-cyan: #00d084; --wp--preset--color--pale-cyan-blue: #8ed1fc; --wp--preset--color--vivid-cyan-blue: #0693e3; --wp--preset--color--vivid-purple: #9b51e0; --wp--preset--color--dark-gray: #28303D; --wp--preset--color--gray: #39414D; --wp--preset--color--green: #D1E4DD; --wp--preset--color--blue: #D1DFE4; --wp--preset--color--purple: #D1D1E4; --wp--preset--color--red: #E4D1D1; --wp--preset--color--orange: #E4DAD1; --wp--preset--color--yellow: #EEEADD; --wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%); --wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%); --wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%); --wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%); --wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%); --wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%); --wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%); --wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%); --wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%); --wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%); --wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%); --wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%); --wp--preset--gradient--purple-to-yellow: linear-gradient(160deg, #D1D1E4 0%, #EEEADD 100%); --wp--preset--gradient--yellow-to-purple: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); --wp--preset--gradient--green-to-yellow: linear-gradient(160deg, #D1E4DD 0%, #EEEADD 100%); --wp--preset--gradient--yellow-to-green: linear-gradient(160deg, #EEEADD 0%, #D1E4DD 100%); --wp--preset--gradient--red-to-yellow: linear-gradient(160deg, #E4D1D1 0%, #EEEADD 100%); --wp--preset--gradient--yellow-to-red: linear-gradient(160deg, #EEEADD 0%, #E4D1D1 100%); --wp--preset--gradient--purple-to-red: linear-gradient(160deg, #D1D1E4 0%, #E4D1D1 100%); --wp--preset--gradient--red-to-purple: linear-gradient(160deg, #E4D1D1 0%, #D1D1E4 100%); --wp--preset--font-size--small: 18px; --wp--preset--font-size--medium: 20px; --wp--preset--font-size--large: 24px; --wp--preset--font-size--x-large: 42px; --wp--preset--font-size--extra-small: 16px; --wp--preset--font-size--normal: 20px; --wp--preset--font-size--extra-large: 40px; --wp--preset--font-size--huge: 96px; --wp--preset--font-size--gigantic: 144px; --wp--preset--spacing--20: 0.44rem; --wp--preset--spacing--30: 0.67rem; --wp--preset--spacing--40: 1rem; --wp--preset--spacing--50: 1.5rem; --wp--preset--spacing--60: 2.25rem; --wp--preset--spacing--70: 3.38rem; --wp--preset--spacing--80: 5.06rem; --wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2); --wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4); --wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2); --wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0); --wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0); }
+:where(body) { margin: 0px; }
+:where(.is-layout-flex) { gap: 0.5em; }
+:where(.is-layout-grid) { gap: 0.5em; }
+.curved { --curve-green: #0d9a82; --curve-yellow: #f7c52f; --ink: #222222; position: relative; isolation: isolate; overflow: hidden; min-height: 760px; padding: 72px 24px 0px; background: rgb(255, 255, 255); color: var(--ink); }
+.curved__inner { position: relative; z-index: 3; width: min(1180px, 100%); margin: 0px auto; text-align: center; }
+.curved__heading { margin: 0px; font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", Meiryo, sans-serif; font-size: clamp(44px, 5.4vw, 76px); font-weight: 700; line-height: 1.3; letter-spacing: 0.08em; color: var(--ink); transform: rotate(-1.2deg); }
+.curved__heading span { position: relative; display: inline-block; }
+.curved__heading span::after { position: absolute; right: 2%; bottom: -3px; left: 2%; z-index: -1; height: 10px; background: var(--curve-yellow); content: ""; transform: rotate(-1.4deg); }
+.curved__lead { margin: 24px 0px 0px; font-size: 16px; line-height: 1.9; letter-spacing: 0.08em; }
+.curved__dot { position: absolute; z-index: 2; border-radius: 50%; background: var(--curve-yellow); }
+.curved__dot--left { bottom: 190px; left: clamp(24px, 8vw, 128px); width: 16px; height: 16px; }
+.curved__dot--right { right: clamp(32px, 10vw, 160px); bottom: 250px; width: 12px; height: 12px; }
+@media (max-width: 767px){.curved { min-height: 620px; padding: 56px 20px 0px; }}
+@media (max-width: 767px){.curved__heading { font-size: clamp(34px, 10vw, 50px); line-height: 1.38; letter-spacing: 0.04em; }}
+@media (max-width: 767px){.curved__heading span::after { bottom: -2px; height: 7px; }}
+@media (max-width: 767px){.curved__lead { margin-top: 16px; font-size: 14px; }}
+@media (max-width: 767px){.curved__dot--left { bottom: 116px; }}
+@media (max-width: 767px){.curved__dot--right { bottom: 154px; }}
+section.curved.imp { --imp-accent: #168c7a; --imp-accent-soft: rgba(22, 140, 122, 0.12); --imp-ink: #263633; min-height: auto !important; padding: clamp(96px, 12vw, 160px) 24px !important; color: var(--imp-ink) !important; background: radial-gradient(circle at 12% 22%, rgba(22, 140, 122, 0.1) 0px, rgba(22, 140, 122, 0.1) 64px, transparent 65px), radial-gradient(circle at 88% 78%, rgba(22, 140, 122, 0.08) 0px, rgba(22, 140, 122, 0.08) 96px, transparent 97px), linear-gradient(145deg, rgb(255, 255, 255) 0%, rgb(244, 250, 248) 100%) !important; }
+section.curved.imp::before, section.curved.imp::after { position: absolute; z-index: 0; content: ""; pointer-events: none; }
+section.curved.imp::before { top: 48px; right: clamp(24px, 8vw, 120px); width: clamp(112px, 15vw, 184px); aspect-ratio: 1 / 1; border: 2px solid rgba(22, 140, 122, 0.14); border-radius: 42% 58% 54% 46%; animation: 7s ease-in-out 0s infinite normal none running imp-float; }
+section.curved.imp::after { bottom: -88px; left: -5%; width: 110%; height: 176px; border-radius: 50% 50% 0px 0px / 56% 56% 0px 0px; background: rgba(22, 140, 122, 0.08); }
+section.imp .curved__inner { box-sizing: border-box; border: 1px solid rgba(22, 140, 122, 0.1); border-radius: 32px; background: rgba(255, 255, 255, 0.88); box-shadow: rgba(22, 140, 122, 0.12) 0px 24px 64px, rgba(22, 140, 122, 0.07) 0px 8px 24px; backdrop-filter: blur(8px); z-index: 3 !important; width: min(960px, 100%) !important; padding: clamp(48px, 7vw, 80px) clamp(24px, 6vw, 72px) !important; }
+section.imp .curved__heading { animation: 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0s 1 normal both running imp-enter; margin: 0px !important; color: var(--imp-ink) !important; font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif !important; font-size: clamp(40px, 5.6vw, 72px) !important; font-weight: 700 !important; line-height: 1.35 !important; letter-spacing: 0.06em !important; translate: none !important; rotate: none !important; scale: none !important; transform: none !important; }
+section.imp .curved__heading span { padding-bottom: 8px; background: linear-gradient(transparent 76%, rgba(22, 140, 122, 0.18) 76%); -webkit-box-decoration-break: clone; box-decoration-break: clone; position: relative !important; display: inline !important; }
+section.imp .curved__heading span::after { display: none !important; }
+section.imp .curved__lead { max-width: 680px; font-weight: 500; animation: 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.12s 1 normal both running imp-enter; margin: 32px auto 0px !important; color: rgb(82, 97, 94) !important; font-size: clamp(16px, 1.6vw, 18px) !important; line-height: 1.9 !important; letter-spacing: 0.06em !important; translate: none !important; rotate: none !important; scale: none !important; transform: none !important; }
+section.imp .curved__dot { box-shadow: rgba(22, 140, 122, 0.16) 0px 8px 20px; opacity: 0.72; animation: 5s ease-in-out 0s infinite normal none running imp-float; z-index: 2 !important; border-radius: 50% !important; background: var(--imp-accent) !important; }
+section.imp .curved__dot--left { bottom: 80px !important; left: clamp(24px, 8vw, 128px) !important; width: 16px !important; height: 16px !important; }
+section.imp .curved__dot--right { animation-delay: -2s; top: 88px !important; right: clamp(32px, 10vw, 160px) !important; bottom: auto !important; width: 12px !important; height: 12px !important; }
+@media (max-width: 767px){section.curved.imp { padding: 72px 20px 96px !important; background: radial-gradient(circle at 8% 16%, rgba(22, 140, 122, 0.09) 0px, rgba(22, 140, 122, 0.09) 40px, transparent 41px), linear-gradient(145deg, rgb(255, 255, 255) 0%, rgb(244, 250, 248) 100%) !important; }}
+@media (max-width: 767px){section.curved.imp::before { top: 32px; right: -32px; width: 112px; }}
+@media (max-width: 767px){section.curved.imp::after { bottom: -48px; height: 112px; }}
+@media (max-width: 767px){section.imp .curved__inner { border-radius: 24px; padding: 48px 24px !important; }}
+@media (max-width: 767px){section.imp .curved__heading { font-size: clamp(34px, 10vw, 48px) !important; line-height: 1.4 !important; letter-spacing: 0.04em !important; }}
+@media (max-width: 767px){section.imp .curved__lead { margin-top: 24px !important; font-size: 15px !important; line-height: 1.9 !important; }}
+@media (max-width: 767px){section.imp .curved__dot--left { bottom: 48px !important; }}
+@media (max-width: 767px){section.imp .curved__dot--right { top: 48px !important; }}
+@media (prefers-reduced-motion: reduce){section.imp .curved__heading, section.imp .curved__lead, section.imp .curved__dot, section.curved.imp::before { animation: auto ease 0s 1 normal none running none !important; }}
+:scope{position:relative;z-index:1}
+}</style></div>
+
+  <section class="section intro" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+    <div class="container section-inner intro-layout">
+      <div class="intro-heading reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <p class="eyebrow" data-cebt="" data-cetx="132" data-cety="74.1796875" style="translate: 132px 74.1797px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">Our Message / はじめに</p>
+        <h2 class="section-title" data-cebt="" data-cetx="132" data-cety="123.0625" style="translate: 132px 123.062px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">「働きたい」の手前にある、不安から聞かせてください。</h2>
+      </div>
+      <div class="intro-copy" data-cebt="" data-cetx="-6" data-cety="107" style="translate: -6px 107px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+        <p class="reveal" style="--delay: .05s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          朝決まった時間に起きられるか。人の多い場所で疲れないか。
+          仕事を長く続けられるか。最初から全部できなくても大丈夫です。
+        </p>
+        <p class="reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          みどりワークス仙台では、支援員との短い面談を毎週行い、
+          仕事内容や勤務時間を小さく調整します。苦手を隠すのではなく、
+          続けられる方法を一緒に探す場所です。
+        </p>
+        <div class="promise reveal" style="--delay: .35s; transform: none !important; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; translate: 0px 17px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; height: 130px !important; width: 888px !important; max-width: none !important;" data-cebt="none" data-cetx="0" data-cety="17">
+          <strong>見学では、作業室・休憩室・実際の仕事を<br>約45分でご案内します。</strong>
+          <span>無理な利用案内は行いません →</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section about" id="about">
+    <span class="outline-word reveal" style="">ABOUT US</span>
+    <span class="vertical-label">私たちについて</span>
+    <div class="container section-inner about-layout">
+      <div class="photo-stack reveal zoom" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <figure class="photo-frame large" data-cebt="" data-cetx="80.5546875" data-cety="-2.32806396484375" style="translate: 80.5547px -2.32806px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_1d421dabc8.png" alt="明るい職場で書類を封入するスタッフ" width="760" height="900" loading="lazy" onerror="this.style.display='none'">
+        </figure>
+        <figure class="photo-frame small" data-cebt="matrix(0.99863, 0.052336, -0.052336, 0.99863, 0, 0)" data-cetx="101.18865966796875" data-cety="-11.554672241210938" style="translate: 101.189px -11.5547px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(0.99863, 0.052336, -0.052336, 0.99863, 0, 0) !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" alt="パソコン作業をする手元" width="430" height="340" loading="lazy" onerror="this.style.display='none'">
+        </figure>
+        <div class="caption-card" data-cebt="" data-cetx="41.8489990234375" data-cety="72.84378051757812" style="translate: 41.849px 72.8438px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          <strong>「昨日より10分長く働けた」</strong>
+          <small>利用2年目・佐々木さん</small>
+        </div>
+      </div>
+
+      <div class="about-copy">
+        <p class="eyebrow reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">About Us / 私たちについて</p>
+        <h2 class="section-title reveal" style="--delay: .1s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">仕事を、人に合わせる。<br>その先の就職まで支える。</h2>
+        <p class="lead reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          定員20名の小さな事業所です。作業の得意・不得意だけでなく、
+          通院や生活の状況も踏まえ、支援計画をつくります。
+        </p>
+        <div class="about-list">
+          <article class="about-row reveal" style="--delay: .1s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <b>01</b>
+            <div><h3>週1日・1日2時間から相談</h3><p>利用開始時の体調に合わせ、勤務日数と時間を段階的に調整できます。</p></div>
+          </article>
+          <article class="about-row reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <b>02</b>
+            <div><h3>仕事は4つのチーム制</h3><p>PC入力、EC運営、検品・梱包、清掃から適性に合う業務を選びます。</p></div>
+          </article>
+          <article class="about-row reveal" style="--delay: .3s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <b>03</b>
+            <div><h3>一般就労への移行も伴走</h3><p>履歴書、面接練習、企業実習、就職後6か月の定着支援まで行います。</p></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="numbers">
+    <div class="container number-layout">
+      <div class="reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <p class="eyebrow">Our Record / 実績</p>
+        <h2 class="section-title">2021年の開所以来、積み重ねてきた数字。</h2>
+      </div>
+      <div class="number-list reveal" style="--delay: .15s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="number-item">
+          <strong><span class="count" data-count="5" data-started="true">5</span>年</strong>
+          <span>仙台での支援実績</span>
+          <small>2021年4月開所</small>
+        </div>
+        <div class="number-item">
+          <strong><span class="count" data-count="38" data-started="true">38</span>名</strong>
+          <span>一般就労へ移行</span>
+          <small>累計・2026年6月末</small>
+        </div>
+        <div class="number-item">
+          <strong><span class="count" data-count="91" data-started="true">91</span>%</strong>
+          <span>6か月定着率</span>
+          <small>2025年度実績</small>
+        </div>
+        <div class="number-item">
+          <strong><span class="count" data-count="4" data-started="true">4</span>種</strong>
+          <span>選べる作業分野</span>
+          <small>個別に組み合わせ可能</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section daily" id="day">
+    <span class="vertical-label">一日の流れ</span>
+    <div class="container section-inner daily-layout" data-cegfz="1" style="grid-template-columns: 675.125px 971.531px !important;">
+      <div class="daily-image reveal zoom" data-cebt="none" data-cetx="209" data-cety="14.1875" style="opacity: 1 !important; transform: none !important; animation: auto ease 0s 1 normal none running none; translate: 209px 14.1875px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; justify-self: start !important; height: 700px !important; overflow: hidden !important; width: 675px !important; max-width: none !important;">
+        <img src="http://127.0.0.1:5000/uploads/up_488f6688b0.jpg" alt="手元を中心に撮影した梱包作業" width="760" height="940" loading="lazy" onerror="this.style.display='none'">
+        <span class="daily-label">自分のペースで働く</span>
+      </div>
+      <div>
+        <p class="eyebrow reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Daily Flow / 1日の流れ</p>
+        <h2 class="section-title reveal" style="--delay: .1s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">短い勤務から、生活のリズムを整える。</h2>
+        <p class="lead reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          下記は9時30分から15時まで働く場合の一例です。
+          午前のみ・午後のみの利用も個別に相談できます。
+        </p>
+        <div class="timeline">
+          <div class="time-row reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><time>09:30</time><div><strong>朝礼・体調確認</strong><p>今日の作業と休憩の取り方を確認します。</p></div></div>
+          <div class="time-row reveal" style="--delay: .1s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><time>09:40</time><div><strong>午前の作業</strong><p>PC入力、検品、封入などを担当します。</p></div></div>
+          <div class="time-row reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><time>12:00</time><div><strong>昼休み</strong><p>静かな休憩室も自由に利用できます。</p></div></div>
+          <div class="time-row reveal" style="--delay: .3s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><time>13:00</time><div><strong>午後の作業</strong><p>途中に10分休憩を取りながら進めます。</p></div></div>
+          <div class="time-row reveal" style="--delay: .4s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;"><time>14:50</time><div><strong>片付け・振り返り</strong><p>困ったことはその日のうちに支援員へ共有します。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section voice" id="voice">
+    <span class="outline-word reveal" style="">VOICE</span>
+    <div class="container section-inner">
+      <div class="voice-header">
+        <div>
+          <p class="eyebrow reveal" style="opacity: 1 !important; transform: none !important; animation: auto ease 0s 1 normal none running none; translate: 123px -4px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="123" data-cety="-4">Voice / 利用者の声</p>
+          <h2 class="section-title reveal" style="--delay: .1s; opacity: 1 !important; transform: none !important; animation: auto ease 0s 1 normal none running none; translate: 123px 2px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="123" data-cety="2">働き方が変わると、毎日の景色も変わった。</h2>
+        </div>
+        <p class="lead reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          利用を始めたきっかけも、目標も人それぞれ。
+          3人の方に、今の仕事とこれからについて聞きました。
+        </p>
+      </div>
+
+      <div class="voice-stage" data-cegfz="1" style="grid-template-columns: 1081.56px 799.438px !important;">
+        <article class="voice-main reveal zoom" style="opacity: 1 !important; transform: none !important; animation: auto ease 0s 1 normal none running none; justify-self: start !important; min-height: 1503px !important; width: 805px !important; max-width: none !important; translate: 123px -28px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="123" data-cety="-28">
+          <img src="http://127.0.0.1:5000/uploads/up_22a345d107.png" alt="ノートパソコンで作業する利用者" width="900" height="680" loading="lazy" onerror="this.style.display='none'">
+          <div class="voice-quote reveal from-left" style="--delay:.25s">
+            <p>「週2日から始めて、今は週5日。任される仕事が増えたことが自信になりました。」</p>
+            <small>EC運営チーム／高橋さん・利用3年目</small>
+          </div>
+        </article>
+
+        <div class="voice-side">
+          <figure class="voice-mini reveal from-right" style="--delay: .12s; opacity: 1 !important; transform: none !important; animation: auto ease 0s 1 normal none running none; translate: -153.047px -46.1799px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="-153.046875" data-cety="-46.179931640625">
+            <img src="http://127.0.0.1:5000/uploads/up_034d4c10b7.png" alt="倉庫で穏やかに働く女性" width="600" height="360" loading="lazy" onerror="this.style.display='none'">
+            <figcaption>「休む相談もできたから、続けられました」<small>検品チーム／鈴木さん</small></figcaption>
+          </figure>
+          <figure class="voice-mini reveal from-right" style="--delay: .24s; opacity: 1 !important; transform: none !important; animation: auto ease 0s 1 normal none running none; translate: -153.047px -56px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="-153.046875" data-cety="-56">
+            <img src="http://127.0.0.1:5000/uploads/up_07d8e0124b.png" alt="穏やかな表情の男性" width="600" height="360" loading="lazy" onerror="this.style.display='none'">
+            <figcaption>「企業実習で、次の目標が見つかりました」<small>PCチーム／伊藤さん</small></figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>WORK AT YOUR OWN PACE — GROW WITH THE JOB —</span>
+      <span>WORK AT YOUR OWN PACE — GROW WITH THE JOB —</span>
+    </div>
+  </div>
+
+  <section class="section news" id="news">
+    <div class="container section-inner news-layout">
+      <div class="news-heading reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <p class="eyebrow" data-cebt="" data-cetx="120" data-cety="0" style="translate: 120px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">News / お知らせ</p>
+        <h2 class="section-title" data-cebt="" data-cetx="120" data-cety="4.28125" style="translate: 120px 4.28125px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">事業所の近況を、少しだけ。</h2>
+        <p class="lead" data-cebt="" data-cetx="120" data-cety="-2.640625" style="translate: 120px -2.64062px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">見学会、作業プログラム、採用情報などを更新しています。</p>
+        <div class="news-more">
+          <a class="button" href="/news/" target="_blank" rel="noopener" data-cebt="matrix(1, 0, 0, 1, 0, -4)" data-cetx="120" data-cety="-4.640625" style="translate: 120px -4.64062px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: matrix(1, 0, 0, 1, 0, -4) !important;">View more <span class="arrow">→</span></a>
+        </div>
+      </div>
+
+      <div class="news-list">
+        <a class="news-item reveal" href="/news/2026-summer-tour/" target="_blank" rel="noopener" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <time datetime="2026-07-15">2026.07.15</time>
+          <strong>8月6日・20日、少人数の事業所見学会を開催します</strong>
+          <i>→</i>
+        </a>
+        <a class="news-item reveal" style="--delay: .1s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;" href="/news/ec-training/" target="_blank" rel="noopener">
+          <time datetime="2026-07-02">2026.07.02</time>
+          <strong>ECチームで商品撮影と画像加工の研修を行いました</strong>
+          <i>→</i>
+        </a>
+        <a class="news-item reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;" href="/news/holiday/" target="_blank" rel="noopener">
+          <time datetime="2026-06-18">2026.06.18</time>
+          <strong>夏季休業期間と電話相談受付時間のお知らせ</strong>
+          <i>→</i>
+        </a>
+        <a class="news-item reveal" style="--delay: .3s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;" href="/news/recruit-supporter/" target="_blank" rel="noopener">
+          <time datetime="2026-06-05">2026.06.05</time>
+          <strong>職業指導員を1名募集しています</strong>
+          <i>→</i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section support" id="support">
+    <span class="vertical-label">利用について</span>
+    <div class="container section-inner support-layout" data-cebt="" data-cetx="157" data-cety="0" style="translate: 157px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; grid-template-columns: 866.094px 866.109px !important;" data-cegfz="1">
+      <div class="support-copy" data-cebt="" data-cetx="-40" data-cety="6.25" style="translate: -40px 6.25px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+        <p class="eyebrow reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Support Guide / 利用案内</p>
+        <h2 class="section-title reveal" style="--delay: .1s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">制度のことも、費用のことも。わかる言葉で説明します。</h2>
+        <p class="lead reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          障害福祉サービス受給者証をお持ちでない方もご相談ください。
+          お住まいの市区町村への申請から利用開始まで、担当者が順番にご案内します。
+        </p>
+        <ul class="checks">
+          <li class="reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">原則18歳以上・就労継続支援A型の支給決定を受けた方</li>
+          <li class="reveal" style="--delay: .1s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">雇用契約を結び、宮城県の最低賃金以上を支給</li>
+          <li class="reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">週1日から相談可能。通院日の勤務調整にも対応</li>
+        </ul>
+        <div class="fee-box reveal" style="--delay: .3s; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; height: 170px !important; width: 823px !important; max-width: none !important;">
+          <strong>利用料について</strong>
+          <p>
+            前年所得に応じて自己負担上限月額が決まります。
+            約9割の利用者が自己負担0円です。昼食代・交通費などの実費は見学時に一覧でご説明します。
+          </p>
+        </div>
+      </div>
+
+      <div class="support-photo reveal zoom" style="animation: auto ease 0s 1 normal none running none; opacity: 1 !important; transform: none !important; translate: -187.328px 11.5px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; justify-self: start !important; height: 660px !important; overflow: hidden !important; width: 786px !important; max-width: none !important;" data-cebt="none" data-cetx="-187.328125" data-cety="11.5">
+        <img src="http://127.0.0.1:5000/uploads/up_110e1fc1ba.png" alt="女性相談員との穏やかな面談" width="760" height="900" loading="lazy" onerror="this.style.display='none'">
+        <div class="puzzle support-piece" style="translate: 0px -30px; rotate: 5.4deg; clip-path: none !important;"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="entry" id="entry">
+    <div class="entry-head">
+      <p class="eyebrow reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">Entry / 見学・相談</p>
+      <h2 class="entry-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">LET’S TALK.</h2>
+      <p class="entry-sub reveal" style="--delay: .1s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">見て、話してから考える。<br>最初の一歩は、それだけで十分です。</p>
+      <div class="entry-actions reveal" style="--delay: .2s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <a class="button" href="/contact/">見学フォームへ <span class="arrow">→</span></a>
+        <a class="button accent" href="tel:0225550148">電話で相談 022-555-0148</a>
+        <a class="button light" href="https://line.me/" target="_blank" rel="noopener">LINEで質問する</a>
+      </div>
+      <p class="entry-note reveal" style="--delay: .3s; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">受付 平日 9:00–17:30／ご家族・支援者のみの相談も歓迎します</p>
+    </div>
+
+    <div class="puzzle entry-piece e1" style="clip-path: none !important;"></div>
+    <div class="puzzle entry-piece e2" style="clip-path: none !important;"></div>
+    <div class="wave one" data-speed=".04" style="transform: translateY(-50px);"></div>
+    <div class="wave two" data-speed=".08" style="transform: translateY(-50px);"></div>
+    <div class="wave three" data-speed=".12" style="transform: translateY(-50px);"></div>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <a class="logo" href="#top">
+              <span class="logo-mark"></span>
+              <span>みどりワークス仙台<small>就労継続支援 A型事業所</small></span>
+            </a>
+            <address class="footer-address">
+              〒983-0852 宮城県仙台市宮城野区榴岡3-8-12<br>
+              JR仙台駅東口から徒歩7分<br>
+              <a href="tel:0225550148">022-555-0148</a><br>
+              平日 9:00–17:30／土日祝休
+            </address>
+          </div>
+          <div>
+            <h3>GUIDE</h3>
+            <nav class="footer-nav">
+              <a href="#about">私たちについて</a>
+              <a href="#day">1日の流れ</a>
+              <a href="#voice">利用者の声</a>
+              <a href="#support">利用案内・利用料</a>
+            </nav>
+          </div>
+          <div>
+            <h3>INFORMATION</h3>
+            <nav class="footer-nav">
+              <a href="/news/" target="_blank">お知らせ</a>
+              <a href="/company/">運営法人</a>
+              <a href="/privacy/">プライバシーポリシー</a>
+              <a href="/contact/">お問い合わせ</a>
+            </nav>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>運営法人：一般社団法人あおばキャリア</span>
+          <span>© 2026 MIDORI WORKS SENDAI</span>
+        </div>
+      </div>
+    </footer>
+  </section>
+</main>
+
+<script>
+(() => {
+  const body = document.body;
+  const loader = document.querySelector('.loader');
+  const header = document.querySelector('.site-header');
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      loader.classList.add('is-hidden');
+      body.classList.remove('loading');
+      body.classList.add('ready');
+    }, 700);
+  });
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+
+      const counters = entry.target.querySelectorAll('.count');
+      counters.forEach(countUp);
+      if (entry.target.classList.contains('number-list')) {
+        entry.target.querySelectorAll('.count').forEach(countUp);
+      }
+      obs.unobserve(entry.target);
+    });
+  }, {threshold:.15});
+
+  reveals.forEach(el => observer.observe(el));
+
+  function countUp(el) {
+    if (el.dataset.started) return;
+    el.dataset.started = 'true';
+    const target = Number(el.dataset.count);
+    const start = performance.now();
+    const duration = 1300;
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const parallaxPieces = document.querySelectorAll('.about .puzzle,.support-piece');
+  const waves = document.querySelectorAll('.wave[data-speed]');
+
+  function onScroll() {
+    const y = window.scrollY;
+    header.classList.toggle('scrolled', y > 30);
+
+    parallaxPieces.forEach((piece, index) => {
+      const rect = piece.getBoundingClientRect();
+      const center = rect.top + rect.height / 2 - innerHeight / 2;
+      const move = Math.max(-30, Math.min(30, center * -.055));
+      piece.style.translate = `0 ${move}px`;
+      piece.style.rotate = `${index % 2 ? move * .18 : move * -.18}deg`;
+    });
+
+    const entry = document.querySelector('.entry');
+    const entryRect = entry.getBoundingClientRect();
+    waves.forEach(wave => {
+      const speed = Number(wave.dataset.speed);
+      const move = Math.max(-50, Math.min(70, -entryRect.top * speed));
+      wave.style.transform = `translateY(${move}px)`;
+    });
+  }
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      onScroll();
+      ticking = false;
+    });
+  }, {passive:true});
+  onScroll();
+
+  document.querySelector('.mobile-button').addEventListener('click', () => {
+    document.querySelector('#entry').scrollIntoView({behavior:'smooth'});
+  });
+})();
+</script>
+
+
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div><div style="z-index: 99; font-weight: 700; color: rgb(51, 51, 51); font-family: inherit; line-height: 1.4; padding: 4px 8px; white-space: nowrap; position: absolute; left: 507px; top: 207px; --ce-emphw: 11px; --ce-emphy: 20%; font-size: 46.9px !important; height: 124px !important; width: 733px !important; max-width: none !important; translate: -341px -46.5px !important; rotate: -2deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 82px !important;" class="ce_emph" data-cebt="" data-cetx="-341" data-cety="-46.5" data-cearcorig="　&amp;nbsp;楽しみを仕事で見つけよう！" data-cearc="17" data-cero="-2"><span style="display:inline-block;transform:translateY(0.0px) rotate(-14.0deg)">　</span><span style="display:inline-block;transform:translateY(-3.8px) rotate(-12.0deg)">&nbsp;</span><span style="display:inline-block;transform:translateY(-7.4px) rotate(-10.0deg)">楽</span><span style="display:inline-block;transform:translateY(-10.6px) rotate(-8.0deg)">し</span><span style="display:inline-block;transform:translateY(-13.3px) rotate(-6.0deg)">み</span><span style="display:inline-block;transform:translateY(-15.3px) rotate(-4.0deg)">を</span><span style="display:inline-block;transform:translateY(-16.6px) rotate(-2.0deg)">仕</span><span style="display:inline-block;transform:translateY(-17.0px) rotate(0.0deg)">事</span><span style="display:inline-block;transform:translateY(-16.6px) rotate(2.0deg)">で</span><span style="display:inline-block;transform:translateY(-15.3px) rotate(4.0deg)">見</span><span style="display:inline-block;transform:translateY(-13.3px) rotate(6.0deg)">つ</span><span style="display:inline-block;transform:translateY(-10.6px) rotate(8.0deg)">け</span><span style="display:inline-block;transform:translateY(-7.4px) rotate(10.0deg)">よ</span><span style="display:inline-block;transform:translateY(-3.8px) rotate(12.0deg)">う</span><span style="display:inline-block;transform:translateY(-0.0px) rotate(14.0deg)">！</span></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  // ★data-cedelay（⏳演出の遅らせ）を尊重して見せる。ここが即表示だと、fxa側が遅らせを守っても
+  //   ページCSSの .reveal.in{...!important} が先に全部見せてしまい「全要素が同時に出る」（実際に起きた）
+  function showD(el){ var d=+el.getAttribute('data-cedelay')||0; if(d>0){ setTimeout(function(){ show(el); }, d); } else show(el); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ showD(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(showD); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__--></body></html>

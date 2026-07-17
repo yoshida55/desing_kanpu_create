@@ -185,6 +185,11 @@ class HtmlGenConfig:
     recheck_model: str = field(
         default_factory=lambda: os.environ.get("DESIGN_STOCK_RECHECK_MODEL", "gpt-5.6-luna")
     )
+    # codex_model＝Codex（ChatGPT定額枠）で使う共通の既定モデル。空/"default"なら
+    # ~/.codex/config.toml の既定。3役のモデル欄で個別指定があればそちらが最優先。
+    codex_model: str = field(
+        default_factory=lambda: os.environ.get("DESIGN_STOCK_CODEX_MODEL", "")
+    )
     # dcfix_provider＝🧐デザイン指摘の「🔧修正する」専用エンジン（未指定ならカンプ修正エンジンと同じ）。
     # 指摘文どおりに直すだけ＝テキスト仕事なので deepseek/zai もOK。
     dcfix_provider: str = field(

@@ -1110,6 +1110,7 @@
         <label class="set_radio"><input type="radio" name="provider" value="gemini"> Gemini（無料枠）</label>
         <label class="set_radio"><input type="radio" name="provider" value="deepseek"> DeepSeek（激安）</label>
         <label class="set_radio"><input type="radio" name="provider" value="zai"> GLM（Z.ai）</label>
+        <label class="set_radio"><input type="radio" name="provider" value="codex"> Codex（ChatGPT定額・追加0円）</label>
       </div>
       <div class="set_row">
         <span class="set_label">カンプ修正エンジン<br><small style="color:#999">生成後の手直し</small></span>
@@ -1118,6 +1119,7 @@
         <label class="set_radio"><input type="radio" name="edit_provider" value="gemini"> Gemini（無料枠）</label>
         <label class="set_radio"><input type="radio" name="edit_provider" value="deepseek"> DeepSeek（激安）</label>
         <label class="set_radio"><input type="radio" name="edit_provider" value="zai"> GLM（Z.ai）</label>
+        <label class="set_radio"><input type="radio" name="edit_provider" value="codex"> Codex（ChatGPT定額・追加0円）</label>
       </div>
       <!-- 🧐デザイン指摘の3役（横一列・変えた瞬間に自動保存） -->
       <div class="set_row" style="align-items:flex-start">
@@ -1167,6 +1169,15 @@
           <option value="gpt-5.6-luna">GPT-5.6 Luna（激安・$1/$6）</option>
           <option value="gpt-5.5">GPT-5.5（高品質・旧）</option>
           <option value="gpt-5.4">GPT-5.4（半額・旧）</option>
+        </select>
+      </div>
+      <div class="set_row">
+        <span class="set_label">Codexモデル<br><small style="color:#999">ChatGPT定額枠・APIキー不要</small></span>
+        <select class="set_input set_input_s" id="set_codex_model">
+          <option value="">既定（~/.codex/config.toml）</option>
+          <option value="gpt-5.6-sol">gpt-5.6-sol（高品質・枠の消費 大）</option>
+          <option value="gpt-5.6-terra">gpt-5.6-terra（バランス）</option>
+          <option value="gpt-5.6-luna">gpt-5.6-luna（軽い・枠が長持ち）</option>
         </select>
       </div>
       <div class="set_row">
@@ -1791,6 +1802,7 @@
       if (s.gemini_model) document.querySelector("#set_gemini_model").value = s.gemini_model;
       if (s.deepseek_model) document.querySelector("#set_deepseek_model").value = s.deepseek_model;
       if (s.zai_model) document.querySelector("#set_zai_model").value = s.zai_model;
+      document.querySelector("#set_codex_model").value = s.codex_model || "";
       const zKey = document.querySelector("#set_zai_key");
       zKey.placeholder = s.zai_set ? "●●●●●●●●  保存済み（変える時だけ入力）" : "（未設定）";
       document.querySelector("#set_zai_state").textContent = s.zai_set ? "設定済み ✓" : "未設定";
@@ -1837,7 +1849,7 @@
     });
 
     // エンジン(プロバイダ)はラジオを変えた瞬間に自動保存（保存ボタンを押し忘れる事故を防ぐ）
-    const provLabel = (v) => (v === "openai" ? "GPT" : v === "gemini" ? "Gemini" : v === "deepseek" ? "DeepSeek" : v === "zai" ? "GLM" : "Claude");
+    const provLabel = (v) => (v === "openai" ? "GPT" : v === "gemini" ? "Gemini" : v === "deepseek" ? "DeepSeek" : v === "zai" ? "GLM" : v === "codex" ? "Codex（追加0円）" : "Claude");
     document.querySelectorAll('input[name="provider"]').forEach((r) => {
       r.addEventListener("change", async () => {
         if (!r.checked) return;
@@ -1874,7 +1886,8 @@
      ["#set_openai_model", "openai_model", "GPT"],
      ["#set_gemini_model", "gemini_model", "Gemini"],
      ["#set_deepseek_model", "deepseek_model", "DeepSeek"],
-     ["#set_zai_model", "zai_model", "GLM"]].forEach((t) => {
+     ["#set_zai_model", "zai_model", "GLM"],
+     ["#set_codex_model", "codex_model", "Codex"]].forEach((t) => {
       const elm = document.querySelector(t[0]);
       if (!elm) return;
       elm.addEventListener("change", async () => {

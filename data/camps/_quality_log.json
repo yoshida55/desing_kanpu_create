@@ -453,5 +453,38 @@
   "anim_id": "",
   "rating": "△",
   "ts": 1784245738
+ },
+ {
+  "file": "camp_20260718_065753_583487.html",
+  "base_id": "3497be3a69399dc6",
+  "anim_id": "",
+  "model": "codex:default",
+  "text_len": 2015,
+  "sections": 5,
+  "warn": true,
+  "ts": 1784325473,
+  "rating": "✖"
+ },
+ {
+  "file": "camp_20260718_070704_438813.html",
+  "base_id": "acd96d1b84ac53af",
+  "anim_id": "",
+  "model": "codex:default",
+  "text_len": 2089,
+  "sections": 8,
+  "warn": false,
+  "ts": 1784326024,
+  "rating": "△"
+ },
+ {
+  "file": "camp_20260718_072253_116634.html",
+  "base_id": "a0f202c0d58744e1",
+  "anim_id": "",
+  "model": "codex:default",
+  "text_len": 2098,
+  "sections": 9,
+  "warn": false,
+  "ts": 1784326973,
+  "rating": "○"
  }
 ]

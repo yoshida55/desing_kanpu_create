@@ -1,0 +1,2250 @@
+<!doctype html>
+<html lang="ja" nighteye="disabled" class="js fxa-on"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>はたらく旅舎 みなと - 就労継続支援A型</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg-soft:#fafafa;
+      --main:#0071b9;
+      --main-soft:#b2d4ea;
+      --text:#333333;
+      --accent:#f2e018;
+      --line:rgba(0,113,185,.16);
+      --shadow-sm:0 8px 24px rgba(0,113,185,.08);
+      --shadow-md:0 16px 40px rgba(0,113,185,.14);
+      --radius:8px;
+      --container:1440px;
+
+      --fz-hero:clamp(2.2rem,5vw,3.6rem);
+      --fz-sec:clamp(1.6rem,3vw,2.4rem);
+      --fz-sub:clamp(1.08rem,1.4vw,1.22rem);
+      --fz-body:clamp(.95rem,1vw,1rem);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);scroll-behavior:smooth}
+    body{
+      font-family:"Times New Roman", serif;
+      line-height:2;
+      letter-spacing:.01em;
+      overflow-x:hidden;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(178,212,234,.18), transparent 22%),
+        radial-gradient(circle at 85% 80%, rgba(178,212,234,.14), transparent 24%),
+        #fff;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(calc(100% - 40px), var(--container));margin-inline:auto}
+    .section{
+      min-height:100vh;
+      padding:10vh 0;
+      position:relative;
+      overflow:hidden;
+    }
+    .section.soft{background:linear-gradient(180deg, rgba(178,212,234,.18), rgba(178,212,234,.08))}
+    .section.white{background:#fff}
+    .section-title{
+      margin-bottom:56px;
+      position:relative;
+      z-index:2;
+    }
+    .eyebrow{
+      font-family:sans-serif;
+      color:var(--main);
+      font-size:.78rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      display:inline-block;
+      margin-bottom:8px;
+      position:relative;
+      padding-left:26px;
+    }
+    .eyebrow:before{
+      content:"";
+      position:absolute;
+      left:0;top:50%;
+      width:16px;height:1px;
+      background:var(--main);
+      transform:translateY(-50%);
+    }
+    h1,h2,h3,h4{
+      font-family:sans-serif;
+      margin:0;
+      color:var(--text);
+      line-height:1.35;
+      letter-spacing:.03em;
+    }
+    h1{font-size:var(--fz-hero)}
+    h2{font-size:var(--fz-sec)}
+    h3{font-size:var(--fz-sub)}
+    p{
+      margin:0;
+      font-size:var(--fz-body);
+      max-width:38em;
+    }
+    .lead{font-size:1rem;line-height:2.05}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:14px 24px;
+      border-radius:999px;
+      background:var(--main);
+      color:#fff;
+      font-family:sans-serif;
+      font-size:.92rem;
+      letter-spacing:.04em;
+      box-shadow:var(--shadow-sm);
+      transition:transform .35s ease, box-shadow .35s ease, background .35s ease;
+    }
+    .btn:hover{transform:translateY(-3px) scale(1.02);box-shadow:var(--shadow-md)}
+    .btn.line{
+      background:#fff;
+      color:var(--main);
+      border:1px solid rgba(255,255,255,.55);
+    }
+    .btn .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      display:inline-block;
+    }
+    .floating{animation:floatingY 1.8s ease-in-out infinite}
+    .floating-x{animation:floatingX 1.8s ease-in-out infinite}
+    .hero{
+      background:var(--main);
+      color:#fff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      overflow:hidden;
+    }
+    .hero .nav{
+      position:absolute;
+      top:20px;left:0;right:0;z-index:10;
+    }
+    .nav-inner{
+      width:min(calc(100% - 40px), var(--container));
+      margin:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color:#fff;
+      font-family:sans-serif;
+    }
+    .logo{
+      font-size:1.15rem;
+      letter-spacing:.08em;
+      font-weight:700;
+    }
+    .logo small{
+      display:block;
+      font-size:.68rem;
+      opacity:.85;
+      font-weight:400;
+      letter-spacing:.18em;
+      margin-top:2px;
+    }
+    .nav-links{
+      display:flex;gap:24px;align-items:center;
+      font-size:.8rem;
+    }
+    .nav-links a{opacity:.9;transition:opacity .3s ease, transform .3s ease}
+    .nav-links a:hover{opacity:1;transform:translateY(-2px)}
+    .nav-cta{
+      background:var(--accent);
+      color:var(--main);
+      padding:10px 16px;
+      border-radius:999px;
+      font-weight:700;
+    }
+
+    .hero-grid{
+      width:min(calc(100% - 40px), var(--container));
+      margin:auto;
+      display:grid;
+      grid-template-columns:1.02fr 1.15fr;
+      gap:40px;
+      align-items:center;
+      padding-top:84px;
+    }
+    .hero-copy{position:relative;z-index:2}
+    .hero-copy .kicker{
+      font-family:sans-serif;
+      font-size:.82rem;
+      letter-spacing:.2em;
+      opacity:.9;
+      margin-bottom:24px;
+    }
+    .hero-copy h1{color:#fff;max-width:8em}
+    .hero-copy p{color:rgba(255,255,255,.9);margin-top:24px}
+    .hero-actions{margin-top:32px;display:flex;gap:16px;flex-wrap:wrap}
+    .hero-visual{
+      position:relative;
+      min-height:620px;
+      display:flex;
+      align-items:end;
+      justify-content:center;
+    }
+    .window-row{
+      position:absolute;
+      top:10px;left:0;right:0;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+      z-index:0;
+    }
+    .window{
+      aspect-ratio:1.45/1;
+      border:2px solid rgba(255,255,255,.8);
+      border-radius:6px;
+      overflow:hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)),
+        #6fb6dd;
+    }
+    .window img{width:100%;height:100%;object-fit:cover;opacity:.88}
+    .hero-person{
+      position:relative;
+      z-index:2;
+      width:min(70%,460px);
+      border-radius:22px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+    }
+    .hero-person img{width:100%;height:auto;object-fit:cover}
+    .hero-sidecopy{
+      position:absolute;
+      right:-6px;
+      top:120px;
+      writing-mode:vertical-rl;
+      font-family:sans-serif;
+      font-size:clamp(2rem,4.1vw,4rem);
+      line-height:1.15;
+      color:#fff;
+      letter-spacing:.08em;
+      z-index:3;
+    }
+    .hero-badge{
+      position:absolute;bottom:58px;right:30px;z-index:3;
+      background:#fff;color:var(--main);
+      padding:14px 18px;border-radius:999px;
+      font-family:sans-serif;font-size:.8rem;
+      box-shadow:var(--shadow-sm);
+      transition:transform .35s ease, box-shadow .35s ease;
+    }
+    .hero-badge:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+
+    .about-wrap{
+      display:grid;
+      grid-template-columns:220px 1fr 180px;
+      gap:32px;
+      align-items:start;
+    }
+    .vertical-note{
+      writing-mode:vertical-rl;
+      font-family:sans-serif;
+      color:var(--main);
+      font-size:clamp(1.8rem,3vw,3rem);
+      letter-spacing:.1em;
+      justify-self:end;
+      align-self:center;
+    }
+    .about-copy p{margin-bottom:24px}
+    .about-copy .btn{margin-top:16px}
+
+    .cta-mini{
+      margin-top:56px;
+      background:var(--main);
+      color:#fff;
+      border-radius:16px;
+      box-shadow:var(--shadow-md);
+      padding:32px;
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:24px;
+      align-items:center;
+      position:relative;
+    }
+    .cta-mini:after{
+      content:"";
+      position:absolute;
+      inset:auto -30px -20px auto;
+      width:180px;height:180px;
+      background:rgba(255,255,255,.1);
+      filter:blur(16px);
+      border-radius:50%;
+    }
+    .cta-mini .linebox{
+      background:#fff;
+      color:var(--main);
+      border-radius:12px;
+      padding:22px;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:center;
+    }
+    .cta-mini .illust{
+      justify-self:end;
+      width:min(100%,240px);
+      transform:translateY(10px);
+    }
+    .cta-mini .illust img{width:100%;height:auto;object-fit:contain}
+
+    .service-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:32px;
+      align-items:start;
+    }
+    .service-item{
+      padding-right:20px;
+    }
+    .service-icon{
+      width:112px;height:112px;border-radius:50%;
+      background:linear-gradient(180deg, rgba(178,212,234,.45), rgba(178,212,234,.18));
+      display:grid;place-items:center;
+      margin-bottom:24px;
+      overflow:hidden;
+      box-shadow:var(--shadow-sm);
+      transition:transform .35s ease, box-shadow .35s ease;
+    }
+    .service-item:hover .service-icon{transform:translateY(-6px);box-shadow:var(--shadow-md)}
+    .service-icon img{width:100%;height:100%;object-fit:cover}
+    .passport-band{
+      margin-top:54px;
+      position:relative;
+      height:150px;
+      overflow:hidden;
+    }
+    .passport-band .loop-text{
+      position:absolute;
+      left:0;top:18px;
+      white-space:nowrap;
+      font-family:sans-serif;
+      font-size:clamp(2.8rem,6.2vw,5.8rem);
+      color:var(--main);
+      font-weight:700;
+      animation:loop 28s linear infinite;
+      opacity:.9;
+    }
+
+    .passport{
+      background:linear-gradient(180deg, rgba(178,212,234,.92), rgba(178,212,234,.78));
+      padding-top:13vh;
+      padding-bottom:0;
+    }
+    .passport-head{text-align:center;margin-bottom:48px}
+    .passport-head p{margin:16px auto 0}
+    .phone-stage{
+      display:grid;
+      grid-template-columns:1fr 160px 1fr;
+      gap:28px;
+      align-items:end;
+      margin-top:40px;
+      position:relative;
+      z-index:2;
+    }
+    .phone{
+      background:#fff;
+      border-radius:16px;
+      padding:18px;
+      box-shadow:var(--shadow-md);
+      width:min(100%,340px);
+      justify-self:center;
+      transition:transform .4s ease, box-shadow .4s ease;
+    }
+    .phone:hover{transform:translateY(-8px);box-shadow:0 20px 48px rgba(0,113,185,.16)}
+    .phone .screen{
+      aspect-ratio:9/18;
+      border-radius:12px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#f7fbfe,#e5f2fa);
+      border:1px solid rgba(0,113,185,.1);
+    }
+    .phone .screen img{width:100%;height:100%;object-fit:cover}
+    .center-pass{
+      width:100%;
+      aspect-ratio:3/4;
+      border-radius:8px;
+      background:var(--main);
+      box-shadow:var(--shadow-md);
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-family:sans-serif;
+      font-weight:700;
+      letter-spacing:.08em;
+      transform:translateY(30px);
+    }
+    .wave{
+      margin-top:56px;
+      height:110px;
+      background:#fff;
+      border-top-left-radius:50% 100%;
+      border-top-right-radius:50% 100%;
+    }
+
+    .flow-wrap{
+      display:grid;
+      grid-template-columns:180px 1fr;
+      gap:40px;
+      align-items:start;
+    }
+    .flow-vertical{
+      writing-mode:vertical-rl;
+      color:var(--main);
+      font-family:sans-serif;
+      font-size:1.5rem;
+      letter-spacing:.14em;
+      line-height:1.7;
+      justify-self:center;
+      margin-top:20px;
+    }
+    .flow-list{display:grid;gap:28px}
+    .flow-step{
+      display:grid;
+      grid-template-columns:110px 1fr;
+      gap:24px;
+      align-items:start;
+      position:relative;
+      padding-bottom:12px;
+    }
+    .flow-step:not(:last-child):after{
+      content:"";
+      position:absolute;
+      left:54px;top:110px;bottom:-4px;
+      width:1px;background:var(--line);
+    }
+    .flow-thumb{
+      width:110px;height:110px;border-radius:50%;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(178,212,234,.4), rgba(178,212,234,.15));
+      box-shadow:var(--shadow-sm);
+    }
+    .flow-thumb img{width:100%;height:100%;object-fit:cover}
+    .flow-text small{
+      display:block;
+      color:var(--main);
+      font-family:sans-serif;
+      letter-spacing:.08em;
+      margin-bottom:6px;
+    }
+
+    .plan-grid{
+      display:grid;
+      grid-template-columns:1fr 1.06fr;
+      gap:40px;
+      align-items:center;
+    }
+    .plan-left{
+      display:grid;
+      grid-template-columns:130px 1fr;
+      gap:24px;
+      align-items:start;
+    }
+    .plan-left .vertical-note{
+      font-size:1.5rem;
+      justify-self:start;
+    }
+    .plan-visual{
+      position:relative;
+      min-height:380px;
+      background:linear-gradient(180deg, rgba(178,212,234,.18), rgba(178,212,234,.04));
+      border-radius:20px;
+    }
+    .plan-visual .stack1,
+    .plan-visual .stack2,
+    .plan-visual .stack3{
+      position:absolute;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);
+      background:linear-gradient(180deg,#dceef9,#f7fbfe);
+    }
+    .plan-visual .stack1{width:170px;aspect-ratio:4/5;left:40px;top:40px;transform:rotate(-8deg)}
+    .plan-visual .stack2{width:160px;aspect-ratio:4/5;left:190px;top:20px;transform:rotate(10deg)}
+    .plan-visual .stack3{width:220px;aspect-ratio:5/3;left:120px;bottom:36px;transform:rotate(-5deg)}
+    .plan-visual img{width:100%;height:100%;object-fit:cover}
+    .price-box{
+      background:#fff;
+      border-radius:12px;
+      box-shadow:var(--shadow-md);
+      padding:28px;
+      border:1px solid rgba(0,113,185,.08);
+      max-width:520px;
+      margin-inline:auto;
+    }
+    .price-box .label{
+      font-family:sans-serif;
+      color:var(--main);
+      letter-spacing:.12em;
+      font-size:.78rem;
+      margin-bottom:8px;
+    }
+    .price{
+      display:flex;align-items:flex-end;gap:6px;
+      color:var(--main);
+      font-family:sans-serif;
+      margin-bottom:18px;
+    }
+    .price strong{font-size:clamp(2.6rem,6vw,4.2rem);line-height:1}
+    .price span{font-size:1rem;margin-bottom:8px}
+    .price-notes{
+      display:grid;gap:10px;
+      font-size:.94rem;
+      border-top:1px solid var(--line);
+      padding-top:14px;
+    }
+
+    .detail-area{
+      margin-top:72px;
+      border-top:1px solid var(--line);
+      padding-top:48px;
+    }
+    .detail-area .section-title{margin-bottom:24px}
+    .detail-block{
+      margin-bottom:40px;
+      max-width:900px;
+    }
+    .diagram{
+      margin-top:24px;
+      background:#fff;
+      border-radius:18px;
+      padding:24px;
+      box-shadow:var(--shadow-sm);
+      border:1px solid rgba(0,113,185,.08);
+    }
+    .diagram-grid{
+      display:grid;
+      grid-template-columns:1fr 140px 1fr;
+      gap:24px;
+      align-items:center;
+    }
+    .diag-card{
+      background:linear-gradient(180deg, #f7fbfe, #fff);
+      border:1px solid rgba(0,113,185,.1);
+      border-radius:14px;
+      padding:20px;
+      min-height:220px;
+    }
+    .diag-arrow{
+      text-align:center;
+      font-family:sans-serif;
+      color:var(--main);
+      font-weight:700;
+    }
+
+    .faq-wrap{
+      display:grid;
+      grid-template-columns:1fr 120px;
+      gap:28px;
+      align-items:start;
+    }
+    .faq-list{display:grid;gap:10px}
+    .faq-item{
+      border:1px solid rgba(0,113,185,.14);
+      background:linear-gradient(180deg, rgba(178,212,234,.14), rgba(255,255,255,.92));
+      border-radius:8px;
+      overflow:hidden;
+      transition:box-shadow .35s ease, transform .35s ease;
+    }
+    .faq-item:hover{box-shadow:var(--shadow-sm);transform:translateY(-2px)}
+    .faq-q{
+      width:100%;
+      background:none;border:none;
+      padding:18px 22px;
+      display:flex;justify-content:space-between;align-items:center;
+      font:inherit;color:var(--text);
+      text-align:left;cursor:pointer;
+    }
+    .faq-q span{font-family:sans-serif;color:var(--main);margin-right:10px}
+    .faq-a{
+      max-height:0;overflow:hidden;
+      transition:max-height .45s ease,padding .45s ease;
+      padding:0 22px;
+    }
+    .faq-item.open .faq-a{max-height:180px;padding:0 22px 18px}
+    .book-stack{
+      width:86px;justify-self:center;margin-top:24px;
+    }
+
+    .voice-track{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:18px;
+      align-items:start;
+    }
+    .voice-card{
+      position:relative;
+      text-align:center;
+      padding:8px 8px 24px;
+    }
+    .voice-card:after{
+      content:"";
+      position:absolute;
+      left:50%;bottom:0;
+      width:10px;height:10px;border-radius:50%;
+      background:var(--main);
+      transform:translateX(-50%);
+      box-shadow:0 20px 0 0 rgba(0,113,185,.18);
+    }
+    .voice-photo{
+      width:112px;height:112px;margin:0 auto 14px;
+      border-radius:50%;overflow:hidden;background:linear-gradient(180deg, #d6ebf7,#fff);
+      box-shadow:var(--shadow-sm);
+    }
+    .voice-photo img{width:100%;height:100%;object-fit:cover}
+    .voice-card h3{font-size:1rem;margin-bottom:6px}
+    .voice-card p{margin-inline:auto;font-size:.88rem;line-height:1.8}
+    .caption-photo{
+      position:relative;
+      overflow:visible;
+    }
+    .caption-photo .blur-blob{
+      position:absolute;
+      width:170px;height:170px;
+      right:-20px;bottom:-10px;
+      background:rgba(178,212,234,.6);
+      filter:blur(28px);
+      z-index:-1;border-radius:50%;
+    }
+    .caption-card{
+      position:absolute;
+      right:-18px;bottom:-22px;
+      background:#fff;
+      border-radius:12px;
+      box-shadow:var(--shadow-md);
+      padding:12px 14px;
+      width:180px;
+      font-size:.8rem;
+      line-height:1.6;
+      text-align:left;
+    }
+    .caption-card strong{
+      display:block;
+      font-family:sans-serif;
+      color:var(--main);
+      font-size:.8rem;
+      margin-top:4px;
+    }
+
+    .follow{
+      text-align:center;
+      min-height:auto;
+      padding:64px 0 24px;
+    }
+    .follow .sns{
+      display:flex;gap:14px;justify-content:center;margin-top:14px
+    }
+    .sns a{
+      width:38px;height:38px;border-radius:50%;
+      background:var(--main);color:#fff;display:grid;place-items:center;
+      font-family:sans-serif;
+      transition:transform .3s ease, box-shadow .3s ease;
+    }
+    .sns a:hover{transform:translateY(-3px);box-shadow:var(--shadow-sm)}
+
+    .footer-title{
+      font-family:sans-serif;
+      color:var(--main);
+      font-size:clamp(2.2rem,6vw,5.4rem);
+      font-weight:700;
+      line-height:1.05;
+      letter-spacing:.03em;
+      margin-top:8px;
+    }
+
+    footer{
+      padding:48px 0 64px;
+      border-top:1px solid rgba(0,113,185,.12);
+      background:#fff;
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr;
+      gap:32px;
+      align-items:start;
+      margin-top:36px;
+    }
+    .footer-grid h4{
+      font-family:sans-serif;
+      color:var(--main);
+      margin-bottom:10px;
+      font-size:.95rem;
+    }
+    .footer-nav a{
+      display:block;
+      margin-bottom:8px;
+      transition:color .3s ease, transform .3s ease;
+    }
+    .footer-nav a:hover{color:var(--main);transform:translateX(4px)}
+
+    html.js .reveal,
+    html.js .hero-person,
+    html.js .hero-copy,
+    html.js .hero-badge,
+    html.js .phone-left,
+    html.js .phone-right,
+    html.js .faq-item,
+    html.js .voice-card,
+    html.js .title-fade{
+      opacity:0;
+    }
+    html.js .reveal{transform:translateY(34px)}
+    html.js .reveal-left{transform:translateX(-50px);opacity:0}
+    html.js .reveal-right{transform:translateX(50px);opacity:0}
+    html.js .hero-person{transform:translateY(20px) scale(.985)}
+    html.js .hero-copy{transform:translateX(-50px)}
+    html.js .hero-badge{transform:scale(.8);opacity:0}
+    html.js .phone-left{transform:translateX(-60px);opacity:0}
+    html.js .phone-right{transform:translateX(60px);opacity:0}
+    html.js .faq-item{transform:translateY(25px)}
+    html.js .voice-card{transform:translateY(-30px)}
+    html.js .title-fade{transform:none}
+
+    .inview{
+      opacity:1 !important;
+      transform:none !important;
+      transition:opacity .95s ease-out, transform .95s ease-out;
+    }
+    .hero-loaded .hero-person{
+      opacity:1;transform:none;
+      transition:opacity 1.2s ease-out, transform 1.2s ease-out;
+    }
+    .hero-loaded .hero-copy{
+      opacity:1;transform:none;
+      transition:opacity 1s ease-out, transform 1s ease-out;
+    }
+    .hero-loaded .hero-badge{
+      opacity:1;transform:scale(1);
+      transition:opacity .8s cubic-bezier(.34,1.56,.64,1), transform .8s cubic-bezier(.34,1.56,.64,1);
+      transition-delay:.6s;
+    }
+
+    .stagger > *{transition-delay:calc(var(--i, 0) * .15s)}
+    .faq-stagger > *{transition-delay:calc(var(--i, 0) * .12s)}
+    .voice-stagger > *{transition-delay:calc(var(--i, 0) * .1s)}
+
+    .img-hover{overflow:hidden}
+    .img-hover img{transition:transform .55s ease}
+    .img-hover:hover img{transform:scale(1.05)}
+
+    @keyframes loop{
+      0%{transform:translateX(100%)}
+      100%{transform:translateX(-100%)}
+    }
+    @keyframes floatingY{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+    }
+    @keyframes floatingX{
+      0%,100%{transform:translateX(0)}
+      50%{transform:translateX(8px)}
+    }
+
+    @media (max-width: 1100px){
+      .hero-grid,.about-wrap,.plan-grid,.footer-grid,.cta-mini,.faq-wrap,.flow-wrap,.diagram-grid,.phone-stage{grid-template-columns:1fr}
+      .service-grid,.voice-track{grid-template-columns:repeat(2,1fr)}
+      .hero-sidecopy,.vertical-note,.flow-vertical{writing-mode:horizontal-tb}
+      .hero-sidecopy{position:static;margin-top:24px;font-size:2rem}
+      .hero-visual{min-height:500px}
+      .window-row{position:relative;top:auto;margin-bottom:24px}
+      .about-wrap{gap:20px}
+      .cta-mini .illust{justify-self:start}
+      .plan-left{grid-template-columns:1fr}
+      .book-stack{display:none}
+    }
+    @media (max-width: 768px){
+      .section{min-height:auto;padding:88px 0}
+      .nav-links{display:none}
+      .hero-grid,.service-grid,.voice-track{grid-template-columns:1fr}
+      .hero-copy h1{max-width:none}
+      .hero-visual{min-height:420px}
+      .hero-person{width:min(86%,360px)}
+      .window-row{grid-template-columns:repeat(2,1fr)}
+      .window:last-child{display:none}
+      .about-wrap{grid-template-columns:1fr}
+      .phone-stage{gap:18px}
+      .center-pass{max-width:160px;justify-self:center;transform:none}
+      .cta-mini .linebox{flex-direction:column;align-items:flex-start}
+      .footer-title{font-size:2.8rem}
+    }
+  </style>
+<style id="fxa-css">html.fxa-on .fxa_pre{opacity:0;transition:opacity var(--fxa-dur,.8s) ease,transform var(--fxa-dur,.8s) ease,filter var(--fxa-dur,.8s) ease,clip-path var(--fxa-dur,.8s) ease}html.fxa-on .fxa_pre.fxa_y{transform:translateY(var(--fxa-dist,28px))}html.fxa-on .fxa_pre.fxa_yd{transform:translateY(calc(-1*var(--fxa-dist,36px)))}html.fxa-on .fxa_pre.fxa_xl{transform:translateX(calc(-1*var(--fxa-dist,48px)))}html.fxa-on .fxa_pre.fxa_xr{transform:translateX(var(--fxa-dist,48px))}html.fxa-on .fxa_pre.fxa_s{transform:scale(var(--fxa-scale,.86))}html.fxa-on .fxa_pre.fxa_bl{filter:blur(var(--fxa-blur,14px))}html.fxa-on .fxa_pre.fxa_ry{transform:perspective(800px) rotateY(var(--fxa-deg,90deg))}html.fxa-on .fxa_pre.fxa_clip{transform:translateY(var(--fxa-dist,40px))}html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}.fxa_ch{display:inline-block}html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,26px));transition:opacity var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1),transform var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1)}html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,32ms))}html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}@keyframes fxa_glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}@keyframes fxa_wave{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,10px)))}}.fxa_ln{display:block;overflow:hidden}.fxa_lni{display:block}html.fxa-on .fxa_pre.fxa_lines{opacity:1;transform:none;transition:none}html.fxa-on .fxa_lines .fxa_lni{transform:translateY(112%);transition:transform var(--fxa-dur,.7s) cubic-bezier(.22,1,.36,1)}html.fxa-on .fxa_lines.fxa_in .fxa_lni{transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,130ms))}html.fxa-on .fxa_pre.fxa_wp{opacity:1;position:relative;clip-path:inset(0 100% 0 0);transition:clip-path var(--fxa-dur,.8s) cubic-bezier(.65,0,.35,1) .1s}html.fxa-on .fxa_wp.fxa_in::after{content:"";position:absolute;inset:0;background:var(--main,#334155);border-radius:inherit;transform:translateX(-101%);animation:fxa_wipeband var(--fxa-dur,.8s) cubic-bezier(.65,0,.35,1) forwards;pointer-events:none}@keyframes fxa_wipeband{0%{transform:translateX(-101%)}45%{transform:translateX(0)}100%{transform:translateX(101%)}}html.fxa-on .fxa_pre.fxa_fl{transform-origin:left center;transform:perspective(1200px) rotateY(var(--fxa-deg,80deg))}html.fxa-on .fxa_pre.fxa_cl{opacity:1;clip-path:inset(0 100% 0 0)}html.fxa-on .fxa_pre.fxa_cc{opacity:1;clip-path:inset(0 50% 0 50%)}.fxa_lp_pulse{animation:fxa_pulse var(--fxa-dur,1.4s) ease-in-out infinite}.fxa_lp_float{animation:fxa_float var(--fxa-dur,2.2s) ease-in-out infinite}.fxa_lp_bounce{animation:fxa_bounce var(--fxa-dur,1.2s) ease infinite}.fxa_lp_glow{animation:fxa_glow var(--fxa-dur,1.8s) ease-in-out infinite}.fxa_wave .fxa_ch{animation:fxa_wave var(--fxa-dur,1.6s) ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt1,92%),transparent var(--hlt1,92%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:slice;box-decoration-break:slice}</style><meta name="ce-base" content="da3513ad88f336dd"></head>
+<body style=""><header class="hero" data-cebt="" data-cetx="1" data-cety="-2" style="position: relative; translate: 1px -2px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+    <div class="nav" data-cesfz="1" style="flex: 0 0 auto !important; width: 1612px !important;">
+      <div class="nav-inner fxa_pre fxa_yd" style="--fxa-dur: 800ms; --fxa-dist: 36px;" data-cedelay="3000">
+        <div class="logo">
+          はたらく旅舎 みなと
+          <small>WORK SUPPORT A-TYPE</small>
+        </div>
+        <nav class="nav-links">
+          <a href="#about">私たちについて</a>
+          <a href="#service">できること</a>
+          <a href="#flow">1日の流れ</a>
+          <a href="#plan">利用案内</a>
+          <a href="#faq">よくある質問</a>
+          <a href="#contact" class="nav-cta">見学申込み</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="hero-grid hero-loaded" id="top" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; flex: 0 0 auto !important; width: 1440px !important;" data-cesfz="1">
+      <div class="hero-copy" style="transform: none; translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; opacity: 1 !important;" data-cebt="none" data-cetx="0" data-cety="0">
+        <div class="kicker">SENDAI / EMPLOYMENT SUPPORT / A-TYPE</div>
+        <h1 class="fxa_pre fxa_cpre" style="--fxa-dur: 348ms; --fxa-stag: 55ms; --fxa-dist: 56px; height: 311px !important; width: 590px !important; max-width: none !important; translate: -8px 8px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; font-size: 64px !important; font-weight: 700 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important;" data-cebt="" data-cetx="-8" data-cety="8"><span class="fxa_ch" style="display: inline-block; --i: 0;">は</span><span class="fxa_ch" style="display: inline-block; --i: 1;">た</span><span class="fxa_ch" style="display: inline-block; --i: 2;">ら</span><span class="fxa_ch" style="display: inline-block; --i: 3;">く</span><span class="fxa_ch" style="display: inline-block; --i: 4;">日</span><span class="fxa_ch" style="display: inline-block; --i: 5;">々</span><span class="fxa_ch" style="display: inline-block; --i: 6;">を</span><span class="fxa_ch" style="display: inline-block; --i: 7;">、</span><br><span class="fxa_hl" style="--hlc: #90d0a8; --hlw: 0; --hldur: 1.85s;" data-cedelay="1500"><span class="fxa_ch" style="display: inline-block; --i: 8;">少</span><span class="fxa_ch" style="display: inline-block; --i: 9;">し</span><span class="fxa_ch" style="display: inline-block; --i: 10;">ず</span><span class="fxa_ch" style="display: inline-block; --i: 11;">つ</span><span class="fxa_ch" style="display: inline-block; --i: 12;">、</span><br><span class="fxa_ch" style="display: inline-block; --i: 13;">自</span><span class="fxa_ch" style="display: inline-block; --i: 14;">分</span><span class="fxa_ch" style="display: inline-block; --i: 15;">の</span><span class="fxa_ch" style="display: inline-block; --i: 16;">歩</span><span class="fxa_ch" style="display: inline-block; --i: 17;">幅</span><span class="fxa_ch" style="display: inline-block; --i: 18;">で</span><span class="fxa_ch" style="display: inline-block; --i: 19;">。</span></span></h1>
+        <p class="lead" style="line-height: 1.8 !important;">
+          仙台駅から徒歩4分。週1日・1日3時間から相談できる、
+          就労継続支援A型事業所です。梱包、データ入力、軽作業、
+          EC発送など、実際の仕事に近い環境で「通えそう」を育てます。
+        </p>
+        <div class="hero-actions">
+          <a href="#contact" class="btn" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"><span class="dot"></span>見学を申し込む</a>
+          <a href="tel:0220001840" class="btn line" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">022-000-1840</a>
+        </div>
+      </div>
+
+      
+    </div>
+  <img src="http://127.0.0.1:5000/uploads/up_937206a8f8.png" style="position: absolute; left: 57.9%; top: 220px; z-index: 5; height: 471px !important; width: 590px !important; max-width: none !important; min-height: 471px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; background: rgb(255, 255, 255) !important; border: 14px solid rgb(255, 255, 255) !important; border-radius: 8px 44px 8px 8px !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important; box-sizing: border-box !important; translate: -81px -9px !important; flex: 0 0 auto !important; object-fit: cover !important;" class="" data-cebt="" data-ceframe="1" data-cetx="-81" data-cety="-9"><img src="http://127.0.0.1:5000/uploads/up_5cf90f094b.png" style="position: absolute; left: 53.7%; top: 566px; z-index: 5; width: 258px !important; height: auto; rotate: 6deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 230px !important; translate: -45px 40px !important; flex: 0 0 auto !important;" class="" data-cebt="" data-cero="6" data-cetx="-45" data-cety="40" data-cesfz="1"></header><main class="">
+    <section class="section white" id="about" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;"><div class="__ce_divline" data-cediv="1" style="display: flex; align-items: center; gap: 14px; margin: 0px 0px 20px;"><span style="display: inline-block; width: 70px; height: 4px; background: rgb(201, 201, 201); flex: 0 0 auto;"></span><span style="font-size:13px;color:#888;letter-spacing:.05em">ここで働くことが、次の一歩になる。</span></div>
+      <div class="container" style="max-width: 1440px !important; margin-left: auto !important; margin-right: auto !important;">
+        <div class="about-wrap">
+          <div class="section-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            <div class="eyebrow">About</div>
+            <h2 style="font-size: 40px !important; font-weight: 600 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important;">ここで働くことが、<br>次の一歩になる。</h2>
+          </div>
+
+          <div class="about-copy stagger">
+            <p class="reveal fxa_pre fxa_xl" style="--i: 0; --fxa-dur: 936ms; --fxa-dist: 168px; opacity: 1 !important;">
+              木町通で2013年に開所してから、<br>
+              348名の方が一般就労や職場定着へ進みました。
+            </p>
+            <p class="reveal fxa_pre fxa_xl" style="--i: 1; --fxa-dur: 936ms; --fxa-dist: 168px; translate: 0px -1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; opacity: 1 !important;" data-cebt="" data-cetx="0" data-cety="-1">
+              「朝が少し不安」「人が多い場所はつかれる」<br>
+              そんな声に合わせて、通所日数も作業内容も、<br>
+              支援員と一緒にゆっくり決めていきます。
+            </p>
+            <p class="reveal fxa_pre fxa_xl" style="--i: 2; --fxa-dur: 936ms; --fxa-dist: 168px; opacity: 1 !important;">
+              本人には、無理をしない始め方を。<br>
+              ご家族には、制度説明と就職までの見通しを。<br>
+              どちらにも分かりやすく、ていねいにお伝えします。
+            </p>
+            <p class="reveal fxa_pre fxa_xl" style="--i: 3; --fxa-dur: 936ms; --fxa-dist: 168px; opacity: 1 !important;">
+              精神障害、発達障害、知的障害、身体障害など、<br>
+              受給者証の取得前相談から対応しています。
+            </p>
+            <a href="#service" class="btn reveal" style="--i: 4; transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"><span class="dot"></span>できる仕事を見る</a>
+          </div>
+
+          <div class="vertical-note reveal fxa_pre fxa_cpre" style="--fxa-dur: 840ms; --fxa-stag: 59ms; --fxa-dist: 56px; translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="0" data-cety="0">考えるより先に、<br>見に来てください。</div>
+        </div>
+
+        <div class="cta-mini reveal" id="contact" style="transform: none; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+          <div>
+            <div class="eyebrow" style="color:#fff;padding-left:0">Reservation</div>
+            <h3 style="font-size: 26px !important; color: rgb(255, 255, 255); font-family: sans-serif; line-height: 1.4 !important; margin-bottom: 0.6em !important; font-weight: 600 !important;" class="">
+              まずは30分の見学から。<br>電話・フォーム・LINEで受付中です。
+            </h3>
+            <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.8 !important;">
+              平日 9:00–17:30 ／ 見学は最短で翌営業日にご案内。<br>
+              ご家族のみ、支援機関の同席も可能です。
+            </p>
+            <div style="margin-top:20px">
+              <div class="linebox">
+                <div>
+                  <strong style="font-family:sans-serif;color:var(--main);font-size:1rem">見学申込みフォーム</strong>
+                  <div style="font-size:.92rem">LINE相談 / 電話 022-000-1840</div>
+                </div>
+                <a href="#" class="btn" style="padding: 12px 18px; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">LINEで予約する</a>
+              </div>
+            </div>
+          </div>
+          <div class="illust floating-x">
+            <img src="http://127.0.0.1:5000/uploads/up_845791e542.png" width="260" height="260" alt="" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+    <img src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_20fqbh20fqbh20fq.png" style="position: absolute; left: 59%; top: 128px; z-index: 5; width: 319px !important; height: auto; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; translate: -85px 40px !important; max-width: none !important; min-height: 386px !important;" class="" data-cebt="" data-cetx="-85" data-cety="40"></section>
+
+    <section class="section white" id="service" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important; min-height: 1100px !important;"><div class="__ce_divline" data-cediv="1" style="display: flex; align-items: center; gap: 14px; margin: 0px 0px 20px; translate: 7px -2px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="7" data-cety="-2"><span style="display: inline-block; width: 70px; height: 4px; background: rgb(201, 201, 201); flex: 0 0 auto;"></span><span style="font-size:13px;color:#888;letter-spacing:.05em">その日の体調に合わせて選べる、3つの仕事。</span></div>
+      <div class="container" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; max-width: 1440px !important; margin-left: auto !important; margin-right: auto !important;">
+        <div class="section-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+          <div class="eyebrow">Service</div>
+          <h2 class="fxa_pre fxa_y" style="--fxa-dur: 800ms; --fxa-dist: 35px; font-size: 40px !important; font-weight: 600 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important; opacity: 1 !important; translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="0" data-cety="0">その日の体調に<br>合わせて選べる、3つの仕事。</h2>
+        </div>
+
+        <div class="service-grid">
+          <article class="service-item reveal" style="--i: 0; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            
+            <h3 class="" data-cebt="" data-cetx="9" data-cety="212" style="translate: 9px 212px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">検品・封入・梱包</h3>
+            <p class="" data-cebt="" data-cetx="3" data-cety="241" style="translate: 3px 241px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+              ギフト箱の組み立て、販促物の封入、アクセサリーの検品など。
+              手順書を見ながら進められるので、初めてでも取り組みやすい作業です。
+            </p>
+          </article>
+
+          <article class="service-item reveal" style="--i: 1; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            
+            <h3 data-cebt="" data-cetx="93" data-cety="347" style="translate: 93px 347px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="">PC入力・事務補助</h3>
+            <p class="" data-cebt="" data-cetx="89" data-cety="385" style="translate: 89px 385px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+              商品登録、文字起こし、帳票整理、メール確認など。
+              支援員が横で確認しながら進めるため、パソコンに自信がない方も安心です。
+            </p>
+          </article>
+
+          <article class="service-item reveal" style="--i: 2; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+            
+            <h3 data-cebt="" data-cetx="148" data-cety="499" style="translate: 148px 499px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="">EC発送・館内軽作業</h3>
+            <p data-cebt="" data-cetx="153" data-cety="535" style="translate: 153px 535px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="">
+              ラベル貼り、在庫整理、発送準備、館内清掃など。
+              立ち仕事と座り仕事を組み合わせ、集中しやすい流れをつくっています。
+            </p>
+          </article>
+        </div>
+
+        <div class="passport-band" data-cebt="" data-cetx="39" data-cety="111" style="translate: 39px 111px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          
+        </div>
+      </div>
+    <img src="http://127.0.0.1:5000/uploads/ChatGPT Image 2026年7月13日 22_00_28.png" style="z-index: 5; height: auto; position: absolute; left: 23.4%; top: 379px; --fxa-dur: 1046ms; --fxa-dist: 83px; width: 320px !important; translate: -207px -41px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; max-width: none !important; min-height: 199px !important;" class="fxa_pre fxa_y" data-cebt="" data-cetx="-207" data-cety="-41" data-cedelay="200"><img src="http://127.0.0.1:5000/uploads/ChatGPT Image 2026年7月13日 22_21_40.png" style="z-index: 5; height: auto; position: absolute; left: 41.3%; top: 517px; --fxa-dur: 1046ms; --fxa-dist: 83px; width: 322px !important; translate: 8px -55px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; max-width: none !important; min-height: 198px !important;" class="fxa_pre fxa_y" data-cebt="" data-cetx="8" data-cety="-55" data-cedelay="600"><img src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_duj7etduj7etduj7 (1).png" style="z-index: 5; height: auto; position: absolute; left: 70.4%; top: 672px; --fxa-dur: 1046ms; --fxa-dist: 83px; width: 303px !important; translate: 6px -148px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; max-width: none !important; min-height: 261px !important;" class="fxa_pre fxa_y" data-cebt="" data-cetx="6" data-cety="-148" data-cedelay="1000"></section>
+
+    <section class="section passport" id="passport">
+  <style>
+    #passport{
+      padding-top:80px !important;
+      padding-bottom:80px !important;
+      margin-top:0 !important;
+      margin-bottom:0 !important;
+      min-height:0 !important;
+      translate:none !important;
+      rotate:0deg !important;
+      scale:1 !important;
+    }
+    #passport > .container{
+      max-width:1440px !important;
+      margin-inline:auto !important;
+    }
+    #passport .__ce_divline{
+      display:flex;
+      align-items:center;
+      gap:16px !important;
+      margin:0 0 20px !important;
+      color:rgb(51,51,51) !important;
+    }
+    #passport .__ce_divline span:first-child{
+      background:rgb(51,51,51) !important;
+    }
+    #passport .passport-head{
+      height:auto !important;
+      width:auto !important;
+      max-width:none !important;
+      margin-bottom:64px !important;
+      translate:none !important;
+      rotate:0deg !important;
+      scale:1 !important;
+    }
+    #passport .passport-head p{
+      max-width:608px !important;
+      color:rgb(51,51,51) !important;
+      line-height:2 !important;
+    }
+    #passport .phone-stage{
+      margin-top:0 !important;
+      translate:none !important;
+      rotate:0deg !important;
+      scale:1 !important;
+    }
+    #passport .phone{
+      width:340px !important;
+      padding:0 !important;
+      border-radius:0 !important;
+      background:transparent !important;
+      box-shadow:none !important;
+    }
+    #passport .phone .screen{
+      border-radius:0 !important;
+      border:0 !important;
+      background:transparent !important;
+    }
+    #passport .phone .screen img{
+      width:340px !important;
+      height:auto !important;
+    }
+    #passport .wave{
+      translate:none !important;
+      rotate:0deg !important;
+      scale:1 !important;
+    }
+  </style>
+
+  <div class="container">
+    <div class="__ce_divline">
+      <span style="display:inline-block;width:70px;height:4px;flex:0 0 auto;"></span>
+      <span style="font-size:13px;letter-spacing:.05em;">就労継続支援A型について</span>
+    </div>
+
+    <div class="passport-head title-fade reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+      <div class="eyebrow" style="padding-left:0">What is A-type</div>
+      <h2>
+        <span>就</span><span>労</span><span>継</span><span>続</span><span>支</span><span>援</span><span>A</span><span>型</span><span>に</span><span>つ</span><span>い</span><span>て</span>
+      </h2>
+      <p>
+        A型は、雇用契約を結んで働く福祉サービスです。<br>
+        はたらく旅舎 みなとでは、利用開始前の制度説明から受給者証の相談まで、
+        ひとつずつ一緒に確認します。
+      </p>
+    </div>
+
+    <div class="phone-stage">
+      <div class="phone phone-left" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="screen img-hover">
+          <img src="http://127.0.0.1:5000/uploads/up_0795336787.png" width="340" height="680" alt="" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <div class="center-pass floating">
+        WORK<br>PASS
+      </div>
+
+      <div class="phone phone-right" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+        <div class="screen img-hover">
+          <img src="http://127.0.0.1:5000/uploads/up_8a2fbc1c56.png" width="340" height="680" alt="" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wave" data-cebt="" data-cetx="-5" data-cety="81" style="translate: -5px 81px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;"></div>
+</section>
+
+    <section class="section white" id="flow" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;"><div class="__ce_divline" data-cediv="1" style="display: flex; align-items: center; gap: 14px; margin: 0px 0px 20px;"><span style="display: inline-block; width: 70px; height: 4px; background: rgb(201, 201, 201); flex: 0 0 auto;"></span><span style="font-size:13px;color:#888;letter-spacing:.05em">見学から利用開始まで。</span></div>
+      <div class="container" style="max-width: 1440px !important; margin-left: auto !important; margin-right: auto !important;">
+        <div class="flow-wrap" data-cebt="" data-cetx="0" data-cety="66" style="translate: 0px 66px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; grid-template-columns: 180px 1220px !important;" data-cegfz="1">
+          <div>
+            <div class="section-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="eyebrow" data-cebt="" data-cetx="-10" data-cety="-48" style="translate: -10px -48px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">Flow</div>
+              <h2 style="font-size: 40px !important; font-weight: 600 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important; translate: -11px -24px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="" data-cebt="" data-cetx="-11" data-cety="-24">見学から<br>利用開始まで。</h2>
+            </div>
+            <div class="flow-vertical reveal" style="animation: auto ease 0s 1 normal none running none; transform: none !important; opacity: 1 !important; translate: 1343px -270px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="1343" data-cety="-270">本人も、ご家族も、<br>順番に確認すれば大丈夫。</div>
+          </div>
+
+          <div class="flow-list" data-cegrp="1" style="translate: 0px -48px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; justify-self: start !important; min-height: 688px !important;" data-cebt="" data-cetx="0" data-cety="-48">
+            <article class="flow-step reveal fxa_pre fxa_xl" style="--fxa-dur: 936ms; --fxa-dist: 168px; opacity: 1 !important; translate: 40px 82px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; grid-template-columns: 110px 1086px !important;" data-cebt="" data-cetx="40" data-cety="82" data-cegfz="1">
+              <div class="flow-thumb img-hover" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important; justify-self: start !important; width: 98px !important; max-width: none !important; min-height: 96px !important; translate: 12px 14px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="12" data-cety="14">
+                <img src="http://127.0.0.1:5000/uploads/up_ceb0b66592.png" width="110" height="110" alt="" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-text" data-cebt="" data-cetx="14" data-cety="-6" style="translate: 14px -6px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+                <small>Flow 01</small>
+                <h3 class="" style="font-size: 26px !important; font-weight: 600 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important;">見学予約・ご相談</h3>
+                <p class="" style="line-height: 1.8 !important;">
+                  お電話、フォーム、LINEから受付。見学は約30〜40分。
+                  作業室、休憩スペース、支援体制、賃金のことまでその場でお話しします。
+                </p>
+              </div>
+            </article>
+
+            <article class="flow-step reveal fxa_pre fxa_xl" style="--fxa-dur: 936ms; --fxa-dist: 168px; opacity: 1 !important;">
+              <div class="flow-thumb img-hover" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important; translate: 31px 86px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="31" data-cety="86">
+                <img src="http://127.0.0.1:5000/uploads/up_5e27f78625.png" width="110" height="110" alt="" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-text" data-cebt="" data-cetx="11" data-cety="8" style="translate: 11px 8px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+                <small>Flow 02</small>
+                <h3 class="" style="font-size: 26px !important; font-weight: 600 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important; translate: 31px 43px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="31" data-cety="43">体験利用・受給者証のご案内</h3>
+                <p class="" style="line-height: 1.8 !important; translate: 31px 43px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="31" data-cety="43">
+                  1〜3回の体験利用で、作業との相性や通所ペースを確認。
+                  受給者証の申請が必要な方には、仙台市の手続き方法を正確にご説明します。
+                </p>
+              </div>
+            </article>
+
+            <article class="flow-step reveal fxa_pre fxa_xl" style="--fxa-dur: 936ms; --fxa-dist: 168px; opacity: 1 !important; translate: 40px 82px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="40" data-cety="82">
+              <div class="flow-thumb img-hover" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+                <img src="http://127.0.0.1:5000/uploads/up_d83a2a4e87.png" width="110" height="110" alt="" onerror="this.style.display='none'">
+              </div>
+              <div class="flow-text" data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+                <small>Flow 03</small>
+                <h3 style="font-size: 26px !important; font-weight: 600 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important; translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="0" data-cety="0" class="">利用開始・雇用契約</h3>
+                <p style="line-height: 1.8 !important;">
+                  勤務日数は週1日から相談可。朝礼、作業、面談、振り返りまで、
+                  自分のペースを見つけながら始めます。定着支援は最長3年まで対応。
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    <img src="http://127.0.0.1:5000/uploads/processed_Gemini_Generated_Image_idgc1sidgc1sidgc (1).png" style="position: absolute; left: 73.9%; top: 95px; z-index: 5; width: 269px !important; height: 482px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; translate: -71px 220px !important; min-height: 482px !important; object-fit: cover !important; max-width: none !important;" class="" data-cebt="" data-cetx="-71" data-cety="220"></section>
+
+    <section class="section soft" id="plan" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important; translate: 3px 43px !important; rotate: 0deg !important; scale: 1 0.9999 !important; transform-origin: center center !important; min-height: 1706px !important;" data-cebt="" data-cetx="3" data-cety="43" data-cesx="1" data-cesy="0.9999000000000001"><div class="__ce_divline" data-cediv="1" style="display: flex; align-items: center; gap: 14px; margin: 0px 0px 20px; translate: 39px -18.0024px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 40px !important;" data-cebt="" data-cetx="39" data-cety="-18.00244140625"><span style="display: inline-block; width: 70px; height: 4px; background: rgb(201, 201, 201); flex: 0 0 auto; translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="" data-cebt="" data-cetx="0" data-cety="0"></span><span style="font-size:13px;color:#888;letter-spacing:.05em">利用料のこと、工賃のこと。</span></div>
+      <div class="container" style="max-width: 1440px !important; margin-left: auto !important; margin-right: auto !important; translate: 42px -122px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="42" data-cety="-122">
+        <div class="section-title reveal" style="transform: none !important; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; translate: 2px 63px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="2" data-cety="63">
+          <div class="eyebrow" data-cebt="" data-cetx="-2" data-cety="14" style="translate: -2px 14px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">Plan</div>
+          <h2 class="fxa_pre fxa_y" style="--fxa-dur: 800ms; --fxa-dist: 63px; font-size: 40px !important; font-weight: 600 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important; opacity: 1 !important; translate: -9px 25px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="-9" data-cety="25">利用料のこと、<br>工賃のこと。</h2>
+        </div>
+
+        <div class="plan-grid">
+          <div class="plan-left" data-cebt="" data-cetx="19" data-cety="48" style="translate: 19px 48px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+            <div class="vertical-note reveal" style="transform: none !important; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; translate: 682px -3px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="682" data-cety="-3">料金より先に、<br>生活の負担を減らすこと。</div>
+            <div class="plan-visual reveal" style="animation: auto ease 0s 1 normal none running none; transform: none !important; opacity: 1 !important; translate: -83px 1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="-83" data-cety="1">
+              <div class="stack1 img-hover" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+                <img src="http://127.0.0.1:5000/uploads/up_42326a40fe.jpg" width="340" height="420" alt="" onerror="this.style.display='none'">
+              </div>
+              <div class="stack2 img-hover" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+                <img src="http://127.0.0.1:5000/uploads/up_5cf90f094b.png" width="340" height="420" alt="" onerror="this.style.display='none'">
+              </div>
+              <div class="stack3 img-hover" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;">
+                <img src="http://127.0.0.1:5000/uploads/up_81a4abcdaa.png" width="440" height="260" alt="" onerror="this.style.display='none'">
+              </div>
+            </div>
+          </div>
+
+          <div class="price-box reveal fxa_pre fxa_ry" style="--fxa-dur: 2200ms; --fxa-deg: 154deg; opacity: 1 !important; box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important; translate: -2px 45px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="-2" data-cety="45">
+            <div class="label">AVERAGE MONTHLY INCOME</div>
+            <div class="price">
+              <strong>98,000</strong><span>円前後 / 月</span>
+            </div>
+            <div class="price-notes">
+              <div class="" data-cebt="" data-cetx="1" data-cety="-2" style="translate: 1px -2px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">時給 980円〜 / 雇用契約あり / 交通費支給あり（上限月12,000円）</div>
+              <div>利用料は前年度所得により決定。多くの方が自己負担 0円で利用しています。</div>
+              <div>昼食補助あり / 週1日・1日3時間から相談可 / 面接練習・履歴書添削込み</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-area" data-cebt="" data-cetx="-1" data-cety="137" style="translate: -1px 137px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+          <div class="detail-block reveal" style="transform: none !important; animation: auto ease 0s 1 normal none running none; opacity: 1 !important; translate: 0px -1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="0" data-cety="-1">
+            
+            
+            
+          </div>
+
+          <div class="detail-block reveal" style="animation: auto ease 0s 1 normal none running none; transform: none !important; opacity: 1 !important; translate: 227px 64px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="none" data-cetx="227" data-cety="64">
+            <div class="eyebrow" data-cebt="" data-cetx="-9" data-cety="59" style="translate: -9px 59px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">Result</div>
+            <h3 style="font-family: sans-serif; font-size: 26px !important; margin-bottom: 0.6em !important; font-weight: 600 !important; line-height: 1.4 !important; translate: -7px 78px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="" data-cebt="" data-cetx="-7" data-cety="78">就職までのイメージ</h3>
+            <div class="diagram" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important; translate: 4px 99px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 362px !important;" data-cebt="" data-cetx="4" data-cety="99">
+              <div class="diagram-grid">
+                <div class="diag-card">
+                  <h3>通所初期 1〜3か月</h3>
+                  <p>生活リズムを整え、作業の向き不向きを確認。週1〜3日からスタートする方が多いです。</p>
+                </div>
+                <div class="diag-arrow">STEP<br>UP</div>
+                <div class="diag-card" data-cebt="" data-cetx="-8" data-cety="6" style="translate: -8px 6px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+                  <h3 data-cebt="" data-cetx="0" data-cety="0" style="translate: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">6〜18か月</h3>
+                  <p class="">勤務時間を増やしながら企業実習へ。2025年度は21名が一般就労へ進み、定着率は87%でした。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <img src="http://127.0.0.1:5000/uploads/processed_ChatGPT Image 2026年7月11日 04_28_33.png" style="position: absolute; left: 70.5%; top: 1046px; z-index: 5; height: auto; width: 319px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; max-width: none !important; min-height: 360px !important; translate: 73px 103px !important;" class="" data-cebt="" data-cetx="73" data-cety="103"><div class="__ce_divline" data-cediv="1" style="display: flex; align-items: center; gap: 14px; margin: 0px 0px 20px; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; min-height: 40px !important; position: absolute; z-index: 5; left: 3.5%; top: 966px; white-space: normal; max-width: 95.5%; translate: -29px 5px !important;" data-cebt="" data-cetx="-29" data-cety="5"><span style="display: inline-block; width: 70px; height: 4px; background: rgb(201, 201, 201); flex: 0 0 auto; translate: -24px 1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="" data-cebt="" data-cetx="-24" data-cety="1"></span><span style="font-size:13px;color:#888;letter-spacing:.05em">利用料のこと、工賃のこと。</span></div><div class="vertical-note reveal fxa_pre fxa_cpre" style="--fxa-dur: 840ms; --fxa-stag: 59ms; --fxa-dist: 56px; position: absolute; z-index: 5; left: 12.3%; top: 1105px; white-space: normal; max-width: 86.7%; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; translate: -17px -55px !important;" data-cebt="" data-cetx="-17" data-cety="-55">焦らないでください。<br>少しずつと前をむいて</div></section>
+
+    <section class="section white" id="faq" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;"><div class="__ce_divline" data-cediv="1" style="display: flex; align-items: center; gap: 14px; margin: 0px 0px 20px;"><span style="display: inline-block; width: 70px; height: 4px; background: rgb(201, 201, 201); flex: 0 0 auto;"></span><span style="font-size:13px;color:#888;letter-spacing:.05em">よくある質問</span></div>
+      <div class="container" style="max-width: 1440px !important; margin-left: auto !important; margin-right: auto !important;">
+        <div class="faq-wrap">
+          <div>
+            <div class="section-title reveal" style="opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+              <div class="eyebrow">FAQ</div>
+              <h2 class="" style="font-size: 40px !important; font-weight: 600 !important; line-height: 1.4 !important; margin-bottom: 0.6em !important;">よくある質問</h2>
+            </div>
+
+            <div class="faq-list faq-stagger">
+              <div class="faq-item reveal" style="--i: 0; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <button class="faq-q"><div><span>Q1</span>週1日だけでも利用できますか？</div><strong>＋</strong></button>
+                <div class="faq-a"><p>はい。体調や生活リズムに合わせて、週1日・1日3時間から相談可能です。体験利用を通して無理のない頻度を一緒に決めます。</p></div>
+              </div>
+              <div class="faq-item reveal" style="--i: 1; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <button class="faq-q"><div><span>Q2</span>受給者証がまだありません。</div><strong>＋</strong></button>
+                <div class="faq-a"><p>見学前でもご相談いただけます。申請窓口や必要書類、主治医意見書の流れなど、制度名も含めて正確にご説明します。</p></div>
+              </div>
+              <div class="faq-item reveal" style="--i: 2; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <button class="faq-q"><div><span>Q3</span>家族だけで見学してもいいですか？</div><strong>＋</strong></button>
+                <div class="faq-a"><p>可能です。ご本人が不安な場合は、ご家族のみ・相談支援専門員同席・オンライン説明にも対応しています。</p></div>
+              </div>
+              <div class="faq-item reveal" style="--i: 3; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <button class="faq-q"><div><span>Q4</span>どんな方が一般就労に進んでいますか？</div><strong>＋</strong></button>
+                <div class="faq-a"><p>事務補助、物流軽作業、清掃、EC関連など幅広い就職先があります。直近3年での一般就労移行者は64名です。</p></div>
+              </div>
+              <div class="faq-item reveal" style="--i: 4; opacity: 1 !important; transform: none; animation: auto ease 0s 1 normal none running none;">
+                <button class="faq-q"><div><span>Q5</span>送迎はありますか？</div><strong>＋</strong></button>
+                <div class="faq-a"><p>当事業所は仙台駅・勾当台公園駅から徒歩圏のため、基本は公共交通機関での通所です。交通費補助制度があります。</p></div>
+              </div>
+            </div>
+          </div>
+
+          
+        </div>
+      </div>
+    </section>
+
+    <section class="section white" id="voice" style="padding-top:100px !important;padding-bottom:100px !important;margin-top:0 !important;margin-bottom:0 !important;translate:none !important;rotate:0deg !important;scale:1 !important;transform-origin:center center !important;background-color:rgb(238,243,251) !important;">
+  <style>
+    #voice .section-title{
+      margin-top:48px !important;
+      margin-bottom:32px !important;
+    }
+    #voice .section-title .eyebrow{
+      margin-bottom:16px !important;
+    }
+    #voice .section-title h2{
+      margin-bottom:0 !important;
+    }
+    #voice .voice-track{
+      grid-template-columns:repeat(3,1fr) !important;
+      column-gap:32px !important;
+      row-gap:48px !important;
+    }
+    #voice .voice-card{
+      padding-bottom:0 !important;
+    }
+    #voice .voice-card h3{
+      min-height:2.7em !important;
+    }
+    #voice .voice-card:after{
+      display:none !important;
+    }
+    #voice .voice-card p{
+      color:#333 !important;
+      line-height:1.9 !important;
+      max-width:38em !important;
+    }
+    #voice .caption-card{
+      position:static !important;
+      width:180px !important;
+      margin-top:24px !important;
+    }
+    #voice .cta-mini{
+      translate:none !important;
+      transform:none !important;
+      position:relative !important;
+    }
+    #voice .cta-mini > div > p{
+      color:#fff !important;
+      line-height:1.9 !important;
+      max-width:38em !important;
+    }
+    #voice .voice-side-image{
+      position:absolute !important;
+      left:auto !important;
+      right:24px !important;
+      bottom:0 !important;
+      top:auto !important;
+      translate:none !important;
+      rotate:0deg !important;
+      scale:1 !important;
+      transform:none !important;
+      width:320px !important;
+      height:268px !important;
+      min-height:0 !important;
+      max-width:none !important;
+      object-fit:cover !important;
+      background:#fff !important;
+      border:0 !important;
+      border-radius:8px !important;
+      box-shadow:var(--shadow-sm) !important;
+      box-sizing:border-box !important;
+    }
+    @media (max-width:1100px){
+      #voice .voice-track{
+        grid-template-columns:repeat(2,1fr) !important;
+      }
+      #voice .voice-side-image{
+        right:24px !important;
+        bottom:0 !important;
+      }
+    }
+    @media (max-width:768px){
+      #voice .voice-track{
+        grid-template-columns:1fr !important;
+      }
+      #voice .voice-side-image{
+        position:static !important;
+        width:320px !important;
+        height:268px !important;
+        margin:32px 0 0 auto !important;
+      }
+    }
+  </style>
+
+  <div class="__ce_divline" data-cediv="1" style="display:flex;align-items:center;gap:14px;margin:0 0 20px;">
+    <span style="display:inline-block;width:70px;height:4px;background:rgb(201,201,201);flex:0 0 auto;"></span>
+    <span style="font-size:13px;color:#888;letter-spacing:.05em">通っている人の、静かな変化。</span>
+  </div>
+
+  <div class="container" style="max-width:1440px !important;margin-left:auto !important;margin-right:auto !important;">
+    <div class="section-title reveal" style="opacity:1 !important;transform:none;animation:auto ease 0s 1 normal none running none;">
+      <div class="eyebrow">Voice</div>
+      <h2 style="font-size:40px !important;font-weight:600 !important;line-height:1.4 !important;margin-bottom:0 !important;">週2日から週4日へ。仙台5人の通所の変化</h2>
+    </div>
+
+    <div class="voice-track voice-stagger">
+      <article class="voice-card reveal" style="--i:0;opacity:1 !important;transform:none;animation:auto ease 0s 1 normal none running none;">
+        <div class="voice-photo" style="box-shadow:var(--shadow-sm) !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_d047f3036e.png" width="112" height="112" alt="" onerror="this.style.display='none'">
+        </div>
+        <h3>29歳 / 青葉区</h3>
+        <p>最初は週2日。3か月で朝の不安が減って、今は週4日通えています。</p>
+      </article>
+
+      <article class="voice-card reveal" style="--i:1;opacity:1 !important;transform:none;animation:auto ease 0s 1 normal none running none;">
+        <div class="voice-photo" style="translate:none !important;rotate:0deg !important;scale:1 !important;transform-origin:center center !important;box-shadow:var(--shadow-sm) !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_b1cc387964.png" width="112" height="112" alt="" onerror="this.style.display='none'">
+        </div>
+        <h3>ご家族 / 宮城野区</h3>
+        <p>制度の説明がていねいで、家族として見通しを持てたのが大きかったです。</p>
+      </article>
+
+      <article class="voice-card caption-photo reveal" style="--i:2;opacity:1 !important;transform:none;animation:auto ease 0s 1 normal none running none;">
+        <div class="voice-photo" style="box-shadow:var(--shadow-sm) !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_f96793e8d0.png" width="112" height="112" alt="" onerror="this.style.display='none'">
+        </div>
+        <h3>34歳 / 若林区</h3>
+        <p>PC作業に挑戦して、自信がつきました。面接練習が具体的で助かりました。</p>
+        <div class="blur-blob"></div>
+        <div class="caption-card" style="box-shadow:var(--shadow-md) !important;">
+          「通所が安定してから就職へ」<strong>支援員・佐藤</strong>
+        </div>
+      </article>
+
+      <article class="voice-card reveal" style="--i:3;opacity:1 !important;transform:none;animation:auto ease 0s 1 normal none running none;">
+        <div class="voice-photo" style="box-shadow:var(--shadow-sm) !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_8d3e1352d5.png" width="112" height="112" alt="" onerror="this.style.display='none'">
+        </div>
+        <h3>26歳 / 太白区</h3>
+        <p>人が多い場所が苦手でも、休憩の取り方を相談できて続けやすかったです。</p>
+      </article>
+
+      <article class="voice-card reveal" style="--i:4;opacity:1 !important;transform:none;animation:auto ease 0s 1 normal none running none;">
+        <div class="voice-photo" style="box-shadow:var(--shadow-sm) !important;">
+          <img src="http://127.0.0.1:5000/uploads/up_a836060db3.png" width="112" height="112" alt="" onerror="this.style.display='none'">
+        </div>
+        <h3>相談支援専門員</h3>
+        <p>本人への声かけが穏やかで、家族への共有も丁寧。紹介しやすい事業所です。</p>
+      </article>
+    </div>
+
+    <div class="cta-mini reveal" style="margin-top:72px;transform:none;box-shadow:var(--shadow-md) !important;translate:none !important;rotate:0deg !important;scale:1 !important;transform-origin:center center !important;opacity:1 !important;animation:auto ease 0s 1 normal none running none;">
+      <div>
+        <div class="eyebrow" style="color:#fff;padding-left:0">Visit us</div>
+        <h3 style="font-size:26px !important;color:#fff;font-family:sans-serif;line-height:1.4 !important;margin-bottom:.6em !important;font-weight:600 !important;">
+          「通えるかも」と思えた日に、<br>そのまま見学予約を。
+        </h3>
+        <p style="color:#fff !important;line-height:1.9 !important;">
+          服装自由。履歴書不要。ご家族のみの参加も歓迎です。<br>
+          LINE返信は平日2時間以内を目安に対応しています。
+        </p>
+        <div style="margin-top:20px">
+          <div class="linebox">
+            <div>
+              <strong style="font-family:sans-serif;color:var(--main);font-size:1rem">見学・体験のお申込み</strong>
+              <div style="font-size:.92rem">フォーム / 電話 / LINE</div>
+            </div>
+            <a href="#" class="btn" style="box-shadow:var(--shadow-sm) !important;">今すぐ申し込む</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <img class="voice-side-image" src="http://127.0.0.1:5000/uploads/ChatGPT Image 2026年7月11日 04_34_48.png" alt="" onerror="this.style.display='none'" data-cebt="" data-cetx="-199" data-cety="-145" style="translate: -199px -145px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">
+</section>
+
+    <section class="follow" style="padding-top: 100px !important; padding-bottom: 100px !important; margin-top: 0px !important; margin-bottom: 0px !important;"><div class="__ce_divline" data-cediv="1" style="display: flex; align-items: center; gap: 14px; margin: 0px 0px 20px;"><span style="display: inline-block; width: 70px; height: 4px; background: rgb(201, 201, 201); flex: 0 0 auto;"></span></div>
+      <div class="container" data-cebt="" data-cetx="-6" data-cety="-85" style="translate: -6px -85px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; max-width: 1440px !important; margin-left: auto !important; margin-right: auto !important;">
+        <div class="eyebrow" style="padding-left: 0px; width: 154px !important; max-width: none !important; min-height: 52px !important; translate: 0px -27px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="0" data-cety="-27">Follow us</div>
+        <p style="margin: 0px auto; line-height: 1.8 !important;">日々の作業風景や空席情報を更新しています</p>
+        <div class="sns">
+          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="LINE">L</a>
+          <a href="#" aria-label="X">X</a>
+        </div>
+        <div class="footer-title title-fade reveal fxa_pre fxa_cl" style="--fxa-dur: 1604ms; translate: 32px 81px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; font-size: 63px !important; height: 163px !important; width: 1427px !important; max-width: none !important;" data-cebt="" data-cetx="32" data-cety="81">さあ、一歩前にでよう！楽しい未来が！</div>
+      </div>
+    </section>
+  </main><footer class="">
+    <div class="container">
+      <div class="logo" style="color:var(--main)">
+        はたらく旅舎 みなと
+        <small style="color:var(--text)">就労継続支援A型事業所</small>
+      </div>
+
+      <div class="footer-grid">
+        <div>
+          <h4>事業所情報</h4>
+          <p>
+            〒980-0804 宮城県仙台市青葉区大町1-4-12 みなとビル 3F<br>
+            TEL 022-000-1840 / FAX 022-000-1841<br>
+            平日 9:00–17:30 / 見学受付 10:00–16:30
+          </p>
+        </div>
+        <div class="footer-nav">
+          <h4>Contents</h4>
+          <a href="#about">私たちについて</a>
+          <a href="#service">できる仕事</a>
+          <a href="#flow">1日の流れ</a>
+          <a href="#plan">利用案内</a>
+          <a href="#faq">よくある質問</a>
+        </div>
+        <div>
+          <h4>お問い合わせ</h4>
+          <p>
+            見学予約は電話・フォーム・LINEで受付中です。<br>
+            ご家族、医療機関、相談支援事業所からのご連絡も承ります。
+          </p>
+          <div style="margin-top:16px">
+            <a href="#contact" class="btn" style="box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px !important;"><span class="dot"></span>見学を申し込む</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+
+  
+
+  
+
+  
+
+  <script>
+    window.addEventListener('load', () => {
+      document.querySelector('.hero-grid')?.classList.add('hero-loaded');
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('inview');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.22, rootMargin: '0px 0px -12% 0px' });
+
+    document.querySelectorAll('.reveal, .phone-left, .phone-right, .faq-item, .voice-card, .title-fade')
+      .forEach(el => observer.observe(el));
+
+    document.querySelectorAll('.faq-q').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.classList.toggle('open');
+      });
+    });
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script id="cefly-run">(function(){if(window.ceflyOn)return;window.ceflyOn=true;var d=document;[].slice.call(d.querySelectorAll("[data-cefly]")).forEach(function(el){if(!el.getAttribute("data-fxa-fly"))el.setAttribute("data-fxa-fly",el.getAttribute("data-cefly"));el.removeAttribute("data-cefly");});function dense(p,m){var out=[],i,j;if(m==="s"||p.length<3){for(i=0;i<p.length;i++)out.push([p[i][0],p[i][1]]);}else{var P=[p[0]].concat(p,[p[p.length-1]]);for(i=1;i<P.length-2;i++){for(j=0;j<32;j++){var t=j/32,t2=t*t,t3=t2*t;out.push([0.5*((2*P[i][0])+((P[i+1][0]-P[i-1][0])*t)+((2*P[i-1][0]-5*P[i][0]+4*P[i+1][0]-P[i+2][0])*t2)+((3*P[i][0]-P[i-1][0]-3*P[i+1][0]+P[i+2][0])*t3)),0.5*((2*P[i][1])+((P[i+1][1]-P[i-1][1])*t)+((2*P[i-1][1]-5*P[i][1]+4*P[i+1][1]-P[i+2][1])*t2)+((3*P[i][1]-P[i-1][1]-3*P[i+1][1]+P[i+2][1])*t3))]);}}out.push([p[p.length-1][0],p[p.length-1][1]]);}var L=[0];for(i=1;i<out.length;i++){var dx=out[i][0]-out[i-1][0],dy=out[i][1]-out[i-1][1];L.push(L[i-1]+Math.sqrt(dx*dx+dy*dy));}return {p:out,L:L,total:L[L.length-1]||1};}function at(pa,dist){var L=pa.L,p=pa.p,i=1;while(i<L.length-1&&L[i]<dist)i++;var seg=L[i]-L[i-1]||1,f=(dist-L[i-1])/seg;return {x:p[i-1][0]+(p[i][0]-p[i-1][0])*f,y:p[i-1][1]+(p[i][1]-p[i-1][1])*f,dx:p[i][0]-p[i-1][0],dy:p[i][1]-p[i-1][1]};}function fly(el){var cfg;try{cfg=JSON.parse(el.getAttribute("data-fxa-fly"));}catch(e){return;}if(!cfg||!cfg.p||cfg.p.length<2)return;var bx=+el.getAttribute("data-cetx")||0,by=+el.getAttribute("data-cety")||0,bro=+el.getAttribute("data-cero")||0;var bsx=+el.getAttribute("data-cesx")||1,bsy=+el.getAttribute("data-cesy")||1;var pa=dense(cfg.p,cfg.m),dur=cfg.d||4000,t0=null,gen=(el.ceflyGen=(el.ceflyGen||0)+1),cur=0,prevFl=false,lastTs=null;function step(ts){if(el.ceflyGen!==gen)return;if(el.getAttribute("data-fxa-fly")==null)return;if(t0===null)t0=ts;var dt=(lastTs==null)?16:Math.min(64,ts-lastTs);lastTs=ts;var p=(ts-t0)/dur,back=false;if(cfg.l){p=p%2;if(p>1){p=2-p;back=true;}}else if(p>1)p=1;var e=0.5-0.5*Math.cos(Math.PI*p);var d1=e*pa.total,pt=at(pa,d1);el.style.setProperty("translate",(bx+pt.x).toFixed(1)+"px "+(by+pt.y).toFixed(1)+"px","important");if(cfg.r){var aF=at(pa,Math.min(pa.total,d1+8)),aB=at(pa,Math.max(0,d1-8));var vx=back?(aB.x-aF.x):(aF.x-aB.x),vy=back?(aB.y-aF.y):(aF.y-aB.y),th=Math.atan2(vy,vx)*180/Math.PI;var st=(cfg.t==null?100:cfg.t)/100,tgt,fl=false;if(cfg.f){fl=Math.abs(th)>90;tgt=fl?(180-th):th;if(tgt>180)tgt-=360;}else{tgt=Math.atan2(vy,Math.abs(vx))*180/Math.PI;}tgt*=st;if(tgt>75)tgt=75;if(tgt<-75)tgt=-75;if(!cfg.l&&p>0.85)tgt*=(1-p)/0.15;if(fl!==prevFl){cur=tgt;}else{cur+=(tgt-cur)*(1-Math.exp(-dt/160));}prevFl=fl;if(cfg.f)el.style.setProperty("scale",(fl?-bsx:bsx)+" "+bsy,"important");el.style.setProperty("rotate",(bro+(bsx<0?-cur:cur)).toFixed(1)+"deg","important");}if(cfg.l||p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}function start(el){var cd=el.getAttribute("data-cedelay");if(cd!=null&&+cd>0)setTimeout(function(){fly(el);},+cd);else fly(el);}var io=("IntersectionObserver" in window)?new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){io.unobserve(en.target);start(en.target);}});},{threshold:0}):null;window.ceflyArm=function(el){if(el.ceflyObs){start(el);return;}el.ceflyObs=1;if(io)io.observe(el);else start(el);};function init(){[].slice.call(d.querySelectorAll("[data-fxa-fly]")).forEach(window.ceflyArm);}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",init);else init();})();</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div><!--__CE_SAFE_START__-->
+<script>
+(function(){
+  var html=document.documentElement;
+  html.classList.add('js');
+  var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
+  var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function show(el){ for(var i=0;i<SHOW.length;i++) el.classList.add(SHOW[i]); }
+  function run(){
+    var els=document.querySelectorAll(SEL);
+    if(els.length && ('IntersectionObserver' in window)){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target);} });
+      }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      els.forEach(function(el){ io.observe(el); });
+    } else if(els.length){ els.forEach(show); }
+    // 押した時だけ出す隠しメニュー/オーバーレイ（fixed/absoluteで隠されている）は
+    // 「本来ずっと隠れているもの」なので強制表示しない（＝メガメニューが開きっぱなしになる事故防止。
+    // 配信時の保険(_SERVE_SAFETY)と同じルール。保存してダブルクリックで開いた時にも効く）。
+    function inOverlay(e){
+      var n=e;
+      while(n && n!==document.body){
+        var s=getComputedStyle(n);
+        if((s.position==='fixed'||s.position==='absolute') && (parseFloat(s.opacity)===0 || s.visibility==='hidden')) return true;
+        n=n.parentElement;
+      }
+      return false;
+    }
+    // ★最終保険：2.5秒後、クラス名に関係なく「透明・非表示のままの要素」を
+    // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
+    // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
+    setTimeout(function(){
+      var all=document.querySelectorAll('body *');
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        if(e.closest&&(e.closest('.fxa_pre')||e.closest('.fxa_wrap'))) continue;  // ★fxaの手付けアニメ(文字span含む)は監視が担当＝強制表示しない（タイプライター等が固定表示になるのを防ぐ）
+        var cs=getComputedStyle(e);
+        var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
+        if(hid && inOverlay(e)) continue;
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+      }
+    }, 2500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+<!--__CE_SAFE_END__-->
+
+
+
+
+
+<div></div>
+
+
+
+
+
+<div></div>
+
+
+
+
+<script id="fxa-run">(function(){var d=document,h=d.documentElement;if(!d.querySelector(".fxa_pre,.fxa_hl,.fxa_cnt")){return;}h.classList.add("fxa-on");[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});function sweepHl(el){var dur=parseFloat(el.style.getPropertyValue("--hldur"))||0.45;var gen=(el.__hlGen=(el.__hlGen||0)+1);var acc=0,lastTs=null;function step(ts){if(el.__hlGen!==gen)return;if(lastTs!==null)acc+=Math.min(64,ts-lastTs);lastTs=ts;var p=Math.min(1,acc/(dur*1000));var e=1+2.70158*Math.pow(p-1,3)+1.70158*Math.pow(p-1,2);el.style.setProperty("--hlw",e*100);if(p<1)requestAnimationFrame(step);else el.classList.add("fxa_in");}requestAnimationFrame(step);}window.__fxaSweepHl=sweepHl;function countUp(el){var m=(el.textContent||"").match(/[-+]?[d,]+(?:.d+)?/);if(!m){el.classList.add("fxa_in");return;}var keep=el.innerHTML,raw=m[0],tgt=parseFloat(raw.replace(/,/g,"")),dec=(raw.split(".")[1]||"").length,com=raw.indexOf(",")>=0;var pre=(el.textContent||"").slice(0,m.index),suf=(el.textContent||"").slice(m.index+raw.length);var dur=parseFloat(el.style.getPropertyValue("--fxa-dur"))||1200,acc=0,last=null;function fmt(v){var s=v.toFixed(dec);if(com){var pp=s.split(".");pp[0]=pp[0].replace(/B(?=(d{3})+(?!d))/g,",");s=pp.join(".");}return s;}function st(ts){if(last!==null)acc+=Math.min(64,ts-last);last=ts;var p=Math.min(1,acc/dur),e=1-Math.pow(1-p,3);el.textContent=pre+fmt(tgt*e)+suf;if(p<1)requestAnimationFrame(st);else{el.innerHTML=keep;el.classList.add("fxa_in");}}requestAnimationFrame(st);}function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in),.fxa_cnt:not(.fxa_in)"));}function groupDelay(el){var g=+el.getAttribute("data-cegrp")||0;if(!g)return 0;var mem=[].slice.call(d.querySelectorAll('[data-cegrp="'+g+'"]'));var idx=mem.indexOf(el);return (g-1)*300+Math.max(0,idx)*150;}function reveal(el){ function go(){ if(el.classList.contains("fxa_cnt")){countUp(el);} else if(el.classList.contains("fxa_hl")){if(d.readyState==="complete") sweepHl(el); else{var done=false,start=function(){if(done)return;done=true;sweepHl(el);};window.addEventListener("load",function(){setTimeout(start,250);},{once:true});setTimeout(start,700);}} else el.classList.add("fxa_in"); }var cd=el.getAttribute("data-cedelay"); var gd=cd!=null?+cd:groupDelay(el); if(gd>0) setTimeout(go,gd); else go(); }if(!("IntersectionObserver" in window)){all().forEach(reveal);return;}var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){reveal(t);});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",obs);else obs();})();</script>
+<div></div></body></html>
