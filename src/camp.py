@@ -1198,7 +1198,9 @@ def list_uploads() -> list[dict]:
     out = []
     if not config.UPLOAD_DIR.exists():
         return out
-    for p in sorted(config.UPLOAD_DIR.iterdir()):
+    # 新しい順（2026-07-19）：カンプ作成中は「さっき生成した画像」を使うことが多いので、
+    # 最近アップした画像がピッカーの先頭に来るよう更新日時の降順で返す。
+    for p in sorted(config.UPLOAD_DIR.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
         if p.name.startswith("_") or not p.is_file() or p.suffix.lower() not in _IMG_EXTS:
             continue
         out.append({"file": p.name, "url": _UPLOAD_BASE + p.name, "caption": meta.get(p.name, "")})

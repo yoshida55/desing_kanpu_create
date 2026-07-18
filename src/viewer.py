@@ -2412,6 +2412,26 @@ html.__ce_altmode{cursor:text}
     if(idx===0){ try{ img.scrollIntoView({block:'center'}); }catch(_){} }
     if(typeof setDragOn==='function'){ if(typeof curEl!=='undefined' && curEl) curEl.classList.remove('__ce_sel'); img.classList.add('__ce_sel'); setDragOn(img); }
   }
+  // 🔍 画像ピッカー共通の検索ボックス（2026-07-19）：キャプション＋ファイル名で絞り込み（AIなし）。
+  //   AIが裏で付けている1行キャプション（「花畑のイラスト」等）が検索対象になるので、
+  //   「花」「人物」のように内容の言葉で探せる。画像が少ない時（8枚以下）は出さない。
+  function attachPickerSearch(ov){
+    var bx=ov.querySelector('.bx'), gr=ov.querySelector('.gr');
+    if(!bx||!gr||gr.querySelectorAll('.it').length<9) return;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.placeholder='🔍 検索（例：花 / 人物 / ロゴ）';
+    inp.style.cssText='display:block;width:100%;box-sizing:border-box;margin:0 0 10px;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:13px';
+    bx.insertBefore(inp, gr);
+    inp.addEventListener('input',function(){
+      var q=inp.value.trim().toLowerCase();
+      [].slice.call(gr.querySelectorAll('.it')).forEach(function(it){
+        var t=(it.textContent||'').toLowerCase();
+        it.style.display=(!q||t.indexOf(q)>=0)?'':'none';
+      });
+    });
+    inp.addEventListener('click',function(e){ e.stopPropagation(); });
+    setTimeout(function(){ try{ inp.focus(); }catch(_){} },0);
+  }
   function openAddImagePicker(px, py){
     fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
       var ups=d.uploads||[];
@@ -2423,6 +2443,7 @@ html.__ce_altmode{cursor:text}
         +'<label class="go2" style="display:block;text-align:center;background:#1a7f37;cursor:pointer;margin-bottom:10px">＋ 新しい画像をアップロード<input type="file" id="__ce_addimgfile" accept="image/*" multiple style="display:none"></label>'
         +'<div class="gr">'+items+'</div></div>';
       document.body.appendChild(ov);
+      attachPickerSearch(ov);
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
         var it=e.target.closest('.it'); if(it){ ov.remove(); insertImageEl(it.dataset.src, 0, px, py); msg.textContent='画像を追加しました。ドラッグで置く（💾保存で確定）'; }
@@ -2554,14 +2575,50 @@ html.__ce_altmode{cursor:text}
   });
   var normBtn=document.getElementById('__ce_normalize');
   if(normBtn) normBtn.addEventListener('click',function(){
-    if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・セクションの上下余白 100px\\n・セクションの左右余白 → 多数派の値にそろえる（左右別々に判定・明らかに違うものはそのまま＝意図的な余白として残す）\\n・中身の箱（.container等）の幅も多数派にそろえる（右端のズレを解消）\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
+    if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・誤ドラッグで中身の箱に残ったズレ(translate)を掃除\\n・セクションの上下余白 100px\\n・セクションの左右余白 → 多数派の値にそろえる（左右別々に判定・明らかに違うものはそのまま＝意図的な余白として残す）\\n・中身の箱（.container等）の幅も多数派にそろえる（右端のズレを解消）\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
     function _skip(el){ return el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')); }
     // カード等の小見出し・小さい文字は対象外（そこまで大きく/広くすると崩れるため）
     function _inCard(el){ var n=el; while(n && n!==document.body){ var c=(n.className&&n.className.toString())||''; if(/card|item|bubble|benefit|badge|chip|tag|nav|menu|footer|col/i.test(c)) return true; n=n.parentElement; } return false; }
     var secN=0, hN=0, pN=0;
     var secEls=[], lVals=[], rVals=[];
-    [].forEach.call(document.querySelectorAll('section'),function(s){
+    // 0) ズレ掃除：セクション本体と「中身の大きな箱」に焼き込まれた誤ドラッグの移動(translate)を先に除去。
+    //   これが残っていると (1)見た目がズレたまま (2)「中央寄せでない」と誤判定→幅そろえの対象外、の二重で直らない。
+    //   小物（ボタン・画像など）の意図した移動は触らない＝大きな箱だけ。
+    var mvN=0;
+    function _clearShift(el){
+      if(!el||!el.style) return;
+      // 触るのは「ドラッグ機能の署名があるズレ」だけ。left/topやCSS由来の位置はデザインの一部なので絶対に触らない
+      // （left/topまで消すと、絶対配置の箱が飛んで逆に大ズレする事故が起きた）。
+      var pos=''; try{ pos=getComputedStyle(el).position; }catch(_){}
+      if(pos==='absolute'||pos==='fixed') return;
+      var had=false;
+      if(el.getAttribute('data-cetx')!=null||el.getAttribute('data-cety')!=null){
+        had=true;
+        el.style.removeProperty('translate');
+        el.removeAttribute('data-cetx'); el.removeAttribute('data-cety');
+      }
+      if(had) mvN++;
+    }
+    // <section>が無いページ（忠実クローン等）は「main/body直下の大きな塊」をセクション扱いで同じ処理をかける
+    var secsAll=[].slice.call(document.querySelectorAll('section'));
+    if(!secsAll.length){
+      var _host=document.querySelector('main')||document.body;
+      secsAll=[].slice.call(_host.children).filter(function(c){
+        if(c.nodeType!==1||_skip(c)) return false;
+        if(/^(SCRIPT|STYLE|HEADER|FOOTER)$/.test(c.tagName)) return false;
+        var r; try{ r=c.getBoundingClientRect(); }catch(_){ return false; }
+        return r.height>200;
+      });
+    }
+    [].forEach.call(secsAll,function(s){
       if(_skip(s)) return;
+      _clearShift(s);
+      var _sr2=null; try{ _sr2=s.getBoundingClientRect(); }catch(_){}
+      [].forEach.call(s.children,function(c){
+        if(c.nodeType!==1) return;
+        var r; try{ r=c.getBoundingClientRect(); }catch(_){ return; }
+        if(_sr2 && (r.width>=_sr2.width*0.5 || r.height>150)) _clearShift(c);
+      });
       s.style.setProperty('padding-top','100px','important');
       s.style.setProperty('padding-bottom','100px','important');
       s.style.setProperty('margin-top','0','important');
@@ -2648,7 +2705,7 @@ html.__ce_altmode{cursor:text}
       if(bs && bs!=='none'){ el.style.setProperty('box-shadow',STD_SHADOW,'important'); shN++; }
     });
     markDirty();
-    msg.textContent='規則化：上下余白 '+secN+'／左右余白 '+lrN+'件そろえ・'+lrSkip+'件は別扱い／中身の箱幅 '+wN+'件そろえ'+(wSkip?('・'+wSkip+'件は別扱い'):'')+'／見出し '+hN+'／本文行間 '+pN+'／影 '+shN+' 箇所をそろえました（💾保存で確定・⟲で戻せる）';
+    msg.textContent='規則化：ズレ掃除 '+mvN+'件／上下余白 '+secN+'／左右余白 '+lrN+'件そろえ・'+lrSkip+'件は別扱い／中身の箱幅 '+wN+'件そろえ'+(wSkip?('・'+wSkip+'件は別扱い'):'')+'／見出し '+hN+'／本文行間 '+pN+'／影 '+shN+' 箇所をそろえました（💾保存で確定・⟲で戻せる）';
   });
   // 📍 動かした跡の一覧：ドラッグ移動（data-cetx/cety）を一覧パネルで見せて、選んで元に戻す。
   // 全部自動で戻すと「わざと動かした位置」まで消えて困る（ユーザー要望）ため、
@@ -3053,6 +3110,16 @@ html.__ce_altmode{cursor:text}
   //   その部品の中だけに効かせる＝レスポンシブも:hoverもそのまま生きる。
   function partCss(el){
     var els=[el].concat([].slice.call(el.querySelectorAll('*')));
+    // ★rem対策（2026-07-18）：元サイトが「html{font-size:1px}」等のrem=px手法だと、
+    //   持ち込み先カンプ（1rem=16px）でrem値が16倍に膨張する（実例：たんぽぽ園フッターの
+    //   padding:325rem→5200pxでページが縦にドーンと伸びた）。
+    //   保存時に「このページの実際のroot font-size」でrem→pxに焼き直して自己完結させる。
+    //   普通のサイト（root=16px）は無変換＝今まで通り。
+    var rootPx=parseFloat(getComputedStyle(document.documentElement).fontSize)||16;
+    function remFix(t){
+      if(Math.abs(rootPx-16)<0.01) return t;
+      return t.replace(/(-?\\d*\\.?\\d+)rem\\b/g,function(_,n){ return (Math.round(parseFloat(n)*rootPx*1000)/1000)+'px'; });
+    }
     function hitAny(selText){
       return selText.split(',').some(function(s){
         // :hover/::before等は保存の瞬間は誰にも当たっていないので、疑似部分を外した本体で判定する
@@ -3128,7 +3195,7 @@ html.__ce_altmode{cursor:text}
     // 元がsticky/fixed等の部品はそのまま尊重する（staticのときだけ）。
     if(getComputedStyle(el).position==='static') out.push(':scope{position:relative;z-index:1}');
     // @scope（中括弧だけ・条件なし）＝「このstyleタグの親要素の中だけに効く」。部品に抱かせる用にぴったり
-    return kf.join('\\n')+'\\n@scope{\\n'+out.join('\\n')+'\\n}';
+    return remFix(kf.join('\\n')+'\\n@scope{\\n'+out.join('\\n')+'\\n}');
   }
   // ①で選んだセクションを画面で薄く光らせる＋そこへスクロール（どこが対象か一目で分かる）
   function highlightSelSec(){
@@ -3465,10 +3532,13 @@ html.__ce_altmode{cursor:text}
   // 〰 セクションの境目の形（clip-pathで端をけずる・AIなし）。%指定のpolygonなので画面幅が変わっても崩れない。
   // 上端・下端は別々に持てる（data-cecliptop/data-ceclipbot）＝両方かけると1つのpolygonに合成。
   function edgeShapeApply(sec, edge, kind){
-    if(edge==='off'){ sec.removeAttribute('data-cecliptop'); sec.removeAttribute('data-ceclipbot'); sec.style.removeProperty('clip-path'); markDirty(); return; }
-    sec.setAttribute(edge==='top'?'data-cecliptop':'data-ceclipbot', kind);
+    if(edge==='off'){ sec.removeAttribute('data-cecliptop'); sec.removeAttribute('data-ceclipbot'); sec.removeAttribute('data-ceclipamp'); sec.style.removeProperty('clip-path'); markDirty(); return; }
+    // 深さ（2026-07-19）：%は対象の高さ基準なので、背の低い帯だと同じ6%でも浅く見える
+    // → data-ceclipampで深さを選べるように（形はそのまま作り直す）
+    if(edge==='amp'){ sec.setAttribute('data-ceclipamp', kind); }
+    else sec.setAttribute(edge==='top'?'data-cecliptop':'data-ceclipbot', kind);
     var tk=sec.getAttribute('data-cecliptop')||'', bk=sec.getAttribute('data-ceclipbot')||'';
-    var amp=6, steps=40, pts=[];
+    var amp=+(sec.getAttribute('data-ceclipamp'))||6, steps=40, pts=[];
     function yOf(k,x){
       if(k==='slantL') return amp*(1-x/100);
       if(k==='slantR') return amp*x/100;
@@ -3493,6 +3563,8 @@ html.__ce_altmode{cursor:text}
       +row('top','slantL','＼ 斜め（左が深い）')+row('top','slantR','／ 斜め（右が深い）')+row('top','curve','⌒ カーブ（へこむ）')+row('top','arch','◠ アーチ（ふくらむ）')+row('top','wave','〰 波')+row('top','wave2','〰 逆波')+row('top','zig','⩙ ギザギザ')
       +'<div style="font-size:11px;color:#888;padding:2px 8px">下端（下のセクションとの境目）</div>'
       +row('bot','slantL','＼ 斜め（左が深い）')+row('bot','slantR','／ 斜め（右が深い）')+row('bot','curve','⌒ カーブ（へこむ）')+row('bot','arch','◠ アーチ（ふくらむ）')+row('bot','wave','〰 波')+row('bot','wave2','〰 逆波')+row('bot','zig','⩙ ギザギザ')
+      +'<div style="font-size:11px;color:#888;padding:2px 8px">⛰ 深さ（けずる量・形を選んだあとに押す）</div>'
+      +row('amp','4','浅め')+row('amp','6','普通（既定）')+row('amp','10','深め')+row('amp','16','もっと深め')
       +row('off','off','⟲ まっすぐに戻す')
       +'</div></div>';
     document.body.appendChild(ov);
@@ -3974,6 +4046,7 @@ html.__ce_altmode{cursor:text}
       var ov=document.createElement('div'); ov.id='__ce_pk';
       ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>差し替える画像を選ぶ</h4><div class="gr">'+items+'</div></div>';
       document.body.appendChild(ov);
+      attachPickerSearch(ov);
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
         var it=e.target.closest('.it'); if(!it) return;
@@ -4021,6 +4094,7 @@ html.__ce_altmode{cursor:text}
       var ov=document.createElement('div'); ov.id='__ce_pk';
       ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>背後に敷く画像を選ぶ（水彩など）</h4><div class="gr">'+items+'</div></div>';
       document.body.appendChild(ov);
+      attachPickerSearch(ov);
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
         var it=e.target.closest('.it'); if(!it) return;
@@ -6617,7 +6691,10 @@ html.__ce_altmode{cursor:text}
     // ★セクション/ヘッダー/フッター丸ごとは「普通のドラッグ」では動かさない（2026-07-11ガード）。
     //   余白部分を掴んでスクロール/選択したつもりが、セクション全体に translate が付いて保存で焼き込まれ
     //   「全ブロックが約200pxずれたカンプ」が実際にできてしまった。動かしたい時は右クリック→🖱 掴んで動かす。
-    if(!_hitSel && /^(SECTION|HEADER|FOOTER)$/.test(el.tagName)) return;
+    if(!_hitSel && /^(SECTION|HEADER|FOOTER|MAIN|BODY|HTML)$/.test(el.tagName)) return;
+    // ★ページ丸ごと級の入れ物（クローンの全体ラッパーdiv等）も普通ドラッグ禁止。
+    //   これが動くと「body全体が一気に左に寄る」事故になる（実際に発生）。動かしたい時は右クリック→🖱。
+    if(!_hitSel){ var _gr=el.getBoundingClientRect(); if(_gr.width>=window.innerWidth*0.95 && _gr.height>=window.innerHeight*1.2) return; }
     _altEl=el; _altActive=true; _aSX=e.clientX; _aSY=e.clientY;
     _aOX=+el.getAttribute('data-cetx')||0; _aOY=+el.getAttribute('data-cety')||0;
     __gd=_gdCollect(el);  // 📏 整列ガイドの吸着候補を集める（普通ドラッグ＝この経路が本命）
@@ -6777,6 +6854,20 @@ html.__ce_altmode{cursor:text}
       var SHOW=['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'];
       var SEL='[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
       [].slice.call(doc.querySelectorAll(SEL)).forEach(function(n){ if(n.classList) SHOW.forEach(function(k){ n.classList.remove(k); }); });
+    })();
+    // 🧩 ローダー/プリローダーの幕（2026-07-19）：保険スクリプトの「強制表示」が焼き込まれると、
+    //   本来すぐ消える読み込み幕がページ全体を覆ったまま保存される（実際に起きた：緑パズルの
+    //   ローダーだけが見える白紙カンプ）。「hidden系クラスで隠す設計」のローダーから強制表示の
+    //   inline styleを外し、CSS本来の「隠れた状態」に戻す。
+    (function(){
+      var HIDDENC=['is-hidden','hidden','is-loaded','loaded','done','is-done','hide'];
+      [].slice.call(doc.querySelectorAll('[class*="loader"],[class*="loading"],[class*="preload"],[class*="splash"]')).forEach(function(n){
+        if(!n.classList) return;
+        var hid=HIDDENC.some(function(k){ return n.classList.contains(k); });
+        if(!hid) return;
+        ['opacity','visibility','display','transform'].forEach(function(p){ n.style.removeProperty(p); });
+        [].slice.call(n.querySelectorAll('*')).forEach(function(c){ if(c.style){ ['opacity','visibility','display'].forEach(function(p){ c.style.removeProperty(p); }); } });
+      });
     })();
     // 🖍マーカーは--hlw(0〜100)で伸び具合を持っているので、fxa_inを外すだけでは戻らない。
     // ★これを忘れると「再生し終わった状態(--hlw:100)」がそのまま保存され、次に開いた時に
@@ -7238,9 +7329,31 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_edge'){
         var ege=curEl.closest('section,header,footer');
         if(!ege){
+          // ★背景を塗っている「見えているブロック」を最優先（2026-07-19）：透明な入れ物や外の大枠に
+          //   かけると、見た目の境目とズレて「設定しても変わらない」が起きる（ヒーローの緑の帯＝
+          //   実は透明な絵の後ろの.messageが塗っていた実例）。クリック地点に重なる要素の中から
+          //   「背景色/背景画像あり・横幅ほぼいっぱい・高さ260px以上」のものを探して使う。
+          try{
+            var _egc=document.elementsFromPoint(qx,qy)||[];
+            for(var _egi=0;_egi<_egc.length;_egi++){
+              var _egn=_egc[_egi];
+              if(_egn.closest && _egn.closest('[id^="__ce"]')) continue;
+              if(_egn===document.body||_egn===document.documentElement) break;
+              var _egs=getComputedStyle(_egn), _egr2=_egn.getBoundingClientRect();
+              var _bgok=_egn.tagName==='IMG'||(_egs.backgroundColor!=='rgba(0, 0, 0, 0)'&&_egs.backgroundColor!=='transparent')||(_egs.backgroundImage&&_egs.backgroundImage!=='none');
+              if(_bgok && _egr2.height>=260 && _egr2.width>=window.innerWidth*0.7){ ege=_egn; break; }
+            }
+          }catch(_){}
+        }
+        if(!ege){
           // <section>が無いページ（クローン等）＝右クリック位置から「1画面ぶんの塊」を対象にする（⭐と同じ流儀）
           ege=curEl;
           while(ege.parentElement && ege.parentElement!==document.body && ege.parentElement.tagName!=='MAIN'){
+            // ★「見えている境目」でけずる（2026-07-19）：横幅ほぼいっぱい＆十分な高さの要素なら
+            //   そこで止める。外の大枠まで登ると、絵より下の透明な余白をけずることになり
+            //   「設定しても見た目が変わらない」が起きる（ヒーローの緑の帯で実際に発生）。
+            var _egr=ege.getBoundingClientRect();
+            if(_egr.height>=260 && _egr.width>=window.innerWidth*0.7) break;
             var _egh=ege.parentElement.getBoundingClientRect().height;
             if(_egh>window.innerHeight*3) break;
             ege=ege.parentElement;
