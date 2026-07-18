@@ -3462,6 +3462,79 @@ html.__ce_altmode{cursor:text}
       msg.textContent='🗑 削除しました。「💾 変更を保存」で確定（保存前なら開き直しで復活します）';
     });
   }
+  // 〰 セクションの境目の形（clip-pathで端をけずる・AIなし）。%指定のpolygonなので画面幅が変わっても崩れない。
+  // 上端・下端は別々に持てる（data-cecliptop/data-ceclipbot）＝両方かけると1つのpolygonに合成。
+  function edgeShapeApply(sec, edge, kind){
+    if(edge==='off'){ sec.removeAttribute('data-cecliptop'); sec.removeAttribute('data-ceclipbot'); sec.style.removeProperty('clip-path'); markDirty(); return; }
+    sec.setAttribute(edge==='top'?'data-cecliptop':'data-ceclipbot', kind);
+    var tk=sec.getAttribute('data-cecliptop')||'', bk=sec.getAttribute('data-ceclipbot')||'';
+    var amp=6, steps=40, pts=[];
+    function yOf(k,x){
+      if(k==='slantL') return amp*(1-x/100);
+      if(k==='slantR') return amp*x/100;
+      if(k==='curve') return amp*Math.sin(Math.PI*x/100);            // ⌒ へこむ（真ん中を深くけずる）
+      if(k==='arch') return amp*(1-Math.sin(Math.PI*x/100));         // ◠ ふくらむ（端をけずって真ん中を残す＝カーブの逆）
+      if(k==='wave') return amp/2*(1+Math.sin(2*Math.PI*x/100));
+      if(k==='wave2') return amp/2*(1-Math.sin(2*Math.PI*x/100));    // 〰 逆波（波の山谷が反対）
+      if(k==='zig'){ var tt=(x%25)/25; return amp*(tt<0.5?tt*2:2-tt*2); }  // ⩙ ギザギザ（三角波）
+      return 0;
+    }
+    for(var i=0;i<=steps;i++){ var x=i/steps*100; pts.push(x.toFixed(1)+'% '+yOf(tk,x).toFixed(1)+'%'); }
+    for(var j=steps;j>=0;j--){ var x2=j/steps*100; pts.push(x2.toFixed(1)+'% '+(100-yOf(bk,x2)).toFixed(1)+'%'); }
+    sec.style.setProperty('clip-path','polygon('+pts.join(',')+')','important');
+    markDirty();
+  }
+  function edgeOpen(sec){
+    if(!sec){ msg.textContent='セクションの中で右クリックしてください'; return; }
+    var ov=document.createElement('div'); ov.id='__ce_pkpos';
+    function row(a,b,l){ return '<div class="sit-pos" data-eg="'+a+'" data-kd="'+b+'">'+l+'</div>'; }
+    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkposx">×</span><h4>〰 境目の形（このセクションの端をけずって直線の境目をなくす・押すたび即反映）</h4><div class="poslist">'
+      +'<div style="font-size:11px;color:#888;padding:2px 8px">上端（上のセクションとの境目）</div>'
+      +row('top','slantL','＼ 斜め（左が深い）')+row('top','slantR','／ 斜め（右が深い）')+row('top','curve','⌒ カーブ（へこむ）')+row('top','arch','◠ アーチ（ふくらむ）')+row('top','wave','〰 波')+row('top','wave2','〰 逆波')+row('top','zig','⩙ ギザギザ')
+      +'<div style="font-size:11px;color:#888;padding:2px 8px">下端（下のセクションとの境目）</div>'
+      +row('bot','slantL','＼ 斜め（左が深い）')+row('bot','slantR','／ 斜め（右が深い）')+row('bot','curve','⌒ カーブ（へこむ）')+row('bot','arch','◠ アーチ（ふくらむ）')+row('bot','wave','〰 波')+row('bot','wave2','〰 逆波')+row('bot','zig','⩙ ギザギザ')
+      +row('off','off','⟲ まっすぐに戻す')
+      +'</div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pkpos'||e.target.id==='__ce_pkposx'){ ov.remove(); return; }
+      var it=e.target.closest('.sit-pos'); if(!it) return;
+      edgeShapeApply(sec, it.getAttribute('data-eg'), it.getAttribute('data-kd'));
+      msg.textContent='〰 境目の形を変えました（上端と下端は併用OK・💾保存で確定）';
+    });
+  }
+  // 💬 がやがやの範囲調整：記号が出る枠（上端%・左右%）を動かす＝文字を避けたり外側に広げたり。
+  function gayaApplyBox(gd){
+    var gt=+(gd.getAttribute('data-gt')||16), gs=+(gd.getAttribute('data-gs')||4);
+    gd.style.setProperty('inset', gt+'% '+gs+'% 0 '+gs+'%');
+    markDirty();
+  }
+  function gayaPanel(gd){
+    gayaApplyBox(gd);  // 既定＝上から16%下げた範囲（見出しの上に出ないように）
+    var ov=document.createElement('div'); ov.id='__ce_pkpos';
+    function row(id,l){ return '<div class="sit-pos" data-ga="'+id+'">'+l+'</div>'; }
+    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkposx">×</span><h4>💬 がやがやの範囲（押すたび即反映・記号はこの枠の中に出る）</h4><div class="poslist">'
+      +row('up','⬆ 範囲を上へ')+row('down','⬇ 範囲を下へ（文字を避ける）')
+      +row('in','↕ 内側に寄せる')+row('out','↔ 外側に広げる')
+      +row('reset','⟲ 位置を初期に戻す')+row('off','🚫 がやがやを外す')
+      +'</div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pkpos'||e.target.id==='__ce_pkposx'){ ov.remove(); return; }
+      var it=e.target.closest('.sit-pos'); if(!it) return;
+      var k=it.getAttribute('data-ga');
+      var gt=+(gd.getAttribute('data-gt')||16), gs=+(gd.getAttribute('data-gs')||4);
+      if(k==='off'){ gd.remove(); ov.remove(); markDirty(); msg.textContent='💬 がやがやを外しました（💾保存で確定）'; return; }
+      if(k==='reset'){ gt=16; gs=4; }
+      if(k==='up') gt=Math.max(-20, gt-6);
+      if(k==='down') gt=Math.min(70, gt+6);
+      if(k==='in') gs=Math.min(30, gs+4);
+      if(k==='out') gs=Math.max(-15, gs-4);
+      gd.setAttribute('data-gt',gt); gd.setAttribute('data-gs',gs);
+      gayaApplyBox(gd);
+      msg.textContent='💬 範囲: 上から'+gt+'%・左右'+gs+'%（💾保存で確定）';
+    });
+  }
   // ➕ お気に入りからセクションを追加（既存を壊さず、選んだ場所に挿入・AIなし）
   var favAddBtn=document.getElementById('__ce_favadd');
   if(favAddBtn) favAddBtn.addEventListener('click',function(){
@@ -4590,9 +4663,13 @@ html.__ce_altmode{cursor:text}
       +'.ce_emph::after{right:.15em;transform:rotate(30deg);box-shadow:-0.5em 0.3em 0 var(--ce-emphc,#f0c14b);}'
       +'.ce_bubble{position:relative;display:inline-block;padding:.45em 1.1em;border:2px solid currentColor;border-radius:999px;}'
       +'.ce_bubble::before{content:"";position:absolute;left:1.4em;bottom:-0.64em;border:0.33em solid transparent;border-top-color:currentColor;}'
-      +'.ce_bubble::after{content:"";position:absolute;left:1.4em;bottom:-0.36em;border:0.33em solid transparent;border-top-color:var(--ce-bubblebg,#fff);}';
+      +'.ce_bubble::after{content:"";position:absolute;left:1.4em;bottom:-0.36em;border:0.33em solid transparent;border-top-color:var(--ce-bubblebg,#fff);}'
+      // 💬がやがや演出：要素に重ねた記号がポコポコ浮かんでは消えるループ（純CSS＝保存版でもJSなしで動く）
+      +'.ce_gaya{position:absolute;inset:0;pointer-events:none;z-index:3;}/*ce_gaya2*/'
+      +'.ce_gaya span{position:absolute;opacity:0;font-weight:700;background:rgba(255,255,255,.92);border-radius:999px;padding:.16em .34em;box-shadow:0 3px 10px rgba(0,0,0,.16);animation:ce_gaya_pop 3.6s ease-in-out infinite;}'
+      +'@keyframes ce_gaya_pop{0%{opacity:0;transform:translateY(10px) scale(.6)}12%{opacity:1;transform:translateY(0) scale(1.12)}20%{transform:scale(1)}55%{opacity:1}75%{opacity:0;transform:translateY(-18px) scale(1.06)}100%{opacity:0}}';
     var st=document.getElementById('ce_deco_css');
-    if(st){ if(st.textContent.indexOf('--ce-emphh')<0) st.textContent=css; return; }
+    if(st){ if(st.textContent.indexOf('ce_gaya2')<0) st.textContent=css; return; }
     st=document.createElement('style'); st.id='ce_deco_css'; st.textContent=css;
     document.head.appendChild(st);
   }
@@ -4617,11 +4694,22 @@ html.__ce_altmode{cursor:text}
         var y=-amp*Math.sin(Math.PI*t);                 // 真ん中ほど上へ
         var r=(t-0.5)*2*Math.min(14, amp*0.9);          // 端ほど傾く（上限14度）
         var ch=(chars[i]===' '||chars[i]==='\\u00a0')?'&nbsp;':esc(chars[i]);
-        html+='<span style="display:inline-block;transform:translateY('+y.toFixed(1)+'px) rotate('+r.toFixed(1)+'deg)">'+ch+'</span>';
+        // background等の打ち消し＝ページCSSに「h2 span{背景}」のような付箋風ルールがあっても巻き込まれない
+        html+='<span style="display:inline-block;background:transparent;box-shadow:none;padding:0;margin:0;transform:translateY('+y.toFixed(1)+'px) rotate('+r.toFixed(1)+'deg)">'+ch+'</span>';
       }
       return html;
     }).join('<br>');
     el.innerHTML=out;
+    // グラデ文字(background-clip:text)は1文字ずつspanに割ると切り抜きが壊れ、背景が箱で見える
+    // → 背景を外し、文字色は今見えている色で単色化する（透明のまま背景だけ外すと文字が消えるため）
+    try{
+      var _ac=getComputedStyle(el);
+      if(((_ac.webkitBackgroundClip||_ac.backgroundClip||'')+'').indexOf('text')>=0){
+        el.style.setProperty('background','none','important');
+        var _fc=_ac.webkitTextFillColor||'';
+        if(_fc.indexOf('transparent')>=0||_fc.indexOf('rgba(0, 0, 0, 0)')>=0) el.style.setProperty('-webkit-text-fill-color', _ac.color, 'important');
+      }
+    }catch(_){}
     el.setAttribute('data-cearc', amp);
     markDirty();
   }
@@ -4809,6 +4897,8 @@ html.__ce_altmode{cursor:text}
       // text-fill-color も同じ色で上書きし、子の文字span(fxa_ch)にも直接当てて確実に色を出す。
       el.style.setProperty('color', this.value, 'important');
       el.style.setProperty('-webkit-text-fill-color', this.value, 'important');
+      // グラデ文字(background-clip:text)の要素は、単色にした時点で敷き背景が「ベタ塗りの箱」として見えてしまう→背景ごと外す
+      try{ var _bc=getComputedStyle(el); if(((_bc.webkitBackgroundClip||_bc.backgroundClip||'')+'').indexOf('text')>=0) el.style.setProperty('background','none','important'); }catch(_){}
       var v=this.value;
       [].forEach.call(el.querySelectorAll('.fxa_ch,.imp-char'), function(sp){ sp.style.setProperty('color', v, 'important'); sp.style.setProperty('-webkit-text-fill-color', v, 'important'); });
       markDirty();
@@ -4921,6 +5011,8 @@ html.__ce_altmode{cursor:text}
     // 囲むだけでは負けるので、子孫の色も全部この色で上書きする。
     function _forceColor(root, color){
       root.style.setProperty('color',color,'important'); root.style.setProperty('-webkit-text-fill-color',color,'important');
+      // グラデ文字(background-clip:text)は単色化すると敷き背景が箱として見える→背景ごと外す
+      try{ var _pc=getComputedStyle(root); if(((_pc.webkitBackgroundClip||_pc.backgroundClip||'')+'').indexOf('text')>=0) root.style.setProperty('background','none','important'); }catch(_){}
       [].forEach.call(root.querySelectorAll('*'), function(sp){ sp.style.setProperty('color',color,'important'); sp.style.setProperty('-webkit-text-fill-color',color,'important'); });
     }
     function paint(color){
@@ -6853,10 +6945,16 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_secadd','➕ セクションを追加（お気に入りから）'],
     ['__ce_q_secswap','🔀 このセクションを入れ替え'],
     ['__ce_q_secdel','🗑 セクションを削除（一覧から選ぶ）'],
+    ['__ce_q_pickov','🎯 重なっている要素から選ぶ（下の層）'],
+    ['__ce_q_del','🗑 この要素を削除'],
     ['__ce_q_ovup','⬆ 上に食い込ませる（重ねる・60px）'],
     ['__ce_q_ovdn','⬇ 食い込みを戻す（60px）'],
+    ['__ce_q_gaya','💬 がやがや演出（にぎやか吹き出しループ）'],
+    ['__ce_q_edge','〰 セクションの境目の形（波・カーブ・斜め）'],
+    ['__ce_q_ovshow','📤 切れてる画像を全部見せる（はみ出し許可）'],
     ['__ce_q_zup','🔼 重なりを手前に'],
     ['__ce_q_zdn','🔽 重なりを後ろに'],
+    ['__ce_q_align','⁝ 兄弟の行をそろえる（ズレ掃除）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
     ['__ce_q_rst','⟲ 位置・サイズをリセット']
   ];
@@ -6866,8 +6964,8 @@ html.__ce_altmode{cursor:text}
     try{ var a=JSON.parse(localStorage.getItem('__ce_qmenu_layout')||'null'); if(Array.isArray(a)&&a.length) lay=a.slice(); }catch(_){}
     if(!lay) lay=QM_DEFS.map(function(d){ return d[0]; });
     var m=qmDefMap();
-    lay=lay.filter(function(k){ return k==='sep'||k.indexOf('sep:')===0||m[k]; });  // 廃止した機能IDは飛ばす（sep:ラベル付き区切りは残す）
-    QM_DEFS.forEach(function(d){ if(lay.indexOf(d[0])<0) lay.push(d[0]); });  // 新機能は末尾へ
+    lay=lay.filter(function(k){ return k==='sep'||k.indexOf('sep:')===0||m[k]||(k.indexOf('off:')===0&&m[k.slice(4)]); });  // 廃止した機能IDは飛ばす（sep:区切り・off:隠し項目は残す）
+    QM_DEFS.forEach(function(d){ if(lay.indexOf(d[0])<0&&lay.indexOf('off:'+d[0])<0) lay.push(d[0]); });  // 新機能は末尾へ（隠し済みは復活させない）
     return lay;
   }
   function qmLayoutSave(a){ try{ localStorage.setItem('__ce_qmenu_layout',JSON.stringify(a)); }catch(_){} }
@@ -6875,17 +6973,21 @@ html.__ce_altmode{cursor:text}
   function qmEditMode(qm){
     var lay=qmLayoutLoad(), m=qmDefMap();
     function html(){
-      return '<div style="padding:6px 10px 2px;font-weight:700;font-size:12px">メニューの並べ替え（↑↓で移動・区切り線には見出しを書ける）</div>'
+      return '<div style="padding:6px 10px 2px;font-weight:700;font-size:12px">メニューの並べ替え（⠿ドラッグ or ↑↓で移動・🙈で隠す・区切り線には見出しを書ける）</div>'
         +lay.map(function(k,i){
           var isSep=(k==='sep'||k.indexOf('sep:')===0);
+          var isOff=(k.indexOf('off:')===0);  // 🙈隠し中の項目＝薄く＋取り消し線で出す（👁で戻せる）
           var lbl=isSep
             ?'<input data-seplb="1" value="'+esc(k.indexOf('sep:')===0?k.slice(4):'')+'" placeholder="─ 見出し（任意・例：アニメ系）" style="flex:1;min-width:0;font-size:11px;color:#666;border:1px dashed #bbb;border-radius:5px;padding:2px 6px;font-family:inherit">'
-            :'<span style="flex:1;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+m[k]+'</span>';
+            :'<span style="flex:1;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'+(isOff?'opacity:.38;text-decoration:line-through':'')+'">'+m[isOff?k.slice(4):k]+'</span>';
           return '<div data-i="'+i+'" style="display:flex;align-items:center;gap:4px;padding:3px 8px">'
+            +'<span data-dh="1" draggable="true" title="ドラッグで移動" style="cursor:grab;color:#aaa;font-size:13px;padding:0 2px;user-select:none">⠿</span>'
             +'<button data-mv="-1" style="width:22px;height:20px;border:none;background:#f0f0f2;border-radius:5px;cursor:pointer;padding:0">↑</button>'
             +'<button data-mv="1" style="width:22px;height:20px;border:none;background:#f0f0f2;border-radius:5px;cursor:pointer;padding:0">↓</button>'
             +lbl
-            +(isSep?'<button data-del="1" style="width:22px;height:20px;border:none;background:#fde8e8;color:#c00;border-radius:5px;cursor:pointer;padding:0">✕</button>':'')
+            +(isSep
+              ?'<button data-del="1" style="width:22px;height:20px;border:none;background:#fde8e8;color:#c00;border-radius:5px;cursor:pointer;padding:0">✕</button>'
+              :'<button data-hide="1" title="'+(isOff?'メニューに戻す':'メニューから隠す')+'" style="width:26px;height:20px;border:none;background:'+(isOff?'#e8f4e8':'#f0f0f2')+';border-radius:5px;cursor:pointer;padding:0">'+(isOff?'👁':'🙈')+'</button>')
             +'</div>';
         }).join('')
         +'<div style="display:flex;gap:6px;padding:6px 8px;flex-wrap:wrap">'
@@ -6897,6 +6999,36 @@ html.__ce_altmode{cursor:text}
     qm.innerHTML=html();
     if(!qm.__qeBound){
       qm.__qeBound=true;
+      // ⠿ドラッグで並べ替え（↑↓ボタンと併用可）。落とす位置は行の上半分＝前、下半分＝後ろ。
+      var _dragI=-1;
+      qm.addEventListener('dragstart',function(ev){
+        if(!qm.__qeOn) return;
+        var h=ev.target; if(!h.getAttribute||!h.getAttribute('data-dh')){ ev.preventDefault(); return; }
+        var rowEl=h.closest('[data-i]'); if(!rowEl){ ev.preventDefault(); return; }
+        _dragI=+rowEl.getAttribute('data-i');
+        try{ ev.dataTransfer.setData('text/plain',''+_dragI); ev.dataTransfer.effectAllowed='move'; }catch(_){}
+      });
+      qm.addEventListener('dragover',function(ev){
+        if(!qm.__qeOn||_dragI<0) return;
+        var rowEl=ev.target.closest?ev.target.closest('[data-i]'):null; if(!rowEl) return;
+        ev.preventDefault(); try{ ev.dataTransfer.dropEffect='move'; }catch(_){}
+        [].forEach.call(qm.querySelectorAll('[data-i]'),function(x){ x.style.borderTop=''; x.style.borderBottom=''; });
+        var r=rowEl.getBoundingClientRect();
+        if(ev.clientY>r.top+r.height/2) rowEl.style.borderBottom='2px solid #2f6bff'; else rowEl.style.borderTop='2px solid #2f6bff';
+      });
+      qm.addEventListener('drop',function(ev){
+        if(!qm.__qeOn||_dragI<0) return;
+        var rowEl=ev.target.closest?ev.target.closest('[data-i]'):null; if(!rowEl) return;
+        ev.preventDefault();
+        var j=+rowEl.getAttribute('data-i');
+        var r=rowEl.getBoundingClientRect();
+        if(ev.clientY>r.top+r.height/2) j+=1;
+        var it=lay.splice(_dragI,1)[0];
+        if(j>_dragI) j-=1;
+        lay.splice(j,0,it);
+        _dragI=-1; qm.innerHTML=html();
+      });
+      qm.addEventListener('dragend',function(){ _dragI=-1; [].forEach.call(qm.querySelectorAll('[data-i]'),function(x){ x.style.borderTop=''; x.style.borderBottom=''; }); });
       // 区切り線の見出し入力＝打った瞬間にlayへ同期（↑↓で再描画されても消えないように）
       qm.addEventListener('input',function(ev){
         if(!qm.__qeOn) return;
@@ -6915,6 +7047,7 @@ html.__ce_altmode{cursor:text}
         var rowEl=t.closest('[data-i]'); if(!rowEl) return;
         var i=+rowEl.getAttribute('data-i');
         if(t.getAttribute('data-del')){ lay.splice(i,1); qm.innerHTML=html(); return; }
+        if(t.getAttribute('data-hide')){ lay[i]=(lay[i].indexOf('off:')===0)?lay[i].slice(4):('off:'+lay[i]); qm.innerHTML=html(); return; }
         var mv=t.getAttribute('data-mv');
         if(mv){ var j=i+(+mv); if(j<0||j>=lay.length) return; var it=lay.splice(i,1)[0]; lay.splice(j,0,it); qm.innerHTML=html(); }
       });
@@ -6964,16 +7097,17 @@ html.__ce_altmode{cursor:text}
     var _qmM=qmDefMap();
     qm.innerHTML=selRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmLayoutLoad().map(function(k){
-        if(k==='sep') return '<div style="border-top:1px solid #eee;margin:3px 6px"></div>';
+        if(k.indexOf('off:')===0) return '';  // 🙈で隠した項目は出さない（⚙並べ替えの👁で戻せる）
+        if(k==='sep') return '<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>';
         if(k.indexOf('sep:')===0){
           // 見出し付き区切り線＝線の真ん中に小さいグレー文字（どんなグループか一目で分かる）
-          return '<div style="display:flex;align-items:center;gap:6px;margin:4px 8px;font-size:10px;color:#9a9aa0">'
-            +'<span style="flex:1;border-top:1px solid #eee"></span><span>'+esc(k.slice(4))+'</span>'
-            +'<span style="flex:1;border-top:1px solid #eee"></span></div>';
+          return '<div style="display:flex;align-items:center;gap:6px;margin:5px 8px;font-size:10.5px;font-weight:700;color:#5b6472">'
+            +'<span style="flex:1;border-top:1px solid #b9b9c4"></span><span>'+esc(k.slice(4))+'</span>'
+            +'<span style="flex:1;border-top:1px solid #b9b9c4"></span></div>';
         }
         return _qmM[k]?row(k,_qmM[k]):'';
       }).join('')
-      +'<div style="border-top:1px solid #eee;margin:3px 6px"></div>'
+      +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
       +row('__ce_q_full','⚙ すべての編集メニュー…')
       +'<div style="text-align:right;padding:0 8px 3px"><button id="__ce_q_edit" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
     document.body.appendChild(qm);
@@ -7046,12 +7180,88 @@ html.__ce_altmode{cursor:text}
           if(fs===document.body||fs.tagName==='HTML') fs=null;
         }
         closeMenu(); favSaveSection(fs); return; }
+      if(t.id==='__ce_q_pickov'){
+        closeMenu();
+        // 右クリック地点に重なっている要素を全部並べる（pointer-events:noneの飾りや下の層も拾える）
+        var cands=document.elementsFromPoint(qx,qy).filter(function(c){ return c!==document.documentElement&&c!==document.body&&!c.closest('[id^="__ce"]'); });
+        if(!cands.length){ msg.textContent='ここに重なっている要素はありません'; return; }
+        var pk=document.createElement('div'); pk.id='__ce_pkpos';
+        pk.innerHTML='<div class="bx"><span class="cl" id="__ce_pkposx">×</span><h4>🎯 どの要素？（上ほど手前の層・行に載せると赤枠で確認）</h4><div class="poslist">'+cands.map(function(c,i){
+          var tx=((c.textContent||'').replace(/\\s+/g,' ').trim().slice(0,18));
+          var lb=c.tagName.toLowerCase()+((c.className&&typeof c.className==='string'&&c.className.trim())?'.'+c.className.trim().split(/\\s+/)[0]:'')+(tx?'「'+tx+'」':'');
+          return '<div class="sit-pos" data-oi="'+i+'">'+esc(lb)+'</div>';
+        }).join('')+'</div></div>';
+        document.body.appendChild(pk);
+        function _pco(){ cands.forEach(function(c){ c.style.outline=''; }); }
+        pk.addEventListener('mouseover',function(ev){ _pco(); var it=ev.target.closest('.sit-pos'); if(it){ var c=cands[+it.getAttribute('data-oi')]; if(c) c.style.outline='3px solid #e05656'; } });
+        pk.addEventListener('click',function(ev){
+          if(ev.target.id==='__ce_pkpos'||ev.target.id==='__ce_pkposx'){ _pco(); pk.remove(); return; }
+          var it=ev.target.closest('.sit-pos'); if(!it) return;
+          var c=cands[+it.getAttribute('data-oi')]; _pco(); pk.remove(); if(!c) return;
+          _forceEl=c; c.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy}));  // その要素で右クリックメニューを開き直す
+        });
+        return;
+      }
+      if(t.id==='__ce_q_del'){
+        if(!confirm('この要素を削除しますか？\\n（💾保存で確定。保存する前なら開き直せば戻ります）')) return;
+        curEl.remove(); closeMenu(); markDirty();
+        msg.textContent='🗑 削除しました（💾保存で確定・保存前なら開き直しで復活）';
+        return;
+      }
       if(t.id==='__ce_q_ovup'||t.id==='__ce_q_ovdn'){
         // 上の要素に重ねる＝margin-topをマイナスに（メニューは閉じない＝連打で調整できる）
         var mt=parseFloat(curEl.style.marginTop); if(isNaN(mt)) mt=parseFloat(getComputedStyle(curEl).marginTop)||0;
         mt+=(t.id==='__ce_q_ovup'?-60:60);
         curEl.style.setProperty('margin-top', Math.round(mt)+'px','important');
         markDirty(); msg.textContent='⬆ 食い込み: '+Math.round(mt)+'px（マイナスほど上に重なる・保存で確定）';
+        return;
+      }
+      if(t.id==='__ce_q_gaya'){
+        ensureDecoCss();
+        var gh=(curEl.tagName==='IMG')?curEl.parentElement:curEl;   // 画像そのものなら親に重ねる
+        var gex=gh.querySelector('.ce_gaya');
+        closeMenu();
+        if(!gex){
+          if(getComputedStyle(gh).position==='static') gh.style.setProperty('position','relative','important');
+          gex=document.createElement('div'); gex.className='ce_gaya';
+          [['♪','6%','14%','0s','34px','#12a37f'],['💬','80%','8%','0.6s','38px','#f0a13b'],['！','28%','4%','1.2s','32px','#e05656'],['✨','58%','2%','1.8s','34px','#d9a80c'],['♪','90%','34%','2.4s','28px','#12a37f'],['💭','10%','48%','3.0s','32px','#5b8fd6']].forEach(function(g){
+            var sp=document.createElement('span'); sp.textContent=g[0];
+            sp.setAttribute('style','left:'+g[1]+';top:'+g[2]+';animation-delay:'+g[3]+';font-size:'+g[4]+';color:'+g[5]);
+            gex.appendChild(sp);
+          });
+          gh.appendChild(gex); markDirty();
+          msg.textContent='💬 がやがや演出を付けました（範囲パネルで位置調整・💾保存で確定）';
+        }
+        gayaPanel(gex);  // 付いている時は範囲調整パネル（外すのもここから）
+        return;
+      }
+      if(t.id==='__ce_q_edge'){
+        var ege=curEl.closest('section,header,footer');
+        if(!ege){
+          // <section>が無いページ（クローン等）＝右クリック位置から「1画面ぶんの塊」を対象にする（⭐と同じ流儀）
+          ege=curEl;
+          while(ege.parentElement && ege.parentElement!==document.body && ege.parentElement.tagName!=='MAIN'){
+            var _egh=ege.parentElement.getBoundingClientRect().height;
+            if(_egh>window.innerHeight*3) break;
+            ege=ege.parentElement;
+          }
+          if(ege===document.body||ege.tagName==='HTML') ege=null;
+        }
+        closeMenu(); edgeOpen(ege); return; }
+      if(t.id==='__ce_q_ovshow'){
+        // 親のoverflow:hidden（枠からはみ出た部分を刈り取る設定）をセクションまで遡って解除。
+        // 画像の上下が切れて見える時の定番原因。重なり順(z-index)では直らないタイプ。
+        var oe=curEl, ofn=0;
+        while(oe&&oe!==document.body){
+          try{
+            var os=getComputedStyle(oe);
+            if(/(hidden|clip|auto|scroll)/.test(''+os.overflow+os.overflowX+os.overflowY)){ oe.style.setProperty('overflow','visible','important'); ofn++; }
+          }catch(_){}
+          if(/^(SECTION|HEADER|FOOTER)$/.test(oe.tagName)) break;
+          oe=oe.parentElement;
+        }
+        markDirty(); closeMenu();
+        msg.textContent=ofn?('📤 '+ofn+'箇所の「はみ出し刈り取り」を解除しました（💾保存で確定・ダメなら保存せず開き直し）'):'はみ出しを隠す設定は見つかりませんでした（🔼重なりを手前に、を試してください）';
         return;
       }
       if(t.id==='__ce_q_zup'||t.id==='__ce_q_zdn'){
@@ -7066,6 +7276,36 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_secadd'){ closeMenu(); var ab=document.getElementById('__ce_favadd'); if(ab) ab.click(); return; }
       if(t.id==='__ce_q_secswap'){ var sw=curEl.closest('section,header,footer'); closeMenu(); favSwapOpen(sw); return; }
       if(t.id==='__ce_q_secdel'){ var de=curEl.closest('section,header,footer'); closeMenu(); secDeleteOpen(de); return; }
+      if(t.id==='__ce_q_align'){
+        // 右クリックした行と「同じ形の兄弟」（同じ親・同じタグ・同じクラス）を探し、
+        // 各行に個別に焼き込まれたズレの元（移動・回転・インライン余白・寄せ）を掃除→共通CSSの位置に戻る＝そろう。
+        var ar=(function(x){
+          var cur=x;
+          while(cur&&cur.parentElement&&cur.parentElement!==document.body){
+            var pa=cur.parentElement, same=0;
+            [].forEach.call(pa.children,function(sib){ if(sib!==cur&&sib.tagName===cur.tagName&&(sib.className||'')===(cur.className||'')) same++; });
+            if(same>=1) return cur;
+            cur=cur.parentElement;
+          }
+          return null;
+        })(curEl);
+        closeMenu();
+        if(!ar){ msg.textContent='そろえる相手（同じ形の兄弟の行）が見つかりませんでした'; return; }
+        var an=0;
+        [].forEach.call(ar.parentElement.children,function(sib){
+          if(sib.tagName!==ar.tagName||(sib.className||'')!==(ar.className||'')) return;
+          ['translate','rotate','scale','transform','transform-origin','left','top','margin-left','margin-top','text-align','padding-left'].forEach(function(p){ sib.style.removeProperty(p); });
+          ['data-cetx','data-cety','data-cero','data-cesx','data-cesy','data-cebt'].forEach(function(a){ sib.removeAttribute(a); });
+          [].forEach.call(sib.children,function(kid){
+            ['translate','transform','margin-left','text-align','padding-left'].forEach(function(p){ kid.style.removeProperty(p); });
+            ['data-cetx','data-cety','data-cero','data-cesx','data-cesy','data-cebt'].forEach(function(a){ kid.removeAttribute(a); });
+          });
+          an++;
+        });
+        markDirty();
+        msg.textContent='⁝ '+an+'行のズレ（個別の移動・余白・寄せ）を掃除してそろえました（💾保存で確定・ダメなら保存せず開き直し）';
+        return;
+      }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
       if(t.id==='__ce_q_full'){ _bigFull=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
@@ -7480,7 +7720,10 @@ _SERVE_SAFETY = """
       if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
       if(cs.visibility==='hidden'){ e.style.setProperty('visibility','visible','important'); }
       var cp=cs.clipPath||cs.webkitClipPath||'';  /* clip-pathで切り取られて消えている(fxa以外)ものも復活 */
-      if(cp && cp!=='none' && /100%|inset\\(1/.test(cp)){ e.style.setProperty('clip-path','none','important'); e.style.setProperty('-webkit-clip-path','none','important'); }
+      /* ★polygonは対象外：〰境目の形やデザインの多角形は「隠す」用途ではないのに、
+         角の座標に必ず100%を含むため誤爆して消していた（保存後に境目の形が消えるバグの犯人）。
+         隠れっぱなし事故はカーテン系のinset()だけなので、そちらだけ復活させる。 */
+      if(cp && cp!=='none' && cp.indexOf('polygon')<0 && /100%|inset\\(1/.test(cp)){ e.style.setProperty('clip-path','none','important'); e.style.setProperty('-webkit-clip-path','none','important'); }
     }
   }
   function run(){ fxaStart(); setTimeout(sweep, 2200); }
