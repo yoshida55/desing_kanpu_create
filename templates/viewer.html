@@ -1273,7 +1273,8 @@
         <button class="camp_up_toggle" id="camp_clone_btn" title="選んだベースの実サイトをそのまま吸い出してカンプ化（AIなし・無料）">📋 ベースを忠実クローン</button>
         <button class="camp_up_toggle" id="cu_toggle">🖼 自分の画像を使う</button>
         <span class="camp_state" id="camp_state"></span>
-        <button class="camp_hist_toggle" id="camp_hist_toggle" style="margin-left:auto">🗂 生成した履歴</button>
+        <button class="camp_hist_toggle" style="margin-left:auto" onclick="window.open('/compare','_blank')" title="2つのカンプを重ねてスライダーで見比べる（営業のBefore/Afterデモ用）">🆚 比較</button>
+        <button class="camp_hist_toggle" id="camp_hist_toggle">🗂 生成した履歴</button>
       </div>
       <!-- 自分の画像（AIが生成に使う）：開くと下に出る -->
       <div class="camp_uploads" id="camp_uploads" hidden>

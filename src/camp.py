@@ -886,7 +886,59 @@ def generate_camp(
 
 
 # ── 反復編集：セクション単位で速く直す＋AIが改善案を提案する ──────────────
-_SEC_RE = re.compile(r"<section\b[^>]*>.*?</section>", re.DOTALL | re.IGNORECASE)
+# ★2026-07-19 入れ子<section>対応：旧実装は非貪欲正規表現
+#   r"<section\b[^>]*>.*?</section>" で、入れ子があると内側の</section>で範囲が
+#   切れて「3番を直せと言ったのに別の所が変わる」事故の原因だった（CLAUDE.md既知の限界）。
+#   → タグの深さを数えて対応する閉じタグまでを1セクションとする方式に変更。
+#   トップレベルの<section>だけを列挙する（入れ子の内側は単独では数えない）。
+#   互換のため名前は _SEC_RE のまま・finditer()と match の group(0)/start()/end() だけ提供
+#   （camp.py / viewer.py の全使用箇所がこのAPIだけを使っている）。
+_SEC_TAG_RE = re.compile(r"<(/?)section\b[^>]*>", re.IGNORECASE)
+
+
+class _SecMatch:
+    """re.Match 互換の最小実装（group(0) / start() / end() / span()）。"""
+
+    __slots__ = ("_html", "_s", "_e")
+
+    def __init__(self, html: str, s: int, e: int):
+        self._html, self._s, self._e = html, s, e
+
+    def group(self, i: int = 0) -> str:
+        return self._html[self._s:self._e]
+
+    def start(self) -> int:
+        return self._s
+
+    def end(self) -> int:
+        return self._e
+
+    def span(self) -> tuple:
+        return (self._s, self._e)
+
+
+class _SecScanner:
+    """<section>を深さを数えて列挙する（入れ子対応）。"""
+
+    def finditer(self, html: str):
+        depth = 0
+        start = None
+        for m in _SEC_TAG_RE.finditer(html):
+            if m.group(1) != "/":  # 開きタグ
+                if depth == 0:
+                    start = m.start()
+                depth += 1
+            else:  # 閉じタグ
+                if depth == 0:
+                    continue  # 開きより先に閉じが来る壊れたHTMLは無視
+                depth -= 1
+                if depth == 0 and start is not None:
+                    yield _SecMatch(html, start, m.end())
+                    start = None
+        # 閉じ忘れで終わった分は返さない（旧実装も閉じ無しはマッチしなかった＝互換）
+
+
+_SEC_RE = _SecScanner()
 
 _SUGGEST_SYSTEM = (
     "あなたは一流のWebデザイナー。既存のランディングページを見て、"
@@ -1134,11 +1186,79 @@ def _save_section_favs_meta(items: list) -> None:
     os.replace(tmp, d / "_index.json")
 
 
+# ── ⭐部品のクラス名前空間化（2026-07-19・クラス名衝突の根治） ──────────────
+# 🔀入れ替え先に同名クラスがあると、先方ページのCSS（特に疑似要素の content）が
+# 部品の要素に当たって「飾り文字が混入する」既知の限界があった（CLAUDE.md 0.0章）。
+# → ⭐保存の瞬間に、部品のクラス名へ部品固有のプレフィックス（cep<ID>-）を付けて
+#   全ページのどのCSSとも二度と衝突しない名前にする。部品が抱えるCSS（<style data-cepart>）と
+#   プレビュー用headcssのセレクタも同時に書き換えるので見た目は変わらない。
+# 除外するクラス：
+#   ・fxa*/__ce*＝アニメ実行系（FX_RUNや保険スクリプトがクラス名で探すため）
+#   ・in/show/is-visible等のSHOW系＝ページJSが実行時に付け外しする状態クラス
+#   ・imp＝一括改善の目印
+#   ・英数字・-・_以外を含む変わり種（Tailwind系のmd:flex等）＝CSS側の書き換えが危険なので触らない
+# 既存の保存済み部品はそのまま（⭐で保存し直せば新方式になる）。
+_NS_KEEP_EXACT = {
+    "in", "show", "is-visible", "active", "visible", "in-view", "inview", "animated",
+    "revealed", "aos-animate", "is-inview", "is-show", "reveal-show", "show-up", "on",
+    "enter", "imp",
+}
+_NS_KEEP_PREFIX = ("fxa", "__ce", "cep")
+_NS_TOKEN_OK = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
+_NS_CLASS_ATTR_RE = re.compile(r"""class\s*=\s*("([^"]*)"|'([^']*)')""", re.IGNORECASE)
+
+
+def _ns_renamable(cls: str) -> bool:
+    if not cls or cls in _NS_KEEP_EXACT:
+        return False
+    if any(cls.startswith(p) for p in _NS_KEEP_PREFIX):
+        return False
+    return bool(_NS_TOKEN_OK.match(cls))
+
+
+def _namespace_part_classes(html: str, headcss: str, prefix: str) -> tuple:
+    """部品HTMLと持ち運びCSSのクラス名を prefix- 付きにそろえて返す。"""
+    classes = set()
+    for m in _NS_CLASS_ATTR_RE.finditer(html):
+        for tok in (m.group(2) if m.group(2) is not None else m.group(3) or "").split():
+            if _ns_renamable(tok):
+                classes.add(tok)
+    if not classes:
+        return html, headcss
+    mapping = {c: f"{prefix}-{c}" for c in classes}
+
+    def _attr_sub(m):
+        quote = '"' if m.group(2) is not None else "'"
+        raw = m.group(2) if m.group(2) is not None else (m.group(3) or "")
+        toks = [mapping.get(t, t) for t in raw.split()]
+        return "class=" + quote + " ".join(toks) + quote
+
+    new_html = _NS_CLASS_ATTR_RE.sub(_attr_sub, html)
+
+    def _css_fix(text: str) -> str:
+        # セレクタ中の .クラス名 を書き換える（.hero が .hero-copy を壊さないよう境界を見る）。
+        # 長い名前から先に置換（部分一致の事故防止の保険）
+        for c in sorted(classes, key=len, reverse=True):
+            text = re.sub(r"\." + re.escape(c) + r"(?![\w-])", "." + mapping[c], text)
+        return text
+
+    # 部品が抱えるCSS（<style>…</style>）と、querySelector('.foo')等のJS内の '.foo' 文字列も
+    # 同じ書き換えを通す（部品にscriptが乗ることは稀だが、乗っていた時に沈黙で壊れるより良い）
+    new_html = re.sub(
+        r"(<(style|script)\b[^>]*>)(.*?)(</\2>)",
+        lambda m: m.group(1) + _css_fix(m.group(3)) + m.group(4),
+        new_html, flags=re.DOTALL | re.IGNORECASE,
+    )
+    return new_html, _css_fix(headcss or "")
+
+
 def save_section_fav(html: str, headcss: str, name: str, kind: str = "section") -> dict:
     """セクション/ヘッダー/フッターのHTML（自己完結）を部品として保存する。
 
     kind: "section"（既定）/ "header" / "footer"。🔀入れ替えは同じkind同士だけに出す
     （セクションの枠にヘッダーを入れる事故を防ぐ）。
+    保存時にクラス名を部品固有の名前空間（cep<ID>-）へ付け替える＝
+    入れ替え先ページのCSSと衝突しない（疑似要素の飾り文字混入の根治）。
     """
     if kind not in ("header", "footer"):
         kind = "section"
@@ -1148,6 +1268,10 @@ def save_section_fav(html: str, headcss: str, name: str, kind: str = "section") 
     d = _section_fav_dir()
     d.mkdir(parents=True, exist_ok=True)
     sid = datetime.now().strftime("sec_%Y%m%d_%H%M%S_%f")
+    try:
+        html, headcss = _namespace_part_classes(html, headcss, "cep" + sid[-6:])
+    except Exception:  # noqa: BLE001  # 名前空間化に失敗しても保存自体は従来方式で続行
+        log.exception("部品のクラス名前空間化に失敗（従来のまま保存）")
     (d / (sid + ".html")).write_text(html, encoding="utf-8")
     if headcss:
         (d / (sid + ".css")).write_text(headcss, encoding="utf-8")

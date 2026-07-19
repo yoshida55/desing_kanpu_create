@@ -1,0 +1,40 @@
+<section class="intro" aria-labelledby="intro-title"><style data-cepart="1">@keyframes header_fade_in { 
+  0% { opacity: 0; transform: translateY(-4rem); }
+  100% { opacity: 1; transform: none; }
+}
+@scope{
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { margin: 0px; padding: 0px; border: 0px; font-style: normal; font-weight: normal; font-size: 100%; vertical-align: baseline; box-sizing: border-box; text-decoration: none; }
+:scope{margin: 0px; padding: 0px; border: 0px; font-style: normal; font-weight: normal; font-size: 100%; vertical-align: baseline; box-sizing: border-box; text-decoration: none;}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; text-align: left; }
+:scope{display: block; text-align: left;}
+.js_soft_reveal { opacity: 0; transform: translateY(4rem); transition: opacity 0.7s, transform 0.8s; }
+.js_soft_reveal.is_visible { opacity: 1; transform: none; }
+:root { --green: #79b350; --green_dark: #5f9c3f; --yellow: #fff4b8; --band: #e2edf5; --text: #4b5350; --muted: #66707a; --font-heading: "Noto Sans JP", sans-serif; }
+.intro { padding: 10rem 0px 7rem; }
+:scope{padding: 10rem 0px 7rem;}
+.intro_inner { width: min(88rem, 100% - 8rem); margin: 0px auto; }
+.intro_title { display: flex; align-items: center; gap: 1.6rem; margin-bottom: 4rem; color: var(--green); font-family: var(--font-heading); font-size: 3.2rem; font-weight: 800; letter-spacing: 0.1em; line-height: 1.6em; }
+.intro_leaf { flex-shrink: 0; width: 2.6rem; height: 2.6rem; background: linear-gradient(135deg, #a5d284, var(--green)); border-radius: 0px 70%; transform: rotate(-15deg); }
+.intro_body { position: relative; }
+.intro_body::before { content: ""; position: absolute; left: -6rem; top: 4rem; z-index: -1; width: 28rem; height: 28rem; background: var(--yellow); border-radius: 50%; opacity: 0.75; }
+.intro_text { margin-bottom: 2.4rem; font-size: 1.5rem; font-weight: 500; line-height: 2.2em; }
+.intro_text:last-child { margin-bottom: 0px; }
+@media screen and (max-width: 699.98px){.intro { padding: 6rem 0px 4rem; }}
+@media screen and (max-width: 699.98px){:scope{padding: 6rem 0px 4rem;}}
+@media screen and (max-width: 699.98px){.intro_inner, .works_inner, .contact_inner { width: calc(100% - 4rem); }}
+@media screen and (max-width: 699.98px){.intro_title { font-size: 2.2rem; gap: 1.2rem; }}
+@media screen and (max-width: 699.98px){.intro_leaf { width: 2rem; height: 2rem; }}
+@media screen and (max-width: 699.98px){.intro_body::before { left: -2rem; width: 20rem; height: 20rem; }}
+@media screen and (max-width: 699.98px){.intro_text, .works_text, .works_note, .contact_text { font-size: 1.4rem; line-height: 2.1em; }}
+:scope{position:relative;z-index:1}
+}</style>
+        <div class="intro_inner js_soft_reveal is_visible">
+          <h2 class="intro_title" id="intro-title"><span class="intro_leaf"></span>「安心して任せられる品質」をめざして</h2>
+          <div class="intro_body">
+            <!-- 黄色いにじみはCSSの装飾（intro_body::before） -->
+            <p class="intro_text">LinkWorksは、軽作業とIT業務に取り組む就労継続支援A型事業所です。一人ひとりの得意を活かしながら、スタッフが作業手順・仕上がり・納期を確認する体制で、企業さまの業務をお引き受けしています。</p>
+            <p class="intro_text">「支援」と「品質管理」を分けずに、一つの仕事として丁寧に進めること。それが、依頼する企業さまにも、働く利用者にも、無理のない継続をつくると考えています。</p>
+            <p class="intro_text">以下でご紹介する業務のご依頼が、利用者の「働く力」を育てる機会になります。ぜひご検討いただけますよう、心よりお願い申し上げます。</p>
+          </div>
+        </div>
+      </section>
