@@ -55,6 +55,7 @@ _MEASURE_JS = r"""
     fxa_pre: 'スクロールで出現',
     fxa_ch: '文字が1文字ずつ出る',
     fxa_hl: 'マーカー線が左から伸びる',
+    fxa_ud: '点線の下線が左から引かれる',
     __ceax_left: '左からスライドイン',
     __ceax_right: '右からスライドイン',
     __ceax_zoom: 'ズームしながら出現',
@@ -295,7 +296,7 @@ _FREEZE_JS = r"""
   }
   const st = document.createElement('style');
   st.textContent = '*{animation:none !important;transition:none !important}'
-    + '.fxa_hl{--hlw:100 !important}';
+    + '.fxa_hl,.fxa_ud{--hlw:100 !important}';
   document.head.appendChild(st);
   // 透明のまま残った要素（出現アニメ不発など）を強制表示
   for (const el of document.querySelectorAll('body *')) {

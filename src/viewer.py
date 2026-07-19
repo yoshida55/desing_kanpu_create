@@ -2117,6 +2117,11 @@ def api_section_fav_delete():
 # カンプ画面の隅に出す編集バー（ツール経由で開いた時だけ注入。保存ファイルは汚さない）
 _EDIT_BAR = """
 <style>
+/* 編集中だけ：文字選択の色をブラウザ標準の青系に固定（2026-07-19）。
+   カンプ自身が ::selection を黄色系にデザインしていると、Alt+ドラッグの選択が
+   マーカーとそっくりに見えて「マーカーが消せない」誤解が実際に起きた。
+   このstyleは #__ce を含むので💾保存時に丸ごと消える＝デザインのselection色は無傷 */
+::selection{background:rgba(51,144,255,.4)!important;color:inherit!important}
 #__ce{position:fixed;right:20px;top:20px;z-index:2147483000;width:480px;max-width:94vw;background:#fff;border:1px solid #e3e3e8;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.32);font-family:system-ui,-apple-system,sans-serif;color:#1d1d1f}
 #__ce *{box-sizing:border-box}
 #__ce .hd{display:flex;align-items:center;gap:8px;background:#1d1d1f;color:#fff;padding:13px 16px;font-weight:700;font-size:15px;cursor:pointer;border-radius:16px 16px 0 0}
@@ -3375,7 +3380,7 @@ html.__ce_altmode{cursor:text}
     [].slice.call(nw.querySelectorAll('*')).concat([nw]).forEach(function(n){
       if(!n.classList) return;
       if(n.classList.contains('fxa_pre')) n.classList.add('fxa_in');
-      if(n.classList.contains('fxa_hl')) n.style.setProperty('--hlw',100);
+      if(n.classList.contains('fxa_hl')||n.classList.contains('fxa_ud')) n.style.setProperty('--hlw',100);
       try{
         var cs=getComputedStyle(n);
         if((cs.opacity==='0'||cs.visibility==='hidden') && n.matches(SEL)) SHOW.forEach(function(k){ n.classList.add(k); });
@@ -5005,8 +5010,8 @@ html.__ce_altmode{cursor:text}
   // 帯の太さ（--hlt0/--hlt1・中心は固定でそこから上下に広げ縮め）。delta%pt単位、8〜70%の範囲。
   function fxHlThick(span, delta){
     if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return; }
-    var t0=parseFloat(span.style.getPropertyValue('--hlt0'))||70;
-    var t1=parseFloat(span.style.getPropertyValue('--hlt1'))||92;
+    var t0=parseFloat(span.style.getPropertyValue('--hlt0'))||79;
+    var t1=parseFloat(span.style.getPropertyValue('--hlt1'))||91;
     var center=(t0+t1)/2, th=Math.max(8,Math.min(70,(t1-t0)+delta));
     span.style.setProperty('--hlt0',(center-th/2)+'%'); span.style.setProperty('--hlt1',(center+th/2)+'%');
     fxHlReplay(span); markDirty();
@@ -5038,8 +5043,8 @@ html.__ce_altmode{cursor:text}
   // 帯の上下位置（--hlt0/--hlt1をまとめてずらす。太さは維持）。delta%pt単位、0〜100%からはみ出ないように収める。
   function fxHlPos(span, delta){
     if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return; }
-    var t0=parseFloat(span.style.getPropertyValue('--hlt0'))||70;
-    var t1=parseFloat(span.style.getPropertyValue('--hlt1'))||92;
+    var t0=parseFloat(span.style.getPropertyValue('--hlt0'))||79;
+    var t1=parseFloat(span.style.getPropertyValue('--hlt1'))||91;
     var th=t1-t0;
     var nt0=Math.max(0,Math.min(100-th,t0+delta));
     span.style.setProperty('--hlt0',nt0+'%'); span.style.setProperty('--hlt1',(nt0+th)+'%');
@@ -5149,6 +5154,7 @@ html.__ce_altmode{cursor:text}
         span.style.setProperty('--hlc',color);
         try{ savedRange.surroundContents(span); }
         catch(_){ var frag=savedRange.extractContents(); span.appendChild(frag); savedRange.insertNode(span); }
+        _unwrapAllIn(span,'.fxa_hl');  // 選択範囲に古いマーカーが混ざっていたら剥がして1枚に（二重防止）
         if(typeof ensureFxAssets==='function') ensureFxAssets();  // アニメCSS/監視JSを注入（保存版で動く）
         if(window.__fxaSweepHl) window.__fxaSweepHl(span); else{ span.style.setProperty('--hlw',100); span.classList.add('fxa_in'); }  // 今すぐ線を引く（プレビュー）
         curHl=span; markDirty();
@@ -5156,17 +5162,38 @@ html.__ce_altmode{cursor:text}
       }catch(err){ if(msg) msg.textContent='この範囲はマーカーを引けませんでした（別々の要素にまたがっています）'; }
     }
     // 〰 点線の下線：選択文字だけをspanで囲んでborder-bottom:dottedを当てる（AIなし・即反映）。
-    function underline(color){
-      if(curUdot){ curUdot.style.setProperty('border-bottom-color',color,'important'); markDirty(); return; }
+    // anim=true（既定）：マーカーと同じ仕組み(.fxa_ud・--hlwスイープ)＝スクロールで左から走る。
+    // anim=false：従来のborder点線＝最初から引かれた静止下線（走らせたくない場所用・2026-07-19）。
+    function underline(color, anim){
+      if(curUdot){
+        // 旧方式(border)・新方式(--udc)どちらの下線でも色が変わるよう両方に当てる
+        curUdot.style.setProperty('border-bottom-color',color,'important');
+        curUdot.style.setProperty('--udc',color); markDirty(); return;
+      }
       if(!savedRange) return;
       try{
-        var span=document.createElement('span'); span.className='ceud';
-        span.style.setProperty('border-bottom','3px dotted '+color,'important');
-        span.style.setProperty('padding-bottom','0.15em','important');
+        var span=document.createElement('span');
+        if(anim===false){
+          span.className='ceud';
+          span.style.setProperty('border-bottom','3px dotted '+color,'important');
+          span.style.setProperty('padding-bottom','0.15em','important');
+        } else {
+          span.className='ceud fxa_ud';
+          span.style.setProperty('--udc',color);
+          // 既定0.45sだと短い文は一瞬で引き終わり「走ってない」ように見える（実際に報告あり）→倍ゆっくりに
+          span.style.setProperty('--hldur','0.9s');
+        }
         try{ savedRange.surroundContents(span); }
         catch(_){ var frag=savedRange.extractContents(); span.appendChild(frag); savedRange.insertNode(span); }
+        _unwrapAllIn(span,'.ceud');  // 選択範囲に古い下線が混ざっていたら剥がして1本に（二重防止）
+        if(anim!==false){
+          if(typeof ensureFxAssets==='function') ensureFxAssets();  // アニメCSS/監視JSを注入（保存版で動く）
+          if(window.__fxaSweepHl) window.__fxaSweepHl(span); else{ span.style.setProperty('--hlw',100); span.classList.add('fxa_in'); }  // 今すぐ引く（プレビュー）
+        }
         curUdot=span; markDirty();
-        if(msg) msg.textContent='選んだ文字に点線の下線をつけました（保存で確定）';
+        if(msg) msg.textContent=(anim===false)
+          ?'点線の下線をつけました（静止・保存で確定）'
+          :'走る下線をつけました（スクロールで左からスーッと・⏳動きの演出にも並びます・保存で確定）';
       }catch(err){ if(msg) msg.textContent='この範囲には下線をつけられませんでした（別々の要素にまたがっています）'; }
     }
     // 装飾span（マーカー/下線）を1つ、中身の文字はそのまま残して剥がす（AIなし・即反映）。
@@ -5177,14 +5204,32 @@ html.__ce_altmode{cursor:text}
       parent.removeChild(span);
       markDirty();
     }
+    // root の中にある同種の装飾spanを全部剥がす（2026-07-19・二重マーカー/二重下線の根治）。
+    // 既に装飾が付いた範囲を含めて選び直して追加すると「古いspanの上に新しいspan」の入れ子ができ、
+    // (1)二重に見える (2)消しても外側1枚しか剥がれず内側が残る、が実際に起きた。
+    function _unwrapAllIn(root, sel){ [].slice.call(root.querySelectorAll(sel)).forEach(_unwrap); }
+    // 選択範囲(savedRange)に重なる装飾spanを全部集める＝「またがって選んでも一発で消せる」用
+    function _touching(sel){
+      var out=[];
+      [].slice.call(document.querySelectorAll(sel)).forEach(function(el){
+        try{ if(savedRange && savedRange.intersectsNode(el)) out.push(el); }catch(_){}
+      });
+      return out;
+    }
     function removeHl(){
-      if(!curHl){ if(msg) msg.textContent='ここにはマーカーがありません'; return; }
-      _unwrap(curHl); curHl=null; hidePop();
+      var list=_touching('.fxa_hl');
+      if(curHl && list.indexOf(curHl)<0) list.push(curHl);
+      if(!list.length){ if(msg) msg.textContent='ここにはマーカーがありません'; return; }
+      list.forEach(function(el){ _unwrapAllIn(el,'.fxa_hl'); _unwrap(el); });  // 入れ子・複数もまとめて剥がす
+      curHl=null;     // ★hidePopは呼ばない＝選択の記憶を残す（続けて下線ボタンも効く）
       if(msg) msg.textContent='マーカーを消しました（保存で確定）';
     }
     function removeUnderline(){
-      if(!curUdot){ if(msg) msg.textContent='ここには下線がありません'; return; }
-      _unwrap(curUdot); curUdot=null; hidePop();
+      var list=_touching('.ceud');
+      if(curUdot && list.indexOf(curUdot)<0) list.push(curUdot);
+      if(!list.length){ if(msg) msg.textContent='ここには下線がありません'; return; }
+      list.forEach(function(el){ _unwrapAllIn(el,'.ceud'); _unwrap(el); });  // 入れ子・複数もまとめて剥がす
+      curUdot=null;   // ★hidePopは呼ばない＝選択の記憶を残す（続けてマーカーボタンも効く）
       if(msg) msg.textContent='点線の下線を消しました（保存で確定）';
     }
     document.addEventListener('mouseup', function(e){
@@ -5202,6 +5247,17 @@ html.__ce_altmode{cursor:text}
         if(ancEl && ancEl.closest){
           var exHl=ancEl.closest('.fxa_hl'); if(exHl) curHl=exHl;
           var exUd=ancEl.closest('.ceud'); if(exUd) curUdot=exUd;
+        }
+        // ★2026-07-19：マーカーより「広い範囲」を選ぶと上の判定では見つからず、
+        //   メニューが「消す」にならない実害があった → 選択範囲に重なるspanも検出する
+        if(!curHl||!curUdot){
+          try{
+            [].slice.call(document.querySelectorAll('.fxa_hl,.ceud')).forEach(function(el2){
+              if(!rng.intersectsNode(el2)) return;
+              if(!curHl && el2.classList.contains('fxa_hl')) curHl=el2;
+              if(!curUdot && el2.classList.contains('ceud')) curUdot=el2;
+            });
+          }catch(_){}
         }
         // ★2026-07-11：ここに出していた黒い小ポップアップは廃止（操作が2箇所に割れて分かりにくいため）。
         //   選択はこの関数の変数(savedRange/curHl/curUdot)に覚えるだけにして、色・マーカー・下線の操作は
@@ -5767,12 +5823,15 @@ html.__ce_altmode{cursor:text}
     // ★box-decoration-breakは slice（既定）を使う：帯を「1本の長い帯を行でスライスした」扱いにする＝
     //   2行にまたがるマーカーは 1行目を引き終わってから2行目に続く（書き順の流れが出る）。
     //   clone だと各行が独立して同時に伸びる（実際に「一緒に出て流れを感じない」と苦情が出た）。
-    +'html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt0,70%),var(--hlc,#ffe66d) var(--hlt1,92%),transparent var(--hlt1,92%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:slice;box-decoration-break:slice}';
+    +'html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,79%),var(--hlc,#ffe66d) var(--hlt0,79%),var(--hlc,#ffe66d) var(--hlt1,91%),transparent var(--hlt1,91%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:slice;box-decoration-break:slice}'
+    // 〰 点線下線のアニメ版（2026-07-19）：マーカーと同じ--hlw(0〜100)で左→右にスーッと引かれる。
+    //   点線はborderでなくrepeating-gradientで描く＝マーカーの仕組み(sweepHl/--hldur/data-cedelay)を丸ごと共用できる。色は--udc。
+    +'html body .fxa_ud.fxa_ud{background-image:repeating-linear-gradient(90deg,var(--udc,#0b6bcb) 0 6px,transparent 6px 11px)!important;background-repeat:no-repeat!important;background-position:left 100%!important;background-size:calc(var(--hlw,0) * 1%) 3px!important;padding-bottom:.15em;-webkit-box-decoration-break:slice;box-decoration-break:slice}';
   // スクロールで画面に入ったら再生。JS無効なら全部表示（消えない保険）。"__ce"を含めない＝保存で残る。
   // ★時間トリガー(setTimeout)は使わない＝「スクロールで画面に入った時に1回だけ再生」に統一。
   //   IntersectionObserverだけで判定→発火したらunobserve（1回きり）。上部の要素は監視開始時に即発火＝読み込みで再生。
   var FX_RUN='(function(){var d=document,h=d.documentElement;'
-    +'if(!d.querySelector(".fxa_pre,.fxa_hl,.fxa_cnt")){return;}h.classList.add("fxa-on");'
+    +'if(!d.querySelector(".fxa_pre,.fxa_hl,.fxa_cnt,.fxa_ud")){return;}h.classList.add("fxa-on");'
     +'[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});'  // 自動修復：出現アニメ要素に焼き込まれた古いtransform(プレビュー残骸)を消す＝過去に固まった分も開くだけで直る
     // 🖍マーカーの帯を毎フレーム手動で描く（--hlw を0→100へ）。連打で二重に走らないよう世代番号(__hlGen)で古いループは自分で止める。
     // ★進捗は「実時間」でなく1フレーム最大64msの積算で進める（飛行ランタイムと同じ流儀）。
@@ -5792,7 +5851,7 @@ html.__ce_altmode{cursor:text}
     +'function st(ts){if(last!==null)acc+=Math.min(64,ts-last);last=ts;var p=Math.min(1,acc/dur),e=1-Math.pow(1-p,3);'
     +'el.textContent=pre+fmt(tgt*e)+suf;if(p<1)requestAnimationFrame(st);else{el.innerHTML=keep;el.classList.add("fxa_in");}}'
     +'requestAnimationFrame(st);}'
-    +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in),.fxa_cnt:not(.fxa_in)"));}'
+    +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in),.fxa_cnt:not(.fxa_in),.fxa_ud:not(.fxa_in)"));}'
     // 🔢グループ表示：data-cegrp="1/2/3"の要素は①→②→③の順にまとめて動く（グループ間0.3s・グループ内は0.15sずつ）
     +'function groupDelay(el){var g=+el.getAttribute("data-cegrp")||0;if(!g)return 0;'
     +'var mem=[].slice.call(d.querySelectorAll(\\'[data-cegrp="\\'+g+\\'"]\\'));var idx=mem.indexOf(el);'
@@ -5801,7 +5860,7 @@ html.__ce_altmode{cursor:text}
     // ★マーカーはページ読み込み中に始めるとコマ落ちして「設定より速く引かれた」ように見える
     //   （--hldurは正しく効いているのに、画像読み込みでrAFの描画が飛ぶ）。
     //   → 読み込み完了(load)まで待ってから引く。文字自体は見えているので遅らせても安全。
-    +'function reveal(el){ function go(){ if(el.classList.contains("fxa_cnt")){countUp(el);} else if(el.classList.contains("fxa_hl")){'
+    +'function reveal(el){ function go(){ if(el.classList.contains("fxa_cnt")){countUp(el);} else if(el.classList.contains("fxa_hl")||el.classList.contains("fxa_ud")){'
     +'if(d.readyState==="complete") sweepHl(el); else{var done=false,start=function(){if(done)return;done=true;sweepHl(el);};window.addEventListener("load",function(){setTimeout(start,250);},{once:true});setTimeout(start,700);}'
     +'} else el.classList.add("fxa_in"); }'
     +'var cd=el.getAttribute("data-cedelay"); var gd=cd!=null?+cd:groupDelay(el); if(gd>0) setTimeout(go,gd); else go(); }'
@@ -5815,7 +5874,7 @@ html.__ce_altmode{cursor:text}
   function _fxInjRun(){ if(document.getElementById('fxa-run')) return; var sc=document.createElement('script'); sc.id='fxa-run'; sc.textContent=FX_RUN; (document.body||document.documentElement).appendChild(sc); }
   function ensureFxAssets(){ _fxInjCss(); _fxInjRun(); }  // applyBakeから毎回呼ばれても副作用が無い
   // 既存カンプを開いた瞬間に1回だけ：焼き込み済みの古いrunを最新版へ入れ替える（clip撤廃・マーカー再生方式の変更などを既存にも反映）
-  if(document.querySelector('.fxa_pre,.fxa_wave,.fxa_ch,.fxa_hl,.fxa_cnt,[class*="fxa_lp_"]')){ var _or=document.getElementById('fxa-run'); if(_or) _or.remove(); ensureFxAssets(); }
+  if(document.querySelector('.fxa_pre,.fxa_wave,.fxa_ch,.fxa_hl,.fxa_cnt,.fxa_ud,[class*="fxa_lp_"]')){ var _or=document.getElementById('fxa-run'); if(_or) _or.remove(); ensureFxAssets(); }
   function fxClearClasses(el){
     [].slice.call(el.classList).forEach(function(c){ if(c.indexOf('fxa_')===0 && c!=='fxa_ch') el.classList.remove(c); });
     ['--fxa-dur','--fxa-dist','--fxa-scale','--fxa-blur','--fxa-deg','--fxa-amp','--fxa-stag'].forEach(function(p){ el.style.removeProperty(p); });
@@ -5945,6 +6004,7 @@ html.__ce_altmode{cursor:text}
   function seqAnimKey(el){
     var c=el.classList;
     if(c.contains('fxa_hl')) return 'hl';
+    if(c.contains('fxa_ud')) return 'ud';
     if(c.contains('fxa_cnt')) return 'count';
     if(c.contains('fxa_tw')) return 'typewriter';
     if(c.contains('fxa_cpre')) return 'stagger';
@@ -5971,7 +6031,7 @@ html.__ce_altmode{cursor:text}
   function dlyLabel(el){
     var k=seqAnimKey(el), def=null;
     for(var i=0;i<FX.length;i++){ if(FX[i].k===k){ def=FX[i]; break; } }
-    var nm=(k==='hl')?'🖍 マーカー/下線':(def?def.b:'動き');
+    var nm=(k==='hl')?'🖍 マーカー':(k==='ud')?'〰 下線':(def?def.b:'動き');
     var tx=(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,10);
     return nm+(tx?('「'+tx+'…」'):'');
   }
@@ -5985,7 +6045,7 @@ html.__ce_altmode{cursor:text}
   function dlyPreview(el){
     clearTimeout(el.__dlyT);
     var d=+el.getAttribute('data-cedelay')||0;
-    if(el.classList.contains('fxa_hl')){
+    if(el.classList.contains('fxa_hl')||el.classList.contains('fxa_ud')){
       el.classList.remove('fxa_in'); el.style.setProperty('--hlw',0);
       el.__dlyT=setTimeout(function(){ if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); } }, d);
     } else {
@@ -6019,20 +6079,21 @@ html.__ce_altmode{cursor:text}
   // ▶ 全体の流れ：そのセクション内の全アニメを、各自のdata-cedelayどおりに一斉再生（本番と同じ見え方）
   function flowRun(scope){
     ensureFxAssets();
-    var els=[].slice.call(scope.querySelectorAll('.fxa_pre,.fxa_hl,.fxa_cnt'));
-    if(scope.matches&&scope.matches('.fxa_pre,.fxa_hl,.fxa_cnt')) els.unshift(scope);
+    var els=[].slice.call(scope.querySelectorAll('.fxa_pre,.fxa_hl,.fxa_cnt,.fxa_ud'));
+    if(scope.matches&&scope.matches('.fxa_pre,.fxa_hl,.fxa_cnt,.fxa_ud')) els.unshift(scope);
     if(!els.length) return;
+    function _isSw(el){ return el.classList.contains('fxa_hl')||el.classList.contains('fxa_ud'); }  // --hlwスイープ系（マーカー/下線）
     els.forEach(function(el){
       clearTimeout(el.__dlyT);
-      if(el.classList.contains('fxa_hl')){ el.classList.remove('fxa_in'); el.style.setProperty('--hlw',0); }
+      if(_isSw(el)){ el.classList.remove('fxa_in'); el.style.setProperty('--hlw',0); }
       else { purgeInlineFx(el); stripShowCls(el); el.style.setProperty('transition','none','important'); el.classList.remove('fxa_in'); }
     });
     void document.body.offsetWidth;
-    els.forEach(function(el){ if(!el.classList.contains('fxa_hl')) el.style.removeProperty('transition'); });
+    els.forEach(function(el){ if(!_isSw(el)) el.style.removeProperty('transition'); });
     els.forEach(function(el){
       var d=+el.getAttribute('data-cedelay')||0;
       el.__dlyT=setTimeout(function(){
-        if(el.classList.contains('fxa_hl')){ if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); } }
+        if(_isSw(el)){ if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); } }
         else el.classList.add('fxa_in');
       }, d+60);
     });
@@ -6040,8 +6101,8 @@ html.__ce_altmode{cursor:text}
   function dlyOpen(el,x,y){
     dlyClose();
     var scope=(el.closest&&el.closest('section,header,footer'))||document.body;
-    var items=[].slice.call(scope.querySelectorAll('.fxa_hl,.fxa_pre,.fxa_cnt'));
-    if(scope.matches&&scope.matches('.fxa_hl,.fxa_pre,.fxa_cnt')) items.unshift(scope);
+    var items=[].slice.call(scope.querySelectorAll('.fxa_hl,.fxa_pre,.fxa_cnt,.fxa_ud'));
+    if(scope.matches&&scope.matches('.fxa_hl,.fxa_pre,.fxa_cnt,.fxa_ud')) items.unshift(scope);
     items=items.slice(0,20);
     if(!items.length){ if(msg) msg.textContent='このセクションに動きが見つかりません（先に「動きを選ぶ」やマーカーを付けてください）'; return; }
     // 今の遅らせ順に並べる（同点はDOM順）＝一覧がそのまま再生順に見える
@@ -6050,10 +6111,11 @@ html.__ce_altmode{cursor:text}
       return (da-db)||(a.i-b.i);
     }).map(function(o){ return o.el; });
     // 開いた時点の値を要素ごと控える＝✖閉じるで元に戻せる（✔決定なら控えを捨てるだけ）
-    var snap=items.map(function(c){ return {el:c, d:c.getAttribute('data-cedelay'), hl:c.classList.contains('fxa_hl'), dur:c.classList.contains('fxa_hl')?c.style.getPropertyValue('--hldur'):c.style.getPropertyValue('--fxa-dur')}; });
+    function _isSw2(c){ return c.classList.contains('fxa_hl')||c.classList.contains('fxa_ud'); }  // --hlwスイープ系（マーカー/下線）
+    var snap=items.map(function(c){ return {el:c, d:c.getAttribute('data-cedelay'), hl:_isSw2(c), dur:_isSw2(c)?c.style.getPropertyValue('--hldur'):c.style.getPropertyValue('--fxa-dur')}; });
     var p=document.createElement('div'); p.id='__ce_dlyp';
     p.setAttribute('style','position:fixed;z-index:2147483647;background:#1d1d2b;color:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);font:12.5px/1.6 sans-serif;width:440px;max-width:96vw;max-height:72vh;overflow:auto');
-    function durOf(c){ return c.classList.contains('fxa_hl')?Math.round((parseFloat(c.style.getPropertyValue('--hldur'))||0.45)*1000):(parseInt(c.style.getPropertyValue('--fxa-dur'))||800); }
+    function durOf(c){ return _isSw2(c)?Math.round((parseFloat(c.style.getPropertyValue('--hldur'))||0.45)*1000):(parseInt(c.style.getPropertyValue('--fxa-dur'))||800); }
     function rowsHtml(){
       return items.map(function(c,i){
         return '<div class="__dlyrow" data-i="'+i+'" style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid #34344a">'
@@ -6083,7 +6145,7 @@ html.__ce_altmode{cursor:text}
     var rowsBox=p.querySelector('#__ce_dlyrows');
     function redraw(){ rowsBox.innerHTML=rowsHtml(); }
     function setDelay(c,v){ v=Math.max(0,Math.round(v)); if(v>0) c.setAttribute('data-cedelay',v); else c.removeAttribute('data-cedelay'); markDirty(); }
-    function setDur(c,v){ v=Math.max(100,Math.round(v)); if(c.classList.contains('fxa_hl')) c.style.setProperty('--hldur',(v/1000)+'s'); else c.style.setProperty('--fxa-dur',v+'ms'); markDirty(); }
+    function setDur(c,v){ v=Math.max(100,Math.round(v)); if(_isSw2(c)) c.style.setProperty('--hldur',(v/1000)+'s'); else c.style.setProperty('--fxa-dur',v+'ms'); markDirty(); }
     rowsBox.addEventListener('input',function(ev){
       var row=ev.target.closest('.__dlyrow'); if(!row) return;
       var c=items[+row.getAttribute('data-i')];
@@ -6872,7 +6934,7 @@ html.__ce_altmode{cursor:text}
     // 🖍マーカーは--hlw(0〜100)で伸び具合を持っているので、fxa_inを外すだけでは戻らない。
     // ★これを忘れると「再生し終わった状態(--hlw:100)」がそのまま保存され、次に開いた時に
     //   アニメせず最初から引かれた状態になってしまう（実際に起きたバグ）。必ず0に戻す。
-    [].slice.call(doc.querySelectorAll('.fxa_hl')).forEach(function(n){ n.style.setProperty('--hlw',0); });
+    [].slice.call(doc.querySelectorAll('.fxa_hl,.fxa_ud')).forEach(function(n){ n.style.setProperty('--hlw',0); });
     // 🖼 スライドショー：保存の瞬間に何枚目が表示中でも、保存版は必ず1枚目から始める
     // （--hlw焼き込み事故と同じ家系の予防。スクリプトが動かない場所＝サムネ等でも1枚目が見える）
     [].slice.call(doc.querySelectorAll('[data-slshow]')).forEach(function(w){
@@ -7183,6 +7245,7 @@ html.__ce_altmode{cursor:text}
         +'<span style="opacity:.8">文字色</span><input type="color" id="__ce_q_selc" value="#e05656" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> '
         +'🖍<input type="color" id="__ce_q_selhlc" value="'+hlDefaultColor()+'" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><button id="__ce_q_selhlb" style="background:#eab308;border:none;border-radius:5px;padding:2px 8px;cursor:pointer;font-weight:700">'+(selApiQ.hasHl()?'マーカーを消す':'マーカー')+'</button> '
         +'〰<input type="color" id="__ce_q_seludc" value="#e07856" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><button id="__ce_q_seludb" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">'+(selApiQ.hasUd()?'下線を消す':'下線')+'</button>'
+        +'<label title="ON=スクロールで左からスーッと走る／OFF=最初から引かれた静止下線" style="font-size:11px;margin-left:3px;cursor:pointer;user-select:none"><input type="checkbox" id="__ce_q_seluda"'+((localStorage.getItem('__ce_ud_anim')||'1')!=='0'?' checked':'')+' style="vertical-align:middle;cursor:pointer">走る</label>'
         +'</div>';
     }
     var _qmM=qmDefMap();
@@ -7223,7 +7286,11 @@ html.__ce_altmode{cursor:text}
       qm.querySelector('#__ce_q_selhlc').addEventListener('change',function(){ if(selApiQ.hasHl()) hlPushColorHistory(this.value); }); // 履歴は決定時に1回だけ
       qm.querySelector('#__ce_q_seludb').addEventListener('click',function(ev){ ev.stopPropagation();
         if(selApiQ.hasUd()){ selApiQ.removeUd(); this.textContent='下線'; }
-        else{ selApiQ.underline(qm.querySelector('#__ce_q_seludc').value); this.textContent='下線を消す'; }
+        else{
+          var _an=qm.querySelector('#__ce_q_seluda'), _anOn=(!_an||_an.checked);
+          try{ localStorage.setItem('__ce_ud_anim', _anOn?'1':'0'); }catch(_){}  // 前回の選択を記憶
+          selApiQ.underline(qm.querySelector('#__ce_q_seludc').value, _anOn); this.textContent='下線を消す';
+        }
       });
       qm.querySelector('#__ce_q_seludc').addEventListener('input',function(){ if(selApiQ.hasUd()) selApiQ.underline(this.value); });
     }
