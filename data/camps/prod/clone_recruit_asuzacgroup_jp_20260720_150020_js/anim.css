@@ -1,0 +1,50 @@
+/* ============================================================
+   anim.css — スクロール出現アニメ一式（依存ゼロ）
+   使い方：動かしたい要素にクラスを付けるだけ（例 class="rv rv-up"）
+   ・遅らせたい : data-delay="400"（ms）
+   ・速さ変更   : data-dur="1200"（ms）
+   ・JSが html に .anim-on を付ける＝JS無効環境では全部そのまま表示（消えない保険）
+   ============================================================ */
+
+/* 出現アニメ（.is-in が付くと再生される） */
+html.anim-on .rv{opacity:0;transition:opacity var(--dur,.8s) ease,transform var(--dur,.8s) ease,filter var(--dur,.8s) ease,clip-path var(--dur,.8s) ease;transition-delay:var(--delay,0ms)}
+html.anim-on .rv-up{transform:translateY(28px)}
+html.anim-on .rv-down{transform:translateY(-36px)}
+html.anim-on .rv-left{transform:translateX(-48px)}
+html.anim-on .rv-right{transform:translateX(48px)}
+html.anim-on .rv-zoom{transform:scale(.86)}
+html.anim-on .rv-blur{filter:blur(14px)}
+html.anim-on .rv-flip{transform:perspective(800px) rotateY(90deg)}
+html.anim-on .rv-page{transform-origin:left center;transform:perspective(1200px) rotateY(80deg)}
+html.anim-on .rv-curtain-l{opacity:1;clip-path:inset(0 100% 0 0)}
+html.anim-on .rv-curtain-c{opacity:1;clip-path:inset(0 50% 0 50%)}
+html.anim-on .rv.is-in{opacity:1;transform:none;filter:none;clip-path:inset(0 0 0 0)}
+
+/* 行マスク（行ごとに下からせり上がる）。HTMLは .ln>.lni で行を包む */
+html.anim-on .rv-lines .ln{display:block;overflow:hidden}
+html.anim-on .rv-lines .lni{display:block;transform:translateY(112%);transition:transform var(--dur,.7s) cubic-bezier(.22,1,.36,1)}
+html.anim-on .rv-lines.is-in .lni{transform:none}
+
+/* 1文字ずつ（JSが .ch に分割する） */
+html.anim-on .chars .ch{display:inline-block;opacity:0;transform:translateY(20px);transition:opacity .3s cubic-bezier(.34,1.56,.64,1),transform .3s cubic-bezier(.34,1.56,.64,1)}
+html.anim-on .chars.is-in .ch{opacity:1;transform:none}
+
+/* 🖍マーカー（左から伸びる）。色は --mk-c */
+html.anim-on .mk{background-image:linear-gradient(transparent 79%,var(--mk-c,#ffe66d) 79%,var(--mk-c,#ffe66d) 91%,transparent 91%);background-repeat:no-repeat;background-size:0% 100%;-webkit-box-decoration-break:slice;box-decoration-break:slice;transition:background-size var(--dur,.6s) cubic-bezier(.25,.6,.3,1) var(--delay,0ms)}
+html.anim-on .mk.is-in{background-size:100% 100%}
+
+/* 〰点線下線（左から引かれる）。色は --ud-c */
+html.anim-on .ud{background-image:repeating-linear-gradient(90deg,var(--ud-c,#0b6bcb) 0 6px,transparent 6px 11px);background-repeat:no-repeat;background-position:left 100%;background-size:0% 3px;padding-bottom:.15em;transition:background-size var(--dur,.6s) ease var(--delay,0ms)}
+html.anim-on .ud.is-in{background-size:100% 3px}
+
+/* ループ系 */
+@keyframes kit-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes kit-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes kit-bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-18px)}60%{transform:translateY(0)}80%{transform:translateY(-7px)}}
+@keyframes kit-glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}
+@keyframes kit-wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.lp-pulse{animation:kit-pulse 1.4s ease-in-out infinite}
+.lp-float{animation:kit-float 2.2s ease-in-out infinite}
+.lp-bounce{animation:kit-bounce 1.2s ease infinite}
+.lp-glow{animation:kit-glow 1.8s ease-in-out infinite}
+html.anim-on .lp-wave.is-in .ch{animation:kit-wave 1.6s ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}

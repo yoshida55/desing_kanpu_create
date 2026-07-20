@@ -97,7 +97,14 @@ def cmd_serve(args: argparse.Namespace) -> int:
     from src import viewer
 
     url = f"http://{args.host}:{args.port}"
-    if not args.no_open:
+    # ★--dev（自動再起動）のとき、再起動のたびにブラウザのタブが増える問題への対策（2026-07-20）。
+    #   werkzeugのリローダは「監視する親プロセス」と「実際に動かす子プロセス」に分かれ、
+    #   .pyを保存するたびに子プロセスを作り直す＝そのたびにこの関数が最初から走り、
+    #   ブラウザが1枚ずつ開かれていた（.pyを直すたびにタブが増える正体）。
+    #   子プロセス側には WERKZEUG_RUN_MAIN=true が入るので、そこでは開かない。
+    #   ＝最初の起動の1枚だけ開き、以後の再起動では開かない（--dev以外は今までどおり）。
+    _is_reload_child = os.environ.get("WERKZEUG_RUN_MAIN") == "true"
+    if not args.no_open and not _is_reload_child:
         # 起動と同時にブラウザを開く（サーバ起動前に予約だけ入れる）
         import threading
         import webbrowser

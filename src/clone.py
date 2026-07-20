@@ -43,6 +43,12 @@ _URL_RE = re.compile(r"url\(\s*(['\"]?)([^'\")]+)\1\s*\)")
 _IMPORT_RE = re.compile(r"@import\s+(?:url\(\s*)?['\"]?([^'\")\s;]+)['\"]?\s*\)?[^;]*;")
 
 
+def _esc_attr(s: str) -> str:
+    """HTML属性値に安全に埋め込む（URLに " や & が入っていても壊れないように）。"""
+    return (str(s).replace("&", "&amp;").replace('"', "&quot;")
+            .replace("<", "&lt;").replace(">", "&gt;"))
+
+
 def _rebase_css(css: str, base_url: str) -> str:
     """CSS中の url(...) を絶対URLに直す（data:等はそのまま）。"""
     def rep(m: re.Match) -> str:
@@ -428,6 +434,10 @@ def clone_site(url: str, keep_js: bool = False, use_extracted: bool = False,
 
     # 相対パス(url)がDOM内に残っていたら絶対URLのまま残す（読み込み切れないよりマシ）
     style_tag = f"<style>\n{combined_css}\n</style>"
+    # ★元URLを刻む（2026-07-20）：画像は `<カンプ名>_files/` に置くが、このフォルダは容量が大きく
+    #   .gitignore で同期対象外（全部で約500MB）。＝別PCでは画像が出ない・フォルダを失うと復旧できない。
+    #   どこから取ったクローンか分かれば「取り直す」で復旧できるので、HTML自身に記録しておく。
+    style_tag = f'<meta name="ce-clone-src" content="{_esc_attr(url)}">' + style_tag
     low = html.lower()
     if "</head>" in low:
         i = low.rfind("</head>")

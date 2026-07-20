@@ -18,7 +18,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
-from . import camp, config
+from . import camp, config, respcheck, spec
 from .animkit import KIT_CSS, KIT_JS, scan_camp
 from .utils import get_logger
 
@@ -46,10 +46,32 @@ def _clean(html: str) -> str:
     return html
 
 
-def build_prodkit(filename: str, out_dir: str | None = None) -> dict:
-    """カンプ1本ぶんの本番化キットフォルダを書き出す。戻り値 {dir, rows, rules}。
+def _broken_images(html: str, src: Path) -> list[str]:
+    """見本が参照しているローカル画像のうち、実ファイルが無いものを返す（AIなし・一瞬）。
+
+    なぜ要るか：クローンは画像を `<カンプ名>_files/` に置くが、そのフォルダごと欠けることがある
+    （実際に154枚中151枚が壊れたカンプがあった）。気づかずキットを作ると img/ が空のまま
+    コーダーに渡り、「画像が無い」と後から発覚する。ここで先に数えて指示書に書く。
+    ※ http(s) の外部画像はダウンロードしないと判定できないので対象外。
+    """
+    missing: list[str] = []
+    seen: set[str] = set()
+    for m in re.finditer(r'<img[^>]+src="([^"]+)"', html):
+        u = m.group(1).strip()
+        if not u or u in seen or u.startswith(("http://", "https://", "data:", "//")):
+            continue
+        seen.add(u)
+        if not (src.parent / u.split("?")[0]).exists():
+            missing.append(u)
+    return missing
+
+
+def build_prodkit(filename: str, out_dir: str | None = None, with_reports: bool = True) -> dict:
+    """カンプ1本ぶんの本番化キットフォルダを書き出す。戻り値 {dir, rows, rules, spec, resp, broken}。
 
     out_dir を渡すと「そのフォルダ／カンプ名／」に出力（未指定なら従来どおり data/camps/prod/）。
+    with_reports=True で 📐仕様書 と 📱レスポンシブ検査 も同梱する（CLAUDE.md 0.0.-3.8 のTODO）。
+    ※この2つはPlaywrightで実測するので数十秒かかる。失敗してもキット本体は必ず作る。
     """
     src = config.CAMP_DIR / filename
     if not src.exists():
@@ -70,6 +92,30 @@ def build_prodkit(filename: str, out_dir: str | None = None) -> dict:
     if rules_ok:
         shutil.copy(RULES_PATH, out / "コーディング規約.md")
 
+    # ── 📐仕様書 と 📱レスポンシブ検査 を同梱（CLAUDE.md 0.0.-3.8 のTODO）─────────────
+    # 狙い：①実装側が毎回Playwrightで実測する手間を半減（人間のコーダーでも数値が分かる）
+    #       ②「これはデザインか、ドラッグ事故か」の判断を機械が肩代わりする
+    #         （実カンプでファーストビューだけで事故4件・横スクロール2090pxという実害があった）
+    # どちらも既存機能をそのまま呼ぶだけ。片方コケてもキット本体は必ず出す。
+    broken = _broken_images(html, src)
+    got: dict[str, dict | None] = {"spec": None, "resp": None}
+    errs: list[str] = []
+    if with_reports:
+        try:
+            r = spec.build_spec(filename)
+            shutil.copy(spec.SPEC_DIR / r["file"], out / "仕様書.html")
+            got["spec"] = r
+        except Exception as exc:  # noqa: BLE001  実測は環境依存で落ちうる＝キットは残す
+            log.warning("仕様書の同梱に失敗: %s", exc)
+            errs.append(f"仕様書: {exc}")
+        try:
+            r = respcheck.run_check(filename)
+            shutil.copy(respcheck.CHECK_DIR / r["file"], out / "レスポンシブ検査.html")
+            got["resp"] = r
+        except Exception as exc:  # noqa: BLE001
+            log.warning("レスポンシブ検査の同梱に失敗: %s", exc)
+            errs.append(f"レスポンシブ検査: {exc}")
+
     table = "\n".join(
         f"| {r['sec']} | `{r['el']}` {r['text'][:24]} | `{r['kit']}` |"
         for r in rows
@@ -79,10 +125,39 @@ def build_prodkit(filename: str, out_dir: str | None = None) -> dict:
     ins = ins.replace("%DATE%", datetime.now().strftime("%Y-%m-%d"))
     ins = ins.replace("%RULESNOTE%", "" if rules_ok else
                       f"\n> ⚠ コーディング規約.mdの同梱に失敗（見つからない: {RULES_PATH}）。規約は口頭指示で補うこと。\n")
+    ins = ins.replace("%CHECKNOTE%", _check_note(got, broken, errs))
     (out / "変換指示.md").write_text(ins, encoding="utf-8")
 
-    log.info("本番化キットを書き出し: %s（アニメ%d件・規約同梱=%s）", out, len(rows), rules_ok)
-    return {"dir": str(out), "rows": len(rows), "rules": rules_ok}
+    log.info("本番化キットを書き出し: %s（アニメ%d件・規約同梱=%s・仕様書=%s・検査=%s・壊れ画像%d件）",
+             out, len(rows), rules_ok, bool(got["spec"]), bool(got["resp"]), len(broken))
+    return {"dir": str(out), "rows": len(rows), "rules": rules_ok,
+            "spec": got["spec"], "resp": got["resp"], "broken": len(broken), "errors": errs}
+
+
+def _check_note(got: dict, broken: list[str], errs: list[str]) -> str:
+    """変換指示.mdの冒頭に差し込む「まず検査結果を見る」ブロックを組み立てる。"""
+    L = ["## ⚠ 最初にやること：事故を見分ける", "",
+         "カンプは手で編集して作るので、**デザインではない「ドラッグ事故」が混ざっている**。",
+         "忠実に再現すると横スクロールするサイトが出来上がるので、**実装前に必ず下を確認し、",
+         "事故と判断したものは直してから実装すること**（判断に迷うものは実装者の裁量でよい）。", ""]
+    if got.get("resp"):
+        r = got["resp"]
+        L.append(f"- **レスポンシブ検査.html**（同梱・指摘{r.get('issues', '?')}件）"
+                 " … 375/768/1440pxの実測。横スクロール・はみ出しの犯人・文字の重なりが出ている")
+    if got.get("spec"):
+        s = got["spec"]
+        L.append(f"- **仕様書.html**（同梱・{s.get('sections', '?')}セクション/{s.get('items', '?')}項目）"
+                 " … 寸法・色・文字サイズの実測表。**自分で測り直さずここの数値を使う**")
+    if broken:
+        ex = "、".join(broken[:3]) + ("…" if len(broken) > 3 else "")
+        L += ["", f"- ⚠ **画像切れ {len(broken)}件**：見本が参照しているのにファイルが無い（{ex}）。",
+              "  そのまま実装すると画像が出ない。**差し替え素材を依頼者に確認すること**"]
+    for e in errs:
+        L.append(f"- ⚠ 同梱に失敗: {e}（ツール側で作り直せば付く）")
+    if not got.get("resp") and not got.get("spec") and not broken:
+        return ""  # 何も無いなら黙る
+    L.append("")
+    return "\n".join(L) + "\n"
 
 
 # AIコーディングエージェントへの指示書。%TABLE%/%DATE%/%RULESNOTE%を差し込む
@@ -91,6 +166,7 @@ _INSTRUCTION = """# 変換指示 — カンプを本番用HTML/CSS/JSに書き�
 あなた（AIコーディングエージェント）への指示。このフォルダの **カンプ見本.html** を見本として、
 本番用のコードを新規に書き起こすこと。
 %RULESNOTE%
+%CHECKNOTE%
 ## 作るファイル
 
 ```
@@ -129,9 +205,17 @@ JSが`<html>`に`anim-on`を付けたときだけ動く＝JS無効でも消え�
 |---|---|---|
 %TABLE%
 
+## スマホ（SP）レイアウトについて
+
+**カンプはSPの答えを持っていない**（見本のSP表示は崩れていることが多い）。
+同梱の「レスポンシブ検査.html」の375px結果は**カンプの粗をそのまま写したもの**なので、
+それを再現するのではなく、**SPレイアウトは実装者の裁量で普通に組んでよい**。
+PCの見た目とテキスト・画像・動きが保たれていればよい。
+
 ## 完了チェック（必ず実行して結果を報告）
 
 1. コーディング規約.md末尾の「コーディング完了チェックリスト」を全項目確認
 2. 見本の全テキストが出力に残っているか機械照合（欠落ゼロ）
 3. ブラウザ（Playwright可）で表示し、PC幅/スマホ幅で崩れ・横スクロールがないか確認
+4. 上の「最初にやること」で挙がった事故を直したか（直した／デザインと判断した の別を報告）
 """

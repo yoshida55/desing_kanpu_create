@@ -192,6 +192,7 @@ _CLASS_RE = re.compile(r"""class\s*=\s*("([^"]*)"|'([^']*)')""", re.IGNORECASE)
 _DELAY_RE = re.compile(r"""data-cedelay\s*=\s*["']?(\d+)""", re.IGNORECASE)
 _STYLE_RE = re.compile(r"""style\s*=\s*("([^"]*)"|'([^']*)')""", re.IGNORECASE)
 _KF_RE = re.compile(r"@keyframes\s+([\w-]+)\s*\{", re.IGNORECASE)
+_H_RE = re.compile(r"<(h[1-3])\b[^>]*>(.*?)</\1>", re.DOTALL | re.IGNORECASE)
 
 
 def _esc(t) -> str:
@@ -219,21 +220,60 @@ def _dur_ms(v: str):
         return None
 
 
+def _clean_text(raw: str) -> str:
+    """HTML断片から表示文字だけを取り出す。
+    タグは空文字で落とす（1文字ずつspanに割れた文字アニメを繋ぎ直すため＝そのままHTML検索できる文字列になる）。
+    切り出し窓の端で切れた不完全なタグ（'<p class="x' 等）も落とす＝生タグが表に出るのを防ぐ。"""
+    t = re.sub(r"<[^>]*>", "", raw)
+    t = re.sub(r"<[^>]*$", "", t)
+    return re.sub(r"\s+", " ", _html.unescape(t)).strip()
+
+
 def _snippet(html: str, pos: int) -> str:
-    raw = html[pos:pos + 200]
-    txt = re.sub(r"<[^>]+>", " ", raw)
-    txt = re.sub(r"\s+", " ", txt).strip()
-    return txt[:22]
+    # 窓は広めに取る（狭いと最初の子タグの属性だけで埋まり、文字が1つも拾えない）
+    return _clean_text(html[pos:pos + 800])[:22]
+
+
+def _attr(tag_html: str, name: str) -> str:
+    m = re.search(name + r"""\s*=\s*("([^"]*)"|'([^']*)')""", tag_html, re.IGNORECASE)
+    if not m:
+        return ""
+    return (m.group(2) if m.group(2) is not None else m.group(3)) or ""
+
+
+def _img_hint(tag: str, whole: str, forward: str) -> str:
+    """文字を持たない画像系の行にも探す手がかりを出す（alt優先・無ければファイル名）。
+    これが無いと、意味を持たないクローン元のクラス名だけが手がかりになってしまう。"""
+    t = whole if tag == "img" else ""
+    if not t:
+        m = re.search(r"<img\b[^>]*>", forward, re.IGNORECASE)
+        t = m.group(0) if m else ""
+    if not t:
+        return ""
+    alt = _attr(t, "alt").strip()
+    if alt:
+        return "画像 alt=" + alt[:18]
+    src = _attr(t, "src").split("?")[0].rsplit("/", 1)[-1]
+    return ("画像 " + src[:20]) if src else ""
+
+
+def _sec_heading(html: str, start: int, end: int) -> str:
+    """セクション内の見出し文字。実装時に「どのセクションか」を探す手がかり。
+    h1〜h3が無いカンプもある（縦書きラベル等）ので、その場合は先頭の文字を拾う。"""
+    m = _H_RE.search(html, start, end)
+    raw = m.group(2) if m else html[start:min(end, start + 2000)]
+    return _clean_text(raw)[:18]
 
 
 def scan_camp(html: str) -> list[dict]:
     """カンプHTMLからアニメ付き要素を列挙する（対応表の行データ）。"""
     spans = [(m.start(), m.end()) for m in camp._SEC_RE.finditer(html)]
+    sec_names = [_sec_heading(html, s, e) for s, e in spans]
 
     def sec_of(pos: int) -> str:
         for i, (s, e) in enumerate(spans):
             if s <= pos < e:
-                return f"セクション{i + 1}"
+                return f"セクション{i + 1}：{sec_names[i]}" if sec_names[i] else f"セクション{i + 1}"
         hm = re.search(r"<header\b.*?</header>", html, flags=re.DOTALL | re.IGNORECASE)
         if hm and hm.start() <= pos < hm.end():
             return "ヘッダー"
@@ -292,10 +332,13 @@ def scan_camp(html: str) -> list[dict]:
         kit_txt = " ".join(dict.fromkeys(" ".join(kit).split())) if kit else "—"
         if extra:
             kit_txt += " ＋ " + " ".join(extra)
+        text = _snippet(html, m.end())
+        if not text:
+            text = _img_hint(tag, m.group(0), html[m.end():m.end() + 800])
         rows.append({
             "sec": sec_of(m.start()),
             "el": label,
-            "text": _snippet(html, m.end()),
+            "text": text,
             "ja": "／".join(dict.fromkeys(ja)),
             "kit": kit_txt,
             "note": "。".join(dict.fromkeys(notes)),
@@ -387,9 +430,13 @@ def build_kit(filename: str) -> dict:
         parts.append(f"<tr class='secrow'><td colspan='5'>📍 {_esc(sec)}（{len(grp)}個）　使う動き: {summary}</td></tr>")
         for r in grp:
             base = r["kit"].split("＋")[0].strip()
+            # 本番HTMLはゼロから書き直す＝カンプのクラス名は残らない。確実に一致するのは本文なので主役にする
+            txt = _esc(r["text"])
+            el_code = f"<code class='dim'>{_esc(r['el'])}</code>"
+            cell = f"<b>「{txt}」</b><br>{el_code}" if txt else el_code
             parts.append(
                 f"<tr data-kit=\"{_esc(base)}\" data-el=\"{_esc(r['el'])}\">"
-                f"<td>{_esc(r['sec'])}</td><td><code>{_esc(r['el'])}</code><br><span class='dim'>{_esc(r['text'])}</span></td>"
+                f"<td>{_esc(r['sec'])}</td><td>{cell}</td>"
                 f"<td>{_esc(r['ja'])}</td><td><code>{_esc(r['kit'])}</code></td><td class='dim'>{_esc(r['note'])}</td></tr>"
             )
     tr = "".join(parts) or "<tr><td colspan='5' class='dim'>アニメ付きの要素は見つかりませんでした</td></tr>"
@@ -531,8 +578,9 @@ CSSの隠す指定を全部この中に入れてあるので、<b>JSが無効・
 <h2>③ どの要素に何を付けるか（対応表）</h2>
 <p class="note">長く見えますが、<b>使う動きは実質 %KINDS% 種類だけ</b>です。青い「📍まとめ行」でセクションごとの全体像が掴めます。<br>
 おすすめの進め方：全部を先に対応させようとせず、<b>HTMLを書きながら「今作っている場所のまとめ行」だけ見る</b>→同じ動きの要素はクラスをコピペ。<br>
-「要素」列のクラス名はカンプ内の名前（＝場所を探すための住所）。自分のHTMLのクラス名はそのままでOK、足すのは「付けるクラス・属性」列だけです。</p>
-<table><thead><tr><th style="width:90px">場所</th><th>要素</th><th style="width:170px">動き</th><th>付けるクラス・属性</th><th style="width:180px">メモ</th></tr></thead>
+探し方：「場所」列はセクション番号＋そのセクションの見出し、「要素」列は<b>その要素の本文の書き出し</b>です。本番のHTMLはゼロから書き直すのでカンプのクラス名は残りませんが、<b>本文はそのまま残る</b>ので、この文字でHTMLを検索すれば一発で見つかります。<br>
+薄い文字の<code>div.xxx</code>はカンプ内の名前です（参考用・自分のHTMLのクラス名はそのままでOK）。足すのは「付けるクラス・属性」列だけです。</p>
+<table><thead><tr><th style="width:150px">場所</th><th>要素（この文字で検索）</th><th style="width:170px">動き</th><th>付けるクラス・属性</th><th style="width:180px">メモ</th></tr></thead>
 <tbody>%TABLE%</tbody></table>
 
 %KF%

@@ -4946,7 +4946,7 @@ a[href*="未設定"], a[href=""] { color: red !important; outline: red dashed 0.
 
   </div><!-- .header__in -->
 
-</header><!-- #header -->
+<img src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_76ex8f76ex8f76ex.png" style="z-index: 999; width: 14.8%; height: auto; position: absolute; left: 22%; top: 97px;" class=""><img src="http://127.0.0.1:5000/uploads/processed_ChatGPT Image 2026年7月18日 00_56_59.png" style="z-index: 999; width: 75%; height: auto; position: absolute; left: 13.5%; top: 221px; max-width: none !important; min-height: 744px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="" data-cebt=""></header><!-- #header -->
 
     <main id="main">
 
@@ -6286,8 +6286,4 @@ html.js .reveal.is-visible { opacity: 1; transform: translateY(0px); }
   else run();
 })();
 </script>
-<!--__CE_SAFE_END__-->
-<!-- ce: 固定ヘッダー内にあり全ページに貼り付いていた追加画像をページ側へ移動（2026-07-20） -->
-<img src="http://127.0.0.1:5000/uploads/Gemini_Generated_Image_76ex8f76ex8f76ex.png" style="z-index: 1001; width: 14.8%; height: auto; position: absolute; left: 22%; top: 97px;" class="">
-<img src="http://127.0.0.1:5000/uploads/processed_ChatGPT Image 2026年7月18日 00_56_59.png" style="z-index: 1001; width: 75%; height: auto; position: absolute; left: 13.5%; top: 221px; max-width: none !important; min-height: 744px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" class="" data-cebt="">
-</body></html>
+<!--__CE_SAFE_END__--></body></html>
