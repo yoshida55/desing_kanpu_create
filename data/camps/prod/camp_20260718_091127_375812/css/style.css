@@ -1,0 +1,175 @@
+/* ┌─────────────────────────────────────────┐
+   │ 共通の土台（文字サイズ・色・本文）      │
+   └─────────────────────────────────────────┘ */
+
+/* 1rem = 10px として計算できるようにしておく */
+html {
+  font-size: 62.5%;
+  scroll-behavior: smooth;
+}
+
+:root {
+  --green: #22b573; /* メインの緑（ロゴ・キャッチ） */
+  --green-dark: #137c55; /* 濃い緑（小さい文字・ホバー） */
+  --green-cta: #0b6e4f; /* ボタンの緑 */
+  --green-band: #10a387; /* メッセージ帯の緑 */
+  --yellow: #f0c14b; /* キャッチ脇の黄色い線 */
+  --ink: #221814; /* 本文の文字色 */
+  --line: rgba(19, 124, 85, 0.14);
+  --shadow: 0 12px 32px rgba(25, 117, 80, 0.12);
+  --shadow-strong: 0 24px 64px rgba(25, 117, 80, 0.18);
+}
+
+body {
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-size: 1.6rem;
+  line-height: 2em;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: #fff;
+  overflow-x: hidden; /* 傾けた飾り文字が右にはみ出しても横スクロールさせない */
+}
+
+/* ┌─────────────────────────────────────────┐
+   │ ヘッダー（全ページ共通）                │
+   └─────────────────────────────────────────┘ */
+
+/* 画面上部に浮かせて固定するバー。中身はロゴとナビの2つを両端に振り分け */
+.header {
+  position: fixed; /* スクロールしても付いてくる */
+  z-index: 100;
+  top: 1.6rem;
+  right: 0;
+  left: 0;
+  width: min(140.8rem, calc(100% - 3.2rem));
+  margin: 0 auto; /* 左右autoで画面の中央に置く */
+  min-height: 6.4rem;
+  display: flex; /* ロゴとナビを横並びにして両端へ */
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.2rem 1rem 2.4rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+/* ロゴ（緑の四角＋事業所名の2行） */
+.header_logo {
+  display: flex; /* 四角と文字を横並び */
+  align-items: center;
+  gap: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+/* 左の緑の四角。飾りなのでタグは作らず疑似要素で置いている */
+.header_logo::before {
+  content: "";
+  flex-shrink: 0; /* 文字が長くても四角は潰さない */
+  width: 2.9rem;
+  aspect-ratio: 1;
+  border-radius: 4px 10px 4px 10px;
+  background: var(--green);
+  transform: rotate(-8deg); /* 少しだけ傾けて手作り感を出す */
+}
+
+.logo_name {
+  line-height: 1.25em;
+}
+
+.logo_sub {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  color: var(--green-dark);
+}
+
+/* PCの横並びナビ（767px以下では隠してボタンに切り替え） */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 2.8rem;
+}
+
+.nav_link {
+  position: relative; /* 下線（::after）の位置の基準 */
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* ホバーすると左から緑の下線が伸びる */
+.nav_link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%; /* 右端を左まで引っ込めて幅0にしている */
+  bottom: -5px;
+  height: 2px;
+  background: var(--green);
+  transition: right 0.3s;
+}
+
+.nav_link:hover::after {
+  right: 0;
+}
+
+/* 一番押してほしいボタン */
+.nav_cta {
+  display: inline-flex; /* 文字を上下左右の中央に置くため */
+  align-items: center;
+  justify-content: center;
+  min-height: 4.8rem;
+  padding: 0 2.4rem;
+  border-radius: 4px;
+  background: var(--green-cta);
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s,
+    background 0.3s;
+}
+
+.nav_cta:hover {
+  transform: translateY(-4px);
+  background: var(--green-dark);
+  box-shadow: var(--shadow-strong);
+}
+
+/* 開閉ボタン（ハンバーガー）。PCでは隠す */
+.nav_toggle {
+  display: none;
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 4px;
+  background: var(--green-cta);
+  color: #fff;
+  font-size: 2rem;
+}
+
+/* ┌─────────────────────────────────────────┐
+   │ スマホ・タブレット                      │
+   └─────────────────────────────────────────┘ */
+
+@media screen and (max-width: 767px) {
+  .header {
+    top: 0.8rem;
+    width: calc(100% - 1.6rem);
+    padding-left: 1.6rem;
+  }
+
+  .header_logo {
+    font-size: 1.3rem;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .nav_toggle {
+    display: block;
+  }
+}

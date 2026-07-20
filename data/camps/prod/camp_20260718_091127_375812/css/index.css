@@ -1,0 +1,314 @@
+/* ┌─────────────────────────────────────────┐
+   │ メインビジュアル                        │
+   └─────────────────────────────────────────┘ */
+
+/* キャッチ・イラスト・緑の帯を重ねる土台 */
+.main {
+  position: relative; /* キャッチ（absolute）の位置の基準 */
+  padding-top: 23.3rem; /* キャッチを置く白い余白ぶん */
+}
+
+/* 弧を描くキャッチコピー。1文字ずつ角度をずらして並べている */
+.main_catch {
+  position: absolute;
+  top: 16.1rem;
+  left: 6.2%;
+  z-index: 3;
+  padding: 0 1.5em; /* 左右の黄色い線を置くスペース */
+  font-size: min(6.88rem, 4.78vw); /* 画面が狭いと1行に収まらないので幅にも連動させる */
+  font-weight: 700;
+  line-height: 1.4em;
+  color: var(--green);
+  white-space: nowrap;
+  transform: rotate(-10deg);
+}
+
+/* 両脇の黄色い線。1本ぶん影を落として2本に見せている */
+.main_catch::before,
+.main_catch::after {
+  content: "";
+  position: absolute;
+  top: 0.93em;
+  width: 0.16em;
+  height: 0.72em;
+  border-radius: 2px;
+  background: var(--yellow);
+}
+
+.main_catch::before {
+  left: 0.15em;
+  transform: rotate(-30deg);
+  box-shadow: 0.5em 0.3em 0 var(--yellow); /* 右下にもう1本 */
+}
+
+.main_catch::after {
+  right: 0.15em;
+  transform: rotate(30deg);
+  box-shadow: -0.5em 0.3em 0 var(--yellow); /* 左下にもう1本 */
+}
+
+/* 1文字ぶんの入れ物。弧の角度と高さはここで付ける */
+.catch_item {
+  display: inline-block;
+}
+
+.catch_item:nth-child(1) {
+  transform: translateY(0) rotate(-12deg);
+}
+.catch_item:nth-child(2) {
+  transform: translateY(-0.6rem) rotate(-10deg);
+}
+.catch_item:nth-child(3) {
+  transform: translateY(-1.1rem) rotate(-8deg);
+}
+.catch_item:nth-child(4) {
+  transform: translateY(-1.5rem) rotate(-6deg);
+}
+.catch_item:nth-child(5) {
+  transform: translateY(-1.8rem) rotate(-4deg);
+}
+.catch_item:nth-child(6) {
+  transform: translateY(-1.9rem) rotate(-2deg);
+}
+.catch_item:nth-child(7) {
+  transform: translateY(-2rem) rotate(0deg);
+}
+.catch_item:nth-child(8) {
+  transform: translateY(-1.9rem) rotate(2deg);
+}
+.catch_item:nth-child(9) {
+  transform: translateY(-1.8rem) rotate(4deg);
+}
+.catch_item:nth-child(10) {
+  transform: translateY(-1.5rem) rotate(6deg);
+}
+.catch_item:nth-child(11) {
+  transform: translateY(-1.1rem) rotate(8deg);
+}
+.catch_item:nth-child(12) {
+  transform: translateY(-0.6rem) rotate(10deg);
+}
+.catch_item:nth-child(13) {
+  transform: translateY(0) rotate(12deg);
+}
+
+/* 左の文字から104msずつ遅らせて、順番にポンポンと出す
+   （先頭の html.anim-on は、あとから読む anim.css の transition 指定に
+     打ち消されないように付けている。無いと13文字が同時に出てしまう） */
+html.anim-on .catch_item:nth-child(2) .ch {
+  transition-delay: 104ms;
+}
+html.anim-on .catch_item:nth-child(3) .ch {
+  transition-delay: 208ms;
+}
+html.anim-on .catch_item:nth-child(4) .ch {
+  transition-delay: 312ms;
+}
+html.anim-on .catch_item:nth-child(5) .ch {
+  transition-delay: 416ms;
+}
+html.anim-on .catch_item:nth-child(6) .ch {
+  transition-delay: 520ms;
+}
+html.anim-on .catch_item:nth-child(7) .ch {
+  transition-delay: 624ms;
+}
+html.anim-on .catch_item:nth-child(8) .ch {
+  transition-delay: 728ms;
+}
+html.anim-on .catch_item:nth-child(9) .ch {
+  transition-delay: 832ms;
+}
+html.anim-on .catch_item:nth-child(10) .ch {
+  transition-delay: 936ms;
+}
+html.anim-on .catch_item:nth-child(11) .ch {
+  transition-delay: 1040ms;
+}
+html.anim-on .catch_item:nth-child(12) .ch {
+  transition-delay: 1144ms;
+}
+html.anim-on .catch_item:nth-child(13) .ch {
+  transition-delay: 1248ms;
+}
+
+/* イラスト。緑の帯に少しかぶせたいので下マージンをマイナスにしている */
+.main_visual {
+  position: relative; /* 吹き出し（absolute）の位置の基準 */
+  z-index: 2; /* 緑の帯より前に出す */
+  width: 96%;
+  max-width: 126.2rem;
+  height: 65rem;
+  margin: 0 auto -20.6rem;
+}
+
+.main_image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 枠の比率に合わせて切り取る */
+}
+
+/* イラストの上に浮かぶ吹き出し。上から22%より下の範囲に散らす */
+.bubble_list {
+  position: absolute;
+  top: 22%;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  pointer-events: none; /* 下のイラストのクリックを邪魔しない */
+}
+
+.bubble_item {
+  position: absolute;
+  padding: 0.16em 0.34em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+  opacity: 0; /* ふわっと出るまでは隠しておく */
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+  animation: bubble_pop 3.6s ease-in-out infinite;
+}
+
+/* 位置・大きさ・色・出る順番は1個ずつ変える */
+.bubble_item:nth-child(1) {
+  top: 14%;
+  left: 6%;
+  font-size: 3.4rem;
+  color: #12a37f;
+}
+.bubble_item:nth-child(2) {
+  top: 8%;
+  left: 80%;
+  font-size: 3.8rem;
+  color: #f0a13b;
+  animation-delay: 0.6s;
+}
+.bubble_item:nth-child(3) {
+  top: 4%;
+  left: 28%;
+  font-size: 3.2rem;
+  color: #e05656;
+  animation-delay: 1.2s;
+}
+.bubble_item:nth-child(4) {
+  top: 2%;
+  left: 58%;
+  font-size: 3.4rem;
+  color: #d9a80c;
+  animation-delay: 1.8s;
+}
+.bubble_item:nth-child(5) {
+  top: 34%;
+  left: 90%;
+  font-size: 2.8rem;
+  color: #12a37f;
+  animation-delay: 2.4s;
+}
+.bubble_item:nth-child(6) {
+  top: 48%;
+  left: 10%;
+  font-size: 3.2rem;
+  color: #5b8fd4;
+  animation-delay: 3s;
+}
+
+@keyframes bubble_pop {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.6);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0) scale(1.12);
+  }
+  20% {
+    transform: scale(1);
+  }
+  55% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+    transform: translateY(-18px) scale(1.06);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 緑の帯。上半分はイラストが重なるので、文字は下寄りに置く */
+.main_message {
+  position: relative; /* 白いふた（::after）の位置の基準 */
+  z-index: 1;
+  padding: 26rem 0 5.4rem;
+  background: var(--green-band);
+  color: #fff;
+  text-align: center;
+}
+
+/* 帯の下端をゆるいアーチに見せる白いふた */
+.main_message::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -3.9rem;
+  left: 0;
+  height: 7.8rem;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.message_text {
+  font-size: 1.6rem;
+  line-height: 1.6em;
+}
+
+/* スマホでだけ改行を1つ増やす */
+.message_break {
+  display: none;
+}
+
+/* ┌─────────────────────────────────────────┐
+   │ スマホ・タブレット                      │
+   └─────────────────────────────────────────┘ */
+
+@media screen and (max-width: 767px) {
+  .main {
+    padding-top: 16rem;
+  }
+
+  .main_catch {
+    top: 11rem;
+    left: 3%;
+    font-size: min(3.6rem, 5.9vw); /* 1行のままスマホ幅に収める */
+  }
+
+  .main_visual {
+    width: 94%;
+    height: auto; /* 横幅に合わせて自然な高さにする */
+    margin-bottom: -8rem;
+  }
+
+  .main_image {
+    height: auto;
+  }
+
+  /* 吹き出しを一回り小さくして、イラストの幅に収める */
+  .bubble_item:nth-child(1),
+  .bubble_item:nth-child(2),
+  .bubble_item:nth-child(3),
+  .bubble_item:nth-child(4),
+  .bubble_item:nth-child(5),
+  .bubble_item:nth-child(6) {
+    font-size: 2.2rem;
+  }
+
+  .main_message {
+    padding: 12rem 0 8rem;
+  }
+
+  .message_break {
+    display: inline;
+  }
+}
