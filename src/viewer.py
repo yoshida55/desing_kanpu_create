@@ -3316,7 +3316,9 @@ html.__ce_altmode{cursor:text}
       var edited=false;
       // data-cedelay（⏳遅らせ・順番の演出タイミング）は「動きの一部」なので部品に残す。
       // それ以外のdata-ce*（ドラッグ署名data-cetx等）は編集の内部印なので外す。
-      if(n.attributes){ [].slice.call(n.attributes).forEach(function(a){ if(a.name.indexOf('data-ce')===0 && a.name!=='data-cedelay'){ edited=true; n.removeAttribute(a.name); } }); }
+      // data-cepin/data-cepinbg（📌貼り付け固定）も「動き＝残す」側＝保存後も解除できるように保持する
+      var _keepCe={'data-cedelay':1,'data-cepin':1,'data-cepinbg':1};
+      if(n.attributes){ [].slice.call(n.attributes).forEach(function(a){ if(a.name.indexOf('data-ce')===0 && !_keepCe[a.name]){ edited=true; n.removeAttribute(a.name); } }); }
       if(n.style){
         ['animation','transition'].forEach(function(p){ n.style.removeProperty(p); });      // 一時アニメは常に除去
         if(edited){ ['transform','transform-origin','width','height','max-width','object-fit','opacity','filter'].forEach(function(p){ n.style.removeProperty(p); }); }  // 編集で動かした要素だけサイズ・位置も戻す
@@ -4152,6 +4154,7 @@ html.__ce_altmode{cursor:text}
       }
     }
     inspBtn.addEventListener('click',toggle);
+    window.__ceInspExit=function(){ if(on) toggle(); };   // Escの全体復旧から呼べるように外へ出す
   })();
   // 差し替え/追加した新要素には出現アニメの監視(IntersectionObserver)が付いていない＝
   // fxa_pre/reveal系が透明のまま永久に出ない（実際に起きた）。「もう見えた」状態にして表示する。
@@ -6134,22 +6137,38 @@ html.__ce_altmode{cursor:text}
       var fixH=(cs.height!=='auto')?(parseFloat(cs.height)||0):0;
       var pad=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.paddingBottom)||0);
       var slack=Math.round(r.height-contentH);
-      var why='';
-      if(minH>contentH+20) why='最小の高さ '+Math.round(minH)+'px';
-      else if(fixH>contentH+20 && cs.position!=='absolute' && cs.position!=='fixed') why='固定の高さ '+Math.round(fixH)+'px';
-      else if(pad>=80 && slack>=80) why='上下の余白 '+Math.round(pad)+'px';
-      else if(kids.length===0 && !(t.textContent||'').trim() && r.height>=100) why='中身が空なのに '+Math.round(r.height)+'px';
+      // ★自然な高さ（中身＋余白）＝min-heightを外した時に落ち着く高さ。
+      //   これを超えるmin-heightだけが「本当の犯人」＝外せば縮む。中身＋余白がmin-heightを既に
+      //   上回っているなら、min-heightを外しても1pxも縮まない（＝以前これで「詰められない」が再発した）。
+      var naturalH=contentH+pad;
+      var why='', kind='';
+      if(minH>naturalH+20){ why='最小の高さ '+Math.round(minH)+'px'; kind='minh'; }
+      else if(fixH>naturalH+20 && cs.position!=='absolute' && cs.position!=='fixed'){ why='固定の高さ '+Math.round(fixH)+'px'; kind='minh'; }
+      else if(pad>=80 && slack>=80){ why='上下の余白 '+Math.round(pad)+'px'; kind='pad'; }
+      else if(kids.length===0 && !(t.textContent||'').trim() && r.height>=100){ why='中身が空なのに '+Math.round(r.height)+'px'; kind='minh'; }
       if(!why) continue;
-      out.push({el:t, name:t.tagName.toLowerCase()+((t.className&&typeof t.className==='string'&&t.className.trim())?('.'+t.className.trim().split(/\\s+/)[0]):''),
+      out.push({el:t, kind:kind, pad:Math.round(pad),
+        name:t.tagName.toLowerCase()+((t.className&&typeof t.className==='string'&&t.className.trim())?('.'+t.className.trim().split(/\\s+/)[0]):''),
         why:why, slack:slack, h:Math.round(r.height)});
     }
     out.sort(function(a,b){ return b.h-a.h; });   // 大きい箱＝影響が大きい順
     return out.slice(0,6);
   }
+  // ★「まとめて詰める」は原因に応じて手を変える＝押して必ず縮む。
+  //   min-heightが犯人→外す。余白(padding)が犯人→上下paddingを削る（min-height除去だけでは
+  //   1pxも縮まないケースが実在した＝flex中央寄せセクションで中身＋余白がmin-heightを超えている時）。
   function padCrush(list){
     list.forEach(function(o){
-      o.el.style.setProperty('min-height','0','important');
-      o.el.style.setProperty('height','auto','important');
+      var el=o.el, h0=el.getBoundingClientRect().height;
+      el.style.setProperty('min-height','0','important');
+      el.style.setProperty('height','auto','important');
+      // min-height除去で縮まなかった＝本当の原因は余白。上下paddingを詰めて確実に縮める。
+      if(el.getBoundingClientRect().height > h0-20){
+        var cs=getComputedStyle(el);
+        var pt=parseFloat(cs.paddingTop)||0, pb=parseFloat(cs.paddingBottom)||0;
+        if(pt>40) el.style.setProperty('padding-top','40px','important');
+        if(pb>40) el.style.setProperty('padding-bottom','40px','important');
+      }
     });
     markDirty();
   }
@@ -8000,6 +8019,46 @@ html.__ce_altmode{cursor:text}
     //   （実際にh1.header-logo__ttlが 0,8647 へ飛んだ）。中身は絶対に動かさない。
     return {kind:'host', target:stuck};
   }
+  // ===== 📌 逆：この要素を画面に貼り付ける（スクロールしても付いてくる固定ヘッダー等） =====
+  // ★狙い＝「セクション（ヘッダー行など）を、スクロールしても上に残る固定バーにする」。
+  //   position:fixed だと元いた場所に穴が空く（🕳と同じ）ので、既定は sticky を使う＝
+  //   その要素の高さぶんは今までどおり場所を取りつつ、スクロールで画面の縁に貼り付く。
+  //   固定バーは背景が透けると下の文字と重なって読めないので、透明なら薄い白を敷く。
+  function pinFixTarget(el){
+    // 右クリックした所から外へ辿り、最初に出会う section/header/footer を貼り付け対象にする
+    //   （中の小さな要素だけ貼り付けると崩れるため。無ければその要素自身）。
+    var t=el;
+    for(var i=0;t&&i<6&&t.tagName!=='BODY'&&t.tagName!=='HTML';i++,t=t.parentElement){
+      if(/^(HEADER|FOOTER|SECTION|NAV)$/.test(t.tagName)) return t;
+    }
+    return el;
+  }
+  function pinIsFixed(el){
+    var cs; try{ cs=getComputedStyle(el); }catch(_){ return false; }
+    return cs.position==='fixed'||cs.position==='sticky'||el.hasAttribute('data-cepin');
+  }
+  function pinFix(el, edge){
+    edge=edge||'top';
+    var cs; try{ cs=getComputedStyle(el); }catch(_){ cs=null; }
+    el.style.setProperty('position','sticky','important');
+    el.style.setProperty(edge,'0','important');
+    el.style.setProperty(edge==='top'?'bottom':'top','auto','important');
+    el.style.setProperty('z-index','2147480000','important');   // ページの中身より前・ツールUIより後ろ
+    // 背景が透けていると貼り付いた時に下の文字と重なって読めない → 薄い白を保険で敷く
+    var bg=cs&&cs.backgroundColor;
+    if(!bg || bg==='rgba(0, 0, 0, 0)' || bg==='transparent'){
+      el.style.setProperty('background-color','rgba(255,255,255,.96)','important');
+      el.setAttribute('data-cepinbg','1');
+    }
+    el.setAttribute('data-cepin',edge);
+    markDirty();
+  }
+  function pinUnfix(el){
+    ['position','top','bottom','z-index'].forEach(function(p){ el.style.removeProperty(p); });
+    if(el.getAttribute('data-cepinbg')){ el.style.removeProperty('background-color'); el.removeAttribute('data-cepinbg'); }
+    el.removeAttribute('data-cepin');
+    markDirty();
+  }
   function unfixEl(el){
     var p=_unfixPlan(el);
     if(!p) return false;
@@ -8091,7 +8150,7 @@ html.__ce_altmode{cursor:text}
   //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
-  function _inUI2(node){ if(window.__ceFlyMode||window.__ceInspOn) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')||el.closest('#__ce_pskill')); }
+  function _inUI2(node){ if(window.__ceFlyMode||window.__ceInspOn) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')||el.closest('#__ce_pskill')||el.closest('#__ce_sbgp')); }
   var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   // 🔲 ドラッグ範囲選択（マーキー・2026-07-19）：セクション余白など「ドラッグしても何も起きない場所」から
   // ドラッグすると青い点線枠が出て、枠に完全に入った要素をまとめて複数選択（Ctrl+クリックと同じselEls状態）。
@@ -8500,7 +8559,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
@@ -8746,6 +8805,54 @@ html.__ce_altmode{cursor:text}
     st.textContent='.cepsoff-b::before{content:none!important}.cepsoff-a::after{content:none!important}';
     (document.head||document.documentElement).appendChild(st);
   }
+  // 🎨 セクションの背景色を変える（AIなし・即反映）＝右クリックから直接開く浮動パネル。
+  //   ①このページのセクション色 ②ページで使用中の色（頻度順） ③自由な色 から選ぶ。
+  //   ⚙大メニューにも同じ機能があるが、右クリックからすぐ届くようにこちらへ切り出した。
+  function openSecBg(el,x,y){
+    var old=document.getElementById('__ce_sbgp'); if(old) old.remove();
+    var target=(el&&el.closest)?el.closest('section,header,footer'):null;
+    if(!target){ if(msg) msg.textContent='セクション（またはヘッダー/フッター）の中を右クリックしてから使ってください'; return; }
+    function _colOk(c){ return c && c!=='transparent' && !/rgba\\(\\s*\\d+,\\s*\\d+,\\s*\\d+,\\s*0\\)/.test(c); }
+    function applySecBg(c){
+      target.style.setProperty('background-color', c, 'important');
+      // グラデが上に被って色が見えない時は外す（写真背景url は残す）
+      try{ var bi=getComputedStyle(target).backgroundImage; if(bi && bi.indexOf('gradient')>=0 && bi.indexOf('url(')<0) target.style.setProperty('background-image','none','important'); }catch(_){}
+      markDirty();
+      if(msg) msg.textContent='セクションの背景色を '+c+' にしました（💾保存で確定・⟲戻すで取り消し）';
+    }
+    function sw(c,t){ return '<button class="__ce_sbgsw" data-c="'+c+'" title="'+esc(t||c)+'" style="width:24px;height:24px;border:1px solid rgba(0,0,0,.28);border-radius:5px;cursor:pointer;background:'+c+';padding:0;margin:2px;vertical-align:middle"></button>'; }
+    var secSw=[], seen={};
+    [].slice.call(document.querySelectorAll('header,section,footer')).forEach(function(s,i){
+      if(s.closest('#__ce')||s.closest('#__ce_cm')) return;
+      var c=''; try{ c=getComputedStyle(s).backgroundColor; }catch(_){ return; }
+      if(!_colOk(c)||seen[c]) return; seen[c]=1;
+      secSw.push(sw(c,(i+1)+'番目('+s.tagName.toLowerCase()+')の背景 '+c));
+    });
+    var cnt={};
+    [].slice.call(document.querySelectorAll('body *')).slice(0,1500).forEach(function(n){
+      if(n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
+      var cs; try{ cs=getComputedStyle(n); }catch(_){ return; }
+      [cs.backgroundColor, cs.color].forEach(function(c){ if(_colOk(c)) cnt[c]=(cnt[c]||0)+1; });
+    });
+    var pgSw=Object.keys(cnt).filter(function(c){return !seen[c];})
+      .sort(function(a,b){return cnt[b]-cnt[a];}).slice(0,14).map(function(c){return sw(c,c+'（ページ内で使用中）');});
+    var p=document.createElement('div'); p.id='__ce_sbgp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:320px');
+    p.innerHTML='<b>🎨 セクションの背景色（〈'+target.tagName.toLowerCase()+'〉）</b>'
+      +'<div style="opacity:.7;margin:6px 0 2px">このページのセクション色</div><div>'+(secSw.join('')||'<span style="color:#999">（なし）</span>')+'</div>'
+      +'<div style="opacity:.7;margin-top:6px">ページで使われている色</div><div>'+(pgSw.join('')||'<span style="color:#999">（なし）</span>')+'</div>'
+      +'<div style="opacity:.7;margin-top:6px">新しい色（選ぶと即反映）</div><input type="color" id="__ce_sbgc" value="#f5f7fa" style="width:44px;height:26px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle">'
+      +'<button data-x="1" style="margin-left:8px;background:#555;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;vertical-align:middle">✖ 閉じる</button>';
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      if(ev.target.getAttribute('data-x')){ p.remove(); return; }
+      var b=ev.target.closest('.__ce_sbgsw'); if(b){ applySecBg(b.getAttribute('data-c')); return; }
+    });
+    p.querySelector('#__ce_sbgc').addEventListener('input',function(){ applySecBg(this.value); });
+  }
   function openDecoKill(el,x,y){
     var old=document.getElementById('__ce_pskill'); if(old) old.remove();
     var items=[];
@@ -8875,15 +8982,17 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_addline','➕ 線を追加（実要素・掴んで動かせる）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
     ['__ce_q_rst','⟲ 位置・サイズをリセット'],
-    ['__ce_q_unfix','📌 画面への貼り付きを解除（一緒にスクロール）']
+    ['__ce_q_unfix','📌 画面への貼り付きを解除（一緒にスクロール）'],
+    ['__ce_q_pin','📌 スクロールしても画面に貼り付ける（固定ヘッダー等）'],
+    ['__ce_q_secbg','🎨 セクションの背景色を変える（AIなし・即反映）']
   ];
   // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
   //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
   var QM_DEF_LAYOUT=[
     'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_slide','__ce_q_addline',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
-    'sep:🧩 セクション','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
-    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_unfix',
+    'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
+    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
     'sep:🧹 整える・消す','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
   ];
@@ -9010,7 +9119,12 @@ html.__ce_altmode{cursor:text}
         if(open&&k.indexOf('off:')!==0) open.n++;
         cnt.push(open);
       });
-      return '<div style="padding:6px 10px 2px;font-weight:700;font-size:12px">📋 メニューの設定</div>'
+      // ★先頭に「掴んで動かせるヘッダー」＝パネルが縦に長く画面外に出た時、これを掴んで上へ動かせる。
+      //   position:sticky で中をスクロールしても常に見える＝どこにいても掴める。
+      return '<div id="__ce_qe_bar" style="position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:6px;'
+        +'padding:7px 10px;margin:-4px -4px 4px;background:#e9eef7;border-bottom:1px solid #c7d2e2;border-radius:9px 9px 0 0;cursor:grab;user-select:none">'
+        +'<span style="color:#7a8aa0;font-size:14px">⠿</span><b style="flex:1;font-size:12.5px;color:#2a3550">📋 メニューの設定</b>'
+        +'<span style="font-size:10px;color:#8a94a8">↕ ここを掴んで動かせます</span></div>'
         +'<div style="padding:0 10px 6px;font-size:11px;color:#666;line-height:1.75">'
         +'<b>📁 グループ</b>を作ると、その下の項目が<b>サブメニュー</b>（▸ホバーで開く）にまとまります。<br>'
         +'次のグループ名（または区切り線）までが中身です。⠿ドラッグ／↑↓で入れ替え・🙈で隠せます。</div>'
@@ -9039,17 +9153,49 @@ html.__ce_altmode{cursor:text}
               :'<button data-hide="1" title="'+(isOff?'メニューに戻す':'メニューから隠す')+'" style="width:26px;height:20px;border:none;background:'+(isOff?'#e8f4e8':'#f0f0f2')+';border-radius:5px;cursor:pointer;padding:0">'+(isOff?'👁':'🙈')+'</button>')
             +'</div>';
         }).join('')
-        +'<div style="display:flex;gap:6px;padding:6px 8px;flex-wrap:wrap">'
+        +'<div style="padding:2px 10px 6px;font-size:10.5px;color:#8a8a90">※ 中身が1個だけのグループは、開く手間が増えるだけなので畳まずに出します。</div>'
+        // ★ボタン列は下に貼り付け（sticky）＝いくらスクロールしても「✔完了」が常に見える＝押せずに迷子にならない。
+        +'<div style="position:sticky;bottom:0;display:flex;gap:6px;padding:7px 8px;flex-wrap:wrap;background:#eef1f7;border-top:1px solid #c7d2e2;margin:0 -4px -4px;border-radius:0 0 9px 9px">'
         +'<button id="__ce_qe_grp" style="border:none;background:#2f6bff;color:#fff;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-weight:700">📁 グループを追加</button>'
         +'<button id="__ce_qe_sep" style="border:1px solid #ccc;background:#fff;border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer">─ 区切り線を追加</button>'
         +'<button id="__ce_qe_rst" style="border:1px solid #ccc;background:#fff;border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer">⟲ 初期に戻す</button>'
-        +'<button id="__ce_qe_ok" style="border:none;background:#22c55e;color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;font-weight:700">✔ 完了</button>'
-        +'</div>'
-        +'<div style="padding:0 10px 8px;font-size:10.5px;color:#8a8a90">※ 中身が1個だけのグループは、開く手間が増えるだけなので畳まずに出します。</div>';
+        +'<button id="__ce_qe_ok" style="border:none;background:#22c55e;color:#fff;border-radius:6px;padding:3px 12px;font-size:12px;cursor:pointer;font-weight:700;margin-left:auto">✔ 完了</button>'
+        +'</div>';
     }
     qm.innerHTML=html();
+    // ★編集パネルは縦に長い＝右クリック位置によっては下端（✔完了）が画面外に出る。
+    //   固定表示にして画面上部へ寄せ、高さも画面に収める（中はスクロール）＝必ずボタンに届く。
+    qm.style.position='fixed';
+    qm.style.left=Math.max(6,Math.min(parseFloat(qm.style.left)||60, window.innerWidth-360))+'px';
+    qm.style.top='8px';
+    qm.style.maxHeight=(window.innerHeight-16)+'px';
+    qm.style.overflowY='auto';
     if(!qm.__qeBound){
       qm.__qeBound=true;
+      // ⠿ヘッダーを掴んでパネルごと移動（画面外に出た時に上へ引っぱれる）。position:fixed基準で動かす。
+      //   ★document側のリスナーは「開くたびに増やさない」＝1回だけ束ねて、動かす対象(_qmDrag.qm)を差し替える。
+      qm.addEventListener('mousedown',function(ev){
+        if(!qm.__qeOn) return;
+        var bar=ev.target.closest&&ev.target.closest('#__ce_qe_bar'); if(!bar) return;
+        ev.preventDefault();
+        var r=qm.getBoundingClientRect();
+        window.__qmDrag={qm:qm, dx:ev.clientX-r.left, dy:ev.clientY-r.top};
+        bar.style.cursor='grabbing';
+      });
+      if(!window.__qmDragBound){
+        window.__qmDragBound=true;
+        document.addEventListener('mousemove',function(ev){
+          var d=window.__qmDrag; if(!d||!d.qm||!d.qm.isConnected) return;
+          var x=Math.max(6,Math.min(ev.clientX-d.dx, window.innerWidth-d.qm.offsetWidth-6));
+          var y=Math.max(6,Math.min(ev.clientY-d.dy, window.innerHeight-40));   // 少し残して掴み直せる
+          d.qm.style.left=x+'px'; d.qm.style.top=y+'px';
+        });
+        document.addEventListener('mouseup',function(){
+          var d=window.__qmDrag; if(!d) return;
+          if(d.qm){ var bar=d.qm.querySelector('#__ce_qe_bar'); if(bar) bar.style.cursor='grab'; }
+          window.__qmDrag=null;
+        });
+      }
       // ⠿ドラッグで並べ替え（↑↓ボタンと併用可）。落とす位置は行の上半分＝前、下半分＝後ろ。
       var _dragI=-1;
       qm.addEventListener('dragstart',function(ev){
@@ -9265,11 +9411,28 @@ html.__ce_altmode{cursor:text}
     // 自分自身が固定なのか、固定の器の中に取り残されているのかで文言を変える＝何が起きるか分かるように。
     (function(){
       var _p=_unfixPlan(curEl);
+      // ツールで貼り付けた(data-cepin sticky)ものは_stuckAncestor(=fixedだけ検出)に映らないので、先に見る
+      var _pinned=curEl&&curEl.closest&&curEl.closest('[data-cepin]');
+      if(_pinned){ _qmM['__ce_q_unfix']='📌 画面への貼り付きを解除（〈'+_pinned.tagName.toLowerCase()+'〉をページと一緒に動かす）'; return; }
       if(!_p){ delete _qmM['__ce_q_unfix']; return; }
       _qmM['__ce_q_unfix']=
         (_p.kind==='self') ? '📌 画面への貼り付きを解除（この要素をページと一緒に動かす）'
       : (_p.kind==='out')  ? '📌 画面への貼り付きを解除（貼り付く枠から出す）'
       : '📌 画面への貼り付きを解除（〈'+_p.target.tagName.toLowerCase()+'〉ごとページと一緒に動かす）';
+    })();
+    // 📌 逆：貼り付ける は「まだ貼り付いていない時」だけ出す（既に固定なら上の解除が出るので二重で出さない）。
+    //   貼り付ける対象のセクション名を出す＝どこが貼り付くか予想できる。
+    (function(){
+      var _pt=pinFixTarget(curEl);
+      if(!_pt || pinIsFixed(_pt)){ delete _qmM['__ce_q_pin']; return; }
+      var _nm=_pt.tagName.toLowerCase();
+      _qmM['__ce_q_pin']='📌 スクロールしても画面に貼り付ける（〈'+_nm+'〉を上に固定）';
+    })();
+    // 🎨 背景色は「セクション/ヘッダー/フッターの中」でだけ出す（塗る相手が無い所では隠す）
+    (function(){
+      var _sb=(curEl&&curEl.closest)?curEl.closest('section,header,footer'):null;
+      if(!_sb){ delete _qmM['__ce_q_secbg']; return; }
+      _qmM['__ce_q_secbg']='🎨 セクションの背景色を変える（〈'+_sb.tagName.toLowerCase()+'〉・AIなし）';
     })();
     // 🅰 まとめて文字調整（複数選択時のみ）：フォント種はページで使用中のものを頻度順に出す＋定番を後ろに
     var mfRow='';
@@ -9632,6 +9795,7 @@ html.__ce_altmode{cursor:text}
         return;
       }
       if(t.id==='__ce_q_pskill'){ var _pke=curEl; closeMenu(); openDecoKill(_pke,qx,qy); return; }
+      if(t.id==='__ce_q_secbg'){ var _sbe=curEl; closeMenu(); openSecBg(_sbe,qx,qy); return; }
       if(t.id==='__ce_q_addline'){
         // ➕ 実要素の線：疑似要素と違い、掴んで移動・右クリック→要素削除・色変え（写真加工の背景色）が全部効く
         var _ln=document.createElement('div');
@@ -9645,7 +9809,20 @@ html.__ce_altmode{cursor:text}
       }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
+      if(t.id==='__ce_q_pin'){
+        var _pt=pinFixTarget(curEl);
+        pinFix(_pt,'top');
+        closeMenu();
+        msg.textContent='📌 〈'+_pt.tagName.toLowerCase()+'〉を画面の上に貼り付けました（スクロールしても残ります／解除は同じ所を右クリック→📌解除・💾保存で確定）';
+        return;
+      }
       if(t.id==='__ce_q_unfix'){
+        // ツールで貼り付けた(data-cepin)ものは、器を動かす_unfixPlanでなく専用の解除で確実に外す
+        if(curEl&&curEl.closest&&curEl.closest('[data-cepin]')){
+          pinUnfix(curEl.closest('[data-cepin]')); closeMenu();
+          msg.textContent='📌 貼り付けを解除しました（ページと一緒にスクロールします・💾保存で確定）';
+          return;
+        }
         var _uf=unfixEl(curEl);
         closeMenu();
         // ⚠️⟲は当てにしない：この操作は要素の入れ物ごと移すので、⟲（DOM丸ごと復元）で戻らない場合がある。
@@ -9659,8 +9836,25 @@ html.__ce_altmode{cursor:text}
     });
   }
   // 右クリック禁止スクリプトが残っていても、こちらを優先させて確実にメニューを開く。
+  // ★「たまに右クリックが出なくなる」対策＝Escで全部の状態を強制リセットする最後の砦。
+  //   モード（🕊線飛ばし・🔍インスペクト）が抜け残っていたり、パネルが閉じ損ねていると
+  //   右クリックが効かなくなる。各モードは自前のEsc処理を持つが、それが取りこぼした時の保険。
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape') return;
+    var recovered=(window.__ceInspOn||window.__ceFlyMode);
+    // まずは各モードの正規の終了処理（後片付けごとやってくれる）
+    try{ if(window.__ceInspOn && window.__ceInspExit) window.__ceInspExit(); }catch(_){}
+    try{ if(window.__ceFlyMode && typeof flyEnd==='function'){ flyStopPrev(); flyEnd(); } }catch(_){}
+    // ★正規終了が例外で途中まで＝フラグが残ると右クリックが死んだままになるので、最後に必ず強制で落とす
+    window.__ceInspOn=false; window.__ceFlyMode=false;
+    try{ document.documentElement.style.cursor=''; }catch(_){}
+    // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill'].forEach(function(id){ var p=document.getElementById(id); if(p){ p.remove(); recovered=true; } });
+    try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
+    if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
+  },true);
   document.addEventListener('contextmenu',function(e){
-    if(window.__ceFlyMode){ e.preventDefault(); return; }  // 🕊ルート描画中は右クリック＝アンカー削除（キャンバス側で処理済み）
+    if(window.__ceFlyMode){ e.preventDefault(); if(msg) msg.textContent='🕊 線を飛ばすモード中です。右クリックメニューに戻すには Esc を押してください'; return; }  // 🕊ルート描画中は右クリック＝アンカー削除
     var _wasForced=_forceEl;
     var el=_forceEl||pickTarget(_realTarget(e)); _forceEl=null;
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;

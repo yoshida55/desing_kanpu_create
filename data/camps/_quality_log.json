@@ -525,5 +525,16 @@
   "warn": false,
   "ts": 1784571926,
   "rating": "○"
+ },
+ {
+  "file": "camp_20260721_071037_808884.html",
+  "base_id": "3497be3a69399dc6",
+  "anim_id": "",
+  "model": "codex:default",
+  "text_len": 1751,
+  "sections": 8,
+  "warn": true,
+  "ts": 1784585437,
+  "rating": "○"
  }
 ]
