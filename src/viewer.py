@@ -3917,6 +3917,59 @@ html.__ce_altmode{cursor:text}
       var d=el.getAttribute('data-cedelay'); if(d) kit+=' ＋ data-delay="'+d+'"';
       return kit;
     }
+    // クローン元サイトが元々持っていた動き（ツールの fxa_* ではない）を拾って言葉で出す。
+    //   ツールの翻訳表(animOf)に載らないので「出なかった」動きを、実装の手がかりごと見せる。
+    function animOrigin(el){
+      var hits=[];
+      // ① カウントアップ：data-count（＋書式）を持つ＝数字を0→目標へ数え上げる自前JS
+      if(el.hasAttribute&&el.hasAttribute('data-count')){
+        var suf=el.getAttribute('data-suffix')||'';
+        hits.push('カウントアップ：data-count="'+el.getAttribute('data-count')+'"'+(suf?(' data-suffix="'+suf+'"'):'')+'（0→この数字へ数え上げ）');
+      }
+      // ② よく使う動きライブラリの目印（属性・クラス）
+      if(el.hasAttribute&&el.hasAttribute('data-aos')) hits.push('AOS：data-aos="'+el.getAttribute('data-aos')+'"');
+      var cls=(el.className&&el.className.split)?el.className.split(/\\s+/):[];
+      cls.forEach(function(c){
+        if(/^animate__/.test(c)) hits.push('animate.css：.'+c);
+        else if(c==='wow') hits.push('WOW.js：.wow（スクロールで発火）');
+        else if(/^(aos|reveal|fade|slide|zoom|count|counter|num)/.test(c) && hits.join(' ').indexOf('.'+c)<0 && !/^count$/.test(c)) hits.push('動きの目印クラス：.'+c);
+      });
+      if(el.classList&&el.classList.contains('count')&&!el.hasAttribute('data-count')) hits.push('カウントアップ用クラス：.count');
+      // ③ CSSアニメ本体（@keyframes名）が乗っているか＝名前で正体が分かることがある
+      try{ var cs=getComputedStyle(el); if(cs.animationName&&cs.animationName!=='none') hits.push('CSSアニメ：@keyframes '+cs.animationName+'（'+cs.animationDuration+'）'); }catch(_){}
+      return hits;
+    }
+    // @keyframes名の実物CSSを全シートから抜き出す（クローンCSSは同一オリジン＝読める）。
+    function _kf(name){
+      for(var i=0;i<document.styleSheets.length;i++){
+        var rs; try{ rs=document.styleSheets[i].cssRules; }catch(_){ continue; }   // 他オリジンは触ると例外
+        if(!rs) continue;
+        for(var j=0;j<rs.length;j++){ if((rs[j].type===7||rs[j].name!=null)&&rs[j].name===name) return rs[j].cssText; }
+      }
+      return '';
+    }
+    // 「元の動き」クリックで渡す実装コード（本番コーディングにそのまま使える形）。
+    function animOriginCode(el){
+      var out=[];
+      var cs; try{ cs=getComputedStyle(el); }catch(_){ cs=null; }
+      if(cs && cs.animationName && cs.animationName!=='none'){
+        var kf=_kf(cs.animationName);
+        out.push('/* CSSアニメ */\\n'+(kf||('@keyframes '+cs.animationName+' { /* 元CSSから取得できませんでした */ }'))
+          +'\\n.target { animation: '+cs.animationName+' '+cs.animationDuration+' '+cs.animationTimingFunction+' '+cs.animationDelay+' '+(cs.animationIterationCount||'1')+'; }');
+      }
+      if(el.hasAttribute&&el.hasAttribute('data-count')){
+        var suf=el.getAttribute('data-suffix')||'';
+        out.push('<!-- カウントアップ（0→'+el.getAttribute('data-count')+'）-->\\n'
+          +'<span class="count" data-count="'+el.getAttribute('data-count')+'"'+(suf?(' data-suffix="'+suf+'"'):'')+'>0</span>\\n'
+          +'<script>\\ndocument.querySelectorAll(".count").forEach(function(el){\\n'
+          +'  var end=+el.dataset.count, suf=el.dataset.suffix||"", t0=null, dur=1200;\\n'
+          +'  new IntersectionObserver(function(es,ob){es.forEach(function(e){ if(!e.isIntersecting)return; ob.unobserve(e.target);\\n'
+          +'    requestAnimationFrame(function step(t){ t0=t0||t; var p=Math.min(1,(t-t0)/dur);\\n'
+          +'      el.textContent=Math.round(end*p)+suf; if(p<1)requestAnimationFrame(step); });\\n'
+          +'  });},{threshold:.4}).observe(el);\\n});\\n<\\/script>');
+      }
+      return out.join('\\n\\n');
+    }
     function row(k,v){ return v?('<div style="display:flex;gap:8px;margin:2px 0"><span style="color:#8fa3b8;min-width:64px;flex:none">'+k+'</span><span style="word-break:break-all">'+v+'</span></div>'):''; }
     function sw(c){ return c?('<span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+c+';border:1px solid #556;vertical-align:-1px;margin-right:4px"></span>'+c):''; }
     function renderPanel(el){
@@ -3968,6 +4021,8 @@ html.__ce_altmode{cursor:text}
         +(s.transform&&s.transform!=='none'?row('変形',esc((el.style&&el.style.transform)||'あり（transform）')):'')
         +(fx?row('並べ方',esc(fx)):'')
         +(animOf(el)?row('動き','<code id="__ce_ipanim" title="クリックで🎬キットのこの動きのデモを開く" style="background:#233527;color:#8ee08e;padding:1px 6px;border-radius:4px;cursor:pointer;text-decoration:underline dotted">'+esc(animOf(el))+'</code><span style="color:#8fa3b8">（付けるクラス・クリックでデモ）</span>'):'')
+        // クローン元の動き（ツールのfxa_*でない＝翻訳表に無い）も、実装の手がかりごと出す
+        +(animOrigin(el).length?row('元の動き','<code id="__ce_iporig" title="クリックで実装コード（keyframes/カウントアップJS）をコピー" style="display:inline-block;background:#3a3320;color:#e0c68e;padding:3px 7px;border-radius:4px;cursor:pointer;text-decoration:underline dotted">'+animOrigin(el).map(function(h){return esc(h);}).join('<br>')+'</code><br><span style="color:#8fa3b8;font-size:10.5px">クローン元由来。クリックで実装コードをコピー（🎬キットにも書き出せます）</span>'):'')
         +'</div>'
         +'<div style="padding:10px 12px;border-top:1px solid #2a2d31">'
         +'<div style="display:flex;align-items:center;margin-bottom:6px"><b style="font-size:11.5px;color:#8fa3b8;letter-spacing:.05em">CSS</b>'
@@ -3991,6 +4046,13 @@ html.__ce_altmode{cursor:text}
       panel.querySelector('#__ce_iphtml').addEventListener('click',function(){ copyText(el.outerHTML,this); });
       var pb=panel.querySelector('#__ce_ippse');
       if(pb) pb.addEventListener('click',function(){ copyText(pcss,this); });
+      var orig=panel.querySelector('#__ce_iporig');
+      if(orig) orig.addEventListener('click',function(){
+        var code=animOriginCode(el);
+        // btnにthisを渡すと複数行表示が「コピーしました✅」で潰れるので、コピーはサイレント＋トーストで知らせる
+        if(code){ copyText(code,null); if(msg) msg.textContent='📋 この動きの実装コードをコピーしました（本番コーディングに貼れます）'; orig.style.outline='2px solid #8ee08e'; setTimeout(function(){ orig.style.outline=''; },700); }
+        else if(msg) msg.textContent='この動きはコード化できませんでした（クラス名だけ表示）';
+      });
       var an=panel.querySelector('#__ce_ipanim');
       if(an) an.addEventListener('click',function(){
         // 🎬キットを（無ければ作って）開き、この動きのカタログカードへ直接ジャンプ
