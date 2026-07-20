@@ -4850,6 +4850,38 @@ html.__ce_altmode{cursor:text}
       });
     }).catch(function(){msg.textContent='画像一覧の取得に失敗';});
   }
+  // 右クリック座標に重なる「差し替えられる画像」を集める：<img> と 背景画像(background-image) の両方。
+  // 前面→背面順。★クイックメニューと⚙大メニューの両方から使う（同じ挙動にするため関数に切り出し）。
+  function imgCandsAt(cx, cy, el){
+    var cands=[];
+    // ★座標が壊れていても例外で右クリック全体を道連れにしない（elementsFromPointは非有限値で throw する）
+    if(!isFinite(cx)||!isFinite(cy)) return cands;
+    function _has(n){ return cands.some(function(c){return c.el===n;}); }
+    function _addBg(n){
+      var bg=''; try{ bg=getComputedStyle(n).backgroundImage; }catch(_){}
+      var mm=bg&&bg.match(/url\\(["']?(.*?)["']?\\)/);
+      if(mm && mm[1] && mm[1].indexOf('data:')!==0 && !_has(n)){ cands.push({el:n,type:'bg',url:mm[1]}); }
+    }
+    document.elementsFromPoint(cx, cy).forEach(function(n){
+      if(!n.closest || n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
+      if(n.tagName==='IMG'){ if(!_has(n)) cands.push({el:n,type:'img',url:n.currentSrc||n.src}); return; }
+      _addBg(n);
+    });
+    // pointer-events:none の装飾など、座標検出で拾えない背面の背景画像も、矩形が重なれば候補に足す
+    var scope=(el&&el.closest&&el.closest('section'))||document.body;
+    [].slice.call(scope.querySelectorAll('*')).forEach(function(n){
+      if(n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
+      var r=n.getBoundingClientRect();
+      if(!r.width||cx<r.left||cx>r.right||cy<r.top||cy>r.bottom) return;
+      if(n.tagName==='IMG'){ if(!_has(n)) cands.push({el:n,type:'img',url:n.currentSrc||n.src}); return; }
+      _addBg(n);
+    });
+    if(!cands.length && el){
+      var fb=(el.tagName==='IMG')?[el]:(el.querySelectorAll?[].slice.call(el.querySelectorAll('img')):[]);
+      fb.forEach(function(im){cands.push({el:im,type:'img',url:im.currentSrc||im.src});});
+    }
+    return cands;
+  }
   // 重なった画像（img・背景）のうち、どれを差し替えるかをサムネで先に選ばせる
   function pickWhichImg(list){
     var items=list.map(function(c,i){return '<div class="it" data-i="'+i+'"><img src="'+c.url+'"><span>'+(c.type==='bg'?'背景':'画像')+(i+1)+(i===0?'（前面）':'')+'</span></div>';}).join('');
@@ -5581,6 +5613,41 @@ html.__ce_altmode{cursor:text}
     el.setAttribute('data-cearc', amp);
     markDirty();
   }
+  // ★「数字を直したら小さい文字になる」の対策（2026-07-21）。
+  //   クローンの実績数字は <div class="result"><strong class="result-number">9</strong>
+  //   <span class="result-label">開設から9年</span></div> のように、**大きさを持っているのは中のタグ**。
+  //   従来は el.innerHTML=文字 で丸ごと書き換えていたので strong/span が消え、
+  //   入れ物の16px明朝が出てしまっていた（実測で確認）。
+  //   → 中の文字ノードだけを1対1で入れ替えれば、タグ＝見た目はそのまま残る。
+  function _brTextNodes(el){
+    var out=[], w=document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n;
+    while((n=w.nextNode())){
+      if(!(n.nodeValue||'').trim()) continue;
+      if(n.parentElement && n.parentElement.closest('[id^="__ce"]')) continue;
+      out.push(n);
+    }
+    return out;
+  }
+  function _brKeepTags(el, val){
+    var nodes=_brTextNodes(el);
+    if(nodes.length<2) return false;                       // 文字が1か所だけの要素は従来どおりでよい
+    var lines=val.split(/\\n/).map(function(s){ return s.trim(); }).filter(function(s){ return s!==''; });
+    if(lines.length!==nodes.length) return false;          // 行数が変わったら1対1にできない
+    nodes.forEach(function(t,i){
+      t.nodeValue=lines[i];
+      // 🔢カウントアップの目標値も一緒に直す（data-countが古いままだと再生で元の数字に戻る）
+      var p=t.parentElement;
+      while(p && p!==el.parentElement){
+        if(p.hasAttribute && p.hasAttribute('data-count')){
+          var num=(lines[i].match(/-?[\\d,.]*\\d/)||[''])[0].replace(/,/g,'');
+          if(num) p.setAttribute('data-count',num);
+          break;
+        }
+        p=p.parentElement;
+      }
+    });
+    return true;
+  }
   // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
@@ -5658,6 +5725,15 @@ html.__ce_altmode{cursor:text}
       host.innerHTML=sws.length?'<span style="font-size:11px;color:#888">ページで使用中：</span>'+sws.map(function(c){return '<button class="__ce_brswb" data-c="'+c+'" title="'+c+'（クリックでこの色に）" style="width:18px;height:18px;border:1px solid rgba(0,0,0,.15);border-radius:4px;background:'+c+';cursor:pointer;padding:0;vertical-align:middle;margin-right:3px"></button>';}).join(''):'';
     })();
     var ta=document.getElementById('__ce_brta'); ta.value=cur; ta.focus();
+    // ★複数の文字が入った枠なら、先に「行数を変えなければ見た目は保たれる」と伝える（事故を未然に防ぐ）
+    (function(){
+      var _bn=_brTextNodes(el).length; if(_bn<2) return;
+      var _h=document.createElement('div');
+      _h.setAttribute('style','margin:6px 0 0;padding:6px 8px;background:#fffbe6;border:1px solid #f0d98c;border-radius:6px;font-size:11.5px;color:#7a5a00;line-height:1.7');
+      _h.innerHTML='📌 この枠には文字が <b>'+_bn+'か所</b>（大きさの違う文字）入っています。<br>'
+        +'<b>行数を変えなければ、大きさ・フォントはそのまま</b>入れ替わります。行を足す／消すと飾りが外れて小さい文字になります。';
+      ta.parentNode.insertBefore(_h, ta.nextSibling);
+    })();
     try{ document.getElementById('__ce_brcol').value=_rgbToHex(getComputedStyle(el).color); }catch(_){}
     try{ document.getElementById('__ce_brudot').value=_rgbToHex(getComputedStyle(el).color); }catch(_){}
     ov.addEventListener('click',function(e){
@@ -5667,6 +5743,15 @@ html.__ce_altmode{cursor:text}
       if(e.target.id==='__ce_pk') return;
       if(e.target.id==='__ce_brapply'){
         stopAnim(el); clearPreviewStyle(el);  // プレビュー途中の半透明・ズレたopacity/transformが残らないよう元へ戻す
+        // ★まず「中のタグを残したまま」入れ替えられるか試す＝大きさ・フォントが変わらない
+        if(_brKeepTags(el, ta.value)){
+          markDirty(); msg.textContent='文字を入れ替えました（大きさ・フォントはそのまま／💾保存で確定）';
+          return;
+        }
+        if(_brTextNodes(el).length>=2 && !confirm('この枠には文字が'+_brTextNodes(el).length+'か所あります。\\n行数を変えると中の飾り（大きさ・フォント）が外れて、小さい文字になります。\\n\\n行数をそのままにすれば見た目は変わりません。このまま進めますか？')){
+          msg.textContent='やめました（行数を元と同じにすれば、大きさはそのまま入れ替わります）';
+          return;
+        }
         // 行頭の半角スペースはHTMLだと潰れて見えない → &nbsp;にして見た目どおり残す（全角スペースは元々残る）
         var _bht=esc(ta.value).replace(/\\n/g,'<br>');
         _bht=_bht.replace(/(^|<br>)( +)/g,function(_m,_p,_sp){ return _p+Array(_sp.length+1).join('&nbsp;'); });
@@ -8728,6 +8813,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_up','⬆ 外側を選ぶ（枠ごと動かす）'],
     ['__ce_q_txt','✏ 文字を追加（編集）'],
     ['__ce_q_img','🖼 画像を追加（ここに置く）'],
+    ['__ce_q_imgswap','🔄 この画像を差し替え（AIなし・一瞬）'],
     ['__ce_q_slide','🖼 スライドショー（画像が次々切り替わる）'],
     ['__ce_q_fx','✨ 動きを付ける（アニメを選ぶ）'],
     ['__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）'],
@@ -8756,43 +8842,154 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_rst','⟲ 位置・サイズをリセット'],
     ['__ce_q_unfix','📌 画面への貼り付きを解除（一緒にスクロール）']
   ];
+  // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
+  //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
+  var QM_DEF_LAYOUT=[
+    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_slide','__ce_q_addline',
+    'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
+    'sep:🧩 セクション','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
+    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_unfix',
+    'sep:🧹 整える・消す','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
+    'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
+  ];
   function qmDefMap(){ var m={}; QM_DEFS.forEach(function(d){ m[d[0]]=d[1]; }); return m; }
   function qmLayoutLoad(){
     var lay=null;
     try{ var a=JSON.parse(localStorage.getItem('__ce_qmenu_layout')||'null'); if(Array.isArray(a)&&a.length) lay=a.slice(); }catch(_){}
-    if(!lay) lay=QM_DEFS.map(function(d){ return d[0]; });
+    if(!lay) lay=QM_DEF_LAYOUT.slice();
     var m=qmDefMap();
-    lay=lay.filter(function(k){ return k==='sep'||k.indexOf('sep:')===0||m[k]||(k.indexOf('off:')===0&&m[k.slice(4)]); });  // 廃止した機能IDは飛ばす（sep:区切り・off:隠し項目は残す）
-    QM_DEFS.forEach(function(d){ if(lay.indexOf(d[0])<0&&lay.indexOf('off:'+d[0])<0) lay.push(d[0]); });  // 新機能は末尾へ（隠し済みは復活させない）
+    // 廃止した機能IDは飛ばす。sep=区切り線 / sep:名前=畳むグループ / sepf:名前=畳まない見出し / off:=隠し項目 は残す
+    lay=lay.filter(function(k){ return k==='sep'||k.indexOf('sep:')===0||k.indexOf('sepf:')===0||m[k]||(k.indexOf('off:')===0&&m[k.slice(4)]); });
+    // 新機能は末尾へ（隠し済みは復活させない）。★末尾が見出しの続きだと新機能がサブメニューに
+    //   埋もれて気づけないので、素の区切り線を1本挟んでトップレベルに出す。
+    var _add=QM_DEFS.filter(function(d){ return lay.indexOf(d[0])<0&&lay.indexOf('off:'+d[0])<0; });
+    if(_add.length){ lay.push('sep'); _add.forEach(function(d){ lay.push(d[0]); }); }
     return lay;
   }
   function qmLayoutSave(a){ try{ localStorage.setItem('__ce_qmenu_layout',JSON.stringify(a)); }catch(_){} }
+  // ▸ 見出し(sep:ラベル)〜次の見出しまでを1つの「親メニュー」に畳む。
+  //   ★サブメニューは position:fixed ＝ メニュー本体(overflow-y:auto)にハサミ切られない。
+  //     入れ子のDOMのままなので、既存のクリック処理・_inUI2・closeMenu は一切いじらなくて済む。
+  //   ★中身が1個だけの見出しは畳まない（開く手間のほうが大きいので、そのまま並べる）。
+  function qmBuildList(m,row){
+    var lay=qmLayoutLoad(), out=[], grp=null, gi=0;
+    function flush(){
+      if(!grp) return;
+      var items=grp.items;
+      if(items.length===0){ grp=null; return; }
+      if(items.length===1){ out.push(items[0]); grp=null; return; }
+      out.push('<div class="__ce_grp">'
+        +'<button class="__ce_qi __ce_gbtn" data-g="'+gi+'" style="display:flex;width:100%;align-items:center;gap:8px;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'
+        +'<span style="flex:1">'+esc(grp.name)+'</span>'
+        +'<span style="color:#8a8a90;font-size:11px">'+items.length+'　▸</span></button>'
+        +'<div class="__ce_sub" data-g="'+gi+'" style="display:none;position:fixed;left:0;top:0;min-width:250px;max-height:calc(100vh - 20px);overflow-y:auto;background:#f2f2f7;border:1px solid #b9b9c4;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.22);padding:4px;z-index:2147483647">'
+        +'<div style="padding:5px 10px 5px;font-size:10.5px;font-weight:700;color:#5b6472;border-bottom:1px solid #dcdce2;margin-bottom:3px">'+esc(grp.name)+'</div>'
+        +items.join('')+'</div></div>');
+      gi++; grp=null;
+    }
+    lay.forEach(function(k){
+      if(k.indexOf('off:')===0) return;                       // 🙈で隠した項目は出さない
+      if(k==='sep'){ flush(); out.push('<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'); return; }
+      if(k.indexOf('sepf:')===0){                             // 畳まない見出し＝そのまま並べる（従来の見え方）
+        flush();
+        out.push('<div style="display:flex;align-items:center;gap:6px;margin:5px 8px;font-size:10.5px;font-weight:700;color:#5b6472">'
+          +'<span style="flex:1;border-top:1px solid #b9b9c4"></span><span>'+esc(k.slice(5))+'</span>'
+          +'<span style="flex:1;border-top:1px solid #b9b9c4"></span></div>');
+        return;
+      }
+      if(k.indexOf('sep:')===0){ flush(); grp={name:k.slice(4), items:[]}; return; }
+      var r=m[k]?row(k,m[k]):'';                              // 今の状況で出さない項目は空文字で返る
+      if(!r) return;
+      if(grp) grp.items.push(r); else out.push(r);
+    });
+    flush();
+    return out.join('');
+  }
+  // ▸ 親メニューにホバー／クリックでサブメニューを開く配線
+  function qmWireGroups(qm){
+    var openG=null, tmr=null;
+    function closeAll(){
+      [].slice.call(qm.querySelectorAll('.__ce_sub')).forEach(function(s){ s.style.display='none'; });
+      [].slice.call(qm.querySelectorAll('.__ce_gbtn')).forEach(function(b){ b.style.background='none'; });
+      openG=null;
+    }
+    function open(g){
+      var btn=qm.querySelector('.__ce_gbtn[data-g="'+g+'"]'), sub=qm.querySelector('.__ce_sub[data-g="'+g+'"]');
+      if(!btn||!sub) return;
+      closeAll();
+      var r=btn.getBoundingClientRect();
+      sub.style.display='block';
+      var w=sub.offsetWidth, h=sub.offsetHeight;
+      var left=r.right+2; if(left+w>innerWidth-6) left=Math.max(6, r.left-w-2);   // 右が狭ければ左に出す
+      var top=r.top-4;    if(top+h>innerHeight-6) top=Math.max(6, innerHeight-h-6);
+      sub.style.left=left+'px'; sub.style.top=top+'px';
+      btn.style.background='#e3e3ea';
+      openG=g;
+    }
+    [].slice.call(qm.querySelectorAll('.__ce_gbtn')).forEach(function(b){
+      b.addEventListener('mouseenter',function(){ clearTimeout(tmr); open(b.getAttribute('data-g')); });
+      b.addEventListener('click',function(ev){
+        ev.stopPropagation(); clearTimeout(tmr);              // クリックでも開ける（ホバーが苦手な人向け）
+        if(openG===b.getAttribute('data-g')) closeAll(); else open(b.getAttribute('data-g'));
+      });
+    });
+    // サブメニューはDOM上はメニューの子なので、そこへ移動しても qm の mouseleave は起きない
+    [].slice.call(qm.querySelectorAll('.__ce_sub')).forEach(function(s){
+      s.addEventListener('mouseenter',function(){ clearTimeout(tmr); });
+      s.addEventListener('mouseleave',function(){ clearTimeout(tmr); tmr=setTimeout(closeAll,280); });
+    });
+    qm.addEventListener('mouseenter',function(){ clearTimeout(tmr); });
+    qm.addEventListener('mouseleave',function(){ clearTimeout(tmr); tmr=setTimeout(closeAll,280); });
+  }
   // ⚙並べ替えモード：↑↓で移動・─区切り線の追加/削除・⟲初期に戻す・✔完了で保存
   function qmEditMode(qm){
     var lay=qmLayoutLoad(), m=qmDefMap();
+    // ★グループ（サブメニュー）を目で分かるようにする：グループ名の下にぶら下がる項目は
+    //   左に線を引いて字下げする＝「どれがどのグループに入っているか」が一目で分かる。
     function html(){
-      return '<div style="padding:6px 10px 2px;font-weight:700;font-size:12px">メニューの並べ替え（⠿ドラッグ or ↑↓で移動・🙈で隠す・区切り線には見出しを書ける）</div>'
+      var open=null, cnt=[];                                  // 各行が属するグループ名（先に数えて件数を出す）
+      lay.forEach(function(k){
+        if(k==='sep'||k.indexOf('sepf:')===0){ open=null; cnt.push(null); return; }
+        if(k.indexOf('sep:')===0){ open={n:0}; cnt.push(open); return; }
+        if(open&&k.indexOf('off:')!==0) open.n++;
+        cnt.push(open);
+      });
+      return '<div style="padding:6px 10px 2px;font-weight:700;font-size:12px">📋 メニューの設定</div>'
+        +'<div style="padding:0 10px 6px;font-size:11px;color:#666;line-height:1.75">'
+        +'<b>📁 グループ</b>を作ると、その下の項目が<b>サブメニュー</b>（▸ホバーで開く）にまとまります。<br>'
+        +'次のグループ名（または区切り線）までが中身です。⠿ドラッグ／↑↓で入れ替え・🙈で隠せます。</div>'
         +lay.map(function(k,i){
-          var isSep=(k==='sep'||k.indexOf('sep:')===0);
+          var isGrp=(k.indexOf('sep:')===0), isFlat=(k.indexOf('sepf:')===0), isLine=(k==='sep');
+          var isSep=(isGrp||isFlat||isLine);
           var isOff=(k.indexOf('off:')===0);  // 🙈隠し中の項目＝薄く＋取り消し線で出す（👁で戻せる）
-          var lbl=isSep
-            ?'<input data-seplb="1" value="'+esc(k.indexOf('sep:')===0?k.slice(4):'')+'" placeholder="─ 見出し（任意・例：アニメ系）" style="flex:1;min-width:0;font-size:11px;color:#666;border:1px dashed #bbb;border-radius:5px;padding:2px 6px;font-family:inherit">'
-            :'<span style="flex:1;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'+(isOff?'opacity:.38;text-decoration:line-through':'')+'">'+m[isOff?k.slice(4):k]+'</span>';
-          return '<div data-i="'+i+'" style="display:flex;align-items:center;gap:4px;padding:3px 8px">'
+          var inGrp=(!isSep&&cnt[i]);
+          var lbl;
+          if(isLine){
+            lbl='<input data-seplb="1" value="" placeholder="─ 区切り線（名前を書くとグループになります）" style="flex:1;min-width:0;font-size:11px;color:#666;border:1px dashed #bbb;border-radius:5px;padding:2px 6px;font-family:inherit">';
+          } else if(isSep){
+            lbl='<input data-seplb="1" value="'+esc(isGrp?k.slice(4):k.slice(5))+'" placeholder="グループ名" style="flex:1;min-width:0;font-size:11.5px;font-weight:700;color:#33415c;border:1px solid #c9d3e0;background:#fff;border-radius:5px;padding:3px 6px;font-family:inherit">'
+              +'<button data-gk="1" title="'+(isGrp?'今：サブメニューに畳む（押すと開いたまま並べる）':'今：畳まず並べる（押すとサブメニューにする）')+'" style="height:22px;border:none;background:'+(isGrp?'#dbeafe':'#f0f0f2')+';color:#33415c;border-radius:5px;cursor:pointer;padding:0 7px;font-size:11px;white-space:nowrap">'
+              +(isGrp?('▸ 畳む'+(cnt[i]&&cnt[i].n?'（'+cnt[i].n+'）':'')):'▾ 畳まない')+'</button>';
+          } else {
+            lbl='<span style="flex:1;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'+(isOff?'opacity:.38;text-decoration:line-through':'')+'">'+m[isOff?k.slice(4):k]+'</span>';
+          }
+          return '<div data-i="'+i+'" style="display:flex;align-items:center;gap:4px;padding:3px 8px 3px '+(inGrp?'22px':'8px')+';'+(inGrp?'border-left:3px solid #c9d3e0;margin-left:14px':'')+'">'
             +'<span data-dh="1" draggable="true" title="ドラッグで移動" style="cursor:grab;color:#aaa;font-size:13px;padding:0 2px;user-select:none">⠿</span>'
             +'<button data-mv="-1" style="width:22px;height:20px;border:none;background:#f0f0f2;border-radius:5px;cursor:pointer;padding:0">↑</button>'
             +'<button data-mv="1" style="width:22px;height:20px;border:none;background:#f0f0f2;border-radius:5px;cursor:pointer;padding:0">↓</button>'
             +lbl
             +(isSep
-              ?'<button data-del="1" style="width:22px;height:20px;border:none;background:#fde8e8;color:#c00;border-radius:5px;cursor:pointer;padding:0">✕</button>'
+              ?'<button data-del="1" title="この区切り／グループ名を消す（中の項目は残ります）" style="width:22px;height:20px;border:none;background:#fde8e8;color:#c00;border-radius:5px;cursor:pointer;padding:0">✕</button>'
               :'<button data-hide="1" title="'+(isOff?'メニューに戻す':'メニューから隠す')+'" style="width:26px;height:20px;border:none;background:'+(isOff?'#e8f4e8':'#f0f0f2')+';border-radius:5px;cursor:pointer;padding:0">'+(isOff?'👁':'🙈')+'</button>')
             +'</div>';
         }).join('')
         +'<div style="display:flex;gap:6px;padding:6px 8px;flex-wrap:wrap">'
+        +'<button id="__ce_qe_grp" style="border:none;background:#2f6bff;color:#fff;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;font-weight:700">📁 グループを追加</button>'
         +'<button id="__ce_qe_sep" style="border:1px solid #ccc;background:#fff;border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer">─ 区切り線を追加</button>'
         +'<button id="__ce_qe_rst" style="border:1px solid #ccc;background:#fff;border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer">⟲ 初期に戻す</button>'
         +'<button id="__ce_qe_ok" style="border:none;background:#22c55e;color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;font-weight:700">✔ 完了</button>'
-        +'</div>';
+        +'</div>'
+        +'<div style="padding:0 10px 8px;font-size:10.5px;color:#8a8a90">※ 中身が1個だけのグループは、開く手間が増えるだけなので畳まずに出します。</div>';
     }
     qm.innerHTML=html();
     if(!qm.__qeBound){
@@ -8832,18 +9029,30 @@ html.__ce_altmode{cursor:text}
         if(!qm.__qeOn) return;
         var t=ev.target; if(!t.getAttribute||!t.getAttribute('data-seplb')) return;
         var rowEl=t.closest('[data-i]'); if(!rowEl) return;
-        var v=(t.value||'').trim();
-        lay[+rowEl.getAttribute('data-i')]='sep'+(v?(':'+v):'');
+        var i=+rowEl.getAttribute('data-i'), v=(t.value||'').trim();
+        var flat=(lay[i].indexOf('sepf:')===0);              // 「畳まない」設定は名前を打ち替えても保つ
+        lay[i]= v ? ((flat?'sepf:':'sep:')+v) : 'sep';       // 名前を消したら ただの区切り線に戻る
       });
       qm.addEventListener('click',function(ev){
         if(!qm.__qeOn) return;
         ev.stopPropagation();
         var t=ev.target;
         if(t.id==='__ce_qe_sep'){ lay.push('sep'); qm.innerHTML=html(); return; }
+        if(t.id==='__ce_qe_grp'){
+          lay.push('sep:新しいグループ'); qm.innerHTML=html();
+          // 追加した名前欄をすぐ書き換えられるように選択状態で待つ（名前を決めるのが最初の作業なので）
+          var ins=qm.querySelectorAll('input[data-seplb]'); var last=ins[ins.length-1];
+          if(last){ last.focus(); last.select(); last.scrollIntoView({block:'nearest'}); }
+          return;
+        }
         if(t.id==='__ce_qe_rst'){ try{ localStorage.removeItem('__ce_qmenu_layout'); }catch(_){} lay=qmLayoutLoad(); qm.innerHTML=html(); return; }
         if(t.id==='__ce_qe_ok'){ qmLayoutSave(lay); qm.__qeOn=false; closeMenu(); if(msg) msg.textContent='メニューの並びを保存しました（次の右クリックから反映）'; return; }
         var rowEl=t.closest('[data-i]'); if(!rowEl) return;
         var i=+rowEl.getAttribute('data-i');
+        if(t.getAttribute('data-gk')){                        // ▸畳む ⇄ ▾畳まない の切り替え
+          lay[i]=(lay[i].indexOf('sepf:')===0)?('sep:'+lay[i].slice(5)):('sepf:'+lay[i].slice(4));
+          qm.innerHTML=html(); return;
+        }
         if(t.getAttribute('data-del')){ lay.splice(i,1); qm.innerHTML=html(); return; }
         if(t.getAttribute('data-hide')){ lay[i]=(lay[i].indexOf('off:')===0)?lay[i].slice(4):('off:'+lay[i]); qm.innerHTML=html(); return; }
         var mv=t.getAttribute('data-mv');
@@ -8853,6 +9062,10 @@ html.__ce_altmode{cursor:text}
     qm.__qeOn=true;
   }
   function openQuickMenu(e){
+    // ★右クリック座標は関数の先頭で確保する。以前は下のほうで var qx=… していたため、
+    //   上のメニュー組み立てで使うと undefined のまま elementsFromPoint に渡って
+    //   「非有限の値」で例外→**右クリックメニューが丸ごと出ない**事故になった（2026-07-21）。
+    var qx=e.clientX, qy=e.clientY;
     var multi=selEls.length>1;
     // 文字の「追加/編集」の自動分岐：中に文字があれば編集、余白（文字なし・大きな器・画像）なら追加。
     // 文字はアニメ用ラッパーdivや1文字ずつのspanに包まれていることがあるので、子孫込み(textContent)で判定する
@@ -8979,6 +9192,13 @@ html.__ce_altmode{cursor:text}
         +'</div>';
     }
     var _qmM=qmDefMap();
+    // 🔄画像の差し替えは「そこに画像がある時」だけ出す（無い場所で押しても何も起きない項目は隠す）。
+    // 何枚重なっているかも出す＝どれを選ぶ画面が出るのか予想できる。
+    (function(){
+      var _n=imgCandsAt(qx,qy,curEl).length;
+      if(!_n){ delete _qmM['__ce_q_imgswap']; return; }
+      if(_n>1) _qmM['__ce_q_imgswap']='🔄 この画像を差し替え（'+_n+'枚が重なっています・AIなし）';
+    })();
     // 📌 貼り付き解除は「実際に画面に貼り付いている時」だけ出す（普通の要素には無関係な項目なので隠す）。
     // 自分自身が固定なのか、固定の器の中に取り残されているのかで文言を変える＝何が起きるか分かるように。
     (function(){
@@ -9013,21 +9233,12 @@ html.__ce_altmode{cursor:text}
         +'</div>';
     }
     qm.innerHTML=selRowQ+dgRowQ+pdRowQ+slRowQ+peRowQ+decoRowQ+mfRow+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
-      +qmLayoutLoad().map(function(k){
-        if(k.indexOf('off:')===0) return '';  // 🙈で隠した項目は出さない（⚙並べ替えの👁で戻せる）
-        if(k==='sep') return '<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>';
-        if(k.indexOf('sep:')===0){
-          // 見出し付き区切り線＝線の真ん中に小さいグレー文字（どんなグループか一目で分かる）
-          return '<div style="display:flex;align-items:center;gap:6px;margin:5px 8px;font-size:10.5px;font-weight:700;color:#5b6472">'
-            +'<span style="flex:1;border-top:1px solid #b9b9c4"></span><span>'+esc(k.slice(4))+'</span>'
-            +'<span style="flex:1;border-top:1px solid #b9b9c4"></span></div>';
-        }
-        return _qmM[k]?row(k,_qmM[k]):'';
-      }).join('')
+      +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
       +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
       +row('__ce_q_full','⚙ すべての編集メニュー…')
       +'<div style="text-align:right;padding:0 8px 3px"><button id="__ce_q_edit" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
     document.body.appendChild(qm);
+    qmWireGroups(qm);
     qm.querySelector('#__ce_q_edit').addEventListener('click',function(ev){ ev.stopPropagation(); qmEditMode(qm); });
     // 🅰 まとめて文字調整の配線（メニューを閉じずにその場で効く・インラインstyle!important＝どのCSSにも勝つ）
     if(multi&&qm.querySelector('#__ce_mf_f')){
@@ -9159,7 +9370,6 @@ html.__ce_altmode{cursor:text}
     qm.style.top=Math.max(6,Math.min(e.clientY, window.innerHeight-qm.offsetHeight-8))+'px';
     curMenu=qm;
     qm.addEventListener('mouseover',function(ev){ var b2=ev.target.closest('.__ce_qi'); [].slice.call(qm.querySelectorAll('.__ce_qi')).forEach(function(x){ x.style.background=(x===b2)?'#eef4ff':'none'; }); });
-    var qx=e.clientX, qy=e.clientY;
     qm.addEventListener('click',function(ev){
       var t=ev.target.closest('.__ce_qi'); if(!t) return;
       if(t.id==='__ce_q_up'){ selectParent(false); return; }
@@ -9177,6 +9387,12 @@ html.__ce_altmode{cursor:text}
         return;
       }
       if(t.id==='__ce_q_img'){ closeMenu(); openAddImagePicker((window.scrollX||window.pageXOffset||0)+qx, (window.scrollY||window.pageYOffset||0)+qy); return; }
+      if(t.id==='__ce_q_imgswap'){
+        var _ic=imgCandsAt(qx,qy,curEl);
+        if(_ic.length>1){ pickWhichImg(_ic); return; }        // 重なっている→どれを差し替えるかサムネで選ぶ
+        if(!_ic.length){ if(msg) msg.textContent='ここには差し替えられる画像がありません（画像の上で右クリックしてください）'; closeMenu(); return; }
+        closeMenu(); openPicker(_ic[0]); return;
+      }
       if(t.id==='__ce_q_slide'){ var sle=curEl; closeMenu(); slideMake(sle); return; }
       if(t.id==='__ce_q_fx'){ _bigFull=true; _bigFxFocus=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
@@ -9430,32 +9646,7 @@ html.__ce_altmode{cursor:text}
     el=curEl;  // 以降の処理は主役（最後に選んだ要素）を基準にする
     // 画像なら「AIなしの即差し替え」を最優先で出す（画像のAI指示は不安定なため）
     var imgEl = (el.tagName==='IMG') ? el : (el.querySelector ? el.querySelector('img') : null);
-    // 右クリック座標に重なる「画像」を集める：<img> と 背景画像(background-image) の両方。前面→背面順。
-    var cands=[];
-    function _has(n){ return cands.some(function(c){return c.el===n;}); }
-    function _addBg(n){
-      var bg=''; try{ bg=getComputedStyle(n).backgroundImage; }catch(_){}
-      var mm=bg&&bg.match(/url\\(["']?(.*?)["']?\\)/);
-      if(mm && mm[1] && mm[1].indexOf('data:')!==0 && !_has(n)){ cands.push({el:n,type:'bg',url:mm[1]}); }
-    }
-    document.elementsFromPoint(e.clientX, e.clientY).forEach(function(n){
-      if(!n.closest || n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
-      if(n.tagName==='IMG'){ if(!_has(n)) cands.push({el:n,type:'img',url:n.currentSrc||n.src}); return; }
-      _addBg(n);
-    });
-    // pointer-events:none の装飾など、座標検出で拾えない背面の背景画像も、矩形が重なれば候補に足す
-    var scope=(el.closest && el.closest('section'))||document.body;
-    [].slice.call(scope.querySelectorAll('*')).forEach(function(n){
-      if(n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
-      var r=n.getBoundingClientRect();
-      if(!r.width||e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom) return;
-      if(n.tagName==='IMG'){ if(!_has(n)) cands.push({el:n,type:'img',url:n.currentSrc||n.src}); return; }
-      _addBg(n);
-    });
-    if(!cands.length){
-      var fb=(el.tagName==='IMG')?[el]:(el.querySelectorAll?[].slice.call(el.querySelectorAll('img')):[]);
-      fb.forEach(function(im){cands.push({el:im,type:'img',url:im.currentSrc||im.src});});
-    }
+    var cands=imgCandsAt(e.clientX, e.clientY, el);
     var swapH = (cands.length
       ? '<button class="go2" id="__ce_cmswap" style="background:#1a7f37;margin-bottom:6px">🖼 この画像を差し替え（AIなし・一瞬）</button>'
         +'<div class="cap" style="margin:0 0 8px">画像はこれが確実です（差し替えは一瞬）</div>'
