@@ -386,8 +386,10 @@ def build_kit(filename: str) -> dict:
         )
         parts.append(f"<tr class='secrow'><td colspan='5'>📍 {_esc(sec)}（{len(grp)}個）　使う動き: {summary}</td></tr>")
         for r in grp:
+            base = r["kit"].split("＋")[0].strip()
             parts.append(
-                f"<tr><td>{_esc(r['sec'])}</td><td><code>{_esc(r['el'])}</code><br><span class='dim'>{_esc(r['text'])}</span></td>"
+                f"<tr data-kit=\"{_esc(base)}\" data-el=\"{_esc(r['el'])}\">"
+                f"<td>{_esc(r['sec'])}</td><td><code>{_esc(r['el'])}</code><br><span class='dim'>{_esc(r['text'])}</span></td>"
                 f"<td>{_esc(r['ja'])}</td><td><code>{_esc(r['kit'])}</code></td><td class='dim'>{_esc(r['note'])}</td></tr>"
             )
     tr = "".join(parts) or "<tr><td colspan='5' class='dim'>アニメ付きの要素は見つかりませんでした</td></tr>"
@@ -404,8 +406,9 @@ def build_kit(filename: str) -> dict:
             badge = "<span class='badge'>このカンプで使用</span>" if set(kcls.split()) & demos_used else ""
             body = sample if kcls in _RAW_SAMPLE else _esc(sample)
             note_html = f"<div class='dnote'>{_esc(note)}</div>" if note else ""
+            slug = re.sub(r"[^a-zA-Z0-9-]+", "-", kcls)  # 🔍パネルからのアンカージャンプ用
             cards.append(
-                f"<div class='dcard'><div class='dhead'><code>{_esc(kcls)}</code> {_esc(name)}{badge}"
+                f"<div class='dcard' id='cat-{slug}'><div class='dhead'><code>{_esc(kcls)}</code> {_esc(name)}{badge}"
                 f"<button class='replay'>▶</button></div>"
                 f"<div class='stage'><span class='{_esc(kcls)} demo'>{body}</span></div>{note_html}</div>"
             )
@@ -471,6 +474,8 @@ pre{background:#1e252e;color:#cde;padding:10px 14px;border-radius:8px;font-size:
 h3.grp{font-size:13.5px;margin:20px 0 8px;color:#456}
 .badge{background:#e8f3e8;color:#1b5e20;border-radius:10px;padding:1px 8px;font-size:10.5px;margin-left:6px;white-space:nowrap}
 .dnote{padding:6px 12px;font-size:11px;color:#8a97a5;background:#fafbfc;border-top:1px solid #eef1f5}
+.hlcard{outline:3px solid #e91e63;outline-offset:2px}
+.hlrow td{background:#fdf3d7!important}
 .flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;font-size:12.5px}
 .flow span{background:#eef4fb;border:1px solid #cfe0f2;border-radius:8px;padding:5px 10px}
 .flow b.ar{color:#0b6bcb}
@@ -545,6 +550,27 @@ document.querySelectorAll('.copy').forEach(function(b){
     var o=b.textContent; b.textContent='コピーしました ✅'; setTimeout(function(){b.textContent=o;},1200);
   });
 });
+// 🔍パネルの「動き」クリックから来た時：該当のカタログカード＋対応表の行をハイライト
+(function(){
+  var q=new URLSearchParams(location.search);
+  var hl=q.get('hl'), el=q.get('el'), tx=(q.get('tx')||'').replace(/\s+/g,'');
+  if(!hl) return;
+  var card=document.getElementById('cat-'+hl);
+  if(card) card.classList.add('hlcard');
+  function slug(s){ return String(s||'').replace(/[^a-zA-Z0-9-]+/g,'-'); }
+  // 表記ゆれ吸収：タグ＋（ツール用クラスを除いた）最初のクラスだけで比べる
+  function norm(s){
+    var p=String(s||'').split('.'); var tag=p.shift();
+    var cs=p.filter(function(c){ return c&&c.indexOf('fxa_')!==0&&c.indexOf('__ce')!==0&&c!=='reveal'&&c!=='in'&&c!=='is-visible'&&c!=='show'; });
+    return tag+(cs.length?('.'+cs[0]):'');
+  }
+  var hit=[].slice.call(document.querySelectorAll('tbody tr[data-kit]'))
+    .filter(function(tr){ return slug(tr.getAttribute('data-kit'))===hl; });
+  // 同じ動きの中から、クラス名（要素）が一致する行だけに絞る → さらにテキストでも絞る
+  if(el){ var byEl=hit.filter(function(tr){ return norm(tr.getAttribute('data-el'))===norm(el); }); if(byEl.length) hit=byEl; }
+  if(tx){ var byTx=hit.filter(function(tr){ var d=tr.querySelector('.dim'); return d&&d.textContent.replace(/\s+/g,'').indexOf(tx.slice(0,10))>=0; }); if(byTx.length) hit=byTx; }
+  hit.forEach(function(tr){ tr.classList.add('hlrow'); });
+})();
 document.querySelectorAll('.replay').forEach(function(b){
   b.addEventListener('click',function(){
     var el=b.closest('.dcard').querySelector('.demo');

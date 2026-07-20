@@ -1900,6 +1900,31 @@ def export_file(filename: str):
     return send_file(path, as_attachment=True, download_name=filename)
 
 
+@app.route("/api/camp_backup", methods=["POST"])
+def api_camp_backup():
+    """🗂 いまのカンプ（最後に保存した状態）を複製してバックアップ（AIなし・一瞬）。
+
+    複製は camp_元名_bkYYYYMMDD_HHMMSS.html でcamps直下に置く＝履歴一覧にそのまま並ぶ。
+    並び順はファイル名先頭の元日時で決まるので、元カンプのすぐ近くに出る。
+    """
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "ファイルが見つかりません"}), 404
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    new = config.CAMP_DIR / f"{p.stem}_bk{stamp}.html"
+    try:
+        new.write_bytes(p.read_bytes())
+        try:  # 一覧で分かるように名前を付ける（失敗しても複製自体は成功扱い）
+            camp.set_camp_name(new.name, f"🗂バックアップ {stamp[4:6]}/{stamp[6:8]} {stamp[9:11]}:{stamp[11:13]}")
+        except Exception:  # noqa: BLE001
+            pass
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True, "file": new.name})
+
+
 @app.route("/api/save_camp_html", methods=["POST"])
 def api_save_camp_html():
     """ドラッグ/矢印での位置調整をHTMLに焼き込む（LLM不使用・その場保存）。
@@ -2077,6 +2102,23 @@ def api_anim_kit():
         result = animkit.build_kit(fn)
     except Exception as exc:  # noqa: BLE001
         log.exception("アニメ実装キットの作成に失敗: %s", fn)
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True, **result})
+
+
+@app.route("/api/prod_kit", methods=["POST"])
+def api_prod_kit():
+    """📦 本番化キット（AI変換用フォルダ）を書き出す（同期で一瞬・AIなし）。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    try:
+        from . import prodkit
+        result = prodkit.build_prodkit(fn)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("本番化キットの作成に失敗: %s", fn)
         return jsonify({"ok": False, "message": str(exc)}), 500
     return jsonify({"ok": True, **result})
 
@@ -2385,6 +2427,10 @@ html.__ce_altmode{cursor:text}
     <button class="im" id="__ce_resp" style="background:#7a3fa8;color:#fff">📱 レスポンシブ検査（スマホ/タブレットで崩れないか）</button>
     <button class="im" id="__ce_insp" style="background:#263238;color:#fff">🔍 インスペクト（コーダーに数値を渡す）</button>
     <button class="im" id="__ce_kit" style="background:#b3541e;color:#fff">🎬 アニメ実装キット（動きをコードで渡す）</button>
+    <button class="im" id="__ce_prod" style="background:#5b21b6;color:#fff">📦 本番化キット（AIに本番コードを書かせる下ごしらえ）</button>
+    <button class="im" id="__ce_secswap" style="background:#0e7490;color:#fff">🔃 セクション並べ替え（順番を入れ替える）</button>
+    <button class="im" id="__ce_bigclean" style="background:#4d7c0f;color:#fff">🧹 大掃除（分割span・残骸を消してソースを軽く）</button>
+    <button class="im" id="__ce_bk" style="background:#475569;color:#fff">🗂 バックアップを取る（今の保存状態を複製）</button>
     <div class="msg" id="__ce_msg">💡 直したい所を<b>右クリック</b>すると、その要素に直接アニメ・指示が出せます</div>
   </div>
 </div>
@@ -3489,6 +3535,115 @@ html.__ce_altmode{cursor:text}
       window.open('/kit/'+encodeURIComponent(d.file),'_blank');
     }).catch(function(){ reset(); msg.textContent='通信エラー'; });
   });
+  // 🧹 大掃除（2026-07-20・AIなし）：AI修正に投げる時のトークン膨らみの犯人を一括除去。
+  //  ①文字アニメの分割span(.fxa_ch/.fxa_ln)→素のテキストへ（一文字ずつ/タイプライター/波打ち/行マスクは解除）
+  //  ②昔の保険が焼き込んだ無意味なinline style（opacity:1等・消して隠れる物は自動で残す）
+  //  ③属性も中身も無い空のspan/div。実行後は⟲（Ctrl+Z）で1手で戻せる。
+  var bigCleanBtn=document.getElementById('__ce_bigclean');
+  if(bigCleanBtn) bigCleanBtn.addEventListener('click',function(){
+    var chN=document.querySelectorAll('.fxa_ch,.fxa_ln').length;
+    var junk=0,emp=0;
+    var all=[].slice.call(document.body.querySelectorAll('*')).filter(function(e){
+      return !(e.closest&&e.closest('#__ce,#__ce_cm,#__ce_pk,#__ce_dlyp,#__ce_flypn'))&&!(e.id&&e.id.indexOf('__ce')===0);
+    });
+    all.forEach(function(e){
+      if(!e.style) return;
+      if(e.style.opacity==='1') junk++;
+      if(e.style.visibility==='visible') junk++;
+      if(e.style.transform==='none') junk++;
+      if((e.tagName==='SPAN'||e.tagName==='DIV')&&!e.attributes.length&&!e.childNodes.length) emp++;
+    });
+    if(!chN&&!junk&&!emp){ if(msg) msg.textContent='🧹 掃除する物が見つかりませんでした（もう軽い状態です）'; return; }
+    if(!confirm('🧹 大掃除します：\\n・文字分割span '+chN+'個 → 素のテキストへ（一文字ずつ系の動きは解除）\\n・残骸style '+junk+'件\\n・空のspan/div '+emp+'個\\n\\n⟲（Ctrl+Z）で戻せます。実行しますか？')) return;
+    fxUnsplit(document.body);
+    [].slice.call(document.querySelectorAll('.fxa_tw,.fxa_cpre,.fxa_wave,.fxa_lines')).forEach(function(e){
+      e.classList.remove('fxa_tw','fxa_cpre','fxa_wave','fxa_lines');
+      e.style.removeProperty('--fxa-stag');
+      if(!/fxa_(y|yd|xl|xr|s|bl|ry|fl|wp|cl|cc|clip)( |$)/.test(e.className)){ e.classList.remove('fxa_pre','fxa_in'); e.style.removeProperty('--fxa-dist'); }
+    });
+    all.forEach(function(e){
+      if(!e.style||!document.contains(e)) return;
+      // 消して隠れてしまう物（CSS側がopacity:0等）は自動で元に戻す＝見た目は絶対に変えない
+      if(e.style.opacity==='1'){ e.style.removeProperty('opacity'); if(parseFloat(getComputedStyle(e).opacity)<0.9) e.style.setProperty('opacity','1','important'); }
+      if(e.style.visibility==='visible'){ e.style.removeProperty('visibility'); if(getComputedStyle(e).visibility==='hidden') e.style.setProperty('visibility','visible','important'); }
+      if(e.style.transform==='none'){ e.style.removeProperty('transform'); if(getComputedStyle(e).transform!=='none') e.style.setProperty('transform','none','important'); }
+      if(e.getAttribute&&e.getAttribute('style')==='') e.removeAttribute('style');
+      if((e.tagName==='SPAN'||e.tagName==='DIV')&&!e.attributes.length&&!e.childNodes.length) e.remove();
+    });
+    markDirty(); pushUndo('bigclean');
+    if(msg) msg.textContent='🧹 大掃除しました（分割span'+chN+'個・残骸'+junk+'件・空要素'+emp+'個）。⟲で戻せます／💾保存で確定';
+  });
+  // 🗂 バックアップ（AIなし・一瞬）：最後に💾保存した状態のファイルを複製→履歴一覧に並ぶ
+  var bkBtn=document.getElementById('__ce_bk');
+  if(bkBtn) bkBtn.addEventListener('click',function(){
+    if(_dirty && !confirm('未保存の変更はバックアップに入りません（「最後に💾保存した状態」の複製です）。\\nこのまま作りますか？（キャンセルして先に💾保存もできます）')) return;
+    fetch('/api/camp_backup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if(msg) msg.textContent=j.ok?('🗂 バックアップを作りました（ホームの履歴一覧に「🗂バックアップ」の名前で並びます）'):('⚠ '+(j.message||'バックアップ失敗')); })
+      .catch(function(){ if(msg) msg.textContent='⚠ バックアップに失敗しました'; });
+  });
+  // 📦 本番化キット（AIなし・一瞬）。そうじ済み見本＋anim部品＋変換指示.md＋規約を1フォルダに書き出す
+  var prodBtn=document.getElementById('__ce_prod');
+  if(prodBtn) prodBtn.addEventListener('click',function(){
+    prodBtn.disabled=true; var old=prodBtn.textContent; prodBtn.textContent='📦 書き出し中…';
+    function reset(){ prodBtn.disabled=false; prodBtn.textContent=old; }
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
+    .then(function(){ return fetch('/api/prod_kit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})}); })
+    .then(function(r){return r.json();}).then(function(d){
+      reset();
+      if(!d.ok){ msg.textContent='本番化キットの作成に失敗：'+(d.message||''); return; }
+      msg.textContent='📦 できました → '+d.dir+' ｜ このフォルダでClaude Code/Codexを開いて「変換指示.mdどおりにやって」と言うだけ'+(d.rules?'':'（⚠規約ファイルが見つからず未同梱）');
+      try{ navigator.clipboard.writeText(d.dir); }catch(_){ }
+    }).catch(function(){ reset(); msg.textContent='通信エラー'; });
+  });
+  // 🔃 セクション並べ替え（AIなし・無料）：DOMごと入れ替え→💾保存で確定。
+  //   一覧は最上位の<section>だけ（入れ子の中身は数えない）。入れ物が違う同士は安全のため拒否
+  var swapBtn=document.getElementById('__ce_secswap');
+  if(swapBtn) swapBtn.addEventListener('click',function(){
+    var old=document.getElementById('__ce_secp'); if(old){ old.remove(); return; }
+    var p=document.createElement('div'); p.id='__ce_secp'; p.className='__ce_hdl';
+    p.style.cssText='position:fixed;left:20px;top:70px;z-index:2147483040;width:300px;max-height:76vh;overflow:auto;background:#1d1d1f;color:#eee;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.45);font:12.5px/1.6 sans-serif;padding:10px 12px';
+    document.body.appendChild(p);
+    function secs(){
+      return [].slice.call(document.body.querySelectorAll('section')).filter(function(s){
+        return !(s.parentElement&&s.parentElement.closest('section'));
+      });
+    }
+    function label(s){
+      var h=s.querySelector('h1,h2,h3');
+      var t=((h?h.textContent:s.textContent)||'').replace(/\s+/g,' ').trim().slice(0,14);
+      return t||'(無題)';
+    }
+    function render(){
+      var list=secs();
+      var html='<div style="display:flex;align-items:center;margin-bottom:8px"><b>🔃 セクション並べ替え</b><span id="__ce_secpx" style="margin-left:auto;cursor:pointer;padding:0 6px">✕</span></div>';
+      list.forEach(function(s,i){
+        html+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid #333">'
+          +'<span style="width:20px;color:#9ab">'+(i+1)+'</span>'
+          +'<span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+label(s).replace(/</g,'&lt;')+'</span>'
+          +'<button data-mv="up" data-i="'+i+'" '+(i===0?'disabled':'')+' style="border:0;border-radius:5px;background:#3a4763;color:#fff;cursor:pointer;padding:2px 8px">↑</button>'
+          +'<button data-mv="dn" data-i="'+i+'" '+(i===list.length-1?'disabled':'')+' style="border:0;border-radius:5px;background:#3a4763;color:#fff;cursor:pointer;padding:2px 8px">↓</button>'
+          +'</div>';
+      });
+      html+='<div style="margin-top:8px;color:#9ab;font-size:11px">↑↓を押すとページに即反映されます。最後に💾保存で確定（保存しなければ開き直しで元どおり）</div>';
+      p.innerHTML=html;
+      p.querySelector('#__ce_secpx').addEventListener('click',function(){ p.remove(); });
+      [].slice.call(p.querySelectorAll('button[data-mv]')).forEach(function(b){
+        b.addEventListener('click',function(){
+          var list=secs(), i=+b.getAttribute('data-i');
+          var s=list[i], o=(b.getAttribute('data-mv')==='up')?list[i-1]:list[i+1];
+          if(!s||!o) return;
+          if(s.parentNode!==o.parentNode){ if(msg) msg.textContent='この2つは入れ物が違うため入れ替えできません'; return; }
+          if(b.getAttribute('data-mv')==='up') s.parentNode.insertBefore(s,o);
+          else s.parentNode.insertBefore(o,s);
+          markDirty(); render();
+          try{ s.scrollIntoView({block:'center'}); }catch(_){ }
+          if(msg) msg.textContent='🔃 「'+label(s)+'」を移動しました（💾保存で確定）';
+        });
+      });
+    }
+    render();
+  });
   // 🔍 インスペクトモード（コーダー受け渡し用・AIなし・無料）
   // ONの間：ホバー＝青枠＋寸法タグ／クリック＝数値パネル（サイズ・文字・色・余白・CSSコピー）／
   // 選択中に他要素へホバー＝Figma風のすき間距離（px）。ドラッグ・右クリックメニューは全部お休み
@@ -3497,16 +3652,30 @@ html.__ce_altmode{cursor:text}
   (function(){
     var inspBtn=document.getElementById('__ce_insp'); if(!inspBtn) return;
     var on=false, sel=null, ov=null, dim=null, l1=null, l2=null, panel=null;
+    var pin=null;  // クリック2連打で固定した距離測定ペア {a,b}（ホバーを外しても消えない）
+    var bA=null, bB=null;  // 測定中の2要素を囲むピンク枠
+    var l3=null, l4=null;  // 親子測定用の追加ライン（右・下）
+    var shield=null;  // 透明シールド：クリックがページ（リンク等）に一切届かないようにする板
     function mk(tag,css){ var d=document.createElement(tag); d.className='__ce_ipui'; d.style.cssText=css; document.body.appendChild(d); return d; }
     function ensure(){
       if(ov) return;
+      // シールドは編集バー(z:2147483000)より下＝編集バーのボタンは押せる。ページのリンクには届かない
+      shield=mk('div','position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147482998;background:transparent;cursor:crosshair;display:none');
       ov=mk('div','position:fixed;z-index:2147483000;pointer-events:none;border:1.5px solid #18a0fb;background:rgba(24,160,251,.08);display:none');
       dim=mk('div','position:fixed;z-index:2147483001;pointer-events:none;background:#18a0fb;color:#fff;font:11px/1.6 sans-serif;padding:1px 7px;border-radius:3px;display:none;white-space:nowrap');
       l1=mk('div','position:fixed;z-index:2147483001;pointer-events:none;background:#e91e63;height:1.5px;display:none');
       l2=mk('div','position:fixed;z-index:2147483001;pointer-events:none;background:#e91e63;width:1.5px;display:none');
       l1.innerHTML='<span style="position:absolute;left:50%;top:-22px;transform:translateX(-50%);background:#e91e63;color:#fff;font:11px/1.5 sans-serif;padding:0 6px;border-radius:3px;white-space:nowrap"></span>';
       l2.innerHTML='<span style="position:absolute;top:50%;left:8px;transform:translateY(-50%);background:#e91e63;color:#fff;font:11px/1.5 sans-serif;padding:0 6px;border-radius:3px;white-space:nowrap"></span>';
-      panel=mk('div','position:fixed;z-index:2147483002;top:64px;right:14px;width:292px;max-height:calc(100vh - 90px);overflow:auto;background:#1e252e;color:#dde;font:12px/1.7 sans-serif;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);display:none');
+      // 親子測定用の追加ライン（右・下）。l1/l2と同じ構造
+      l3=mk('div','position:fixed;z-index:2147483001;pointer-events:none;background:#e91e63;height:1.5px;display:none');
+      l4=mk('div','position:fixed;z-index:2147483001;pointer-events:none;background:#e91e63;width:1.5px;display:none');
+      l3.innerHTML=l1.innerHTML; l4.innerHTML=l2.innerHTML;
+      // 測定中の2要素を囲む枠（どれとどれの距離か一目で分かるように）
+      bA=mk('div','position:fixed;z-index:2147483000;pointer-events:none;border:1.5px dashed #e91e63;display:none');
+      bB=mk('div','position:fixed;z-index:2147483000;pointer-events:none;border:1.5px dashed #e91e63;display:none');
+      // XD風の右サイド固定パネル（全高・ダーク）
+      panel=mk('div','position:fixed;z-index:2147483002;top:0;right:0;bottom:0;width:300px;overflow:auto;background:#18191b;color:#dde;font:12px/1.7 sans-serif;box-shadow:-6px 0 24px rgba(0,0,0,.35);display:none');
       panel.id='__ce_ip';
       panel.addEventListener('mousedown',function(e){ e.stopPropagation(); });
       panel.addEventListener('click',function(e){ e.stopPropagation(); });
@@ -3551,14 +3720,21 @@ html.__ce_altmode{cursor:text}
         if(s.alignItems!=='normal'&&s.alignItems!=='stretch') add('align-items',s.alignItems);
         if(s.display.indexOf('grid')>=0) add('grid-template-columns',s.gridTemplateColumns);
       }
-      var fam=(s.fontFamily||'').split(',')[0].trim();
-      add('font-family',fam);
-      add('font-size',px(s.fontSize)+'px  /* '+remOf(parseFloat(s.fontSize))+' */');
-      if(s.fontWeight!=='400') add('font-weight',s.fontWeight);
-      if(s.lineHeight!=='normal'){ var lh=Math.round(parseFloat(s.lineHeight)/parseFloat(s.fontSize)*100)/100; add('line-height',lh+'  /* '+px(s.lineHeight)+'px */'); }
-      if(s.letterSpacing!=='normal') add('letter-spacing',s.letterSpacing);
-      if(s.textAlign!=='start'&&s.textAlign!=='left') add('text-align',s.textAlign);
-      add('color',hex(s.color));
+      // 文字を持たない要素（画像等）に文字系CSSを出しても意味がないので出し分ける
+      if(hasTxt(el)){
+        var fam=(s.fontFamily||'').split(',')[0].trim();
+        add('font-family',fam);
+        add('font-size',px(s.fontSize)+'px  /* '+remOf(parseFloat(s.fontSize))+' */');
+        if(s.fontWeight!=='400') add('font-weight',s.fontWeight);
+        if(s.lineHeight!=='normal'){ var lh=Math.round(parseFloat(s.lineHeight)/parseFloat(s.fontSize)*100)/100; add('line-height',lh+'  /* '+px(s.lineHeight)+'px */'); }
+        if(s.letterSpacing!=='normal') add('letter-spacing',s.letterSpacing);
+        if(s.textAlign!=='start'&&s.textAlign!=='left') add('text-align',s.textAlign);
+        add('color',hex(s.color));
+      } else if(el.tagName==='IMG'){
+        add('width',Math.round(r.width)+'px');
+        add('height',Math.round(r.height)+'px');
+        if(s.objectFit&&s.objectFit!=='fill') add('object-fit',s.objectFit);
+      }
       var bg=hex(s.backgroundColor); if(bg) add('background-color',bg);
       if(s.backgroundImage&&s.backgroundImage!=='none') add('background-image',s.backgroundImage.length>90?'/* グラデ/画像あり（長いので省略） */':s.backgroundImage);
       add('padding',fourVal(s,'padding'));
@@ -3566,6 +3742,12 @@ html.__ce_altmode{cursor:text}
       if(s.borderTopStyle!=='none'&&px(s.borderTopWidth)) add('border',s.borderTopWidth+' '+s.borderTopStyle+' '+hex(s.borderTopColor));
       if(px(s.borderRadius)||s.borderRadius.indexOf('%')>=0) add('border-radius',s.borderRadius);
       if(s.boxShadow&&s.boxShadow!=='none') add('box-shadow',s.boxShadow);
+      // 配置と変形：これが無いと「飾りをどこにどう置くか」が実装できない
+      if(s.position==='absolute'||s.position==='fixed'){
+        add('top',px(s.top)+'px'); add('left',px(s.left)+'px');
+        out.push('  /* 親要素に position: relative を付けること */');
+      }
+      if(s.transform&&s.transform!=='none') add('transform',(el.style&&el.style.transform)||s.transform);
       out.push('}');
       return out.join('\\n');
     }
@@ -3574,6 +3756,61 @@ html.__ce_altmode{cursor:text}
       if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done); return; }
       var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); }catch(e){} ta.remove(); done();
+    }
+    function hasTxt(el){ return el.tagName!=='IMG' && (el.textContent||'').trim().length>0; }
+    // matrix(...)を読める形（translate/rotate）に直す（純回転のときだけ・無理なら素のまま）
+    function tfNice(m){
+      var mm=/^matrix\\(([-\\d.]+), ?([-\\d.]+), ?([-\\d.]+), ?([-\\d.]+), ?([-\\d.]+), ?([-\\d.]+)\\)$/.exec(m||'');
+      if(!mm) return m;
+      var a=+mm[1],b=+mm[2],e=+mm[5],f=+mm[6];
+      var sc=Math.sqrt(a*a+b*b), ang=Math.round(Math.atan2(b,a)*180/Math.PI);
+      if(Math.abs(sc-1)<0.02){
+        var t=(Math.round(e)||Math.round(f))?('translate('+Math.round(e)+'px, '+Math.round(f)+'px)'):'';
+        var r=ang?('rotate('+ang+'deg)'):'';
+        return (t+' '+r).trim()||'none';
+      }
+      return m;
+    }
+    // ::before/::after（CSSだけで描かれた飾り）を、コピペで再現できるCSS見本に起こす
+    function pseudoCss(el){
+      var out=[];
+      ['before','after'].forEach(function(k){
+        var ps=null; try{ ps=getComputedStyle(el,'::'+k); }catch(_){ return; }
+        if(!ps||!ps.content||ps.content==='none'||ps.content==='normal') return;
+        var o=[selectorOf(el)+'::'+k+' {'];
+        o.push('  content: '+ps.content+';');
+        if(ps.position!=='static'){
+          o.push('  position: '+ps.position+';  /* 親に position: relative */');
+          ['top','left','right','bottom'].forEach(function(p){ if(ps[p]&&ps[p]!=='auto') o.push('  '+p+': '+ps[p]+';'); });
+        }
+        if(parseFloat(ps.width)) o.push('  width: '+ps.width+';');
+        if(parseFloat(ps.height)) o.push('  height: '+ps.height+';');
+        if(ps.content!=='\"\"'){ o.push('  font-size: '+ps.fontSize+';'); var c=hex(ps.color); if(c) o.push('  color: '+c+';'); }
+        var bg=hex(ps.backgroundColor); if(bg) o.push('  background: '+bg+';');
+        if(ps.backgroundImage&&ps.backgroundImage!=='none') o.push('  background-image: '+(ps.backgroundImage.length>90?'/* グラデ/画像（長いので省略） */':ps.backgroundImage)+';');
+        if(ps.borderRadius&&parseFloat(ps.borderRadius)) o.push('  border-radius: '+ps.borderRadius+';');
+        if(ps.transform&&ps.transform!=='none') o.push('  transform: '+tfNice(ps.transform)+';');
+        if(ps.opacity&&ps.opacity!=='1') o.push('  opacity: '+ps.opacity+';');
+        o.push('}');
+        out.push(o.join('\\n'));
+      });
+      return out.join('\\n\\n');
+    }
+    // この要素の動き→アニメ実装キットのクラス名に翻訳（animkit.pyの_FX_MAPと同じ対応表）
+    function animOf(el){
+      var M=[['fxa_yd','rv rv-down'],['fxa_y','rv rv-up'],['fxa_xl','rv rv-left'],['fxa_xr','rv rv-right'],
+        ['fxa_s','rv rv-zoom'],['fxa_bl','rv rv-blur'],['fxa_ry','rv rv-flip'],['fxa_clip','rv rv-up'],
+        ['fxa_fl','rv rv-page'],['fxa_wp','rv rv-curtain-l'],['fxa_cl','rv rv-curtain-l'],['fxa_cc','rv rv-curtain-c'],
+        ['fxa_lines','rv-lines'],['fxa_cpre','chars'],['fxa_tw','chars'],['fxa_wave','chars lp-wave'],
+        ['fxa_lp_pulse','lp-pulse'],['fxa_lp_float','lp-float'],['fxa_lp_bounce','lp-bounce'],['fxa_lp_glow','lp-glow'],
+        ['fxa_hl','mk'],['fxa_ud','ud'],['fxa_cnt','cnt']];
+      var out=[];
+      for(var i=0;i<M.length;i++){ if(el.classList&&el.classList.contains(M[i][0])&&out.indexOf(M[i][1])<0) out.push(M[i][1]); }
+      if(!out.length&&el.classList&&el.classList.contains('reveal')) out.push('rv rv-up');
+      if(!out.length) return '';
+      var kit=out.join(' ');
+      var d=el.getAttribute('data-cedelay'); if(d) kit+=' ＋ data-delay="'+d+'"';
+      return kit;
     }
     function row(k,v){ return v?('<div style="display:flex;gap:8px;margin:2px 0"><span style="color:#8fa3b8;min-width:64px;flex:none">'+k+'</span><span style="word-break:break-all">'+v+'</span></div>'):''; }
     function sw(c){ return c?('<span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+c+';border:1px solid #556;vertical-align:-1px;margin-right:4px"></span>'+c):''; }
@@ -3586,42 +3823,81 @@ html.__ce_altmode{cursor:text}
       if(s.display.indexOf('flex')>=0||s.display.indexOf('grid')>=0){
         fx=s.display+(s.gap&&s.gap!=='normal'&&px(s.gap)?(' / gap '+s.gap):'');
       }
+      var cell=function(k,v){ return '<div><span style="color:#8fa3b8;display:inline-block;width:16px">'+k+'</span> <b>'+v+'</b></div>'; };
+      // 疑似要素の飾り：自分に無ければ親のも見る（飾りをクリックすると中の空要素が選ばれがちなため）
+      var pcss=pseudoCss(el);
+      if(!pcss&&el.parentElement&&el.parentElement!==document.body) pcss=pseudoCss(el.parentElement);
+      // この要素が表示している画像（img / background-image / 中のimg）＝「どの画像か」をサムネで見せる
+      var isrc='';
+      if(el.tagName==='IMG') isrc=el.currentSrc||el.src||'';
+      if(!isrc){ var _bm=/url\\(["']?([^"')]+)/.exec(s.backgroundImage||''); if(_bm) isrc=_bm[1]; }
+      if(!isrc&&el.querySelector){ var _im=el.querySelector('img'); if(_im) isrc=_im.currentSrc||_im.src||''; }
       var html=''
-        +'<div id="__ce_iph" style="cursor:move;padding:9px 12px;background:#141a21;border-radius:10px 10px 0 0;display:flex;align-items:center;gap:8px">'
-        +'<b style="font-size:12px">🔍 '+esc(selectorOf(el))+'</b>'
-        +'<span id="__ce_ipx" style="margin-left:auto;cursor:pointer;padding:0 4px">✕</span></div>'
+        +'<div id="__ce_iph" style="padding:11px 12px;background:#101113;display:flex;align-items:center;gap:8px;position:sticky;top:0">'
+        +'<b style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🔍 '+esc(selectorOf(el))+'</b>'
+        +'<button id="__ce_ipup" style="margin-left:auto;border:0;border-radius:5px;background:#3a4763;color:#fff;cursor:pointer;font-size:11px;padding:2px 8px" title="1つ外側の要素を選ぶ">⬆ 親</button>'
+        +'<span id="__ce_ipx" style="cursor:pointer;padding:0 4px">✕</span></div>'
+        +'<div style="padding:10px 12px;border-bottom:1px solid #2a2d31">'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;font-size:12px">'
+        +cell('W',Math.round(r.width)+'px')+cell('X',Math.round(r.left+window.scrollX)+'px')
+        +cell('H',Math.round(r.height)+'px')+cell('Y',Math.round(r.top+window.scrollY)+'px')
+        +'</div></div>'
         +'<div style="padding:10px 12px">'
-        +row('サイズ',Math.round(r.width)+' × '+Math.round(r.height)+' px')
-        +row('フォント',esc(fam))
-        +row('文字',px(s.fontSize)+'px（'+remOf(parseFloat(s.fontSize))+'）/ 太さ'+s.fontWeight)
-        +row('行間',lh)
-        +(s.letterSpacing!=='normal'?row('字間',esc(s.letterSpacing)):'')
-        +row('文字色',sw(hex(s.color)))
+        +(isrc?('<div style="margin:2px 0 8px"><img src="'+esc(isrc)+'" style="max-width:100%;max-height:90px;border-radius:6px;border:1px solid #2a2d31;display:block">'
+          +'<div style="color:#8fa3b8;font-size:11px;margin-top:3px;word-break:break-all">画像: '
+          +esc(isrc.indexOf('data:')===0?'（HTML埋め込み画像）':String(isrc).split('/').pop().split('?')[0].slice(0,48))+'</div></div>'):'')
+        +(hasTxt(el)?(
+           row('フォント',esc(fam))
+          +row('文字',px(s.fontSize)+'px（'+remOf(parseFloat(s.fontSize))+'）/ 太さ'+s.fontWeight)
+          +row('行間',lh)
+          +(s.letterSpacing!=='normal'?row('字間',esc(s.letterSpacing)):'')
+          +row('文字色',sw(hex(s.color)))
+        ):'')
         +row('背景色',sw(hex(s.backgroundColor))||(s.backgroundImage!=='none'?'グラデ/画像':''))
         +row('padding',fourVal(s,'padding')||'0')
         +row('margin',fourVal(s,'margin')||'0')
         +(px(s.borderRadius)||s.borderRadius.indexOf('%')>=0?row('角丸',esc(s.borderRadius)):'')
         +(s.borderTopStyle!=='none'&&px(s.borderTopWidth)?row('枠線',esc(s.borderTopWidth+' '+s.borderTopStyle+' ')+sw(hex(s.borderTopColor))):'')
         +(s.boxShadow&&s.boxShadow!=='none'?row('影','あり'):'')
+        +(s.position!=='static'?row('配置',esc(s.position)+'（top '+px(s.top)+'px / left '+px(s.left)+'px）'):'')
+        +(s.transform&&s.transform!=='none'?row('変形',esc((el.style&&el.style.transform)||'あり（transform）')):'')
         +(fx?row('並べ方',esc(fx)):'')
-        +'<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">'
-        +'<button id="__ce_ipcss" style="flex:1;min-width:110px;padding:7px;border:0;border-radius:6px;background:#18a0fb;color:#fff;cursor:pointer;font-size:12px">📋 CSSをコピー</button>'
-        +'<button id="__ce_ipup" style="padding:7px 10px;border:0;border-radius:6px;background:#3a4763;color:#fff;cursor:pointer;font-size:12px" title="1つ外側の要素を選ぶ">⬆ 親</button>'
+        +(animOf(el)?row('動き','<code id="__ce_ipanim" title="クリックで🎬キットのこの動きのデモを開く" style="background:#233527;color:#8ee08e;padding:1px 6px;border-radius:4px;cursor:pointer;text-decoration:underline dotted">'+esc(animOf(el))+'</code><span style="color:#8fa3b8">（付けるクラス・クリックでデモ）</span>'):'')
         +'</div>'
-        +'<div style="margin-top:8px;color:#8fa3b8;font-size:11px">他の要素にマウスを乗せると距離(px)が出ます</div>'
+        +'<div style="padding:10px 12px;border-top:1px solid #2a2d31">'
+        +'<div style="display:flex;align-items:center;margin-bottom:6px"><b style="font-size:11.5px;color:#8fa3b8;letter-spacing:.05em">CSS</b>'
+        +'<button id="__ce_iphtml" style="margin-left:auto;border:0;background:none;color:#18a0fb;cursor:pointer;font-size:11.5px" title="飾り文字など複雑な要素はHTMLごとコピペが早い">HTMLをコピー</button>'
+        +'<button id="__ce_ipcss" style="border:0;background:none;color:#18a0fb;cursor:pointer;font-size:11.5px;margin-left:10px">CSSをコピー</button></div>'
+        +'<pre style="margin:0;background:#24262a;border-radius:8px;padding:10px;font:11px/1.65 Consolas,monospace;white-space:pre-wrap;word-break:break-all;color:#cde">'+esc(cssOf(el))+'</pre>'
+        +'<div style="margin-top:8px;color:#8fa3b8;font-size:11px">別の要素をクリック＝距離を固定表示／ホバー＝仮の距離</div>'
+        +(pcss?('<div style="padding:10px 12px 0 12px;border-top:1px solid #2a2d31;margin:10px -12px 0 -12px">'
+          +'<div style="display:flex;align-items:center;margin-bottom:6px;padding:0 12px"><b style="font-size:11.5px;color:#8fa3b8;letter-spacing:.05em">飾り（CSSだけで描く疑似要素）</b>'
+          +'<button id="__ce_ippse" style="margin-left:auto;border:0;background:none;color:#18a0fb;cursor:pointer;font-size:11.5px">見本をコピー</button></div>'
+          +'<pre style="margin:0 12px;background:#24262a;border-radius:8px;padding:10px;font:11px/1.65 Consolas,monospace;white-space:pre-wrap;word-break:break-all;color:#cde">'+esc(pcss)+'</pre></div>'):'')
+        +'<details style="margin-top:8px;font-size:11px;color:#8fa3b8"><summary style="cursor:pointer;list-style-position:inside">📏 距離線の読み方（実装で使う値はどっち？）</summary>'
+        +'<div style="margin-top:6px;padding:8px 10px;background:#242830;border-left:3px solid #eab308;border-radius:0 6px 6px 0;color:#cbd5e1;line-height:1.7">'
+        +'ピンクの距離線＝<b>見た目の距離</b>（文字の上下に付く「行間の余り」を含む）。<br>'
+        +'CSSに書く値は<b>このパネルのmargin / padding をそのまま</b>使うこと。<br>'
+        +'例：見た目36px ＝ margin 24px ＋ 行間の余り12px。36と書くと広がりすぎる。</div></details>'
         +'</div>';
       panel.innerHTML=html; panel.style.display='block';
       panel.querySelector('#__ce_ipx').addEventListener('click',function(){ sel=null; panel.style.display='none'; hideLines(); });
       panel.querySelector('#__ce_ipcss').addEventListener('click',function(){ copyText(cssOf(el),this); });
+      panel.querySelector('#__ce_iphtml').addEventListener('click',function(){ copyText(el.outerHTML,this); });
+      var pb=panel.querySelector('#__ce_ippse');
+      if(pb) pb.addEventListener('click',function(){ copyText(pcss,this); });
+      var an=panel.querySelector('#__ce_ipanim');
+      if(an) an.addEventListener('click',function(){
+        // 🎬キットを（無ければ作って）開き、この動きのカタログカードへ直接ジャンプ
+        var kit=an.textContent.split('＋')[0].trim();
+        var anchor='cat-'+kit.replace(/[^a-zA-Z0-9-]+/g,'-');
+        fetch('/api/anim_kit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})})
+          .then(function(r){ return r.json(); })
+          .then(function(d){ if(d&&d.file) window.open('/kit/'+encodeURIComponent(d.file)+'?hl='+anchor.slice(4)+'&el='+encodeURIComponent(selectorOf(el))+'&tx='+encodeURIComponent((el.textContent||'').replace(/\\s+/g,'').slice(0,16))+'#'+anchor,'_blank'); });
+      });
       panel.querySelector('#__ce_ipup').addEventListener('click',function(){
         var p=el.parentElement; if(p&&p!==document.body&&p.tagName!=='HTML'){ sel=p; renderPanel(p); showBox(p); } });
-      var hd=panel.querySelector('#__ce_iph');
-      hd.addEventListener('mousedown',function(e){
-        e.preventDefault(); var sx=e.clientX,sy=e.clientY,rc=panel.getBoundingClientRect();
-        function mv(ev){ panel.style.left=(rc.left+ev.clientX-sx)+'px'; panel.style.top=(rc.top+ev.clientY-sy)+'px'; panel.style.right='auto'; }
-        function up(){ document.removeEventListener('mousemove',mv,true); document.removeEventListener('mouseup',up,true); }
-        document.addEventListener('mousemove',mv,true); document.addEventListener('mouseup',up,true);
-      });
+      // 固定サイドバー化に伴いパネルのドラッグ移動は廃止（XD風・位置は右端固定）
     }
     function showBox(el){
       ensure();
@@ -3633,67 +3909,142 @@ html.__ce_altmode{cursor:text}
       dim.style.left=Math.max(2,r.left)+'px'; dim.style.top=dt+'px';
     }
     function hideBox(){ if(ov){ ov.style.display='none'; dim.style.display='none'; } }
-    function hideLines(){ if(l1){ l1.style.display='none'; l2.style.display='none'; } }
+    function hideLines(){ [l1,l2,l3,l4,bA,bB].forEach(function(d){ if(d) d.style.display='none'; }); }
+    function boxAt(d,r){ d.style.display='block'; d.style.left=r.left+'px'; d.style.top=r.top+'px'; d.style.width=(r.right-r.left)+'px'; d.style.height=(r.bottom-r.top)+'px'; }
+    // 距離測定用の矩形＝「実際に文字が描かれている範囲」（マーキー選択と同じ流儀）。
+    // CSSの箱は余白ぶん大きくて隣と重なりやすく、重なると「すき間なし」で線が出ない
+    // （実際に起きた）。見た目どおりの文字間の距離を出す。文字なし要素（画像等）は箱で測る
+    function vrect(el){
+      var r=el.getBoundingClientRect();
+      try{
+        if((el.textContent||'').trim()){
+          var rg=document.createRange(); rg.selectNodeContents(el);
+          var t=rg.getBoundingClientRect();
+          if(t&&t.width>=1&&t.height>=1) return t;
+        }
+      }catch(_){ }
+      return r;
+    }
+    function hline(el,x1,x2,y){
+      if(x2-x1>=1){ el.style.display='block'; el.style.left=x1+'px'; el.style.width=(x2-x1)+'px'; el.style.top=y+'px';
+        el.firstChild.textContent=gpx(x2-x1)+'px'; return true; }
+      el.style.display='none'; return false;
+    }
+    function vline(el,y1,y2,x){
+      if(y2-y1>=1){ el.style.display='block'; el.style.top=y1+'px'; el.style.height=(y2-y1)+'px'; el.style.left=x+'px';
+        el.firstChild.textContent=gpx(y2-y1)+'px'; return true; }
+      el.style.display='none'; return false;
+    }
     function showGap(a,b){
       ensure();
-      var A=a.getBoundingClientRect(), B=b.getBoundingClientRect();
+      var shown=false;
+      // 親子（片方がもう片方を含む）＝XD風に「内側の余白」上下左右を測る。
+      // 以前は親子をスキップしていて「行→01とクリックしても何も出ない」が実際に起きた
+      if(a.contains(b)||b.contains(a)){
+        var outEl=a.contains(b)?a:b, inEl=(outEl===a)?b:a;
+        var O=outEl.getBoundingClientRect(), I=vrect(inEl);
+        boxAt(bA,O); boxAt(bB,I);
+        var cy=(I.top+I.bottom)/2, cx=(I.left+I.right)/2;
+        shown=hline(l1,O.left,I.left,cy)||shown;
+        shown=hline(l3,I.right,O.right,cy)||shown;
+        shown=vline(l2,O.top,I.top,cx)||shown;
+        shown=vline(l4,I.bottom,O.bottom,cx)||shown;
+        return shown;
+      }
+      var A=vrect(a), B=vrect(b);
+      boxAt(bA,A); boxAt(bB,B);
+      l3.style.display='none'; l4.style.display='none';
       var ovT=Math.max(A.top,B.top), ovB=Math.min(A.bottom,B.bottom);
       var ovL=Math.max(A.left,B.left), ovR=Math.min(A.right,B.right);
       var y=(ovT<ovB)?((ovT+ovB)/2):((A.top+A.bottom)/2);
       var x=(ovL<ovR)?((ovL+ovR)/2):((A.left+A.right)/2);
       var g1=null;
       if(B.left>=A.right) g1={x1:A.right,x2:B.left}; else if(A.left>=B.right) g1={x1:B.right,x2:A.left};
-      if(g1&&g1.x2-g1.x1>=1){
-        l1.style.display='block'; l1.style.left=g1.x1+'px'; l1.style.width=(g1.x2-g1.x1)+'px'; l1.style.top=y+'px';
-        l1.firstChild.textContent=Math.round(g1.x2-g1.x1)+'px';
-      } else l1.style.display='none';
+      if(g1) shown=hline(l1,g1.x1,g1.x2,y)||shown; else l1.style.display='none';
       var g2=null;
       if(B.top>=A.bottom) g2={y1:A.bottom,y2:B.top}; else if(A.top>=B.bottom) g2={y1:B.bottom,y2:A.top};
-      if(g2&&g2.y2-g2.y1>=1){
-        l2.style.display='block'; l2.style.top=g2.y1+'px'; l2.style.height=(g2.y2-g2.y1)+'px'; l2.style.left=x+'px';
-        l2.firstChild.textContent=Math.round(g2.y2-g2.y1)+'px';
-      } else l2.style.display='none';
+      if(g2) shown=vline(l2,g2.y1,g2.y2,x)||shown; else l2.style.display='none';
+      return shown;
     }
-    function inOwnUI(t){ var el=t&&(t.nodeType===1?t:t.parentElement); return el&&el.closest&&(el.closest('.__ce_ipui')||el.closest('#__ce')); }
+    function inOwnUI(t){ var el=t&&(t.nodeType===1?t:t.parentElement); if(el===shield) return false; return el&&el.closest&&(el.closest('.__ce_ipui')||el.closest('#__ce')); }
+    // シールド越しに「その座標にある実際の要素」を透視して拾う
+    function pickAt(e){
+      var ls=(document.elementsFromPoint?document.elementsFromPoint(e.clientX,e.clientY):[])||[];
+      for(var i=0;i<ls.length;i++){
+        var n=ls[i];
+        if(n===shield) continue;
+        if(n.classList&&n.classList.contains('__ce_ipui')) continue;
+        if(n.closest&&n.closest('#__ce')) continue;
+        return n;
+      }
+      return null;
+    }
+    // 距離の表示丸め：50px未満はそのまま（小さい余白は1pxに意味がある）、50px以上は10px単位
+    // （元がAI生成＋実測で±数px揺れる＝1桁目は見せても役に立たないため）
+    function gpx(v){ v=Math.round(v); return v<50?v:Math.round(v/10)*10; }
+    function showPin(){ if(pin){ showGap(pin.a,pin.b); } else hideLines(); }
     function onMove(e){
       if(!on) return;
-      if(inOwnUI(e.target)){ if(!sel) hideBox(); hideLines(); return; }
-      var el=e.target;
-      if(!el||el===document.body||el===document.documentElement){ hideBox(); hideLines(); return; }
+      if(inOwnUI(e.target)){ if(!sel) hideBox(); showPin(); return; }
+      var el=pickAt(e);
+      if(!el||el===document.body||el===document.documentElement){ hideBox(); showPin(); return; }
       showBox(el);
-      if(sel&&el!==sel&&!sel.contains(el)&&!el.contains(sel)) showGap(sel,el); else hideLines();
+      if(sel&&el!==sel) showGap(sel,el); else showPin();
     }
     function onClick(e){
       if(!on||inOwnUI(e.target)) return;
       e.preventDefault(); e.stopPropagation();
-      var el=e.target; if(!el||el===document.body||el===document.documentElement) return;
-      sel=el; renderPanel(el); showBox(el);
+      // 何もない所（body直）をクリック＝固定表示と選択をクリア（前の測定が残って紛らわしいため）
+      var el=pickAt(e);
+      if(!el||el===document.body||el===document.documentElement){
+        pin=null; sel=null; hideBox(); hideLines(); if(panel) panel.style.display='none';
+        if(msg) msg.textContent='🔍 クリック＝数値パネル／続けて別の要素をクリック＝距離を固定表示。Escで終了';
+        return;
+      }
+      // 2回目のクリック＝前の選択との距離を「固定表示」する（ホバーを外しても消えない）。
+      // クリックした要素が次の選択になるので、クリックで渡り歩くと隣同士の距離を順に測れる
+      if(sel&&el!==sel){
+        pin={a:sel,b:el};
+        var isPc=(sel.contains(el)||el.contains(sel));
+        if(msg) msg.textContent=showGap(pin.a,pin.b)
+          ?(isPc?'📏 親子の距離（内側の余白）を固定表示中（余白クリック＝リセット／Escで終了）'
+                :'📏 距離を固定表示中（別の要素をクリック＝次の距離／余白クリック＝リセット）')
+          :'📏 この2つは重なっていて、すき間はありません（内側の余白はパネルのpadding/marginを見る）';
+      }
+      sel=el; renderPanel(el); showBox(el); showPin();
     }
     function onDown(e){ if(on&&!inOwnUI(e.target)){ e.preventDefault(); e.stopPropagation(); } }
+    // リンク対策の二重ロック：中クリック(auxclick)・ダブルクリック・他スクリプトのクリック処理も封じる
+    function onAux(e){ if(on&&!inOwnUI(e.target)){ e.preventDefault(); e.stopImmediatePropagation(); } }
     function onCtx(e){ if(on&&!inOwnUI(e.target)){ e.preventDefault(); e.stopPropagation(); } }
     function onKey(e){ if(on&&e.key==='Escape'){ toggle(); } }
-    function onScroll(){ if(!on) return; if(sel) showBox(sel); else hideBox(); hideLines(); }
+    function onScroll(){ if(!on) return; if(sel) showBox(sel); else hideBox(); showPin(); }
     function toggle(){
       on=!on; window.__ceInspOn=on; ensure();
       inspBtn.textContent=on?'🔍 インスペクト中（Escで終了）':'🔍 インスペクト（コーダーに数値を渡す）';
       inspBtn.style.background=on?'#18a0fb':'#263238';
       document.documentElement.style.cursor=on?'crosshair':'';
+      if(shield) shield.style.display=on?'block':'none';
       if(on){
         document.addEventListener('mousemove',onMove,true);
         document.addEventListener('click',onClick,true);
+        document.addEventListener('auxclick',onAux,true);
+        document.addEventListener('dblclick',onAux,true);
         document.addEventListener('mousedown',onDown,true);
         document.addEventListener('contextmenu',onCtx,true);
         document.addEventListener('keydown',onKey,true);
         window.addEventListener('scroll',onScroll,true);
-        if(msg) msg.textContent='🔍 要素をクリック＝数値パネル／選択後に他へホバー＝距離。Escで終了';
+        if(msg) msg.textContent='🔍 クリック＝数値パネル／続けて別の要素をクリック＝距離を固定表示。Escで終了';
       } else {
         document.removeEventListener('mousemove',onMove,true);
         document.removeEventListener('click',onClick,true);
+        document.removeEventListener('auxclick',onAux,true);
+        document.removeEventListener('dblclick',onAux,true);
         document.removeEventListener('mousedown',onDown,true);
         document.removeEventListener('contextmenu',onCtx,true);
         document.removeEventListener('keydown',onKey,true);
         window.removeEventListener('scroll',onScroll,true);
-        sel=null; hideBox(); hideLines(); if(panel) panel.style.display='none';
+        sel=null; pin=null; hideBox(); hideLines(); if(panel) panel.style.display='none';
         if(msg) msg.textContent='';
       }
     }
@@ -5150,6 +5501,11 @@ html.__ce_altmode{cursor:text}
   // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
+    // Alt+ドラッグで文字を選択中なら「その選択文字だけ」を編集対象にする（spanで包む・2026-07-20）
+    if(window.__ceSel&&window.__ceSel.has&&window.__ceSel.has()&&window.__ceSel.wrapSpan){
+      var _w=window.__ceSel.wrapSpan();
+      if(_w&&el.contains(_w)) el=_w;
+    }
     // ➖区切り線（線span＋ラベルspanの入れ物）は、入れ物ごと書き換えると線が消える（実際に起きた）
     // → 編集対象をラベルspanに差し替える。ラベルが無い（線だけ）なら空ラベルを作ってそこを編集。
     if(el.getAttribute && el.getAttribute('data-cediv')!=null){
@@ -5629,6 +5985,19 @@ html.__ce_altmode{cursor:text}
       hasUd:function(){ return !!curUdot; },
       paint:paint, highlight:highlight, underline:underline, spacing:spacing, fontSize:fontSize,
       removeHl:removeHl, removeUd:removeUnderline,
+      // 選択文字をspanで包んで返す（✏文字を編集の「選択文字だけ」対象用・2026-07-20）
+      wrapSpan:function(){
+        if(curSpan) return curSpan;
+        if(curHl) return curHl;
+        if(curUdot) return curUdot;
+        if(!savedRange) return null;
+        try{
+          var t=document.createElement('span');
+          try{ savedRange.surroundContents(t); }
+          catch(_){ var f=savedRange.extractContents(); t.appendChild(f); savedRange.insertNode(t); }
+          curSpan=t; return t;
+        }catch(err){ return null; }
+      },
       // 色ドラッグ中の追従用＝履歴を貯めずに色だけ変える（履歴はメニュー側がchangeで1回だけ入れる）
       recolorHl:function(c){ if(curHl){ curHl.style.setProperty('--hlc',c); fxHlReplay(curHl); markDirty(); } },
       clear:hidePop
@@ -5892,7 +6261,11 @@ html.__ce_altmode{cursor:text}
     texts.forEach(function(tn){
       var frag=document.createDocumentFragment(), s=tn.nodeValue;
       for(var i=0;i<s.length;i++){
-        var ch=s[i];
+        var ch=s[i], cc=s.charCodeAt(i);
+        // 絵文字（サロゲートペア）は2コード=1文字。真ん中で割ると表示が壊れる上、
+        // 片割れがDOMに残ると💾保存がUTF-8エラー（surrogates not allowed）で必ず失敗する
+        if(cc>=0xD800&&cc<=0xDBFF&&i+1<s.length){ ch+=s[i+1]; i++; }
+        if(i+1<s.length&&s.charCodeAt(i+1)===0xFE0F){ ch+=s[i+1]; i++; }  // 絵文字の飾り指定(VS16)も同じ箱に
         if(/\\s/.test(ch)){ frag.appendChild(document.createTextNode(ch)); continue; }
         var sp=document.createElement('span'); sp.className='fxa_ch'; sp.textContent=ch; sp.style.display='inline-block';
         spans.push(sp); frag.appendChild(sp);
@@ -6215,7 +6588,13 @@ html.__ce_altmode{cursor:text}
     // ★マーカーはページ読み込み中に始めるとコマ落ちして「設定より速く引かれた」ように見える
     //   （--hldurは正しく効いているのに、画像読み込みでrAFの描画が飛ぶ）。
     //   → 読み込み完了(load)まで待ってから引く。文字自体は見えているので遅らせても安全。
-    +'function reveal(el){ function go(){ if(el.classList.contains("fxa_cnt")){countUp(el);} else if(el.classList.contains("fxa_hl")||el.classList.contains("fxa_ud")){'
+    // ★マーカー/下線/カウントは「親がまだ出現待ちで透明」の間は走らせない（透明のまま走り終わり
+    //   「最初から引かれた状態」に見える実害があった）。親が現れるまで150ms間隔で待つ（上限20秒）
+    +'function reveal(el){ function go(){ '
+    +'if(el.classList.contains("fxa_cnt")||el.classList.contains("fxa_hl")||el.classList.contains("fxa_ud")){'
+    +'var anc=el.parentElement&&el.parentElement.closest?el.parentElement.closest(".fxa_pre:not(.fxa_in)"):null;'
+    +'if(anc&&(el.__fxaWait=(el.__fxaWait||0)+1)<130){setTimeout(go,150);return;}}'
+    +'if(el.classList.contains("fxa_cnt")){countUp(el);} else if(el.classList.contains("fxa_hl")||el.classList.contains("fxa_ud")){'
     +'if(d.readyState==="complete") sweepHl(el); else{var done=false,start=function(){if(done)return;done=true;sweepHl(el);};window.addEventListener("load",function(){setTimeout(start,250);},{once:true});setTimeout(start,700);}'
     +'} else el.classList.add("fxa_in"); }'
     +'var cd=el.getAttribute("data-cedelay"); var gd=cd!=null?+cd:groupDelay(el); if(gd>0) setTimeout(go,gd); else go(); }'
@@ -6448,7 +6827,14 @@ html.__ce_altmode{cursor:text}
     els.forEach(function(el){
       var d=+el.getAttribute('data-cedelay')||0;
       el.__dlyT=setTimeout(function(){
-        if(_isSw(el)){ if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); } }
+        if(_isSw(el)){
+          // 親が出現待ちで透明の間は待ってから走る（透明のまま引き終わる事故防止・本番ランタイムと同じ）
+          (function w(n){
+            var anc=el.parentElement&&el.parentElement.closest?el.parentElement.closest('.fxa_pre:not(.fxa_in)'):null;
+            if(anc&&n<130){ el.__dlyT=setTimeout(function(){ w(n+1); },150); return; }
+            if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); }
+          })(0);
+        }
         else el.classList.add('fxa_in');
       }, d+60);
     });
@@ -7073,12 +7459,14 @@ html.__ce_altmode{cursor:text}
     else { var sn=_gdSnap(dragEl,tx,ty); tx=sn.tx; ty=sn.ty; }
     setPos(dragEl, tx, ty);
   },true);
-  document.addEventListener('mouseup',function(){ if(dActive){ dActive=false; document.body.style.userSelect=''; _gdEnd(); pushUndo(dragEl); } },true);
+  document.addEventListener('mouseup',function(e){ if(dActive){ dActive=false; document.body.style.userSelect=''; _gdEnd(); pushUndo(dragEl);
+    e.stopPropagation(); _hdlDrag=true; setTimeout(function(){ _hdlDrag=false; },150);  // ドラッグ直後のclickでページJSが発火（リンク遷移等）しないようやり過ごす
+  } },true);
   // ★普通にクリックしてつかむと、ボタンを押さなくてもその場で即ドラッグできる（既定の動き）。
   //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
-  function _inUI2(node){ if(window.__ceFlyMode||window.__ceInspOn) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')); }
+  function _inUI2(node){ if(window.__ceFlyMode||window.__ceInspOn) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')||el.closest('#__ce_pskill')); }
   var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   // 🔲 ドラッグ範囲選択（マーキー・2026-07-19）：セクション余白など「ドラッグしても何も起きない場所」から
   // ドラッグすると青い点線枠が出て、枠に完全に入った要素をまとめて複数選択（Ctrl+クリックと同じselEls状態）。
@@ -7281,7 +7669,9 @@ html.__ce_altmode{cursor:text}
     var cur=snapContent();
     if(cur===_lastSnap) return;
     var now=Date.now();
-    var same=key&&key===_lastPushKey&&(now-_lastPushT)<20000;
+    // 同じ要素をいじり続けている間は何分たっても1履歴（別の要素に移った時点で区切り）
+    // ＝「ちょい動かし20回→⟲1回で操作前へ」。旧仕様の20秒制限は「少しずつしか戻らない」の犯人だった
+    var same=key&&key===_lastPushKey;
     if(_lastSnap!==null&&!same){ _undoStack.push(_lastSnap); if(_undoStack.length>25) _undoStack.shift(); }
     _lastSnap=cur; _lastPushKey=key||null; _lastPushT=now; updUndoBtn();
   }
@@ -7292,6 +7682,8 @@ html.__ce_altmode{cursor:text}
     // 復元で opacity:0 等のまま隠れる本文が出ないよう強制表示（保険・_SERVE_SAFETYと同じ考え）
     [].slice.call(document.body.querySelectorAll('*')).forEach(function(e){
       if(e.id && e.id.indexOf('__ce')===0) return;
+      // ローダー/プリローダーの幕は「隠れているのが正常」＝強制表示しない（緑パズルが復活する事故防止）
+      if(e.closest&&e.closest('[class*="loader"],[class*="loading"],[class*="preload"],[class*="splash"]')) return;
       var cs; try{ cs=getComputedStyle(e); }catch(_){ return; }
       if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; }
       if(cs.visibility==='hidden'){ e.style.setProperty('visibility','visible','important'); }
@@ -7307,6 +7699,57 @@ html.__ce_altmode{cursor:text}
     updUndoBtn();
     msg.textContent='ひとつ前に戻しました（さらに戻せます／保存で確定）';
   }
+  // Ctrl+Z＝⟲ボタンと同じ「ひとつ戻す」／Shift+Ctrl+Z＝5手まとめて戻す（2026-07-20）。
+  // 文字入力中だけはブラウザ標準のundoに任せる。
+  document.addEventListener('keydown',function(e){
+    if(!(e.ctrlKey||e.metaKey)||e.altKey) return;
+    if((e.key||'').toLowerCase()!=='z') return;
+    var ae=document.activeElement;
+    if(ae&&(ae.isContentEditable||ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')){
+      // 標準undoは編集UIの断片（掴みハンドル等の小さいボタン）まで復活させることがある→直後に掃除
+      setTimeout(function(){ [].slice.call(document.querySelectorAll('.__ce_hdl,#__ce_selc,.__ce_ipui')).forEach(function(n){ n.remove(); }); },0);
+      return;
+    }
+    e.preventDefault(); e.stopPropagation();
+    if(e.shiftKey){ for(var i=0;i<5&&_undoStack.length;i++) undoStep(); }
+    else undoStep();
+  },true);
+  // 🔗 編集中はリンクに飛ばない（誤クリックでカンプから離脱して編集が迷子になるのを防ぐ・2026-07-20）
+  // ★ページ自前のJSがdocumentのcaptureで先にクリックを拾う作り（クローン系）に順序で負けないよう、
+  //   ①windowのcapture（一番先に走る）＋②押した瞬間にhrefを一時無効化、の二段構え。
+  var _lkT=null;
+  window.addEventListener('pointerdown',function(e){
+    var a=e.target&&e.target.closest&&e.target.closest('a[href]');
+    if(!a||_inUI2(a)) return;
+    if((a.getAttribute('href')||'')==='javascript:void(0)') return;
+    a.setAttribute('data-cehref', a.getAttribute('href'));
+    a.setAttribute('href','javascript:void(0)');  // 離した後600msで元に戻す＝ホバー装飾等は保たれる
+    clearTimeout(_lkT);
+    _lkT=setTimeout(function(){ [].slice.call(document.querySelectorAll('a[data-cehref]')).forEach(function(x){ x.setAttribute('href', x.getAttribute('data-cehref')); x.removeAttribute('data-cehref'); }); },600);
+  },true);
+  window.addEventListener('click',function(e){
+    if(e.target&&e.target.closest&&(e.target.closest('#__ce')||e.target.closest('#__ce_cm')||e.target.closest('#__ce_pk')||e.target.closest('#__ce_dlyp')||e.target.closest('#__ce_flypn')||e.target.closest('.__ce_hdl'))) return;  // ツールUIは素通し
+    // ドラッグで動かした直後のclickは丸ごと無効化＝ページ自前のJS（カードクリックで遷移等）も発火させない
+    if(_hdlDrag){ e.preventDefault(); e.stopPropagation(); return; }
+    var a=e.target.closest&&e.target.closest('a[href]');
+    if(a){
+      e.preventDefault();
+      if(msg) msg.textContent='🔗 編集中はリンクに飛びません（リンク先: '+(a.getAttribute('data-cehref')||a.getAttribute('href')||'')+'）';
+      return;
+    }
+    // onclick属性でページ遷移する作り（location/href/window.open入り）もブロック
+    var oc=e.target.closest&&e.target.closest('[onclick]');
+    if(oc&&/location|\\bhref\\b|window\\.open/.test(oc.getAttribute('onclick')||'')){
+      e.preventDefault(); e.stopPropagation();
+      if(msg) msg.textContent='🔗 編集中はページ移動しません（onclick遷移をブロック）';
+    }
+  },true);
+  // 🔗 リンク/画像のブラウザ標準ドラッグ（リンクを掴んで運ぶ・ゴースト画像）を編集中は止める
+  // ＝<a>の行やリンク付きカードも、普通の要素と同じようにドラッグ移動できるようになる
+  document.addEventListener('dragstart',function(e){
+    if(e.target&&e.target.closest&&(e.target.closest('#__ce')||e.target.closest('#__ce_cm'))) return;
+    e.preventDefault();
+  },true);
   // 位置/大きさを変えたら、ヘッダの保存ボタンを「💾 変更を保存」に変えて緑で目立たせる（ボタンは1つに統一）
   var _dirty=false;
   function markDirty(){
@@ -7353,7 +7796,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
@@ -7418,7 +7861,12 @@ html.__ce_altmode{cursor:text}
     if(_op){ _op.removeAttribute('data-paused'); _op.style.removeProperty('display'); _op.style.removeProperty('opacity'); _op.style.removeProperty('transition'); }
     [].slice.call(doc.querySelectorAll('script')).forEach(function(s){ if(/__ce/.test(s.textContent)) s.remove(); });
     [].slice.call(doc.querySelectorAll('style')).forEach(function(s){ if(/#__ce/.test(s.textContent)) s.remove(); });
-    return '<!doctype html>\\n'+doc.outerHTML;
+    // 🔗 リンク無効化の一時退避(data-cehref)が保存に紛れないよう必ず元のhrefへ戻す
+    [].slice.call(doc.querySelectorAll('a[data-cehref]')).forEach(function(n){ n.setAttribute('href', n.getAttribute('data-cehref')); n.removeAttribute('data-cehref'); });
+    // 過去の文字分割（修正前のsplitChars）で割れた絵文字の片割れ（孤立サロゲート）が残っていても
+    // 保存をUTF-8エラーで失敗させない：ペアが揃った正常な絵文字は残し、孤立した片割れだけ捨てる
+    var __out=doc.outerHTML.replace(/([\\uD800-\\uDBFF][\\uDC00-\\uDFFF])|[\\uD800-\\uDFFF]/g,function(m,p){ return p||''; });
+    return '<!doctype html>\\n'+__out;
   }
   function saveLayout(){
     var b=document.getElementById('__ce_save'); if(b) b.textContent='保存中…';
@@ -7485,6 +7933,60 @@ html.__ce_altmode{cursor:text}
       if(!_seeThrough(pc)) return pc;   // 実体のある要素が見つかったらそこを選ぶ
     }
     return el;                           // 全部が膜なら元のまま（膜自体を消せるように）
+  }
+  // ===== ➖ 線・飾りを消す（border/疑似要素・AIなし・2026-07-20） =====
+  // 疑似要素(::before/::after)はDOMに実体が無く掴んで移動できない（既知の限界）ため、「消す/戻す」だけ提供。
+  // 消し方＝要素にcepsoff-b/aクラスを付け、content:none!importantのCSS（#ce-psoff・保存に残る）で殺す。
+  function _psCss(){
+    if(document.getElementById('ce-psoff')) return;
+    var st=document.createElement('style'); st.id='ce-psoff';
+    st.textContent='.cepsoff-b::before{content:none!important}.cepsoff-a::after{content:none!important}';
+    (document.head||document.documentElement).appendChild(st);
+  }
+  function openDecoKill(el,x,y){
+    var old=document.getElementById('__ce_pskill'); if(old) old.remove();
+    var items=[];
+    [el, el&&el.parentElement].forEach(function(t,ti){
+      if(!t||t===document.body||t.tagName==='HTML') return;
+      var cs; try{ cs=getComputedStyle(t); }catch(_){ return; }
+      var nm=ti?('親〈'+t.tagName.toLowerCase()+'〉'):'この要素';
+      ['top','right','bottom','left'].forEach(function(sd){
+        var off=(t.style.getPropertyValue('border-'+sd)==='none');
+        if(off||(cs.getPropertyValue('border-'+sd+'-style')!=='none'&&parseFloat(cs.getPropertyValue('border-'+sd+'-width'))>0))
+          items.push({t:t,kind:'bd',side:sd,label:nm+'：'+({top:'上',right:'右',bottom:'下',left:'左'})[sd]+'の線(border)'+(off?'【消し済み】':'')});
+      });
+      ['::before','::after'].forEach(function(ps){
+        var c=''; try{ c=getComputedStyle(t,ps).content; }catch(_){}
+        var kcls=(ps==='::before')?'cepsoff-b':'cepsoff-a';
+        if(t.classList.contains(kcls)||(c&&c!=='none'&&c!=='normal'))
+          items.push({t:t,kind:(ps==='::before')?'pb':'pa',label:nm+'：飾り('+ps+')'+(t.classList.contains(kcls)?'【消し済み】':'')});
+      });
+    });
+    if(!items.length){ if(msg) msg.textContent='この要素（と親）にborder線・疑似要素の飾りは見つかりませんでした（⬆外側を選ぶで一段上も試せます）'; return; }
+    var p=document.createElement('div'); p.id='__ce_pskill';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#1d1d2b;color:#fff;border-radius:10px;padding:10px 12px;font:12.5px/1.7 sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4);max-width:340px');
+    p.innerHTML='<b>➖ 線・飾りを消す</b><div style="font-size:11px;opacity:.7;margin:2px 0 6px">疑似要素は掴んで移動できないので「消す/戻す」だけできます（同じボタンでトグル）</div>'
+      +items.map(function(it,i){ return '<button data-i="'+i+'" style="display:block;width:100%;text-align:left;margin:3px 0;background:#34344a;color:#fff;border:none;border-radius:6px;padding:5px 8px;cursor:pointer">'+it.label+'</button>'; }).join('')
+      +'<button data-x="1" style="margin-top:6px;background:#555;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer">✖ 閉じる</button>';
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      if(ev.target.getAttribute('data-x')){ p.remove(); return; }
+      var i=ev.target.getAttribute('data-i'); if(i==null) return;
+      var it=items[+i];
+      if(it.kind==='bd'){
+        var pr='border-'+it.side;
+        if(it.t.style.getPropertyValue(pr)==='none') it.t.style.removeProperty(pr);
+        else it.t.style.setProperty(pr,'none','important');
+      } else {
+        _psCss();
+        it.t.classList.toggle(it.kind==='pb'?'cepsoff-b':'cepsoff-a');
+      }
+      markDirty(); pushUndo(it.t);
+      if(msg) msg.textContent='➖ 切り替えました（同じボタンで戻る・💾保存で確定）';
+    });
   }
   // capture:true＝キャプチャ段階で先取りする。忠実クローン(元JS保持)の中に元サイト自前の
   // ===== ブラウザ風クイックメニュー（右クリックの瞬間にカーソル位置へ・よく使う操作だけ） =====
@@ -7565,6 +8067,8 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_zup','🔼 重なりを手前に'],
     ['__ce_q_zdn','🔽 重なりを後ろに'],
     ['__ce_q_align','⁝ 兄弟の行をそろえる（ズレ掃除）'],
+    ['__ce_q_pskill','➖ 線・飾りを消す（border・疑似要素）'],
+    ['__ce_q_addline','➕ 線を追加（実要素・掴んで動かせる）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
     ['__ce_q_rst','⟲ 位置・サイズをリセット']
   ];
@@ -7991,6 +8495,18 @@ html.__ce_altmode{cursor:text}
         msg.textContent='⁝ '+an+'行のズレ（個別の移動・余白・寄せ）を掃除してそろえました（💾保存で確定・ダメなら保存せず開き直し）';
         return;
       }
+      if(t.id==='__ce_q_pskill'){ var _pke=curEl; closeMenu(); openDecoKill(_pke,qx,qy); return; }
+      if(t.id==='__ce_q_addline'){
+        // ➕ 実要素の線：疑似要素と違い、掴んで移動・右クリック→要素削除・色変え（写真加工の背景色）が全部効く
+        var _ln=document.createElement('div');
+        _ln.setAttribute('style','height:2px;background:#d9d9d9;width:100%;margin:16px 0');
+        _ln.setAttribute('data-celine','1');
+        if(curEl&&curEl.parentElement&&curEl!==document.body) curEl.parentElement.insertBefore(_ln,curEl);
+        else document.body.appendChild(_ln);
+        markDirty(); pushUndo(_ln); closeMenu();
+        if(msg) msg.textContent='➕ 右クリックした要素のすぐ上に線（実要素・2px）を置きました。掴んで移動・右クリックで削除/調整できます（💾保存で確定）';
+        return;
+      }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
       if(t.id==='__ce_q_full'){ _bigFull=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
@@ -8372,8 +8888,8 @@ _SERVE_SAFETY = """
       if(document.getElementById('fxa-run')) return;  // 本家(FX_RUN)が動いている＝そちらに任せて何もしない
       /* ★フォールバックは fxa_hl(マーカー) も対象にする。本家のようにrAFで伸ばす芸は持たないが、
          --hlw:100 を入れて「少なくとも引かれた状態」にする（0のままだと一生マーカーが出ない）。 */
-      function show(t){ if(t.classList.contains('fxa_hl')) t.style.setProperty('--hlw',100); t.classList.add('fxa_in'); }
-      function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in)')); }
+      function show(t){ if(t.classList.contains('fxa_hl')||t.classList.contains('fxa_ud')) t.style.setProperty('--hlw',100); t.classList.add('fxa_in'); }
+      function all(){ return [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in),.fxa_ud:not(.fxa_in)')); }
       if(!('IntersectionObserver' in window)){ all().forEach(show); return; }
       var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ var t=en.target; io.unobserve(t); var cd=t.getAttribute('data-cedelay'); if(cd!=null){ setTimeout(function(){ show(t); }, +cd); } else { show(t); } } }); }, {threshold:0, rootMargin:'0px 0px -18% 0px'});
       all().forEach(function(el){ io.observe(el); });
