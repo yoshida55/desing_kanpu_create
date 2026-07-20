@@ -37,6 +37,9 @@ DB_PATH = LIBRARY_DIR / "design_stock.sqlite"
 MOTION_DIR = DATA_DIR / "motion"  # 録画から抜いたフレーム(AIが動きを読み取る用・動画から再生成できるので同期不要)
 UPLOAD_DIR = DATA_DIR / "uploads"  # ユーザーがアップロードした自前画像（カンプに使う）
 CAMP_DIR = DATA_DIR / "camps"  # 生成したカンプHTML（従来通りこのGitリポジトリで同期）
+# 右クリックメニューの並び順・グループ設定。以前はブラウザのlocalStorageだけに置いていたので
+# 家↔会社で揃わなかった（会社PCで区切り線が出ない）。data/直下＝.gitignore対象外なのでGitで同期される。
+MENU_LAYOUT_PATH = DATA_DIR / "menu_layout.json"
 RESULTS_HTML_PATH = PROJECT_ROOT / "results.html"
 TEMPLATE_DIR = PROJECT_ROOT / "templates"
 

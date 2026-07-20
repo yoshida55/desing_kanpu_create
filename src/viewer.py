@@ -1791,6 +1791,41 @@ def api_camp_rate_get():
     return jsonify({"ok": True, "rating": quality.get_rating(fn)})
 
 
+@app.route("/api/menu_layout")
+def api_menu_layout_get():
+    """右クリックメニューの並び順・グループ設定を返す（Git同期の共有ファイルから）。
+
+    まだ保存が無ければ null を返す＝ブラウザ側は既定レイアウト(QM_DEF_LAYOUT)を使う。
+    """
+    try:
+        if config.MENU_LAYOUT_PATH.exists():
+            data = _json.loads(config.MENU_LAYOUT_PATH.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                return jsonify({"ok": True, "layout": data})
+    except Exception:  # noqa: BLE001
+        pass
+    return jsonify({"ok": True, "layout": None})
+
+
+@app.route("/api/menu_layout", methods=["POST"])
+def api_menu_layout_save():
+    """右クリックメニューの並び順を共有ファイルに保存する（家↔会社でGit同期）。"""
+    data = request.get_json(silent=True) or {}
+    layout = data.get("layout")
+    if not isinstance(layout, list) or not all(isinstance(x, str) for x in layout):
+        return jsonify({"ok": False, "message": "レイアウトの形式が不正です"}), 400
+    if len(layout) > 200:  # 項目数の暴走ガード（通常は30〜40）
+        return jsonify({"ok": False, "message": "項目が多すぎます"}), 400
+    try:
+        config.MENU_LAYOUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        tmp = config.MENU_LAYOUT_PATH.with_suffix(".json.tmp")
+        tmp.write_text(_json.dumps(layout, ensure_ascii=False, indent=0), encoding="utf-8")
+        os.replace(tmp, config.MENU_LAYOUT_PATH)
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True})
+
+
 @app.route("/api/base_stats_all")
 def api_base_stats_all():
     """全ベース(手本)ぶんの実績をまとめて返す（一覧・ベース選択グリッドのバッジ表示用）。
@@ -8866,7 +8901,28 @@ html.__ce_altmode{cursor:text}
     if(_add.length){ lay.push('sep'); _add.forEach(function(d){ lay.push(d[0]); }); }
     return lay;
   }
-  function qmLayoutSave(a){ try{ localStorage.setItem('__ce_qmenu_layout',JSON.stringify(a)); }catch(_){} }
+  function qmLayoutSave(a){
+    try{ localStorage.setItem('__ce_qmenu_layout',JSON.stringify(a)); }catch(_){}  // まずローカルに即反映（同期）
+    // サーバーの共有ファイルにも保存＝Gitで家↔会社が揃う（区切り線・グループが会社でも出る）
+    try{
+      fetch('/api/menu_layout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({layout:a})})
+        .then(function(r){return r.json();})
+        .then(function(d){ if(!(d&&d.ok)&&msg) msg.textContent='メニューの並びは保存しましたが、共有ファイルへの書き込みに失敗しました'; })
+        .catch(function(){});
+    }catch(_){}
+  }
+  // ★起動時に1回だけ、共有ファイル(サーバー)の並び順をローカルのキャッシュへ流し込む。
+  //   qmLayoutLoadは同期で毎回呼ばれるので、非同期fetchはここで済ませてlocalStorageに橋渡しする。
+  //   ＝家で作った区切り線が、Git同期後の会社PCでも最初の右クリックから出る。
+  (function _syncMenuLayout(){
+    try{
+      fetch('/api/menu_layout').then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok&&Array.isArray(d.layout)&&d.layout.length){
+          try{ localStorage.setItem('__ce_qmenu_layout',JSON.stringify(d.layout)); }catch(_){}
+        }
+      }).catch(function(){});
+    }catch(_){}
+  })();
   // ▸ 見出し(sep:ラベル)〜次の見出しまでを1つの「親メニュー」に畳む。
   //   ★サブメニューは position:fixed ＝ メニュー本体(overflow-y:auto)にハサミ切られない。
   //     入れ子のDOMのままなので、既存のクリック処理・_inUI2・closeMenu は一切いじらなくて済む。
@@ -9045,7 +9101,13 @@ html.__ce_altmode{cursor:text}
           if(last){ last.focus(); last.select(); last.scrollIntoView({block:'nearest'}); }
           return;
         }
-        if(t.id==='__ce_qe_rst'){ try{ localStorage.removeItem('__ce_qmenu_layout'); }catch(_){} lay=qmLayoutLoad(); qm.innerHTML=html(); return; }
+        if(t.id==='__ce_qe_rst'){
+          try{ localStorage.removeItem('__ce_qmenu_layout'); }catch(_){}
+          // 共有ファイルも既定に戻す（既定レイアウトをそのまま保存＝会社PCでも初期化が揃う）
+          qmLayoutSave(QM_DEF_LAYOUT.slice());
+          try{ localStorage.removeItem('__ce_qmenu_layout'); }catch(_){}  // 保存直後に消して「既定」を読ませる
+          lay=qmLayoutLoad(); qm.innerHTML=html(); return;
+        }
         if(t.id==='__ce_qe_ok'){ qmLayoutSave(lay); qm.__qeOn=false; closeMenu(); if(msg) msg.textContent='メニューの並びを保存しました（次の右クリックから反映）'; return; }
         var rowEl=t.closest('[data-i]'); if(!rowEl) return;
         var i=+rowEl.getAttribute('data-i');
