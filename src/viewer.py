@@ -5974,6 +5974,256 @@ html.__ce_altmode{cursor:text}
     }
     _psCss(); var on=it.el.classList.toggle(it.kind); markDirty(); return on?'消しました':'戻しました';
   }
+  // ===== 📏 余白を詰める（AIなし・2026-07-21） =====
+  // ★「親を選んで高さを縮める」がうまくいかない理由＝カンプのセクションはたいてい
+  //   min-height:720px(100vh) を持っていて、height をいくら縮めても min-height に負ける。
+  //   さらに padding:120px 0 が乗る。だから「原因を名指しして、その場で外す」形にする。
+  function padInfo(el){
+    if(!el||el.nodeType!==1) return null;
+    var cs; try{ cs=getComputedStyle(el); }catch(_){ return null; }
+    var r=el.getBoundingClientRect();
+    if(r.height<80) return null;
+    var top=1e9, bot=-1e9, n=0;
+    [].slice.call(el.children).forEach(function(c){
+      if(c.closest&&c.closest('[id^="__ce"]')) return;
+      var k=c.getBoundingClientRect(); if(!k.width||!k.height) return;
+      n++; if(k.top<top) top=k.top; if(k.bottom>bot) bot=k.bottom;
+    });
+    var contentH=n?(bot-top):0;
+    return {el:el, h:r.height, contentH:contentH, 余り:Math.round(r.height-contentH), 子数:n,
+      minH:Math.round(parseFloat(cs.minHeight)||0), padT:Math.round(parseFloat(cs.paddingTop)||0),
+      padB:Math.round(parseFloat(cs.paddingBottom)||0), 空:(n===0&&!(el.textContent||'').trim())};
+  }
+  // ★クリック地点から body まで全部辿って「余白の原因になっている指定」を持つ箱を全部集める。
+  //   セクションで打ち切っていたのが致命傷だった：実際の真犯人は <main> の min-height:10278px で、
+  //   これがある限り中のセクションをいくら縮めてもページは1pxも縮まない（実測で判明）。
+  function padChain(el){
+    var out=[], t=el;
+    for(var i=0; t && i<14 && t.tagName!=='HTML'; i++, t=t.parentElement){
+      if(t.closest && t.closest('[id^="__ce"]')) continue;
+      var cs; try{ cs=getComputedStyle(t); }catch(_){ continue; }
+      var r=t.getBoundingClientRect(); if(r.height<60) continue;
+      var kids=[].slice.call(t.children).filter(function(c){
+        if(c.closest && c.closest('[id^="__ce"]')) return false;
+        var k=c.getBoundingClientRect(); return k.width>0&&k.height>0;
+      });
+      var top=1e9, bot=-1e9;
+      kids.forEach(function(c){ var k=c.getBoundingClientRect(); if(k.top<top) top=k.top; if(k.bottom>bot) bot=k.bottom; });
+      var contentH=kids.length?(bot-top):0;
+      var minH=parseFloat(cs.minHeight)||0;
+      var fixH=(cs.height!=='auto')?(parseFloat(cs.height)||0):0;
+      var pad=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.paddingBottom)||0);
+      var slack=Math.round(r.height-contentH);
+      var why='';
+      if(minH>contentH+20) why='最小の高さ '+Math.round(minH)+'px';
+      else if(fixH>contentH+20 && cs.position!=='absolute' && cs.position!=='fixed') why='固定の高さ '+Math.round(fixH)+'px';
+      else if(pad>=80 && slack>=80) why='上下の余白 '+Math.round(pad)+'px';
+      else if(kids.length===0 && !(t.textContent||'').trim() && r.height>=100) why='中身が空なのに '+Math.round(r.height)+'px';
+      if(!why) continue;
+      out.push({el:t, name:t.tagName.toLowerCase()+((t.className&&typeof t.className==='string'&&t.className.trim())?('.'+t.className.trim().split(/\\s+/)[0]):''),
+        why:why, slack:slack, h:Math.round(r.height)});
+    }
+    out.sort(function(a,b){ return b.h-a.h; });   // 大きい箱＝影響が大きい順
+    return out.slice(0,6);
+  }
+  function padCrush(list){
+    list.forEach(function(o){
+      o.el.style.setProperty('min-height','0','important');
+      o.el.style.setProperty('height','auto','important');
+    });
+    markDirty();
+  }
+  // ★padTargetだけでは「箱の中のムダ」しか見つけられない。実際に多いのは
+  //   「要素と要素のあいだ（margin/gap）」で、そこをクリックしても箱の余りは小さく出て
+  //   何も出ない＝「押しても変わらない」になる。→ クリックしたY座標の上下にある実体を探して
+  //   その隙間を実測し、原因（margin / gap / padding / min-height）をまとめて潰せるようにする。
+  function gapAt(el,y){
+    var t=el, hop=0;
+    while(t && hop<8 && t!==document.body && t.tagName!=='HTML'){
+      var kids=[].slice.call(t.children).filter(function(c){
+        if(c.closest&&c.closest('[id^="__ce"]')) return false;
+        var r=c.getBoundingClientRect(); return r.width>0&&r.height>0;
+      });
+      var tr=t.getBoundingClientRect();
+      if(kids.length){
+        var above=null,below=null,ab=-1e9,bt=1e9;
+        kids.forEach(function(c){
+          var r=c.getBoundingClientRect();
+          if(r.bottom<=y+1 && r.bottom>ab){ ab=r.bottom; above=c; }
+          if(r.top>=y-1 && r.top<bt){ bt=r.top; below=c; }
+        });
+        var topEdge=above?ab:tr.top, botEdge=below?bt:tr.bottom;
+        var g=Math.round(botEdge-topEdge);
+        if(g>=40 && y>=topEdge-1 && y<=botEdge+1) return {box:t, above:above, below:below, gap:g};
+      } else if(tr.height>=40 && y>=tr.top && y<=tr.bottom){
+        return {box:t, above:null, below:null, gap:Math.round(tr.height)};   // 中身が空の箱
+      }
+      t=t.parentElement; hop++;
+    }
+    return null;
+  }
+  function gapClose(info){
+    if(!info) return 0;
+    var before=info.gap;
+    if(info.above) info.above.style.setProperty('margin-bottom','0','important');
+    if(info.below) info.below.style.setProperty('margin-top','0','important');
+    var cs; try{ cs=getComputedStyle(info.box); }catch(_){ cs=null; }
+    if(cs){
+      if(/(flex|grid)/.test(cs.display) && (parseFloat(cs.rowGap)||0)>0) info.box.style.setProperty('row-gap','0','important');
+      if(!info.above && (parseFloat(cs.paddingTop)||0)>0) info.box.style.setProperty('padding-top','0','important');
+      if(!info.below && (parseFloat(cs.paddingBottom)||0)>0) info.box.style.setProperty('padding-bottom','0','important');
+    }
+    info.box.style.setProperty('min-height','0','important');   // 最後の砦：これが残っていると全部無駄になる
+    markDirty();
+    return before;
+  }
+  function gapReset(info){
+    if(!info) return;
+    if(info.above) info.above.style.removeProperty('margin-bottom');
+    if(info.below) info.below.style.removeProperty('margin-top');
+    ['row-gap','padding-top','padding-bottom','min-height'].forEach(function(p){ info.box.style.removeProperty(p); });
+    markDirty();
+    if(msg) msg.textContent='この隙間の調整を元に戻しました';
+  }
+  function padTighten(el){
+    el.style.setProperty('min-height','0','important');   // ★これが本命：高さを縮めても効かない原因
+    el.style.setProperty('height','auto','important');
+    markDirty();
+    if(msg) msg.textContent='最小の高さを外して、中身の分だけの高さにしました（💾保存で確定・⟲戻すで取り消し）';
+  }
+  function padShrink(el,ratio){
+    var cs=getComputedStyle(el);
+    var t=Math.max(0,Math.round((parseFloat(cs.paddingTop)||0)*ratio));
+    var b=Math.max(0,Math.round((parseFloat(cs.paddingBottom)||0)*ratio));
+    el.style.setProperty('padding-top',t+'px','important');
+    el.style.setProperty('padding-bottom',b+'px','important');
+    markDirty();
+    if(msg) msg.textContent='上下の余白を '+t+'px / '+b+'px にしました（続けて押すともっと詰まります）';
+  }
+  function padReset(el){
+    ['min-height','height','padding-top','padding-bottom'].forEach(function(p){ el.style.removeProperty(p); });
+    markDirty();
+    if(msg) msg.textContent='余白を元に戻しました';
+  }
+  // ===== 🕳 ドラッグで空いた「穴」を埋める（AIなし・2026-07-21） =====
+  // ★これが「余白が消せない」の本当の犯人だった（実測で判明）。
+  //   ドラッグ移動は translate＝**見た目だけ**動かす仕組みなので、元いた場所に
+  //   その要素の高さぶんの空白が残り続ける。padding も min-height も持っていないので
+  //   📏でいくら押しても1pxも縮まない＝「押しても変わらない」の正体。
+  //   → translate を margin に振り替えれば、見た目はそのままで穴だけ閉じる。
+  // ★対象は「縦に積まれた大きいブロック」だけに絞る（実測での大事故防止）。
+  //   小さい飾りや文字を margin に振り替えると、translate と違って**兄弟まで押し出す**ので
+  //   ページ全体の見た目が変わってしまった（13個拾って別セクションが68pxズレた）。
+  //   section/header/footer など「縦に1列で並ぶ箱」だけなら、margin＝translate と見た目が一致する。
+  function dragHoles(){
+    var out=[];
+    [].slice.call(document.querySelectorAll('[data-cety],[data-cehole]')).forEach(function(t){
+      if(t.closest && t.closest('[id^="__ce"]')) return;
+      var pt=t.parentElement&&t.parentElement.tagName;
+      var block=/^(SECTION|HEADER|FOOTER)$/.test(t.tagName) || pt==='MAIN' || pt==='BODY';
+      if(!block) return;
+      var ty=parseFloat(t.getAttribute('data-cety'))||0;
+      if(t.hasAttribute('data-cehole')) ty=parseFloat((t.getAttribute('data-cehole')||'').split(',')[1])||0;
+      if(Math.abs(ty)<40) return;                             // 微調整は穴にならないので出さない
+      var r=t.getBoundingClientRect(); if(r.height<80) return;
+      out.push({el:t, ty:Math.round(ty), h:Math.round(r.height), done:t.hasAttribute('data-cehole'),
+        name:t.tagName.toLowerCase()+((t.className&&typeof t.className==='string'&&t.className.trim())?('.'+t.className.trim().split(/\\s+/)[0]):'')});
+    });
+    out.sort(function(a,b){ return Math.abs(b.ty)-Math.abs(a.ty); });
+    return out.slice(0,6);
+  }
+  // ★穴を閉じても main に min-height:10278px のような「今の高さ」が焼き付いていると
+  //   ページは1pxも縮まない（実測で判明）。入れ物系だけ最小の高さを外す。
+  //   ★section/header/footer は外さない＝デザインの高さを勝手に潰さないため（それは📏の仕事）。
+  function _holeUnpin(el){
+    var t=el.parentElement, n=0;
+    while(t && t.tagName!=='HTML' && n<8){
+      if(!/^(SECTION|HEADER|FOOTER|ARTICLE|ASIDE)$/.test(t.tagName)){
+        var cs; try{ cs=getComputedStyle(t); }catch(_){ cs=null; }
+        if(cs && (parseFloat(cs.minHeight)||0)>0){
+          t.style.setProperty('min-height','0','important');
+          t.style.setProperty('height','auto','important');
+        }
+      }
+      t=t.parentElement; n++;
+    }
+  }
+  // ★transitionを一瞬だけ止めてから振り替える：カンプのクローン元CSSは transition:all を
+  //   持っていることがあり、margin を書き換えた瞬間にアニメして位置がふらつくため。
+  // ★縦(ty)だけを margin に振り替え、横(tx)は translate のまま残す。
+  //   margin-left にすると幅が変わって見た目が動くため（縦は積み上げなので一致する）。
+  function dragBake(o){
+    var el=o.el; if(el.hasAttribute('data-cehole')) return;   // 二重に足さない
+    var tx=parseFloat(el.getAttribute('data-cetx'))||0;
+    var mt=parseFloat(getComputedStyle(el).marginTop)||0;
+    el.style.setProperty('transition','none','important');
+    el.style.setProperty('margin-top',Math.round(mt+o.ty)+'px','important');
+    el.style.setProperty('translate',tx+'px 0','important');
+    el.setAttribute('data-cety','0');
+    el.setAttribute('data-cehole',tx+','+o.ty);              // ⟲で戻せるように元のズレを覚えておく
+    _holeUnpin(el);
+    requestAnimationFrame(function(){ try{ el.style.removeProperty('transition'); }catch(_){} });
+    markDirty();
+  }
+  function dragUnbake(el){
+    if(!el.hasAttribute('data-cehole')) return;              // まだ埋めていないものは触らない
+    var v=(el.getAttribute('data-cehole')||'').split(','), tx=parseFloat(v[0])||0, ty=parseFloat(v[1])||0;
+    el.style.setProperty('transition','none','important');
+    el.style.removeProperty('margin-top');
+    el.style.setProperty('translate',tx+'px '+ty+'px','important');
+    el.setAttribute('data-cetx',tx); el.setAttribute('data-cety',ty);
+    el.removeAttribute('data-cehole');
+    requestAnimationFrame(function(){ try{ el.style.removeProperty('transition'); }catch(_){} });
+    markDirty();
+  }
+  // ===== 🎞 スライドショーを止めて「見せたい1枚」に固定（AIなし・2026-07-21） =====
+  // カンプでは「どんどん切り替わる」と困る（右クリックで掴めない・スクショが撮れない・
+  // 見せたい絵が映らない）。ライブラリ(Splide/Swiper/slick)の停止APIには頼らず、
+  // CSSの!importantで見た目を固定する＝インスタンスが取れないクローンでも確実に効く。
+  // ★スタイルシート側で!important＝ライブラリが後からstyle.opacityを書いても勝てる
+  //   （インラインに!importantを付けても、ライブラリの代入で優先度ごと消えるため）。
+  function _sliderCss(){
+    if(document.getElementById('ce-slidefix')) return;
+    var st=document.createElement('style'); st.id='ce-slidefix';   // __ce系にしない＝保存に残す
+    st.textContent='[data-cefreeze] .splide__slide,[data-cefreeze] .swiper-slide,[data-cefreeze] .slick-slide{display:none!important}'
+      +'[data-cefreeze] .cefreeze-on{display:flex!important;opacity:1!important;visibility:visible!important;transform:none!important;z-index:2!important;position:relative!important}';
+    (document.head||document.documentElement).appendChild(st);
+  }
+  function _sliderAt(el){
+    if(!el||!el.closest) return null;
+    var root=el.closest('.splide,.swiper,.swiper-container,.slick-slider');
+    if(!root) return null;
+    var items=[].slice.call(root.querySelectorAll('.splide__slide,.swiper-slide,.slick-slide')).filter(function(s){
+      return !s.classList.contains('splide__slide--clone') && !s.classList.contains('swiper-slide-duplicate') && !s.classList.contains('slick-cloned');
+    });
+    if(items.length<2) return null;
+    return {root:root, items:items, frozen:root.getAttribute('data-cefreeze')!=null};
+  }
+  // スライドの見た目（サムネ用の画像URL）を1枚ぶん取る
+  function _slideThumb(s){
+    var im=s.querySelector('img');
+    if(im&&im.getAttribute('src')) return im.getAttribute('src');
+    var n=s, hop=0;
+    while(n&&hop<3){ var bi=''; try{ bi=getComputedStyle(n).backgroundImage; }catch(_){}
+      if(bi&&bi!=='none'&&bi.indexOf('gradient')<0){ var m=bi.match(/url\\(["']?([^"')]+)/); if(m) return m[1]; }
+      n=n.firstElementChild; hop++; }
+    return '';
+  }
+  function sliderFreeze(info, idx){
+    if(!info) return;
+    _sliderCss();
+    info.root.setAttribute('data-cefreeze','1');
+    info.items.forEach(function(s,i){ s.classList.toggle('cefreeze-on', i===idx); });
+    markDirty();
+    if(msg) msg.textContent='スライドショーを止めて '+(idx+1)+'枚目に固定しました（💾保存で確定・「切り替わりに戻す」で解除）';
+  }
+  function sliderUnfreeze(info){
+    if(!info) return;
+    info.root.removeAttribute('data-cefreeze');
+    info.items.forEach(function(s){ s.classList.remove('cefreeze-on'); });
+    markDirty();
+    if(msg) msg.textContent='スライドショーの切り替わりを元に戻しました（💾保存で確定）';
+  }
   // ===== 文章の一部だけ色を変える：ドラッグで文字を選ぶ→小さな色ボタンが出る（AIなし）=====
   (function(){
     var pop=null, curSpan=null, savedRange=null, curHl=null, curUdot=null;
@@ -8234,10 +8484,34 @@ html.__ce_altmode{cursor:text}
     if(st.backgroundColor!=='rgba(0, 0, 0, 0)'||st.backgroundImage!=='none') return true;  // 色/画像を持つ飾り
     return false;
   }
+  // <span>等でも「見た目は独立した箱」ならそれ自体を掴ませる（親へ上らない）。
+  // ★縦書きラベルが掴めない報告(2026-07-21)の原因＝タグ名だけで判定していたため、
+  //   display:block の <span class="vertical-label"> でも「文字の断片」とみなして
+  //   親の巨大なレイアウトdivまで上っていた＝クリックしても永久に選べない。
+  function _isStandaloneBox(el){
+    if(!el||el.nodeType!==1) return false;
+    var cl=el.classList;
+    // ツールが1文字ずつ包んだ断片は今までどおり親へ上る（アニメ用のinline-blockに引っかからないように）
+    if(cl&&(cl.contains('fxa_ch')||cl.contains('imp-char')||cl.contains('ch')||cl.contains('fxa_ln')||cl.contains('fxa_lni'))) return false;
+    if((el.textContent||'').trim().length<=2) return false;   // 1〜2文字＝分割された文字の断片
+    var st; try{ st=getComputedStyle(el); }catch(_){ return false; }
+    if((st.writingMode||'').indexOf('vertical')===0) return true;              // 縦書き＝意図して作った塊
+    if(st.position==='absolute'||st.position==='fixed') return true;           // 浮かせて置いてある
+    // 親がflex/gridで自分がその「並びの1コマ」＝レイアウト部品なので独立した箱として掴ませる。
+    // ★見出しの中の <span style="display:block"> は親がflexではないので巻き込まない
+    //   （見出しは今までどおり丸ごと掴める＝既存の操作感を壊さないための線引き）
+    if(st.display==='block'||st.display==='flex'||st.display==='grid'){
+      var pa=el.parentElement, ps; if(!pa) return false;
+      try{ ps=getComputedStyle(pa); }catch(_){ return false; }
+      if(/(flex|grid)/.test(ps.display)) return true;
+    }
+    return false;
+  }
   function pickTarget(el){
     var INLINE={SPAN:1,B:1,I:1,EM:1,STRONG:1,SMALL:1,MARK:1,U:1,FONT:1,WBR:1,BR:1};
     var cur=el, hops=0;
-    while(cur && cur.parentElement && cur!==document.body && hops<10 && INLINE[cur.tagName] && !_isGraphicInline(cur)){
+    while(cur && cur.parentElement && cur!==document.body && hops<10 && INLINE[cur.tagName]
+          && !_isGraphicInline(cur) && !_isStandaloneBox(cur)){
       cur=cur.parentElement; hops++;
     }
     return cur||el;
@@ -8657,6 +8931,53 @@ html.__ce_altmode{cursor:text}
         }).join('')
         +'</div>';
     }
+    // 🕳 ドラッグで空いた「穴」＝📏では絶対に消せない空白。見つけたら最優先で出す
+    var dgQ=dragHoles(), dgRowQ='';
+    if(dgQ.length){
+      dgRowQ='<div style="background:#fff7ed;border-bottom:1px solid #f2d0a4;padding:6px 10px 7px;font-size:12px;border-radius:7px">'
+        +'<b>🕳 ドラッグで空いた「穴」が '+dgQ.length+'個 あります</b>（AIなし）<br>'
+        +'<span style="font-size:10.5px;color:#8a6a4a">動かした跡に空白が残っています。📏では消せません</span>'
+        +'<div style="margin:3px 0 4px;font-size:10.5px;color:#7a5a3a;line-height:1.8">'
+        +dgQ.map(function(o,i){ return '<div class="__ce_dgz" data-i="'+i+'" style="cursor:default">'+(i===0?'<b>▶ ':'　')
+            +esc(o.name)+'</b>：縦に '+o.ty+'px（高さ'+o.h+'px）'
+            +(o.done?' <span style="color:#15803d;font-weight:700">✅埋め済み</span>':'')+'</div>'; }).join('')
+        +'</div>'
+        +'<button id="__ce_dg_fix" style="background:#ea580c;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11.5px;font-weight:700">🕳 穴を埋める（見た目はそのまま）</button> '
+        +'<button id="__ce_dg_rst" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11.5px">⟲ 元に戻す</button>'
+        +'<span id="__ce_dg_now" style="margin-left:6px;font-size:11px;color:#8a6a4a"></span>'
+        +'</div>';
+    }
+    // 📏 ムダな余白がある箱で右クリックしたら「詰める」を出す（数字つきで原因を名指し）
+    var pdQ=padChain(curEl), pdRowQ='';
+    if(pdQ.length){
+      pdRowQ='<div style="background:#fff5f5;border-bottom:1px solid #f3cccc;padding:6px 10px 7px;font-size:12px;border-radius:7px">'
+        +'<b>📏 余白の原因が '+pdQ.length+'個 見つかりました</b>（AIなし）<br>'
+        +'<span style="font-size:10.5px;color:#8a6a6a">大きい箱ほど効きます。押すと全部まとめて外します</span>'
+        +'<div style="margin:3px 0 4px;font-size:10.5px;color:#7a5a5a;line-height:1.8">'
+        +pdQ.map(function(o,i){ return '<div>'+(i===0?'<b>▶ ':'　')+esc(o.name)+'</b>：'+esc(o.why)+'（高さ'+o.h+'px）'+(i===0?'':'')+'</div>'; }).join('')
+        +'</div>'
+        +'<button id="__ce_pd_fit" style="background:#dc2626;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11.5px;font-weight:700">⬍ まとめて詰める</button> '
+        +'<button id="__ce_pd_half" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11.5px">▁ 上下の余白も半分</button> '
+        +'<button id="__ce_pd_rst" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11.5px">⟲ 元に戻す</button>'
+        +'<span id="__ce_pd_now" style="margin-left:6px;font-size:11px;color:#8a6a6a"></span>'
+        +'</div>';
+    }
+    // 🎞 スライドショーの中で右クリックしたら「止めて1枚に固定」を出す（サムネで選べる）
+    var slQ=_sliderAt(curEl), slRowQ='';
+    if(slQ){
+      slRowQ='<div style="background:#eefaf3;border-bottom:1px solid #bfe6d3;padding:6px 10px 7px;font-size:12px;border-radius:7px">'
+        +'<b>🎞 スライドショー（'+slQ.items.length+'枚・AIなし）</b>'+(slQ.frozen?'<span style="color:#0f766e;font-weight:700"> 固定中</span>':'')+'<br>'
+        +'<span style="font-size:10.5px;color:#6b7280">切り替わりを止めて、見せたい1枚に固定できます（クリックで選ぶ）</span><br>'
+        +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">'
+        +slQ.items.map(function(s,i){
+          var th=_slideThumb(s), on=s.classList.contains('cefreeze-on');
+          return '<button class="__ce_slz" data-i="'+i+'" title="'+(i+1)+'枚目に固定" style="width:46px;height:36px;padding:0;border:2px solid '+(on?'#0f766e':'#cfe6db')+';border-radius:5px;background:#fff;cursor:pointer;overflow:hidden">'
+            +(th?'<img src="'+esc(th)+'" style="width:100%;height:100%;object-fit:contain">':'<span style="font-size:11px">'+(i+1)+'</span>')+'</button>';
+        }).join('')
+        +'</div>'
+        +(slQ.frozen?'<button id="__ce_slzoff" style="margin-top:5px;background:#64748b;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11.5px">▶ 切り替わりに戻す</button>':'')
+        +'</div>';
+    }
     var _qmM=qmDefMap();
     // 📌 貼り付き解除は「実際に画面に貼り付いている時」だけ出す（普通の要素には無関係な項目なので隠す）。
     // 自分自身が固定なのか、固定の器の中に取り残されているのかで文言を変える＝何が起きるか分かるように。
@@ -8691,7 +9012,7 @@ html.__ce_altmode{cursor:text}
         +'<span style="opacity:.8">文字色</span> <input type="color" id="__ce_mf_c" value="#222222" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> <span style="font-size:10.5px;color:#888">選んだ'+selEls.length+'個全部に効く・💾保存で残る</span>'
         +'</div>';
     }
-    qm.innerHTML=selRowQ+peRowQ+decoRowQ+mfRow+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    qm.innerHTML=selRowQ+dgRowQ+pdRowQ+slRowQ+peRowQ+decoRowQ+mfRow+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmLayoutLoad().map(function(k){
         if(k.indexOf('off:')===0) return '';  // 🙈で隠した項目は出さない（⚙並べ替えの👁で戻せる）
         if(k==='sep') return '<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>';
@@ -8733,6 +9054,50 @@ html.__ce_altmode{cursor:text}
       _mfc.addEventListener('input',function(){ var v=this.value; selEls.forEach(function(x){ x.style.setProperty('color',v,'important'); }); });
       _mfc.addEventListener('change',function(){ try{ markDirty(); }catch(_){} });
     }
+    // 🕳 穴を埋めるの配線（ホバーで対象を赤枠＝どれのことか目で分かる）
+    if(dgQ.length && qm.querySelector('#__ce_dg_fix')){
+      var _dgH0=document.scrollingElement.scrollHeight, _dgNow=qm.querySelector('#__ce_dg_now');
+      var _dgSync=function(){
+        var h=document.scrollingElement.scrollHeight;
+        if(_dgNow) _dgNow.textContent='ページ '+_dgH0+'px → '+h+'px';
+        if(msg) msg.textContent='ドラッグの跡の空白を埋めました：ページの高さ '+_dgH0+'px → '+h+'px（💾保存で確定・⟲戻すで取り消し）';
+      };
+      [].slice.call(qm.querySelectorAll('.__ce_dgz')).forEach(function(b){
+        var n=dgQ[+b.getAttribute('data-i')].el;
+        b.addEventListener('mouseenter',function(){ try{ n.style.setProperty('outline','2px solid #ff3b30','important'); }catch(_){} });
+        b.addEventListener('mouseleave',function(){ try{ n.style.removeProperty('outline'); }catch(_){} });
+      });
+      qm.querySelector('#__ce_dg_fix').addEventListener('click',function(ev){ ev.stopPropagation();
+        dgQ.forEach(function(o){ try{ o.el.style.removeProperty('outline'); dragBake(o); }catch(_){} });
+        setTimeout(_dgSync,60); });
+      qm.querySelector('#__ce_dg_rst').addEventListener('click',function(ev){ ev.stopPropagation();
+        dgQ.forEach(function(o){ try{ dragUnbake(o.el); }catch(_){} }); setTimeout(_dgSync,60); });
+    }
+    // 📏 余白を詰めるの配線。★ページ全体の高さの変化を出す＝「効いたのか分からない」を無くす
+    if(pdQ.length && qm.querySelector('#__ce_pd_fit')){
+      var _pdH0=document.scrollingElement.scrollHeight, _pdNow=qm.querySelector('#__ce_pd_now');
+      var _pdSync=function(){
+        var h=document.scrollingElement.scrollHeight;
+        if(_pdNow) _pdNow.textContent='ページ '+_pdH0+'px → '+h+'px（'+(_pdH0-h)+'px 縮んだ）';
+        if(msg) msg.textContent='余白を詰めました：ページの高さ '+_pdH0+'px → '+h+'px（💾保存で確定・⟲戻すで取り消し）';
+      };
+      qm.querySelector('#__ce_pd_fit').addEventListener('click',function(ev){ ev.stopPropagation(); padCrush(pdQ); _pdSync(); });
+      qm.querySelector('#__ce_pd_half').addEventListener('click',function(ev){ ev.stopPropagation();
+        pdQ.forEach(function(o){ padShrink(o.el,0.5); }); _pdSync(); });
+      qm.querySelector('#__ce_pd_rst').addEventListener('click',function(ev){ ev.stopPropagation();
+        pdQ.forEach(function(o){ padReset(o.el); }); _pdSync(); });
+    }
+    // 🎞 スライドショーの配線（サムネを押すとその1枚に固定・メニューは開いたまま）
+    [].slice.call(qm.querySelectorAll('.__ce_slz')).forEach(function(b){
+      b.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        sliderFreeze(slQ, +this.getAttribute('data-i'));
+        [].slice.call(qm.querySelectorAll('.__ce_slz')).forEach(function(x){ x.style.borderColor='#cfe6db'; });
+        this.style.borderColor='#0f766e';
+      });
+    });
+    var _slOff=qm.querySelector('#__ce_slzoff');
+    if(_slOff) _slOff.addEventListener('click',function(ev){ ev.stopPropagation(); sliderUnfreeze(slQ); closeMenu(); });
     // 🫥「すり抜ける絵」を選ぶ配線：pointer-eventsを戻してから、その要素で右クリックを開き直す
     [].slice.call(qm.querySelectorAll('.__ce_pez')).forEach(function(b){
       var n=peQ[+b.getAttribute('data-i')];

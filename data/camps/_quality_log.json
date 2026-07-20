@@ -507,5 +507,23 @@
   "anim_id": "",
   "rating": "○",
   "ts": 1784569072
+ },
+ {
+  "file": "camp_20260718_091127_375812_bk20260721_021135.html",
+  "base_id": "",
+  "anim_id": "",
+  "rating": "△",
+  "ts": 1784571475
+ },
+ {
+  "file": "camp_20260721_032526_210475.html",
+  "base_id": "da3513ad88f336dd",
+  "anim_id": "",
+  "model": "codex:default",
+  "text_len": 2651,
+  "sections": 11,
+  "warn": false,
+  "ts": 1784571926,
+  "rating": "○"
  }
 ]
