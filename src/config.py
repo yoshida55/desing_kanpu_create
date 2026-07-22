@@ -40,6 +40,8 @@ CAMP_DIR = DATA_DIR / "camps"  # 生成したカンプHTML（従来通りこのG
 # 右クリックメニューの並び順・グループ設定。以前はブラウザのlocalStorageだけに置いていたので
 # 家↔会社で揃わなかった（会社PCで区切り線が出ない）。data/直下＝.gitignore対象外なのでGitで同期される。
 MENU_LAYOUT_PATH = DATA_DIR / "menu_layout.json"
+# ショートカットキーの割り当て（操作→キー）。menu_layoutと同じく data/直下＝Gitで家↔会社同期。
+SHORTCUTS_PATH = DATA_DIR / "shortcuts.json"
 RESULTS_HTML_PATH = PROJECT_ROOT / "results.html"
 TEMPLATE_DIR = PROJECT_ROOT / "templates"
 

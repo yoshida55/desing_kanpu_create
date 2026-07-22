@@ -1829,6 +1829,43 @@ def api_menu_layout_save():
     return jsonify({"ok": True})
 
 
+@app.route("/api/shortcuts")
+def api_shortcuts_get():
+    """ショートカットキーの割り当て（操作→キー）を返す（Git同期の共有ファイルから）。
+
+    まだ保存が無ければ null を返す＝ブラウザ側は既定の割り当て(SC_DEF)を使う。
+    """
+    try:
+        if config.SHORTCUTS_PATH.exists():
+            data = _json.loads(config.SHORTCUTS_PATH.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return jsonify({"ok": True, "keys": data})
+    except Exception:  # noqa: BLE001
+        pass
+    return jsonify({"ok": True, "keys": None})
+
+
+@app.route("/api/shortcuts", methods=["POST"])
+def api_shortcuts_save():
+    """ショートカットキーの割り当てを共有ファイルに保存する（家↔会社でGit同期）。"""
+    data = request.get_json(silent=True) or {}
+    keys = data.get("keys")
+    if not isinstance(keys, dict) or not all(
+        isinstance(k, str) and isinstance(v, str) for k, v in keys.items()
+    ):
+        return jsonify({"ok": False, "message": "割り当ての形式が不正です"}), 400
+    if len(keys) > 60:  # 操作数の暴走ガード
+        return jsonify({"ok": False, "message": "項目が多すぎます"}), 400
+    try:
+        config.SHORTCUTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        tmp = config.SHORTCUTS_PATH.with_suffix(".json.tmp")
+        tmp.write_text(_json.dumps(keys, ensure_ascii=False, indent=0), encoding="utf-8")
+        os.replace(tmp, config.SHORTCUTS_PATH)
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True})
+
+
 @app.route("/api/base_stats_all")
 def api_base_stats_all():
     """全ベース(手本)ぶんの実績をまとめて返す（一覧・ベース選択グリッドのバッジ表示用）。
@@ -7697,8 +7734,165 @@ html.__ce_altmode{cursor:text}
   // 右クリックで選んだ要素(curEl)をCtrl+Cでコピー→Ctrl+Vでマウス位置に貼り付け（placeFree＝レスポンシブ%配置）。
   // セクション/ヘッダー/フッターを丸ごとコピーした時は、元の直後に複製を挿入（絶対配置にしない）。
   // 文字入力中(input/contenteditable)や文字を選択中は何もしない＝普通のコピペを邪魔しない。
-  var _ceClip=null, _ceMX=0, _ceMY=0;
-  document.addEventListener('mousemove',function(e){ _ceMX=e.pageX; _ceMY=e.pageY; });
+  var _ceClip=null, _ceMX=0, _ceMY=0, _ceCX=0, _ceCY=0;
+  document.addEventListener('mousemove',function(e){ _ceMX=e.pageX; _ceMY=e.pageY; _ceCX=e.clientX; _ceCY=e.clientY; });
+
+  // ===== ⌨ ショートカットキー（マウス位置の要素に既存機能を発火・設定で変更／家↔会社同期） =====
+  // 割り当ては localStorage['__ce_shortcuts']（{op:key}）＋サーバー(/api/shortcuts)で家↔会社共有。
+  var SC_DEF={ txt:'t', edit:'e', img:'g', photo:'f', fx:'a', fav:'o' };
+  // op=処理／label=設定パネルの説明／mid=対応する右クリックメニュー項目ID（[t]表示に使う・無い操作はnull）
+  var SC_META=[
+    {op:'txt',   label:'✏ 文字を追加（カーソル位置に新規）', mid:'__ce_q_txt'},
+    {op:'edit',  label:'✏ 文字を編集（カーソル下の文字）',   mid:null},
+    {op:'img',   label:'🖼 画像を追加（カーソル位置）',       mid:'__ce_q_img'},
+    {op:'photo', label:'🖼 写真を加工（カーソル下の画像）',   mid:'__ce_cmdeco'},
+    {op:'fx',    label:'✨ 動きを付ける（アニメを選ぶ）',      mid:'__ce_q_fx'},
+    {op:'fav',   label:'⭐ お気に入りメニュー（保存・切替・追加）', mid:'__ce_q_fav'}
+  ];
+  var _scKeys=null;
+  function scKeys(){
+    if(_scKeys) return _scKeys;
+    var m={}; for(var k in SC_DEF){ m[k]=SC_DEF[k]; }
+    try{ var s=JSON.parse(localStorage.getItem('__ce_shortcuts')||'null');
+      if(s&&typeof s==='object'){ for(var k2 in s){ if(typeof s[k2]==='string') m[k2]=s[k2].toLowerCase(); } } }catch(_){}
+    _scKeys=m; return m;
+  }
+  function scKeyOf(mid){ if(!mid) return ''; var ks=scKeys(); for(var i=0;i<SC_META.length;i++){ if(SC_META[i].mid===mid) return ks[SC_META[i].op]||''; } return ''; }
+  function scSave(m){
+    _scKeys=m;
+    try{ localStorage.setItem('__ce_shortcuts', JSON.stringify(m)); }catch(_){}
+    try{ fetch('/api/shortcuts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keys:m})}); }catch(_){}
+  }
+  // 起動時に1回だけサーバー版を読んでlocalStorageへ流し込む（menu_layoutと同じ同期方式）
+  (function _syncShortcuts(){
+    try{ fetch('/api/shortcuts').then(function(r){return r.json();}).then(function(d){
+      if(d&&d.keys&&typeof d.keys==='object'){ try{ localStorage.setItem('__ce_shortcuts',JSON.stringify(d.keys)); }catch(_){} _scKeys=null; }
+    }).catch(function(){}); }catch(_){}
+  })();
+  // 文字を追加：空の要素を置いて即編集パネルを開く。何も入力せず閉じたら（Escape/×）空要素を残さず消す。
+  function _scAddText(px,py){
+    var nd=document.createElement('div'); nd.textContent='';
+    nd.setAttribute('style','z-index:'+_freeZIndex()+';font-size:32px;font-weight:700;color:#333;font-family:inherit;line-height:1.4;padding:4px 8px;white-space:nowrap');
+    placeFree(nd,px,py); markDirty(); openBreakEditor(nd);
+    var w=new MutationObserver(function(){
+      if(document.getElementById('__ce_pk')) return;          // 編集パネルはまだ開いている
+      w.disconnect();
+      if(!(nd.textContent||'').replace(/[\\s\\u200b]/g,'')){    // 何も入力されていない＝空要素を残さない
+        if(nd.parentNode) nd.parentNode.removeChild(nd);
+      }
+    });
+    w.observe(document.body,{childList:true,subtree:true});
+  }
+  function scRun(op){
+    var cx=_ceCX, cy=_ceCY;
+    var under=document.elementFromPoint(cx,cy);
+    var overUI = under && (under.closest('#__ce')||under.closest('#__ce_cm')||under.closest('#__ce_pk')||under.closest('#__ce_dlyp')||under.closest('#__ce_scmenu')||under.closest('#__ce_scset'));
+    // 右クリックで選択済みの要素(curEl)があればそれを最優先で対象にする＝マウスがメニューの上でも効く。
+    // 無ければ従来どおりマウス直下の要素で発火する。
+    var sel=(curEl&&document.body.contains(curEl)&&!curEl.closest('#__ce')&&!curEl.closest('#__ce_cm'))?curEl:null;
+    var el, px, py, uForEdit;
+    if(sel){
+      el=sel; uForEdit=sel;
+      var r=sel.getBoundingClientRect();
+      px=(window.scrollX||window.pageXOffset||0)+r.left+Math.min(24,r.width/2);
+      py=(window.scrollY||window.pageYOffset||0)+r.top+Math.min(24,r.height/2);
+    } else {
+      if(!under||overUI) return;
+      el=pickTarget(under); if(!el) return;
+      px=_ceMX; py=_ceMY; uForEdit=under;
+    }
+    if(op==='txt'){ closeMenu(); _scAddText(px,py); return; }
+    if(op==='edit'){
+      // 編集は対象の「文字を持つ要素」を狙う（選択があればそれ／無ければカーソル直下。
+      // pickTargetで入れ物まで登ると文字の無い箱を掴んで空欄＝追加のように見えるため）。
+      var te=uForEdit;
+      while(te && te!==document.body && !(te.textContent||'').replace(/[\\s\\u200b]/g,'')){ te=te.parentElement; }
+      if(!te||te===document.body){ if(msg) msg.textContent='ここには編集できる文字がありません（文字の上で押してください）'; return; }
+      closeMenu(); openBreakEditor(te); return;
+    }
+    if(op==='img'){ closeMenu(); openAddImagePicker(px,py); return; }
+    if(op==='photo'){
+      var imgEl=(el.tagName==='IMG')?el:(el.querySelector?el.querySelector('img'):null);
+      var si=secIndexOf(el); closeMenu(); openPhotoDecoPicker(el, imgEl, si); return;
+    }
+    if(op==='fx'){
+      closeMenu(); curEl=el; el.classList.add('__ce_sel'); selEls=[el];
+      _bigFull=true; _bigFxFocus=true; _forceEl=el;
+      el.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:cx,clientY:cy})); return;
+    }
+    if(op==='fav'){ scFavMenu(el, cx, cy); return; }
+  }
+  function scFavMenu(el, cx, cy){
+    var old=document.getElementById('__ce_scmenu'); if(old) old.remove();
+    var sec=el.closest('section,header,footer')||el;
+    var mn=document.createElement('div'); mn.id='__ce_scmenu';
+    mn.setAttribute('style','position:fixed;z-index:2147483003;background:#fff;border:1px solid #e2c98a;border-radius:10px;box-shadow:0 12px 34px rgba(0,0,0,.28);padding:6px;font-family:system-ui,sans-serif;min-width:230px');
+    var items=[
+      ['⭐ このセクションをお気に入り保存', function(){ favSaveSection(sec); }],
+      ['🔀 お気に入りから切り替え',        function(){ favSwapOpen(sec); }],
+      ['➕ お気に入りから追加（場所を選ぶ）', function(){ var ab=document.getElementById('__ce_favadd'); if(ab) ab.click(); }]
+    ];
+    items.forEach(function(it){
+      var b=document.createElement('div');
+      b.setAttribute('style','padding:9px 11px;font-size:13px;color:#7a4f00;cursor:pointer;border-radius:7px;white-space:nowrap');
+      b.textContent=it[0];
+      b.addEventListener('mouseover',function(){ b.style.background='#fff5e0'; });
+      b.addEventListener('mouseout',function(){ b.style.background='none'; });
+      b.addEventListener('click',function(){ mn.remove(); it[1](); });
+      mn.appendChild(b);
+    });
+    document.body.appendChild(mn);
+    mn.style.left=Math.max(6,Math.min(cx, window.innerWidth-mn.offsetWidth-8))+'px';
+    mn.style.top=Math.max(6,Math.min(cy, window.innerHeight-mn.offsetHeight-8))+'px';
+    setTimeout(function(){ document.addEventListener('mousedown',function _off(ev){ if(!mn.contains(ev.target)){ mn.remove(); document.removeEventListener('mousedown',_off,true); } },true); },0);
+  }
+  function scOpenSettings(){
+    var old=document.getElementById('__ce_scset'); if(old) old.remove();
+    var keys=scKeys();
+    var ov=document.createElement('div'); ov.id='__ce_scset';
+    ov.setAttribute('style','position:fixed;inset:0;z-index:2147483004;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif');
+    var rows=SC_META.map(function(x){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #f0f0f3">'
+        +'<span style="flex:1;font-size:13px;color:#1d1d1f">'+esc(x.label)+'</span>'
+        +'<input class="__sck" data-op="'+x.op+'" maxlength="1" value="'+esc(keys[x.op]||'')+'" '
+        +'style="width:44px;text-align:center;font-size:15px;font-weight:700;padding:6px;border:1px solid #cfd3da;border-radius:7px;text-transform:lowercase"></div>';
+    }).join('');
+    ov.innerHTML='<div style="background:#fff;border-radius:12px;padding:18px 20px;max-width:460px;width:92%;max-height:82vh;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.35)">'
+      +'<div style="display:flex;align-items:center;margin-bottom:6px"><b style="font-size:15px">⌨ ショートカットキー</b>'
+      +'<span id="__ce_scsx" style="margin-left:auto;cursor:pointer;font-size:18px;color:#888">✕</span></div>'
+      +'<div style="font-size:12px;color:#667;margin-bottom:12px">マウスを要素に載せてキーを押すと発火します。空欄にすると無効。1文字だけ（英字推奨）。家↔会社で同期されます。</div>'
+      +rows
+      +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">'
+      +'<button id="__ce_screset" style="background:#eef0f4;border:1px solid #d7dae1;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer">⟲ 初期に戻す</button>'
+      +'<button id="__ce_scsave" style="background:#0b6bcb;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer">✔ 保存</button></div></div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    ov.querySelector('#__ce_scsx').addEventListener('click',close);
+    ov.addEventListener('mousedown',function(e){ if(e.target===ov) close(); });
+    ov.querySelector('#__ce_screset').addEventListener('click',function(){
+      [].slice.call(ov.querySelectorAll('.__sck')).forEach(function(inp){ inp.value=SC_DEF[inp.getAttribute('data-op')]||''; });
+    });
+    ov.querySelector('#__ce_scsave').addEventListener('click',function(){
+      var m={}, seen={}, dup='';
+      [].slice.call(ov.querySelectorAll('.__sck')).forEach(function(inp){
+        var v=(inp.value||'').trim().toLowerCase().slice(0,1); m[inp.getAttribute('data-op')]=v;
+        if(v){ if(seen[v]) dup=v; seen[v]=1; }
+      });
+      if(dup){ if(msg) msg.textContent='⚠ キー「'+dup+'」が重複しています（1つの操作にしてください）'; return; }
+      scSave(m); close();
+      if(msg) msg.textContent='⌨ ショートカットキーを保存しました（家↔会社で同期）';
+    });
+  }
+  window.scOpenSettings=scOpenSettings;
+  document.addEventListener('keydown',function(e){
+    if(e.ctrlKey||e.metaKey||e.altKey) return;  // 修飾キー付きは対象外（Ctrl+C等と衝突させない）
+    var ae=document.activeElement;
+    if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.isContentEditable)) return;  // 入力中は無効
+    if(document.getElementById('__ce_pk')||document.getElementById('__ce_dlyp')||document.getElementById('__ce_shp')||document.getElementById('__ce_scset')||document.getElementById('__ce_scmenu')) return;  // パネル・キー設定・お気に入りメニューを開いている時は無効
+    var k=(e.key||'').toLowerCase(); if(k.length!==1) return;
+    var keys=scKeys();
+    for(var op in keys){ if(keys[op]===k){ e.preventDefault(); scRun(op); return; } }
+  });
   document.addEventListener('keydown',function(e){
     if(!(e.ctrlKey||e.metaKey)) return;
     var k=(e.key||'').toLowerCase();
@@ -8337,7 +8531,7 @@ html.__ce_altmode{cursor:text}
   //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
-  function _inUI2(node){ if(window.__ceFlyMode||window.__ceInspOn) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')||el.closest('#__ce_pskill')||el.closest('#__ce_sbgp')); }
+  function _inUI2(node){ if(window.__ceFlyMode||window.__ceInspOn) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')||el.closest('#__ce_pskill')||el.closest('#__ce_sbgp')||el.closest('#__ce_scset')||el.closest('#__ce_scmenu')); }
   var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   // 🔲 ドラッグ範囲選択（マーキー・2026-07-19）：セクション余白など「ドラッグしても何も起きない場所」から
   // ドラッグすると青い点線枠が出て、枠に完全に入った要素をまとめて複数選択（Ctrl+クリックと同じselEls状態）。
@@ -8746,7 +8940,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
@@ -9470,7 +9664,10 @@ html.__ce_altmode{cursor:text}
     var addMode=!_hasTxt || _tooBig || /^(SECTION|MAIN|HEADER|FOOTER|BODY|HTML|IMG)$/.test(curEl.tagName);
     var qm=document.createElement('div'); qm.id='__ce_cm';
     qm.setAttribute('style','width:auto;min-width:215px;padding:4px;max-height:calc(100vh - 16px);overflow-y:auto');  // 項目が増えて画面より長い時はメニュー内スクロール
-    function row(id,label){ return '<button class="__ce_qi" id="'+id+'" style="display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'+label+'</button>'; }
+    function row(id,label){
+      var kk=scKeyOf(id);  // この項目にショートカットキーが割り当ててあれば末尾に [t] を出す（見つけやすく）
+      var badge=kk?' <span style="float:right;margin-left:8px;font-size:11px;font-weight:700;color:#6b7280;background:#eef0f4;border:1px solid #d7dae1;border-radius:4px;padding:0 5px">'+esc(kk)+'</span>':'';
+      return '<button class="__ce_qi" id="'+id+'" style="display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'+label+badge+'</button>'; }
     // ✂ Alt+ドラッグで文字を選択してから右クリック＝選択への操作（色・マーカー・下線）を最上部に出す
     // （以前は選択直後に黒い小ポップアップが出ていた→2026-07-11にこのメニューへ一本化）
     var selApiQ=window.__ceSel, selRowQ='';
@@ -9648,10 +9845,13 @@ html.__ce_altmode{cursor:text}
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
       +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
       +row('__ce_q_full','⚙ すべての編集メニュー…')
-      +'<div style="text-align:right;padding:0 8px 3px"><button id="__ce_q_edit" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
+      +'<div style="display:flex;justify-content:flex-end;gap:10px;padding:0 8px 3px">'
+      +'<button id="__ce_q_sckey" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⌨ キー設定</button>'
+      +'<button id="__ce_q_edit" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
     document.body.appendChild(qm);
     qmWireGroups(qm);
     qm.querySelector('#__ce_q_edit').addEventListener('click',function(ev){ ev.stopPropagation(); qmEditMode(qm); });
+    qm.querySelector('#__ce_q_sckey').addEventListener('click',function(ev){ ev.stopPropagation(); closeMenu(); scOpenSettings(); });
     // 🅰 まとめて文字調整の配線（メニューを閉じずにその場で効く・インラインstyle!important＝どのCSSにも勝つ）
     if(multi&&qm.querySelector('#__ce_mf_f')){
       var mfEach=function(fn){ selEls.forEach(function(x){ try{ pushUndo(x); fn(x); }catch(_){} }); try{ markDirty(); }catch(_){} };
@@ -9788,11 +9988,8 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_txt'){
         if(addMode){
           // 余白（文字を持たない要素）で押した＝右クリックしたその場所に新しい文字を置いて、すぐ編集開始
-          var nd=document.createElement('div');
-          nd.textContent='ここに文字';
-          nd.setAttribute('style','z-index:'+_freeZIndex()+';font-size:32px;font-weight:700;color:#333;font-family:inherit;line-height:1.4;padding:4px 8px;white-space:nowrap');
-          placeFree(nd, (window.scrollX||window.pageXOffset||0)+qx, (window.scrollY||window.pageYOffset||0)+qy);  // セクション相対%＝画面幅に追従
-          markDirty(); closeMenu(); openBreakEditor(nd);
+          // （空のまま Escape/× で閉じたら _scAddText が空要素を残さず消す）
+          closeMenu(); _scAddText((window.scrollX||window.pageXOffset||0)+qx, (window.scrollY||window.pageYOffset||0)+qy);
         } else {
           var tgt=curEl; closeMenu(); openBreakEditor(tgt);
         }
@@ -10036,7 +10233,7 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill'].forEach(function(id){ var p=document.getElementById(id); if(p){ p.remove(); recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu'].forEach(function(id){ var p=document.getElementById(id); if(p){ p.remove(); recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
@@ -10095,7 +10292,7 @@ html.__ce_altmode{cursor:text}
         +'<div class="cap" style="margin:0 0 8px">画像はこれが確実です（差し替えは一瞬）</div>'
       : '')
       // 白フチ／はみ出しカード／背景の飾り／背景に設定／水彩(AI) をまとめて1つの入口に統合（ボタン数を増やさない）
-      + '<button class="go2" id="__ce_cmdeco" style="background:#0b6bcb;margin-bottom:8px">🖼 写真を加工（フチ・カード・背景など）</button>';
+      + '<button class="go2" id="__ce_cmdeco" style="background:#0b6bcb;margin-bottom:8px">🖼 写真を加工（フチ・カード・背景など）'+(scKeyOf('__ce_cmdeco')?' ['+esc(scKeyOf('__ce_cmdeco'))+']':'')+'</button>';
     // 右クリックのAIセクションは「無料の焼き込みで出来ないもの」だけに絞る（背景装飾=bg / AI専用=ai）。
     // 単純な出現/ループ系は上の「動きを選ぶ→付ける」に一本化したのでここには出さない。
     var aiList=PRESETS.filter(function(p){return p.bg||p.ai;});

@@ -36,9 +36,7 @@
 "__ce_q_zdn",
 "off:__ce_q_pskill",
 "off:__ce_q_addline",
-"sep",
+"sep:固定系(fixed)",
 "__ce_q_unfix",
-"sep",
-"__ce_q_pin",
-"sep"
+"__ce_q_pin"
 ]
