@@ -6,5 +6,6 @@ data/videos/
 data/assets/
 data/*.sqlite
 data/camps/*_files/
+data/camps/figma/
 results.html
 .env

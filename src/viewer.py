@@ -25,7 +25,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, animkit, assets, camp, clone, config, db, embed, export_split, ingest, motion, quality, respcheck, search, spec, style_check, vibe
+from . import anim, animkit, assets, camp, clone, config, db, embed, export_split, figmakit, ingest, motion, quality, respcheck, search, spec, style_check, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -2167,6 +2167,35 @@ def kit_file(filename: str):
     return Response(path.read_text(encoding="utf-8"), mimetype="text/html")
 
 
+@app.route("/api/figma_kit", methods=["POST"])
+def api_figma_kit():
+    """🎨 Figma取り込み用の書き出し（掃除＋アニメ潰し＋画像埋め込み・同期で一瞬・AIなし）。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    try:
+        result = figmakit.build_figmakit(fn)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("Figma書き出しに失敗: %s", fn)
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True, **result})
+
+
+@app.route("/figma/<path:sub>")
+def figma_file(sub: str):
+    """Figma書き出しフォルダ（data/camps/figma/…）の成果物を返す（持ち運び用HTML・手順書）。"""
+    path = (figmakit.FIGMA_DIR / sub).resolve()
+    if figmakit.FIGMA_DIR.resolve() not in path.parents or not path.is_file():
+        abort(404)
+    if path.suffix == ".html":
+        return Response(path.read_text(encoding="utf-8"), mimetype="text/html")
+    if path.suffix == ".md":
+        return Response(path.read_text(encoding="utf-8"), mimetype="text/plain; charset=utf-8")
+    abort(404)
+
+
 @app.route("/api/save_spec_html", methods=["POST"])
 def api_save_spec_html():
     """仕様書の編集（セルの数値・メモ書き換え）をファイルに焼き込む（AIなし）。"""
@@ -2463,6 +2492,7 @@ html.__ce_altmode{cursor:text}
     <button class="im" id="__ce_insp" style="background:#263238;color:#fff">🔍 インスペクト（コーダーに数値を渡す）</button>
     <button class="im" id="__ce_kit" style="background:#b3541e;color:#fff">🎬 アニメ実装キット（動きをコードで渡す）</button>
     <button class="im" id="__ce_prod" style="background:#5b21b6;color:#fff">📦 本番化キット（AIに本番コードを書かせる下ごしらえ）</button>
+    <button class="im" id="__ce_figma" style="background:#0d99ff;color:#fff">🎨 Figma用に書き出す（取り込んでデザイン化）</button>
     <button class="im" id="__ce_secswap" style="background:#0e7490;color:#fff">🔃 セクション並べ替え（順番を入れ替える）</button>
     <button class="im" id="__ce_bigclean" style="background:#4d7c0f;color:#fff">🧹 大掃除（分割span・残骸を消してソースを軽く）</button>
     <button class="im" id="__ce_bk" style="background:#475569;color:#fff">🗂 バックアップを取る（今の保存状態を複製）</button>
@@ -3699,6 +3729,23 @@ html.__ce_altmode{cursor:text}
       if(!d.ok){ msg.textContent='本番化キットの作成に失敗：'+(d.message||''); return; }
       msg.textContent='📦 できました → '+d.dir+' ｜ このフォルダでClaude Code/Codexを開いて「変換指示.mdどおりにやって」と言うだけ'+(d.rules?'':'（⚠規約ファイルが見つからず未同梱）');
       try{ navigator.clipboard.writeText(d.dir); }catch(_){ }
+    }).catch(function(){ reset(); msg.textContent='通信エラー'; });
+  });
+  // 🎨 Figma用に書き出す（AIなし・一瞬）：掃除＋アニメ潰し＋画像埋め込み→キャプチャ用ページを開く。
+  //   Figmaには動きは付かない（静止画で入る）＝動きは同梱のアニメキットでコーダーへ渡す設計。
+  var figBtn=document.getElementById('__ce_figma');
+  if(figBtn) figBtn.addEventListener('click',function(){
+    figBtn.disabled=true; var old=figBtn.textContent; figBtn.textContent='🎨 書き出し中…';
+    function reset(){ figBtn.disabled=false; figBtn.textContent=old; }
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
+    .then(function(){ return fetch('/api/figma_kit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})}); })
+    .then(function(r){return r.json();}).then(function(d){
+      reset();
+      if(!d.ok){ msg.textContent='Figma書き出しに失敗：'+(d.message||''); return; }
+      var mn=d.missing?('・⚠画像'+d.missing+'枚は取得できず'):'';
+      msg.innerHTML='🎨 Figma用ページを開きました。右上の <b>html.to.design 拡張 → Capture Current Page</b>（幅1440px）で取り込めます。'
+        +'<br>持ち運び用ファイル＋動きの引き継ぎ(アニメキット)は <b>'+d.dir+'</b> に出しました（画像'+d.embedded+'枚埋め込み'+mn+'）';
+      window.open(d.capture_url,'_blank');
     }).catch(function(){ reset(); msg.textContent='通信エラー'; });
   });
   // 🔃 セクション並べ替え（AIなし・無料）：DOMごと入れ替え→💾保存で確定。
@@ -10393,6 +10440,16 @@ def camp_preview(filename: str):
     if not path.exists() or not path.is_file() or path.suffix != ".html" or path.parent != config.CAMP_DIR:
         abort(404)
     return send_file(path)
+
+
+@app.route("/camp_figma/<path:filename>")
+def camp_figma(filename: str):
+    """🎨 Figmaキャプチャ用ページ：掃除＋アニメ潰し（完成状態で固定）した素のHTMLを返す。
+    画像はサーバー配信のまま（軽い）＝ツール起動中に開いて html.to.design 拡張でCaptureする用。"""
+    path = config.CAMP_DIR / filename
+    if not path.exists() or not path.is_file() or path.suffix != ".html" or path.parent != config.CAMP_DIR:
+        abort(404)
+    return Response(figmakit.capture_ready(path.read_text(encoding="utf-8")), mimetype="text/html")
 
 
 # ── 🆚 Before/After比較ビュー（AIなし・営業デモ用） ──────────────────────────

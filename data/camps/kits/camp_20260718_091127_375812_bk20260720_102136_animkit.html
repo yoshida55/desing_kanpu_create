@@ -1,0 +1,3003 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<title>🎬 アニメ実装キット: みどりワークス仙台｜就労継続支援A型</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Hiragino Sans','Yu Gothic',sans-serif;margin:0;padding:28px;background:#f4f6f8;color:#223;line-height:1.8}
+h1{font-size:20px;margin:0 0 4px}
+h2{font-size:16px;margin:28px 0 10px;border-left:4px solid #0b6bcb;padding-left:10px}
+.note{font-size:13px;color:#567}
+.step{background:#fff;border-radius:10px;padding:14px 18px;font-size:13.5px;box-shadow:0 2px 10px rgba(20,40,80,.08)}
+textarea{width:100%;min-height:180px;font:12px/1.6 Consolas,monospace;padding:12px;border:1px solid #cdd;border-radius:8px;background:#1e252e;color:#cde}
+.copy{margin:6px 0 0;padding:8px 20px;border:0;border-radius:6px;background:#0b6bcb;color:#fff;font-size:13px;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(20,40,80,.08);font-size:12.5px}
+th{background:#25314a;color:#fff;padding:8px 10px;text-align:left;font-weight:600}
+td{padding:8px 10px;border-top:1px solid #e8ecf1;vertical-align:top}
+code{background:#eef2f7;padding:1px 6px;border-radius:4px;font-size:12px;color:#0b4d8c}
+td code{background:#e8f3e8;color:#1b5e20}
+.secrow td{background:#eef4fb;font-weight:600;font-size:12.5px;border-top:2px solid #cfe0f2}
+.dim{color:#8a97a5;font-size:11.5px}
+pre{background:#1e252e;color:#cde;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto}
+.mini{font-size:12.5px;margin-top:6px}
+.mini td{padding:5px 8px}
+.mini td:first-child{white-space:nowrap}
+h3.grp{font-size:13.5px;margin:20px 0 8px;color:#456}
+.badge{background:#e8f3e8;color:#1b5e20;border-radius:10px;padding:1px 8px;font-size:10.5px;margin-left:6px;white-space:nowrap}
+.dnote{padding:6px 12px;font-size:11px;color:#8a97a5;background:#fafbfc;border-top:1px solid #eef1f5}
+.hlcard{outline:3px solid #e91e63;outline-offset:2px}
+.hlrow td{background:#fdf3d7!important}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;font-size:12.5px}
+.flow span{background:#eef4fb;border:1px solid #cfe0f2;border-radius:8px;padding:5px 10px}
+.flow b.ar{color:#0b6bcb}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.dcard{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(20,40,80,.08);overflow:hidden}
+.dhead{display:flex;align-items:center;gap:6px;padding:8px 12px;font-size:12px;background:#f0f3f7}
+.dhead .replay{margin-left:auto;border:0;background:#0b6bcb;color:#fff;border-radius:5px;padding:2px 10px;cursor:pointer}
+.stage{padding:34px 16px;text-align:center;font-size:18px;font-weight:700;min-height:96px}
+.stage .mk{--mk-c:#ffe66d}
+/* ============================================================
+   anim.css — スクロール出現アニメ一式（依存ゼロ）
+   使い方：動かしたい要素にクラスを付けるだけ（例 class="rv rv-up"）
+   ・遅らせたい : data-delay="400"（ms）
+   ・速さ変更   : data-dur="1200"（ms）
+   ・JSが html に .anim-on を付ける＝JS無効環境では全部そのまま表示（消えない保険）
+   ============================================================ */
+
+/* 出現アニメ（.is-in が付くと再生される） */
+html.anim-on .rv{opacity:0;transition:opacity var(--dur,.8s) ease,transform var(--dur,.8s) ease,filter var(--dur,.8s) ease,clip-path var(--dur,.8s) ease;transition-delay:var(--delay,0ms)}
+html.anim-on .rv-up{transform:translateY(28px)}
+html.anim-on .rv-down{transform:translateY(-36px)}
+html.anim-on .rv-left{transform:translateX(-48px)}
+html.anim-on .rv-right{transform:translateX(48px)}
+html.anim-on .rv-zoom{transform:scale(.86)}
+html.anim-on .rv-blur{filter:blur(14px)}
+html.anim-on .rv-flip{transform:perspective(800px) rotateY(90deg)}
+html.anim-on .rv-page{transform-origin:left center;transform:perspective(1200px) rotateY(80deg)}
+html.anim-on .rv-curtain-l{opacity:1;clip-path:inset(0 100% 0 0)}
+html.anim-on .rv-curtain-c{opacity:1;clip-path:inset(0 50% 0 50%)}
+html.anim-on .rv.is-in{opacity:1;transform:none;filter:none;clip-path:inset(0 0 0 0)}
+
+/* 行マスク（行ごとに下からせり上がる）。HTMLは .ln>.lni で行を包む */
+html.anim-on .rv-lines .ln{display:block;overflow:hidden}
+html.anim-on .rv-lines .lni{display:block;transform:translateY(112%);transition:transform var(--dur,.7s) cubic-bezier(.22,1,.36,1)}
+html.anim-on .rv-lines.is-in .lni{transform:none}
+
+/* 1文字ずつ（JSが .ch に分割する） */
+html.anim-on .chars .ch{display:inline-block;opacity:0;transform:translateY(20px);transition:opacity .3s cubic-bezier(.34,1.56,.64,1),transform .3s cubic-bezier(.34,1.56,.64,1)}
+html.anim-on .chars.is-in .ch{opacity:1;transform:none}
+
+/* 🖍マーカー（左から伸びる）。色は --mk-c */
+html.anim-on .mk{background-image:linear-gradient(transparent 79%,var(--mk-c,#ffe66d) 79%,var(--mk-c,#ffe66d) 91%,transparent 91%);background-repeat:no-repeat;background-size:0% 100%;-webkit-box-decoration-break:slice;box-decoration-break:slice;transition:background-size var(--dur,.6s) cubic-bezier(.25,.6,.3,1) var(--delay,0ms)}
+html.anim-on .mk.is-in{background-size:100% 100%}
+
+/* 〰点線下線（左から引かれる）。色は --ud-c */
+html.anim-on .ud{background-image:repeating-linear-gradient(90deg,var(--ud-c,#0b6bcb) 0 6px,transparent 6px 11px);background-repeat:no-repeat;background-position:left 100%;background-size:0% 3px;padding-bottom:.15em;transition:background-size var(--dur,.6s) ease var(--delay,0ms)}
+html.anim-on .ud.is-in{background-size:100% 3px}
+
+/* ループ系 */
+@keyframes kit-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes kit-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes kit-bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-18px)}60%{transform:translateY(0)}80%{transform:translateY(-7px)}}
+@keyframes kit-glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}
+@keyframes kit-wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.lp-pulse{animation:kit-pulse 1.4s ease-in-out infinite}
+.lp-float{animation:kit-float 2.2s ease-in-out infinite}
+.lp-bounce{animation:kit-bounce 1.2s ease infinite}
+.lp-glow{animation:kit-glow 1.8s ease-in-out infinite}
+html.anim-on .lp-wave.is-in .ch{animation:kit-wave 1.6s ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}
+
+</style></head><body>
+<h1>🎬 アニメ実装キット</h1>
+<p class="note">元カンプ: camp_20260718_091127_375812_bk20260720_102136.html（2026-07-22 生成・実測ベース）／ アニメ付き要素 40 件。<br>
+このページの内容だけで、カンプと同じ動きを<b>依存ライブラリなし</b>で再現できます。</p>
+
+<h2>⓪ 1分でわかる仕組み（はじめての人はここから）</h2>
+<div class="step">
+<b>結論：自分のHTMLに「動き用のクラス」を追加で付けるだけ。JSは書かない・触らない。</b><br><br>
+<b>🔍 何が起きているか</b>
+<div class="flow"><span>ページをスクロール</span><b class="ar">→</b><span>要素が画面に入る</span><b class="ar">→</b><span>anim.js がその要素に <code>is-in</code> を自動で付ける</span><b class="ar">→</b><span>anim.css の「is-inが付いたら見せる」スタイルが効く</span><b class="ar">→</b><span>ふわっと出現</span></div>
+<b>✍ 書き方（Before → After）</b>　自分のクラス名（BEM等）はそのまま、後ろに足すだけ
+<pre>Before: &lt;h2 class="about__title"&gt;私たちについて&lt;/h2&gt;
+After : &lt;h2 class="about__title rv rv-up" data-delay="200"&gt;私たちについて&lt;/h2&gt;</pre>
+<b>📋 それぞれの役割（自分で書くのは上3つだけ）</b>
+<table class="mini"><tbody>
+<tr><td><code>rv</code></td><td>「スクロールで出現させる」合図。これが無いと動かない（出現系のみ必要）</td></tr>
+<tr><td><code>rv-up</code></td><td>動き方の種類。⑤のカタログから好きなものに変えられる</td></tr>
+<tr><td><code>data-delay="200"</code></td><td>200ms（0.2秒）待ってから動く。順番に出したい時に使う。省略OK</td></tr>
+<tr><td><code>is-in</code></td><td>❌自分では書かない。JSが「画面に入ったよ」の印として自動で付ける</td></tr>
+<tr><td><code>html.anim-on</code></td><td>❌自分では書かない。anim.jsが起動時に&lt;html&gt;へ付ける「JSが動いた証明」。<br>
+CSSの隠す指定を全部この中に入れてあるので、<b>JSが無効・読み込み失敗でも要素が消えず全部表示される</b>（保険）</td></tr>
+</tbody></table>
+<br>⚠ <b>よくあるつまずき</b>：①<code>is-in</code>や<code>anim-on</code>をHTMLに手で書く（→最初から出現済みになりアニメしない）
+②anim.jsの読み込み忘れ（→保険が働き全部最初から表示＝動かないけど消えもしない。動かない時はまずこれを疑う）
+③<code>rv-up</code>だけ付けて<code>rv</code>を忘れる（→何も起きない）
+</div>
+
+<h2>① 使い方（3ステップ）</h2>
+<div class="step">
+1. 下の <b>anim.css</b> をコピーしてCSSファイルに貼る（または&lt;style&gt;で読み込む）<br>
+2. 下の <b>anim.js</b> をコピーして&lt;/body&gt;直前の&lt;script&gt;に貼る<br>
+3. ③の対応表どおり、各要素にクラスと data-delay 等を付ける → スクロールで同じ動きになります
+</div>
+
+<h2>② コピーするコード</h2>
+<b style="font-size:13px">anim.css</b>
+<textarea readonly id="css">/* ============================================================
+   anim.css — スクロール出現アニメ一式（依存ゼロ）
+   使い方：動かしたい要素にクラスを付けるだけ（例 class=&quot;rv rv-up&quot;）
+   ・遅らせたい : data-delay=&quot;400&quot;（ms）
+   ・速さ変更   : data-dur=&quot;1200&quot;（ms）
+   ・JSが html に .anim-on を付ける＝JS無効環境では全部そのまま表示（消えない保険）
+   ============================================================ */
+
+/* 出現アニメ（.is-in が付くと再生される） */
+html.anim-on .rv{opacity:0;transition:opacity var(--dur,.8s) ease,transform var(--dur,.8s) ease,filter var(--dur,.8s) ease,clip-path var(--dur,.8s) ease;transition-delay:var(--delay,0ms)}
+html.anim-on .rv-up{transform:translateY(28px)}
+html.anim-on .rv-down{transform:translateY(-36px)}
+html.anim-on .rv-left{transform:translateX(-48px)}
+html.anim-on .rv-right{transform:translateX(48px)}
+html.anim-on .rv-zoom{transform:scale(.86)}
+html.anim-on .rv-blur{filter:blur(14px)}
+html.anim-on .rv-flip{transform:perspective(800px) rotateY(90deg)}
+html.anim-on .rv-page{transform-origin:left center;transform:perspective(1200px) rotateY(80deg)}
+html.anim-on .rv-curtain-l{opacity:1;clip-path:inset(0 100% 0 0)}
+html.anim-on .rv-curtain-c{opacity:1;clip-path:inset(0 50% 0 50%)}
+html.anim-on .rv.is-in{opacity:1;transform:none;filter:none;clip-path:inset(0 0 0 0)}
+
+/* 行マスク（行ごとに下からせり上がる）。HTMLは .ln&gt;.lni で行を包む */
+html.anim-on .rv-lines .ln{display:block;overflow:hidden}
+html.anim-on .rv-lines .lni{display:block;transform:translateY(112%);transition:transform var(--dur,.7s) cubic-bezier(.22,1,.36,1)}
+html.anim-on .rv-lines.is-in .lni{transform:none}
+
+/* 1文字ずつ（JSが .ch に分割する） */
+html.anim-on .chars .ch{display:inline-block;opacity:0;transform:translateY(20px);transition:opacity .3s cubic-bezier(.34,1.56,.64,1),transform .3s cubic-bezier(.34,1.56,.64,1)}
+html.anim-on .chars.is-in .ch{opacity:1;transform:none}
+
+/* 🖍マーカー（左から伸びる）。色は --mk-c */
+html.anim-on .mk{background-image:linear-gradient(transparent 79%,var(--mk-c,#ffe66d) 79%,var(--mk-c,#ffe66d) 91%,transparent 91%);background-repeat:no-repeat;background-size:0% 100%;-webkit-box-decoration-break:slice;box-decoration-break:slice;transition:background-size var(--dur,.6s) cubic-bezier(.25,.6,.3,1) var(--delay,0ms)}
+html.anim-on .mk.is-in{background-size:100% 100%}
+
+/* 〰点線下線（左から引かれる）。色は --ud-c */
+html.anim-on .ud{background-image:repeating-linear-gradient(90deg,var(--ud-c,#0b6bcb) 0 6px,transparent 6px 11px);background-repeat:no-repeat;background-position:left 100%;background-size:0% 3px;padding-bottom:.15em;transition:background-size var(--dur,.6s) ease var(--delay,0ms)}
+html.anim-on .ud.is-in{background-size:100% 3px}
+
+/* ループ系 */
+@keyframes kit-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes kit-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes kit-bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-18px)}60%{transform:translateY(0)}80%{transform:translateY(-7px)}}
+@keyframes kit-glow{0%,100%{text-shadow:0 0 4px currentColor;filter:brightness(1)}50%{text-shadow:0 0 16px currentColor,0 0 30px currentColor;filter:brightness(1.16)}}
+@keyframes kit-wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.lp-pulse{animation:kit-pulse 1.4s ease-in-out infinite}
+.lp-float{animation:kit-float 2.2s ease-in-out infinite}
+.lp-bounce{animation:kit-bounce 1.2s ease infinite}
+.lp-glow{animation:kit-glow 1.8s ease-in-out infinite}
+html.anim-on .lp-wave.is-in .ch{animation:kit-wave 1.6s ease-in-out infinite;animation-delay:calc(var(--i,0)*90ms)}
+</textarea>
+<button class="copy" data-for="css">📋 CSSをコピー</button>
+<br><br><b style="font-size:13px">anim.js</b>
+<textarea readonly id="js">/* ============================================================
+   anim.js — スクロール出現の再生役（依存ゼロ・これ1つでOK）
+   仕組み：IntersectionObserverで「画面に入った要素」に .is-in を付けるだけ。
+   アニメの見た目は全部 anim.css 側にある。
+   ============================================================ */
+(function () {
+  var d = document, h = d.documentElement;
+  if (!(&#x27;IntersectionObserver&#x27; in window)) return;  // 古い環境では全部表示のまま（保険）
+  h.classList.add(&#x27;anim-on&#x27;);
+
+  // data-delay / data-dur をCSS変数に橋渡し
+  [].slice.call(d.querySelectorAll(&#x27;[data-delay]&#x27;)).forEach(function (el) {
+    el.style.setProperty(&#x27;--delay&#x27;, (+el.getAttribute(&#x27;data-delay&#x27;) || 0) + &#x27;ms&#x27;);
+  });
+  [].slice.call(d.querySelectorAll(&#x27;[data-dur]&#x27;)).forEach(function (el) {
+    el.style.setProperty(&#x27;--dur&#x27;, (+el.getAttribute(&#x27;data-dur&#x27;) || 800) + &#x27;ms&#x27;);
+  });
+
+  // .chars ＝中身を1文字ずつ&lt;span class=&quot;ch&quot;&gt;に分割（40ms間隔で時間差）
+  [].slice.call(d.querySelectorAll(&#x27;.chars&#x27;)).forEach(function (el) {
+    if (el.querySelector(&#x27;.ch&#x27;)) return;
+    var text = el.textContent; el.textContent = &#x27;&#x27;;
+    [].slice.call(text).forEach(function (c, i) {
+      var s = d.createElement(&#x27;span&#x27;); s.className = &#x27;ch&#x27;;
+      s.style.setProperty(&#x27;--i&#x27;, i);
+      s.style.transitionDelay = &#x27;calc(var(--delay,0ms) + &#x27; + (i * 40) + &#x27;ms)&#x27;;
+      s.textContent = (c === &#x27; &#x27;) ? &#x27;\u00A0&#x27; : c;
+      el.appendChild(s);
+    });
+  });
+
+  // .rv-lines ＝行(.lni)ごとに130msずつ時間差
+  [].slice.call(d.querySelectorAll(&#x27;.rv-lines&#x27;)).forEach(function (el) {
+    [].slice.call(el.querySelectorAll(&#x27;.lni&#x27;)).forEach(function (li, i) {
+      li.style.transitionDelay = &#x27;calc(var(--delay,0ms) + &#x27; + (i * 130) + &#x27;ms)&#x27;;
+    });
+  });
+
+  // .cnt ＝文字中の最初の数字を0→目標値（カンマ・小数の書式は維持）
+  function countUp(el) {
+    var m = (el.textContent || &#x27;&#x27;).match(/[-+]?[\d,]+(?:\.\d+)?/);
+    if (!m) return;
+    var keep = el.innerHTML, raw = m[0];
+    var tgt = parseFloat(raw.replace(/,/g, &#x27;&#x27;)), dec = (raw.split(&#x27;.&#x27;)[1] || &#x27;&#x27;).length;
+    var com = raw.indexOf(&#x27;,&#x27;) &gt;= 0;
+    var pre = (el.textContent || &#x27;&#x27;).slice(0, m.index), suf = (el.textContent || &#x27;&#x27;).slice(m.index + raw.length);
+    var dur = (+el.getAttribute(&#x27;data-dur&#x27;) || 1200), t0 = null;
+    function fmt(v) {
+      var s = v.toFixed(dec);
+      if (com) { var p = s.split(&#x27;.&#x27;); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, &#x27;,&#x27;); s = p.join(&#x27;.&#x27;); }
+      return s;
+    }
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = pre + fmt(tgt * e) + suf;
+      if (p &lt; 1) requestAnimationFrame(step); else el.innerHTML = keep;
+    }
+    requestAnimationFrame(step);
+  }
+  window.__kitCountUp = countUp;  // キットページのデモ再生用（本番サイトでは未使用・消してもOK）
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var el = en.target; io.unobserve(el);
+      el.classList.add(&#x27;is-in&#x27;);
+      if (el.classList.contains(&#x27;cnt&#x27;)) {
+        setTimeout(function () { countUp(el); }, +el.getAttribute(&#x27;data-delay&#x27;) || 0);
+      }
+    });
+  }, { threshold: 0.25, rootMargin: &#x27;0px 0px -8% 0px&#x27; });
+
+  [].slice.call(d.querySelectorAll(&#x27;.rv,.rv-lines,.mk,.ud,.chars,.cnt&#x27;)).forEach(function (el) { io.observe(el); });
+})();
+</textarea>
+<button class="copy" data-for="js">📋 JSをコピー</button>
+
+<h2>③ どの要素に何を付けるか（対応表）</h2>
+<p class="note">長く見えますが、<b>使う動きは実質 5 種類だけ</b>です。青い「📍まとめ行」でセクションごとの全体像が掴めます。<br>
+おすすめの進め方：全部を先に対応させようとせず、<b>HTMLを書きながら「今作っている場所のまとめ行」だけ見る</b>→同じ動きの要素はクラスをコピペ。<br>
+探し方：「場所」列はセクション番号＋そのセクションの見出し、「要素」列は<b>その要素の本文の書き出し</b>です。本番のHTMLはゼロから書き直すのでカンプのクラス名は残りませんが、<b>本文はそのまま残る</b>ので、この文字でHTMLを検索すれば一発で見つかります。<br>
+薄い文字の<code>div.xxx</code>はカンプ内の名前です（参考用・自分のHTMLのクラス名はそのままでOK）。足すのは「付けるクラス・属性」列だけです。</p>
+<table><thead><tr><th style="width:150px">場所</th><th>要素（この文字で検索）</th><th style="width:170px">動き</th><th>付けるクラス・属性</th><th style="width:180px">メモ</th></tr></thead>
+<tbody><tr class='secrow'><td colspan='5'>📍 ヘッダー（1個）　使う動き: <code>rv rv-down</code></td></tr><tr data-kit="rv rv-down" data-el="header.site-header"><td>ヘッダー</td><td><b>「みどりワークス仙台就労継続支援 A型事業所 」</b><br><code class='dim'>header.site-header</code></td><td>上から降りてくる</td><td><code>rv rv-down ＋ data-delay=&quot;1600&quot; data-dur=&quot;800&quot;</code></td><td class='dim'></td></tr><tr class='secrow'><td colspan='5'>📍 セクション1：🍀「働きたい」の手前にある、不安を聞（5個）　使う動き: <code>rv rv-up</code>×4　<code>rv rv-left</code></td></tr><tr data-kit="rv rv-up" data-el="div.intro-heading"><td>セクション1：🍀「働きたい」の手前にある、不安を聞</td><td><b>「Our Message / はじめに」</b><br><code class='dim'>div.intro-heading</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-left" data-el="h2.section-title"><td>セクション1：🍀「働きたい」の手前にある、不安を聞</td><td><b>「🍀「働きたい」の手前にある、不安を聞かせてく」</b><br><code class='dim'>h2.section-title</code></td><td>左からスライドイン</td><td><code>rv rv-left ＋ data-dur=&quot;658&quot;</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="p"><td>セクション1：🍀「働きたい」の手前にある、不安を聞</td><td><b>「朝決まった時間に起きられるか。人の多い場所で」</b><br><code class='dim'>p</code></td><td>ふわっと出現（下から）</td><td><code>rv rv-up ＋ data-dur=&quot;1046&quot;</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="p"><td>セクション1：🍀「働きたい」の手前にある、不安を聞</td><td><b>「みどりワークス仙台では、支援員との短い面談を」</b><br><code class='dim'>p</code></td><td>ふわっと出現（下から）</td><td><code>rv rv-up ＋ data-dur=&quot;1046&quot;</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div.promise"><td>セクション1：🍀「働きたい」の手前にある、不安を聞</td><td><b>「見学では、作業室・休憩室・実際の仕事を約45」</b><br><code class='dim'>div.promise</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr class='secrow'><td colspan='5'>📍 セクション2：仕事を、人に合わせる。その先の就職ま（9個）　使う動き: <code>rv rv-up</code>×8　<code>rv rv-blur</code></td></tr><tr data-kit="rv rv-up" data-el="span.outline-word"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「ABOUT US 私たちについて」</b><br><code class='dim'>span.outline-word</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div.photo-stack.zoom"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「画像 alt=明るい職場で書類を封入するスタッフ」</b><br><code class='dim'>div.photo-stack.zoom</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-blur" data-el="figure.photo-frame.large"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「画像 alt=明るい職場で書類を封入するスタッフ」</b><br><code class='dim'>figure.photo-frame.large</code></td><td>ぼかしから出現</td><td><code>rv rv-blur ＋ data-dur=&quot;900&quot;</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="p.eyebrow"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「About Us / 私たちについて 仕事を」</b><br><code class='dim'>p.eyebrow</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="h2.section-title"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「仕事を、人に合わせる。その先の就職まで支える」</b><br><code class='dim'>h2.section-title</code></td><td>ふわっと出現（下から）</td><td><code>rv rv-up ＋ data-dur=&quot;1046&quot;</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="p.lead"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「定員20名の小さな事業所です。作業の得意・不」</b><br><code class='dim'>p.lead</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="article.about-row"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「01 週1日・1日2時間から相談利用開始時の」</b><br><code class='dim'>article.about-row</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="article.about-row"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「02 仕事は4つのチーム制PC入力、EC運営」</b><br><code class='dim'>article.about-row</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="article.about-row"><td>セクション2：仕事を、人に合わせる。その先の就職ま</td><td><b>「03 一般就労への移行も伴走履歴書、面接練習」</b><br><code class='dim'>article.about-row</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr class='secrow'><td colspan='5'>📍 セクション3：一日の流れ 自分のペースで働く（9個）　使う動き: <code>rv rv-blur</code>　<code>rv rv-up</code>×8</td></tr><tr data-kit="rv rv-blur" data-el="div.daily-image.zoom"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「自分のペースで働く」</b><br><code class='dim'>div.daily-image.zoom</code></td><td>ぼかしから出現</td><td><code>rv rv-blur ＋ data-dur=&quot;900&quot;</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="p.eyebrow"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「Daily Flow / 1日の流れ 下記は」</b><br><code class='dim'>p.eyebrow</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="p.lead"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「下記は9時30分から15時まで働く場合の一例」</b><br><code class='dim'>p.lead</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div.time-row"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「09:30朝礼・体調確認」</b><br><code class='dim'>div.time-row</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div.time-row"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「09:40午前の作業」</b><br><code class='dim'>div.time-row</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div.time-row"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「12:00昼休み」</b><br><code class='dim'>div.time-row</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div.time-row"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「13:00午後の作業」</b><br><code class='dim'>div.time-row</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div.time-row"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「14:50片付け・振り返り困ったことはその日」</b><br><code class='dim'>div.time-row</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div"><td>セクション3：一日の流れ 自分のペースで働く</td><td><b>「短い勤務から、生活のリズムを整える。 #ne」</b><br><code class='dim'>div</code></td><td>ふわっと出現（下から）</td><td><code>rv rv-up ＋ data-dur=&quot;1046&quot;</code></td><td class='dim'></td></tr><tr class='secrow'><td colspan='5'>📍 セクション4：事業所の近況を報告いたします。（5個）　使う動き: <code>rv rv-up</code>×5</td></tr><tr data-kit="rv rv-up" data-el="div.news-heading"><td>セクション4：事業所の近況を報告いたします。</td><td><b>「News / お知らせ 事業所の近況を報告い」</b><br><code class='dim'>div.news-heading</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="a.news-item"><td>セクション4：事業所の近況を報告いたします。</td><td><b>「2026.07.15 8月6日・20日、少人」</b><br><code class='dim'>a.news-item</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="a.news-item"><td>セクション4：事業所の近況を報告いたします。</td><td><b>「2026.07.02 ECチームで商品撮影と」</b><br><code class='dim'>a.news-item</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="a.news-item"><td>セクション4：事業所の近況を報告いたします。</td><td><b>「2026.06.18 夏季休業期間と電話相談」</b><br><code class='dim'>a.news-item</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="a.news-item"><td>セクション4：事業所の近況を報告いたします。</td><td><b>「2026.06.05 職業指導員を1名募集し」</b><br><code class='dim'>a.news-item</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr class='secrow'><td colspan='5'>📍 セクション5：☘️制度のことも、費用のことも。わか（8個）　使う動き: <code>rv rv-up</code>×6　<code>rv rv-left</code>　<code>rv rv-blur</code></td></tr><tr data-kit="rv rv-up" data-el="p.eyebrow"><td>セクション5：☘️制度のことも、費用のことも。わか</td><td><b>「Support Guide / 利用案内 ☘」</b><br><code class='dim'>p.eyebrow</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-left" data-el="h2.section-title"><td>セクション5：☘️制度のことも、費用のことも。わか</td><td><b>「☘️制度のことも、費用のことも。わかる言葉で」</b><br><code class='dim'>h2.section-title</code></td><td>左からスライドイン</td><td><code>rv rv-left ＋ data-dur=&quot;658&quot;</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="p.lead"><td>セクション5：☘️制度のことも、費用のことも。わか</td><td><b>「障害福祉サービス受給者証をお持ちでない方もご」</b><br><code class='dim'>p.lead</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="li"><td>セクション5：☘️制度のことも、費用のことも。わか</td><td><b>「原則18歳以上・就労継続支援A型の支給決定を」</b><br><code class='dim'>li</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="li"><td>セクション5：☘️制度のことも、費用のことも。わか</td><td><b>「雇用契約を結び、宮城県の最低賃金以上を支給 」</b><br><code class='dim'>li</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="li"><td>セクション5：☘️制度のことも、費用のことも。わか</td><td><b>「週1日から相談可能。通院日の勤務調整にも対応」</b><br><code class='dim'>li</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-up" data-el="div.fee-box"><td>セクション5：☘️制度のことも、費用のことも。わか</td><td><b>「利用料について 前年所得に応じて自己負担上限」</b><br><code class='dim'>div.fee-box</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-blur" data-el="div.support-photo.zoom"><td>セクション5：☘️制度のことも、費用のことも。わか</td><td><b>「画像 alt=女性相談員との穏やかな面談」</b><br><code class='dim'>div.support-photo.zoom</code></td><td>ぼかしから出現</td><td><code>rv rv-blur ＋ data-dur=&quot;900&quot;</code></td><td class='dim'></td></tr><tr class='secrow'><td colspan='5'>📍 セクション6：いきなり利用を決める必要はありません（2個）　使う動き: <code>rv rv-up</code>　<code>rv rv-left</code></td></tr><tr data-kit="rv rv-up" data-el="div.origin-message"><td>セクション6：いきなり利用を決める必要はありません</td><td><b>「@keyframes top_main_la」</b><br><code class='dim'>div.origin-message</code></td><td>スクロールで出現</td><td><code>rv rv-up</code></td><td class='dim'></td></tr><tr data-kit="rv rv-left" data-el="h2.section-title.ce_emph"><td>セクション6：いきなり利用を決める必要はありません</td><td><b>「いきなり利用を決める必要はありません。まずは」</b><br><code class='dim'>h2.section-title.ce_emph</code></td><td>左からスライドイン</td><td><code>rv rv-left ＋ data-dur=&quot;658&quot;</code></td><td class='dim'></td></tr><tr class='secrow'><td colspan='5'>📍 ページ（1個）　使う動き: <code>chars</code></td></tr><tr data-kit="chars" data-el="div.ce_emph"><td>ページ</td><td><b>「楽し」</b><br><code class='dim'>div.ce_emph</code></td><td>1文字ずつ跳ねて出る</td><td><code>chars ＋ data-dur=&quot;682&quot;</code></td><td class='dim'>JSが自動で1文字ずつspan分割する</td></tr></tbody></table>
+
+<h2>④ このカンプ独自の@keyframes（そのままCSSへコピー）</h2><textarea readonly rows='8'>@keyframes loaderPulse {
+        0%,
+        100% {
+          transform: rotate(0) scale(1);
+        }
+        50% {
+          transform: rotate(15deg) scale(1.1);
+        }
+      }
+@keyframes kenBurns {
+        to {
+          transform: scale(1.06);
+        }
+      }
+@keyframes cloudLoop {
+        from {
+          translate: -100px 0;
+        }
+        to {
+          translate: 850px 0;
+        }
+      }
+@keyframes floating {
+        50% {
+          translate: 0 -10px;
+        }
+      }
+@keyframes marqueeRight {
+        from {
+          transform: translateX(-50%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+@keyframes ce_gaya_pop {
+        0% {
+          opacity: 0;
+          transform: translateY(10px) scale(0.6);
+        }
+        12% {
+          opacity: 1;
+          transform: translateY(0) scale(1.12);
+        }
+        20% {
+          transform: scale(1);
+        }
+        55% {
+          opacity: 1;
+        }
+        75% {
+          opacity: 0;
+          transform: translateY(-18px) scale(1.06);
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes UpAnime {
+            0% {
+              opacity: 1;
+              transform: translateY(0px);
+            }
+            100% {
+              opacity: 0;
+              transform: translateY(-100px);
+            }
+          }
+@keyframes DownAnime {
+            0% {
+              opacity: 0;
+              transform: translateY(-100px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0px);
+            }
+          }
+@keyframes fadezoom {
+            0% {
+              transform: scale(1);
+            }
+            100% {
+              transform: scale(1.2);
+            }
+          }
+@keyframes fadeIn {
+            0% {
+              opacity: 0;
+            }
+            100% {
+              opacity: 1;
+            }
+          }
+@keyframes blink {
+            50% {
+              opacity: 1;
+            }
+          }
+@keyframes load7 {
+            0%,
+            80%,
+            100% {
+              box-shadow: 0px 2.5em 0px -1.3em;
+            }
+            40% {
+              box-shadow: 0px 2.5em 0px 0px;
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes fa-beat {
+            0%,
+            90% {
+              transform: scale(1);
+            }
+            45% {
+              transform: scale(var(--fa-beat-scale, 1.25));
+            }
+          }
+@keyframes fa-bounce {
+            0% {
+              transform: scale(1) translateY(0px);
+            }
+            10% {
+              transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            }
+            30% {
+              transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            }
+            50% {
+              transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            }
+            57% {
+              transform: scale(1) translateY(var(--fa-bounce-rebound, -0.125em));
+            }
+            64% {
+              transform: scale(1) translateY(0px);
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+            }
+          }
+@keyframes fa-fade {
+            50% {
+              opacity: var(--fa-fade-opacity, 0.4);
+            }
+          }
+@keyframes fa-beat-fade {
+            0%,
+            100% {
+              opacity: var(--fa-beat-fade-opacity, 0.4);
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(var(--fa-beat-fade-scale, 1.125));
+            }
+          }
+@keyframes fa-flip {
+            50% {
+              transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            }
+          }
+@keyframes fa-shake {
+            0% {
+              transform: rotate(-15deg);
+            }
+            4% {
+              transform: rotate(15deg);
+            }
+            8%,
+            24% {
+              transform: rotate(-18deg);
+            }
+            12%,
+            28% {
+              transform: rotate(18deg);
+            }
+            16% {
+              transform: rotate(-22deg);
+            }
+            20% {
+              transform: rotate(22deg);
+            }
+            32% {
+              transform: rotate(-12deg);
+            }
+            36% {
+              transform: rotate(12deg);
+            }
+            40%,
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+@keyframes fa-spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(1turn);
+            }
+          }
+@keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+@keyframes blink {
+            0% {
+              opacity: 0;
+            }
+            50% {
+              opacity: 1;
+            }
+            100% {
+              opacity: 0;
+            }
+          }
+@keyframes aslAnFadeInDrop {
+            0% {
+              opacity: 0;
+              transform: translate(0px, -50px);
+            }
+            100% {
+              opacity: 1;
+              transform: translate(0px, 0px);
+            }
+          }
+@keyframes aslAnFadeOutDrop {
+            0% {
+              opacity: 1;
+              transform: translate(0px, 0px);
+            }
+            100% {
+              opacity: 0;
+              transform: translate(0px, -50px);
+            }
+          }
+@keyframes rotate-simple {
+            0% {
+              transform: rotate(0deg);
+            }
+            50% {
+              transform: rotate(180deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+@keyframes lds-ellipsis1 {
+            0% {
+              transform: scale(0);
+            }
+            100% {
+              transform: scale(1);
+            }
+          }
+@keyframes lds-ellipsis3 {
+            0% {
+              transform: scale(1);
+            }
+            100% {
+              transform: scale(0);
+            }
+          }
+@keyframes lds-ellipsis2 {
+            0% {
+              transform: translate(0px, 0px);
+            }
+            100% {
+              transform: translate(24px, 0px);
+            }
+          }
+@keyframes bgslide {
+            0% {
+              background-position-x: 0px;
+            }
+            100% {
+              background-position-x: -200%;
+            }
+          }
+@keyframes imp-enter {
+            0% {
+              opacity: 0;
+              transform: translateY(24px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0px);
+            }
+          }
+@keyframes imp-float {
+            0%,
+            100% {
+              transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+              transform: translateY(-12px) rotate(4deg);
+            }
+          }
+@keyframes top_main_last_mask {
+            0% {
+              width: 470px;
+              height: 580px;
+              box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px 0px;
+            }
+            100% {
+              width: 100%;
+              height: 100%;
+              box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+            }
+          }
+@keyframes top_main_last_mask_img {
+            0% {
+              bottom: -4%;
+              right: 0px;
+              width: 135%;
+              height: 110%;
+            }
+            100% {
+              bottom: -10%;
+              right: -15%;
+              width: 115%;
+              height: 132.5%;
+            }
+          }
+@keyframes about-title-mask {
+            0% {
+              mask-size: 0% 100%;
+            }
+            100% {
+              mask-size: 100% 100%;
+            }
+          }
+@keyframes about-title-mask-img {
+            0% {
+              transform: scale(1.13);
+              opacity: 0.72;
+            }
+            100% {
+              transform: scale(1);
+              opacity: 1;
+            }
+          }
+@keyframes office-scroll1 {
+            0% {
+              transform: translate3d(0px, 0px, 0px);
+            }
+            100% {
+              transform: translate3d(-24px, 0px, 0px);
+            }
+          }
+@keyframes office-scroll2 {
+            0% {
+              transform: translate3d(0px, 0px, 0px);
+            }
+            100% {
+              transform: translate3d(24px, 0px, 0px);
+            }
+          }
+@keyframes office-scroll3 {
+            0% {
+              transform: translate3d(0px, 0px, 0px);
+            }
+            100% {
+              transform: translate3d(0px, -18px, 0px);
+            }
+          }
+@keyframes floatY {
+            0%,
+            100% {
+              transform: translateY(0px) rotate(-4deg);
+            }
+            50% {
+              transform: translateY(-12px) rotate(3deg);
+            }
+          }
+@keyframes heroIn {
+            0% {
+              opacity: 0;
+              transform: translateY(22px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0px);
+            }
+          }</textarea>
+
+<h2>⑤ クラス名カタログ（全種類・▶でその場再生）</h2>
+<p class="note">どんな動きか迷ったらここ。カードの<code>クラス名</code>をそのままHTMLに付ければ同じ動きになります。「このカンプで使用」バッジ付きが対応表に出てくるものです。</p>
+<h3 class='grp'>✨ 出現系（rv とセットで使う・スクロールで画面に入ると1回だけ動く）</h3><div class='dgrid'><div class='dcard' id='cat-rv-rv-up'><div class='dhead'><code>rv rv-up</code> ふわっと出現（下から）<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-up demo'>見出しテキスト</span></div><div class='dnote'>一番よく使う基本形</div></div><div class='dcard' id='cat-rv-rv-down'><div class='dhead'><code>rv rv-down</code> 上から降りる<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-down demo'>ヘッダーなど</span></div><div class='dnote'>ヘッダー向き</div></div><div class='dcard' id='cat-rv-rv-left'><div class='dhead'><code>rv rv-left</code> 左からスライド<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-left demo'>テキスト</span></div></div><div class='dcard' id='cat-rv-rv-right'><div class='dhead'><code>rv rv-right</code> 右からスライド<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-right demo'>テキスト</span></div></div><div class='dcard' id='cat-rv-rv-zoom'><div class='dhead'><code>rv rv-zoom</code> ズーム出現<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-zoom demo'>カード</span></div><div class='dnote'>カード・写真向き</div></div><div class='dcard' id='cat-rv-rv-blur'><div class='dhead'><code>rv rv-blur</code> ピンぼけ→くっきり<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-blur demo'>ぼかし出現</span></div></div><div class='dcard' id='cat-rv-rv-flip'><div class='dhead'><code>rv rv-flip</code> 3D回転<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-flip demo'>パタッと回転</span></div></div><div class='dcard' id='cat-rv-rv-page'><div class='dhead'><code>rv rv-page</code> 📖ページめくり<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-page demo'>ページが開く</span></div><div class='dnote'>左端が軸</div></div><div class='dcard' id='cat-rv-rv-curtain-l'><div class='dhead'><code>rv rv-curtain-l</code> カーテン開き（左から）<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-curtain-l demo'>写真の代わり</span></div><div class='dnote'>写真向き</div></div><div class='dcard' id='cat-rv-rv-curtain-c'><div class='dhead'><code>rv rv-curtain-c</code> カーテン開き（真ん中から）<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='rv rv-curtain-c demo'>写真の代わり</span></div><div class='dnote'>写真向き</div></div></div><h3 class='grp'>📝 文字系</h3><div class='dgrid'><div class='dcard' id='cat-rv-lines'><div class='dhead'><code>rv-lines</code> 行ごとに下からせり上がる<button class='replay'>▶</button></div><div class='stage'><span class='rv-lines demo'><span class='ln'><span class='lni'>1行目がせり上がり</span></span><span class='ln'><span class='lni'>2行目が続く</span></span></span></div><div class='dnote'>HTML側で行を .ln&gt;.lni で包む（rv不要）</div></div><div class='dcard' id='cat-chars'><div class='dhead'><code>chars</code> 1文字ずつ出現<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='chars demo'>ようこそ</span></div><div class='dnote'>分割はJSが自動でやる（rv不要）</div></div><div class='dcard' id='cat-cnt'><div class='dhead'><code>cnt</code> 🔢カウントアップ<button class='replay'>▶</button></div><div class='stage'><span class='cnt demo'>1,250件の実績</span></div><div class='dnote'>文中の最初の数字が0→目標値（rv不要）</div></div></div><h3 class='grp'>🖍 線・強調系（rv不要）</h3><div class='dgrid'><div class='dcard' id='cat-mk'><div class='dhead'><code>mk</code> マーカー（左から伸びる）<button class='replay'>▶</button></div><div class='stage'><span class='mk demo'>大事なところに線</span></div><div class='dnote'>色は style=&quot;--mk-c:#ffe66d&quot; で変更</div></div><div class='dcard' id='cat-ud'><div class='dhead'><code>ud</code> 〰点線下線（左から引かれる）<button class='replay'>▶</button></div><div class='stage'><span class='ud demo'>さりげない強調</span></div><div class='dnote'>色は style=&quot;--ud-c:#0b6bcb&quot; で変更</div></div></div><h3 class='grp'>🔁 ループ系（ずっと動き続ける・rv不要・付けるだけ）</h3><div class='dgrid'><div class='dcard' id='cat-lp-pulse'><div class='dhead'><code>lp-pulse</code> ドクドク拡縮<button class='replay'>▶</button></div><div class='stage'><span class='lp-pulse demo'>ボタン</span></div><div class='dnote'>ボタン・CTA向き</div></div><div class='dcard' id='cat-lp-float'><div class='dhead'><code>lp-float</code> ふわふわ浮遊<button class='replay'>▶</button></div><div class='stage'><span class='lp-float demo'>ふわふわ</span></div><div class='dnote'>イラスト・バッジ向き</div></div><div class='dcard' id='cat-lp-bounce'><div class='dhead'><code>lp-bounce</code> ぴょんぴょん<button class='replay'>▶</button></div><div class='stage'><span class='lp-bounce demo'>ぴょん</span></div></div><div class='dcard' id='cat-lp-glow'><div class='dhead'><code>lp-glow</code> 光る<button class='replay'>▶</button></div><div class='stage'><span class='lp-glow demo'>キラッと光る</span></div></div><div class='dcard' id='cat-chars-lp-wave'><div class='dhead'><code>chars lp-wave</code> 波打つ文字<span class='badge'>このカンプで使用</span><button class='replay'>▶</button></div><div class='stage'><span class='chars lp-wave demo'>なみなみもじ</span></div><div class='dnote'>chars とセットで使う</div></div></div>
+
+<script>/* ============================================================
+   anim.js — スクロール出現の再生役（依存ゼロ・これ1つでOK）
+   仕組み：IntersectionObserverで「画面に入った要素」に .is-in を付けるだけ。
+   アニメの見た目は全部 anim.css 側にある。
+   ============================================================ */
+(function () {
+  var d = document, h = d.documentElement;
+  if (!('IntersectionObserver' in window)) return;  // 古い環境では全部表示のまま（保険）
+  h.classList.add('anim-on');
+
+  // data-delay / data-dur をCSS変数に橋渡し
+  [].slice.call(d.querySelectorAll('[data-delay]')).forEach(function (el) {
+    el.style.setProperty('--delay', (+el.getAttribute('data-delay') || 0) + 'ms');
+  });
+  [].slice.call(d.querySelectorAll('[data-dur]')).forEach(function (el) {
+    el.style.setProperty('--dur', (+el.getAttribute('data-dur') || 800) + 'ms');
+  });
+
+  // .chars ＝中身を1文字ずつ<span class="ch">に分割（40ms間隔で時間差）
+  [].slice.call(d.querySelectorAll('.chars')).forEach(function (el) {
+    if (el.querySelector('.ch')) return;
+    var text = el.textContent; el.textContent = '';
+    [].slice.call(text).forEach(function (c, i) {
+      var s = d.createElement('span'); s.className = 'ch';
+      s.style.setProperty('--i', i);
+      s.style.transitionDelay = 'calc(var(--delay,0ms) + ' + (i * 40) + 'ms)';
+      s.textContent = (c === ' ') ? '\u00A0' : c;
+      el.appendChild(s);
+    });
+  });
+
+  // .rv-lines ＝行(.lni)ごとに130msずつ時間差
+  [].slice.call(d.querySelectorAll('.rv-lines')).forEach(function (el) {
+    [].slice.call(el.querySelectorAll('.lni')).forEach(function (li, i) {
+      li.style.transitionDelay = 'calc(var(--delay,0ms) + ' + (i * 130) + 'ms)';
+    });
+  });
+
+  // .cnt ＝文字中の最初の数字を0→目標値（カンマ・小数の書式は維持）
+  function countUp(el) {
+    var m = (el.textContent || '').match(/[-+]?[\d,]+(?:\.\d+)?/);
+    if (!m) return;
+    var keep = el.innerHTML, raw = m[0];
+    var tgt = parseFloat(raw.replace(/,/g, '')), dec = (raw.split('.')[1] || '').length;
+    var com = raw.indexOf(',') >= 0;
+    var pre = (el.textContent || '').slice(0, m.index), suf = (el.textContent || '').slice(m.index + raw.length);
+    var dur = (+el.getAttribute('data-dur') || 1200), t0 = null;
+    function fmt(v) {
+      var s = v.toFixed(dec);
+      if (com) { var p = s.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); s = p.join('.'); }
+      return s;
+    }
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = pre + fmt(tgt * e) + suf;
+      if (p < 1) requestAnimationFrame(step); else el.innerHTML = keep;
+    }
+    requestAnimationFrame(step);
+  }
+  window.__kitCountUp = countUp;  // キットページのデモ再生用（本番サイトでは未使用・消してもOK）
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var el = en.target; io.unobserve(el);
+      el.classList.add('is-in');
+      if (el.classList.contains('cnt')) {
+        setTimeout(function () { countUp(el); }, +el.getAttribute('data-delay') || 0);
+      }
+    });
+  }, { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
+
+  [].slice.call(d.querySelectorAll('.rv,.rv-lines,.mk,.ud,.chars,.cnt')).forEach(function (el) { io.observe(el); });
+})();
+</script>
+<script>
+document.querySelectorAll('.copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=document.getElementById(b.getAttribute('data-for'));
+    t.select(); document.execCommand('copy');
+    var o=b.textContent; b.textContent='コピーしました ✅'; setTimeout(function(){b.textContent=o;},1200);
+  });
+});
+// 🔍パネルの「動き」クリックから来た時：該当のカタログカード＋対応表の行をハイライト
+(function(){
+  var q=new URLSearchParams(location.search);
+  var hl=q.get('hl'), el=q.get('el'), tx=(q.get('tx')||'').replace(/\s+/g,'');
+  if(!hl) return;
+  var card=document.getElementById('cat-'+hl);
+  if(card) card.classList.add('hlcard');
+  function slug(s){ return String(s||'').replace(/[^a-zA-Z0-9-]+/g,'-'); }
+  // 表記ゆれ吸収：タグ＋（ツール用クラスを除いた）最初のクラスだけで比べる
+  function norm(s){
+    var p=String(s||'').split('.'); var tag=p.shift();
+    var cs=p.filter(function(c){ return c&&c.indexOf('fxa_')!==0&&c.indexOf('__ce')!==0&&c!=='reveal'&&c!=='in'&&c!=='is-visible'&&c!=='show'; });
+    return tag+(cs.length?('.'+cs[0]):'');
+  }
+  var hit=[].slice.call(document.querySelectorAll('tbody tr[data-kit]'))
+    .filter(function(tr){ return slug(tr.getAttribute('data-kit'))===hl; });
+  // 同じ動きの中から、クラス名（要素）が一致する行だけに絞る → さらにテキストでも絞る
+  if(el){ var byEl=hit.filter(function(tr){ return norm(tr.getAttribute('data-el'))===norm(el); }); if(byEl.length) hit=byEl; }
+  if(tx){ var byTx=hit.filter(function(tr){ var d=tr.querySelector('.dim'); return d&&d.textContent.replace(/\s+/g,'').indexOf(tx.slice(0,10))>=0; }); if(byTx.length) hit=byTx; }
+  hit.forEach(function(tr){ tr.classList.add('hlrow'); });
+})();
+document.querySelectorAll('.replay').forEach(function(b){
+  b.addEventListener('click',function(){
+    var el=b.closest('.dcard').querySelector('.demo');
+    el.classList.remove('is-in');
+    el.style.animation='none'; void el.offsetWidth; el.style.animation='';
+    el.classList.add('is-in');
+    if(el.classList.contains('cnt') && window.__kitCountUp) window.__kitCountUp(el);
+  });
+});
+</script>
+</body></html>
