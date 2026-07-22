@@ -25,7 +25,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, animkit, assets, camp, clone, config, db, embed, export_split, figmakit, ingest, motion, quality, respcheck, search, spec, style_check, vibe
+from . import anim, animkit, assets, camp, clone, config, db, embed, export_split, figmakit, ingest, motion, quality, respcheck, search, sp_convert, spec, style_check, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -89,6 +89,9 @@ _SPEC_LOCK = threading.Lock()
 # 📱レスポンシブ監査ジョブ（仕様書と同じ作り・同時1つ）
 _RESP_RUNNING: dict = {"file": None, "result": None, "error": None}
 _RESP_LOCK = threading.Lock()
+# 📱スマホ版おおよそ変換ジョブ（同時1つ）
+_SP_RUNNING: dict = {"file": None, "result": None, "error": None}
+_SP_LOCK = threading.Lock()
 
 
 def _swatches(design_tokens_json) -> list[str]:
@@ -2125,6 +2128,58 @@ def check_file(filename: str):
     return Response(path.read_text(encoding="utf-8"), mimetype="text/html")
 
 
+def _run_sp_job(filename: str) -> None:
+    """バックグラウンドでカンプを375px実測し、SP用CSSを注入した新ファイルを作る。"""
+    try:
+        result = sp_convert.run_convert(filename)
+        with _SP_LOCK:
+            _SP_RUNNING["result"] = result
+            _SP_RUNNING["error"] = None
+    except Exception as exc:  # noqa: BLE001
+        log.exception("スマホ版変換に失敗: %s", filename)
+        with _SP_LOCK:
+            _SP_RUNNING["error"] = str(exc)
+    finally:
+        with _SP_LOCK:
+            _SP_RUNNING["file"] = None
+
+
+@app.route("/api/sp_convert", methods=["POST"])
+def api_sp_convert():
+    """📱 スマホ版おおよそ変換（非同期・AIなし）。進捗は /api/sp_convert/status。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    p = config.CAMP_DIR / fn
+    if not fn or p.suffix != ".html" or p.parent != config.CAMP_DIR or not p.exists():
+        return jsonify({"ok": False, "message": "カンプが見つかりません"}), 404
+    with _SP_LOCK:
+        if _SP_RUNNING.get("file") is not None:
+            return jsonify({"ok": False, "message": "別のスマホ版変換を実行中です"}), 409
+        _SP_RUNNING.update({"file": fn, "result": None, "error": None})
+    log.info("スマホ版変換ジョブ開始: %s", fn)
+    threading.Thread(target=_run_sp_job, args=(fn,), daemon=True).start()
+    return jsonify({"ok": True, "file": fn})
+
+
+@app.route("/api/sp_convert/status")
+def api_sp_convert_status():
+    """スマホ版変換の進捗（ポーリング用）。"""
+    with _SP_LOCK:
+        running = _SP_RUNNING.get("file") is not None
+        result = _SP_RUNNING.get("result")
+        error = _SP_RUNNING.get("error")
+    return jsonify({"running": running, "result": result, "error": error})
+
+
+@app.route("/sp/<path:filename>")
+def sp_file(filename: str):
+    """スマホ版に変換したカンプHTMLを返す（元カンプにSP用CSSを足しただけの1ファイル）。"""
+    path = sp_convert.SP_DIR / filename
+    if not path.exists() or not path.is_file() or path.suffix != ".html":
+        abort(404)
+    return Response(path.read_text(encoding="utf-8"), mimetype="text/html")
+
+
 @app.route("/api/anim_kit", methods=["POST"])
 def api_anim_kit():
     """🎬 アニメ実装キットを書き出す（静的解析のみ＝同期で一瞬・AIなし）。"""
@@ -2489,6 +2544,7 @@ html.__ce_altmode{cursor:text}
     <div class="lbl plain">📐 コーディング仕様書（寸法・色・フォント・動きを実測で1枚に・AIなし）</div>
     <button class="im" id="__ce_spec" style="background:#0b6bcb;color:#fff">📐 仕様書を作る（コーディング担当に渡す用）</button>
     <button class="im" id="__ce_resp" style="background:#7a3fa8;color:#fff">📱 レスポンシブ検査（スマホ/タブレットで崩れないか）</button>
+    <button class="im" id="__ce_sp" style="background:#e8590c;color:#fff">📱 スマホ版を作る（おおよそ変換・AIなし）</button>
     <button class="im" id="__ce_insp" style="background:#263238;color:#fff">🔍 インスペクト（コーダーに数値を渡す）</button>
     <button class="im" id="__ce_kit" style="background:#b3541e;color:#fff">🎬 アニメ実装キット（動きをコードで渡す）</button>
     <button class="im" id="__ce_prod" style="background:#5b21b6;color:#fff">📦 本番化キット（AIに本番コードを書かせる下ごしらえ）</button>
@@ -3644,6 +3700,28 @@ html.__ce_altmode{cursor:text}
           if(s.result&&s.result.file){
             msg.textContent=(s.result.issues===0?'📱 ✅ 3つの画面幅すべて問題なし！':'📱 ⚠ 崩れ候補 '+s.result.issues+'件。レポートを開きます');
             window.open('/check/'+encodeURIComponent(s.result.file),'_blank');
+          }
+        }).catch(function(){});
+      },1200);
+    }).catch(function(){ reset(); msg.textContent='通信エラー'; });
+  });
+  // 📱 スマホ版を作る（375px実測→SP用CSSを注入した新ファイル・AIなし）。未保存の編集を焼き込んでから変換
+  var spBtn=document.getElementById('__ce_sp');
+  if(spBtn) spBtn.addEventListener('click',function(){
+    spBtn.disabled=true; var old=spBtn.textContent; spBtn.textContent='📱 スマホ版に変換中…（20〜40秒）';
+    function reset(){ spBtn.disabled=false; spBtn.textContent=old; }
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
+    .then(function(){ return fetch('/api/sp_convert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE})}); })
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d.ok){ reset(); msg.textContent='スマホ版変換の開始に失敗：'+(d.message||''); return; }
+      var t=setInterval(function(){
+        fetch('/api/sp_convert/status').then(function(r){return r.json();}).then(function(s){
+          if(s.running) return;
+          clearInterval(t); reset();
+          if(s.error){ msg.textContent='スマホ版変換に失敗：'+s.error; return; }
+          if(s.result&&s.result.file){
+            msg.textContent='📱 スマホ版ができました（'+s.result.fixes+'箇所を調整）。元カンプは無傷です';
+            window.open('/sp/'+encodeURIComponent(s.result.file),'_blank');
           }
         }).catch(function(){});
       },1200);

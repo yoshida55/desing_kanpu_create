@@ -7,7 +7,7 @@
 読む人へ：`CLAUDE.md` は**時系列の開発ログ**（なぜ作ったか・バグの原因）であって機能一覧ではありません。
 「何ができるか」を知りたいならこのファイルだけで足ります。
 
-規模: 右クリック 30項目 / 編集バー 25項目 / APIパス 72本 / モジュール 24本
+規模: 右クリック 33項目 / 編集バー 27項目 / APIパス 79本 / モジュール 26本
 
 💰=AIを呼ぶ（お金がかかる） ／ 無料=AIを使わない。ほとんどの操作は無料です。
 
@@ -22,6 +22,7 @@
 | ⬆ 外側を選ぶ（枠ごと動かす） | `__ce_q_up` | 無料 |
 | ✏ 文字を追加（編集） | `__ce_q_txt` | 無料 |
 | 🖼 画像を追加（ここに置く） | `__ce_q_img` | 無料 |
+| 🔄 この画像を差し替え（AIなし・一瞬） | `__ce_q_imgswap` | 無料 |
 | 🖼 スライドショー（画像が次々切り替わる） | `__ce_q_slide` | 無料 |
 | ✨ 動きを付ける（アニメを選ぶ） | `__ce_q_fx` | 無料 |
 | 🕊 線を描いて飛ばす（空飛ぶルート） | `__ce_q_fly` | 無料 |
@@ -49,6 +50,8 @@
 | 🚫 動きを消す | `__ce_q_fxrm` | 無料 |
 | ⟲ 位置・サイズをリセット | `__ce_q_rst` | 無料 |
 | 📌 画面への貼り付きを解除（一緒にスクロール） | `__ce_q_unfix` | 無料 |
+| 📌 スクロールしても画面に貼り付ける（固定ヘッダー等） | `__ce_q_pin` | 無料 |
+| 🎨 セクションの背景色を変える（AIなし・即反映） | `__ce_q_secbg` | 無料 |
 
 ## 2. 編集バー（画面右上・ページ全体に効く操作）
 
@@ -73,9 +76,11 @@
 | 📦 分割エクスポート（zipで保存） | `__ce_export` | 無料 |
 | 📐 仕様書を作る（コーディング担当に渡す用） | `__ce_spec` | 無料 |
 | 📱 レスポンシブ検査（スマホ/タブレットで崩れないか） | `__ce_resp` | 無料 |
+| 📱 スマホ版を作る（おおよそ変換・AIなし） | `__ce_sp` | 無料 |
 | 🔍 インスペクト（コーダーに数値を渡す） | `__ce_insp` | 無料 |
 | 🎬 アニメ実装キット（動きをコードで渡す） | `__ce_kit` | 無料 |
 | 📦 本番化キット（AIに本番コードを書かせる下ごしらえ） | `__ce_prod` | 無料 |
+| 🎨 Figma用に書き出す（取り込んでデザイン化） | `__ce_figma` | 無料 |
 | 🔃 セクション並べ替え（順番を入れ替える） | `__ce_secswap` | 無料 |
 | 🧹 大掃除（分割span・残骸を消してソースを軽く） | `__ce_bigclean` | 無料 |
 | 🗂 バックアップを取る（今の保存状態を複製） | `__ce_bk` | 無料 |
@@ -93,6 +98,7 @@
 | `src/db.py` | SQLite アクセス層。仕様 4.2 の `site` テーブルをそのまま実装する。 |
 | `src/embed.py` | 埋め込み（embed）パイプライン。仕様 4.3 を実装する。 |
 | `src/export_split.py` | 納品用の「分割エクスポート」（HTML / CSS / JS を別ファイルに切り出し＋画像ローカル化）。 |
+| `src/figmakit.py` | 🎨 Figma取り込み用の書き出し（AIなし＝無料・一瞬）。 |
 | `src/ingest.py` | 取り込み（ingest）。仕様 4.1 を実装する。 |
 | `src/model.py` | SigLIP-2 のラッパー。仕様 4.3 の方針： |
 | `src/motion.py` | 録画（スクロール動画）から「動きの仕様書」をAIに書かせる（Phase 4 / mix & match B案）。 |
@@ -102,6 +108,7 @@
 | `src/recipes.py` | 業種別デザインレシピ。 |
 | `src/respcheck.py` | レスポンシブ自動監査（カンプHTML → 3画面幅の実測レポート）。 |
 | `src/search.py` | 検索（search）。仕様 4.4 / 4.5 を実装する。 |
+| `src/sp_convert.py` | スマホ版のおおよそ自動変換（カンプHTML → SP用 @media を注入した1ファイル）。 |
 | `src/spec.py` | コーディング仕様書の生成（カンプHTML → 寸法・色・フォント・動き入りの1枚HTML）。 |
 | `src/style_check.py` | おしゃれ度チェック（納品前の最終QC）。 |
 | `src/tokens.py` | デザイントークン抽出（仕様 Phase 3 / カンプ生成の"効き"を強くする）。 |
@@ -111,7 +118,7 @@
 
 ## 4. APIエンドポイント
 
-<details><summary>全72本（クリックで展開）</summary>
+<details><summary>全79本（クリックで展開）</summary>
 
 - `/`
 - `/anim/<site_id>/<path:filename>`
@@ -140,6 +147,7 @@
 - `/api/export_split`
 - `/api/extract_anim`
 - `/api/extract_images`
+- `/api/figma_kit`
 - `/api/generate_camp`
 - `/api/generate_camp/status`
 - `/api/import_folder`
@@ -147,6 +155,7 @@
 - `/api/improve_camp/status`
 - `/api/make_spec`
 - `/api/make_spec/status`
+- `/api/menu_layout`
 - `/api/pair_fit`
 - `/api/pair_fit_all`
 - `/api/prod_kit`
@@ -168,6 +177,8 @@
 - `/api/similar`
 - `/api/site/<site_id>`
 - `/api/sites`
+- `/api/sp_convert`
+- `/api/sp_convert/status`
 - `/api/style_check`
 - `/api/swap_image`
 - `/api/test_key`
@@ -176,12 +187,15 @@
 - `/api/uploads`
 - `/assets/<site_id>/<path:filename>`
 - `/camp/<path:filename>`
+- `/camp_figma/<path:filename>`
 - `/camp_preview/<path:filename>`
 - `/check/<path:filename>`
 - `/compare`
 - `/exports/<path:filename>`
+- `/figma/<path:sub>`
 - `/img/<site_id>/<which>`
 - `/kit/<path:filename>`
+- `/sp/<path:filename>`
 - `/spec/<path:filename>`
 - `/uploads/<path:filename>`
 - `/video/<site_id>`
