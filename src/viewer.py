@@ -5431,6 +5431,7 @@ html.__ce_altmode{cursor:text}
       +'<button class="go2" id="__ce_pdframe" style="background:#1a7f37;margin-bottom:8px">🖼 白フチで囲む（ポラロイド風）</button>'
       +'<button class="go2" id="__ce_pdcap" style="background:#0b6bcb;margin-bottom:8px">💬 はみ出しキャプションカードを付ける</button>'
       +'<button class="go2" id="__ce_pdgrad" style="background:#c026a6;margin-bottom:8px">🌸 背景の飾り（グラデ）を敷く</button>'
+      +'<button class="go2" id="__ce_pdglow" style="background:#0ea5a3;margin-bottom:8px">🌫 ふわっと白い光を出す（左下・右下）</button>'
       +'<button class="go2" id="__ce_pdsetbg" style="background:#0b6bcb;margin-bottom:8px">🖼 画像を背景に設定</button>'
       +(imgEl?'<button class="go2" id="__ce_pdwater" style="background:#c026a6">🎨 背後に水彩画像を敷く（AI・数十円）</button>':'')
       +'</div>';
@@ -5440,8 +5441,79 @@ html.__ce_altmode{cursor:text}
       if(e.target.id==='__ce_pdframe'){ ov.remove(); toggleWhiteFrame(el); return; }
       if(e.target.id==='__ce_pdcap'){ ov.remove(); addOverlapCaption(el); return; }
       if(e.target.id==='__ce_pdgrad'){ ov.remove(); openGradPicker(el); return; }
+      if(e.target.id==='__ce_pdglow'){ ov.remove(); glowSpots(el); return; }
       if(e.target.id==='__ce_pdsetbg'){ ov.remove(); openPicker({el:el, type:'bg', fresh:true}); return; }
       if(e.target.id==='__ce_pdwater'){ ov.remove(); openBgPicker(imgEl, sIdx); return; }
+    });
+  }
+
+  // 🌫 ふわっと白い光（写真の左下・右下）：白いボケ玉ふうの飾りを付ける／調整する／外す。AIなし・即反映。
+  //   実体は写真枠の中に置く子div2つ（radial-gradientの白円）。class名が__ce始まりでないので保存で消えない。
+  function _glowHost(el){
+    if(!el) return el;
+    var h=el;
+    if(h.tagName==='IMG'||h.tagName==='PICTURE'){ h=h.parentElement||h; }
+    if(h.tagName==='PICTURE'){ h=h.parentElement||h; }
+    if(h===document.body) h=el;
+    return h;
+  }
+  function _glowStyle(d, side, size, op, spread){
+    d.style.cssText='position:absolute;bottom:6%;'+side+':4%;width:'+size+'%;aspect-ratio:1 / 1;'
+      +'border-radius:50%;pointer-events:none;z-index:2;'
+      +'background:radial-gradient(circle, rgba(255,255,255,'+op+') 0%, rgba(255,255,255,0) '+spread+'%)';
+  }
+  function _glowAdd(host, size, op, spread){
+    if(getComputedStyle(host).position==='static'){ host.style.setProperty('position','relative'); host.setAttribute('data-ceglowpos','1'); }
+    ['left','right'].forEach(function(side){
+      var d=document.createElement('div'); d.className='ceglow-spot ceglow-'+side[0];
+      _glowStyle(d, side, size, op, spread); host.appendChild(d);
+    });
+    host.setAttribute('data-ceglow', size+'|'+op+'|'+spread);
+    markDirty();
+  }
+  function _glowRemove(host){
+    [].slice.call(host.querySelectorAll('.ceglow-spot')).forEach(function(n){ n.remove(); });
+    host.removeAttribute('data-ceglow');
+    if(host.getAttribute('data-ceglowpos')!=null){ host.style.removeProperty('position'); host.removeAttribute('data-ceglowpos'); }
+    markDirty();
+  }
+  function glowSpots(el){
+    var host=_glowHost(el);
+    if(!host){ msg.textContent='対象がありません'; return; }
+    // 既に付いているか＝子の.ceglow-spotの有無で判定（属性が消えても堅牢）
+    if(!host.querySelector('.ceglow-spot')){ _glowAdd(host, 30, 0.85, 70); msg.textContent='ふわっとした白い光を付けました（同じボタンで大きさ・濃さを調整・外せます）'; }
+    openGlowPanel(host);
+  }
+  function openGlowPanel(host){
+    var p=(host.getAttribute('data-ceglow')||'30|0.85|70').split('|');
+    var size=+p[0]||30, op=parseFloat(p[1]); if(isNaN(op)) op=0.85; var spread=+p[2]||70;
+    var old=document.getElementById('__ce_pk'); if(old) old.remove();
+    var ov=document.createElement('div'); ov.id='__ce_pk';
+    ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🌫 ふわっと白い光（写真の左下・右下）</h4>'
+      +'<div style="font-size:12px;color:#888;margin-bottom:10px">写真の左下・右下に白いボケ光を出します。数値はその場で反映。<br><b style="color:#1a7f37">閉じるのは右上の × だけ</b>（タイトルを掴めば動かせます）</div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:8px 0 6px">🔵 大きさ</div>'
+      +'<div style="display:flex;gap:6px"><button class="go2" data-gs="4" style="background:#0b6bcb;margin:0;flex:1">＋ 大きく</button><button class="go2" data-gs="-4" style="background:#0b6bcb;margin:0;flex:1">－ 小さく</button></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">💧 濃さ（白の強さ）</div>'
+      +'<div style="display:flex;gap:6px"><button class="go2" data-go="0.1" style="background:#0b6bcb;margin:0;flex:1">＋ 濃く</button><button class="go2" data-go="-0.1" style="background:#0b6bcb;margin:0;flex:1">－ うすく</button></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🌫 ぼかしの広がり</div>'
+      +'<div style="display:flex;gap:6px"><button class="go2" data-gp="8" style="background:#0b6bcb;margin:0;flex:1">＋ ふんわり</button><button class="go2" data-gp="-8" style="background:#0b6bcb;margin:0;flex:1">－ くっきり</button></div>'
+      +'<div style="border-top:1px solid #eee;margin:16px 0 0"></div>'
+      +'<button class="go2" id="__ce_glowoff" style="background:#b45309;margin-top:12px">🗑 白い光を外す</button>'
+      +'</div>';
+    document.body.appendChild(ov);
+    function _apply(){
+      [].slice.call(host.querySelectorAll('.ceglow-spot')).forEach(function(d){
+        _glowStyle(d, d.classList.contains('ceglow-l')?'left':'right', size, op, spread);
+      });
+      host.setAttribute('data-ceglow', size+'|'+op+'|'+spread); markDirty();
+    }
+    ov.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pkx'){ ov.remove(); return; }
+      if(e.target.id==='__ce_pk') return;   // 暗幕クリックでは閉じない（調整中に消えないように）
+      if(e.target.id==='__ce_glowoff'){ _glowRemove(host); ov.remove(); msg.textContent='白い光を外しました'; return; }
+      var gs=e.target.closest('button[data-gs]'); if(gs){ size=Math.max(8,Math.min(80,size+(+gs.getAttribute('data-gs')))); _apply(); return; }
+      var go=e.target.closest('button[data-go]'); if(go){ op=Math.max(0.15,Math.min(1,+(op+(+go.getAttribute('data-go'))).toFixed(2))); _apply(); return; }
+      var gp=e.target.closest('button[data-gp]'); if(gp){ spread=Math.max(35,Math.min(92,spread+(+gp.getAttribute('data-gp')))); _apply(); return; }
     });
   }
   // 🖱 #__ce_pk系パネル（写真加工・文字編集・画像選択など全部）を、見出し(h4)を掴んでドラッグ移動
@@ -5926,15 +5998,7 @@ html.__ce_altmode{cursor:text}
       el=_lb;
     }
     var cur=(el.innerText||el.textContent||'').replace(/\\u200b/g,'');
-    var FONTS=[
-      ['','（フォントはそのまま）'],
-      ["'Yu Gothic','Hiragino Kaku Gothic ProN',Meiryo,sans-serif",'ゴシック（標準）'],
-      ["'Yu Mincho','Hiragino Mincho ProN',serif",'明朝（上品）'],
-      ["'Hiragino Maru Gothic ProN','Rounded Mplus 1c',sans-serif",'丸ゴシック（やわらか）'],
-      ["Georgia,'Times New Roman',serif",'英字セリフ'],
-      ["Helvetica,Arial,sans-serif",'英字サンセリフ'],
-      ["'Courier New',monospace",'等幅（コード風）']
-    ];
+    var FONTS=FONT_LIST;  // 🅰 共通リスト（OS標準＋Google Fonts）を使う
     var opts=FONTS.map(function(f){return '<option value="'+f[0].replace(/"/g,'&quot;')+'">'+f[1]+'</option>';}).join('');
     var ov=document.createElement('div'); ov.id='__ce_pk';
     ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>✏ 文字を編集（AIなし・即反映）</h4>'
@@ -5967,6 +6031,16 @@ html.__ce_altmode{cursor:text}
       +'<button class="go2" id="__ce_brvert" style="background:#0b6bcb">📜 縦書きにする／戻す</button>'
       +'</div>';
     document.body.appendChild(ov);
+    // 📍 編集パネルを「編集する文字の反対側」へ寄せる＝文字がパネルに隠れず、その場でプレビューを確認できる。
+    //    幅・中身は元のまま（細くすると縦に伸びてフォント等が触りにくくなる）。中央寄せをやめて端に寄せるだけ。
+    (function(){
+      try{
+        var r=el.getBoundingClientRect(), vw=window.innerWidth;
+        ov.style.padding='12px';
+        ov.style.justifyContent=((r.left+r.width/2) < vw/2) ? 'flex-end' : 'flex-start';
+        ov.style.alignItems='flex-start';   // 縦は上寄せ＝縦長パネルでも上から全部見える
+      }catch(_){}
+    })();
     // 🎨 ページで実際に使われている文字色（頻度順10色）＝ここから選べば色が統一できる
     function _brApplyCol(v){
       el.style.setProperty('color', v, 'important');
@@ -6111,7 +6185,7 @@ html.__ce_altmode{cursor:text}
       el.style.setProperty('--ce-emphc', this.value); markDirty();
     });
     document.getElementById('__ce_brff').addEventListener('change',function(){
-      if(this.value) el.style.setProperty('font-family', this.value, 'important');
+      if(this.value){ ensureGoogleFont(this.value); el.style.setProperty('font-family', this.value, 'important'); }
       else el.style.removeProperty('font-family');
       markDirty();
     });
@@ -6234,7 +6308,63 @@ html.__ce_altmode{cursor:text}
   //   ⑤💬吹き出し（.ce_bubble）
   // 全部同じ関数で拾う。②〜⑤のように「飾り専用の包みspanではない」相手は中身を出さず
   // クラスと色指定だけ落とす（見出しごと消えてしまうのを防ぐ）。
-  var DECO_SEL='.fxa_hl,.ceud,.fxa_ud,[data-ceudot],.ce_emph,.ce_bubble';
+  // 🅰 フォント一覧（✏文字を編集／🅰まとめて文字調整で共用・2026-07-24）。
+  //   value=完全なfont-family文字列。3要素目が有るもの=Google Fonts（選ぶと自動でWebフォントを読み込む）。
+  var FONT_LIST=[
+    ['','（フォントはそのまま）'],
+    ["'Yu Gothic','Hiragino Kaku Gothic ProN',Meiryo,sans-serif",'ゴシック（標準）'],
+    ["'Yu Mincho','Hiragino Mincho ProN',serif",'明朝（上品）'],
+    ["'Hiragino Maru Gothic ProN','Rounded Mplus 1c',sans-serif",'丸ゴシック（OS標準）'],
+    ["'BIZ UDPGothic',sans-serif",'BIZ UDゴシック（読みやすい）'],
+    ["'BIZ UDPMincho',serif",'BIZ UD明朝'],
+    ["'UD Digi Kyokasho NP-R','UDデジタル教科書体 NP-R',sans-serif",'UD教科書体（やわらか）'],
+    ["'Zen Maru Gothic',sans-serif",'丸ゴシック Zen（Web）',1],
+    ["'M PLUS Rounded 1c',sans-serif",'丸ゴシック M＋（Web）',1],
+    ["'Kosugi Maru',sans-serif",'丸ゴシック 小杉（Web）',1],
+    ["'RocknRoll One',sans-serif",'太丸ゴシック（Web）',1],
+    ["'Zen Kaku Gothic New',sans-serif",'角ゴシック Zen（Web）',1],
+    ["'Noto Sans JP',sans-serif",'角ゴシック Noto（Web）',1],
+    ["'Noto Serif JP',serif",'明朝 Noto（Web）',1],
+    ["'Shippori Mincho',serif",'明朝 しっぽり（Web）',1],
+    ["'Zen Old Mincho',serif",'明朝 Zen Old（Web）',1],
+    ["'Kaisei Decol',serif",'やわらか明朝 解星（Web）',1],
+    ["'Klee One',cursive",'教科書体風 Klee（Web）',1],
+    ["'Zen Kurenaido',sans-serif",'手書き風 紅道（Web）',1],
+    ["'Yuji Syuku',serif",'筆文字 佑字祝（Web）',1],
+    ["'Hachi Maru Pop',cursive",'ポップ丸 はち（Web）',1],
+    ["'Dela Gothic One',sans-serif",'極太見出し（Web）',1],
+    ["Georgia,'Times New Roman',serif",'英字セリフ'],
+    ["Helvetica,Arial,sans-serif",'英字サンセリフ'],
+    ["'Poppins',sans-serif",'英字 Poppins（Web）',1],
+    ["'Playfair Display',serif",'英字 Playfair（Web）',1],
+    ["'Courier New',monospace",'等幅（コード風）']
+  ];
+  // Google Fonts の家系名 → css2 の family クエリ。ここに載っている名前だけ Web から読み込む。
+  var _GF_MAP={
+    'Zen Maru Gothic':'Zen+Maru+Gothic:wght@400;500;700','M PLUS Rounded 1c':'M+PLUS+Rounded+1c:wght@400;500;700',
+    'Kosugi Maru':'Kosugi+Maru','RocknRoll One':'RocknRoll+One','Zen Kaku Gothic New':'Zen+Kaku+Gothic+New:wght@400;500;700',
+    'Noto Sans JP':'Noto+Sans+JP:wght@400;500;700','Noto Serif JP':'Noto+Serif+JP:wght@400;600;700',
+    'Shippori Mincho':'Shippori+Mincho:wght@400;600;700','Zen Old Mincho':'Zen+Old+Mincho:wght@400;700',
+    'Kaisei Decol':'Kaisei+Decol:wght@400;700','Klee One':'Klee+One:wght@400;600','Zen Kurenaido':'Zen+Kurenaido',
+    'Yuji Syuku':'Yuji+Syuku','Hachi Maru Pop':'Hachi+Maru+Pop','Dela Gothic One':'Dela+Gothic+One',
+    'Poppins':'Poppins:wght@400;500;700','Playfair Display':'Playfair+Display:wght@400;600;700'
+  };
+  // 選ばれた font-family から先頭のフォント名を取り出し、Google Fonts なら <link> を1度だけ<head>に足す。
+  //   保存(cleanHtml)は<head>の<link rel=stylesheet>を残すので、保存後も効く。日本語名(OS標準)はマップに無く素通り。
+  function ensureGoogleFont(fam){
+    try{
+      var m=(fam||'').match(/['"]?([A-Za-z0-9 -]+)/);
+      if(!m) return;
+      var name=m[1].trim();
+      var q=_GF_MAP[name]; if(!q) return;
+      var id='cegf-'+name.replace(/\\s+/g,'-');
+      if(document.getElementById(id)) return;
+      var l=document.createElement('link'); l.id=id; l.rel='stylesheet';
+      l.href='https://fonts.googleapis.com/css2?family='+q+'&display=swap';
+      (document.head||document.documentElement).appendChild(l);
+    }catch(_){}
+  }
+  var DECO_SEL='.fxa_hl,.ceud,.fxa_ud,[data-ceudot],.ce_emph,.ce_bubble,.ce_txtbg';
   var UD_SEL='.ceud,.fxa_ud,[data-ceudot]';   // 〰下線だけ（マーカー・あしらいは含めない）
   var DECO_CLS=['fxa_hl','fxa_ud','ceud','fxa_in'];
   var DECO_VARS=['--hlc','--udc','--hlw','--hldur','--hlt0','--hlt1',
@@ -6247,6 +6377,7 @@ html.__ce_altmode{cursor:text}
   }
   function decoStrip(el){
     if(!el) return;
+    if(el.classList && el.classList.contains('ce_txtbg')){ textBgRemove(el); return; }  // 🖌文字の背景色は専用の外し処理へ
     if(_isDecoWrap(el)){
       var p=el.parentNode; if(!p) return;
       while(el.firstChild) p.insertBefore(el.firstChild, el);
@@ -6267,7 +6398,7 @@ html.__ce_altmode{cursor:text}
     if(el.classList.contains('ce_bubble')) return '💬吹き出し';
     return '〰下線';
   }
-  var DECO_NAMED=[['fxa_hl','🖍マーカー'],['ceud','〰下線'],['fxa_ud','〰走る下線'],['ce_emph','＼あしらい／'],['ce_bubble','💬吹き出し']];
+  var DECO_NAMED=[['fxa_hl','🖍マーカー'],['ceud','〰下線'],['fxa_ud','〰走る下線'],['ce_emph','＼あしらい／'],['ce_bubble','💬吹き出し'],['ce_txtbg','🖌文字の背景色']];
   var _SIDE_JA={top:'上',right:'右',bottom:'下',left:'左'};
   // ★右クリック位置から「見えている飾り」を全部集める（AIなし）。
   //   クラス名で決め打ちせず、疑似要素(::before/::after)とborderも同列に並べるのが肝：
@@ -9287,6 +9418,83 @@ html.__ce_altmode{cursor:text}
     });
     p.querySelector('#__ce_sbgc').addEventListener('input',function(){ applySecBg(this.value); });
   }
+  // 🖌 文字の「行の背景」に色ボックスを敷く（AIなし・2026-07-24）。
+  //   マーカー(蛍光ペン)と違い、文字のまわりに余白を付けたベタ塗りのボックス。
+  //   中身を span.ce_txtbg で包み、box-decoration-break:clone で複数行でも行ごとに背景が付く。
+  function textBgApply(el,color){
+    if(!el||el.nodeType!==1) return;
+    var sp;
+    if(el.classList.contains('ce_txtbg')){ sp=el; }
+    else {
+      // ★既に背景spanが（子孫でも祖先でも）あれば使い回す＝色を塗り直すだけ。
+      //   これをしないと内側の文字を選んで塗るたびにspanが入れ子になり「2重に色が付いて1枚消せない」事故になる。
+      var ex=(el.querySelector&&el.querySelector('.ce_txtbg'))||(el.closest&&el.closest('.ce_txtbg'));
+      if(ex){ sp=ex; }
+      else {
+        sp=document.createElement('span'); sp.className='ce_txtbg';
+        while(el.firstChild) sp.appendChild(el.firstChild);
+        el.appendChild(sp);
+      }
+    }
+    // 縦書き(vertical-rl等)は行の向きが横＝余白を入れ替えないと隣の列と背景が重なる（報告あり）
+    var vert=false; try{ vert=/vertical/.test(getComputedStyle(sp).writingMode||''); }catch(_){}
+    sp.style.setProperty('background-color',color,'important');
+    sp.style.setProperty('padding', vert?'.4em .1em':'.12em .4em','important');
+    sp.style.setProperty('border-radius','3px','important');
+    sp.style.setProperty('box-decoration-break','clone','important');
+    sp.style.setProperty('-webkit-box-decoration-break','clone','important');
+    markDirty();
+  }
+  // 包みspanを剥がして中身を戻す（背景を消す）
+  function textBgRemove(el){
+    if(!el) return;
+    // ★2重・3重に付いていても一度で全部はがす。範囲＝祖先に背景があればその親、無ければ自分。
+    //   その配下（＋自分自身）の .ce_txtbg を全部はがす＝「下の1枚が消せない」を根絶。
+    var scope=el, anc=el.closest?el.closest('.ce_txtbg'):null;
+    if(anc && anc.parentElement) scope=anc.parentElement;
+    var list=scope.querySelectorAll?[].slice.call(scope.querySelectorAll('.ce_txtbg')):[];
+    if(scope.classList && scope.classList.contains('ce_txtbg')) list.unshift(scope);
+    if(!list.length) return;
+    list.forEach(function(sp){
+      if(sp.parentNode && sp!==scope){ var pa=sp.parentNode; while(sp.firstChild) pa.insertBefore(sp.firstChild, sp); pa.removeChild(sp); }
+      else { ['background-color','padding','border-radius','box-decoration-break','-webkit-box-decoration-break'].forEach(function(pr){ sp.style.removeProperty(pr); }); sp.classList.remove('ce_txtbg'); }
+    });
+    markDirty();
+  }
+  // 🖌 文字の背景ボックスのパレット（右クリックから直接開く浮動パネル・openSecBg と同じ作り）
+  function openTextBg(el,x,y){
+    var old=document.getElementById('__ce_tbgp'); if(old) old.remove();
+    if(!el||!(el.textContent||'').trim()){ if(msg) msg.textContent='文字のある要素を右クリックしてから使ってください'; return; }
+    function _colOk(c){ return c && c!=='transparent' && !/rgba\\(\\s*\\d+,\\s*\\d+,\\s*\\d+,\\s*0\\)/.test(c); }
+    function sw(c,t){ return '<button class="__ce_tbgsw" data-c="'+c+'" title="'+esc(t||c)+'" style="width:24px;height:24px;border:1px solid rgba(0,0,0,.28);border-radius:5px;cursor:pointer;background:'+c+';padding:0;margin:2px;vertical-align:middle"></button>'; }
+    var cnt={};
+    [].slice.call(document.querySelectorAll('body *')).slice(0,1500).forEach(function(n){
+      if(n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
+      var cs; try{ cs=getComputedStyle(n); }catch(_){ return; }
+      [cs.backgroundColor, cs.color].forEach(function(c){ if(_colOk(c)) cnt[c]=(cnt[c]||0)+1; });
+    });
+    var pgSw=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a];}).slice(0,14).map(function(c){return sw(c,c+'（ページ内で使用中）');});
+    var soft=['#fdf6e3','#fff3d6','#fde8e8','#e8f3ee','#e7f0fb','#f3e8fb','#fbeee0','#eef2f6','#fff7cc','#ffe4ec'];
+    var softSw=soft.map(function(c){return sw(c,c+'（淡い定番）');});
+    var p=document.createElement('div'); p.id='__ce_tbgp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:330px');
+    p.innerHTML='<b>🖌 文字の背景に色を塗る（〈'+el.tagName.toLowerCase()+'〉の行）</b>'
+      +'<div style="opacity:.7;margin:6px 0 2px">淡い定番色（画像のようなクリーム等）</div><div>'+softSw.join('')+'</div>'
+      +'<div style="opacity:.7;margin-top:6px">ページで使われている色</div><div>'+(pgSw.join('')||'<span style="color:#999">（なし）</span>')+'</div>'
+      +'<div style="opacity:.7;margin-top:6px">好きな色（選ぶと即反映）</div><input type="color" id="__ce_tbgc" value="#fff3d6" style="width:44px;height:26px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle">'
+      +'<button data-flat="1" style="margin-left:8px;background:#eee;color:#333;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;vertical-align:middle">✕ 背景を消す</button>'
+      +'<button data-x="1" style="margin-left:6px;background:#555;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;vertical-align:middle">閉じる</button>';
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      if(ev.target.getAttribute('data-x')){ p.remove(); return; }
+      if(ev.target.getAttribute('data-flat')){ textBgRemove(el); if(msg) msg.textContent='文字の背景を消しました（💾保存で確定）'; return; }
+      var b=ev.target.closest('.__ce_tbgsw'); if(b){ textBgApply(el,b.getAttribute('data-c')); if(msg) msg.textContent='文字の背景に色を塗りました（💾保存で確定・⟲戻すで取り消し）'; return; }
+    });
+    p.querySelector('#__ce_tbgc').addEventListener('input',function(){ textBgApply(el,this.value); });
+  }
   function openDecoKill(el,x,y){
     var old=document.getElementById('__ce_pskill'); if(old) old.remove();
     var items=[];
@@ -9418,12 +9626,13 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_rst','⟲ 位置・サイズをリセット'],
     ['__ce_q_unfix','📌 画面への貼り付きを解除（一緒にスクロール）'],
     ['__ce_q_pin','📌 スクロールしても画面に貼り付ける（固定ヘッダー等）'],
-    ['__ce_q_secbg','🎨 セクションの背景色を変える（AIなし・即反映）']
+    ['__ce_q_secbg','🎨 セクションの背景色を変える（AIなし・即反映）'],
+    ['__ce_q_txtbg','🖌 文字の背景に色を塗る（行ごと・AIなし）']
   ];
   // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
   //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
   var QM_DEF_LAYOUT=[
-    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_slide','__ce_q_addline',
+    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_slide','__ce_q_addline','__ce_q_txtbg',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
@@ -9886,6 +10095,13 @@ html.__ce_altmode{cursor:text}
       if(!_sb){ delete _qmM['__ce_q_secbg']; return; }
       _qmM['__ce_q_secbg']='🎨 セクションの背景色を変える（〈'+_sb.tagName.toLowerCase()+'〉・AIなし）';
     })();
+    // 🖌 文字の背景色は「文字のある要素」でだけ出す（section等の大きな器や画像では隠す）
+    (function(){
+      var _te=curEl;
+      var ok=_te && (_te.textContent||'').trim().length>0 && !/^(SECTION|HEADER|FOOTER|MAIN|BODY|HTML|IMG|SVG)$/.test(_te.tagName);
+      if(!ok){ delete _qmM['__ce_q_txtbg']; return; }
+      _qmM['__ce_q_txtbg']='🖌 文字の背景に色を塗る（〈'+_te.tagName.toLowerCase()+'〉の行・AIなし）';
+    })();
     // 🅰 まとめて文字調整（複数選択時のみ）：フォント種はページで使用中のものを頻度順に出す＋定番を後ろに
     var mfRow='';
     if(multi){
@@ -9903,7 +10119,8 @@ html.__ce_altmode{cursor:text}
       mfRow='<div style="background:#e8f2ff;border-bottom:1px solid #c9def5;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px">'
         +'<b>🅰 まとめて文字調整（'+selEls.length+'個・AIなし）</b><br>'
         +'<span style="opacity:.8">フォント</span> <select id="__ce_mf_f" style="max-width:150px;font-size:11px;padding:2px;border:1px solid #ccd;border-radius:5px"><option value="">（そのまま）</option>'
-        +_mfF.map(function(f){ return '<option value="'+esc(f)+'">'+esc(f)+'</option>'; }).join('')+'</select><br>'
+        +'<optgroup label="ページで使用中">'+_mfF.map(function(f){ return '<option value="'+esc(f)+'">'+esc(f)+'</option>'; }).join('')+'</optgroup>'
+        +'<optgroup label="おすすめ（Web＝要ネット）">'+FONT_LIST.filter(function(f){return f[0];}).map(function(f){ return '<option value="'+esc(f[0])+'">'+esc(f[1])+'</option>'; }).join('')+'</optgroup></select><br>'
         +'<span style="opacity:.8">大きさ</span> <button id="__ce_mf_m" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">−小さく</button> <button id="__ce_mf_p" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">＋大きく</button> '
         +'<span style="opacity:.8">太さ</span> <button id="__ce_mf_b" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;font-weight:700">太く</button> <button id="__ce_mf_n" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">標準</button><br>'
         +'<span style="opacity:.8">文字色</span> <input type="color" id="__ce_mf_c" value="#222222" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> <span style="font-size:10.5px;color:#888">選んだ'+selEls.length+'個全部に効く・💾保存で残る</span>'
@@ -9925,7 +10142,10 @@ html.__ce_altmode{cursor:text}
       var mfEach=function(fn){ selEls.forEach(function(x){ try{ pushUndo(x); fn(x); }catch(_){} }); try{ markDirty(); }catch(_){} };
       qm.querySelector('#__ce_mf_f').addEventListener('change',function(ev){ ev.stopPropagation();
         var v=this.value; if(!v) return;
-        mfEach(function(x){ x.style.setProperty('font-family','"'+v+'", sans-serif','important'); });
+        ensureGoogleFont(v);
+        // 完全なfont-family(カンマ/引用符入り＝おすすめリスト)はそのまま／フォント名1個(ページ使用)はsans-serifを添える
+        var fam=(v.indexOf(',')>=0||v.indexOf("'")>=0||v.indexOf('"')>=0)? v : ('"'+v+'", sans-serif');
+        mfEach(function(x){ x.style.setProperty('font-family', fam,'important'); });
       });
       qm.querySelector('#__ce_mf_f').addEventListener('click',function(ev){ ev.stopPropagation(); });
       qm.querySelector('#__ce_mf_m').addEventListener('click',function(ev){ ev.stopPropagation();
@@ -10262,6 +10482,7 @@ html.__ce_altmode{cursor:text}
       }
       if(t.id==='__ce_q_pskill'){ var _pke=curEl; closeMenu(); openDecoKill(_pke,qx,qy); return; }
       if(t.id==='__ce_q_secbg'){ var _sbe=curEl; closeMenu(); openSecBg(_sbe,qx,qy); return; }
+      if(t.id==='__ce_q_txtbg'){ var _tbe=curEl; closeMenu(); openTextBg(_tbe,qx,qy); return; }
       if(t.id==='__ce_q_addline'){
         // ➕ 実要素の線：疑似要素と違い、掴んで移動・右クリック→要素削除・色変え（写真加工の背景色）が全部効く
         var _ln=document.createElement('div');
