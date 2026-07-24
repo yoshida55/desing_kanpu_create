@@ -6993,6 +6993,13 @@ html.__ce_altmode{cursor:text}
     var x=+el.getAttribute('data-cetx')||0, y=+el.getAttribute('data-cety')||0;
     var sx=+el.getAttribute('data-cesx')||1, sy=+el.getAttribute('data-cesy')||1;
     var ro=+el.getAttribute('data-cero')||0;
+    // ★インライン要素(display:inline)は translate/rotate/scale を無視する＝ドラッグしても1pxも動かない。
+    //   実際に縦書き見出しの文字spanで発生（span.__ce_selを掴んでも移動できない）。移動・変形がある時だけ
+    //   inline-block へ上げて効くようにする（保存でinline styleは残るので移動位置も残る）。
+    if((x||y||ro||sx!==1||sy!==1)){
+      var _disp=''; try{ _disp=getComputedStyle(el).display; }catch(_){}
+      if(_disp==='inline') el.style.setProperty('display','inline-block','important');
+    }
     // 移動/回転/拡大は個別プロパティ(translate/rotate/scale)で当てる。
     // これで transform を出現アニメ用に空けられ、移動とアニメが奪い合わず両立する（消えない・位置も残る）。
     el.style.setProperty('translate', x+'px '+y+'px', 'important');
