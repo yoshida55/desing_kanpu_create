@@ -25,7 +25,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, animkit, assets, camp, clone, config, db, embed, export_split, figmakit, ingest, motion, quality, respcheck, search, sp_convert, spec, style_check, vibe
+from . import anim, animkit, assets, bgremove, camp, clone, config, db, embed, export_split, figmakit, ingest, motion, quality, respcheck, search, sp_convert, spec, style_check, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -1708,6 +1708,29 @@ def api_upload_delete():
     return jsonify({"ok": True})
 
 
+@app.route("/api/remove_bg", methods=["POST"])
+def api_remove_bg():
+    """アップロード画像の背景を除去 → 透過PNGを新規アップロードとして保存する（rembg・AIなし）。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    src = config.UPLOAD_DIR / fn
+    if not fn or src.parent != config.UPLOAD_DIR or not src.exists():
+        return jsonify({"ok": False, "message": "画像が見つかりません"}), 404
+    try:
+        out = bgremove.remove_background(src)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("背景除去に失敗")
+        return jsonify({"ok": False, "message": "背景除去に失敗：" + str(exc)}), 500
+    newname = "up_" + uuid.uuid4().hex[:10] + ".png"
+    (config.UPLOAD_DIR / newname).write_bytes(out)
+    meta = camp.load_uploads_meta()
+    base = meta.get(fn, "")
+    meta[newname] = (base + "（背景除去）") if base else "背景除去済み"
+    camp.save_uploads_meta(meta)
+    log.info("背景除去: %s → %s", fn, newname)
+    return jsonify({"ok": True, "file": newname, "uploads": camp.list_uploads()})
+
+
 @app.route("/api/camps")
 def api_camps():
     """保存済みカンプの一覧（履歴）。名前付き（お気に入り）を先頭に、あとは新しい順。"""
@@ -2799,6 +2822,18 @@ html.__ce_altmode{cursor:text}
       attachPickerSearch(ov);
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+        var rb=e.target.closest('[data-rmbg]');
+        if(rb){ e.stopPropagation();
+          var rfn=rb.getAttribute('data-rmbg');
+          rb.textContent='除去中…（初回はモデル取得で少し待ちます）'; rb.disabled=true;
+          fetch('/api/remove_bg',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:rfn})})
+            .then(function(r){return r.json();}).then(function(dd){
+              if(!dd.ok){ rb.textContent='✂ 背景を除去'; rb.disabled=false; msg.textContent='背景除去に失敗：'+(dd.message||''); return; }
+              ov.remove(); openAddImagePicker(px,py);
+              msg.textContent='背景を除去した透過画像を追加しました（一覧の先頭）。クリックで配置できます';
+            }).catch(function(){ rb.textContent='✂ 背景を除去'; rb.disabled=false; msg.textContent='通信エラー'; });
+          return;
+        }
         var it=e.target.closest('.it'); if(it){ ov.remove(); insertImageEl(it.dataset.src, 0, px, py); msg.textContent='画像を追加しました。ドラッグで置く（💾保存で確定）'; }
       });
       document.getElementById('__ce_addimgfile').addEventListener('change',function(){
@@ -5194,7 +5229,21 @@ html.__ce_altmode{cursor:text}
     var t = el.tagName==='IMG' ? (el.parentElement||el) : el;   // imgには子を入れられないので親に敷く
     return (!t||t===document.body) ? null : t;
   }
-  // 対象に飾りdivが無ければ作る（既にあれば取得するだけ）。形・大きさの調整はこれを使い回す。
+  // 飾りパネルを「写真の後ろから斜めにずらして覗かせる」位置に置く（Dpx＝覗く量／dir＝ずらす向き）。
+  //   ★旧方式は左右対称(inset:-N%)で、写真が不透明だと真裏に完全に隠れて色が見えなかった
+  //     （大きくしても薄い縁が広がるだけ）。同じ大きさのパネルをdir方向へDpxずらし、
+  //     その2辺を写真の外へ確実にはみ出させる＝色の帯が必ず見える（デザインの「オフセット色面」）。
+  function _bgPlace(bg, D, dir){
+    dir=dir||'br';
+    var t,r,b,l;                                   // 覗く辺は -D（外へはみ出す）／隠れる辺は +D（写真の下に潜る）
+    if(dir==='br'){ t=D; l=D; r=-D; b=-D; }        // 右下へずらす＝右・下に色帯
+    else if(dir==='bl'){ t=D; r=D; l=-D; b=-D; }   // 左下
+    else if(dir==='tr'){ b=D; l=D; t=-D; r=-D; }   // 右上
+    else { b=D; r=D; t=-D; l=-D; }                 // tl 左上
+    bg.style.removeProperty('inset');
+    bg.style.top=t+'px'; bg.style.right=r+'px'; bg.style.bottom=b+'px'; bg.style.left=l+'px';
+  }
+  // 対象に飾りdivが無ければ作る（既にあれば取得するだけ）。形・大きさ・向きの調整はこれを使い回す。
   function ensureBackdrop(target){
     if(getComputedStyle(target).position==='static') target.style.setProperty('position','relative');
     target.style.setProperty('isolation','isolate');   // 負のz-indexが祖先の後ろへ抜けないよう囲む
@@ -5203,8 +5252,9 @@ html.__ce_altmode{cursor:text}
     var bg=target.querySelector(':scope > .ce_bgdeco');
     if(!bg){
       bg=document.createElement('div'); bg.className='ce_bgdeco'; bg.setAttribute('aria-hidden','true');
-      bg.dataset.size='22'; bg.dataset.shape='oval';
-      bg.style.cssText='position:absolute;inset:-22%;z-index:-1;pointer-events:none;border-radius:'+BG_SHAPES.oval+';filter:blur(2px);background:radial-gradient(60% 55% at 50% 45%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%);';
+      bg.dataset.size='26'; bg.dataset.shape='round'; bg.dataset.dir='br';
+      bg.style.cssText='position:absolute;z-index:-1;pointer-events:none;border-radius:'+BG_SHAPES.round+';background:radial-gradient(60% 55% at 50% 45%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%);';
+      _bgPlace(bg, 26, 'br');                        // 右下へずらして色帯を覗かせる（初期）
       target.insertBefore(bg, target.firstChild);   // 先頭＝一番後ろに置く
     }
     return bg;
@@ -5226,11 +5276,22 @@ html.__ce_altmode{cursor:text}
   function setBackdropSize(el, delta){
     var target=bgTarget(el); if(!target) return;
     var bg=ensureBackdrop(target);
-    var cur=parseFloat(bg.dataset.size||'22');
-    var next=Math.max(5, Math.min(70, cur+delta));
+    var cur=parseFloat(bg.dataset.size||'26');
+    var next=Math.max(8, Math.min(120, cur+delta));   // 覗く量(px)。大きいほど色帯が太く見える
     bg.dataset.size=String(next);
-    bg.style.inset='-'+next+'%';
+    _bgPlace(bg, next, bg.dataset.dir||'br');
     markDirty();
+  }
+  // ずらす向きを 右下→右上→左上→左下 と切り替える（色帯を出したい辺を選べる）
+  function flipBackdropDir(el){
+    var target=bgTarget(el); if(!target) return;
+    var bg=ensureBackdrop(target);
+    var order=['br','tr','tl','bl'];
+    var next=order[(order.indexOf(bg.dataset.dir||'br')+1)%order.length];
+    bg.dataset.dir=next;
+    _bgPlace(bg, parseFloat(bg.dataset.size||'26'), next);
+    markDirty();
+    if(msg) msg.textContent='ずらす向き：'+({br:'右下',tr:'右上',tl:'左上',bl:'左下'}[next]);
   }
   function removeBackdrop(el){
     var target=bgTarget(el); if(!target) return;
@@ -5348,8 +5409,8 @@ html.__ce_altmode{cursor:text}
     ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>背景の飾りを選ぶ（要素の後ろ・AIなし）</h4><div class="gr">'+items+'</div>'
       +'<div class="cap" style="margin-top:12px">かたち</div>'
       +'<div class="__ce_size" style="grid-template-columns:repeat(4,1fr)">'+shapeH+'</div>'
-      +'<div class="cap" style="margin-top:10px">大きさ</div>'
-      +'<div class="__ce_size"><button class="go2" id="__ce_bgsm" style="background:#888;margin:0">－ 小さく</button><button class="go2" id="__ce_bgbg" style="background:#888;margin:0">＋ 大きく</button></div>'
+      +'<div class="cap" style="margin-top:10px">大きさ（写真の外へ覗く色帯の太さ）・ずらす向き</div>'
+      +'<div class="__ce_size" style="grid-template-columns:repeat(3,1fr)"><button class="go2" id="__ce_bgsm" style="background:#888;margin:0">－ 細く</button><button class="go2" id="__ce_bgbg" style="background:#888;margin:0">＋ 太く</button><button class="go2" id="__ce_bgdir" style="background:#0b6bcb;margin:0">↔ ずらす向き</button></div>'
       +'<button class="go2" id="__ce_bgrm" style="background:#c0392b">🚫 飾りを消す</button>'
       +'<div class="cap" style="margin-top:12px">⭕ 輪郭だけのリングを重ねる（ゆっくり回転・お洒落に・任意）</div>'
       +'<div class="__ce_size" style="grid-template-columns:repeat(3,1fr)">'
@@ -5372,8 +5433,9 @@ html.__ce_altmode{cursor:text}
       if(it){ applyBackdrop(el, GRADS[+it.dataset.i][1]); return; }
       var sb=e.target.closest('button[data-shape]');
       if(sb){ setBackdropShape(el, sb.getAttribute('data-shape')); return; }
-      if(e.target.id==='__ce_bgsm'){ setBackdropSize(el, -6); return; }   // 小さく＝はみ出しを減らす
-      if(e.target.id==='__ce_bgbg'){ setBackdropSize(el, 6); return; }    // 大きく＝はみ出しを増やす
+      if(e.target.id==='__ce_bgsm'){ setBackdropSize(el, -14); return; }   // 細く＝覗く色帯を減らす
+      if(e.target.id==='__ce_bgbg'){ setBackdropSize(el, 14); return; }    // 太く＝覗く色帯を増やす
+      if(e.target.id==='__ce_bgdir'){ flipBackdropDir(el); return; }       // ずらす向きを切替
       if(e.target.id==='__ce_bgrm'){ removeBackdrop(el); ov.remove(); return; }
       var rb=e.target.closest('button[data-ring]');
       if(rb){ toggleRing(el, rb.getAttribute('data-ring')); return; }
