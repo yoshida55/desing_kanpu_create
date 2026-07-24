@@ -6321,6 +6321,59 @@ html.__ce_altmode{cursor:text}
     }
     _psCss(); var on=it.el.classList.toggle(it.kind); markDirty(); return on?'消しました':'戻しました';
   }
+  // ◽ 角丸の写真の「裏の四角(ケース)」を探す（AIなし・2026-07-24）。
+  //   表に角丸があるのに裏の箱が直角だと、丸みの外側から直角の角がはみ出して見える。
+  //   その裏の四角を「⌒角丸にする / ✕見た目を消す」で隠せるよう候補を集める（自分＋外側5段）。
+  function radiusScan(el){
+    if(!el||el.nodeType!==1) return [];
+    function rad(n){ try{ return parseFloat(getComputedStyle(n).borderTopLeftRadius)||0; }catch(_){ return 0; } }
+    // お手本の丸み＝自分・中の要素・親から拾った最大の角丸（表の写真の丸みに合わせる）
+    var model=0, kids=el.querySelectorAll?[].slice.call(el.querySelectorAll('*')).slice(0,30):[];
+    [el].concat(kids).forEach(function(n){ var r=rad(n); if(r>model) model=r; });
+    var p=el; for(var k=0;k<5&&p&&p.nodeType===1;k++,p=p.parentElement){ var r=rad(p); if(r>model) model=r; }
+    if(model<4) model=16;
+    var out=[], t=el;
+    for(var i=0; t && i<6; i++, t=t.parentElement){
+      if(!t||t===document.body||t.tagName==='HTML') break;
+      if(t.closest && t.closest('[id^="__ce"]')) continue;
+      var cs; try{ cs=getComputedStyle(t); }catch(_){ continue; }
+      var box=t.getBoundingClientRect();
+      if(box.width>=24 && box.height>=24){
+        // 背景/画像/枠/影 のどれかを持つ「見た目のある四角」で、角丸が表より小さい＝はみ出す犯人候補
+        var bgc=cs.backgroundColor||'';
+        var bg=bgc&&bgc!=='transparent'&&bgc!=='rgba(0, 0, 0, 0)';
+        var bimg=cs.backgroundImage&&cs.backgroundImage!=='none';
+        var bd=parseFloat(cs.borderTopWidth)>0&&cs.borderTopStyle!=='none';
+        var sh=cs.boxShadow&&cs.boxShadow!=='none';
+        var r=rad(t);
+        if((bg||bimg||bd||sh) && r<model-1){
+          var lb=(i===0)?'ここ〈'+t.tagName.toLowerCase()+'〉':'外側'+i+'〈'+t.tagName.toLowerCase()+'〉';
+          out.push({el:t, model:Math.round(model), cur:Math.round(r), name:lb});
+        }
+      }
+      if(/^(SECTION|HEADER|FOOTER|MAIN)$/.test(t.tagName)) break;
+    }
+    return out.slice(0,5);
+  }
+  // ⌒ 裏の四角に角丸をつける／外す（同じボタンでトグル）
+  function radiusRound(it){
+    var el=it.el;
+    if(el.style.getPropertyValue('border-radius')){ el.style.removeProperty('border-radius'); el.style.removeProperty('overflow'); markDirty(); return false; }
+    el.style.setProperty('border-radius', it.model+'px','important'); markDirty(); return true;
+  }
+  // ✕ 裏の四角の見た目（背景・枠・影）を消す／戻す（箱と中身は残す＝中の写真は消えない）
+  function radiusFlat(it){
+    var el=it.el;
+    if(el.style.getPropertyValue('background-color')==='transparent'){
+      ['background-color','background-image','border','box-shadow'].forEach(function(pr){ el.style.removeProperty(pr); });
+      markDirty(); return false;
+    }
+    el.style.setProperty('background-color','transparent','important');
+    el.style.setProperty('background-image','none','important');
+    el.style.setProperty('border','none','important');
+    el.style.setProperty('box-shadow','none','important');
+    markDirty(); return true;
+  }
   // ===== 📏 余白を詰める（AIなし・2026-07-21） =====
   // ★「親を選んで高さを縮める」がうまくいかない理由＝カンプのセクションはたいてい
   //   min-height:720px(100vh) を持っていて、height をいくら縮めても min-height に負ける。
@@ -9713,6 +9766,21 @@ html.__ce_altmode{cursor:text}
         }).join('')
         +'</div>';
     }
+    // ◽ 角丸の写真の「裏の四角」＝直角のケースが角からはみ出している時、⌒丸く/✕消すで隠す（AIなし）
+    var radQ=radiusScan(curEl), radRowQ='';
+    if(radQ.length){
+      radRowQ='<div style="background:#eef6ff;border-bottom:1px solid #c9dcf5;padding:6px 10px 7px;font-size:12px;border-radius:7px">'
+        +'<b>◽ 裏の四角のカドを隠す</b>（'+radQ.length+'件・AIなし）<br>'
+        +'<span style="font-size:10.5px;color:#6a7a8a">角丸の写真の裏で直角の角がはみ出している箱です。触れると赤枠／⌒丸くする か ✕見た目を消す（もう一度で戻る）</span>'
+        +radQ.map(function(it,i){
+          return '<div style="display:flex;align-items:center;gap:5px;margin:4px 0 0">'
+            +'<span style="flex:1;font-size:11px;color:#1d1d1f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(it.name)+(it.cur?'（今 '+it.cur+'px）':'')+'</span>'
+            +'<button class="__ce_rrz" data-i="'+i+'" style="background:#fff;border:1px solid #bcd0ee;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-family:inherit;color:#1d1d1f;white-space:nowrap">⌒ 角丸 '+it.model+'px</button>'
+            +'<button class="__ce_rhz" data-i="'+i+'" style="background:#fff;border:1px solid #e6bcbc;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-family:inherit;color:#b23;white-space:nowrap">✕ 消す</button>'
+            +'</div>';
+        }).join('')
+        +'</div>';
+    }
     // 🫥 クリックがすり抜ける絵（pointer-events:none）がこの位置にあるなら「選ぶ」ボタンを出す。
     // ★これが無いと「見えているのに右クリックでは絶対に掴めない絵」になる（気球のイラストで発覚）。
     //   勝手に掴み替えると文字クリックを横取りするので、必ずユーザーに選ばせる。
@@ -9841,7 +9909,7 @@ html.__ce_altmode{cursor:text}
         +'<span style="opacity:.8">文字色</span> <input type="color" id="__ce_mf_c" value="#222222" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> <span style="font-size:10.5px;color:#888">選んだ'+selEls.length+'個全部に効く・💾保存で残る</span>'
         +'</div>';
     }
-    qm.innerHTML=selRowQ+dgRowQ+pdRowQ+slRowQ+peRowQ+decoRowQ+mfRow+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    qm.innerHTML=selRowQ+dgRowQ+pdRowQ+slRowQ+peRowQ+decoRowQ+radRowQ+mfRow+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
       +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
       +row('__ce_q_full','⚙ すべての編集メニュー…')
@@ -9948,6 +10016,20 @@ html.__ce_altmode{cursor:text}
         var r=decoToggle(it);
         var sp=this.querySelector('span'); if(sp) sp.textContent=(r==='消しました'?'✓ 消した：':'↩ 戻した：')+it.name;
         if(msg) msg.textContent='飾りを'+r+'（💾保存で確定・⟲戻すで取り消し）';
+      });
+    });
+    // ◽ 裏の四角のカドを隠す（⌒角丸／✕見た目消す）の配線＝ホバーで赤枠→押すとトグル
+    [].slice.call(qm.querySelectorAll('.__ce_rrz,.__ce_rhz')).forEach(function(b){
+      var it=radQ[+b.getAttribute('data-i')]; if(!it) return;
+      b.addEventListener('mouseenter',function(){ try{ it.el.__rrz=it.el.style.getPropertyValue('outline'); it.el.style.setProperty('outline','2px solid #ff3b30','important'); }catch(_){} });
+      b.addEventListener('mouseleave',function(){ try{ if(it.el.__rrz) it.el.style.setProperty('outline',it.el.__rrz,'important'); else it.el.style.removeProperty('outline'); }catch(_){} });
+      b.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        try{ it.el.style.removeProperty('outline'); }catch(_){}
+        var round=b.classList.contains('__ce_rrz');
+        var on=round?radiusRound(it):radiusFlat(it);
+        this.textContent=round?(on?'↩ 戻す':'⌒ 角丸 '+it.model+'px'):(on?'↩ 戻す':'✕ 消す');
+        if(msg) msg.textContent=(round?'裏の四角を角丸に':'裏の四角の見た目を')+(on?(round?'しました':'消しました'):'戻しました')+'（💾保存で確定・⟲戻すで取り消し）';
       });
     });
     // ✂ 選択中の文字の配線（ボタンはメニューを閉じずにその場で効く）
