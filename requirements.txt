@@ -19,6 +19,10 @@ waitress>=3.0
 # .env 読み込み
 python-dotenv>=1.0
 
+# 画像の背景除去（rembg = onnxruntime + U2-Net・ローカル/無料・透過PNG）
+rembg>=2.0
+onnxruntime>=1.17
+
 # カンプ生成・修正（雰囲気描写＝Claude / カンプ生成＝Claude・GPT・DeepSeek等）
 anthropic>=0.40
 openai>=1.50
