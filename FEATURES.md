@@ -7,7 +7,7 @@
 読む人へ：`CLAUDE.md` は**設計の約束と落とし穴**、`docs/実装履歴.md` は**なぜそう作ったか・試してダメだった案**の記録で、
 どちらも機能一覧ではありません。「何ができるか」を知りたいならこのファイルだけで足ります。
 
-規模: 右クリック 34項目 / 編集バー 27項目 / APIパス 81本 / モジュール 27本
+規模: 右クリック 35項目 / 編集バー 27項目 / APIパス 84本 / モジュール 27本
 
 💰=AIを呼ぶ（お金がかかる） ／ 無料=AIを使わない。ほとんどの操作は無料です。
 
@@ -23,6 +23,7 @@
 | ✏ 文字を追加（編集） | `__ce_q_txt` | 無料 |
 | 🖼 画像を追加（ここに置く） | `__ce_q_img` | 無料 |
 | 🔄 この画像を差し替え（AIなし・一瞬） | `__ce_q_imgswap` | 無料 |
+| 🖼 写真を加工（フチ・カード・背景など） | `__ce_q_photo` | 無料 |
 | 🖼 スライドショー（画像が次々切り替わる） | `__ce_q_slide` | 無料 |
 | ✨ 動きを付ける（アニメを選ぶ） | `__ce_q_fx` | 無料 |
 | 🕊 線を描いて飛ばす（空飛ぶルート） | `__ce_q_fly` | 無料 |
@@ -120,7 +121,7 @@
 
 ## 4. APIエンドポイント
 
-<details><summary>全81本（クリックで展開）</summary>
+<details><summary>全84本（クリックで展開）</summary>
 
 - `/`
 - `/anim/<site_id>/<path:filename>`
@@ -160,12 +161,15 @@
 - `/api/menu_layout`
 - `/api/pair_fit`
 - `/api/pair_fit_all`
+- `/api/paste_image`
+- `/api/paste_to_section`
 - `/api/prod_kit`
 - `/api/read_motion`
 - `/api/record_animation`
 - `/api/register`
 - `/api/register/status`
 - `/api/remove_bg`
+- `/api/remove_bg_url`
 - `/api/resp_check`
 - `/api/resp_check/status`
 - `/api/save_camp_html`

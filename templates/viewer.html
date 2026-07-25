@@ -2150,14 +2150,14 @@
         const favCls = c.fav ? " is_fav" : "";
         return `<div class="hist_row${favCls}" data-file="${c.file}"><span class="h_title" title="${_esc(c.name || c.title || c.file)}">${label}</span><span class="h_date">${ds}</span><button class="h_fav" data-file="${c.file}" title="${c.fav ? "お気に入りを外す" : "お気に入りに登録"}">${c.fav ? "⭐" : "☆"}</button><button class="h_name" data-file="${c.file}" data-name="${_esc(c.name || "")}" title="名前を付ける（お気に入りとは別）">✎ 名前</button><a href="/camp/${c.file}" target="campview" rel="noopener">開く</a><button class="h_del" data-file="${c.file}" title="削除">🗑</button></div>`;
       };
-      // 左＝お気に入り、右＝それ以外を新しい順（APIが既にfav先頭・mtime降順で返す）
+      // 左＝お気に入り、右＝それ以外を「更新が新しい順」（APIが既にfav先頭・mtime降順で返す）
       const favs = camps.filter((c) => c.fav);
       const rest = camps.filter((c) => !c.fav);
       const colHtml = (title, list) =>
         `<div class="hist_col"><div class="hist_col_h">${title}</div>` +
         (list.length ? list.map(rowHtml).join("") : "<div class='hist_empty'>まだありません</div>") +
         `</div>`;
-      campHistList.innerHTML = colHtml("⭐ お気に入り", favs) + colHtml("🕘 保存した順（新しい順）", rest);
+      campHistList.innerHTML = colHtml("⭐ お気に入り", favs) + colHtml("🕘 更新した順（新しい順）", rest);
       try { campHistToggle.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {}
     }
     // 起動時は履歴画面をデフォルトで開いておく（下までスクロールしなくても2列で一覧できる）

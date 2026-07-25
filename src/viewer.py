@@ -1641,6 +1641,96 @@ def uploaded_file(filename: str):
     return send_file(path)
 
 
+# ============================================================
+# 📋 スクショを貼り付けてセクションにする（2026-07-25）
+#   ⭐セクション保存は「ページのDOMからsectionを掴む」方式なので、クローン元の作りが
+#   変だと取れないことが多い。そこで「見えている通りにスクショを撮って貼る」逃げ道を作る。
+#   ① AIなし＝貼った画像をそのまま1セクションにする（確実・無料・数秒）
+#   ② AIあり＝画像を見てHTML/CSSに作り直す（文字が本物のテキストになる）
+# ============================================================
+@app.route("/api/paste_image", methods=["POST"])
+def api_paste_image():
+    """クリップボードから貼られた画像を保存してURLを返す（AI説明は付けない＝速い）。"""
+    f = request.files.get("image")
+    if f is None:
+        return jsonify({"ok": False, "message": "画像がありません"}), 400
+    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    name = "paste_%s.png" % datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    path = config.UPLOAD_DIR / name
+    f.save(str(path))
+    w = h = 0
+    try:
+        from PIL import Image
+
+        with Image.open(path) as im:
+            w, h = im.size
+    except Exception:  # noqa: BLE001
+        pass
+    log.info("貼り付け画像を保存: %s (%dx%d)", name, w, h)
+    # URLは既存の「🖼画像を追加」と同じ絶対URL（camp._UPLOAD_BASE）に揃える
+    #   ＝分割エクスポート・Figma書き出しが既に対応済みの形なので、後工程がそのまま動く。
+    return jsonify({"ok": True, "file": name, "url": camp._UPLOAD_BASE + name, "w": w, "h": h})
+
+
+# ★地雷：ここは % 書式（"%(ns)s"）で埋めてはいけない。本文に「幅は % で作る」等の
+#   生の % が入るため ValueError で必ず落ちる（実際に「AI生成が失敗」した原因）。
+#   {NS}/{SHOT} を str.replace で差し替える方式にしてある。
+_PASTE_SYS = (
+    "あなたは日本語Webサイトのフロントエンド実装者です。渡された1枚のスクリーンショットは、"
+    "あるWebページの『1セクション』を切り取ったものです。これを HTML+CSS で作り直してください。\n"
+    "【厳守】\n"
+    "1) 出力は <section> ... </section> の1ブロックだけ。前後に説明文やコードフェンスを書かない。\n"
+    "2) CSSは <style> を section の中に入れ、セレクタは必ず .{NS} から始める"
+    "（例 .{NS} .ttl{...}）。既存ページのCSSと絶対にぶつからないようにする。\n"
+    "3) section には class=\"{NS}\" を付ける。\n"
+    "4) 画像の中の文字は、読み取れる限りそのまま本物のテキストとして書き出す"
+    "（画像のまま貼らない・あとで編集できるようにする）。\n"
+    "5) 写真部分は <img src=\"{SHOT}\" style=\"...object-fit:cover\"> のように"
+    "『渡したスクショのURL』を仮の画像として使い、object-position で該当部分が見えるよう寄せる。"
+    "写真が何枚あっても同じURLで構わない（あとで差し替える前提）。\n"
+    "6) レイアウトは flex / grid で組み、幅は % か max-width で作る（固定pxで横幅を決めない）。\n"
+    "7) 文字サイズ・色・余白・角丸・線は、スクショから読み取った実際の見た目に合わせる。\n"
+    "8) JavaScript は使わない。外部CSS/フォントも読み込まない。"
+)
+
+
+@app.route("/api/paste_to_section", methods=["POST"])
+def api_paste_to_section():
+    """貼り付けた画像をAIに見せて、1セクション分のHTMLを作らせる。"""
+    data = request.get_json(silent=True) or {}
+    fn = (data.get("file") or "").strip()
+    path = config.UPLOAD_DIR / fn
+    if not fn or not path.exists():
+        return jsonify({"ok": False, "message": "貼り付けた画像が見つかりません"}), 404
+    ns = "psec" + datetime.now().strftime("%H%M%S")
+    blk = camp._ref_image_block(path, max_w=1400, max_h=1800)
+    if blk is None:
+        return jsonify({"ok": False, "message": "画像を読み込めませんでした"}), 400
+    hint = (data.get("hint") or "").strip()
+    content = [blk, {"type": "text", "text": "このスクショの見た目を、上のルールで再現してください。"
+                     + (("\n【追加の指示】" + hint) if hint else "")}]
+    sys_txt = _PASTE_SYS.replace("{NS}", ns).replace("{SHOT}", camp._UPLOAD_BASE + fn)
+    # これは「作り直す＝修正系」の作業なので、修正用エンジン(edit_provider)を使う。
+    #   .env で DESIGN_STOCK_EDIT_PROVIDER=codex にしてあれば ChatGPT定額枠＝追加課金ゼロで動く。
+    try:
+        html, used = camp._call_llm(sys_txt, content,
+                                    provider=config.CONFIG.htmlgen.edit_provider)
+    except Exception as e:  # noqa: BLE001
+        log.exception("貼り付け→AI生成に失敗")
+        m = str(e)
+        # Codexのログイン切れ（401/revoked）は文言が英語で分かりにくいので、やることだけ日本語で出す
+        if "401" in m or "revoked" in m or "sign in again" in m:
+            m = "Codexのログインが切れています。ターミナルで『codex login』を実行してChatGPTにログインし直してください。"
+        return jsonify({"ok": False, "message": m}), 500
+    m = re.search(r"```(?:html)?\s*(.*?)```", html, flags=re.DOTALL | re.IGNORECASE)
+    if m:
+        html = m.group(1)
+    i, j = html.find("<section"), html.rfind("</section>")
+    if i < 0 or j < 0:
+        return jsonify({"ok": False, "message": "AIがセクションを返しませんでした"}), 500
+    return jsonify({"ok": True, "html": html[i:j + len("</section>")], "model": used, "ns": ns})
+
+
 @app.route("/api/uploads")
 def api_uploads():
     """アップロード画像の一覧（説明つき）。"""
@@ -1708,6 +1798,42 @@ def api_upload_delete():
     return jsonify({"ok": True})
 
 
+@app.route("/api/remove_bg_url", methods=["POST"])
+def api_remove_bg_url():
+    """カンプに『すでに置いてある画像』の背景を抜く（src がどんな形でもOK）。
+
+    ⭐アップロード済みファイル名ではなく src を受け取るのがミソ。クローン元の相対パス
+    （clone_xxx_files/…）・外部URL・data: も、分割エクスポートの取得ロジックで実体を読む。
+    """
+    data = request.get_json(silent=True) or {}
+    url = (data.get("src") or "").strip()
+    camp_file = (data.get("camp") or "").strip()
+    if not url:
+        return jsonify({"ok": False, "message": "画像のURLがありません"}), 400
+    camp_dir = config.CAMP_DIR
+    if camp_file:
+        p = config.CAMP_DIR / Path(camp_file).name
+        if p.exists():
+            camp_dir = p.parent
+    raw, _ct = export_split._fetch_bytes(url, camp_dir)
+    if not raw:
+        return jsonify({"ok": False, "message": "この画像の元データを取得できませんでした（外部URLは取りに行けないことがあります）"}), 404
+    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = config.UPLOAD_DIR / ("_bgsrc_" + uuid.uuid4().hex[:8] + ".png")
+    try:
+        tmp.write_bytes(raw)
+        out = bgremove.remove_background(tmp)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("背景除去に失敗（URL指定）")
+        return jsonify({"ok": False, "message": "背景除去に失敗：" + str(exc)}), 500
+    finally:
+        tmp.unlink(missing_ok=True)   # 元データの控えは残さない（uploads一覧を汚さない）
+    newname = "up_" + uuid.uuid4().hex[:10] + ".png"
+    (config.UPLOAD_DIR / newname).write_bytes(out)
+    log.info("背景除去(URL): %s → %s", url[:80], newname)
+    return jsonify({"ok": True, "file": newname, "url": camp._UPLOAD_BASE + newname})
+
+
 @app.route("/api/remove_bg", methods=["POST"])
 def api_remove_bg():
     """アップロード画像の背景を除去 → 透過PNGを新規アップロードとして保存する（rembg・AIなし）。"""
@@ -1733,7 +1859,7 @@ def api_remove_bg():
 
 @app.route("/api/camps")
 def api_camps():
-    """保存済みカンプの一覧（履歴）。名前付き（お気に入り）を先頭に、あとは新しい順。"""
+    """保存済みカンプの一覧（履歴）。お気に入りを先頭に、あとは「更新が新しい順」。"""
     names = camp.load_camp_names()
     items = []
     # 生成カンプ(camp_*)＋お気に入りスナップショット(fav_*)＋忠実クローン(clone_*)を拾う
@@ -1755,14 +1881,18 @@ def api_camps():
         # 並び替えのキーにする。git経由の移行等でmtimeが全ファイル同時刻に揃ってしまっても、
         # 本来の作成順が崩れないようにするため（mtimeだけだと順序が失われる実例が発生した）。
         ts_m = re.search(r"(\d{8})_(\d{6})", p.name)
-        sort_key = int(ts_m.group(1) + ts_m.group(2)) if ts_m else int(datetime.fromtimestamp(st.st_mtime).strftime("%Y%m%d%H%M%S"))
+        made_key = int(ts_m.group(1) + ts_m.group(2)) if ts_m else int(datetime.fromtimestamp(st.st_mtime).strftime("%Y%m%d%H%M%S"))
+        # 並びは「更新時間（最後に保存した時）の新しい順」。一覧に出している日時も mtime なので、
+        # 表示とならびが一致する。mtimeが同じ（git clone等で一括コピーされた）ときだけ、
+        # ファイル名の作成日時で細かい順を決める＝PC移行しても順番が完全には崩れない。
+        sort_key = (st.st_mtime, made_key)
         item = {
             "file": p.name, "title": title, "mtime": st.st_mtime, "size": st.st_size,
             "name": info.get("name", ""), "fav": bool(info.get("fav")),
         }
         items.append((item, sort_key))
-    # お気に入り（名前付き）を上に、その中と外はそれぞれ新しい順（ファイル名の日時で判定）
-    items.sort(key=lambda pair: (0 if pair[0]["fav"] else 1, -pair[1]))
+    # お気に入りを上に、その中と外はそれぞれ「更新が新しい順」
+    items.sort(key=lambda pair: (0 if pair[0]["fav"] else 1, -pair[1][0], -pair[1][1]))
     return jsonify({"camps": [item for item, _ in items]})
 
 
@@ -2811,8 +2941,13 @@ html.__ce_altmode{cursor:text}
   function openAddImagePicker(px, py){
     fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
       var ups=d.uploads||[];
+      // ★2026-07-25：「✂ 背景を除去」ボタンをここに出す。押した時の処理(data-rmbg)と
+      //   API(/api/remove_bg・rembg)は前からあったのに、ボタンだけどこにも描かれておらず
+      //   ＝機能があるのに一生たどり着けない状態だった（発見できない機能は無い機能と同じ）。
       var items = ups.length
-        ? ups.map(function(u){return '<div class="it" data-src="'+u.url+'"><img src="'+u.url+'"><span>'+esc(u.caption||u.file)+'</span></div>';}).join('')
+        ? ups.map(function(u){return '<div class="it" data-src="'+u.url+'" style="position:relative"><img src="'+u.url+'"><span>'+esc(u.caption||u.file)+'</span>'
+            +'<button data-rmbg="'+esc(u.file)+'" title="人物や商品を切り抜いて透過PNGにする（AIなし・無料・ローカル処理）" style="position:absolute;right:5px;top:5px;background:rgba(17,17,17,.78);color:#fff;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;font-family:inherit">✂ 背景を除去</button>'
+            +'</div>';}).join('')
         : '<div style="color:#999">まだアップロード画像がありません。下から新しく追加できます</div>';
       var ov=document.createElement('div'); ov.id='__ce_pk';
       ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🖼 画像を追加</h4>'
@@ -5484,6 +5619,34 @@ html.__ce_altmode{cursor:text}
     markDirty();
     msg.textContent='はみ出しキャプションカードを付けました。文字は「✏文字を編集」、位置はドラッグで調整→保存で確定（もう一度押すと外せる）';
   }
+  // ✂ 今カンプに置いてある写真の背景を切り抜いて、その場で透過画像に差し替える（AIなし・無料）。
+  //   元に戻せるよう、切り抜く前のsrcを data-cebgorig に控える（もう一度押すと戻る）。
+  function cutoutImg(imgEl, btn){
+    if(!imgEl){ msg.textContent='写真の上で右クリックしてから使ってください'; return; }
+    var back=imgEl.getAttribute('data-cebgorig');
+    if(back){   // 2回目＝元に戻す
+      imgEl.src=back; imgEl.removeAttribute('data-cebgorig'); markDirty();
+      msg.textContent='切り抜く前の写真に戻しました（💾保存で確定）';
+      var ovx=document.getElementById('__ce_pk'); if(ovx) ovx.remove();
+      return;
+    }
+    var src=imgEl.getAttribute('src')||'';
+    if(!src){ msg.textContent='この写真のURLが取れませんでした'; return; }
+    if(btn){ btn.textContent='✂ 切り抜き中…（10〜30秒）'; btn.disabled=true; btn.style.opacity='.7'; }
+    fetch('/api/remove_bg_url',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({src:src, camp:FILE})}).then(function(r){return r.json();}).then(function(d){
+      var ov=document.getElementById('__ce_pk'); if(ov) ov.remove();
+      if(!d||!d.ok){ msg.textContent='切り抜きに失敗：'+((d&&d.message)||'不明'); return; }
+      pushUndo(imgEl);
+      imgEl.setAttribute('data-cebgorig', src);
+      imgEl.src=d.url;
+      markDirty();
+      msg.textContent='✂ 背景を切り抜きました（もう一度押すと元に戻せます・💾保存で確定）';
+    }).catch(function(){
+      var ov=document.getElementById('__ce_pk'); if(ov) ov.remove();
+      msg.textContent='切り抜きに失敗しました（サーバーに届いていません）';
+    });
+  }
   // 🖼 写真を加工：白フチ／はみ出しカード／背景の飾り／背景に設定／水彩(AI) の入口をまとめた1つのボタン用ピッカー。
   //   ボタンを増やさず、選択肢はこの中の一覧から選ぶ形にする。
   function openPhotoDecoPicker(el, imgEl, sIdx){
@@ -5495,6 +5658,10 @@ html.__ce_altmode{cursor:text}
       +'<button class="go2" id="__ce_pdgrad" style="background:#c026a6;margin-bottom:8px">🌸 背景の飾り（グラデ）を敷く</button>'
       +'<button class="go2" id="__ce_pdglow" style="background:#0ea5a3;margin-bottom:8px">🌫 ふわっと白い光を出す（左下・右下）</button>'
       +'<button class="go2" id="__ce_pdsetbg" style="background:#0b6bcb;margin-bottom:8px">🖼 画像を背景に設定</button>'
+      // ✂背景を切り抜く：カンプに『すでに置いてある画像』にも効かせる（2026-07-25）。
+      //   ⭐アップロード一覧の同名ボタンはファイル名で動くが、こちらは src をサーバーに渡す＝
+      //     クローン元の画像（相対パス）・外部URLでも切り抜ける。
+      +(imgEl?'<button class="go2" id="__ce_pdcut" style="background:#7c3aed;margin-bottom:8px">✂ この写真の背景を切り抜く（透過・AIなし・無料）</button>':'')
       +(imgEl?'<button class="go2" id="__ce_pdwater" style="background:#c026a6">🎨 背後に水彩画像を敷く（AI・数十円）</button>':'')
       +'</div>';
     document.body.appendChild(ov);
@@ -5505,6 +5672,7 @@ html.__ce_altmode{cursor:text}
       if(e.target.id==='__ce_pdgrad'){ ov.remove(); openGradPicker(el); return; }
       if(e.target.id==='__ce_pdglow'){ ov.remove(); glowSpots(el); return; }
       if(e.target.id==='__ce_pdsetbg'){ ov.remove(); openPicker({el:el, type:'bg', fresh:true}); return; }
+      if(e.target.id==='__ce_pdcut'){ cutoutImg(imgEl, e.target); return; }
       if(e.target.id==='__ce_pdwater'){ ov.remove(); openBgPicker(imgEl, sIdx); return; }
     });
   }
@@ -6724,6 +6892,147 @@ html.__ce_altmode{cursor:text}
   //   小さい飾りや文字を margin に振り替えると、translate と違って**兄弟まで押し出す**ので
   //   ページ全体の見た目が変わってしまった（13個拾って別セクションが68pxズレた）。
   //   section/header/footer など「縦に1列で並ぶ箱」だけなら、margin＝translate と見た目が一致する。
+  // ➡ 「ページの右側に上から下まで余白ができる」の原因＝横にはみ出している要素を探す（AIなし）。
+  //   ★これが起きると犯人は画面の外（右）に居るので右クリックで選べない＝手では直せない。
+  //     実例：ドラッグ事故でボタンが右に1545px飛び、ページ幅が1440→2090pxになっていた。
+  //   親が犯人なら子は出さない（同じ原因で何十件も並ぶのを防ぐ）。
+  function overflowScan(lim){
+    var de=document.documentElement, vw=de.clientWidth;
+    if(de.scrollWidth<=vw+4) return [];
+    var out=[];
+    [].slice.call(document.querySelectorAll('body *')).forEach(function(el){
+      if(el.closest('[id^="__ce"]')) return;
+      if(el.tagName==='SCRIPT'||el.tagName==='STYLE') return;
+      var cs=getComputedStyle(el);
+      if(cs.position==='fixed') return;              // 画面に貼り付く物は横スクロールを作らない
+      var r=el.getBoundingClientRect();
+      if(r.width<2||r.height<2) return;
+      var over=Math.round(r.right-vw);
+      if(over<=4) return;
+      out.push({el:el, over:over, drag:!!(el.getAttribute('data-cetx')||el.getAttribute('data-cety')), wide:Math.round(r.width)>vw});
+    });
+    out.sort(function(a,b){ return b.over-a.over; });
+    out=out.slice(0,120);
+    return out.filter(function(o){ return !out.some(function(p){ return p!==o && p.el.contains(o.el); }); }).slice(0, lim||6);
+  }
+  // ★ウィンドウ幅に依存しない直し方（2026-07-25）。
+  //   はみ出しは「今開いている幅」でしか判定できないので、1900pxで直しても1280pxではまた出る（実測）。
+  //   横ズレの正体はほぼ「誤ドラッグ」なので、data-cetx（ドラッグの署名）が右向きに付いている物を
+  //   幅に関係なく全部0に戻す＝どの画面幅で見ても再発しない。
+  function ovDragXAll(){
+    var list=[].slice.call(document.querySelectorAll('[data-cetx]')).filter(function(el){
+      if(el.closest('[id^="__ce"]')) return false;
+      return (parseFloat(el.getAttribute('data-cetx'))||0) > 2;   // 右へ動かされている物だけ
+    });
+    list.forEach(function(el){
+      try{ pushUndo(el); }catch(_){}
+      var ty=parseFloat(el.getAttribute('data-cety')||'0')||0;
+      el.style.setProperty('translate','0px '+ty+'px');
+      el.setAttribute('data-cetx','0');
+    });
+    markDirty();
+    var de=document.documentElement;
+    if(msg) msg.textContent='⟲ 横のドラッグズレを '+list.length+'箇所 戻しました（縦の調整は残しています）。ページ幅 '+de.scrollWidth+'px／画面 '+de.clientWidth+'px・💾保存で確定';
+    return list.length;
+  }
+  // 🧢 画面に貼り付く帯（固定ヘッダー等）のズレ。★これは横スクロールを作らないので上のはみ出し検査に
+  //   引っかからないが、見た目は「右にビヨーン」と一番目立つ。実例：CSSは width:calc(100% - 16px) なのに
+  //   インラインへ width:1819px と translate:-305px が焼き込まれ、中央寄せのtransformも消えていた。
+  function stickyScan(){
+    var vw=document.documentElement.clientWidth, out=[];
+    [].slice.call(document.querySelectorAll('body *')).forEach(function(el){
+      if(el.closest('[id^="__ce"]')) return;
+      var cs=getComputedStyle(el);
+      if(cs.position!=='fixed'&&cs.position!=='sticky') return;
+      var r=el.getBoundingClientRect();
+      if(r.height<20||r.width<vw*0.35) return;
+      var pxw=/px\s*$/.test(el.style.width||'');
+      var tx=Math.abs(parseFloat(el.getAttribute('data-cetx')||'0'))||0;
+      var off=(r.left<-8)||(r.right>vw+8);
+      if(off||pxw||tx>2) out.push({el:el, left:Math.round(r.left), right:Math.round(r.right), w:Math.round(r.width), pxw:pxw});
+    });
+    return out.slice(0,4);
+  }
+  function stickyFix(){
+    var list=stickyScan();
+    list.forEach(function(o){
+      try{ pushUndo(o.el); }catch(_){}
+      // インラインに焼き込まれた「幅・横位置」だけ剥がす＝ページ自身のCSS（width:calc(100% - 16px)や
+      // translateX(-50%)の中央寄せ）が復活する。色や影などの他の編集は触らない。
+      ['translate','width','max-width','transform','left','right','margin-left'].forEach(function(p){ o.el.style.removeProperty(p); });
+      o.el.removeAttribute('data-cetx'); o.el.removeAttribute('data-cety');
+      // ★幅を戻したあとに「元のtransform」を測り直す。先に測ると、事故のpx幅で中央寄せ判定に失敗して
+      //   matrix(px固定)のまま控えてしまい、別の画面幅でまた横ズレする（実測で判明）。
+      try{ if(window.__fxaSetTf0) window.__fxaSetTf0(o.el, true); }catch(_){}
+    });
+    markDirty();
+    var vw=document.documentElement.clientWidth;
+    var after=stickyScan().length;
+    if(msg) msg.textContent='🧢 画面に貼り付く帯を '+list.length+'箇所 元に戻しました'+(after?('（まだ'+after+'箇所ズレています）'):'（画面ぴったりに戻っています）')+'・💾保存で確定';
+    return list.length;
+  }
+  function ovDragXCount(){
+    var n=0;
+    [].slice.call(document.querySelectorAll('[data-cetx]')).forEach(function(el){
+      if(el.closest('[id^="__ce"]')) return;
+      if((parseFloat(el.getAttribute('data-cetx'))||0) > 2) n++;
+    });
+    return n;
+  }
+  function ovName(el){
+    var c=(el.className||'').toString().trim().split(/\\s+/)[0]||'';
+    return el.tagName.toLowerCase()+(c?('.'+c):'');
+  }
+  // 見つけた犯人を直す：①ドラッグで横に動かされたもの＝横方向だけ0に戻す（縦の調整は残す）
+  //                     ②画面より広いもの＝max-width:100% で画面内に収める
+  function overflowFix(){
+    var total=_ovPass(), tries=0;
+    // ★1回で終わらせない：画像の遅れ読み込みや出現アニメで版が動き、直した直後は1440pxでも
+    //   その後また1654pxへ戻ることがある（実測）。4秒ほど見張って、増えるたびに掃除し直す。
+    var iv=setInterval(function(){
+      total+=_ovPass(); tries++;
+      var de=document.documentElement, left=de.scrollWidth-de.clientWidth;
+      if(msg) msg.textContent = (left>4)
+        ? ('➡ '+total+'箇所を直しました。まだ '+left+'px はみ出しています（見張り中…）')
+        : ('➡ 右のはみ出しを直しました（'+total+'箇所）。ページ幅 '+de.scrollWidth+'px＝画面ぴったりです・💾保存で確定');
+      if(tries>=8){
+        clearInterval(iv);
+        if(left>4 && msg) msg.textContent='➡ '+total+'箇所を直しましたが、まだ '+left+'px はみ出しています（もう一度押すか、右クリック→⟲位置・サイズをリセット）';
+      }
+    }, 500);
+    markDirty();
+    return total;
+  }
+  function _ovPass(){
+    var n=0;
+    for(var pass=0; pass<8; pass++){          // 1回では取り切れない（直すと次の犯人が顔を出す）ので繰り返す
+      var list=overflowScan(40);
+      if(!list.length) break;
+      list.forEach(function(o){
+        var el=o.el, vw=document.documentElement.clientWidth;
+        try{ pushUndo(el); }catch(_){}
+        var tx=parseFloat(el.getAttribute('data-cetx')||'0')||0;
+        var ty=parseFloat(el.getAttribute('data-cety')||'0')||0;
+        if(o.drag && tx>0){
+          // ★右へドラッグされた事故＝横だけ元の位置に戻す（縦の調整は残す）
+          el.style.setProperty('translate','0px '+ty+'px');
+          el.setAttribute('data-cetx','0'); n++;
+        }else{
+          // ドラッグ以外（左へ動かした物・元から大きい飾り）は「はみ出した分だけ左へ寄せる」。
+          //   ★ここで0に戻すと、左へドラッグしてある物は逆に右へ飛んで悪化する（実際に起きた）。
+          var nx=Math.round(tx-o.over);
+          el.style.setProperty('translate',nx+'px '+ty+'px');
+          el.setAttribute('data-cetx',String(nx)); n++;
+        }
+        if(Math.round(el.getBoundingClientRect().width)>vw){
+          el.style.setProperty('max-width','100%','important');
+          el.style.setProperty('box-sizing','border-box','important');
+          n++;
+        }
+      });
+    }
+    return n;
+  }
   function dragHoles(){
     var out=[];
     [].slice.call(document.querySelectorAll('[data-cety],[data-cehole]')).forEach(function(t){
@@ -7090,6 +7399,7 @@ html.__ce_altmode{cursor:text}
     var sx=(+el.getAttribute('data-cesx')||1)*fx, sy=(+el.getAttribute('data-cesy')||1)*fy;
     if(sx<0.2)sx=0.2; if(sx>5)sx=5; if(sy<0.2)sy=0.2; if(sy>5)sy=5;
     el.setAttribute('data-cesx',sx); el.setAttribute('data-cesy',sy); applyTf(el);
+    growClipFrame(el,fx,fy);   // 中/外に「切り取り枠」があると見た目が変わらないので枠も一緒に広げる
   }
   function rotateBy(el,delta){ _cebt(el); el.setAttribute('data-cero',(+el.getAttribute('data-cero')||0)+delta); applyTf(el); }
   // 画像のサイズ変更：transform:scaleだと引き伸ばされて歪む。幅・高さを変え、object-fit:coverで
@@ -7104,7 +7414,38 @@ html.__ce_altmode{cursor:text}
     el.style.setProperty('height',Math.round(h)+'px','important');
     el.style.setProperty('object-fit','cover','important');
     el.style.setProperty('max-width','none','important');  // 元CSSのmax-width:100%等に負けないように
+    growClipFrame(el,fx,fy);
     markDirty();
+  }
+  // ★「サイズを何度変えても戻る（見た目が変わらない）」の正体＝間に "固定サイズ＋overflow:hidden の枠" が
+  //   あり、そこで切り取られているため（実例：DIV.daily-image 646×932固定。画像を1.7倍にしても見た目は不変）。
+  //   枠のサイズがインラインpx（＝このツールで付けた枠）なら、同じ倍率で枠も広げる＝見た目が実際に変わる。
+  //   枠がページ側CSSで決まっている場合は触らない（切り取りが元デザインの意図なので）。
+  //   選んだ要素の外側（親4段）と内側（子孫）の両方を見る＝どちらを選んでいても効く。
+  function growClipFrame(el,fx,fy){
+    if(!el||(fx===1&&fy===1)) return null;
+    function clipSized(n){
+      if(!n||n.nodeType!==1) return false;
+      var cs=getComputedStyle(n);
+      if(cs.overflow!=='hidden'&&cs.overflowX!=='hidden'&&cs.overflowY!=='hidden') return false;
+      return (parseFloat(n.style.width)||0)>0 || (parseFloat(n.style.height)||0)>0 || (parseFloat(n.style.minHeight)||0)>0;
+    }
+    function grow(n){
+      var pw=parseFloat(n.style.width)||0, ph=parseFloat(n.style.height)||0, pmh=parseFloat(n.style.minHeight)||0;
+      if(pw>0) n.style.setProperty('width',Math.round(pw*fx)+'px','important');
+      if(ph>0) n.style.setProperty('height',Math.round(ph*fy)+'px','important');
+      if(pmh>0) n.style.setProperty('min-height',Math.round(pmh*fy)+'px','important');
+    }
+    var hit=null;
+    var n=el, hops=0;
+    while(n&&n.parentElement&&hops<4){ n=n.parentElement; hops++; if(clipSized(n)){ grow(n); hit=n; break; } }
+    if(el.querySelectorAll){       // 内側の枠（選んだのが外側の飾りwrapperだった場合）
+      [].slice.call(el.querySelectorAll('*')).slice(0,60).forEach(function(c){
+        if(hit===c) return;
+        if(clipSized(c)){ grow(c); hit=hit||c; }
+      });
+    }
+    return hit;
   }
   // 縦の高さ(min-height)を増減。scaleと違い中身は歪まず、余白だけ増減する（セクションを高く保つのに最適）。
   function adjustMinH(el,delta){
@@ -7552,7 +7893,16 @@ html.__ce_altmode{cursor:text}
     +'html.fxa-on .fxa_pre.fxa_bl{filter:blur(var(--fxa-blur,14px))}'
     +'html.fxa-on .fxa_pre.fxa_ry{transform:perspective(800px) rotateY(var(--fxa-deg,90deg))}'
     +'html.fxa-on .fxa_pre.fxa_clip{transform:translateY(var(--fxa-dist,40px))}'
-    +'html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:none!important;filter:none!important;clip-path:inset(0 0 0 0)!important}'
+    // ★地雷（2026-07-25修正）：ここが clip-path:inset(0 0 0 0) だと「再生し終わった状態」でも
+    //   要素のボックスちょうどで切り抜き続ける＝文字の上に出る部分（大きい文字の上端・アーチで持ち上げた字・
+    //   回転させた見出し）が斜めの直線でスパッと切れる（実例：「楽しみを仕事で見つけよう！」の"事"の上が欠けた）。
+    //   終わったら切らない＝none が正しい。カーテン系だけは transition の行き先が必要なので下で別に指定する。
+    // ★transform は none ではなく「元々の transform（--fxa-tf0）」に戻す。
+    //   none にすると固定ヘッダーの translateX(-50%) 等の中央寄せまで消えて横にビヨーンと飛ぶ（2026-07-25）。
+    +'html.fxa-on .fxa_pre.fxa_in{opacity:1!important;transform:var(--fxa-tf0,none)!important;filter:none!important;clip-path:none!important}'
+    // カーテン開き/ワイプは inset を animate する演出なので none に出来ない（noneは補間できず一瞬で終わる）。
+    //   代わりに終点を少し外側（-25%）にして、文字のはみ出しは切らないようにする。
+    +'html.fxa-on .fxa_pre.fxa_wp.fxa_in,html.fxa-on .fxa_pre.fxa_cl.fxa_in,html.fxa-on .fxa_pre.fxa_cc.fxa_in{clip-path:inset(-25% -1px -25% -1px)!important}'
     +'html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}'
     +'.fxa_ch{display:inline-block}'
     +'html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,26px));transition:opacity var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1),transform var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1)}'
@@ -7604,6 +7954,33 @@ html.__ce_altmode{cursor:text}
   var FX_RUN='(function(){var d=document,h=d.documentElement;'
     +'if(!d.querySelector(".fxa_pre,.fxa_hl,.fxa_cnt,.fxa_ud")){return;}h.classList.add("fxa-on");'
     +'[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});'  // 自動修復：出現アニメ要素に焼き込まれた古いtransform(プレビュー残骸)を消す＝過去に固まった分も開くだけで直る
+    // ★地雷（2026-07-25修正）：再生後の .fxa_in は transform:none!important で「アニメ用のtransform」を
+    //   消しているが、これは要素が元々持っているtransform（例：固定ヘッダーの translateX(-50%) 中央寄せ）も
+    //   一緒に消してしまう＝再生し終わった瞬間にヘッダーが右へ705pxビヨーンと飛ぶ（実際に起きた）。
+    //   そこで「アニメ前の素のtransform」を測って --fxa-tf0 に控え、.fxa_in はそれを書き戻す。
+    //   測り方＝fxa_preクラスを一瞬外して計算値を読む（data-cebt＝ドラッグ前の控えがあればそれを優先）。
+    //   ★matrixをそのまま控えると %指定が px に固定される（translateX(-50%)＝中央寄せが、その時の幅の
+    //     px値で固まり、別の画面幅で見ると左右にズレる）。中央寄せと判る場合は -50% に読み替えて控える。
+    // ★地雷：ここで正規表現は使わない。FX_RUNはJS文字列の中なので \\( と書いてもJS側で1段落ちて
+    //   /^matrix(([^)]+))$/ になり、一致せず黙って何もしない（実際に半日ハマった）。indexOf/sliceで書く。
+    +'function _tf50(el,t0){if(!t0||t0.indexOf("matrix(")!==0||t0.charAt(t0.length-1)!==")")return t0;'
+    +'var v=t0.slice(7,-1).split(",").map(function(x){return parseFloat(x);});if(v.length<6)return t0;'
+    +'if(!(Math.abs(v[0]-1)<.001&&Math.abs(v[1])<.001&&Math.abs(v[2])<.001&&Math.abs(v[3]-1)<.001))return t0;'
+    +'var r=el.getBoundingClientRect();'
+    +'var sx=(r.width>4&&Math.abs(v[4]+r.width/2)<=2)?"-50%":(v[4]+"px");'
+    +'var sy=(r.height>4&&Math.abs(v[5]+r.height/2)<=2)?"-50%":(v[5]+"px");'
+    +'return "translate("+sx+","+sy+")";}'
+    +'function _setTf0(el,force){try{'
+    +'if(!force&&el.style.getPropertyValue("--fxa-tf0"))return;'
+    +'if(force)el.style.removeProperty("--fxa-tf0");'
+    +'var bt=el.getAttribute("data-cebt");'
+    +'if(bt&&bt!=="none"&&bt.indexOf("matrix")===0){el.style.setProperty("--fxa-tf0",_tf50(el,bt));return;}'
+    +'var had=el.classList.contains("fxa_pre");if(had)el.classList.remove("fxa_pre");'
+    +'var t0=getComputedStyle(el).transform;if(had)el.classList.add("fxa_pre");'
+    +'if(t0&&t0!=="none")el.style.setProperty("--fxa-tf0",_tf50(el,t0));'
+    +'}catch(_){}}'
+    +'window.__fxaSetTf0=_setTf0;window.__fxaTf50=_tf50;'   // 🧢ヘッダー修復から呼ぶ（幅を直したあとに測り直す＝-50%として控えられる）
+    +'[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){_setTf0(el);});'
     // 🖍マーカーの帯を毎フレーム手動で描く（--hlw を0→100へ）。連打で二重に走らないよう世代番号(__hlGen)で古いループは自分で止める。
     // ★進捗は「実時間」でなく1フレーム最大64msの積算で進める（飛行ランタイムと同じ流儀）。
     //   実時間だと画像読み込み中のコマ落ちで線がワープし「設定より速く引かれた」ように見える。
@@ -8163,7 +8540,13 @@ html.__ce_altmode{cursor:text}
       if(msg) msg.textContent='📋 コピーしました。貼り付けたい場所にマウスを置いて Ctrl+V';
       return;
     }
-    if(!_ceClip){ if(msg) msg.textContent='先に要素を右クリックで選んで Ctrl+C を押してください'; return; }
+    // ★スクショ貼り付け（📋→セクション）と共存させる：内部コピーが無い時は、すぐ文句を言わずに
+    //   paste イベント（この直後に来る）が画像を拾えるか待つ。拾えたら _psWait を false にされる。
+    if(!_ceClip){
+      _psWait=true;
+      setTimeout(function(){ if(_psWait){ _psWait=false; if(msg) msg.textContent='先に要素を右クリックで選んで Ctrl+C（スクショなら Ctrl+V でセクションにできます）'; } },400);
+      return;
+    }
     e.preventDefault();
     var tpl=document.createElement('template'); tpl.innerHTML=_ceClip.html;
     var nd=tpl.content.firstElementChild; if(!nd) return;
@@ -8185,6 +8568,109 @@ html.__ce_altmode{cursor:text}
     markDirty();
     if(msg) msg.textContent='📋 貼り付けました（もう一度Ctrl+Vで増やせます）。💾保存で残ります';
   });
+  // ===== 📋 スクショを貼り付けて「セクション」にする（2026-07-25） =====
+  // ⭐セクション保存はDOMからsectionを掴む方式なので、クローン元の作りが変だと取れないことが多い。
+  // その逃げ道＝「見えている通りにスクショを撮って、カンプ上で Ctrl+V」。
+  //   ①AIなし＝画像をそのまま1セクションにする（確実・無料・数秒）
+  //   ②AIあり＝画像を見てHTML/CSSに作り直す（文字が本物のテキストになる／数十円）
+  var _psWait=false;
+  document.addEventListener('paste',function(e){
+    var ae=document.activeElement;
+    if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.isContentEditable)) return;  // 入力欄への貼り付けは邪魔しない
+    var items=(e.clipboardData&&e.clipboardData.items)?[].slice.call(e.clipboardData.items):[];
+    var f=null;
+    items.forEach(function(it){ if(!f&&it.kind==='file'&&(it.type||'').indexOf('image/')===0) f=it.getAsFile(); });
+    if(!f) return;                       // 画像じゃない＝従来どおり（要素の複製貼り付け等）に任せる
+    _psWait=false; e.preventDefault();
+    if(msg) msg.textContent='📋 スクショを受け取りました。保存中…';
+    var fd=new FormData(); fd.append('image', f, 'paste.png');
+    fetch('/api/paste_image',{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ if(msg) msg.textContent='貼り付けた画像の保存に失敗しました'; return; }
+      psOpen(d);
+    }).catch(function(){ if(msg) msg.textContent='貼り付けた画像の保存に失敗しました（サーバーに届いていません）'; });
+  });
+  // 貼った直後のパネル：どう使うか（画像のまま／AIで作り直す）を選ばせる
+  function psOpen(d){
+    var old=document.getElementById('__ce_ps'); if(old) old.remove();
+    var ov=document.createElement('div'); ov.id='__ce_ps';
+    ov.setAttribute('style','position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif');
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);padding:16px 18px;width:min(680px,92vw);max-height:88vh;overflow-y:auto">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><b style="font-size:15px">📋 このスクショをセクションにします</b>'
+      +'<button id="__ce_psx" style="margin-left:auto;background:none;border:none;font-size:18px;color:#888;cursor:pointer">×</button></div>'
+      +'<img src="'+esc(d.url)+'" style="display:block;width:100%;border:1px solid #e3e3e8;border-radius:8px;background:#fafafa">'
+      +'<div style="font-size:11px;color:#888;margin:4px 0 12px">'+d.w+'×'+d.h+'px</div>'
+      +'<button id="__ce_ps_raw" style="display:block;width:100%;background:#1a7f37;color:#fff;border:none;border-radius:9px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">🖼 画像のまま入れる（AIなし・無料・数秒）</button>'
+      +'<div style="font-size:11.5px;color:#777;margin:5px 0 14px">見た目は100%そのまま。あとで文字は直せません（位置調整・サイズ変更はできます）</div>'
+      +'<input id="__ce_ps_hint" placeholder="AIへの追加指示（任意）例：見出しは「先生の声」にして" style="width:100%;box-sizing:border-box;border:1px solid #d7dae1;border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;margin-bottom:6px">'
+      +'<button id="__ce_ps_ai" style="display:block;width:100%;background:#0b6bcb;color:#fff;border:none;border-radius:9px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">🤖 コードに作り直す（AI・数十円・20〜60秒）</button>'
+      +'<div style="font-size:11.5px;color:#777;margin-top:5px">文字が本物のテキストになるので後から編集できます。写真は貼ったスクショを仮置きします（あとで差し替え）</div>'
+      +'<div id="__ce_ps_msg" style="font-size:12px;color:#0b6bcb;margin-top:10px;min-height:16px"></div></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#__ce_psx').addEventListener('click',function(){ ov.remove(); });
+    ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
+    ov.querySelector('#__ce_ps_raw').addEventListener('click',function(){
+      ov.remove();
+      psPickPos(function(insert){
+        var sec=document.createElement('section');
+        sec.setAttribute('data-cepaste','1');
+        sec.setAttribute('style','margin:0;padding:0;line-height:0;font-size:0');
+        var im=document.createElement('img');
+        im.src=d.url; im.alt=''; im.setAttribute('data-cepasteimg','1');
+        im.setAttribute('style','display:block;width:100%;height:auto');
+        sec.appendChild(im);
+        insert(sec);
+        if(msg) msg.textContent='🖼 画像のセクションを追加しました。💾保存で確定してください';
+      });
+    });
+    ov.querySelector('#__ce_ps_ai').addEventListener('click',function(){
+      var pm=ov.querySelector('#__ce_ps_msg'), btn=ov.querySelector('#__ce_ps_ai');
+      var hint=(ov.querySelector('#__ce_ps_hint').value||'').trim();
+      btn.disabled=true; btn.style.opacity='.6';
+      pm.textContent='🤖 AIがコードに作り直しています…（20〜60秒）';
+      fetch('/api/paste_to_section',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({file:d.file,hint:hint})}).then(function(r){return r.json();}).then(function(res){
+        btn.disabled=false; btn.style.opacity='1';
+        if(!res||!res.ok){ pm.style.color='#c00'; pm.textContent='失敗：'+((res&&res.message)||'不明なエラー'); return; }
+        ov.remove();
+        psPickPos(function(insert){
+          var tpl=document.createElement('template'); tpl.innerHTML=res.html;
+          var el=tpl.content.firstElementChild;
+          if(!el){ if(msg) msg.textContent='AIの返した中身が空でした（もう一度お試しください）'; return; }
+          insert(el);
+          if(msg) msg.textContent='🤖 AIがセクションを作りました（'+esc(res.model||'')+'）。💾保存で確定してください';
+        });
+      }).catch(function(){ btn.disabled=false; btn.style.opacity='1'; pm.style.color='#c00'; pm.textContent='通信に失敗しました'; });
+    });
+  }
+  // どのセクションの下に入れるか選ばせる（➕お気に入り追加と同じ見た目・同じ考え方）
+  function psPickPos(done){
+    var secs=[].slice.call(document.querySelectorAll('section,header,footer')).filter(function(x){ return !x.closest('#__ce'); });
+    if(!secs.length){ if(msg) msg.textContent='入れる目印になるセクションがページにありません'; return; }
+    var _sn=0;   // ★番号は<section>だけで数える（ヘッダーを1に含めると「セクション2」から始まって混乱する）
+    var rows='<div class="sit-pos" data-pos="-1">▲ 一番上（先頭）に入れる</div>'
+      +secs.map(function(s,i){
+        var hEl=s.querySelector('h1,h2,h3');
+        var tag=(s.tagName==='HEADER')?'🧢ヘッダー':(s.tagName==='FOOTER')?'🦶フッター':('セクション'+(++_sn));
+        var lbl=(hEl?hEl.textContent:'').replace(/\\s+/g,' ').trim().slice(0,24);
+        return '<div class="sit-pos" data-pos="'+i+'">▼ '+esc(tag)+(lbl?'「'+esc(lbl)+'」':'')+' の下に入れる</div>';
+      }).join('');
+    var ovp=document.createElement('div'); ovp.id='__ce_pkpos';
+    ovp.innerHTML='<div class="bx"><span class="cl" id="__ce_pkposx">×</span><h4>➕ どこに入れますか？</h4><div class="poslist">'+rows+'</div></div>';
+    document.body.appendChild(ovp);
+    ovp.addEventListener('click',function(e){
+      if(e.target.id==='__ce_pkpos'||e.target.id==='__ce_pkposx'){ ovp.remove(); return; }
+      var pit=e.target.closest('.sit-pos'); if(!pit) return;
+      var pi=Number(pit.getAttribute('data-pos'));
+      ovp.remove();
+      done(function(newEl){
+        if(pi<0){ secs[0].parentElement.insertBefore(newEl,secs[0]); }
+        else { var a=secs[pi]; a.parentElement.insertBefore(newEl,a.nextSibling); }
+        try{ markRevealed(newEl); }catch(_){}
+        markDirty();
+        try{ newEl.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){}
+      });
+    });
+  }
   // ===== 🕊 空飛ぶルート（線を手描き→整えて飛ばす・AIなし・無料） =====
   // 使い方：右クリック→「🕊 線を描いて飛ばす」→キャラの上から線を描く→整え方を選ぶ→
   //         ○アンカーをドラッグで微修正（右クリックで削除）→▶試す→✅付ける→💾保存。
@@ -10099,6 +10585,28 @@ html.__ce_altmode{cursor:text}
         +'<span id="__ce_dg_now" style="margin-left:6px;font-size:11px;color:#8a6a4a"></span>'
         +'</div>';
     }
+    // ➡ 横はみ出し（＝ページの右側に上から下まで余白ができる）。犯人は画面外に居て掴めないので一覧で名指しする
+    var owQ=overflowScan(), owDX=ovDragXCount(), owSK=stickyScan(), owRowQ='';
+    if(owQ.length || owDX || owSK.length){
+      var _de=document.documentElement, _owGap=_de.scrollWidth-_de.clientWidth;
+      owRowQ='<div style="background:#fef2f2;border-bottom:1px solid #f0c4c4;padding:6px 10px 7px;font-size:12px;border-radius:7px">'
+        +'<b>➡ 横のズレ・はみ出し</b>（AIなし）<br>'
+        +'<span style="font-size:10.5px;color:#8a6a6a">「右側に上から下まで余白ができる」の正体です。犯人は画面の外に居るので手では選べません</span>'
+        +'<div style="margin:3px 0 4px;font-size:10.5px;color:#7a5a5a;line-height:1.8">'
+        +'<div>今の画面（'+_de.clientWidth+'px）でのはみ出し：<b>'+(_owGap>0?_owGap:0)+'px</b>'
+        +(owDX?('　／　右へドラッグされたまま：<b>'+owDX+'箇所</b>'):'')+'</div>'
+        +owSK.map(function(o){ return '<div>🧢 <b>'+esc(ovName(o.el))+'</b>（画面に貼り付く帯）が左'+o.left+'〜右'+o.right+'px'
+            +(o.pxw?'・幅が'+o.w+'pxで固定されています':'')+'</div>'; }).join('')
+        +owQ.map(function(o,i){ return '<div class="__ce_owz" data-i="'+i+'" style="cursor:default">'+(i===0?'<b>▶ ':'　')
+            +esc(ovName(o.el))+'</b>：右に '+o.over+'px'+(o.drag?'（ドラッグで動かされています）':(o.wide?'（画面より広い）':''))+'</div>'; }).join('')
+        +'</div>'
+        +(owSK.length?'<button id="__ce_ow_sk" style="background:#0e7490;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11.5px;font-weight:700" title="焼き込まれた幅・横位置だけ剥がして、ページ本来のCSSに戻す">🧢 ヘッダー等を元の位置に戻す（'+owSK.length+'）</button> ':'')
+        +(owDX?'<button id="__ce_ow_dx" style="background:#b91c1c;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11.5px;font-weight:700" title="どの画面幅で見ても再発しない直し方">⟲ 横ドラッグのズレを全部戻す（'+owDX+'）</button> ':'')
+        +(owQ.length?'<button id="__ce_ow_fix" style="background:#dc2626;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11.5px;font-weight:700">➡ 今の幅のはみ出しを直す</button> ':'')
+        +'<button id="__ce_ow_rst" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11.5px">⟲ 元に戻す</button>'
+        +'<div style="font-size:10px;color:#9a8a8a;margin-top:3px">※「はみ出しを直す」は今の画面幅が基準です。狭い画面でも直したいときは、先に<b>横ドラッグのズレを全部戻す</b>を押してください</div>'
+        +'</div>';
+    }
     // 📏 ムダな余白がある箱で右クリックしたら「詰める」を出す（数字つきで原因を名指し）
     var pdQ=padChain(curEl), pdRowQ='';
     if(pdQ.length){
@@ -10201,7 +10709,7 @@ html.__ce_altmode{cursor:text}
     //   パネル群はその下にまとめる（選択中パネル selRowQ / まとめて文字調整 mfRow は今の操作の続きなので上のまま）。
     //   ★パネルは他のグループと同じ「▸ 1つの畳んだメニュー」にまとめる（data-g="n"＝数字のgiと衝突しない）。
     //     中身はDOM上 qm の子のままなので、下の #__ce_dg_fix 等の配線・closeMenu はそのまま効く。
-    var noticeL=[dgRowQ,pdRowQ,slRowQ,peRowQ,decoRowQ,radRowQ].filter(function(s){ return !!s; });
+    var noticeL=[owRowQ,dgRowQ,pdRowQ,slRowQ,peRowQ,decoRowQ,radRowQ].filter(function(s){ return !!s; });
     var noticeQ = noticeL.length
       ? '<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
         +'<div class="__ce_grp"><button class="__ce_qi __ce_gbtn" data-g="n" style="display:flex;width:100%;align-items:center;gap:8px;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'
@@ -10269,6 +10777,39 @@ html.__ce_altmode{cursor:text}
         setTimeout(_dgSync,60); });
       qm.querySelector('#__ce_dg_rst').addEventListener('click',function(ev){ ev.stopPropagation();
         dgQ.forEach(function(o){ try{ dragUnbake(o.el); }catch(_){} }); setTimeout(_dgSync,60); });
+    }
+    // ➡ 右のはみ出しを直すの配線（直した瞬間にページ幅の変化を出す＝効いたのが目で分かる）
+    if((owQ.length||owDX||owSK.length) && qm.querySelector('#__ce_ow_rst')){
+      var _owW0=document.documentElement.scrollWidth;
+      // 戻す用の控えは「今はみ出している物」＋「右へドラッグされている物」＋「貼り付く帯」
+      var _owEls=owQ.map(function(o){ return o.el; }).concat(owSK.map(function(o){ return o.el; }));
+      [].slice.call(document.querySelectorAll('[data-cetx]')).forEach(function(el){
+        if(el.closest('[id^="__ce"]')) return;
+        if((parseFloat(el.getAttribute('data-cetx'))||0)>2 && _owEls.indexOf(el)<0) _owEls.push(el);
+      });
+      var _owSnap=_owEls.map(function(el){ return {el:el, tr:el.style.translate||'', tx:el.getAttribute('data-cetx'),
+        ty:el.getAttribute('data-cety'), mw:el.style.maxWidth||'', w:el.style.width||'', tf:el.style.transform||''}; });
+      var _fixB=qm.querySelector('#__ce_ow_fix');
+      if(_fixB) _fixB.addEventListener('click',function(ev){ ev.stopPropagation();
+        overflowFix();
+        if(msg) msg.textContent=msg.textContent+'（ページ幅 '+_owW0+'px → '+document.documentElement.scrollWidth+'px）';
+      });
+      var _dxB=qm.querySelector('#__ce_ow_dx');
+      if(_dxB) _dxB.addEventListener('click',function(ev){ ev.stopPropagation(); ovDragXAll(); });
+      var _skB=qm.querySelector('#__ce_ow_sk');
+      if(_skB) _skB.addEventListener('click',function(ev){ ev.stopPropagation(); stickyFix(); });
+      qm.querySelector('#__ce_ow_rst').addEventListener('click',function(ev){ ev.stopPropagation();
+        _owSnap.forEach(function(s){
+          if(s.tr) s.el.style.translate=s.tr; else s.el.style.removeProperty('translate');
+          if(s.tf) s.el.style.transform=s.tf; else s.el.style.removeProperty('transform');
+          if(s.w) s.el.style.width=s.w; else s.el.style.removeProperty('width');
+          if(s.tx!=null) s.el.setAttribute('data-cetx',s.tx); else s.el.removeAttribute('data-cetx');
+          if(s.ty!=null) s.el.setAttribute('data-cety',s.ty); else s.el.removeAttribute('data-cety');
+          if(s.mw) s.el.style.maxWidth=s.mw; else s.el.style.removeProperty('max-width');
+        });
+        markDirty();
+        if(msg) msg.textContent='➡ はみ出しの修正を取り消しました（ページ幅 '+document.documentElement.scrollWidth+'px）';
+      });
     }
     // 📏 余白を詰めるの配線。★ページ全体の高さの変化を出す＝「効いたのか分からない」を無くす
     if(pdQ.length && qm.querySelector('#__ce_pd_fit')){
