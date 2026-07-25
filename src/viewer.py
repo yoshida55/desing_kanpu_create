@@ -9667,6 +9667,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_txt','✏ 文字を追加（編集）'],
     ['__ce_q_img','🖼 画像を追加（ここに置く）'],
     ['__ce_q_imgswap','🔄 この画像を差し替え（AIなし・一瞬）'],
+    ['__ce_q_photo','🖼 写真を加工（フチ・カード・背景など）'],
     ['__ce_q_slide','🖼 スライドショー（画像が次々切り替わる）'],
     ['__ce_q_fx','✨ 動きを付ける（アニメを選ぶ）'],
     ['__ce_q_fly','🕊 線を描いて飛ばす（空飛ぶルート）'],
@@ -9701,7 +9702,7 @@ html.__ce_altmode{cursor:text}
   // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
   //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
   var QM_DEF_LAYOUT=[
-    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_slide','__ce_q_addline','__ce_q_txtbg',
+    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
@@ -10195,8 +10196,24 @@ html.__ce_altmode{cursor:text}
         +'<span style="opacity:.8">文字色</span> <input type="color" id="__ce_mf_c" value="#222222" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> <span style="font-size:10.5px;color:#888">選んだ'+selEls.length+'個全部に効く・💾保存で残る</span>'
         +'</div>';
     }
-    qm.innerHTML=selRowQ+dgRowQ+pdRowQ+slRowQ+peRowQ+decoRowQ+radRowQ+mfRow+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    // ★並び順（2026-07-25）：気づき系パネル（🕳穴・📏余白・🎞スライド・🫥すり抜け・➖飾り・◽カド）は
+    //   縦に長く、3つ重なると本命のメニューが画面外まで押し下げられる。よく使うグループメニューを先に出し、
+    //   パネル群はその下にまとめる（選択中パネル selRowQ / まとめて文字調整 mfRow は今の操作の続きなので上のまま）。
+    //   ★パネルは他のグループと同じ「▸ 1つの畳んだメニュー」にまとめる（data-g="n"＝数字のgiと衝突しない）。
+    //     中身はDOM上 qm の子のままなので、下の #__ce_dg_fix 等の配線・closeMenu はそのまま効く。
+    var noticeL=[dgRowQ,pdRowQ,slRowQ,peRowQ,decoRowQ,radRowQ].filter(function(s){ return !!s; });
+    var noticeQ = noticeL.length
+      ? '<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
+        +'<div class="__ce_grp"><button class="__ce_qi __ce_gbtn" data-g="n" style="display:flex;width:100%;align-items:center;gap:8px;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'
+        +'<span style="flex:1">🔎 このページで見つかったこと</span>'
+        +'<span style="color:#8a8a90;font-size:11px">'+noticeL.length+'　▸</span></button>'
+        +'<div class="__ce_sub" data-g="n" style="display:none;position:fixed;left:0;top:0;min-width:300px;max-width:380px;max-height:calc(100vh - 20px);overflow-y:auto;background:#f2f2f7;border:1px solid #b9b9c4;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.22);padding:4px;z-index:2147483647">'
+        +'<div style="padding:5px 10px;font-size:10.5px;font-weight:700;color:#5b6472;border-bottom:1px solid #dcdce2;margin-bottom:3px">🔎 このページで見つかったこと（全部AIなし）</div>'
+        +noticeL.join('')+'</div></div>'
+      : '';
+    qm.innerHTML=selRowQ+mfRow+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
+      +noticeQ
       +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
       +row('__ce_q_full','⚙ すべての編集メニュー…')
       +'<div style="display:flex;justify-content:flex-end;gap:10px;padding:0 8px 3px">'
@@ -10372,6 +10389,11 @@ html.__ce_altmode{cursor:text}
         if(_ic.length>1){ pickWhichImg(_ic); return; }        // 重なっている→どれを差し替えるかサムネで選ぶ
         if(!_ic.length){ if(msg) msg.textContent='ここには差し替えられる画像がありません（画像の上で右クリックしてください）'; closeMenu(); return; }
         closeMenu(); openPicker(_ic[0]); return;
+      }
+      // 🖼 写真を加工：⚙大メニュー(__ce_cmdeco)にしか無かったのでクイックにも出す（2026-07-25）
+      if(t.id==='__ce_q_photo'){
+        var _pe=curEl, _pim=(_pe&&_pe.tagName==='IMG')?_pe:((_pe&&_pe.querySelector)?_pe.querySelector('img'):null);
+        var _psi=secIndexOf(_pe); closeMenu(); openPhotoDecoPicker(_pe,_pim,_psi); return;
       }
       if(t.id==='__ce_q_slide'){ var sle=curEl; closeMenu(); slideMake(sle); return; }
       if(t.id==='__ce_q_fx'){ _bigFull=true; _bigFxFocus=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }

@@ -2,6 +2,7 @@
 "sep:要素追加・編集",
 "__ce_q_up",
 "__ce_q_txt",
+"__ce_q_photo",
 "__ce_q_img",
 "__ce_q_imgswap",
 "__ce_q_txtbg",
@@ -40,5 +41,6 @@
 "sep:固定系(fixed)",
 "__ce_q_unfix",
 "__ce_q_pin",
-"sep:髙橋研三"
+"sep:髙橋研三",
+"sep"
 ]
