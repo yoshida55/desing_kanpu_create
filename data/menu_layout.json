@@ -4,6 +4,7 @@
 "__ce_q_txt",
 "__ce_q_img",
 "__ce_q_imgswap",
+"__ce_q_txtbg",
 "sep:アニメーション系",
 "__ce_q_fx",
 "__ce_q_fly",
@@ -28,7 +29,7 @@
 "__ce_q_pickov",
 "off:__ce_q_del",
 "__ce_q_align",
-"sep:要素操作",
+"sep:Male",
 "__ce_q_ovup",
 "__ce_q_ovdn",
 "__ce_q_ovshow",
@@ -38,5 +39,6 @@
 "off:__ce_q_addline",
 "sep:固定系(fixed)",
 "__ce_q_unfix",
-"__ce_q_pin"
+"__ce_q_pin",
+"sep:髙橋研三"
 ]
