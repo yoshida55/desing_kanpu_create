@@ -10780,7 +10780,13 @@ html.__ce_altmode{cursor:text}
         return '<button class="__ce_spv" data-v="'+esc(v)+'" title="'+esc(v)+(px?('（約'+px+'）'):'')+'" style="'+_pbS+'">'+esc(v)+'</button>';
       }).join(' ');
       // ドラッグで縦にずらした跡があると、余白をそろえてもその分だけアキが狂う＝一緒に戻せるようにする
-      var ty=0; (selEls.length?selEls:[curEl]).forEach(function(x){ if(x) ty+=Math.abs(+x.getAttribute('data-cety')||0); });
+      var ty=0, free=0;
+      (selEls.length?selEls:[curEl]).forEach(function(x){
+        if(!x) return;
+        ty+=Math.abs(+x.getAttribute('data-cety')||0);
+        var ps=''; try{ ps=getComputedStyle(x).position; }catch(_){}
+        if(ps==='absolute'||ps==='fixed') free++;   // 自由配置＝margin/paddingでは1pxも動かない
+      });
       var mode=localStorage.getItem('__ce_sp_mode')||'mt';
       var opt=function(v,t){ return '<option value="'+v+'"'+(mode===v?' selected':'')+'>'+t+'</option>'; };
       spRow='<div style="background:#fdf3e6;border-bottom:1px solid #ecd9bb;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px">'
@@ -10945,20 +10951,64 @@ html.__ce_altmode{cursor:text}
         });
         box.textContent = seen.length? ('今 '+seen.slice(0,5).join(' / ')+'px'+(seen.length>1?'（バラバラ）':'（そろっています）')) : '';
       };
+      // 指定値(10rem/24px/2em)を px にする
+      var spPx=function(v,el){
+        var n=parseFloat(v)||0;
+        if(/rem\\s*$/.test(v)){ var rp=16; try{ rp=parseFloat(getComputedStyle(document.documentElement).fontSize)||16; }catch(_){} return n*rp; }
+        if(/em\\s*$/.test(v)){ var ep=16; try{ ep=parseFloat(getComputedStyle(el).fontSize)||16; }catch(_){} return n*ep; }
+        return n;
+      };
+      // ★自由配置(position:absolute/fixed)の要素は margin/padding を入れても1pxも動かない
+      //   （値は入るのに見た目が変わらない＝一番気づけない失敗）。この場合は「すぐ上にあるものとの
+      //   隙間」を指定値にするよう、要素自体を縦に動かす＝ユーザーの狙い（間隔をそろえる）を満たす。
+      var spFreeGap=function(x,px){
+        var r=x.getBoundingClientRect();
+        var host=(x.closest&&x.closest('section,header,footer,main'))||document.body;
+        var best=null;
+        [].slice.call(host.querySelectorAll('*')).forEach(function(n){
+          if(n===x||x.contains(n)||n.contains(x)||_inUI2(n)) return;
+          var nr=n.getBoundingClientRect();
+          if(!(nr.width>4&&nr.height>4)||nr.bottom>r.top+1) return;      // 上にあるものだけ
+          var cs; try{ cs=getComputedStyle(n); }catch(_){ return; }
+          if(cs.visibility==='hidden'||(parseFloat(cs.opacity)||0)<0.05) return;
+          var ov=Math.min(nr.right,r.right)-Math.max(nr.left,r.left);
+          if(ov<Math.min(nr.width,r.width)*0.25) return;                 // 横がある程度重なっているものだけ
+          if(!best||nr.bottom>best.b) best={el:n,b:nr.bottom};
+        });
+        if(!best) return null;
+        var gap=r.top-best.b;
+        try{ setPos(x,(+x.getAttribute('data-cetx')||0),(+x.getAttribute('data-cety')||0)+(px-gap)); }catch(_){ return null; }
+        return {from:Math.round(gap), to:Math.round(px)};
+      };
       var spDo=function(v){
         var m=spMd(), prop=(m.charAt(0)==='m')?'margin':'padding', sides=m.slice(1);
         var zy=qm.querySelector('#__ce_sp_zy'), doZy=!!(zy&&zy.checked);
         var els=spEls(); if(!els.length) return;
+        var h0=document.scrollingElement.scrollHeight, mv=0, st=0, ng=0, gaps=[];
         els.forEach(function(x){
+          var pos=''; try{ pos=getComputedStyle(x).position; }catch(_){}
+          if(pos==='absolute'||pos==='fixed'){
+            var g=spFreeGap(x, spPx(v,x));
+            if(g){ mv++; gaps.push(g.from+'→'+g.to+'px'); } else ng++;
+            return;
+          }
+          var t0=x.getBoundingClientRect().top;
           if(sides.indexOf('t')>=0) x.style.setProperty(prop+'-top', v,'important');
           if(sides.indexOf('b')>=0) x.style.setProperty(prop+'-bottom', v,'important');
           // ドラッグで縦にずらした跡を残したままだと、余白をそろえてもその分アキが狂う
           if(doZy&&(+x.getAttribute('data-cety')||0)){ try{ setPos(x,(+x.getAttribute('data-cetx')||0),0); }catch(_){} }
+          st++;
+          if(Math.abs(x.getBoundingClientRect().top-t0)<0.5 && document.scrollingElement.scrollHeight===h0) ng++;
         });
         try{ markDirty(); }catch(_){}
         setTimeout(spNow,0);
-        if(msg) msg.textContent='📏 '+els.length+'個の'+({m:'外側',p:'内側'}[m.charAt(0)])
-          +'の余白（'+(sides==='tb'?'上下':(sides==='t'?'上':'下'))+'）を '+v+' にそろえました。💾保存で残ります・⟲で戻せます';
+        if(msg){
+          var t=[];
+          if(mv) t.push('自由配置の'+mv+'個は上との隙間を '+v+' にしました（'+gaps.slice(0,3).join('・')+'）');
+          if(st) t.push(st+'個の'+({m:'外側',p:'内側'}[m.charAt(0)])+'の余白（'+(sides==='tb'?'上下':(sides==='t'?'上':'下'))+'）を '+v+' にしました');
+          if(ng) t.push('⚠'+ng+'個は見た目が変わりませんでした（上に基準が無い／隣の余白のほうが大きい）');
+          msg.textContent='📏 '+t.join('／')+'。💾保存で残ります・⟲で戻せます';
+        }
       };
       spNow();
       [].slice.call(qm.querySelectorAll('.__ce_spv')).forEach(function(b){
