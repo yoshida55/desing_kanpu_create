@@ -10784,19 +10784,24 @@ html.__ce_altmode{cursor:text}
       (selEls.length?selEls:[curEl]).forEach(function(x){
         if(!x) return;
         ty+=Math.abs(+x.getAttribute('data-cety')||0);
+        try{ delete x.__ceSpRef; }catch(_){}        // 隙間の基準はメニューを開き直したら選び直す（古い基準を持ち越さない）
         var ps=''; try{ ps=getComputedStyle(x).position; }catch(_){}
         if(ps==='absolute'||ps==='fixed') free++;   // 自由配置＝margin/paddingでは1pxも動かない
       });
-      var mode=localStorage.getItem('__ce_sp_mode')||'mt';
+      var mode=localStorage.getItem('__ce_sp_mode')||'gap';
       var opt=function(v,t){ return '<option value="'+v+'"'+(mode===v?' selected':'')+'>'+t+'</option>'; };
-      spRow='<div style="background:#fdf3e6;border-bottom:1px solid #ecd9bb;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px">'
+      // ★max-width＝この板の説明文でメニュー全体が横に広がるのを止める（widthはauto＝中身なりのため）
+      spRow='<div style="background:#fdf3e6;border-bottom:1px solid #ecd9bb;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px;max-width:295px;box-sizing:border-box">'
         +'<b>📏 余白の定番（'+tgtN+'個に当てる・AIなし）</b><br>'
         +btns+' <button id="__ce_sp_ed" title="定番の数値を自分で決め直す（カンマ区切り・カンプをまたいで残る）" style="background:none;border:none;color:#8a6d3b;font-size:11px;cursor:pointer;text-decoration:underline">✎ 値を変える</button><br>'
-        +'<span style="opacity:.8">どこに</span> '
-        +'<select id="__ce_sp_md" style="font-size:11px;padding:2px;border:1px solid #ccd;border-radius:5px">'
-        +opt('mt','上の外側（margin-top）')+opt('mb','下の外側（margin-bottom）')+opt('mtb','上下の外側（margin）')
-        +opt('pt','上の内側（padding-top）')+opt('pb','下の内側（padding-bottom）')+opt('ptb','上下の内側（padding）')
-        +'</select> <span id="__ce_sp_now" style="font-size:10.5px;color:#888"></span>'
+        +'<span style="opacity:.8">そろえ方</span> '
+        +'<select id="__ce_sp_md" style="font-size:11px;padding:2px;border:1px solid #ccd;border-radius:5px;max-width:185px">'
+        +opt('gap','隙間＝結果その値（おすすめ）')
+        +opt('mt','margin-top をその値に')+opt('mb','margin-bottom をその値に')+opt('ptb','padding上下 をその値に')
+        +'</select><br><span id="__ce_sp_now" style="font-size:10.5px;color:#888"></span>'
+        +(mode==='gap'?('<div style="font-size:10.5px;color:#8a6d3b;line-height:1.45;margin-top:3px;max-width:275px">'
+            +(tgtN>1?'選んだもの同士の隙間が<b>結果その値ちょうど</b>になります<br>（一番上は動かしません）'
+                    :'すぐ上にあるものとの隙間が<b>結果その値ちょうど</b>に<br>なります（2個以上選ぶとより確実）')+'</div>'):'')
         +(ty>8?('<label title="ドラッグで動かした縦のズレを0に戻してから余白を当てる" style="display:block;font-size:11px;line-height:1.5;margin-top:4px;cursor:pointer;user-select:none"><input type="checkbox" id="__ce_sp_zy" style="vertical-align:middle;margin-right:4px;cursor:pointer">ドラッグの縦ズレ（計'+Math.round(ty)+'px）も0に戻す</label>'):'')
         +'</div>';
     })();
@@ -10939,12 +10944,25 @@ html.__ce_altmode{cursor:text}
     }
     // 📏 余白の定番の配線（メニューは閉じない＝5rem→10remと当て比べできる）
     if(qm.querySelector('#__ce_sp_ed')){
+      var _spFixT=0;   // アニメ落ち着き待ちの当て直しタイマー（当て直す前に別の値を押されたら取り消す）
       var spEls=function(){ return selEls.length?selEls:(curEl?[curEl]:[]); };
       var spMd=function(){ var s=qm.querySelector('#__ce_sp_md'); return (s&&s.value)||'mt'; };
       var spNow=function(){
         var box=qm.querySelector('#__ce_sp_now'); if(!box) return;
-        var m=spMd(), prop=(m.charAt(0)==='m')?'margin':'padding', side=(m.indexOf('t')>0)?'Top':'Bottom';
-        var seen=[];
+        var m=spMd(), seen=[];
+        if(m==='gap'){
+          // 「今できている隙間」を実測で出す（CSSの値ではなく、目で見えているアキ）
+          var ls=spEls().slice().sort(function(a,b){ return a.getBoundingClientRect().top-b.getBoundingClientRect().top; });
+          if(ls.length>1){
+            for(var i=1;i<ls.length;i++) seen.push(Math.round(ls[i].getBoundingClientRect().top-ls[i-1].getBoundingClientRect().bottom));
+          } else if(ls.length===1){
+            var rf=spRefAbove(ls[0]);
+            if(rf) seen.push(Math.round(ls[0].getBoundingClientRect().top-rf.getBoundingClientRect().bottom));
+          }
+          box.textContent = seen.length? ('今の隙間 '+seen.slice(0,5).join(' / ')+'px') : '';
+          return;
+        }
+        var prop=(m.charAt(0)==='m')?'margin':'padding', side=(m==='mb')?'Bottom':'Top';
         spEls().forEach(function(x){
           var v; try{ v=Math.round(parseFloat(getComputedStyle(x)[prop+side])||0); }catch(_){ return; }
           if(seen.indexOf(v)<0) seen.push(v);
@@ -10961,7 +10979,14 @@ html.__ce_altmode{cursor:text}
       // ★自由配置(position:absolute/fixed)の要素は margin/padding を入れても1pxも動かない
       //   （値は入るのに見た目が変わらない＝一番気づけない失敗）。この場合は「すぐ上にあるものとの
       //   隙間」を指定値にするよう、要素自体を縦に動かす＝ユーザーの狙い（間隔をそろえる）を満たす。
-      var spFreeGap=function(x,px){
+      // ★基準（上にあるもの）はパネルを開いている間ずっと固定する。毎回選び直すと、下へ動かした拍子に
+      //   別の要素を追い越して「その追い越した相手」が新しい基準になり、10rem→5remで上がらず下がる
+      //   （実測で再現）。＝1回選んだ相手を覚えて、当て直しでも同じ相手との隙間を作る。
+      // すぐ上にあるものを探す。★一度選んだ相手は覚えておく（パネルを開いている間は固定）。
+      //   毎回選び直すと、下へ動かした拍子に別の要素を追い越して基準が入れ替わり、10rem→5remで
+      //   上がらず下がる（実測で再現）。
+      var spRefAbove=function(x){
+        var ref=x.__ceSpRef; if(ref&&ref.isConnected) return ref;
         var r=x.getBoundingClientRect();
         var host=(x.closest&&x.closest('section,header,footer,main'))||document.body;
         var best=null;
@@ -10976,38 +11001,74 @@ html.__ce_altmode{cursor:text}
           if(!best||nr.bottom>best.b) best={el:n,b:nr.bottom};
         });
         if(!best) return null;
-        var gap=r.top-best.b;
-        try{ setPos(x,(+x.getAttribute('data-cetx')||0),(+x.getAttribute('data-cety')||0)+(px-gap)); }catch(_){ return null; }
-        return {from:Math.round(gap), to:Math.round(px)};
+        return (x.__ceSpRef=best.el);
       };
-      var spDo=function(v){
-        var m=spMd(), prop=(m.charAt(0)==='m')?'margin':'padding', sides=m.slice(1);
-        var zy=qm.querySelector('#__ce_sp_zy'), doZy=!!(zy&&zy.checked);
-        var els=spEls(); if(!els.length) return;
-        var h0=document.scrollingElement.scrollHeight, mv=0, st=0, ng=0, gaps=[];
-        els.forEach(function(x){
+      // ★「上のもの(prev)との隙間が、結果的にちょうど px になる」ようにする。
+      //   足し算(＋10rem)でも「margin:10rem」でもなく、実測 → 足りない分だけ動かす → もう一度実測。
+      //   自由配置は margin が1pxも効かないので移動で、それ以外は margin-top を差分で増減して作る。
+      var spSetGap=function(prev,x,px){
+        var from=null;
+        for(var pass=0; pass<3; pass++){
+          var gap=x.getBoundingClientRect().top-prev.getBoundingClientRect().bottom;
+          if(from===null) from=gap;
+          var d=px-gap;
+          if(Math.abs(d)<0.6) break;
           var pos=''; try{ pos=getComputedStyle(x).position; }catch(_){}
           if(pos==='absolute'||pos==='fixed'){
-            var g=spFreeGap(x, spPx(v,x));
-            if(g){ mv++; gaps.push(g.from+'→'+g.to+'px'); } else ng++;
+            try{ setPos(x,(+x.getAttribute('data-cetx')||0),(+x.getAttribute('data-cety')||0)+d); }catch(_){ return null; }
+          }else{
+            var mt=0; try{ mt=parseFloat(getComputedStyle(x).marginTop)||0; }catch(_){}
+            x.style.setProperty('margin-top', Math.round((mt+d)*100)/100+'px','important');
+          }
+        }
+        var got=x.getBoundingClientRect().top-prev.getBoundingClientRect().bottom;
+        return {from:Math.round(from), to:Math.round(got), ok:Math.abs(got-px)<=1.5};
+      };
+      var spDo=function(v){
+        var m=spMd();
+        var zy=qm.querySelector('#__ce_sp_zy'), doZy=!!(zy&&zy.checked);
+        var els=spEls(); if(!els.length) return;
+        if(doZy) els.forEach(function(x){   // ドラッグの縦ズレを先に0へ戻してから隙間を作る
+          if(+x.getAttribute('data-cety')||0){ try{ setPos(x,(+x.getAttribute('data-cetx')||0),0); }catch(_){} }
+        });
+        var res=[], ng=0;
+        var spRun=function(){
+          res=[]; ng=0;
+          if(m!=='gap'){
+            els.forEach(function(x){
+              if(m==='mt') x.style.setProperty('margin-top', v,'important');
+              else if(m==='mb') x.style.setProperty('margin-bottom', v,'important');
+              else { x.style.setProperty('padding-top', v,'important'); x.style.setProperty('padding-bottom', v,'important'); }
+            });
             return;
           }
-          var t0=x.getBoundingClientRect().top;
-          if(sides.indexOf('t')>=0) x.style.setProperty(prop+'-top', v,'important');
-          if(sides.indexOf('b')>=0) x.style.setProperty(prop+'-bottom', v,'important');
-          // ドラッグで縦にずらした跡を残したままだと、余白をそろえてもその分アキが狂う
-          if(doZy&&(+x.getAttribute('data-cety')||0)){ try{ setPos(x,(+x.getAttribute('data-cetx')||0),0); }catch(_){} }
-          st++;
-          if(Math.abs(x.getBoundingClientRect().top-t0)<0.5 && document.scrollingElement.scrollHeight===h0) ng++;
-        });
+          var ls=els.slice().sort(function(a,b){ return a.getBoundingClientRect().top-b.getBoundingClientRect().top; });
+          var px=spPx(v,ls[0]);
+          if(ls.length>1){
+            for(var i=1;i<ls.length;i++){
+              var g=spSetGap(ls[i-1],ls[i],px);
+              if(g){ res.push(g.from+'→'+g.to+'px'); if(!g.ok) ng++; } else ng++;
+            }
+          }else{
+            var rf=spRefAbove(ls[0]);
+            if(!rf){ ng++; return; }
+            var g1=spSetGap(rf,ls[0],px);
+            if(g1){ res.push(g1.from+'→'+g1.to+'px'); if(!g1.ok) ng++; } else ng++;
+          }
+        };
+        spRun();
+        // ★出現アニメでtransformが動いている最中に測ると1回目だけズレる（実測）。
+        //   0.7秒後＝アニメが落ち着いてからもう一度合わせ直して、必ず指定どおりの隙間にする。
+        //   ★前の値の当て直しが残っていると次の値を上書きしてしまう（5rem→10remが80pxに戻る）ので必ず取り消す。
+        if(_spFixT){ clearTimeout(_spFixT); _spFixT=0; }
+        if(m==='gap') _spFixT=setTimeout(function(){ _spFixT=0; try{ spRun(); markDirty(); spNow(); }catch(_){} },700);
         try{ markDirty(); }catch(_){}
         setTimeout(spNow,0);
         if(msg){
-          var t=[];
-          if(mv) t.push('自由配置の'+mv+'個は上との隙間を '+v+' にしました（'+gaps.slice(0,3).join('・')+'）');
-          if(st) t.push(st+'個の'+({m:'外側',p:'内側'}[m.charAt(0)])+'の余白（'+(sides==='tb'?'上下':(sides==='t'?'上':'下'))+'）を '+v+' にしました');
-          if(ng) t.push('⚠'+ng+'個は見た目が変わりませんでした（上に基準が無い／隣の余白のほうが大きい）');
-          msg.textContent='📏 '+t.join('／')+'。💾保存で残ります・⟲で戻せます';
+          msg.textContent = (m==='gap')
+            ? ('📏 隙間を '+v+'（'+Math.round(spPx(v,els[0]))+'px）にしました：'+(res.join(' / ')||'（対象なし）')
+               +(ng?('　⚠'+ng+'件は届きませんでした（上に基準が無い等）'):'')+'。💾保存で残ります・⟲で戻せます')
+            : ('📏 '+els.length+'個の '+({mt:'margin-top',mb:'margin-bottom',ptb:'padding上下'}[m])+' を '+v+' にしました。💾保存で残ります・⟲で戻せます');
         }
       };
       spNow();
@@ -11179,8 +11240,24 @@ html.__ce_altmode{cursor:text}
       });
       qm.querySelector('#__ce_q_seludc').addEventListener('input',function(){ if(selApiQ.hasUd()) selApiQ.underline(this.value); });
     }
-    qm.style.left=Math.max(6,Math.min(e.clientX, window.innerWidth-qm.offsetWidth-8))+'px';
-    qm.style.top=Math.max(6,Math.min(e.clientY, window.innerHeight-qm.offsetHeight-8))+'px';
+    // メニューは右クリック位置から少し離して出す（真上に出ると、いじりたい要素がメニューで隠れて
+    // 変化が見えない）。それでも選んだ要素にかぶるなら、要素の右横（無理なら左横）へ逃がす。
+    (function(){
+      var gapX=24, gapY=18, w=qm.offsetWidth, h=qm.offsetHeight;
+      var mx=e.clientX+gapX, my=e.clientY+gapY;
+      try{
+        // 小さい要素（文字ブロック等）は、メニューが上に乗ると何を直しているのか見えなくなるので横へ逃がす。
+        // 大きい要素はどう置いてもかぶるので、カーソルの近く（＝目線の近く）のまま。遠くへ飛ぶと迷子になる。
+        var er=(curEl&&curEl.getBoundingClientRect)?curEl.getBoundingClientRect():null;
+        if(er&&er.width>0&&er.width<=420&&er.height<=420
+           &&!(mx>er.right||mx+w<er.left||my>er.bottom||my+h<er.top)){
+          if(er.right+gapX+w<=window.innerWidth-8) mx=er.right+gapX;
+          else if(er.left-gapX-w>=8) mx=er.left-gapX-w;
+        }
+      }catch(_){}
+      qm.style.left=Math.max(6,Math.min(mx, window.innerWidth-w-8))+'px';
+      qm.style.top=Math.max(6,Math.min(my, window.innerHeight-h-8))+'px';
+    })();
     curMenu=qm;
     qm.addEventListener('mouseover',function(ev){ var b2=ev.target.closest('.__ce_qi'); [].slice.call(qm.querySelectorAll('.__ce_qi')).forEach(function(x){ x.style.background=(x===b2)?'#eef4ff':'none'; }); });
     qm.addEventListener('click',function(ev){
