@@ -6236,12 +6236,15 @@ html.__ce_altmode{cursor:text}
       +'<textarea id="__ce_brta" style="width:100%;height:120px;font-size:15px;padding:10px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
       +'<button class="go2" id="__ce_brapply" style="background:#1a7f37;margin-top:8px">✅ 改行を反映</button>'
       +'<div style="border-top:1px solid #eee;margin:14px 0 0"></div>'
-      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:12px 0 6px">🔡 文字の大きさ</div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:12px 0 6px">🔡 文字の大きさ <span id="__ce_brfsnow" style="font-weight:400;color:#666;font-size:11.5px"></span></div>'
       +'<div style="display:flex;gap:6px"><button class="go2" data-fs="1.1" style="background:#0b6bcb;margin:0;flex:1">＋ 大きく</button><button class="go2" data-fs="0.9" style="background:#0b6bcb;margin:0;flex:1">－ 小さく</button><button class="go2" data-fs="0" style="background:#888;margin:0">⟲</button></div>'
-      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">↕ 行間（ラインハイト）</div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">↕ 行間（ラインハイト） <span id="__ce_brlhnow" style="font-weight:400;color:#666;font-size:11.5px"></span></div>'
       +'<div style="display:flex;gap:6px"><button class="go2" data-lh="0.15" style="background:#0b6bcb;margin:0;flex:1">＋ 広く</button><button class="go2" data-lh="-0.15" style="background:#0b6bcb;margin:0;flex:1">－ 狭く</button><button class="go2" data-lhr="1" style="background:#888;margin:0">⟲</button></div>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🅰 フォント</div>'
       +'<select id="__ce_brff" style="width:100%;font-size:13px;padding:9px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit">'+opts+'</select>'
+      +'<div id="__ce_brffnow" style="font-size:11.5px;color:#555;margin-top:5px"></div>'
+      +'<div style="display:flex;gap:6px;margin-top:5px"><button class="go2" id="__ce_brffall" style="background:#7c3aed;margin:0;flex:1">🅰 このフォントをページ全部に適用</button>'
+      +'<button class="go2" id="__ce_brffallr" title="ページ全部への適用をやめる（個別に指定した分は戻りません）" style="background:#888;margin:0">⟲</button></div>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🎨 文字の色</div>'
       +'<div style="display:flex;gap:8px;align-items:center"><input type="color" id="__ce_brcol" style="width:54px;height:38px;padding:2px;border:1px solid #d0d0d5;border-radius:8px;cursor:pointer"><button class="go2" id="__ce_brcolr" style="background:#888;margin:0;flex:1">⟲ 色を元に戻す</button></div>'
       +'<div id="__ce_brsw" style="margin-top:6px"></div>'
@@ -6414,10 +6417,67 @@ html.__ce_altmode{cursor:text}
       ensureDecoCss(); if(!el.classList.contains('ce_emph')) el.classList.add('ce_emph');
       el.style.setProperty('--ce-emphc', this.value); markDirty();
     });
+    // 🅰 今かかっている値（フォント名・大きさ・行間）を出す。★「このフォント何？」を調べるのが目的なので、
+    //    プルダウンも今のフォントを選んだ状態にする（一覧に無い名前なら先頭に足して選ぶ）。
+    function _brSyncNow(){
+      var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
+      var f=(cs.fontFamily||'').split(',')[0].trim().replace(/["']/g,'');
+      var n1=document.getElementById('__ce_brffnow');
+      if(n1) n1.innerHTML='今のフォント：<b>'+esc(f||'（不明）')+'</b>'+(document.getElementById('__ce_fontall')?'　<span style="color:#7c3aed">※ページ全部に適用中</span>':'');
+      var n2=document.getElementById('__ce_brfsnow');
+      if(n2) n2.textContent='今 '+(Math.round((parseFloat(cs.fontSize)||0)*10)/10)+'px';
+      var n3=document.getElementById('__ce_brlhnow');
+      if(n3){ var lh=parseFloat(cs.lineHeight), fs=parseFloat(cs.fontSize)||16;
+        n3.textContent=isFinite(lh)?('今 '+(Math.round(lh/fs*100)/100)+'倍（'+Math.round(lh)+'px）'):'今 標準'; }
+    }
+    (function(){
+      var sel=document.getElementById('__ce_brff'); if(!sel) return;
+      var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
+      var first=(cs.fontFamily||'').split(',')[0].trim().replace(/["']/g,'').toLowerCase(), hit='';
+      FONTS.forEach(function(f){
+        if(!f[0]||hit) return;
+        if(f[0].split(',')[0].trim().replace(/["']/g,'').toLowerCase()===first) hit=f[0];
+      });
+      if(hit){ sel.value=hit; }
+      else if(cs.fontFamily){
+        var op=document.createElement('option'); op.value=cs.fontFamily;
+        op.textContent='今のフォント：'+cs.fontFamily.split(',')[0].replace(/["']/g,'');
+        sel.insertBefore(op, sel.children[1]||null); sel.value=cs.fontFamily;
+      }
+    })();
+    _brSyncNow();
+    ov.addEventListener('click',function(){ setTimeout(_brSyncNow,0); });   // 何を押しても表示を追従させる
     document.getElementById('__ce_brff').addEventListener('change',function(){
       if(this.value){ ensureGoogleFont(this.value); el.style.setProperty('font-family', this.value, 'important'); }
       else el.style.removeProperty('font-family');
-      markDirty();
+      markDirty(); setTimeout(_brSyncNow,0);
+    });
+    // 🅰 このフォントをページ全部に適用（＝気に入ったフォントを1クリックで全体に配る）
+    //   1枚の<style>で当てる（要素ごとにインラインを書くとHTMLが膨らむため）。ただし
+    //   ★インライン指定は<style>より強いので、先に個別のfont-family指定を外さないと効かない。
+    document.getElementById('__ce_brffall').addEventListener('click',function(){
+      var fam=''; try{ fam=getComputedStyle(el).fontFamily||''; }catch(_){}
+      if(!fam){ msg.textContent='フォントが読み取れませんでした'; return; }
+      var sel=document.getElementById('__ce_brff');
+      if(sel&&sel.value) ensureGoogleFont(sel.value);
+      var n=0;
+      [].slice.call(document.querySelectorAll('[style*="font-family"]')).forEach(function(x){
+        if(_inUI2(x)) return;
+        x.style.removeProperty('font-family'); n++;
+      });
+      var st=document.getElementById('__ce_fontall');
+      if(!st){ st=document.createElement('style'); st.id='__ce_fontall'; document.head.appendChild(st); }
+      st.textContent='body,body *{font-family:'+fam+' !important}'
+        +'#__ce,#__ce *,#__ce_cm,#__ce_cm *,#__ce_pk,#__ce_pk *,#__ce_toast,#__ce_toast *,#__ce_savebar,#__ce_savebar *{font-family:system-ui,"Segoe UI",sans-serif !important}';
+      markDirty(); setTimeout(_brSyncNow,0);
+      msg.textContent='🅰 ページ全部を「'+fam.split(',')[0].replace(/["']/g,'')+'」にしました'
+        +(n?('（個別指定 '+n+'件は外しました）'):'')+'。戻すときは同じ所の ⟲。💾保存で残ります';
+    });
+    document.getElementById('__ce_brffallr').addEventListener('click',function(){
+      var st=document.getElementById('__ce_fontall');
+      if(!st){ msg.textContent='ページ全部への適用はしていません'; return; }
+      st.remove(); markDirty(); setTimeout(_brSyncNow,0);
+      msg.textContent='🅰 ページ全部への適用をやめました（元のフォントに戻ります）';
     });
     document.getElementById('__ce_brcol').addEventListener('input',function(){
       // color だけだと、グラデ文字(-webkit-text-fill-color:transparent)や1文字アニメで「透明のまま＝黒/消える」になる。
@@ -10726,14 +10786,31 @@ html.__ce_altmode{cursor:text}
         _mfF=Object.keys(_fc).sort(function(a,b){return _fc[b]-_fc[a];}).slice(0,6);
       }catch(_){ }
       ['游明朝','游ゴシック','ヒラギノ角ゴ ProN','メイリオ','serif','sans-serif'].forEach(function(f){ if(_mfF.indexOf(f)<0) _mfF.push(f); });
-      mfRow='<div style="background:#e8f2ff;border-bottom:1px solid #c9def5;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px">'
+      // ★今かかっている値を読んで、そのまま画面に出す（＝「何が選ばれているか」が一目で分かる）。
+      //   選んだもので値が違えば「バラバラ」と出す。値が1つなら選択肢もその値を選んだ状態にする。
+      var _mfNow=function(get){ var s=[]; selEls.forEach(function(x){ var v; try{ v=get(getComputedStyle(x)); }catch(_){ return; } if(v!=null&&v!==''&&s.indexOf(v)<0) s.push(v); }); return s; };
+      var _curF=_mfNow(function(cs){ return (cs.fontFamily||'').split(',')[0].trim().replace(/["']/g,''); });
+      var _curS=_mfNow(function(cs){ return Math.round((parseFloat(cs.fontSize)||0)*10)/10; });
+      var _curW=_mfNow(function(cs){ return cs.fontWeight; });
+      var _curC=_mfNow(function(cs){ return cs.color; });
+      var _mfHex=function(c){ var m=/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/.exec(c||''); return m?('#'+[1,2,3].map(function(i){ return ('0'+(+m[i]).toString(16)).slice(-2); }).join('')):''; };
+      var _one=function(a,suf){ return a.length===1?(a[0]+(suf||'')):(a.length?'バラバラ':'—'); };
+      var _bS='background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer';
+      var _nowS='font-size:10.5px;color:#5b7396;background:#dbe9fb;border-radius:4px;padding:0 5px';
+      mfRow='<div style="background:#e8f2ff;border-bottom:1px solid #c9def5;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px;max-width:295px;box-sizing:border-box">'
         +'<b>🅰 まとめて文字調整（'+selEls.length+'個・AIなし）</b><br>'
-        +'<span style="opacity:.8">フォント</span> <select id="__ce_mf_f" style="max-width:150px;font-size:11px;padding:2px;border:1px solid #ccd;border-radius:5px"><option value="">（そのまま）</option>'
+        +'<span style="opacity:.8">フォント</span> <select id="__ce_mf_f" style="max-width:185px;font-size:11px;padding:2px;border:1px solid #ccd;border-radius:5px">'
+        +'<option value="">'+(_curF.length===1?'（変えない）':'（変えない・今はバラバラ）')+'</option>'
+        +(_curF.length===1?('<optgroup label="今のフォント"><option value="'+esc(_curF[0])+'" selected>'+esc(_curF[0])+'</option></optgroup>'):'')
         +'<optgroup label="ページで使用中">'+_mfF.map(function(f){ return '<option value="'+esc(f)+'">'+esc(f)+'</option>'; }).join('')+'</optgroup>'
         +'<optgroup label="おすすめ（Web＝要ネット）">'+FONT_LIST.filter(function(f){return f[0];}).map(function(f){ return '<option value="'+esc(f[0])+'">'+esc(f[1])+'</option>'; }).join('')+'</optgroup></select><br>'
-        +'<span style="opacity:.8">大きさ</span> <button id="__ce_mf_m" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">−小さく</button> <button id="__ce_mf_p" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">＋大きく</button> '
-        +'<span style="opacity:.8">太さ</span> <button id="__ce_mf_b" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;font-weight:700">太く</button> <button id="__ce_mf_n" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">標準</button><br>'
-        +'<span style="opacity:.8">文字色</span> <input type="color" id="__ce_mf_c" value="#222222" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> <span style="font-size:10.5px;color:#888">選んだ'+selEls.length+'個全部に効く・💾保存で残る</span>'
+        +'<span style="opacity:.8">大きさ</span> <input type="number" id="__ce_mf_s" value="'+(_curS.length===1?_curS[0]:'')+'" placeholder="'+(_curS.length?'バラバラ':'')+'" title="今の文字サイズ（px）。直接入れてEnterでも変えられます" style="width:56px;font-size:11px;padding:2px 4px;border:1px solid #ccd;border-radius:5px">px '
+        +'<button id="__ce_mf_m" style="'+_bS+'">−</button> <button id="__ce_mf_p" style="'+_bS+'">＋</button>'
+        +(_curS.length>1?(' <span id="__ce_mf_sn" style="'+_nowS+'">今 '+_curS.slice(0,4).join(' / ')+'px</span>'):'')+'<br>'
+        +'<span style="opacity:.8">太さ</span> <button id="__ce_mf_b" style="'+_bS+';font-weight:700">太く</button> <button id="__ce_mf_n" style="'+_bS+'">標準</button> '
+        +'<span id="__ce_mf_wn" style="'+_nowS+'">今 '+_one(_curW)+'</span><br>'
+        +'<span style="opacity:.8">文字色</span> <input type="color" id="__ce_mf_c" value="'+(_curC.length===1?(_mfHex(_curC[0])||'#222222'):'#222222')+'" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"> '
+        +'<span id="__ce_mf_cn" style="'+_nowS+'">今 '+(_curC.length===1?(_mfHex(_curC[0])||_curC[0]):'バラバラ')+'</span>'
         +'</div>';
     }
     // 📐 まとめてサイズをそろえる（複数選択時のみ・Figmaの「サイズを合わせる」相当・AIなし）
@@ -10835,29 +10912,68 @@ html.__ce_altmode{cursor:text}
     // 🅰 まとめて文字調整の配線（メニューを閉じずにその場で効く・インラインstyle!important＝どのCSSにも勝つ）
     if(multi&&qm.querySelector('#__ce_mf_f')){
       var mfEach=function(fn){ selEls.forEach(function(x){ try{ pushUndo(x); fn(x); }catch(_){} }); try{ markDirty(); }catch(_){} };
+      // 当てたあと、今かかっている値を読み直して表示に反映する（＝押した結果がその場で分かる）
+      var mfSync=function(){
+        var g=function(get){ var s=[]; selEls.forEach(function(x){ var v; try{ v=get(getComputedStyle(x)); }catch(_){ return; } if(v!=null&&v!==''&&s.indexOf(v)<0) s.push(v); }); return s; };
+        var hx=function(c){ var m=/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/.exec(c||''); return m?('#'+[1,2,3].map(function(i){ return ('0'+(+m[i]).toString(16)).slice(-2); }).join('')):''; };
+        var s=g(function(cs){ return Math.round((parseFloat(cs.fontSize)||0)*10)/10; });
+        var w=g(function(cs){ return cs.fontWeight; });
+        var c=g(function(cs){ return cs.color; });
+        var f=g(function(cs){ return (cs.fontFamily||'').split(',')[0].trim().replace(/["']/g,''); });
+        var si=qm.querySelector('#__ce_mf_s');
+        if(si&&document.activeElement!==si){ si.value=(s.length===1?s[0]:''); si.placeholder=(s.length>1?'バラバラ':''); }
+        var sn=qm.querySelector('#__ce_mf_sn'); if(sn) sn.textContent=(s.length>1?('今 '+s.slice(0,4).join(' / ')+'px'):'');
+        var wn=qm.querySelector('#__ce_mf_wn'); if(wn) wn.textContent='今 '+(w.length===1?w[0]:(w.length?'バラバラ':'—'));
+        var cn=qm.querySelector('#__ce_mf_cn'); if(cn) cn.textContent='今 '+(c.length===1?(hx(c[0])||c[0]):'バラバラ');
+        var ci=qm.querySelector('#__ce_mf_c'); if(ci&&c.length===1&&hx(c[0])) ci.value=hx(c[0]);
+        // フォント選択も今の値に合わせる（無い名前ならリストに足してから選ぶ）
+        var fi=qm.querySelector('#__ce_mf_f');
+        if(fi&&f.length===1){
+          var found=false;
+          [].slice.call(fi.options).forEach(function(o){ if(o.value===f[0]) found=true; });
+          if(!found){ var og=document.createElement('optgroup'); og.label='今のフォント';
+            var op=document.createElement('option'); op.value=f[0]; op.textContent=f[0]; og.appendChild(op);
+            fi.insertBefore(og, fi.children[1]||null); }
+          fi.value=f[0];
+        }
+      };
       qm.querySelector('#__ce_mf_f').addEventListener('change',function(ev){ ev.stopPropagation();
         var v=this.value; if(!v) return;
         ensureGoogleFont(v);
         // 完全なfont-family(カンマ/引用符入り＝おすすめリスト)はそのまま／フォント名1個(ページ使用)はsans-serifを添える
         var fam=(v.indexOf(',')>=0||v.indexOf("'")>=0||v.indexOf('"')>=0)? v : ('"'+v+'", sans-serif');
         mfEach(function(x){ x.style.setProperty('font-family', fam,'important'); });
+        setTimeout(mfSync,0);
       });
       qm.querySelector('#__ce_mf_f').addEventListener('click',function(ev){ ev.stopPropagation(); });
       qm.querySelector('#__ce_mf_m').addEventListener('click',function(ev){ ev.stopPropagation();
         mfEach(function(x){ var fs=parseFloat(getComputedStyle(x).fontSize)||16; x.style.setProperty('font-size',Math.max(8,fs-2)+'px','important'); });
+        mfSync();
       });
       qm.querySelector('#__ce_mf_p').addEventListener('click',function(ev){ ev.stopPropagation();
         mfEach(function(x){ var fs=parseFloat(getComputedStyle(x).fontSize)||16; x.style.setProperty('font-size',(fs+2)+'px','important'); });
+        mfSync();
+      });
+      // px直接入力（Enterでも入力中でも即反映）＝「今いくつか」を見ながら数値で決められる
+      var _mfs=qm.querySelector('#__ce_mf_s');
+      _mfs.addEventListener('click',function(ev){ ev.stopPropagation(); });
+      _mfs.addEventListener('keydown',function(ev){ ev.stopPropagation(); if(ev.key==='Enter') this.blur(); });
+      _mfs.addEventListener('change',function(ev){ ev.stopPropagation();
+        var n=parseFloat(this.value); if(!(n>0)) return;
+        mfEach(function(x){ x.style.setProperty('font-size', Math.max(6,n)+'px','important'); });
+        mfSync();
       });
       qm.querySelector('#__ce_mf_b').addEventListener('click',function(ev){ ev.stopPropagation();
         mfEach(function(x){ x.style.setProperty('font-weight','700','important'); });
+        mfSync();
       });
       qm.querySelector('#__ce_mf_n').addEventListener('click',function(ev){ ev.stopPropagation();
         mfEach(function(x){ x.style.setProperty('font-weight','400','important'); });
+        mfSync();
       });
       var _mfc=qm.querySelector('#__ce_mf_c');
       _mfc.addEventListener('click',function(ev){ ev.stopPropagation(); });
-      _mfc.addEventListener('input',function(){ var v=this.value; selEls.forEach(function(x){ x.style.setProperty('color',v,'important'); }); });
+      _mfc.addEventListener('input',function(){ var v=this.value; selEls.forEach(function(x){ x.style.setProperty('color',v,'important'); }); mfSync(); });
       _mfc.addEventListener('change',function(){ try{ markDirty(); }catch(_){} });
     }
     // 📐 サイズをそろえるの配線（メニューは閉じない＝大きい方→小さい方と試し比べできる）
