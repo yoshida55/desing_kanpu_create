@@ -1272,9 +1272,23 @@
         <button class="camp_button" id="camp_button">🎨 生成する</button>
         <button class="camp_up_toggle" id="camp_clone_btn" title="選んだベースの実サイトをそのまま吸い出してカンプ化（AIなし・無料）">📋 ベースを忠実クローン</button>
         <button class="camp_up_toggle" id="cu_toggle">🖼 自分の画像を使う</button>
+        <button class="camp_up_toggle" id="fg_toggle" title="Figmaで作ったデザインを読み込んでカンプにする（AIなし・無料）">🎯 Figmaから取り込む</button>
         <span class="camp_state" id="camp_state"></span>
         <button class="camp_hist_toggle" style="margin-left:auto" onclick="window.open('/compare','_blank')" title="2つのカンプを重ねてスライダーで見比べる（営業のBefore/Afterデモ用）">🆚 比較</button>
         <button class="camp_hist_toggle" id="camp_hist_toggle">🗂 生成した履歴</button>
+      </div>
+      <!-- 🎯 Figmaから取り込む：URLを貼るだけ（AIなし・無料。REST APIで座標ごと読み込む） -->
+      <div class="camp_uploads" id="fg_panel" hidden>
+        <div class="cu_actions">
+          <input class="cu_path" id="fg_url" style="flex:1"
+            placeholder="FigmaのURLを貼る（フレームを選んで右クリック→Copy link を推奨）例: https://www.figma.com/design/xxxx/名前?node-id=12-345">
+          <button class="cu_btn cu_go" id="fg_import">取り込む</button>
+          <span class="cu_state" id="fg_state"></span>
+        </div>
+        <div style="font-size:12px;color:#888;line-height:1.7;margin-top:4px">
+          文字は文字のまま・アイコンや写真はPNGで取り込みます（取り込み後は右クリックで編集できます）。<br>
+          ⚠ Auto Layoutは座標に潰れます（レスポンシブにはなりません）。回転・マスクは再現しません。
+        </div>
       </div>
       <!-- 自分の画像（AIが生成に使う）：開くと下に出る -->
       <div class="camp_uploads" id="camp_uploads" hidden>
@@ -2015,6 +2029,37 @@
       box.hidden = !show;
       if (show) loadUploads();
     });
+    // 🎯 Figmaから取り込む（AIなし・REST API）：URLを貼って「取り込む」だけ
+    document.querySelector("#fg_toggle").addEventListener("click", () => {
+      const box = document.querySelector("#fg_panel");
+      box.hidden = !box.hidden;
+      if (!box.hidden) document.querySelector("#fg_url").focus();
+    });
+    const fgRun = async () => {
+      const url = document.querySelector("#fg_url").value.trim();
+      const st = document.querySelector("#fg_state");
+      const btn = document.querySelector("#fg_import");
+      if (!url) { st.textContent = "FigmaのURLを貼ってください"; return; }
+      btn.disabled = true; btn.textContent = "取り込み中…";
+      st.textContent = "Figmaから読み込んでいます（画像の枚数によっては十数秒かかります）";
+      try {
+        const d = await fetch("/api/figma_import", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        }).then((r) => r.json());
+        if (!d.ok) { st.textContent = "❌ " + (d.message || "取り込めませんでした"); return; }
+        st.innerHTML = `✅ 「${d.title}」を取り込みました（文字${d.text}・画像${d.images}・箱${d.boxes}／${d.width}×${d.height}px）`
+          + (d.missing_images ? `　⚠画像${d.missing_images}枚は取得できず箱で代用` : "");
+        window.open("/camp/" + d.file, "_blank");
+        if (typeof loadCamps === "function") loadCamps();
+      } catch (e) {
+        st.textContent = "通信エラー：" + e;
+      } finally {
+        btn.disabled = false; btn.textContent = "取り込む";
+      }
+    };
+    document.querySelector("#fg_import").addEventListener("click", fgRun);
+    document.querySelector("#fg_url").addEventListener("keydown", (e) => { if (e.key === "Enter") fgRun(); });
 
     // ===== 自分の画像アップロード（AIが内容を判断して生成/編集で使う）=====
     const cuGrid = document.querySelector("#cu_grid");

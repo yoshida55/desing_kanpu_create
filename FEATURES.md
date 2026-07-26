@@ -7,7 +7,7 @@
 読む人へ：`CLAUDE.md` は**設計の約束と落とし穴**、`docs/実装履歴.md` は**なぜそう作ったか・試してダメだった案**の記録で、
 どちらも機能一覧ではありません。「何ができるか」を知りたいならこのファイルだけで足ります。
 
-規模: 右クリック 35項目 / 編集バー 27項目 / APIパス 84本 / モジュール 27本
+規模: 右クリック 35項目 / 編集バー 27項目 / APIパス 85本 / モジュール 28本
 
 💰=AIを呼ぶ（お金がかかる） ／ 無料=AIを使わない。ほとんどの操作は無料です。
 
@@ -101,6 +101,7 @@
 | `src/db.py` | SQLite アクセス層。仕様 4.2 の `site` テーブルをそのまま実装する。 |
 | `src/embed.py` | 埋め込み（embed）パイプライン。仕様 4.3 を実装する。 |
 | `src/export_split.py` | 納品用の「分割エクスポート」（HTML / CSS / JS を別ファイルに切り出し＋画像ローカル化）。 |
+| `src/figmaimport.py` | 🎨 Figma → カンプHTML の取り込み（REST API・AIなし＝無料）。 |
 | `src/figmakit.py` | 🎨 Figma取り込み用の書き出し（AIなし＝無料・一瞬）。 |
 | `src/ingest.py` | 取り込み（ingest）。仕様 4.1 を実装する。 |
 | `src/model.py` | SigLIP-2 のラッパー。仕様 4.3 の方針： |
@@ -121,7 +122,7 @@
 
 ## 4. APIエンドポイント
 
-<details><summary>全84本（クリックで展開）</summary>
+<details><summary>全85本（クリックで展開）</summary>
 
 - `/`
 - `/anim/<site_id>/<path:filename>`
@@ -150,6 +151,7 @@
 - `/api/export_split`
 - `/api/extract_anim`
 - `/api/extract_images`
+- `/api/figma_import`
 - `/api/figma_kit`
 - `/api/generate_camp`
 - `/api/generate_camp/status`

@@ -144,6 +144,28 @@ class VibeConfig:
 
 
 @dataclass(frozen=True)
+class FigmaConfig:
+    """🎨 Figmaからの取り込み（REST API・AIなし＝無料）。
+
+    トークンは .env の FIGMA_TOKEN（Figma → Settings → Security → Personal access tokens）。
+    ★必要なスコープは「File content: Read-only」。これが無いと 403 になる（実測）。
+    """
+
+    token: str = field(default_factory=lambda: os.environ.get("FIGMA_TOKEN", "").strip())
+    # 画像（Figmaで描いたベクター・写真）を書き出すときの倍率。2=Retina相当
+    image_scale: float = field(
+        default_factory=lambda: float(os.environ.get("DESIGN_STOCK_FIGMA_IMG_SCALE", "2") or 2)
+    )
+    # 一度に画像化するノード数の上限（URLが長くなりすぎるのを防ぐ）
+    image_batch: int = 50
+    timeout_s: int = 60
+
+    @property
+    def enabled(self) -> bool:
+        return self.token.startswith("figd_")
+
+
+@dataclass(frozen=True)
 class HtmlGenConfig:
     """カンプHTML生成に使うLLM（Claude / OpenAI を切替）。"""
 

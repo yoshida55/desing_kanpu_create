@@ -25,7 +25,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file
 
-from . import anim, animkit, assets, bgremove, camp, clone, config, db, embed, export_split, figmakit, ingest, motion, quality, respcheck, search, sp_convert, spec, style_check, vibe
+from . import anim, animkit, assets, bgremove, camp, clone, config, db, embed, export_split, figmaimport, figmakit, ingest, motion, quality, respcheck, search, sp_convert, spec, style_check, vibe
 from .model import DesignEmbedder
 from .utils import get_logger
 
@@ -2424,6 +2424,24 @@ def api_figma_kit():
         result = figmakit.build_figmakit(fn)
     except Exception as exc:  # noqa: BLE001
         log.exception("Figma書き出しに失敗: %s", fn)
+        return jsonify({"ok": False, "message": str(exc)}), 500
+    return jsonify({"ok": True, **result})
+
+
+@app.route("/api/figma_import", methods=["POST"])
+def api_figma_import():
+    """🎯 Figma → カンプHTML（逆方向の取り込み・REST API・AIなし＝無料）。
+
+    Figma側にプラグインは要らない。`.env` の FIGMA_TOKEN（File content: Read-only）だけ。
+    """
+    data = request.get_json(silent=True) or {}
+    url = (data.get("url") or "").strip()
+    if not url:
+        return jsonify({"ok": False, "message": "FigmaのURLを入れてください"}), 400
+    try:
+        result = figmaimport.import_from_url(url)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("Figma取り込みに失敗: %s", url)
         return jsonify({"ok": False, "message": str(exc)}), 500
     return jsonify({"ok": True, **result})
 
