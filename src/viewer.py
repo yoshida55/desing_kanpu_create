@@ -5459,6 +5459,57 @@ html.__ce_altmode{cursor:text}
       return 'html body '+r.sel+'{'+Object.keys(r.d).map(function(p){ return p+':'+r.d[p]+'!important'; }).join(';')+'}';
     }).join('');
   }
+  // その要素（と外側4段）が持っている背景の絵を1つ返す。＝「写真を加工」からも背景を扱えるように。
+  function bgOfEl(el){
+    var t=el;
+    for(var i=0;i<4&&t&&t!==document.body&&t.nodeType===1;i++,t=t.parentElement){
+      var bi=''; try{ bi=getComputedStyle(t).backgroundImage; }catch(_){}
+      var m=bi&&bi.match(/url\\(["']?(.*?)["']?\\)/);
+      if(m&&m[1]&&m[1].indexOf('data:')!==0) return {el:t, ps:'', type:'bg', url:m[1]};
+    }
+    return null;
+  }
+  // ✂ 背景の絵・飾りを切り抜いて透過にする／もう一度で元に戻す（<img>と同じrembgを使う）
+  function bgCutToggle(c, btn, after){
+    var lab=btn?btn.textContent:'';
+    if(c.__cutOrig){
+      try{ pushUndo(c.el); }catch(_){}
+      bgpApply(c,'background-image','url("'+c.__cutOrig+'")');
+      c.url=c.__cutOrig; c.__cutOrig=null;
+      try{ if(!c.ps) c.el.removeAttribute('data-cecutbg'); }catch(_){}
+      if(btn) btn.textContent='✂ 切り抜いて透過';
+      try{ markDirty(); }catch(_){}
+      if(after) after();
+      if(msg) msg.textContent='切り抜く前の絵に戻しました（💾保存で確定）';
+      return;
+    }
+    if(!c.url){ if(msg) msg.textContent='この絵のURLが取れませんでした'; return; }
+    // SVG（図形データ）は写真ではないので切り抜けない。サーバーに投げる前に分かる言葉で止める
+    if(/[.]svg([?#]|$)/i.test(c.url)){
+      if(msg) msg.textContent='この絵はSVG（図形のデータ）なので切り抜けません。切り抜けるのは写真（jpg/png）だけです';
+      return;
+    }
+    if(btn){ btn.textContent='✂ 切り抜き中…'; btn.disabled=true; btn.style.opacity='.7'; }
+    if(msg) msg.textContent='✂ 切り抜き中です（10〜30秒かかります）';
+    var src=c.url;
+    fetch('/api/remove_bg_url',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({src:src, camp:FILE})}).then(function(r){return r.json();}).then(function(d){
+      if(btn){ btn.disabled=false; btn.style.opacity='1'; }
+      if(!d||!d.ok){ if(btn) btn.textContent=lab||'✂ 切り抜いて透過'; if(msg) msg.textContent='切り抜きに失敗：'+((d&&d.message)||'不明'); return; }
+      try{ pushUndo(c.el); }catch(_){}
+      c.__cutOrig=src; c.url=d.url;
+      bgpApply(c,'background-image','url("'+d.url+'")');
+      // 透明な部分は掴まない目印（＝空いた所を右クリックしても、この大きな箱は選ばれない）
+      try{ if(!c.ps){ c.el.setAttribute('data-cecutbg','1'); bgpApply(c,'background-repeat','no-repeat'); } }catch(_){}
+      if(btn) btn.textContent='⟲ 切り抜き前に戻す';
+      try{ markDirty(); }catch(_){}
+      if(after) after();
+      if(msg) msg.textContent='✂ 背景を切り抜きました（もう一度押すと元に戻せます・💾保存で確定）';
+    }).catch(function(){
+      if(btn){ btn.disabled=false; btn.style.opacity='1'; btn.textContent=lab||'✂ 切り抜いて透過'; }
+      if(msg) msg.textContent='切り抜きに失敗しました（サーバーに届いていません）';
+    });
+  }
   function bgpRead(cand, prop){
     try{ return (cand.ps?getComputedStyle(cand.el,cand.ps):getComputedStyle(cand.el))[prop]; }catch(_){ return ''; }
   }
@@ -5505,7 +5556,11 @@ html.__ce_altmode{cursor:text}
       +['left top','center top','right top','left center','center center','right center','left bottom','center bottom','right bottom']
         .map(function(v){ return '<button class="__ce_bgp_g" data-v="'+v+'" title="'+v+'" style="'+_bs+';padding:6px 0">・</button>'; }).join('')
       +'</div>'
-      +'<div style="display:flex;gap:5px;margin-top:8px"><button id="__ce_bgp_nr" style="'+_bs+'">繰り返しを止める</button>'
+      +'<div style="margin-top:8px">前後（重なり） <span id="__ce_bgp_zn" style="color:#fbbf24;font-weight:700"></span></div>'
+      +'<div style="display:flex;gap:4px"><button id="__ce_bgp_zup" title="文字や写真より前に出す" style="'+_bs+'">⬆ 手前に出す</button>'
+      +'<button id="__ce_bgp_zdn" title="文字の後ろへ送る（飾りが文字にかぶった時はこれ）" style="'+_bs+'">⬇ 奥へ送る</button></div>'
+      +'<div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap"><button id="__ce_bgp_nr" style="'+_bs+'">繰り返しを止める</button>'
+      +'<button id="__ce_bgp_cut" title="人物や商品だけを残して背景を透明にする（AIなし・無料・10〜30秒）" style="'+_bs+';background:#7c3aed;border-color:#7c3aed">✂ 切り抜いて透過</button>'
       +'<button id="__ce_bgp_rs" style="'+_bs+'">⟲ 元に戻す</button></div>'
       +'<div id="__ce_bgp_tip" style="font-size:10.5px;opacity:.7;margin-top:6px">💾保存で確定／Escで閉じる</div>';
     document.body.appendChild(p);
@@ -5584,6 +5639,8 @@ html.__ce_altmode{cursor:text}
         if(v) v.textContent=bs;
         if(r) r.value=pc?Math.max(10,Math.min(300,Math.round(parseFloat(pc[1])))):100;
       }
+      var zn=p.querySelector('#__ce_bgp_zn');
+      if(zn){ var zv=bgpRead(c,'zIndex'); zn.textContent='今 '+((zv==null||zv===''||zv==='auto')?'ふつう':zv); }
       hint(); markSel();
       var tip=p.querySelector('#__ce_bgp_tip');
       if(tip) tip.innerHTML='🖱 <b>赤い枠をドラッグ</b>＝'+(c.ps?'飾りを動かす':'絵を箱の中でずらす')+'<br>💾保存で確定／Escで閉じる';
@@ -5623,10 +5680,83 @@ html.__ce_altmode{cursor:text}
         apply('background-position', b.getAttribute('data-v'));
       });
     });
+    // ⬆⬇ 前後（重なり）：飾りが文字にかぶった時は「奥へ送る」で解決する。
+    //   ★飾り（疑似要素）は実体が無く、通常のz-index機能では掴めない＝ここが唯一の操作口になる。
+    var zNow=function(){ var n=parseInt(bgpRead(cur(),'zIndex'),10); return isNaN(n)?0:n; };
+    var zStep=function(d){
+      var c=cur();
+      try{ pushUndo(c.el); }catch(_){}
+      var n=Math.max(-5,Math.min(50, zNow()+d));
+      var pos=bgpRead(c,'position');
+      if(pos==='static'||!pos) bgpApply(c,'position','relative');   // z-indexは位置指定が無いと効かない
+      bgpApply(c,'z-index', String(n));
+      try{ markDirty(); }catch(_){}
+      sync();
+      if(msg) msg.textContent='重なりを'+(d>0?'手前に':'奥に')+'しました（今 '+n+'）。まだ隠れる時はもう一度押してください';
+    };
+    // ★数字をいくら上げても前に出ないことがある：相手が別の「重なりの箱」に入っていると、
+    //   その中でいくら大きくしても外側の順番には勝てない（実報告：18まで上げても変わらない）。
+    //   共通の親までさかのぼって、その直下の枝ごと相手より上に持ち上げるのが正しい直し方。
+    // ★中央だけ見ると、角だけ覆われている相手を見逃す（実報告：左上の箱だけ前に残った）。
+    //   要素の上を格子状に何点も調べて、1つでも上に乗っている相手が居れば返す。
+    var zCoverOf=function(el){
+      var r=el.getBoundingClientRect();
+      if(!(r.width>2&&r.height>2)) return null;
+      var fs=[0.08,0.3,0.5,0.7,0.92];
+      for(var a=0;a<fs.length;a++){
+        for(var b=0;b<fs.length;b++){
+          var x=r.left+r.width*fs[a], y=r.top+r.height*fs[b];
+          if(x<2||y<2||x>window.innerWidth-2||y>window.innerHeight-2) continue;
+          var ls=[]; try{ ls=document.elementsFromPoint(x,y); }catch(_){ continue; }
+          for(var i=0;i<ls.length;i++){
+            var n=ls[i];
+            if(n===el||el.contains(n)) break;      // 自分に到達＝この点では上に誰も居ない
+            if(n.contains(el)) break;              // 親に到達＝同上
+            if(_inUI2(n)) continue;                // ツールのUIは無視
+            return n;
+          }
+        }
+      }
+      return null;
+    };
+    var zLiftOver=function(el, cover){
+      var chain=[]; for(var n=el;n;n=n.parentElement) chain.push(n);
+      var lca=null; for(var m=cover;m;m=m.parentElement){ if(chain.indexOf(m)>=0){ lca=m; break; } }
+      if(!lca) lca=document.body;
+      var A=el; while(A&&A.parentElement&&A.parentElement!==lca) A=A.parentElement;
+      var B=cover; while(B&&B.parentElement&&B.parentElement!==lca) B=B.parentElement;
+      if(!A||!B||A===B) return false;
+      try{ pushUndo(A); }catch(_){}
+      var bz=parseInt(getComputedStyle(B).zIndex,10); if(isNaN(bz)) bz=0;
+      if(getComputedStyle(A).position==='static') A.style.setProperty('position','relative','important');
+      A.style.setProperty('z-index', String(Math.min(999,bz+1)),'important');
+      return true;
+    };
+    var zFront=function(){
+      var c=cur(), el=c.el, done=0;
+      try{ pushUndo(el); }catch(_){}
+      // 相手が複数（別々の重なりの箱）のことがあるので、上に居るものが無くなるまで繰り返す
+      for(var pass=0; pass<4; pass++){
+        var cover=zCoverOf(el);
+        if(!cover) break;
+        if(!zLiftOver(el, cover)) break;
+        done++;
+      }
+      if(!done){ zStep(1); return; }
+      try{ markDirty(); }catch(_){}
+      sync();
+      if(msg) msg.textContent = zCoverOf(el)
+        ? '手前に出しましたが、まだ上に何かが残っています（もう一度押してください）'
+        : ('手前に出しました（'+done+'つの相手より上になりました）');
+    };
+    p.querySelector('#__ce_bgp_zup').addEventListener('click',zFront);
+    p.querySelector('#__ce_bgp_zdn').addEventListener('click',function(){ zStep(-1); });
     p.querySelector('#__ce_bgp_nr').addEventListener('click',function(){ apply('background-repeat','no-repeat'); });
+    // ✂ 背景の絵・飾りも切り抜いて透過にする（<img>と同じrembgを使う。もう一度押すと元の絵に戻る）
+    p.querySelector('#__ce_bgp_cut').addEventListener('click',function(){ bgCutToggle(cur(), this, sync); });
     p.querySelector('#__ce_bgp_rs').addEventListener('click',function(){
       var c=cur(); try{ pushUndo(c.el); }catch(_){}
-      if(c.ps){ ['background-size','background-position','background-repeat','translate','width','height','pointer-events'].forEach(function(pr){ bgpApply(c,pr,null); }); }
+      if(c.ps){ ['background-size','background-position','background-repeat','translate','width','height','pointer-events','background-image','z-index','position'].forEach(function(pr){ bgpApply(c,pr,null); }); }
       else if(snap[idx]) c.el.setAttribute('style', snap[idx]); else c.el.removeAttribute('style');
       try{ markDirty(); }catch(_){} sync();
       if(msg) msg.textContent='🖼 背景の見た目を開いた時の状態に戻しました';
@@ -6022,6 +6152,9 @@ html.__ce_altmode{cursor:text}
       //   ⭐アップロード一覧の同名ボタンはファイル名で動くが、こちらは src をサーバーに渡す＝
       //     クローン元の画像（相対パス）・外部URLでも切り抜ける。
       +(imgEl?'<button class="go2" id="__ce_pdcut" style="background:#7c3aed;margin-bottom:8px">✂ この写真の背景を切り抜く（透過・AIなし・無料）</button>':'')
+      // ★<img>でない「要素の背景として敷かれた写真」もここから切り抜けるようにする。
+      //   素人目にはどちらも同じ写真で、img/背景の違いは見えない（実報告：ボタンが出ず迷子になった）。
+      +((!imgEl&&bgOfEl(el))?'<button class="go2" id="__ce_pdcutbg" style="background:#7c3aed;margin-bottom:8px">✂ この背景の写真を切り抜く（透過・AIなし・無料）</button>':'')
       +(imgEl?'<button class="go2" id="__ce_pdwater" style="background:#c026a6">🎨 背後に水彩画像を敷く（AI・数十円）</button>':'')
       +'</div>';
     document.body.appendChild(ov);
@@ -6033,6 +6166,11 @@ html.__ce_altmode{cursor:text}
       if(e.target.id==='__ce_pdglow'){ ov.remove(); glowSpots(el); return; }
       if(e.target.id==='__ce_pdsetbg'){ ov.remove(); openPicker({el:el, type:'bg', fresh:true}); return; }
       if(e.target.id==='__ce_pdcut'){ cutoutImg(imgEl, e.target); return; }
+      if(e.target.id==='__ce_pdcutbg'){
+        var _bc=ov.__bgc||(ov.__bgc=bgOfEl(el));      // 押すたびに拾い直すと「戻す」が効かないので覚える
+        if(_bc) bgCutToggle(_bc, e.target);
+        return;
+      }
       if(e.target.id==='__ce_pdwater'){ ov.remove(); openBgPicker(imgEl, sIdx); return; }
     });
   }
@@ -7783,6 +7921,40 @@ html.__ce_altmode{cursor:text}
     el.setAttribute('data-cebt', (c && c!=='none') ? c : '');
   }
   // 位置(translate)＋大きさ(scaleX,scaleY)をまとめて当てる。アニメ/トランジションは止めて最優先で反映。
+  // ★移動・回転・拡大を当てた瞬間、その要素は「中の浮いた部品(position:absolute/fixed)の基準」に変わる。
+  //   基準が外側の大きな箱から自分に切り替わるため、中の部品が急に自分のサイズまで縮む
+  //   （実例：丸いCTAの白文字を動かしたら青い丸が320px→160pxに縮んだ）。
+  //   変形を当てる前に、中の浮いた部品を「今見えている大きさ・位置」でpx固定して見た目を保つ。
+  function _freezeAbsKids(el){
+    if(!el||el.__ceAbsFz) return;
+    el.__ceAbsFz=1;
+    var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
+    var had=(cs.transform&&cs.transform!=='none')||(cs.translate&&cs.translate!=='none')
+      ||(cs.rotate&&cs.rotate!=='none'&&parseFloat(cs.rotate)!==0)||(cs.scale&&cs.scale!=='none'&&cs.scale!=='1');
+    if(had) return;                       // すでに基準になっている＝今さら変わらない
+    var kids=[];
+    try{
+      [].slice.call(el.querySelectorAll('*')).forEach(function(n){
+        if(n.closest&&n.closest('[id^="__ce"]')) return;
+        var s; try{ s=getComputedStyle(n); }catch(_){ return; }
+        if(s.position!=='absolute'&&s.position!=='fixed') return;
+        var r=n.getBoundingClientRect();
+        if(r.width>0&&r.height>0) kids.push({el:n, r:r});
+      });
+    }catch(_){ return; }
+    if(!kids.length) return;
+    var pr=el.getBoundingClientRect();
+    var bl=parseFloat(cs.borderLeftWidth)||0, bt=parseFloat(cs.borderTopWidth)||0;
+    kids.forEach(function(k){
+      var st=k.el.style;
+      st.setProperty('width', Math.round(k.r.width)+'px','important');
+      st.setProperty('height', Math.round(k.r.height)+'px','important');
+      st.setProperty('left', Math.round(k.r.left-pr.left-bl)+'px','important');
+      st.setProperty('top', Math.round(k.r.top-pr.top-bt)+'px','important');
+      st.setProperty('right','auto','important');
+      st.setProperty('bottom','auto','important');
+    });
+  }
   function applyTf(el){
     var x=+el.getAttribute('data-cetx')||0, y=+el.getAttribute('data-cety')||0;
     var sx=+el.getAttribute('data-cesx')||1, sy=+el.getAttribute('data-cesy')||1;
@@ -7793,6 +7965,7 @@ html.__ce_altmode{cursor:text}
     if((x||y||ro||sx!==1||sy!==1)){
       var _disp=''; try{ _disp=getComputedStyle(el).display; }catch(_){}
       if(_disp==='inline') el.style.setProperty('display','inline-block','important');
+      _freezeAbsKids(el);   // 中の浮いた部品が縮まないよう、変形を当てる前に今の見た目で固定
     }
     // 移動/回転/拡大は個別プロパティ(translate/rotate/scale)で当てる。
     // これで transform を出現アニメ用に空けられ、移動とアニメが奪い合わず両立する（消えない・位置も残る）。
@@ -8882,9 +9055,25 @@ html.__ce_altmode{cursor:text}
     if(op==='edit'){
       // 編集は対象の「文字を持つ要素」を狙う（選択があればそれ／無ければカーソル直下。
       // pickTargetで入れ物まで登ると文字の無い箱を掴んで空欄＝追加のように見えるため）。
-      var te=uForEdit;
-      while(te && te!==document.body && !(te.textContent||'').replace(/[\\s\\u200b]/g,'')){ te=te.parentElement; }
-      if(!te||te===document.body){ if(msg) msg.textContent='ここには編集できる文字がありません（文字の上で押してください）'; return; }
+      // ★「中に文字があるか」で親をたどると、余白で押したときに大きな入れ物まで登って
+      //   その中の関係ない文章が編集対象になる（実報告）。自分の中に直接ある文字だけを見る。
+      var _own=function(n){
+        if(!n||n.nodeType!==1) return false;
+        for(var i=0;i<n.childNodes.length;i++){
+          var c=n.childNodes[i];
+          if(c.nodeType===3&&(c.nodeValue||'').replace(/[\\s\\u200b]/g,'')) return true;
+        }
+        return false;
+      };
+      var te=uForEdit, lim=3;
+      while(te&&te!==document.body&&!_own(te)&&lim-->0&&!/^(SECTION|HEADER|FOOTER|MAIN)$/.test(te.tagName)){ te=te.parentElement; }
+      var _big=false;
+      try{ var _r=te?te.getBoundingClientRect():null;
+        _big=!!_r&&(_r.width*_r.height)>(window.innerWidth*window.innerHeight*0.4); }catch(_){}
+      if(!te||te===document.body||!_own(te)||_big){
+        if(msg) msg.textContent='ここには編集できる文字がありません（直したい文字の上にマウスを置いて押してください）';
+        return;
+      }
       closeMenu(); openBreakEditor(te); return;
     }
     if(op==='img'){ closeMenu(); openAddImagePicker(px,py); return; }
@@ -10287,7 +10476,61 @@ html.__ce_altmode{cursor:text}
   // 後から乗せた飾り画像の「透明な部分」か判定（絵のある所だけ掴ませ、透過部分は下へ通す）。
   // 対象は__ceFree印＝ツールで追加した画像だけ。カンプ本体の画像の掴み方は今までどおり。
   var _pxCv=null;
+  // 切り抜いた「背景の絵」の透明な部分もクリックを素通しにする（imgと同じ考え方）。
+  //   ★これが無いと、透過にした瞬間その要素の箱ぜんぶが当たり判定になり、
+  //     透明な余白を右クリックしただけで大きな箱が選ばれる（＝全体がグループ化されたように見える）。
+  var _bgNatCache={};
+  function _bgNat(url){
+    var im=_bgNatCache[url];
+    if(!im){ im=new Image(); im.src=url; _bgNatCache[url]=im; }
+    return (im.complete&&im.naturalWidth)?im:null;
+  }
+  function _clearPixelBg(el, x, y){
+    if(!el||el.nodeType!==1||!el.getAttribute||el.getAttribute('data-cecutbg')!=='1') return false;
+    var cs; try{ cs=getComputedStyle(el); }catch(_){ return false; }
+    if((cs.backgroundRepeat||'').indexOf('no-repeat')<0) return false;   // 敷き詰めは判定しない（安全側）
+    var m=(cs.backgroundImage||'').match(/url\\(["']?(.*?)["']?\\)/); if(!m) return false;
+    var im=_bgNat(m[1]); if(!im) return false;
+    var r=el.getBoundingClientRect();
+    var bl=parseFloat(cs.borderLeftWidth)||0, bt=parseFloat(cs.borderTopWidth)||0;
+    var bw=r.width-bl-(parseFloat(cs.borderRightWidth)||0), bh=r.height-bt-(parseFloat(cs.borderBottomWidth)||0);
+    if(!(bw>0&&bh>0)) return false;
+    var iw=im.naturalWidth, ih=im.naturalHeight, sw, sh, bs=cs.backgroundSize||'auto';
+    if(bs==='cover'||bs==='contain'){
+      var sc=(bs==='cover')?Math.max(bw/iw,bh/ih):Math.min(bw/iw,bh/ih);
+      sw=iw*sc; sh=ih*sc;
+    }else{
+      var ps=bs.split(' ');
+      var pv=function(v,base){ if(/%$/.test(v)) return parseFloat(v)/100*base; if(/px$/.test(v)) return parseFloat(v); return null; };
+      sw=pv(ps[0]||'',bw); sh=(ps.length>1)?pv(ps[1],bh):null;
+      if(sw==null&&sh==null){ sw=iw; sh=ih; }
+      else if(sh==null){ sh=sw*ih/iw; }
+      else if(sw==null){ sw=sh*iw/ih; }
+    }
+    if(!(sw>0&&sh>0)) return false;
+    var one=function(s, base, span){
+      var mm=/^calc[(](.+?)\\s*([+-])\\s*(-?[0-9.]+)px[)]$/.exec(s||''), off=0, b=s||'0%';
+      if(mm){ b=mm[1]; off=(mm[2]==='-'?-1:1)*parseFloat(mm[3]); }
+      return (/%$/.test(b)? parseFloat(b)/100*(base-span) : (parseFloat(b)||0))+off;
+    };
+    var pos=cs.backgroundPosition||'0% 0%', out=[], d=0, cur2='';
+    for(var i=0;i<pos.length;i++){ var ch=pos.charAt(i);
+      if(ch==='(') d++; else if(ch===')') d--;
+      if(ch===' '&&d===0){ if(cur2){ out.push(cur2); cur2=''; } continue; }
+      cur2+=ch; }
+    if(cur2) out.push(cur2);
+    var px=x-(r.left+bl)-one(out[0],bw,sw), py=y-(r.top+bt)-one(out[1],bh,sh);
+    if(px<0||py<0||px>=sw||py>=sh) return true;         // 絵の外＝ここには何も描かれていない
+    try{
+      if(!_pxCv){ _pxCv=document.createElement('canvas'); _pxCv.width=1; _pxCv.height=1; }
+      var g=_pxCv.getContext('2d',{willReadFrequently:true});
+      g.clearRect(0,0,1,1);
+      g.drawImage(im, Math.floor(px/sw*iw), Math.floor(py/sh*ih), 1, 1, 0, 0, 1, 1);
+      return g.getImageData(0,0,1,1).data[3]<8;
+    }catch(_){ return false; }
+  }
   function _clearPixel(el, x, y){
+    if(el&&el.nodeType===1&&el.tagName!=='IMG') return _clearPixelBg(el, x, y);
     if(!el||el.tagName!=='IMG'||!el.__ceFree) return false;
     if(!el.naturalWidth||!el.naturalHeight) return false;
     try{
@@ -11109,7 +11352,31 @@ html.__ce_altmode{cursor:text}
             +'<img src="'+esc(c.url)+'" style="width:44px;height:30px;object-fit:contain;background:#fff;border-radius:3px">'
             +'<span>'+esc(nm)+'</span></button>';
         }).join('')
-        +'</div></div>';
+        +'</div>'
+        // ★「白い所＝余白」だと思って余白パネルをいくら触っても直らない事故が起きる。
+        //   正体は「絵が箱まで届いていない」こと。届いていない量を出して1クリックで直せるようにする。
+        +(function(){
+          var out='';
+          bgQ.forEach(function(c,i){
+            if(out||c.ps) return;
+            if(/^(BODY|HTML)$/.test(c.el.tagName)) return;
+            var cs; try{ cs=getComputedStyle(c.el); }catch(_){ return; }
+            var bs=cs.backgroundSize||'auto';
+            if(bs==='cover') return;
+            var r=c.el.getBoundingClientRect();
+            if(!(r.width>60&&r.height>40)) return;
+            var pv=function(v,base){ if(/%$/.test(v)) return parseFloat(v)/100*base; if(/px$/.test(v)) return parseFloat(v); return null; };
+            var t2=bs.split(' '), sw=pv(t2[0]||'',r.width);
+            if(sw==null) return;                       // auto/contain は絵の実寸が要るのでここでは出さない
+            var gw=Math.round(r.width-sw);
+            if(gw<12) return;
+            out='<div style="margin-top:5px;background:#fff4f4;border:1px solid #f0c9c9;border-radius:6px;padding:5px 8px;font-size:11px;color:#a33;line-height:1.5">'
+              +'⚠ 絵が箱まで届いていません（左右に'+gw+'px）。ここは余白ではないので余白パネルでは詰まりません<br>'
+              +'<button class="__ce_bgfill" data-i="'+i+'" style="margin-top:3px;background:#fff;border:1px solid #d99;border-radius:5px;padding:2px 9px;cursor:pointer;font-size:11px;font-family:inherit;color:#a33">箱いっぱいにする（cover）</button></div>';
+          });
+          return out;
+        })()
+        +'</div>';
     }
     var _qmM=qmDefMap();
     // 🔄画像の差し替えは「そこに画像がある時」だけ出す（無い場所で押しても何も起きない項目は隠す）。
@@ -11935,6 +12202,22 @@ html.__ce_altmode{cursor:text}
       });
       b.addEventListener('mouseleave',function(){ grabHintHide(); });
       b.addEventListener('click',function(ev){ ev.stopPropagation(); grabHintHide(); closeMenu(); openBgSizePanel(bgQ, i); });
+    });
+    // ⚠「絵が箱まで届いていません」→ 1クリックで箱いっぱいにする
+    [].slice.call(qm.querySelectorAll('.__ce_bgfill')).forEach(function(b){
+      var c=bgQ[+b.getAttribute('data-i')]; if(!c) return;
+      b.addEventListener('mouseenter',function(){
+        var r=c.el.getBoundingClientRect();
+        grabHintShow(c.el, '背景の絵', c.url, Math.round(r.width)+'×'+Math.round(r.height), c.ps);
+      });
+      b.addEventListener('mouseleave',function(){ grabHintHide(); });
+      b.addEventListener('click',function(ev){ ev.stopPropagation();
+        try{ pushUndo(c.el); }catch(_){}
+        bgpApply(c,'background-size','cover'); bgpApply(c,'background-repeat','no-repeat');
+        try{ markDirty(); }catch(_){}
+        this.textContent='✓ 箱いっぱいにしました';
+        if(msg) msg.textContent='🖼 絵を箱いっぱいに広げました（はみ出た分は切れます・⟲で戻せます・💾保存で確定）';
+      });
     });
     // ― 近くの薄い線の配線：ホバーで赤く光らせ、押したらその要素を選択して開き直す
     [].slice.call(qm.querySelectorAll('.__ce_lnz')).forEach(function(b){
