@@ -3665,8 +3665,37 @@ html.__ce_altmode{cursor:text}
     //   保存時に「このページの実際のroot font-size」でrem→pxに焼き直して自己完結させる。
     //   普通のサイト（root=16px）は無変換＝今まで通り。
     var rootPx=parseFloat(getComputedStyle(document.documentElement).fontSize)||16;
+    // ★開いているページで元サイトの html{font-size:...} が生きていないと rootPx が16のままになり、
+    //   「変換不要」と誤判定して rem を素のまま保存してしまう（実例：1rem≒0.89pxのサイトの
+    //   300rem が貼り先で4800pxに膨張）。その時はCSSに書いてある指定を実際に計算して本当の値を得る。
+    if(Math.abs(rootPx-16)<0.01){
+      var _pv='';
+      [].slice.call(document.styleSheets).forEach(function(ss){
+        var rr; try{ rr=ss.cssRules; }catch(_){ return; }
+        [].slice.call(rr||[]).forEach(function(r){
+          if(!r.selectorText||!r.style) return;
+          if(!/(^|,)\\s*(html|:root)\\s*(,|$)/.test(r.selectorText)) return;
+          var v=r.style.getPropertyValue('font-size'); if(v) _pv=v;
+        });
+      });
+      if(_pv){
+        try{
+          var _p=document.createElement('div');
+          _p.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden;font-size:'+_pv;
+          document.documentElement.appendChild(_p);
+          var _px=parseFloat(getComputedStyle(_p).fontSize)||0;
+          _p.remove();
+          if(_px>0 && Math.abs(_px-16)>=0.01) rootPx=_px;
+        }catch(_){}
+      }
+    }
+    window.__cePartRem=0;                       // 変換できずに残った大きなrem（保存後に警告を出す用）
     function remFix(t){
-      if(Math.abs(rootPx-16)<0.01) return t;
+      if(Math.abs(rootPx-16)<0.01){
+        var big=(t.match(/(?:^|[^0-9.])([0-9]{2,})(?:\\.[0-9]+)?rem\\b/g)||[]).length;
+        window.__cePartRem=big;                 // 1rem=16px のはずなのに2桁remが多い＝縮小前提のサイト
+        return t;
+      }
       return t.replace(/(-?\\d*\\.?\\d+)rem\\b/g,function(_,n){ return (Math.round(parseFloat(n)*rootPx*1000)/1000)+'px'; });
     }
     function hitAny(selText){
@@ -3809,7 +3838,8 @@ html.__ce_altmode{cursor:text}
     //   持ち込み先にクラス定義が無く、レイアウトが崩れて縦に間延びする実害があった→常時trueに統一。
     fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el, true).outerHTML,headcss:headCss(),name:name,kind:kind})})
     .then(function(r){return r.json();}).then(function(d){
-      msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'):('保存失敗：'+(d.message||''));
+      var _warn=(window.__cePartRem>5)?'　⚠この部品はrem基準のサイトです。貼り先で大きさが数倍になる可能性があります（元サイトのクローンページを開いた状態で保存し直すと直ります）':'';
+      msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'+_warn):('保存失敗：'+(d.message||''));
     }).catch(function(){ msg.textContent='通信エラー'; });
   }
   // 🎨 おしゃれ度チェック：現DOMを保存→AIが有名サイト基準で採点＋改善点。結果はモーダル表示。
@@ -5563,6 +5593,7 @@ html.__ce_altmode{cursor:text}
       +'<div id="__ce_bgp_cv" style="font-size:10.5px;color:#9fd0ff;margin-top:2px;min-height:14px"></div>'
       +'<div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap"><button id="__ce_bgp_nr" style="'+_bs+'">繰り返しを止める</button>'
       +'<button id="__ce_bgp_cut" title="人物や商品だけを残して背景を透明にする（AIなし・無料・10〜30秒）" style="'+_bs+';background:#7c3aed;border-color:#7c3aed">✂ 切り抜いて透過</button>'
+      +'<button id="__ce_bgp_del" title="この絵を消す（もう一度押すと戻る・箱やレイアウトはそのまま）" style="'+_bs+';background:#7a2b2b;border-color:#9b3d3d">✕ この絵を消す</button>'
       +'<button id="__ce_bgp_rs" style="'+_bs+'">⟲ 元に戻す</button></div>'
       +'<div id="__ce_bgp_tip" style="font-size:10.5px;opacity:.7;margin-top:6px">💾保存で確定／Escで閉じる</div>';
     document.body.appendChild(p);
@@ -5800,10 +5831,25 @@ html.__ce_altmode{cursor:text}
     p.querySelector('#__ce_bgp_nr').addEventListener('click',function(){ apply('background-repeat','no-repeat'); });
     // ✂ 背景の絵・飾りも切り抜いて透過にする（<img>と同じrembgを使う。もう一度押すと元の絵に戻る）
     p.querySelector('#__ce_bgp_cut').addEventListener('click',function(){ bgCutToggle(cur(), this, sync); });
+    // ✕ この絵を消す（もう一度で戻る）。飾りは丸ごと非表示、背景は絵だけ外す＝箱やレイアウトは動かさない
+    p.querySelector('#__ce_bgp_del').addEventListener('click',function(){
+      var c=cur();
+      try{ pushUndo(c.el); }catch(_){}
+      if(c.__hidden){
+        if(c.ps) bgpApply(c,'display',null); else bgpApply(c,'background-image',null);
+        c.__hidden=false; this.textContent='✕ この絵を消す';
+        if(msg) msg.textContent='絵を戻しました（💾保存で確定）';
+      }else{
+        if(c.ps) bgpApply(c,'display','none'); else bgpApply(c,'background-image','none');
+        c.__hidden=true; this.textContent='↩ 消したのを戻す';
+        if(msg) msg.textContent='絵を消しました（もう一度押すと戻ります・💾保存で確定・⟲でも戻せます）';
+      }
+      try{ markDirty(); }catch(_){} sync();
+    });
     p.querySelector('#__ce_bgp_rs').addEventListener('click',function(){
       while(zLifts.length){ var _b=zLifts.pop(); for(var _i=_b.length-1;_i>=0;_i--) zRestore(_b[_i]); }   // 手前に出すで触った枝も全部戻す
       var c=cur(); try{ pushUndo(c.el); }catch(_){}
-      if(c.ps){ ['background-size','background-position','background-repeat','translate','width','height','pointer-events','background-image','z-index','position'].forEach(function(pr){ bgpApply(c,pr,null); }); }
+      if(c.ps){ ['background-size','background-position','background-repeat','translate','width','height','pointer-events','background-image','z-index','position','display'].forEach(function(pr){ bgpApply(c,pr,null); }); }
       else if(snap[idx]) c.el.setAttribute('style', snap[idx]); else c.el.removeAttribute('style');
       try{ markDirty(); }catch(_){} sync();
       if(msg) msg.textContent='🖼 背景の見た目を開いた時の状態に戻しました';
@@ -11432,7 +11478,16 @@ html.__ce_altmode{cursor:text}
       var ls=[]; try{ ls=document.elementsFromPoint(qx,qy); }catch(_){ return; }
       ls=ls.filter(function(c){ return c!==document.documentElement&&c!==document.body&&!(c.closest&&c.closest('[id^="__ce"]')); });
       var pe=[]; try{ pe=_peNoneAt(qx,qy)||[]; }catch(_){}          // クリックがすり抜ける飾りも並べる
-      ovQ=pe.concat(ls.filter(function(c){ return pe.indexOf(c)<0; })).slice(0,7);
+      var raw=pe.concat(ls.filter(function(c){ return pe.indexOf(c)<0; }));
+      // ★同じ中身の入れ物が何重にも並ぶと選べない（実報告：7個すべて同じ文字）。
+      //   中の要素とほぼ同じ大きさの外側は「増えていない」ので畳む。残すのは意味の違うものだけ。
+      var area=function(n){ var r=n.getBoundingClientRect(); return Math.max(1,r.width*r.height); };
+      ovQ=[];
+      raw.forEach(function(c){
+        if(ovQ.length>=5) return;
+        var dup=ovQ.some(function(k){ return c.contains(k) && area(c)<=area(k)*1.25; });   // 外側だが実質同じ
+        if(!dup) ovQ.push(c);
+      });
       if(ovQ.length<2) { ovQ=[]; return; }
       // ★入れ子の親子は文字が同じで見分けが付かない＝大きさを添える（小さい＝文字そのもの／大きい＝入れ物）
       var nameOf2=function(c){
@@ -11458,7 +11513,16 @@ html.__ce_altmode{cursor:text}
     //   ★板そのものは出さない：スライダー＋9マスは背が高く、メニューが画面外まで押し下がるため。
     //   サムネに触れるとページ側が赤枠＝どれのことか目で確かめてから押せる。
     var bgQ=bgCandsAt(qx,qy,curEl), bgRowQ='';
-    if(bgQ.length){
+    // ★1枚しかない時に選ばせるのは無駄（ユーザー指摘）。1枚なら1行だけ、複数の時だけサムネを並べる。
+    if(bgQ.length===1){
+      var _b1=bgQ[0], _t1=_b1.el.tagName;
+      var _n1=(_t1==='BODY'||_t1==='HTML')?'⚠ ページ全体の背景':(_b1.ps?'飾りの絵':'背景の絵');
+      bgRowQ='<div style="background:#eef2ff;border-bottom:1px solid #ccd6f5;padding:5px 10px 6px;border-radius:7px">'
+        +'<button class="__ce_bgz" data-i="0" style="display:flex;align-items:center;gap:7px;width:100%;text-align:left;background:none;border:none;padding:2px;cursor:pointer;font:12px/1.4 inherit;color:#1d1d1f">'
+        +'<img src="'+esc(_b1.url)+'" style="width:34px;height:24px;object-fit:contain;background:#fff;border:1px solid #ccd6f5;border-radius:4px">'
+        +'<span>🖼 '+esc(_n1)+'を直す（大きさ・位置・前後・消す）</span></button></div>';
+    }
+    else if(bgQ.length){
       bgRowQ='<div style="background:#eef2ff;border-bottom:1px solid #ccd6f5;padding:6px 10px 7px;border-radius:7px">'
         +'<b style="font-size:12px">🖼 ここにある背景の絵・飾り（'+bgQ.length+'枚・AIなし）</b><br>'
         +'<span style="font-size:10.5px;color:#5b6a8a">触れるとページ側が赤枠／押すと大きさ・位置を直せます</span>'
@@ -11732,8 +11796,11 @@ html.__ce_altmode{cursor:text}
         +'<div style="padding:5px 10px;font-size:10.5px;font-weight:700;color:#5b6472;border-bottom:1px solid #dcdce2;margin-bottom:3px">🔎 このページで見つかったこと（全部AIなし）</div>'
         +noticeL.join('')+'</div></div>'
       : '';
-    qm.innerHTML=selRowQ+mfRow+szRow+ovRowQ+spRow+bgRowQ+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    // 背景が複数ある時のサムネ一覧は縦に長いので、本命メニューの下へ回す（1枚の時の1行は上のまま）
+    var bgTop=(bgQ.length===1)?bgRowQ:'', bgBottom=(bgQ.length>1)?bgRowQ:'';
+    qm.innerHTML=selRowQ+mfRow+szRow+ovRowQ+spRow+bgTop+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
+      +bgBottom
       +noticeQ
       +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
       +row('__ce_q_full','⚙ すべての編集メニュー…')
@@ -13095,10 +13162,26 @@ html.__ce_altmode{cursor:text}
   document.addEventListener('click',function(e){ if(_hdlDrag) return; if((curMenu||curEl) && !e.target.closest('#__ce_cm') && !e.target.closest('.__ce_hdl')) closeMenu(); }, true);
   // 右クリックで選んだ要素（青点線）は、キーボードのDeleteキーでも消せる（確認ダイアログ付き・保存で確定）
   document.addEventListener('keydown',function(e){
-    if(e.key!=='Delete' || !curEl) return;
+    if(e.key!=='Delete') return;
     var a=document.activeElement;
     if(a && (a.tagName==='INPUT' || a.tagName==='TEXTAREA' || a.isContentEditable)) return;  // 文字入力・文字編集中は誤爆させない
     e.preventDefault();
+    // ★選択が外れていると何も起きず「壊れている」と見える（実報告）。選択が無いときは
+    //   マウスの下のものを対象にする（他のショートカットと同じ考え方）。それも無ければ理由を言う。
+    if(!curEl || !document.body.contains(curEl)){
+      var u=null; try{ u=document.elementFromPoint(_ceCX,_ceCY); }catch(_){}
+      var el2=null;
+      try{ el2=_textAt(_ceCX,_ceCY); }catch(_){}      // 上に入れ物がかぶっていても、見えている文字を優先
+      if(!el2 && u && !_inUI2(u)){
+        try{ el2=pickTarget(_realTarget({target:u, clientX:_ceCX, clientY:_ceCY})); }catch(_){ el2=u; }
+      }
+      if(!el2 || _undraggable(el2)){
+        if(msg) msg.textContent='消したいものにマウスを置くか、右クリックで選んでから Delete を押してください';
+        return;
+      }
+      closeMenu();
+      curEl=el2; el2.classList.add('__ce_sel'); selEls=[el2];
+    }
     removeSelected();
   }, true);
   // 保険：読み込み時に、万一残っている選択マーカーのクラスを全部剥がす

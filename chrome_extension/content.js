@@ -102,7 +102,41 @@
     });
     // 護身用：入れ替え先の「浮く絶対配置」に被されないよう、staticの部品はrelative+z-index:1に
     if (getComputedStyle(el).position === "static") out.push(":scope{position:relative;z-index:1}");
-    return kf.join("\n") + "\n@scope{\n" + out.join("\n") + "\n}";
+    // ★rem対策（ツール本体と同じ）：元サイトが html{font-size:clamp(100vw/1440)} 等で
+    //   1rem を 1px 未満に縮めていると、貼り先のカンプ（1rem=16px）で寸法が十数倍に膨張する
+    //   （実例：width:300rem が 267px のはずが 4800px になった）。保存時に px へ焼き直す。
+    let rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    if (Math.abs(rootPx - 16) < 0.01) {
+      // ページ側で指定が効いていない場合は、CSSに書かれている指定を実際に計算して本来の値を得る
+      let pv = "";
+      [].slice.call(document.styleSheets).forEach(function (ss) {
+        let rr;
+        try { rr = ss.cssRules; } catch (_) { return; }
+        [].slice.call(rr || []).forEach(function (r) {
+          if (!r.selectorText || !r.style) return;
+          if (!/(^|,)\s*(html|:root)\s*(,|$)/.test(r.selectorText)) return;
+          const v = r.style.getPropertyValue("font-size");
+          if (v) pv = v;
+        });
+      });
+      if (pv) {
+        try {
+          const p = document.createElement("div");
+          p.style.cssText = "position:absolute;left:-9999px;top:0;visibility:hidden;font-size:" + pv;
+          document.documentElement.appendChild(p);
+          const px = parseFloat(getComputedStyle(p).fontSize) || 0;
+          p.remove();
+          if (px > 0 && Math.abs(px - 16) >= 0.01) rootPx = px;
+        } catch (_) {}
+      }
+    }
+    let css = kf.join("\n") + "\n@scope{\n" + out.join("\n") + "\n}";
+    if (Math.abs(rootPx - 16) >= 0.01) {
+      css = css.replace(/(-?\d*\.?\d+)rem\b/g, function (_m, n) {
+        return Math.round(parseFloat(n) * rootPx * 1000) / 1000 + "px";
+      });
+    }
+    return css;
   }
 
   // ===== 部品HTMLの掃除：script除去・画像URLを絶対化（サイトを閉じても表示できるように） =====
