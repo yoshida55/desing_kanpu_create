@@ -5285,6 +5285,14 @@ html.__ce_altmode{cursor:text}
         // 背景画像でも<img>でも、ブラウザ側で差し替えて位置・角度ごと保存（角度が戻らない）
         if(cand.type==='bg'){
           cand.el.style.setProperty('background-image','url("'+url+'")','important');
+          // ★背景は既定でタイル（繰り返し）。元が小さな模様だと写真に替えた瞬間、同じ写真が
+          //   下へ延々と並ぶ（body差し替えで実際に発生）。写真を敷き詰めたい場面は無いので必ず止める。
+          cand.el.style.setProperty('background-repeat','no-repeat','important');
+          var _bsz=''; try{ _bsz=getComputedStyle(cand.el).backgroundSize; }catch(_){}
+          if(!_bsz||_bsz==='auto'||_bsz==='auto auto'){       // 元が原寸タイル＝写真だと小さすぎるので画面に合わせる
+            cand.el.style.setProperty('background-size','cover','important');
+            cand.el.style.setProperty('background-position','center','important');
+          }
           // 画像を持たない要素に新しく入れる時は、要素いっぱいに綺麗に写るよう cover 表示にする
           if(cand.fresh){
             cand.el.style.setProperty('background-size','cover','important');
@@ -5334,7 +5342,13 @@ html.__ce_altmode{cursor:text}
   }
   // 重なった画像（img・背景）のうち、どれを差し替えるかをサムネで先に選ばせる
   function pickWhichImg(list){
-    var items=list.map(function(c,i){return '<div class="it" data-i="'+i+'"><img src="'+c.url+'"><span>'+(c.type==='bg'?'背景':'画像')+(i+1)+(i===0?'（前面）':'')+'</span></div>';}).join('');
+    // ★body/html＝ページ全体の背景は、選ぶと「ページ全部が変わる」ので名前で分かるようにする
+    //   （気づかず選んで、写真がページ全体にタイル表示された事故があった）
+    var items=list.map(function(c,i){
+      var tg=c.el&&c.el.tagName, whole=(tg==='BODY'||tg==='HTML');
+      var nm=whole?'⚠ページ全体の背景':((c.type==='bg'?'背景':'画像')+(i+1)+(i===0?'（前面）':''));
+      return '<div class="it" data-i="'+i+'"><img src="'+c.url+'"><span'+(whole?' style="color:#c0392b"':'')+'>'+nm+'</span></div>';
+    }).join('');
     var ov=document.createElement('div'); ov.id='__ce_pk';
     ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>どの画像を差し替える？（重なっています）</h4><div class="gr">'+items+'</div></div>';
     document.body.appendChild(ov);
@@ -6054,7 +6068,7 @@ html.__ce_altmode{cursor:text}
   var _forceEl=null;  // ⬆外側選択用：次のcontextmenuでpickTargetを使わずこの要素を選ぶ
   function eachSel(fn){ (selEls.length?selEls:(curEl?[curEl]:[])).forEach(fn); }
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
-  function closeMenu(){ hideHandles(); if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} selEls.forEach(function(x){ stopAnim(x); clearPreviewStyle(x); x.classList.remove('__ce_sel'); }); selEls=[]; curAnim=null; curP={};
+  function closeMenu(){ hideHandles(); window.__ceDblSel=null; if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} selEls.forEach(function(x){ stopAnim(x); clearPreviewStyle(x); x.classList.remove('__ce_sel'); }); selEls=[]; curAnim=null; curP={};
     // メニューを閉じたらドラッグ移動モードも解除＝文字をドラッグで「選択」できるようにする（部分色付けと両立）
     if(typeof dragEl!=='undefined' && dragEl){ try{ dragEl.removeEventListener('mousedown',_dDown,true); dragEl.style.cursor=''; }catch(_){} dragEl=null; } }
   // 要素を丸ごと消す（AIなし・即反映）。ドラッグ中なら解除してから消す。保存するまでは確定しない。
@@ -10862,11 +10876,13 @@ html.__ce_altmode{cursor:text}
     // 📏 余白の定番（自分で決めた値をボタンにして当てる・AIなし）
     // ブロックごとにアキがバラバラなのを、同じ数値を配って一発でそろえる用。値は自分で編集でき、
     // localStorage に持つのでカンプをまたいで使い回せる（＝自分の"余白ルール"になる）。
-    var spRow='';
+    var spRow='', spFit=null;
     (function(){
       var tgtN=(selEls.length?selEls.length:1);
+      // ★数値＋単位だけを通す。引用符などが混じるとボタンの中身が空になって「押せない空箱」に見える
+      //   （実際に空ボタンの報告あり）。通らない値は捨てて、全滅なら既定値に戻す。
       var vals=(localStorage.getItem('__ce_sp_presets')||'5rem,10rem,14rem').split(',')
-        .map(function(s){ return s.trim(); }).filter(Boolean).slice(0,6);
+        .map(function(s){ return s.trim(); }).filter(function(s){ return /^[0-9]*[.]?[0-9]+(rem|em|px|%)?$/.test(s); }).slice(0,6);
       if(!vals.length) vals=['5rem','10rem','14rem'];
       var rootPx=16; try{ rootPx=parseFloat(getComputedStyle(document.documentElement).fontSize)||16; }catch(_){}
       var _pbS='background:#fff;border:1px solid #dcc6a6;border-radius:5px;padding:2px 9px;cursor:pointer;font-weight:700';
@@ -10879,32 +10895,96 @@ html.__ce_altmode{cursor:text}
       (selEls.length?selEls:[curEl]).forEach(function(x){
         if(!x) return;
         ty+=Math.abs(+x.getAttribute('data-cety')||0);
-        try{ delete x.__ceSpRef; }catch(_){}        // 隙間の基準はメニューを開き直したら選び直す（古い基準を持ち越さない）
+        try{ delete x.__ceSpRef; delete x.__ceSpRefB; }catch(_){}   // 隙間の基準はメニューを開き直したら選び直す（古い基準を持ち越さない）
         var ps=''; try{ ps=getComputedStyle(x).position; }catch(_){}
         if(ps==='absolute'||ps==='fixed') free++;   // 自由配置＝margin/paddingでは1pxも動かない
       });
+      // 🤏 箱が中身よりずっと高い（過去のリサイズで height が !important で焼き込まれた等）＝
+      //   padding や min-height をいくら下げても縮まないので、1発で文字ぴったりに戻すボタンを出す
+      var fitInfo=null;
+      try{
+        var _fe=selEls.length? (selEls.length===1?selEls[0]:null) : curEl;   // 複数選択時は出さない
+        if(_fe&&_fe.textContent&&_fe.textContent.trim()&&!/^(SECTION|HEADER|FOOTER|MAIN|IMG)$/.test(_fe.tagName)){
+          var _rg=document.createRange(); _rg.selectNodeContents(_fe);
+          var _ch=_rg.getBoundingClientRect().height, _bh=_fe.offsetHeight;
+          if(_ch>0&&_bh-_ch>24) fitInfo={h:Math.round(_bh), c:Math.round(_ch)};
+        }
+      }catch(_){}
       var mode=localStorage.getItem('__ce_sp_mode')||'gap';
       var opt=function(v,t){ return '<option value="'+v+'"'+(mode===v?' selected':'')+'>'+t+'</option>'; };
       // ★max-width＝この板の説明文でメニュー全体が横に広がるのを止める（widthはauto＝中身なりのため）
       spRow='<div style="background:#fdf3e6;border-bottom:1px solid #ecd9bb;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px;max-width:295px;box-sizing:border-box">'
         +'<b>📏 余白の定番（'+tgtN+'個に当てる・AIなし）</b><br>'
-        +btns+' <button id="__ce_sp_ed" title="定番の数値を自分で決め直す（カンマ区切り・カンプをまたいで残る）" style="background:none;border:none;color:#8a6d3b;font-size:11px;cursor:pointer;text-decoration:underline">✎ 値を変える</button><br>'
+        +btns+' <button id="__ce_sp_ed" title="定番の数値を自分で決め直す（カンマ区切り・カンプをまたいで残る）" style="background:none;border:none;color:#8a6d3b;font-size:11px;cursor:pointer;text-decoration:underline">✎ 値を変える</button>'
+        +' <button id="__ce_sp_rl" title="ページ中の今の隙間を全部その場に数字で表示（もう一度押すと消える・保存には写らない）" style="background:none;border:none;color:#8a6d3b;font-size:11px;cursor:pointer;text-decoration:underline">📐ものさし</button><br>'
         +'<span style="opacity:.8">そろえ方</span> '
         +'<select id="__ce_sp_md" style="font-size:11px;padding:2px;border:1px solid #ccd;border-radius:5px;max-width:185px">'
-        +opt('gap','隙間＝結果その値（おすすめ）')
+        +opt('gap','上との隙間＝結果その値（おすすめ）')
+        +opt('gapb','下との隙間＝結果その値')
         +opt('mt','margin-top をその値に')+opt('mb','margin-bottom をその値に')+opt('ptb','padding上下 をその値に')
         +'</select><br><span id="__ce_sp_now" style="font-size:10.5px;color:#888"></span>'
         +(mode==='gap'?('<div style="font-size:10.5px;color:#8a6d3b;line-height:1.45;margin-top:3px;max-width:275px">'
             +(tgtN>1?'選んだもの同士の隙間が<b>結果その値ちょうど</b>になります<br>（一番上は動かしません）'
                     :'すぐ上にあるものとの隙間が<b>結果その値ちょうど</b>に<br>なります（2個以上選ぶとより確実）')+'</div>'):'')
+        +(mode==='gapb'?('<div style="font-size:10.5px;color:#8a6d3b;line-height:1.45;margin-top:3px;max-width:275px">'
+            +'すぐ下にあるものとの隙間が<b>結果その値ちょうど</b>に<br>なります（下にあるものを動かして作ります）</div>'):'')
+        +((free&&mode!=='gap'&&mode!=='gapb')?('<div style="font-size:10.5px;color:#c0392b;line-height:1.45;margin-top:3px;max-width:275px">'
+            +'⚠ 自由配置が'+free+'個：margin/padding では1pxも動きません。そろえ方は「隙間＝結果その値」を使ってください</div>'):'')
+        +(fitInfo?('<button id="__ce_sp_fit" title="固定サイズ(height)の焼き込みを外して、箱の高さを中身ぴったりに戻す" style="display:block;margin-top:4px;background:#fff;border:1px solid #dcc6a6;border-radius:6px;padding:3px 9px;cursor:pointer;font-size:11.5px;font-family:inherit;color:#1d1d1f">🤏 箱を中身にぴったり縮める（今 '+fitInfo.h+'px → 約'+fitInfo.c+'px）</button>'):'')
         +(ty>8?('<label title="ドラッグで動かした縦のズレを0に戻してから余白を当てる" style="display:block;font-size:11px;line-height:1.5;margin-top:4px;cursor:pointer;user-select:none"><input type="checkbox" id="__ce_sp_zy" style="vertical-align:middle;margin-right:4px;cursor:pointer">ドラッグの縦ズレ（計'+Math.round(ty)+'px）も0に戻す</label>'):'')
         +'</div>';
+      spFit=fitInfo;
     })();
+    // 📏 板は畳んで1行にする（最初に使う機能ではないので、本命メニューを押し下げない）。
+    //   開閉はこのPCに記憶＝よく使う人は開いたままにできる。中身はDOMに残す＝下の配線はそのまま効く。
+    if(spRow){
+      var _spOpen=(localStorage.getItem('__ce_sp_open')==='1');
+      spRow='<button id="__ce_sp_tg" style="display:flex;width:100%;align-items:center;gap:8px;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'
+        +'<span style="flex:1">📏 余白・間隔をそろえる'+(spFit?' <span style="font-size:10.5px;color:#c1801f">🤏縮められます</span>':'')+'</span>'
+        +'<span class="__ce_sp_ar" style="color:#8a8a90;font-size:11px">'+(_spOpen?'▾':'▸')+'</span></button>'
+        +'<div id="__ce_sp_body" style="'+(_spOpen?'':'display:none')+'">'+spRow+'</div>';
+    }
     // ★並び順（2026-07-25）：気づき系パネル（🕳穴・📏余白・🎞スライド・🫥すり抜け・➖飾り・◽カド）は
     //   縦に長く、3つ重なると本命のメニューが画面外まで押し下げられる。よく使うグループメニューを先に出し、
     //   パネル群はその下にまとめる（選択中パネル selRowQ / まとめて文字調整 mfRow は今の操作の続きなので上のまま）。
     //   ★パネルは他のグループと同じ「▸ 1つの畳んだメニュー」にまとめる（data-g="n"＝数字のgiと衝突しない）。
     //     中身はDOM上 qm の子のままなので、下の #__ce_dg_fix 等の配線・closeMenu はそのまま効く。
+    // ― 薄い区切り線は細すぎて右クリックで掴めない＝クリック位置の上下12pxから線を拾って
+    //   「この線を選ぶ」ボタンを出す（AIなし）。線そのもの(hr・高さ8px以下)と、大きい要素の
+    //   上下フチのborder線（持ち主を選ぶ）の両方を拾う。
+    var lineQ=[];
+    (function(){
+      var seen=[];
+      var push=function(el,name){ if(el!==curEl&&seen.indexOf(el)<0&&lineQ.length<4){ seen.push(el); lineQ.push({el:el,name:name}); } };
+      var stack=[];
+      [-12,-8,-4,0,4,8,12].forEach(function(dy){
+        var y=qy+dy; if(y<0||y>window.innerHeight) return;
+        var ls; try{ ls=document.elementsFromPoint(qx,y)||[]; }catch(_){ ls=[]; }
+        ls.forEach(function(n){ if(stack.indexOf(n)<0) stack.push(n); });
+      });
+      stack.forEach(function(n){
+        if(!n||n.nodeType!==1||n===document.body||n.tagName==='HTML'||_inUI2(n)) return;
+        var r=n.getBoundingClientRect(); if(!(r.width>=40)) return;
+        var cs; try{ cs=getComputedStyle(n); }catch(_){ return; }
+        if(cs.visibility==='hidden'||(parseFloat(cs.opacity)||0)<0.05) return;
+        var tg=n.tagName.toLowerCase();
+        var hasBg=(cs.backgroundColor&&cs.backgroundColor!=='transparent'&&cs.backgroundColor!=='rgba(0, 0, 0, 0)')||(cs.backgroundImage&&cs.backgroundImage!=='none');
+        var bt=parseFloat(cs.borderTopWidth)>0&&cs.borderTopStyle!=='none';
+        var bb=parseFloat(cs.borderBottomWidth)>0&&cs.borderBottomStyle!=='none';
+        if(tg==='hr'||(r.height<=8&&(hasBg||bt))){ push(n,'― 線そのもの〈'+tg+'〉幅'+Math.round(r.width)+'px'); return; }
+        if(bt&&Math.abs(r.top-qy)<=12) push(n,'￣ 上フチに線を持つ〈'+tg+'〉');
+        if(bb&&Math.abs(r.bottom-qy)<=12) push(n,'＿ 下フチに線を持つ〈'+tg+'〉');
+      });
+    })();
+    var lineRowQ='';
+    if(lineQ.length){
+      lineRowQ='<div style="background:#eefbf1;border-bottom:1px solid #bfe3c8;padding:6px 10px 7px;font-size:12px;border-radius:7px">'
+        +'<b>― 近くの薄い線を選ぶ</b>（'+lineQ.length+'件・AIなし）<br>'
+        +'<span style="font-size:10.5px;color:#5f7a66">触れると赤く光ります／押すとその線が選択されます（動かす・消す・⚙もOK）</span>'
+        +lineQ.map(function(it,i){
+          return '<button class="__ce_lnz" data-i="'+i+'" style="display:block;width:100%;text-align:left;margin:3px 0 0;background:#fff;border:1px solid #b5d9bf;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11.5px;font-family:inherit;color:#1d1d1f">'+esc(it.name)+'</button>';
+        }).join('')+'</div>';
+    }
     var noticeL=[owRowQ,dgRowQ,pdRowQ,slRowQ,peRowQ,decoRowQ,radRowQ].filter(function(s){ return !!s; });
     var noticeQ = noticeL.length
       ? '<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
@@ -10915,7 +10995,7 @@ html.__ce_altmode{cursor:text}
         +'<div style="padding:5px 10px;font-size:10.5px;font-weight:700;color:#5b6472;border-bottom:1px solid #dcdce2;margin-bottom:3px">🔎 このページで見つかったこと（全部AIなし）</div>'
         +noticeL.join('')+'</div></div>'
       : '';
-    qm.innerHTML=selRowQ+mfRow+szRow+spRow+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    qm.innerHTML=selRowQ+mfRow+szRow+spRow+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
       +noticeQ
       +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
@@ -11096,6 +11176,14 @@ html.__ce_altmode{cursor:text}
           box.textContent = seen.length? ('今の隙間 '+seen.slice(0,5).join(' / ')+'px') : '';
           return;
         }
+        if(m==='gapb'){
+          spEls().forEach(function(x){
+            var rb=spRefBelow(x); if(!rb) return;
+            seen.push(Math.round(rb.getBoundingClientRect().top-x.getBoundingClientRect().bottom));
+          });
+          box.textContent = seen.length? ('今の下の隙間 '+seen.slice(0,5).join(' / ')+'px') : '';
+          return;
+        }
         var prop=(m.charAt(0)==='m')?'margin':'padding', side=(m==='mb')?'Bottom':'Top';
         spEls().forEach(function(x){
           var v; try{ v=Math.round(parseFloat(getComputedStyle(x)[prop+side])||0); }catch(_){ return; }
@@ -11137,22 +11225,60 @@ html.__ce_altmode{cursor:text}
         if(!best) return null;
         return (x.__ceSpRef=best.el);
       };
+      // すぐ下にあるものを探す（spRefAboveの下方向版）。★同じく一度選んだ相手は覚えて固定する。
+      var spRefBelow=function(x){
+        var ref=x.__ceSpRefB; if(ref&&ref.isConnected) return ref;
+        var r=x.getBoundingClientRect();
+        var host=(x.closest&&x.closest('section,header,footer,main'))||document.body;
+        var best=null;
+        [].slice.call(host.querySelectorAll('*')).forEach(function(n){
+          if(n===x||x.contains(n)||n.contains(x)||_inUI2(n)) return;
+          var nr=n.getBoundingClientRect();
+          if(!(nr.width>4&&nr.height>4)||nr.top<r.bottom-1) return;      // 下にあるものだけ
+          var cs; try{ cs=getComputedStyle(n); }catch(_){ return; }
+          if(cs.visibility==='hidden'||(parseFloat(cs.opacity)||0)<0.05) return;
+          var ov=Math.min(nr.right,r.right)-Math.max(nr.left,r.left);
+          if(ov<Math.min(nr.width,r.width)*0.25) return;                 // 横がある程度重なっているものだけ
+          if(!best||nr.top<best.t) best={el:n,t:nr.top};
+        });
+        if(!best) return null;
+        // ★見つかったのが「01」のような小さな中身なら、行の器まで遡って器ごと動かす
+        //   （中身だけ動かすと行の残り（見出し・本文）が置いていかれてバラける）。
+        //   親の上端が選択側と縦に重なったら器を超えたのでそこで止める。
+        var b=best.el;
+        while(b.parentElement){
+          var pE=b.parentElement;
+          if(/^(SECTION|HEADER|FOOTER|MAIN|BODY|HTML)$/.test(pE.tagName)||_inUI2(pE)) break;
+          if(pE.contains(x)) break;
+          if(pE.getBoundingClientRect().top<r.bottom-1) break;
+          b=pE;
+        }
+        return (x.__ceSpRefB=b);
+      };
       // ★「上のもの(prev)との隙間が、結果的にちょうど px になる」ようにする。
       //   足し算(＋10rem)でも「margin:10rem」でもなく、実測 → 足りない分だけ動かす → もう一度実測。
       //   自由配置は margin が1pxも効かないので移動で、それ以外は margin-top を差分で増減して作る。
       var spSetGap=function(prev,x,px){
-        var from=null;
+        var from=null, usedTr=false;
         for(var pass=0; pass<3; pass++){
           var gap=x.getBoundingClientRect().top-prev.getBoundingClientRect().bottom;
           if(from===null) from=gap;
           var d=px-gap;
           if(Math.abs(d)<0.6) break;
           var pos=''; try{ pos=getComputedStyle(x).position; }catch(_){}
-          if(pos==='absolute'||pos==='fixed'){
+          if(pos==='absolute'||pos==='fixed'||usedTr){
             try{ setPos(x,(+x.getAttribute('data-cetx')||0),(+x.getAttribute('data-cety')||0)+d); }catch(_){ return null; }
           }else{
+            var pt=prev.getBoundingClientRect().top;
             var mt=0; try{ mt=parseFloat(getComputedStyle(x).marginTop)||0; }catch(_){}
             x.style.setProperty('margin-top', Math.round((mt+d)*100)/100+'px','important');
+            // ★marginを足した反動で基準(prev)側まで動く親がある（高さ固定のflex等＝実報告：
+            //   下を広げたら上の要素が上に逃げた）。動いたらmarginを取り消して、以後は
+            //   translate（レイアウトに響かない移動）で隙間を作る。
+            if(Math.abs(prev.getBoundingClientRect().top-pt)>1){
+              x.style.setProperty('margin-top', Math.round(mt*100)/100+'px','important');
+              usedTr=true;
+            }
           }
         }
         var got=x.getBoundingClientRect().top-prev.getBoundingClientRect().bottom;
@@ -11165,10 +11291,10 @@ html.__ce_altmode{cursor:text}
         if(doZy) els.forEach(function(x){   // ドラッグの縦ズレを先に0へ戻してから隙間を作る
           if(+x.getAttribute('data-cety')||0){ try{ setPos(x,(+x.getAttribute('data-cetx')||0),0); }catch(_){} }
         });
-        var res=[], ng=0;
+        var res=[], ng=0, isGap=(m==='gap'||m==='gapb');
         var spRun=function(){
           res=[]; ng=0;
-          if(m!=='gap'){
+          if(!isGap){
             els.forEach(function(x){
               if(m==='mt') x.style.setProperty('margin-top', v,'important');
               else if(m==='mb') x.style.setProperty('margin-bottom', v,'important');
@@ -11178,6 +11304,35 @@ html.__ce_altmode{cursor:text}
           }
           var ls=els.slice().sort(function(a,b){ return a.getBoundingClientRect().top-b.getBoundingClientRect().top; });
           var px=spPx(v,ls[0]);
+          if(m==='gapb'){
+            // 下との隙間＝下にあるものを動かして作る（marginが効かない自由配置でも確実に空く）
+            ls.forEach(function(x){
+              var rb=spRefBelow(x); if(!rb){ ng++; return; }
+              // ★同じセクション内で「選択より下にある自由配置」を先に控える。器(rb)を動かしても
+              //   絶対配置の迷子（過去ドラッグの焼き込み）は付いてこないので、動かなかった子は
+              //   後から同じ量だけ一緒に動かす（＝行がバラけない）。
+              var host=(x.closest&&x.closest('section,header,footer,main'))||document.body;
+              var xb=x.getBoundingClientRect().bottom;
+              var strays=[];
+              [].slice.call(host.querySelectorAll('*')).forEach(function(n){
+                if(n===x||n===rb||n.contains(x)||x.contains(n)||n.contains(rb)||_inUI2(n)) return;
+                var ps=''; try{ ps=getComputedStyle(n).position; }catch(_){ return; }
+                if(ps!=='absolute'&&ps!=='fixed') return;
+                var nr=n.getBoundingClientRect();
+                if(nr.top>=xb-1&&nr.width>4&&nr.height>4) strays.push({el:n,t0:nr.top});
+              });
+              var g=spSetGap(x,rb,px);
+              if(g){ res.push(g.from+'→'+g.to+'px'); if(!g.ok) ng++;
+                var d2=g.to-g.from;
+                if(Math.abs(d2)>0.5){
+                  var un=strays.filter(function(s){ return Math.abs(s.el.getBoundingClientRect().top-s.t0)<0.5; });
+                  un=un.filter(function(s){ return !un.some(function(o){ return o!==s&&o.el.contains(s.el); }); });  // 入れ子は外側だけ
+                  un.forEach(function(s){ try{ setPos(s.el,(+s.el.getAttribute('data-cetx')||0),(+s.el.getAttribute('data-cety')||0)+d2); }catch(_){} });
+                }
+              } else ng++;
+            });
+            return;
+          }
           if(ls.length>1){
             for(var i=1;i<ls.length;i++){
               var g=spSetGap(ls[i-1],ls[i],px);
@@ -11190,21 +11345,114 @@ html.__ce_altmode{cursor:text}
             if(g1){ res.push(g1.from+'→'+g1.to+'px'); if(!g1.ok) ng++; } else ng++;
           }
         };
+        // ★margin/padding系は「値は入るのに1pxも動かない」事故が起きうる（自由配置・親の高さ固定等）。
+        //   当てる前後で実際に動いたかを測って、動いていなければ⚠で正直に言う（黙って成功と言わない）。
+        var freeN=0, h0=0, t0=[];
+        if(!isGap){
+          els.forEach(function(x){ var ps=''; try{ ps=getComputedStyle(x).position; }catch(_){} if(ps==='absolute'||ps==='fixed') freeN++; });
+          h0=document.scrollingElement.scrollHeight;
+          t0=els.map(function(x){ return x.getBoundingClientRect().top; });
+        }
         spRun();
+        var spWarn='';
+        if(!isGap){
+          var moved=(Math.abs(document.scrollingElement.scrollHeight-h0)>0.5);
+          els.forEach(function(x,i){ if(Math.abs(x.getBoundingClientRect().top-t0[i])>0.5) moved=true; });
+          if(freeN) spWarn='　⚠'+freeN+'個は自由配置＝margin/paddingでは動きません。そろえ方を「下との隙間＝結果その値」にすると空きます';
+          else if(!moved) spWarn='　⚠見た目は1pxも動いていません（元からその値だったか、親の高さが固定等）。動かないときは「隙間＝結果その値」が確実です';
+        }
         // ★出現アニメでtransformが動いている最中に測ると1回目だけズレる（実測）。
         //   0.7秒後＝アニメが落ち着いてからもう一度合わせ直して、必ず指定どおりの隙間にする。
         //   ★前の値の当て直しが残っていると次の値を上書きしてしまう（5rem→10remが80pxに戻る）ので必ず取り消す。
         if(_spFixT){ clearTimeout(_spFixT); _spFixT=0; }
-        if(m==='gap') _spFixT=setTimeout(function(){ _spFixT=0; try{ spRun(); markDirty(); spNow(); }catch(_){} },700);
+        if(isGap) _spFixT=setTimeout(function(){ _spFixT=0; try{ spRun(); markDirty(); spNow(); }catch(_){} },700);
         try{ markDirty(); }catch(_){}
         setTimeout(spNow,0);
+        if(document.getElementById('__ce_ruler')) setTimeout(spRulerDraw,750);   // ものさし表示中なら測り直す
         if(msg){
-          msg.textContent = (m==='gap')
-            ? ('📏 隙間を '+v+'（'+Math.round(spPx(v,els[0]))+'px）にしました：'+(res.join(' / ')||'（対象なし）')
-               +(ng?('　⚠'+ng+'件は届きませんでした（上に基準が無い等）'):'')+'。💾保存で残ります・⟲で戻せます')
-            : ('📏 '+els.length+'個の '+({mt:'margin-top',mb:'margin-bottom',ptb:'padding上下'}[m])+' を '+v+' にしました。💾保存で残ります・⟲で戻せます');
+          msg.textContent = isGap
+            ? ('📏 '+(m==='gapb'?'下との':'上との')+'隙間を '+v+'（'+Math.round(spPx(v,els[0]))+'px）にしました：'+(res.join(' / ')||'（対象なし）')
+               +(ng?('　⚠'+ng+'件は届きませんでした（'+(m==='gapb'?'下':'上')+'に基準が無い等）'):'')+'。💾保存で残ります・⟲で戻せます')
+            : ('📏 '+els.length+'個の '+({mt:'margin-top',mb:'margin-bottom',ptb:'padding上下'}[m])+' を '+v+' にしました'+spWarn+'。💾保存で残ります・⟲で戻せます');
         }
       };
+      // 📐 余白ものさし：今の隙間を全部その場に数字で出す。役割で色分け＝「全部同じ値」にしない前提
+      //   （🟣セクション間 / 🟠見出し下 / 🔵本文間。同じ色の中でバラついている所だけそろえる、が使い方）
+      var spRulerOff=function(){ var o=document.getElementById('__ce_ruler'); if(o) o.remove(); };
+      var spRulerDraw=function(){
+        spRulerOff();
+        var ov=document.createElement('div'); ov.id='__ce_ruler';
+        ov.style.cssText='position:absolute;left:0;top:0;width:100%;height:0;pointer-events:none;z-index:2147483600';
+        var rootPx=16; try{ rootPx=parseFloat(getComputedStyle(document.documentElement).fontSize)||16; }catch(_){}
+        var sy=window.scrollY||0, sx=window.scrollX||0;
+        var isHead=function(n){ if(/^H[1-6]$/.test(n.tagName)) return true;
+          var cs; try{ cs=getComputedStyle(n); }catch(_){ return false; }
+          return (parseFloat(cs.fontSize)||0)>=24&&(parseInt(cs.fontWeight,10)||400)>=600; };
+        var chip=function(prev,next,kind){
+          var a=prev.getBoundingClientRect(), b=next.getBoundingClientRect();
+          var g=Math.round(b.top-a.bottom); if(g<2||g>800) return;
+          var col=(kind==='sec')?'#8e44ad':(kind==='head')?'#e67e22':'#2980b9';
+          var x=Math.max(a.left,b.left)+Math.min(a.width,b.width)/2;
+          var ln=document.createElement('div');
+          ln.style.cssText='position:absolute;width:0;border-left:2px dashed '+col+';opacity:.55';
+          ln.style.left=Math.round(sx+x)+'px'; ln.style.top=Math.round(sy+a.bottom)+'px'; ln.style.height=g+'px';
+          var d=document.createElement('div');
+          d.style.cssText='position:absolute;transform:translate(-50%,-50%);background:'+col+';color:#fff;font:700 11px/1.7 sans-serif;padding:0 7px;border-radius:9px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35)';
+          d.style.left=Math.round(sx+x)+'px'; d.style.top=Math.round(sy+(a.bottom+b.top)/2)+'px';
+          d.textContent=g+'px（'+(Math.round(g/rootPx*10)/10)+'rem）';
+          ov.appendChild(ln); ov.appendChild(d);
+        };
+        var vis=function(n){ var r=n.getBoundingClientRect(); if(!(r.width>30&&r.height>8)) return null;
+          var cs; try{ cs=getComputedStyle(n); }catch(_){ return null; }
+          if(cs.visibility==='hidden'||(parseFloat(cs.opacity)||0)<0.05) return null; return r; };
+        var secs=[].slice.call(document.querySelectorAll('section,header,footer')).filter(function(s){ return !_inUI2(s)&&vis(s); });
+        secs.sort(function(a,b){ return a.getBoundingClientRect().top-b.getBoundingClientRect().top; });
+        for(var i=1;i<secs.length;i++) if(!secs[i-1].contains(secs[i])&&!secs[i].contains(secs[i-1])) chip(secs[i-1],secs[i],'sec');
+        secs.forEach(function(sec){
+          var els=[].slice.call(sec.querySelectorAll('h1,h2,h3,h4,h5,h6,p,img,ul,ol,figure,blockquote,table')).filter(function(n){ return !_inUI2(n)&&vis(n); });
+          els=els.filter(function(n){ return !els.some(function(o){ return o!==n&&o.contains(n); }); });
+          els.sort(function(a,b){ return a.getBoundingClientRect().top-b.getBoundingClientRect().top; });
+          for(var j=1;j<els.length;j++){
+            var ra=els[j-1].getBoundingClientRect(), rb2=els[j].getBoundingClientRect();
+            if(Math.min(ra.right,rb2.right)-Math.max(ra.left,rb2.left)<Math.min(ra.width,rb2.width)*0.25) continue;
+            chip(els[j-1],els[j], isHead(els[j-1])?'head':'flow');
+          }
+        });
+        document.body.appendChild(ov);
+      };
+      // 📏 1行←→板の開閉（このPCに記憶）
+      var _spTg=qm.querySelector('#__ce_sp_tg');
+      if(_spTg){
+        _spTg.addEventListener('mouseenter',function(){ this.style.background='#eef4ff'; });
+        _spTg.addEventListener('mouseleave',function(){ this.style.background='none'; });
+        _spTg.addEventListener('click',function(ev){ ev.stopPropagation();
+          var bd=qm.querySelector('#__ce_sp_body'); if(!bd) return;
+          var on=(bd.style.display==='none');
+          bd.style.display=on?'':'none';
+          try{ localStorage.setItem('__ce_sp_open', on?'1':'0'); }catch(_){}
+          var ar=this.querySelector('.__ce_sp_ar'); if(ar) ar.textContent=on?'▾':'▸';
+          if(on) spNow();
+        });
+      }
+      // 🤏 箱を中身にぴったり縮める：焼き込まれた height/min-height を外す（paddingは残す）
+      var _fitB=qm.querySelector('#__ce_sp_fit');
+      if(_fitB) _fitB.addEventListener('click',function(ev){ ev.stopPropagation();
+        var x=selEls.length===1?selEls[0]:curEl; if(!x) return;
+        try{ pushUndo(x); }catch(_){}
+        var h0=x.offsetHeight;
+        x.style.setProperty('height','auto','important');
+        x.style.setProperty('min-height','0','important');
+        try{ markDirty(); }catch(_){}
+        var h1=x.offsetHeight;
+        this.textContent='✓ 縮めました（'+h0+'px → '+h1+'px）';
+        if(msg) msg.textContent='🤏 箱を中身ぴったりに縮めました：'+h0+'px → '+h1+'px（💾保存で確定・⟲で戻せます）';
+        if(document.getElementById('__ce_ruler')) setTimeout(spRulerDraw,300);
+        setTimeout(spNow,0);
+      });
+      qm.querySelector('#__ce_sp_rl').addEventListener('click',function(ev){ ev.stopPropagation();
+        if(document.getElementById('__ce_ruler')){ spRulerOff(); if(msg) msg.textContent='📐 ものさしを消しました'; }
+        else { spRulerDraw(); if(msg) msg.textContent='📐 今の隙間を表示中：🟣セクション間 / 🟠見出し下 / 🔵本文間。もう一度📐かEscで消えます（💾保存には写りません）'; }
+      });
       spNow();
       [].slice.call(qm.querySelectorAll('.__ce_spv')).forEach(function(b){
         b.addEventListener('click',function(ev){ ev.stopPropagation(); spDo(b.getAttribute('data-v')); });
@@ -11219,8 +11467,13 @@ html.__ce_altmode{cursor:text}
         var cur=localStorage.getItem('__ce_sp_presets')||'5rem,10rem,14rem';
         var v=prompt('余白の定番をカンマ区切りで入れてください（例：5rem,10rem,14rem）。px・em でもOK・最大6個', cur);
         if(v==null) return;
-        v=v.split(',').map(function(s){ return s.trim(); }).filter(Boolean).slice(0,6).join(',');
-        if(!v) return;
+        var _bad=[];
+        v=v.split(',').map(function(s){ return s.trim(); }).filter(function(s){
+          if(!s) return false;
+          if(/^[0-9]*[.]?[0-9]+(rem|em|px|%)?$/.test(s)) return true;
+          _bad.push(s); return false;                       // 引用符などが混じると空ボタンになるので弾く
+        }).slice(0,6).join(',');
+        if(!v){ if(msg) msg.textContent='📏 数値で入れてください（例：5rem,10rem,14rem）。使えなかった値：'+_bad.join(' / '); return; }
         try{ localStorage.setItem('__ce_sp_presets', v); }catch(_){}
         closeMenu();
         if(msg) msg.textContent='📏 余白の定番を「'+v+'」にしました（このPCに記憶・どのカンプでも使えます）。もう一度右クリックで出ます';
@@ -11316,6 +11569,21 @@ html.__ce_altmode{cursor:text}
         closeMenu();
         _forceEl=n;
         n.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy}));
+      });
+    });
+    // ― 近くの薄い線の配線：ホバーで赤く光らせ、押したらその要素を選択して開き直す
+    [].slice.call(qm.querySelectorAll('.__ce_lnz')).forEach(function(b){
+      var it=lineQ[+b.getAttribute('data-i')]; if(!it) return;
+      b.addEventListener('mouseenter',function(){ try{ it.el.__lnz=it.el.style.getPropertyValue('outline'); it.el.style.setProperty('outline','2px solid #ff3b30','important'); }catch(_){} });
+      b.addEventListener('mouseleave',function(){ try{ if(it.el.__lnz) it.el.style.setProperty('outline',it.el.__lnz,'important'); else it.el.style.removeProperty('outline'); }catch(_){} });
+      b.addEventListener('click',function(ev){ ev.stopPropagation();
+        try{ it.el.style.removeProperty('outline'); }catch(_){}
+        _forceEl=it.el;
+        var r=it.el.getBoundingClientRect();
+        it.el.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,
+          clientX:Math.max(10,Math.min(r.left+r.width/2, window.innerWidth-20)),
+          clientY:Math.max(10,Math.min(r.top+Math.min(12,r.height/2), window.innerHeight-20))}));
+        if(msg) msg.textContent='― 線を選択しました（🖱掴んで動かす・削除・⚙メニューが使えます）';
       });
     });
     // ➖「見えている飾りを消す」の配線（選択の有無に関係なく、1件ずつトグルで消せる）
@@ -11651,14 +11919,46 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_secp','__ce_pkpos'].forEach(function(id){ var p=document.getElementById(id); if(p){ p.remove(); recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_secp','__ce_pkpos','__ce_ruler'].forEach(function(id){ var p=document.getElementById(id); if(p){ p.remove(); recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
+  },true);
+  // 🎯 Figma式ダブルクリック：1回目＝右クリックと同じ塊を選択、以降ダブルクリックのたびに
+  //   クリック位置の子へ1段ずつ潜る（文字そのものまで届く）。メニューは開かず選択だけ＝
+  //   潜り終わったら右クリックでメニュー（下のcontextmenuが __ceDblSel を優先して拾う）。
+  document.addEventListener('dblclick',function(e){
+    if(window.__ceFlyMode||window.__ceInspOn) return;
+    var t=e.target;
+    if(!t||t.nodeType!==1) return;
+    if(t.closest&&(t.closest('[id^="__ce"]')||t.closest('.__ce_hdl'))) return;
+    if(t.isContentEditable) return;                     // 文字編集中の単語選択はそのまま
+    var next=null;
+    if(curEl&&curEl===t){ if(msg) msg.textContent='🎯 ここが一番奥です（右クリックでメニュー・Escで解除）'; return; }
+    if(curEl&&curEl.contains(t)){
+      // 1段だけ潜る：今の選択の子のうち、クリックした場所を含むもの
+      var c=t; while(c&&c.parentElement!==curEl) c=c.parentElement;
+      next=c||t;
+    }else{
+      next=pickTarget(_realTarget(e));                  // 最初は右クリックと同じ掴み方
+      if(next) next=_descendOverlay(next,e.clientX,e.clientY);
+    }
+    if(!next||next===document.body||next.tagName==='HTML') return;
+    if(next.closest&&next.closest('[id^="__ce"]')) return;
+    closeMenu();
+    curEl=next; next.classList.add('__ce_sel'); selEls=[next];
+    window.__ceDblSel=next;
+    if(msg){
+      var d=next.tagName.toLowerCase()+(next.className&&typeof next.className==='string'?'.'+next.className.split(' ')[0]:'');
+      msg.textContent='🎯 '+d+' を選択（もう一度ダブルクリック＝1段奥へ／右クリック＝メニュー／Esc＝解除）';
+    }
   },true);
   document.addEventListener('contextmenu',function(e){
     if(window.__ceFlyMode){ e.preventDefault(); if(msg) msg.textContent='🕊 線を飛ばすモード中です。右クリックメニューに戻すには Esc を押してください'; return; }  // 🕊ルート描画中は右クリック＝アンカー削除
     var _wasForced=_forceEl;
     var el=_forceEl||pickTarget(_realTarget(e)); _forceEl=null;
+    // 🎯ダブルクリックで潜って選んだ要素の上で右クリック＝その選択を保ってメニューを出す
+    if(!_wasForced&&window.__ceDblSel&&window.__ceDblSel.isConnected&&(window.__ceDblSel===e.target||window.__ceDblSel.contains(e.target))){ el=window.__ceDblSel; }
+    window.__ceDblSel=null;
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
     if(!_wasForced) el=_descendOverlay(el, e.clientX, e.clientY);  // 透明な膜は貫通して下の実体を掴む（⬆外側選択のときは貫通させない）
     // ※「クリックがすり抜ける絵」は勝手に掴み替えない（文字の上を右クリックした時に横取りする誤爆が
