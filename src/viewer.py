@@ -5557,8 +5557,10 @@ html.__ce_altmode{cursor:text}
         .map(function(v){ return '<button class="__ce_bgp_g" data-v="'+v+'" title="'+v+'" style="'+_bs+';padding:6px 0">・</button>'; }).join('')
       +'</div>'
       +'<div style="margin-top:8px">前後（重なり） <span id="__ce_bgp_zn" style="color:#fbbf24;font-weight:700"></span></div>'
-      +'<div style="display:flex;gap:4px"><button id="__ce_bgp_zup" title="文字や写真より前に出す" style="'+_bs+'">⬆ 手前に出す</button>'
-      +'<button id="__ce_bgp_zdn" title="文字の後ろへ送る（飾りが文字にかぶった時はこれ）" style="'+_bs+'">⬇ 奥へ送る</button></div>'
+      +'<div style="font-size:10.5px;opacity:.75;margin-bottom:2px">動くのは<b style="color:#ff6b62">赤枠のもの</b>だけです</div>'
+      +'<div style="display:flex;gap:4px"><button id="__ce_bgp_zup" title="赤枠のものを、上に乗っているものより前に出す（触れると邪魔しているものが青枠で光ります）" style="'+_bs+'">⬆ 赤枠を手前に</button>'
+      +'<button id="__ce_bgp_zdn" title="赤枠のものを奥へ戻す（手前に出す前の重なりに戻します）" style="'+_bs+'">⬇ 赤枠を奥へ</button></div>'
+      +'<div id="__ce_bgp_cv" style="font-size:10.5px;color:#9fd0ff;margin-top:2px;min-height:14px"></div>'
       +'<div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap"><button id="__ce_bgp_nr" style="'+_bs+'">繰り返しを止める</button>'
       +'<button id="__ce_bgp_cut" title="人物や商品だけを残して背景を透明にする（AIなし・無料・10〜30秒）" style="'+_bs+';background:#7c3aed;border-color:#7c3aed">✂ 切り抜いて透過</button>'
       +'<button id="__ce_bgp_rs" style="'+_bs+'">⟲ 元に戻す</button></div>'
@@ -5719,6 +5721,10 @@ html.__ce_altmode{cursor:text}
       }
       return null;
     };
+    // ★「手前に出す」は対象そのものではなく、共通の親の直下（枝）に印を付ける。
+    //   だから「奥へ送る」で対象の数字を下げても元に戻らない（実報告）。触った枝を控えておき、
+    //   奥へ送るときは新しい順に戻す＝押した手順をそのまま巻き戻す。
+    var zLifts=[], zPend=[];
     var zLiftOver=function(el, cover){
       var chain=[]; for(var n=el;n;n=n.parentElement) chain.push(n);
       var lca=null; for(var m=cover;m;m=m.parentElement){ if(chain.indexOf(m)>=0){ lca=m; break; } }
@@ -5727,14 +5733,18 @@ html.__ce_altmode{cursor:text}
       var B=cover; while(B&&B.parentElement&&B.parentElement!==lca) B=B.parentElement;
       if(!A||!B||A===B) return false;
       try{ pushUndo(A); }catch(_){}
+      zPend.push({el:A, z:A.style.getPropertyValue('z-index'), zp:A.style.getPropertyPriority('z-index'),
+                   ps:A.style.getPropertyValue('position'), pp:A.style.getPropertyPriority('position')});
       var bz=parseInt(getComputedStyle(B).zIndex,10); if(isNaN(bz)) bz=0;
       if(getComputedStyle(A).position==='static') A.style.setProperty('position','relative','important');
       A.style.setProperty('z-index', String(Math.min(999,bz+1)),'important');
+      A.setAttribute('data-cezlift','1');   // 空っぽの場所ではクリックを素通しにする目印
       return true;
     };
     var zFront=function(){
       var c=cur(), el=c.el, done=0;
       try{ pushUndo(el); }catch(_){}
+      zPend=[];                                  // この1回で触った枝＝まとめて1手として戻せるようにする
       // 相手が複数（別々の重なりの箱）のことがあるので、上に居るものが無くなるまで繰り返す
       for(var pass=0; pass<4; pass++){
         var cover=zCoverOf(el);
@@ -5743,25 +5753,63 @@ html.__ce_altmode{cursor:text}
         done++;
       }
       if(!done){ zStep(1); return; }
+      if(zPend.length){ zLifts.push(zPend); zPend=[]; }
       try{ markDirty(); }catch(_){}
       sync();
       if(msg) msg.textContent = zCoverOf(el)
         ? '手前に出しましたが、まだ上に何かが残っています（もう一度押してください）'
         : ('手前に出しました（'+done+'つの相手より上になりました）');
     };
-    p.querySelector('#__ce_bgp_zup').addEventListener('click',zFront);
-    p.querySelector('#__ce_bgp_zdn').addEventListener('click',function(){ zStep(-1); });
+    var zRestore=function(o){
+      try{ pushUndo(o.el); }catch(_){}
+      if(o.z) o.el.style.setProperty('z-index',o.z,o.zp); else o.el.style.removeProperty('z-index');
+      if(o.ps) o.el.style.setProperty('position',o.ps,o.pp); else o.el.style.removeProperty('position');
+      try{ o.el.removeAttribute('data-cezlift'); }catch(_){}
+    };
+    // 「何が邪魔しているか」を触れるだけで見せる（青枠）＝手前に出すの意味が分かる
+    var cvHide=function(){ var o=document.getElementById('__ce_grab2'); if(o) o.remove();
+      var t2=p.querySelector('#__ce_bgp_cv'); if(t2) t2.textContent=''; };
+    var cvShow=function(){
+      cvHide();
+      var cover=zCoverOf(cur().el);
+      var t2=p.querySelector('#__ce_bgp_cv');
+      if(!cover){ if(t2) t2.textContent='上に乗っているものはありません（もう一番前です）'; return; }
+      var r=cover.getBoundingClientRect();
+      var o=document.createElement('div'); o.id='__ce_grab2';
+      o.style.cssText='position:fixed;z-index:2147483645;pointer-events:none;border:2px dashed #2f9bff;border-radius:4px;'
+        +'left:'+Math.round(r.left)+'px;top:'+Math.round(r.top)+'px;width:'+Math.max(2,Math.round(r.width))+'px;height:'+Math.max(2,Math.round(r.height))+'px';
+      var lb=document.createElement('div');
+      lb.style.cssText='position:absolute;left:0;top:'+(r.top<24?'2px':'-22px')+';background:#2f9bff;color:#fff;font:700 11px/1.8 sans-serif;padding:0 7px;border-radius:5px;white-space:nowrap';
+      lb.textContent='これが上に乗っています';
+      o.appendChild(lb); document.body.appendChild(o);
+      if(t2) t2.textContent='青枠のものより前に出します';
+    };
+    p.querySelector('#__ce_bgp_zup').addEventListener('mouseenter',cvShow);
+    p.querySelector('#__ce_bgp_zup').addEventListener('mouseleave',cvHide);
+    p.querySelector('#__ce_bgp_zup').addEventListener('click',function(){ cvHide(); zFront(); });
+    p.querySelector('#__ce_bgp_zdn').addEventListener('click',function(){
+      if(zLifts.length){                       // 手前に出した1回分（複数の枝）をまとめて取り消す
+        var b=zLifts.pop();
+        for(var i=b.length-1;i>=0;i--) zRestore(b[i]);
+        try{ markDirty(); }catch(_){} sync();
+        if(msg) msg.textContent='奥へ戻しました（手前に出す前の重なりに戻っています）';
+        return;
+      }
+      zStep(-1);
+    });
     p.querySelector('#__ce_bgp_nr').addEventListener('click',function(){ apply('background-repeat','no-repeat'); });
     // ✂ 背景の絵・飾りも切り抜いて透過にする（<img>と同じrembgを使う。もう一度押すと元の絵に戻る）
     p.querySelector('#__ce_bgp_cut').addEventListener('click',function(){ bgCutToggle(cur(), this, sync); });
     p.querySelector('#__ce_bgp_rs').addEventListener('click',function(){
+      while(zLifts.length){ var _b=zLifts.pop(); for(var _i=_b.length-1;_i>=0;_i--) zRestore(_b[_i]); }   // 手前に出すで触った枝も全部戻す
       var c=cur(); try{ pushUndo(c.el); }catch(_){}
       if(c.ps){ ['background-size','background-position','background-repeat','translate','width','height','pointer-events','background-image','z-index','position'].forEach(function(pr){ bgpApply(c,pr,null); }); }
       else if(snap[idx]) c.el.setAttribute('style', snap[idx]); else c.el.removeAttribute('style');
       try{ markDirty(); }catch(_){} sync();
       if(msg) msg.textContent='🖼 背景の見た目を開いた時の状態に戻しました';
     });
-    var close=function(){ var o=document.getElementById('__ce_grab'); if(o&&o.__off) o.__off(); grabHintHide(); p.remove(); };
+    var close=function(){ var o=document.getElementById('__ce_grab'); if(o&&o.__off) o.__off(); grabHintHide();
+      var o2=document.getElementById('__ce_grab2'); if(o2) o2.remove(); p.remove(); };
     p.querySelector('#__ce_bgpx').addEventListener('click',close);
     p.__close=close;
     if(msg) msg.textContent='🖼 背景画像の大きさ・位置を調整中（スライダーで大きさ／9つのボタンで位置・Escで閉じる）';
@@ -10529,7 +10577,23 @@ html.__ce_altmode{cursor:text}
       return g.getImageData(0,0,1,1).data[3]<8;
     }catch(_){ return false; }
   }
+  // ⬆手前に出すで持ち上げた「入れ物」は、中身が無い場所でも箱ぜんぶが当たり判定になり、
+  //   その下の文字が掴めなくなる（実報告）。何も描いていない場所ではクリックを素通しにする。
+  function _zliftSkip(c, x, y){
+    if(!c||!c.getAttribute||c.getAttribute('data-cezlift')!=='1') return false;
+    var cs; try{ cs=getComputedStyle(c); }catch(_){ return false; }
+    if(cs.backgroundImage&&cs.backgroundImage!=='none') return false;         // 自分で絵を描いている
+    var m=(cs.backgroundColor||'').match(/rgba?\\(([^)]+)\\)/);
+    if(m){ var p=m[1].split(','); var a=(p.length>3)?parseFloat(p[3]):1; if(a>0.05) return false; }  // 色で塗っている
+    var ls=[]; try{ ls=document.elementsFromPoint(x,y); }catch(_){ return false; }
+    for(var i=0;i<ls.length;i++){
+      if(ls[i]===c) break;
+      if(c.contains(ls[i])) return false;      // その点に自分の中身がある＝掴んでよい
+    }
+    return true;                                // 空っぽの場所＝下へ通す
+  }
   function _clearPixel(el, x, y){
+    if(_zliftSkip(el, x, y)) return true;
     if(el&&el.nodeType===1&&el.tagName!=='IMG') return _clearPixelBg(el, x, y);
     if(!el||el.tagName!=='IMG'||!el.__ceFree) return false;
     if(!el.naturalWidth||!el.naturalHeight) return false;
@@ -10545,6 +10609,29 @@ html.__ce_altmode{cursor:text}
       g.drawImage(el, sx, sy, 1, 1, 0, 0, 1, 1);
       return g.getImageData(0,0,1,1).data[3]<8;   // ほぼ透明＝ここは絵が無い
     }catch(_){ return false; }                     // 読めない画像は従来どおり「掴める」扱い（安全側）
+  }
+  // 👆 その座標に「実際に文字が描かれている」なら、その文字の要素を返す（AIなし）。
+  //   ★上に透明な入れ物がかぶっていると、文字を右クリックしても入れ物が掴まれる（実報告）。
+  //   キャレット位置＝ブラウザが「ここに文字がある」と認めた位置なので、覆われていても本物の文字に届く。
+  function _textAt(x,y){
+    var ls=[]; try{ ls=document.elementsFromPoint(x,y); }catch(_){ return null; }
+    for(var i=0;i<ls.length;i++){
+      var n=ls[i];
+      if(!n||n.nodeType!==1) continue;
+      if(n.closest&&n.closest('[id^="__ce"]')) continue;
+      if(n===document.body||n.tagName==='HTML') break;
+      for(var k=0;k<n.childNodes.length;k++){
+        var c=n.childNodes[k];
+        if(c.nodeType!==3||!(c.nodeValue||'').replace(/[\\s\\u200b]/g,'')) continue;
+        var rg=document.createRange(); rg.selectNode(c);
+        var rs=[]; try{ rs=rg.getClientRects(); }catch(_){ continue; }
+        for(var j=0;j<rs.length;j++){
+          var q=rs[j];
+          if(x>=q.left-1&&x<=q.right+1&&y>=q.top-1&&y<=q.bottom+1) return n;   // ここに文字が描かれている
+        }
+      }
+    }
+    return null;
   }
   // クリック地点の「本当に触りたい要素」＝生き返らせた画像の透明部分なら下の要素を返す。
   function _realTarget(e){
@@ -11337,6 +11424,36 @@ html.__ce_altmode{cursor:text}
         +(slQ.frozen?'<button id="__ce_slzoff" style="margin-top:5px;background:#64748b;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11.5px">▶ 切り替わりに戻す</button>':'')
         +'</div>';
     }
+    // 🎯 ここに重なっているものを右クリックの一番上に並べる（AIなし）。
+    //   ★重なりを前後させて掴みに行くのは素人には難しい。「その場で選べる」ほうが早い、というユーザーの指摘で新設。
+    //   同じ一覧は⚙メニューの「重なっている要素から選ぶ」にもあるが、奥にあって見つけてもらえなかった。
+    var ovQ=[], ovRowQ='';
+    (function(){
+      var ls=[]; try{ ls=document.elementsFromPoint(qx,qy); }catch(_){ return; }
+      ls=ls.filter(function(c){ return c!==document.documentElement&&c!==document.body&&!(c.closest&&c.closest('[id^="__ce"]')); });
+      var pe=[]; try{ pe=_peNoneAt(qx,qy)||[]; }catch(_){}          // クリックがすり抜ける飾りも並べる
+      ovQ=pe.concat(ls.filter(function(c){ return pe.indexOf(c)<0; })).slice(0,7);
+      if(ovQ.length<2) { ovQ=[]; return; }
+      // ★入れ子の親子は文字が同じで見分けが付かない＝大きさを添える（小さい＝文字そのもの／大きい＝入れ物）
+      var nameOf2=function(c){
+        var tx=(c.textContent||'').replace(/\\s+/g,' ').trim();
+        var r2=c.getBoundingClientRect(), sz=' '+Math.round(r2.width)+'×'+Math.round(r2.height);
+        if(c.tagName==='IMG') return '🖼 画像'+sz;
+        var cs2=''; try{ cs2=getComputedStyle(c).backgroundImage; }catch(_){}
+        if(tx) return '「'+tx.slice(0,8)+'」'+sz;
+        if(cs2&&cs2!=='none') return '🖼 絵の箱'+sz;
+        return '⬜ 箱'+sz;
+      };
+      ovRowQ='<div style="background:#f3f0ff;border-bottom:1px solid #d5cdf0;padding:6px 10px 7px;border-radius:7px">'
+        +'<b style="font-size:12px">🎯 ここに重なっているもの（'+ovQ.length+'個・AIなし）</b><br>'
+        +'<span style="font-size:10.5px;color:#6a5f8a">触れると赤枠／押すとそれを掴みます（上ほど手前）</span>'
+        +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">'
+        +ovQ.map(function(c,i){
+          return '<button class="__ce_ovz" data-i="'+i+'" title="'+esc(c.tagName.toLowerCase()+(c.className&&typeof c.className==='string'?'.'+c.className.split(' ')[0]:''))+'" style="background:#fff;border:1px solid #cfc6ea;border-radius:6px;padding:3px 8px;cursor:pointer;font:11.5px/1.3 inherit;color:#1d1d1f;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+            +(i===0?'▲ ':'')+esc(nameOf2(c))+'</button>';
+        }).join('')
+        +'</div></div>';
+    })();
     // 🖼 ここにある背景の絵・飾りを「サムネで」右クリックにそのまま出す（押さなくても分かる）。
     //   ★板そのものは出さない：スライダー＋9マスは背が高く、メニューが画面外まで押し下がるため。
     //   サムネに触れるとページ側が赤枠＝どれのことか目で確かめてから押せる。
@@ -11615,7 +11732,7 @@ html.__ce_altmode{cursor:text}
         +'<div style="padding:5px 10px;font-size:10.5px;font-weight:700;color:#5b6472;border-bottom:1px solid #dcdce2;margin-bottom:3px">🔎 このページで見つかったこと（全部AIなし）</div>'
         +noticeL.join('')+'</div></div>'
       : '';
-    qm.innerHTML=selRowQ+mfRow+szRow+spRow+bgRowQ+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    qm.innerHTML=selRowQ+mfRow+szRow+ovRowQ+spRow+bgRowQ+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
       +noticeQ
       +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
@@ -11624,6 +11741,37 @@ html.__ce_altmode{cursor:text}
       +'<button id="__ce_q_sckey" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⌨ キー設定</button>'
       +'<button id="__ce_q_edit" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
     document.body.appendChild(qm);
+    // 🖱 メニュー自体を掴んで動かせるようにする（下に隠れた要素を見たい時に邪魔になるため）。
+    //   ボタン・入力の上では動かさない＝押す操作は今まで通り。位置はこのPCに記憶する。
+    (function(){
+      var dg=false, sx=0, sy=0, ol=0, ot=0;
+      qm.addEventListener('mousedown',function(ev){
+        if(ev.button!==0) return;
+        if(qm.__qeOn) return;                                     // 並べ替えモードは従来の仕組みを使う
+        var t=ev.target;
+        if(t.closest&&t.closest('button,input,select,textarea,label,a,.__ce_qi,.__ce_sub')) return;
+        var r=qm.getBoundingClientRect();
+        dg=true; sx=ev.clientX; sy=ev.clientY; ol=r.left; ot=r.top;
+        qm.style.left=ol+'px'; qm.style.top=ot+'px'; qm.style.right='auto'; qm.style.bottom='auto';
+        ev.preventDefault(); ev.stopPropagation();
+        var mv=function(e2){
+          if(!dg) return;
+          var nl=Math.max(0,Math.min(ol+(e2.clientX-sx), window.innerWidth-60));
+          var nt=Math.max(0,Math.min(ot+(e2.clientY-sy), window.innerHeight-40));
+          qm.style.left=nl+'px'; qm.style.top=nt+'px';
+        };
+        var up=function(){
+          dg=false;
+          document.removeEventListener('mousemove',mv,true); document.removeEventListener('mouseup',up,true);
+          var rr=qm.getBoundingClientRect();
+          lastMenuPos={left:rr.left, top:rr.top};
+          try{ localStorage.setItem('__ce_menupos',JSON.stringify(lastMenuPos)); }catch(_){}
+        };
+        document.addEventListener('mousemove',mv,true);
+        document.addEventListener('mouseup',up,true);
+      },true);
+      qm.style.cursor='default';
+    })();
     qmWireGroups(qm);
     qm.querySelector('#__ce_q_edit').addEventListener('click',function(ev){ ev.stopPropagation(); qmEditMode(qm); });
     qm.querySelector('#__ce_q_sckey').addEventListener('click',function(ev){ ev.stopPropagation(); closeMenu(); scOpenSettings(); });
@@ -12191,6 +12339,22 @@ html.__ce_altmode{cursor:text}
         n.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy}));
       });
     });
+    // 🎯 重なっているものの配線：触れると赤枠／押すとその要素を掴んで開き直す
+    [].slice.call(qm.querySelectorAll('.__ce_ovz')).forEach(function(b){
+      var c=ovQ[+b.getAttribute('data-i')]; if(!c) return;
+      b.addEventListener('mouseenter',function(){
+        try{ c.__ovz=c.style.getPropertyValue('outline'); c.style.setProperty('outline','2px solid #ff3b30','important'); }catch(_){}
+      });
+      b.addEventListener('mouseleave',function(){
+        try{ if(c.__ovz) c.style.setProperty('outline',c.__ovz,'important'); else c.style.removeProperty('outline'); }catch(_){}
+      });
+      b.addEventListener('click',function(ev){ ev.stopPropagation();
+        try{ c.style.removeProperty('outline'); }catch(_){}
+        try{ if(_peWake(c)&&msg) msg.textContent='この飾りはクリックがすり抜ける設定でした→掴めるようにしました'; }catch(_){}
+        _forceEl=c;
+        c.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy}));
+      });
+    });
     // 🖼 背景の絵・飾りのサムネ配線：触れると赤枠／押すと大きさ・位置パネルをその絵で開く
     [].slice.call(qm.querySelectorAll('.__ce_bgz')).forEach(function(b){
       var i=+b.getAttribute('data-i'), c=bgQ[i]; if(!c) return;
@@ -12572,7 +12736,7 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
@@ -12614,6 +12778,11 @@ html.__ce_altmode{cursor:text}
     window.__ceDblSel=null;
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
     if(!_wasForced) el=_descendOverlay(el, e.clientX, e.clientY);  // 透明な膜は貫通して下の実体を掴む（⬆外側選択のときは貫通させない）
+    // 別の枝の入れ物が上にかぶっている時は、実際に見えている文字のほうを掴む（重なりを直さなくても選べる）
+    if(!_wasForced){
+      var _tx=_textAt(e.clientX, e.clientY);
+      if(_tx && _tx!==el && !el.contains(_tx) && !_tx.contains(el)) el=_tx;
+    }
     // ※「クリックがすり抜ける絵」は勝手に掴み替えない（文字の上を右クリックした時に横取りする誤爆が
     //   実測で出たため）。代わりにクイックメニューの先頭に「この絵を選ぶ」を出して選ばせる（_peRowQ）。
     // 🖼画像は「枠（親）ごと」がほぼ常に正解：親が画像をぴったり包むラッパー（figure/div等）なら
