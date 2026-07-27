@@ -3613,10 +3613,25 @@ html.__ce_altmode{cursor:text}
         var s=srcEls[i], d=dstEls[i]; if(!d) continue;
         var cs; try{ cs=getComputedStyle(s); }catch(_){ continue; }
         if(cs.position!=='absolute') continue;
+        // ★位置の基準（一番近いpositionedな祖先）が部品の「中」にある要素は焼き込まない。
+        //   元のCSS座標のままで正しく、部品全体基準の座標で上書きすると基準違いでズレて
+        //   overflow:hiddenの外へ飛び「写真が消えた」ように見える（実例：figure基準のカード写真）。
+        var anc=s.parentElement, refInside=false;
+        while(anc){
+          var ap='static';
+          try{ ap=getComputedStyle(anc).position; }catch(_){ }
+          if(ap!=='static'){ refInside=el.contains(anc); break; }
+          anc=anc.parentElement;
+        }
+        if(refInside) continue;
         var r=s.getBoundingClientRect();
         if(!r.width && !r.height) continue;
         d.style.setProperty('top',(r.top-baseRect.top)+'px','important');
         d.style.setProperty('left',(r.left-baseRect.left)+'px','important');
+        // ★right/bottom を auto にすると、left+right の組で幅を作っていた要素が潰れて消える
+        //   （実例：カードの写真が空っぽの枠になった）。実測した幅・高さも一緒に焼き込む。
+        if(r.width) d.style.setProperty('width',Math.round(r.width)+'px','important');
+        if(r.height) d.style.setProperty('height',Math.round(r.height)+'px','important');
         d.style.setProperty('right','auto','important');
         d.style.setProperty('bottom','auto','important');
       }
@@ -3748,7 +3763,7 @@ html.__ce_altmode{cursor:text}
       });
       return res;
     }
-    var out=[], kf=[];
+    var out=[], kf=[], hideSel=[];
     function scan(rules, mediaTxt){
       [].slice.call(rules||[]).forEach(function(r){
         if(r.media && r.cssRules){ scan(r.cssRules, r.media.mediaText); return; }        // @media
@@ -3757,6 +3772,12 @@ html.__ce_altmode{cursor:text}
         if(!r.style) return;
         if(r.parentStyleSheet && r.parentStyleSheet.ownerNode && r.parentStyleSheet.ownerNode.id==='fxa-css') return;  // fxaは両ページにあるので除外
         if(hitAny(r.selectorText)){
+          // ★元サイトがJSで表示する作り（CSSでは opacity:0 で隠しておく）だと、部品にした時に
+          //   そのJSが無いので永久に見えない（実例：インタビューのカードが真っ白のまま）。
+          //   隠す指定を控えておき、あとで「元サイトで見えていたもの」だけ表示に戻す。
+          try{
+            if(r.style && (parseFloat(r.style.opacity)===0 || r.style.visibility==='hidden')) hideSel.push(r.selectorText);
+          }catch(_){}
           out.push(mediaTxt?('@media '+mediaTxt+'{'+r.cssText+'}'):r.cssText);
           var rs=extraSels(r.selectorText);
           if(rs.length){ var rule=rs.join(',')+'{'+r.style.cssText+'}'; out.push(mediaTxt?('@media '+mediaTxt+'{'+rule+'}'):rule); }
@@ -3766,12 +3787,24 @@ html.__ce_altmode{cursor:text}
     [].slice.call(document.styleSheets).forEach(function(ss){
       if(ss.ownerNode && /#__ce/.test(ss.ownerNode.textContent||'')) return;  // 編集UIのCSSは除外
       var rr; try{ rr=ss.cssRules; }catch(_){ return; }
-      scan(rr);
+      // ★<link media="(max-width:767px)">のようなシートまるごとの幅条件を無視すると、
+      //   スマホ専用CSSが無条件で紛れ込む（実例：overflow-x:scrollでPC表示にスクロールバーが出た）。
+      //   シート側のmedia条件も@mediaとして引き継ぐ。
+      var _mt=''; try{ _mt=(ss.media&&ss.media.mediaText)||''; }catch(_){}
+      scan(rr, _mt||undefined);
     });
     // 護身用：入れ替え先に「画面基準で浮く絶対配置（親にrelative無しの.hero-media等）」があると
     // 部品の上に被さってくる（実際に起きた）。部品ルートを relative+z-index:1 にして上に出す。
     // 元がsticky/fixed等の部品はそのまま尊重する（staticのときだけ）。
     if(getComputedStyle(el).position==='static') out.push(':scope{position:relative;z-index:1}');
+    // 隠す指定のうち、保存の瞬間に「実際は見えていた」ものだけ表示に戻す（JS前提の演出対策）
+    hideSel.forEach(function(sel){
+      var vis=false;
+      for(var i=0;i<els.length;i++){
+        try{ if(els[i].matches(sel) && parseFloat(getComputedStyle(els[i]).opacity)>=0.99) { vis=true; break; } }catch(_){}
+      }
+      if(vis) out.push(sel+'{opacity:1!important;visibility:visible!important}');
+    });
     // @scope（中括弧だけ・条件なし）＝「このstyleタグの親要素の中だけに効く」。部品に抱かせる用にぴったり
     return remFix(kf.join('\\n')+'\\n@scope{\\n'+out.join('\\n')+'\\n}');
   }
@@ -4687,6 +4720,26 @@ html.__ce_altmode{cursor:text}
     if(!target){ msg.textContent='入れ替える先が見つかりません（①で選ぶか、セクションの中で右クリックしてください）'; return; }
     // 同じ種類同士だけ出す（セクションの枠にヘッダーが入る事故を防ぐ）
     var tKind=target.tagName.toLowerCase(); if(tKind!=='header'&&tKind!=='footer') tKind='section';
+    // ★rem基準のサイトから保存した古い部品は、この小窓（1rem=16px）では十数倍に膨らみ、
+    //   端っこだけが写って「真っ白・細長い帯」に見える（実報告）。中身の実寸を測って、
+    //   小窓に収まるよう文字の基準サイズを縮める＝古い部品でも見た目が分かるようにする。
+    if(!window.favPvFit) window.favPvFit=function(root){
+      [].slice.call(root.querySelectorAll('.pv iframe')).forEach(function(f){
+        var fit=function(){
+          try{
+            var d=f.contentDocument; if(!d||!d.body) return;
+            for(var i=0;i<3;i++){
+              var w=Math.max(d.body.scrollWidth, d.documentElement.scrollWidth||0);
+              if(!(w>1260)) break;
+              var cur=parseFloat(getComputedStyle(d.documentElement).fontSize)||16;
+              d.documentElement.style.fontSize=Math.max(0.2, cur*1200/w)+'px';
+            }
+          }catch(_){}
+        };
+        f.addEventListener('load',fit);
+        setTimeout(fit,80); setTimeout(fit,400);
+      });
+    };
     var tKindJp=(tKind==='section'?'セクション':tKind==='header'?'ヘッダー':'フッター');
     fetch('/api/section_fav/list').then(function(r){return r.json();}).then(function(d){
       var favs=(d.favs||[]).filter(function(f){ return (f.kind||'section')===tKind; });
@@ -4709,6 +4762,7 @@ html.__ce_altmode{cursor:text}
       var ov=document.createElement('div'); ov.id='__ce_pk';
       ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🔀 入れ替える'+tKindJp+'を選ぶ（クリックで差し替え）</h4><div class="secgr">'+items+'</div></div>';
       document.body.appendChild(ov);
+      favPvFit(ov);
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
         var del=e.target.closest('.del');
@@ -4881,6 +4935,7 @@ html.__ce_altmode{cursor:text}
         var ov=document.createElement('div'); ov.id='__ce_pk';
         ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>➕ 追加するセクションを選ぶ（クリックで挿入）</h4><div class="secgr">'+items+'</div></div>';
         document.body.appendChild(ov);
+        if(window.favPvFit) window.favPvFit(ov);
         ov.addEventListener('click',function(e){
           if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
           var del=e.target.closest('.del');
