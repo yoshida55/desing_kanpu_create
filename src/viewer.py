@@ -6133,7 +6133,13 @@ html.__ce_altmode{cursor:text}
   }
   function bgTarget(el){
     var t = el.tagName==='IMG' ? (el.parentElement||el) : el;   // imgには子を入れられないので親に敷く
-    return (!t||t===document.body) ? null : t;
+    if(!t||t===document.body) return null;
+    // どの写真に対する飾りかを覚える（親が大きい時に、写真の箱へ合わせて置くため）
+    try{
+      t.__ceDecoImg=(el.tagName==='IMG'||el.tagName==='VIDEO')?el
+        :((el.querySelector&&el.querySelector('img,video'))||t.querySelector('img,video')||null);
+    }catch(_){}
+    return t;
   }
   // 飾りパネルを「写真の後ろから斜めにずらして覗かせる」位置に置く（Dpx＝覗く量／dir＝ずらす向き）。
   //   ★旧方式は左右対称(inset:-N%)で、写真が不透明だと真裏に完全に隠れて色が見えなかった
@@ -6182,6 +6188,28 @@ html.__ce_altmode{cursor:text}
   function myColsPut(a){ try{ localStorage.setItem('__ce_bgmycols', JSON.stringify(a.slice(0,10))); }catch(_){} }
   function myColsAdd(hex){ var a=myColsGet().filter(function(c){ return c!==hex; }); a.unshift(hex); myColsPut(a); }
   function myColsDel(hex){ myColsPut(myColsGet().filter(function(c){ return c!==hex; })); }
+  // ★飾りは「写真の箱」に合わせる（2026-07-29）。
+  //   親が大きい（左に文章＋右に写真／セクション丸ごと 等）と、飾りが親いっぱいに広がって
+  //   「セクション全体が青くなった」ように見える（実報告）。写真の実寸を測って、その周りだけに置く。
+  //   ★測るのは offsetLeft/Top/Width/Height（rectは出現アニメのtransform途中の値を拾うため使わない）
+  function _decoBox(host){
+    if(!host) return null;
+    var img=null;
+    try{ img=host.__ceDecoImg||host.querySelector('img,video'); }catch(_){ }
+    if(!img||img.offsetParent!==host) return null;
+    var iw=img.offsetWidth, ih=img.offsetHeight;
+    if(iw<20||ih<20) return null;
+    var hw=host.clientWidth||host.offsetWidth||1, hh=host.clientHeight||host.offsetHeight||1;
+    if(hw<=iw*1.15 && hh<=ih*1.15) return null;   // 親がほぼ写真サイズ＝今までどおりでよい
+    return {x:img.offsetLeft, y:img.offsetTop, w:iw, h:ih, hw:hw, hh:hh};
+  }
+  function _decoFit(el, box, x, y, w, h){        // %で置く＝画面幅が変わっても写真に付いていく
+    ['inset','right','bottom'].forEach(function(p){ el.style.removeProperty(p); });
+    el.style.setProperty('left',(x/box.hw*100).toFixed(2)+'%');
+    el.style.setProperty('top',(y/box.hh*100).toFixed(2)+'%');
+    el.style.setProperty('width',(w/box.hw*100).toFixed(2)+'%');
+    el.style.setProperty('height',(h/box.hh*100).toFixed(2)+'%');
+  }
   // 色・形・大きさ・向き・モードを飾りdivに塗り直す（どのボタンからも必ずここを通す）
   function _bgPaint(bg){
     // ★区切りは「|」：色が rgb(255,217,230) のようにカンマを含むので , で繋ぐと壊れる
@@ -6189,11 +6217,23 @@ html.__ce_altmode{cursor:text}
     if(cols.length<3){ cols=_bgColsFrom(bg); if(cols.length>=3) bg.dataset.cols=cols.join('|'); }
     var dir=bg.dataset.dir||'br', mode=bg.dataset.mode||'shift', D=parseFloat(bg.dataset.size||'26');
     if(cols.length>=3) bg.style.background=_bgGradCss(cols,dir,mode);
-    if(mode==='halo'){
-      ['top','right','bottom','left'].forEach(function(p){ bg.style.removeProperty(p); });
+    var box=_decoBox(bg.parentElement);
+    if(box){                                   // 写真の箱に合わせて置く（親が大きい時）
+      if(mode==='halo'){
+        var pad=D+14;
+        _decoFit(bg, box, box.x-pad, box.y-pad, box.w+pad*2, box.h+pad*2);
+        bg.style.setProperty('filter','blur('+Math.max(16,Math.round(D*0.7))+'px)');
+      }else{
+        var dx=(dir==='br'||dir==='tr')?D:-D, dy=(dir==='br'||dir==='bl')?D:-D;
+        _decoFit(bg, box, box.x+dx, box.y+dy, box.w, box.h);
+        bg.style.setProperty('filter','blur(2px)');
+      }
+    }else if(mode==='halo'){
+      ['top','right','bottom','left','width','height'].forEach(function(p){ bg.style.removeProperty(p); });
       bg.style.setProperty('inset', (-D-14)+'px');                        // 全周に広げる
       bg.style.setProperty('filter','blur('+Math.max(16,Math.round(D*0.7))+'px)');
     }else{
+      ['width','height'].forEach(function(p){ bg.style.removeProperty(p); });
       _bgPlace(bg, D, dir);
       bg.style.setProperty('filter','blur(2px)');
     }
@@ -6340,6 +6380,12 @@ html.__ce_altmode{cursor:text}
       target.insertBefore(ring, target.firstChild);
     }
     _unhideDeco(ring);
+    // 親が大きいと inset:-9% は「セクション全体を囲む巨大な輪」になる＝写真の箱に合わせ直す
+    (function(){
+      var box=_decoBox(target); if(!box) return;
+      var pad=Math.round(Math.min(box.w,box.h)*0.09);
+      _decoFit(ring, box, box.x-pad, box.y-pad, box.w+pad*2, box.h+pad*2);
+    })();
     ring.dataset.ring=colorKey;
     ring.style.borderColor=RING_COLORS[colorKey]||RING_COLORS.soft;
     ring.style.borderStyle='solid';
