@@ -1,0 +1,125 @@
+<section class="bg-[#eee]" data-v-0dcb1632="" style="--tw-translate-y: 0; --tw-border-style: solid; --tw-shadow: 0 0 #0000; --tw-outline-style: solid; font-family: &quot;Noto Sans JP&quot;, sans-serif; color: rgb(0, 0, 0);"><style data-cepart="1">@layer properties {
+  @supports ((-webkit-hyphens:none) and (not (margin-trim:inline))) or ((-moz-orient:inline) and (not (color:rgb(from red r g b)))) {
+  *, ::backdrop, ::after, ::before { --tw-translate-x: 0; --tw-translate-y: 0; --tw-translate-z: 0; --tw-rotate-x: initial; --tw-rotate-y: initial; --tw-rotate-z: initial; --tw-skew-x: initial; --tw-skew-y: initial; --tw-border-style: solid; --tw-leading: initial; --tw-font-weight: initial; --tw-tracking: initial; --tw-shadow: 0 0 #0000; --tw-shadow-color: initial; --tw-shadow-alpha: 100%; --tw-inset-shadow: 0 0 #0000; --tw-inset-shadow-color: initial; --tw-inset-shadow-alpha: 100%; --tw-ring-color: initial; --tw-ring-shadow: 0 0 #0000; --tw-inset-ring-color: initial; --tw-inset-ring-shadow: 0 0 #0000; --tw-ring-inset: initial; --tw-ring-offset-width: 0px; --tw-ring-offset-color: #fff; --tw-ring-offset-shadow: 0 0 #0000; --tw-outline-style: solid; --tw-backdrop-blur: initial; --tw-backdrop-brightness: initial; --tw-backdrop-contrast: initial; --tw-backdrop-grayscale: initial; --tw-backdrop-hue-rotate: initial; --tw-backdrop-invert: initial; --tw-backdrop-opacity: initial; --tw-backdrop-saturate: initial; --tw-backdrop-sepia: initial; --tw-duration: initial; --tw-ease: initial; --tw-scale-x: 1; --tw-scale-y: 1; --tw-scale-z: 1; }
+}
+}
+@layer theme {
+  :host, :root { --font-sans: ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"; --font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; --color-red-700: oklch(50.5% .213 27.518); --color-gray-200: oklch(92.8% .006 264.531); --color-gray-300: oklch(87.2% .01 258.338); --color-gray-800: oklch(27.8% .033 256.848); --color-white: #fff; --spacing: .25rem; --breakpoint-sm: 480px; --breakpoint-md: 768px; --breakpoint-lg: 1320px; --text-xs: .75rem; --text-xs--line-height: 1.33333; --text-sm: .875rem; --text-sm--line-height: 1.42857; --text-base: 1rem; --text-base--line-height: 1.5; --text-lg: 1.125rem; --text-lg--line-height: 1.55556; --text-xl: 1.25rem; --text-xl--line-height: 1.4; --text-3xl: 1.875rem; --text-3xl--line-height: 1.2; --text-6xl: 3.75rem; --text-6xl--line-height: 1; --font-weight-normal: 400; --font-weight-bold: 700; --radius-sm: .25rem; --radius-lg: .5rem; --ease-in: cubic-bezier(.4,0,1,1); --default-transition-duration: .15s; --default-transition-timing-function: cubic-bezier(.4,0,.2,1); --default-font-family: var(--font-sans); --default-mono-font-family: var(--font-mono); }
+}
+@layer base {
+  *, ::backdrop, ::after, ::before { border: 0px solid; box-sizing: border-box; margin: 0px; padding: 0px; }
+  ::file-selector-button { border: 0px solid; box-sizing: border-box; margin: 0px; padding: 0px; }
+  :host, html { text-size-adjust: 100%; font-family: var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"); font-feature-settings: var(--default-font-feature-settings,normal); font-variation-settings: var(--default-font-variation-settings,normal); line-height: 1.5; tab-size: 4; -webkit-tap-highlight-color: transparent; }
+  hr { border-top-width: 1px; color: inherit; height: 0px; }
+  abbr:where([title]) { text-decoration: underline dotted; }
+  h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+  a { color: inherit; text-decoration: inherit; }
+  b, strong { font-weight: bolder; }
+  code, kbd, pre, samp { font-family: var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace); font-feature-settings: var(--default-mono-font-feature-settings,normal); font-size: 1em; font-variation-settings: var(--default-mono-font-variation-settings,normal); }
+  small { font-size: 80%; }
+  sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+  sub { bottom: -0.25em; }
+  sup { top: -0.5em; }
+  table { border-collapse: collapse; border-color: inherit; text-indent: 0px; }
+  progress { vertical-align: baseline; }
+  summary { display: list-item; }
+  menu, ol, ul { list-style: none; }
+  audio, canvas, embed, iframe, img, object, svg, video { display: block; vertical-align: middle; }
+  img, video { height: auto; max-width: 100%; }
+  button, input, optgroup, select, textarea { background-color: rgba(0, 0, 0, 0); border-radius: 0px; color: inherit; font: inherit; letter-spacing: inherit; opacity: 1; }
+  ::file-selector-button { background-color: rgba(0, 0, 0, 0); border-radius: 0px; color: inherit; font: inherit; letter-spacing: inherit; opacity: 1; }
+  :where(select:is([multiple], [size])) optgroup { font-weight: bolder; }
+  :where(select:is([multiple], [size])) optgroup option { padding-inline-start: 20px; }
+  ::file-selector-button { margin-inline-end: 4px; }
+  ::placeholder { opacity: 1; }
+  @supports (not (-webkit-appearance:-apple-pay-button)) or (contain-intrinsic-size:1px) {
+  ::placeholder { color: currentcolor; }
+  @supports (color:color-mix(in lab,red,red)) {
+  ::placeholder { color: color-mix(currentcolor, transparent); }
+}
+}
+  textarea { resize: vertical; }
+  ::-webkit-search-decoration { appearance: none; }
+  ::-webkit-date-and-time-value { min-height: 1lh; text-align: inherit; }
+  ::-webkit-datetime-edit { display: inline-flex; }
+  ::-webkit-datetime-edit-fields-wrapper { padding: 0px; }
+  ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field { padding-block: 0px; }
+  ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-month-field { padding-block: 0px; }
+  ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field { padding-block: 0px; }
+  ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-second-field { padding-block: 0px; }
+  ::-webkit-datetime-edit-meridiem-field { padding-block: 0px; }
+  ::-webkit-calendar-picker-indicator { line-height: 1; }
+  button, input:where([type="button"], [type="reset"], [type="submit"]) { appearance: button; }
+  ::file-selector-button { appearance: button; }
+  ::-webkit-inner-spin-button, ::-webkit-outer-spin-button { height: auto; }
+  [hidden]:where(:not([hidden="until-found"])) { display: none !important; }
+}
+@keyframes loading-overlay-spin-bd1f6d51 { 
+  100% { transform: rotate(1turn); }
+}
+@scope{
+.cep488201-footer-contact-card[data-v-0dcb1632]::after { background: url("/img/contact.webp") 0% 0% / contain no-repeat; content: ""; display: block; height: 62px; left: 20px; position: absolute; top: -20px; width: 176px; }
+@media screen and (max-width: 768px){.cep488201-footer-contact-card[data-v-0dcb1632]::after { height: 10vw; left: 5px; top: 5px; width: 28vw; }}
+.cep488201-pointer-events-none { pointer-events: none; }
+.cep488201-absolute { position: absolute; }
+.cep488201-relative { position: relative; }
+.bottom-\[5px\] { bottom: 5px; }
+.left-\[-5\%\] { left: -5%; }
+.cep488201-z-0 { z-index: 0; }
+.z-\[-1\] { z-index: -1; }
+.cep488201-mx-5 { margin-inline: calc(var(--spacing)*5); }
+.cep488201-mx-auto { margin-inline: auto; }
+.cep488201-mt-4 { margin-top: calc(var(--spacing)*4); }
+.cep488201-mt-5 { margin-top: calc(var(--spacing)*5); }
+.cep488201-mr-5 { margin-right: calc(var(--spacing)*5); }
+.cep488201-flex { display: flex; }
+.h-\[10px\] { height: 10px; }
+.h-\[30px\] { height: 30px; }
+.cep488201-h-full { height: 100%; }
+.cep488201-h-px { height: 1px; }
+.w-\[110\%\] { width: 110%; }
+.w-\[240px\] { width: 240px; }
+.cep488201-w-fit { width: fit-content; }
+.cep488201-w-full { width: 100%; }
+.max-w-\[40px\] { max-width: 40px; }
+.max-w-\[1200px\] { max-width: 1200px; }
+.min-w-\[40px\] { min-width: 40px; }
+.cep488201-cursor-pointer { cursor: pointer; }
+.cep488201-flex-col { flex-direction: column; }
+.cep488201-flex-nowrap { flex-wrap: nowrap; }
+.cep488201-flex-wrap { flex-wrap: wrap; }
+.cep488201-items-center { align-items: center; }
+.cep488201-justify-center { justify-content: center; }
+.cep488201-overflow-visible { overflow: visible; }
+.cep488201-border { border-style: var(--tw-border-style); border-width: 1px; }
+.border-\[\#333\] { border-color: rgb(51, 51, 51); }
+.bg-\[\#4b4843\] { background-color: rgb(75, 72, 67); }
+.bg-\[\#e1d8ce\] { background-color: rgb(225, 216, 206); }
+.bg-\[\#eee\] { background-color: rgb(238, 238, 238); }
+:scope{background-color: rgb(238, 238, 238);}
+.cep488201-bg-white { background-color: var(--color-white); }
+.cep488201-p-5 { padding: calc(var(--spacing)*5); }
+.cep488201-px-0 { padding-inline: calc(var(--spacing)*0); }
+.px-2\.5 { padding-inline: calc(var(--spacing)*2.5); }
+.cep488201-py-0 { padding-block: calc(var(--spacing)*0); }
+.py-2\.5 { padding-block: calc(var(--spacing)*2.5); }
+.cep488201-py-5 { padding-block: calc(var(--spacing)*5); }
+.cep488201-pt-0 { padding-top: calc(var(--spacing)*0); }
+.cep488201-pb-5 { padding-bottom: calc(var(--spacing)*5); }
+.cep488201-text-center { text-align: center; }
+.text-\[3vw\] { font-size: 3vw; }
+.text-\[4\.8vw\] { font-size: 4.8vw; }
+.text-\[4vw\] { font-size: 4vw; }
+.text-\[9vw\] { font-size: 9vw; }
+.leading-\[1\.2\] { --tw-leading: 1.2; line-height: 1.2; }
+.leading-\[1\.5\] { --tw-leading: 1.5; line-height: 1.5; }
+.leading-\[1\] { --tw-leading: 1; line-height: 1; }
+.leading-\[2\] { --tw-leading: 2; line-height: 2; }
+.cep488201-font-bold { --tw-font-weight: var(--font-weight-bold); font-weight: var(--font-weight-bold); }
+.text-\[\#3e4555\] { color: rgb(62, 69, 85); }
+.text-\[\#333\] { color: rgb(51, 51, 51); }
+.cep488201-duration-200 { --tw-duration: .2s; transition-duration: 0.2s; }
+.cep488201-footer-contact-card[data-v-0dcb1632]::after { background: url("../img/contact.webp") 0% 0% / contain no-repeat; content: ""; display: block; height: 62px; left: 20px; position: absolute; top: -20px; width: 176px; }
+@media screen and (max-width: 768px){.cep488201-footer-contact-card[data-v-0dcb1632]::after { height: 10vw; left: 5px; top: 5px; width: 28vw; }}
+:scope{position:relative;z-index:1}
+}</style><div class="cep488201-py-5 px-2.5 md:py-18 md:px-0" data-v-0dcb1632=""><div class="cep488201-flex cep488201-justify-center cep488201-flex-wrap" data-v-0dcb1632=""><div class="cep488201-footer-contact-card cep488201-relative cep488201-w-full max-w-[1200px] cep488201-overflow-visible cep488201-bg-white" data-v-0dcb1632=""><div class="py-2.5 cep488201-px-0" data-v-0dcb1632=""><div class="cep488201-px-0 cep488201-pb-5 md:pb-2.5 cep488201-pt-0 md:pt-5" data-v-0dcb1632=""><h2 class="text-[4.8vw] md:text-3xl text-[#3e4555] cep488201-text-center leading-[2] cep488201-font-bold" data-v-0dcb1632=""> ご相談はこちら </h2></div><div class="w-[240px] cep488201-h-px bg-[#4b4843] cep488201-mx-auto" data-v-0dcb1632=""></div><div class="cep488201-mt-5 cep488201-w-full" data-v-0dcb1632=""></div><div class="cep488201-flex cep488201-justify-center cep488201-flex-wrap" data-v-0dcb1632=""><div class="cep488201-relative cep488201-w-fit cep488201-py-0 cep488201-mx-5 sm:mx-10 cep488201-z-0" data-v-0dcb1632=""><a class="cep488201-relative cep488201-pointer-events-none" rel="noopener noreferrer" target="_blank" href="tel:022-398-7350" data-v-0dcb1632=""><div class="text-[9vw] md:text-6xl text-[#333] leading-[1.2] cep488201-font-bold" data-v-0dcb1632="">022-398-7350</div></a><div class="cep488201-absolute left-[-5%] z-[-1] bottom-[5px] md:h-[10px] w-[110%] h-[10px] md:h-[20px] bg-[#e1d8ce] cep488201-mx-auto" data-v-0dcb1632=""></div></div></div><div class="text-[4vw] md:text-xl cep488201-text-center leading-[1.5] cep488201-font-bold text-[#333]" data-v-0dcb1632="">平日のみ（土日祝休み）</div><div class="cep488201-mt-5 md:mt-7.5 cep488201-w-full" data-v-0dcb1632=""></div><div class="cep488201-flex cep488201-flex-col cep488201-items-center cep488201-flex-wrap" data-v-0dcb1632=""><button arialabel="Contact" type="button" class="cep488201-border border-[#333] cep488201-transition-filter hover:opacity-70 cep488201-duration-200 cep488201-cursor-pointer" data-v-0dcb1632=""><div class="cep488201-p-5" data-v-0dcb1632=""><div class="cep488201-flex cep488201-flex-nowrap cep488201-items-center" data-v-0dcb1632=""><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 31" aria-hidden="true" focusable="false" class="min-w-[40px] max-w-[40px] h-[30px] text-[#333]" data-v-0dcb1632=""><g fill="#fff"><path d="M0 29.5c0-.8.7-1.5 1.5-1.5s1.5.7 1.5 1.5S2.3 31 1.5 31 0 30.3 0 29.5M38 29.5c0-.8.7-1.5 1.5-1.5s1.5.7 1.5 1.5-.7 1.5-1.5 1.5-1.5-.7-1.5-1.5M16 27.3c-.8-.3-2.9-1.8-4.6-3.4l-3-2.9L6 23.5C4.7 24.9 2.8 26 1.8 26 .2 26 0 24.9 0 13 0 .7.1 0 2 0c1.1 0 2 .6 2 1.3 0 .6 3.7 4.4 8.3 8.3l8.3 7.1 7.9-6.9C32.9 6.1 36.8 3 37.3 3c.4 0 .7-.7.7-1.5S38.7 0 39.5 0C40.8 0 41 2.1 41 12.5c0 12.2-.1 12.5-2.2 12.5-1.2 0-3-.7-3.9-1.6-1.7-1.5-2-1.5-4.5.2-6.2 4.4-9.9 5.3-14.4 3.7"></path></g><g fill="currentColor"><path d="M.7 30.4C.3 30 0 28.3 0 26.5c0-2.3 1-4.1 4-7 4.3-4.2 4.1-4.3 10.7 1.8 4.4 4.1 7.2 3.8 13.3-1.3l5.1-4.3 4 3.9c3.4 3.3 3.9 4.4 3.7 7.4l-.3 3.5-19.6.3c-10.7.1-19.8-.1-20.2-.4"></path><path d="M10.4 13.5C3.2 7.4.5 4.4.5 2.8V.5h20c19.4 0 20 .1 20.3 2.1.2 1.5-2.1 4.1-9 10-5.1 4.4-9.8 8.3-10.4 8.7-.6.3-5.6-3.2-11-7.8M0 13.6V8.9l2.5 1.8c3.1 2.2 3.1 2.4 0 5.3L0 18.3zM38.2 15.7 36 13.4l2.5-2.4L41 8.7v4.6c0 2.6-.1 4.7-.3 4.7s-1.3-1-2.5-2.3"></path></g></svg><div class="cep488201-mr-5 cep488201-h-full" data-v-0dcb1632=""></div><div class="text-[4vw] md:text-lg text-[#333] leading-[1]" data-v-0dcb1632=""> お問い合わせフォーム </div></div></div></button><p class="text-[3vw] md:text-[100%] text-[#333] leading-[1.5]" data-v-0dcb1632=""> ※ お電話またはメールフォームからご相談ください。 </p><div class="cep488201-mt-4 cep488201-w-full" data-v-0dcb1632=""></div></div></div></div></div></div></section>

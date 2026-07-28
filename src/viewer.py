@@ -2882,7 +2882,7 @@ html.__ce_altmode{cursor:text}
   //   （専用の編集画面を作らない＝覚えることを増やさない）。
   //   色はマイ色に記憶（背景の飾りと同じ置き場＝どちらで登録しても両方に出る）。
   //   ★バーのidは "__ce" 始まり＝💾保存時に自動で除去される（板が焼き込まれる事故が起きない）
-  var SHAPE_ST={col:'#7fd0e6', fill:1, op:1};
+  var SHAPE_ST={col:'#7fd0e6', fill:1, op:1, water:0};
   // 形の作り方（clip-pathは中身の無い飾りなので安全に使える）
   var SHAPE_DEF={
     circle:{lb:'⭕ 丸',  css:'width:180px;height:180px;border-radius:50%;'},
@@ -2891,8 +2891,21 @@ html.__ce_altmode{cursor:text}
     pill:  {lb:'⬭ 帯',  css:'width:260px;height:70px;border-radius:999px;'},
     tri:   {lb:'🔺 三角', css:'width:180px;height:160px;clip-path:polygon(50% 0%,100% 100%,0% 100%);'},
     star:  {lb:'⭐ 星',  css:'width:170px;height:170px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);'},
-    blob:  {lb:'💧 しずく', css:'width:190px;height:190px;border-radius:62% 38% 55% 45% / 45% 55% 42% 58%;'}
+    blob:  {lb:'💧 しずく', css:'width:190px;height:190px;border-radius:62% 38% 55% 45% / 45% 55% 42% 58%;'},
+    slash: {lb:'／ 斜め線', css:'width:300px;height:3px;border-radius:3px;rotate:-28deg;'},
+    arc:   {lb:'⌒ カーブ線', css:'width:340px;height:340px;border-radius:50%;rotate:-20deg;'}
   };
+  // ▶ 丸アイコン（丸の中に記号）7種。見出しの前・リンクの横・箇条書きの先頭に置く小さな飾り。
+  //   中身は文字なので、大きさ・色は図形バーの色/塗り、書体はページの書体をそのまま継ぐ。
+  var ICON_DEF=[
+    ['→','進む・リンク'],
+    ['✓','チェック・できること'],
+    ['＋','追加・開く'],
+    ['？','よくある質問'],
+    ['！','注意・ポイント'],
+    ['★','おすすめ'],
+    ['▶','再生・はじめる']
+  ];
   // ★「今いじっている図形」を自前で覚える（2026-07-28）。
   //   バーのボタンを押すと、ページ側の捕捉フェーズの処理が先に走って選択(curEl)が外れるため、
   //   curEl頼みだと「色を変えても選択中の図形に反映されない」。触った図形をここに控える。
@@ -2902,10 +2915,44 @@ html.__ce_altmode{cursor:text}
   },true);
   try{ var _shs=JSON.parse(localStorage.getItem('__ce_shapest')||'null'); if(_shs&&_shs.col){ SHAPE_ST.col=_shs.col; SHAPE_ST.fill=_shs.fill?1:0; } }catch(_){}
   function _shapeStSave(){ try{ localStorage.setItem('__ce_shapest', JSON.stringify(SHAPE_ST)); }catch(_){} }
+  // 🎨 水彩：中心が濃く縁がにじむ円を3つ重ね、ぼかして紙に落とした絵の具のようにする。
+  //   ★1枚のグラデだと「きれいな円」にしか見えない。ずらした円を重ねてムラを作るのが水彩らしさの肝。
+  //   mix-blend-mode:multiply＝重なった所が濃くなる（絵の具が重なった感じ）。
+  function paintWater(el, col, op){
+    var c1=_rgbaWith(col,.5), c2=_rgbaWith(col,.34), c3=_rgbaWith(col,.22), z='rgba(255,255,255,0)';
+    el.style.setProperty('background',
+       'radial-gradient(58% 54% at 34% 38%, '+c1+' 0%, '+c2+' 46%, '+z+' 74%),'
+      +'radial-gradient(52% 58% at 70% 64%, '+c2+' 0%, '+c3+' 52%, '+z+' 80%),'
+      +'radial-gradient(70% 68% at 52% 50%, '+c3+' 0%, '+z+' 72%)','important');
+    el.style.removeProperty('border');
+    el.style.setProperty('filter','blur(7px)','important');
+    el.style.setProperty('mix-blend-mode','multiply');
+    if(!el.getAttribute('data-cewshape')){                 // 形は不定形に（まん丸だと絵の具に見えない）
+      el.setAttribute('data-cewshape','1');
+      el.style.setProperty('border-radius','62% 38% 55% 45% / 45% 55% 42% 58%');
+    }
+    if(op!=null) el.style.setProperty('opacity', String(op));
+  }
   function shapePaint(el, col, fill, op){
     var kind=el.getAttribute('data-ceshape')||'rect';
+    if(el.getAttribute('data-cewater')){ paintWater(el, col, op); return; }
+    if(kind==='arc'){     // ⌒カーブ線＝円の枠の一部だけ描く（上側の弧）
+      el.style.setProperty('background','transparent','important');
+      el.style.setProperty('border','3px solid '+col,'important');
+      el.style.setProperty('border-right-color','transparent','important');
+      el.style.setProperty('border-bottom-color','transparent','important');
+      el.style.setProperty('border-left-color','transparent','important');
+      if(op!=null) el.style.setProperty('opacity', String(op));
+      return;
+    }
+    if(kind==='icon'){    // 丸アイコン＝塗りなら中の記号は白、フチだけなら記号もフチと同じ色
+      if(fill){ el.style.setProperty('background',col); el.style.setProperty('color','#fff'); el.style.removeProperty('border'); }
+      else { el.style.setProperty('background','transparent'); el.style.setProperty('color',col); el.style.setProperty('border','2px solid '+col); }
+      if(op!=null) el.style.setProperty('opacity', String(op));
+      return;
+    }
     // ★三角・星はclip-pathで形を作る＝borderは形どおりに切られて出ないので、必ず塗りで描く
-    var noBorder=(kind==='line'||kind==='tri'||kind==='star');
+    var noBorder=(kind==='line'||kind==='tri'||kind==='star'||kind==='slash');
     if(noBorder||fill){ el.style.setProperty('background',col); el.style.removeProperty('border'); }
     else { el.style.setProperty('background','transparent'); el.style.setProperty('border','3px solid '+col); }
     if(op!=null) el.style.setProperty('opacity', String(op));
@@ -2919,11 +2966,19 @@ html.__ce_altmode{cursor:text}
     if(t){ t.style.setProperty('opacity', String(next)); markDirty(); }
     return next;
   }
-  function addShape(kind){
+  function addShape(kind, sym){
     var d=document.createElement('div');
     d.className='ce_shape'; d.setAttribute('data-ceshape',kind);
-    var def=SHAPE_DEF[kind]||SHAPE_DEF.rect;
-    d.setAttribute('style','box-sizing:border-box;'+def.css);
+    if(kind==='icon'){
+      d.setAttribute('data-ceicon',sym);
+      d.setAttribute('style','box-sizing:border-box;width:44px;height:44px;border-radius:50%;'
+        +'display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;line-height:1;font-family:inherit;');
+      d.textContent=sym;
+    }else{
+      var def=SHAPE_DEF[kind]||SHAPE_DEF.rect;
+      d.setAttribute('style','box-sizing:border-box;'+def.css);
+    }
+    if(SHAPE_ST.water && kind!=='icon' && kind!=='arc') d.setAttribute('data-cewater','1');
     shapePaint(d, SHAPE_ST.col, SHAPE_ST.fill, SHAPE_ST.op);
     placeFree(d, (window.scrollX||0)+window.innerWidth/2, (window.scrollY||0)+window.innerHeight/2);
     // placeFreeは文字用に max-width / white-space を足す＝〇が横だけ縮んで楕円になるので外す
@@ -2952,10 +3007,17 @@ html.__ce_altmode{cursor:text}
         return '<span class="__ce_shc" data-c="'+c+'" title="'+esc(c)+'" style="display:inline-block;width:22px;height:22px;border-radius:6px;border:2px solid '+(c===SHAPE_ST.col?'#0b6bcb':'rgba(0,0,0,.18)')+';background:'+c+';cursor:pointer;vertical-align:middle"></span>';
       }).join('');
       var shapes=Object.keys(SHAPE_DEF).map(function(k){ return btn(k, SHAPE_DEF[k].lb); }).join('');
+      var icons=ICON_DEF.map(function(a){
+        return '<button data-sb="ic:'+a[0]+'" title="'+esc(a[1])+'（丸アイコンを置く）" style="background:#f2f2f4;color:#1d1d1f;'
+          +'border:1px solid #d5d5dc;border-radius:50%;width:28px;height:28px;padding:0;cursor:pointer;font:inherit;font-size:14px;line-height:1">'+a[0]+'</button>';
+      }).join('');
       bar.innerHTML='<b style="font-size:12px;color:#5b6472">🔶 図形</b>'
         +shapes
         +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
+        +'<b style="font-size:12px;color:#5b6472">アイコン</b>'+icons
+        +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
         +btn('fill', SHAPE_ST.fill?'● 塗り':'○ フチだけ')
+        +btn('water', SHAPE_ST.water?'🎨 水彩 ON':'🎨 水彩', SHAPE_ST.water?'#0ea5a3':null)
         +btn('opm','－ 薄く')+btn('opp','＋ 濃く')
         +'<span style="font-size:11px;color:#5b6472">'+Math.round(SHAPE_ST.op*100)+'%</span>'
         +'<input type="color" id="__ce_shcol" value="'+SHAPE_ST.col+'" title="色を選ぶ（このPCに記憶）" style="width:38px;height:28px;padding:0;border:1px solid #d5d5dc;border-radius:7px;cursor:pointer">'
@@ -2966,7 +3028,11 @@ html.__ce_altmode{cursor:text}
     function repaintSel(){    // 直前に置いた／触った図形に、色と塗りの変更をその場で反映
       var t=(_lastShape&&document.contains(_lastShape))?_lastShape
            :((curEl&&curEl.getAttribute&&curEl.getAttribute('data-ceshape'))?curEl:null);
-      if(t){ shapePaint(t,SHAPE_ST.col,SHAPE_ST.fill,null); markDirty(); }
+      if(t){
+        if(SHAPE_ST.water) t.setAttribute('data-cewater','1');
+        else { t.removeAttribute('data-cewater'); t.removeAttribute('data-cewshape'); t.style.removeProperty('mix-blend-mode'); t.style.removeProperty('filter'); }
+        shapePaint(t,SHAPE_ST.col,SHAPE_ST.fill,null); markDirty();
+      }
     }
     render();
     document.body.appendChild(bar);
@@ -2979,11 +3045,17 @@ html.__ce_altmode{cursor:text}
         var k=b.getAttribute('data-sb');
         if(k==='x'){ bar.remove(); return; }
         if(k==='fill'){ SHAPE_ST.fill=SHAPE_ST.fill?0:1; _shapeStSave(); render(); repaintSel(); return; }
+        if(k==='water'){
+          SHAPE_ST.water=SHAPE_ST.water?0:1; _shapeStSave(); render(); repaintSel();
+          if(msg) msg.textContent=SHAPE_ST.water?'🎨 水彩ON：置く図形が「にじんだ絵の具」になります（選んでいる図形にもすぐ効きます）':'🎨 水彩をやめました';
+          return;
+        }
         if(k==='opm'||k==='opp'){                                   // 透明度（薄く／濃く）
           var v=shapeOpacity(k==='opm'?-0.1:0.1); render();
           if(msg) msg.textContent='🔶 濃さ '+Math.round(v*100)+'%（0に近いほど透明・次に置く図形にも効きます）';
           return;
         }
+        if(k.indexOf('ic:')===0){ addShape('icon', k.slice(3)); render(); return; }   // 丸アイコン
         addShape(k); render(); return;
       }
       var c=e.target.closest('.__ce_shc');
@@ -4184,7 +4256,7 @@ html.__ce_altmode{cursor:text}
     fxUnsplit(document.body);
     [].slice.call(document.querySelectorAll('.fxa_tw,.fxa_cpre,.fxa_wave,.fxa_lines')).forEach(function(e){
       e.classList.remove('fxa_tw','fxa_cpre','fxa_wave','fxa_lines');
-      e.style.removeProperty('--fxa-stag');
+      e.style.removeProperty('--fxa-stag'); e.style.removeProperty('--fxa-bnc');
       if(!/fxa_(y|yd|xl|xr|s|bl|ry|fl|wp|cl|cc|clip)( |$)/.test(e.className)){ e.classList.remove('fxa_pre','fxa_in'); e.style.removeProperty('--fxa-dist'); }
     });
     all.forEach(function(e){
@@ -5094,7 +5166,7 @@ html.__ce_altmode{cursor:text}
     {k:'blur',b:'ぼやけて出現',d:'ブラー→くっきり',g:'in',dir:'bl',sl:[{k:'blur',l:'ぼかし',min:2,max:40,def:14},{k:'dur',l:'速さ',min:200,max:2200,def:900,u:'ms'}]},
     {k:'flip',b:'3Dフリップ',d:'くるっと回転',g:'in',dir:'ry',sl:[{k:'deg',l:'回転角',min:20,max:180,def:90,u:'°'},{k:'dur',l:'速さ',min:200,max:2200,def:800,u:'ms'}]},
     {k:'rise',b:'せり上がり',d:'下からスッと上へ',g:'in',dir:'clip',sl:[{k:'dist',l:'移動量',min:10,max:140,def:40},{k:'dur',l:'速さ',min:200,max:2200,def:900,u:'ms'}]},
-    {k:'stagger',b:'一文字ずつ',d:'文字が順に出現',g:'char',sl:[{k:'stag',l:'文字の間隔',min:15,max:150,def:32,u:'ms'},{k:'dist',l:'移動量',min:0,max:56,def:26},{k:'dur',l:'速さ',min:150,max:900,def:340,u:'ms'}]},
+    {k:'stagger',b:'一文字ずつ',d:'文字が順に出現',g:'char',sl:[{k:'stag',l:'文字の間隔',min:15,max:150,def:32,u:'ms'},{k:'dist',l:'跳ねる高さ（移動量）',min:0,max:180,def:26},{k:'bnc',l:'跳ね具合（大きいほど飛び跳ねる）',min:0,max:100,def:30},{k:'dur',l:'速さ',min:150,max:900,def:340,u:'ms'}]},
     {k:'typewriter',b:'タイプライター',d:'打ち込み風',g:'char',type:1,sl:[{k:'stag',l:'打つ速さ',min:20,max:200,def:60,u:'ms'}]},
     {k:'wave',b:'波打ち',d:'文字が波打つ(ループ)',g:'char',loop:1,sl:[{k:'amp',l:'ゆれ幅',min:4,max:30,def:10},{k:'dur',l:'速さ',min:800,max:3000,def:1600,u:'ms'}]},
     {k:'glow',b:'ネオングロー',d:'光る(ループ)',g:'loop',glow:1,sl:[{k:'dur',l:'速さ',min:600,max:3200,def:1800,u:'ms'}]},
@@ -6310,7 +6382,7 @@ html.__ce_altmode{cursor:text}
       bg.dataset.size='26'; bg.dataset.shape='round'; bg.dataset.dir='br'; bg.dataset.mode='shift';
       // pointer-events:auto ＝飾りを直接クリックして色/薄さ/形を変えられるようにするため（2026-07-29）。
       // 写真より後ろ(z-index:-1)なので、写真の上をクリックしても写真が優先＝じゃまにならない。
-      bg.style.cssText='position:absolute;z-index:-1;pointer-events:auto;cursor:pointer;border-radius:'+BG_SHAPES.round+';background:radial-gradient(60% 55% at 50% 45%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%);';
+      bg.style.cssText='position:absolute;z-index:-1;pointer-events:auto;cursor:move;border-radius:'+BG_SHAPES.round+';background:radial-gradient(60% 55% at 50% 45%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%);';
       _bgPlace(bg, 26, 'br');                        // 右下へずらして色帯を覗かせる（初期）
       target.insertBefore(bg, target.firstChild);   // 先頭＝一番後ろに置く
     }
@@ -6417,7 +6489,7 @@ html.__ce_altmode{cursor:text}
     ensureRingCss();
     if(!ring){
       ring=document.createElement('div'); ring.className='ce_ringdeco'; ring.setAttribute('aria-hidden','true');
-      ring.style.cssText='position:absolute;inset:-9%;z-index:-1;pointer-events:auto;cursor:pointer;border-radius:50%;';
+      ring.style.cssText='position:absolute;inset:-9%;z-index:-1;pointer-events:auto;cursor:move;border-radius:50%;';
       target.insertBefore(ring, target.firstChild);
     }
     _unhideDeco(ring);
@@ -6483,7 +6555,7 @@ html.__ce_altmode{cursor:text}
     if(!ol){
       ol=document.createElement('div'); ol.className='ce_outlinedeco'; ol.setAttribute('aria-hidden','true');
       ol.dataset.dir='br'; ol.dataset.shift='28';    // 既定＝右下へ28px（見本の「もう1枚後ろにある」見え方）
-      ol.style.cssText='position:absolute;z-index:-1;pointer-events:auto;cursor:pointer;border-style:solid;border-width:2px;';
+      ol.style.cssText='position:absolute;z-index:-1;pointer-events:auto;cursor:move;border-style:solid;border-width:2px;';
       // 既にある背景ブロブ(ce_bgdeco)より後ろに置くと隠れて見えなくなる（同じz-index:-1同士はDOM順で後が上）。
       // 写真(position:staticのimg)より必ず後ろに描画される点は変わらないので、末尾に足してブロブより手前に出す。
       target.appendChild(ol);
@@ -6647,7 +6719,7 @@ html.__ce_altmode{cursor:text}
   function dqArm(root){
     try{
       [].slice.call((root||document).querySelectorAll('.ce_bgdeco,.ce_ringdeco,.ce_outlinedeco')).forEach(function(n){
-        n.style.setProperty('pointer-events','auto'); n.style.setProperty('cursor','pointer');
+        n.style.setProperty('pointer-events','auto'); n.style.setProperty('cursor','move');
       });
     }catch(_){ }
   }
@@ -6713,6 +6785,7 @@ html.__ce_altmode{cursor:text}
   function _alphaOf(col){ var m=/rgba\(([^)]+)\)/.exec(col||''); if(m){ var v=m[1].split(','); return v.length>3?parseFloat(v[3]):1; } return 1; }
   function dqColor(el, hex){
     var k=dqKind(el); pushUndo(el);
+    if(el.getAttribute('data-cewater')){ el.setAttribute('data-cedqbase',hex); paintWater(el,hex,null); markDirty(); return; }
     var a=parseFloat(el.getAttribute('data-cedqa')||'1');
     if(k==='bg'){ el.dataset.cols=_colsFromOne(hex).join('|'); el.dataset.alpha=String(a); _bgPaint(el); }
     else{
@@ -6832,6 +6905,10 @@ html.__ce_altmode{cursor:text}
         +'<button data-mv="0,-10" style="'+B+'">↑</button><button data-mv="0,10" style="'+B+'">↓</button>'
         +'<button data-mv="0,0" style="'+B+'">⟲</button></div>';
     }
+    if(k==='shape'||k==='bg'){
+      h+='<div style="opacity:.7;margin-top:8px">🎨 水彩（にじんだ絵の具にする）</div>'
+        +'<div style="display:flex;gap:5px;margin-top:3px"><button data-water="1" style="'+B+'">🎨 水彩にする／戻す</button></div>';
+    }
     h+='<div style="opacity:.7;margin-top:8px">⤴ 傾き（少し斜めにするとおしゃれ）</div>'
       +'<div style="display:flex;gap:5px;margin-top:3px"><button data-ro="-3" style="'+B+'">↖ 左へ</button><button data-ro="3" style="'+B+'">↗ 右へ</button><button data-ror="1" style="'+B+'">⟲ まっすぐ</button></div>'
       +'<div style="display:flex;gap:6px;margin-top:10px">'
@@ -6851,8 +6928,10 @@ html.__ce_altmode{cursor:text}
       p.remove();
     };
     var offFn=function(ev){ if(p.parentElement && !p.contains(ev.target)) p.__close(); };
-    p.__off=function(){ document.removeEventListener('mousedown',offFn,true); };
-    setTimeout(function(){ document.addEventListener('mousedown',offFn,true); },0);
+    // 右クリックしたら板は引っ込める＝いつもの右クリックメニュー（動きを付ける等）の邪魔をしない
+    var ctxFn=function(){ if(p.parentElement) p.__close(); };
+    p.__off=function(){ document.removeEventListener('mousedown',offFn,true); document.removeEventListener('contextmenu',ctxFn,true); };
+    setTimeout(function(){ document.addEventListener('mousedown',offFn,true); document.addEventListener('contextmenu',ctxFn,true); },0);
     p.addEventListener('click',function(ev){
       ev.stopPropagation();
       var t=ev.target;
@@ -6864,30 +6943,246 @@ html.__ce_altmode{cursor:text}
       var sz=t.getAttribute('data-sz'); if(sz){ dqBigger(el,parseFloat(sz)); return; }
       if(t.getAttribute('data-dir')){ dqFlipDir(el); return; }
       var mv=t.getAttribute('data-mv'); if(mv){ var a=mv.split(','); dqMove(el,parseFloat(a[0]),parseFloat(a[1])); return; }
+      if(t.getAttribute('data-water')){
+        if(el.getAttribute('data-cewater')){
+          el.removeAttribute('data-cewater'); el.removeAttribute('data-cewshape');
+          el.style.removeProperty('mix-blend-mode'); el.style.removeProperty('filter');
+          if(dqKind(el)==='bg') _bgPaint(el);
+          else shapePaint(el, el.getAttribute('data-cedqbase')||SHAPE_ST.col, SHAPE_ST.fill, null);
+          if(msg) msg.textContent='水彩をやめました';
+        }else{
+          el.setAttribute('data-cewater','1');
+          var wc=el.getAttribute('data-cedqbase')
+            || ((el.dataset&&el.dataset.cols)?((el.dataset.cols||'').split('|')[2]||SHAPE_ST.col):null)
+            || getComputedStyle(el).backgroundColor || SHAPE_ST.col;
+          paintWater(el, wc, null);
+          if(msg) msg.textContent='🎨 水彩にしました（色を押すと水彩のまま色が変わります）';
+        }
+        markDirty(); return;
+      }
       var ro=t.getAttribute('data-ro'); if(ro){ dqTilt(el,parseFloat(ro)); if(msg) msg.textContent='少し斜めにしました（もう一度押すともっと傾きます）'; return; }
       if(t.getAttribute('data-ror')){ dqTiltReset(el); return; }
     });
     p.querySelector('.__ce_dqc').addEventListener('input',function(){ dqColor(el,this.value); });
   }
+  // ===== ➖ 実体のない線（要素のborder）も掴めるようにする（2026-07-29・要望）=====
+  //   一覧の区切り線などは <div> ではなく border-bottom で描かれている＝DOMに実体が無く、
+  //   押しても「行」が選ばれるだけで線そのものに触れなかった。クリック位置が辺のそばなら
+  //   その border を対象にする。同じ見た目の線は「まとめて」変えられる（一覧は揃っているのが普通）。
+  var DQ_EDGE=6;                                   // 1pxの線でも押しやすいよう当たり判定に余裕を持たせる
+  var BD_SIDE={top:'上',bottom:'下',left:'左',right:'右'};
+  function dqBorderAt(x,y){
+    // ★境界ちょうどを押すと elementsFromPoint は「隣の要素」を返す（実測：区切り線の上を押しても
+    //   線を持つ行ではなく次の行が返ってきて掴めなかった）。少しずらした点も候補に混ぜる。
+    var cands=[], seen=[];
+    [[0,0],[0,-DQ_EDGE],[0,DQ_EDGE],[-DQ_EDGE,0],[DQ_EDGE,0]].forEach(function(o){
+      var l=[];
+      try{ l=document.elementsFromPoint(x+o[0],y+o[1])||[]; }catch(_){ return; }
+      for(var i=0;i<l.length&&i<6;i++){ if(seen.indexOf(l[i])<0){ seen.push(l[i]); cands.push(l[i]); } }
+    });
+    for(var k=0;k<cands.length;k++){
+      var n=cands[k];
+      if(!n||n===document.body||n.tagName==='HTML') continue;
+      if(n.closest&&n.closest('[id^=__ce]')) continue;
+      var cs; try{ cs=getComputedStyle(n); }catch(_){ continue; }
+      var r=n.getBoundingClientRect();
+      var sides=[['top',Math.abs(y-r.top)],['bottom',Math.abs(y-r.bottom)],['left',Math.abs(x-r.left)],['right',Math.abs(x-r.right)]];
+      for(var j=0;j<sides.length;j++){
+        var sd=sides[j][0], dist=sides[j][1];
+        var w=parseFloat(cs.getPropertyValue('border-'+sd+'-width'))||0;
+        var st=cs.getPropertyValue('border-'+sd+'-style');
+        if(w<=0||st==='none'||st==='hidden') continue;
+        if(dist>Math.max(DQ_EDGE, w+3)) continue;
+        // 横の線は「押した点が要素の左右の範囲内」／縦の線は「上下の範囲内」のときだけ（誤爆よけ）
+        if((sd==='top'||sd==='bottom')&&(x<r.left-2||x>r.right+2)) continue;
+        if((sd==='left'||sd==='right')&&(y<r.top-2||y>r.bottom+2)) continue;
+        return {el:n, side:sd};
+      }
+    }
+    return null;
+  }
+  // 同じ親の中で「同じ見た目の線」を持つ仲間（一覧の区切り線をまとめて変えるため）
+  function bdSiblings(el, side){
+    var p=el.parentElement; if(!p) return [el];
+    var cls=(el.className||'')+'';
+    var list=[].slice.call(p.children).filter(function(n){
+      if(n===el) return true;
+      if(n.tagName!==el.tagName||((n.className||'')+'')!==cls) return false;
+      var cs; try{ cs=getComputedStyle(n); }catch(_){ return false; }
+      return (parseFloat(cs.getPropertyValue('border-'+side+'-width'))||0)>0;
+    });
+    return list.length?list:[el];
+  }
+  function bdEach(t, all, fn){
+    var els=all?bdSiblings(t.el,t.side):[t.el];
+    els.forEach(function(n){ pushUndo(n); fn(n); });
+    markDirty();
+    return els.length;
+  }
+  function openLineQuick(t, x, y){
+    var old=document.getElementById('__ce_dqp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    var B='background:#eef2f7;color:#333;border:1px solid #d7e0ea;border-radius:6px;padding:4px 8px;cursor:pointer;font:inherit';
+    function sw(c,nm){ return '<button class="__ce_dqsw" data-c="'+c+'" title="'+esc(nm)+'" style="width:24px;height:24px;border:1px solid rgba(0,0,0,.25);border-radius:5px;cursor:pointer;background:'+c+';padding:0;margin:2px 2px 0 0;vertical-align:middle"></button>'; }
+    var p=document.createElement('div'); p.id='__ce_dqp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:300px');
+    p.innerHTML='<b>➖ 線</b><span style="opacity:.6;font-size:11px">（〈'+t.el.tagName.toLowerCase()+'〉の'+BD_SIDE[t.side]+'の線）</span>'
+      +'<label style="display:block;margin:6px 0 2px;cursor:pointer"><input type="checkbox" id="__ce_dqall" style="vertical-align:middle"> <span style="opacity:.75">同じ線をまとめて変える（一覧の区切り線をそろえたい時だけON）</span></label>'
+      +'<div style="opacity:.7;margin-top:6px">色</div><div>'+DQ_COLORS.map(function(c){return sw(c[0],c[1]);}).join('')
+      +'<input type="color" class="__ce_dqc" title="好きな色" style="width:32px;height:24px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle;margin-left:4px"></div>'
+      +'<div style="opacity:.7;margin-top:8px">濃さ</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-op="-0.15" style="'+B+'">◻ 薄く</button><button data-op="0.15" style="'+B+'">◼ 濃く</button></div>'
+      +'<div style="opacity:.7;margin-top:8px">太さ</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-w="-1" style="'+B+'">－ 細く</button><button data-w="1" style="'+B+'">＋ 太く</button></div>'
+      +'<div style="opacity:.7;margin-top:8px">線の種類</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap"><button data-st="solid" style="'+B+'">─ 実線</button><button data-st="dashed" style="'+B+'">╌ 破線</button><button data-st="dotted" style="'+B+'">┄ 点線</button></div>'
+      +'<div style="display:flex;gap:6px;margin-top:10px">'
+      +'<button data-del="1" style="background:#c0392b;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">🚫 消す</button>'
+      +'<button data-x="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">閉じる</button></div>';
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    // ★選択中の目印は「その1辺だけ」を光らせる（要素を枠で囲むと上下どちらの線を掴んだのか分からない）
+    var mk=document.createElement('div'); mk.id='__ce_dqmark';
+    var MK_BASE='position:fixed;z-index:2147483000;pointer-events:none;background:rgba(47,111,208,.6);box-shadow:0 0 0 1px rgba(47,111,208,.95)';
+    mk.style.cssText=MK_BASE;
+    document.body.appendChild(mk);
+    function placeMark(){
+      var r=t.el.getBoundingClientRect(), s;
+      if(t.side==='top')          s='left:'+r.left+'px;top:'+(r.top-1)+'px;width:'+r.width+'px;height:3px';
+      else if(t.side==='bottom')  s='left:'+r.left+'px;top:'+(r.bottom-2)+'px;width:'+r.width+'px;height:3px';
+      else if(t.side==='left')    s='left:'+(r.left-1)+'px;top:'+r.top+'px;width:3px;height:'+r.height+'px';
+      else                        s='left:'+(r.right-2)+'px;top:'+r.top+'px;width:3px;height:'+r.height+'px';
+      mk.style.cssText=MK_BASE+';'+s;
+    }
+    placeMark();
+    var mkT=setInterval(placeMark, 400);      // スクロールや太さ変更に追従
+    p.__close=function(){
+      clearInterval(mkT); if(mk.parentElement) mk.remove();
+      if(p.__off) p.__off();
+      p.remove();
+    };
+    var offFn=function(ev){ if(p.parentElement && !p.contains(ev.target)) p.__close(); };
+    // 右クリックしたら板は引っ込める＝いつもの右クリックメニュー（動きを付ける等）の邪魔をしない
+    var ctxFn=function(){ if(p.parentElement) p.__close(); };
+    p.__off=function(){ document.removeEventListener('mousedown',offFn,true); document.removeEventListener('contextmenu',ctxFn,true); };
+    setTimeout(function(){ document.addEventListener('mousedown',offFn,true); document.addEventListener('contextmenu',ctxFn,true); },0);
+    function all(){ var c=p.querySelector('#__ce_dqall'); return !!(c&&c.checked); }
+    function curCol(n){ return getComputedStyle(n).getPropertyValue('border-'+t.side+'-color')||'rgb(136,136,136)'; }
+    function setCol(hex){
+      var n=bdEach(t, all(), function(n){
+        n.setAttribute('data-cedqbd', hex);
+        n.style.setProperty('border-'+t.side+'-color', hex, 'important');
+        n.style.setProperty('border-'+t.side+'-style', getComputedStyle(n).getPropertyValue('border-'+t.side+'-style')||'solid', 'important');
+      });
+      if(msg) msg.textContent='線の色を変えました（'+n+'本・💾保存で確定）';
+    }
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var e=ev.target;
+      if(e.id==='__ce_dqall') return;
+      if(e.getAttribute('data-x')){ p.__close(); return; }
+      if(e.getAttribute('data-del')){
+        var n0=bdEach(t, all(), function(n){ n.style.setProperty('border-'+t.side,'none','important'); });
+        p.__close(); if(msg) msg.textContent='線を消しました（'+n0+'本・💾保存で確定・⟲戻すで取り消せます）'; return;
+      }
+      var c=e.closest('.__ce_dqsw'); if(c){ setCol(c.getAttribute('data-c')); return; }
+      var op=e.getAttribute('data-op');
+      if(op){
+        var d=parseFloat(op);
+        var n1=bdEach(t, all(), function(n){
+          var a=Math.max(0.05, Math.min(1, (parseFloat(n.getAttribute('data-cedqbda')||'1'))+d));
+          a=Math.round(a*100)/100;
+          n.setAttribute('data-cedqbda', String(a));
+          var base=n.getAttribute('data-cedqbd');
+          if(!base){ base=curCol(n); n.setAttribute('data-cedqbd', base); }
+          n.style.setProperty('border-'+t.side+'-color', _rgbaWith(base, Math.round(_alphaOf(base)*a*100)/100), 'important');
+        });
+        if(msg) msg.textContent='線の濃さを変えました（'+n1+'本）'; return;
+      }
+      var w=e.getAttribute('data-w');
+      if(w){
+        var dw=parseFloat(w);
+        var n2=bdEach(t, all(), function(n){
+          var cw=parseFloat(getComputedStyle(n).getPropertyValue('border-'+t.side+'-width'))||1;
+          n.style.setProperty('border-'+t.side+'-width', Math.max(1,Math.min(24,cw+dw))+'px', 'important');
+        });
+        if(msg) msg.textContent='線の太さを変えました（'+n2+'本）'; return;
+      }
+      var st=e.getAttribute('data-st');
+      if(st){
+        var n3=bdEach(t, all(), function(n){ n.style.setProperty('border-'+t.side+'-style', st, 'important'); });
+        if(msg) msg.textContent='線の種類を変えました（'+n3+'本）'; return;
+      }
+    });
+    p.querySelector('.__ce_dqc').addEventListener('input',function(){ setCol(this.value); });
+  }
   // 左クリックで飾り・線を選ぶ（4px以上動いたらドラッグ扱い＝板は出さない）
-  var _dqX=0,_dqY=0,_dqDown=null;
+  var _dqX=0,_dqY=0,_dqDown=null,_dqBd=null,_dqDrag=null;
   document.addEventListener('mousedown',function(e){
     if(e.button!==0) return;
     _dqX=e.clientX; _dqY=e.clientY; _dqDown=dqHitAt(e.clientX,e.clientY,e.target);
-    // 飾りは既存のドラッグ機構に渡さない（掴んで動かすと_bgPaintの再計算と食い違うため。位置は板の矢印で動かす）
-    // 線・図形は普通の要素なので、これまでどおり掴んで動かせるようにそのまま通す
-    if(_dqDown){ var _kk=dqKind(_dqDown); if(_kk!=='line'&&_kk!=='shape') e.stopPropagation(); }
+    _dqBd=_dqDown?null:dqBorderAt(e.clientX,e.clientY);    // 飾りが無ければ「要素のborderで描かれた線」を探す
+    // 飾りは既存のドラッグ機構に渡さない（あちらが動かすと_bgPaintの再計算と食い違うため）。
+    // 代わりに自前でドラッグする＝ずらし量を data に持つので、色や形を変え直しても位置が戻らない。
+    if(_dqDown){
+      var _kk=dqKind(_dqDown);
+      if(_kk!=='line'&&_kk!=='shape'){
+        e.stopPropagation();
+        _dqDrag={el:_dqDown, kind:_kk, x:e.clientX, y:e.clientY, moved:false,
+          ox:(_kk==='bg')?parseFloat(_dqDown.dataset.ox||'0'):parseFloat(_dqDown.getAttribute('data-cedqx')||'0'),
+          oy:(_kk==='bg')?parseFloat(_dqDown.dataset.oy||'0'):parseFloat(_dqDown.getAttribute('data-cedqy')||'0')};
+      }
+    }
+  },true);
+  // 飾りを掴んで動かす（4px動かしたらドラッグ開始＝板は出ない）
+  document.addEventListener('mousemove',function(e){
+    if(!_dqDrag) return;
+    var dx=e.clientX-_dqDrag.x, dy=e.clientY-_dqDrag.y;
+    if(!_dqDrag.moved){
+      if(Math.abs(dx)<4&&Math.abs(dy)<4) return;
+      _dqDrag.moved=true; pushUndo(_dqDrag.el);
+      try{ document.documentElement.style.cursor='move'; }catch(_){}
+    }
+    var el=_dqDrag.el, nx=_dqDrag.ox+dx, ny=_dqDrag.oy+dy;
+    if(_dqDrag.kind==='bg'){ el.dataset.ox=String(Math.round(nx)); el.dataset.oy=String(Math.round(ny)); _bgPaint(el); }
+    else{
+      el.setAttribute('data-cedqx',String(Math.round(nx))); el.setAttribute('data-cedqy',String(Math.round(ny)));
+      el.style.setProperty('translate', Math.round(nx)+'px '+Math.round(ny)+'px');
+    }
+    e.preventDefault(); e.stopPropagation();
   },true);
   // ★clickではなくmouseupで見る（2026-07-29 実測）
   //   図形や線は既存のドラッグ機構が mousedown を掴んで preventDefault するので、
   //   実際のマウス操作では click が飛んでこない＝「押しても板が出ない」になっていた。
+  // マウスがウィンドウの外で離されると mouseup が来ない＝掴んだままの状態が残るので保険で落とす
+  window.addEventListener('blur',function(){ _dqDrag=null; _dqDown=null; _dqBd=null; try{ document.documentElement.style.cursor=''; }catch(_){} });
   document.addEventListener('mouseup',function(e){
-    if(e.button!==0) return;
-    var d=_dqDown; _dqDown=null;
-    if(!d) return;
+    if(e.button!==0){ _dqDrag=null; _dqDown=null; _dqBd=null; return; }
+    var d=_dqDown, bd=_dqBd; _dqDown=null; _dqBd=null;
+    if(_dqDrag){                                  // 掴んで動かしていた＝確定して終わり（板は出さない）
+      // ★ここを取りこぼすと以降ずっと飾りのドラッグ中扱いになり、他の要素が動かなくなる
+      var wasMoved=_dqDrag.moved; _dqDrag=null;
+      try{ document.documentElement.style.cursor=''; }catch(_){}
+      if(wasMoved){ markDirty(); if(msg) msg.textContent='飾りを動かしました（💾保存で確定・⟲戻すで取り消せます）'; return; }
+    }
+    if(!d&&!bd) return;
     if(Math.abs(e.clientX-_dqX)>4||Math.abs(e.clientY-_dqY)>4) return;   // 動かしていたらドラッグ＝板は出さない
-    if(d!==dqHitAt(e.clientX,e.clientY,e.target)) return;
-    openDecoQuick(d, e.clientX+10, e.clientY+10);
+    if(d){
+      if(d!==dqHitAt(e.clientX,e.clientY,e.target)) return;
+      openDecoQuick(d, e.clientX+10, e.clientY+10);
+      return;
+    }
+    var now=dqBorderAt(e.clientX,e.clientY);
+    if(!now||now.el!==bd.el||now.side!==bd.side) return;
+    // 線がリンクの上にあるとページが飛んでしまうので、直後のclickを1回だけ止める。
+    // ★ただし板の中のクリックは通すこと（止めると板を開いた直後の1回目の操作＝色選びが効かない・実測）
+    var _kill=function(ev){
+      if(ev.target&&ev.target.closest&&ev.target.closest('#__ce_dqp')) return;
+      ev.preventDefault(); ev.stopPropagation(); document.removeEventListener('click',_kill,true);
+    };
+    document.addEventListener('click',_kill,true);
+    setTimeout(function(){ document.removeEventListener('click',_kill,true); },350);
+    openLineQuick(bd, e.clientX+10, e.clientY+10);
   },true);
   // 🖼 写真を白フチで囲む（ポラロイド/カード風・AIなし・即反映）。右上だけ角丸を大きめに。
   //   borderで白い台紙を作るので余計なラッパーは足さない。もう一度押すと外す。
@@ -7371,6 +7666,111 @@ html.__ce_altmode{cursor:text}
   var curMenu=null, curEl=null, lastMenuPos=null;  // lastMenuPos=前回ドラッグで動かした位置を記憶
   // ===== 複数選択（Ctrl+右クリックで追加）＝サイズ・動き・削除をまとめて掛ける =====
   var selEls=[];  // 選択中の全要素（curEl=最後に選んだ主役。単独選択時は[curEl]と同じ）
+  // ===== 🧩 グループ（Ctrl+G＝まとめる／Ctrl+Shift+G＝ほどく・2026-07-29）=====
+  //   ★divで囲む方式は採らない：カンプの部品は自由配置(position:absolute)が多く、囲んだ瞬間に位置が崩れる。
+  //   印（data-cegid）で結ぶだけ＝DOMは1ミリも変えずに「1つ掴めば仲間も一緒に動く」を実現する。
+  // 画面まん中下に2秒だけ出る通知（編集バーの小さい文字だと気づかれないため・id は __ce 始まり＝保存に残らない）
+  function ceFlash(txt){
+    var old=document.getElementById('__ce_flash'); if(old) old.remove();
+    var n=document.createElement('div'); n.id='__ce_flash'; n.textContent=txt;
+    n.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:2147483040;'
+      +'background:#1d1d1f;color:#fff;border-radius:999px;padding:11px 22px;font:13.5px/1.5 system-ui,sans-serif;'
+      +'font-weight:700;box-shadow:0 12px 32px rgba(0,0,0,.38);pointer-events:none;max-width:88vw;text-align:center';
+    document.body.appendChild(n);
+    setTimeout(function(){ if(n.parentElement) n.remove(); }, 2400);
+  }
+  // グループに入ったものを数秒だけ光らせる＝「どれが入ったか」を目で確かめられる
+  function groupBlink(list){
+    list.forEach(function(n){
+      var had=n.style.outline;
+      try{ n.style.setProperty('outline','2px dashed #1a7f37'); n.style.setProperty('outline-offset','2px'); }catch(_){}
+      setTimeout(function(){ if(had) n.style.outline=had; else { n.style.removeProperty('outline'); n.style.removeProperty('outline-offset'); } }, 1800);
+    });
+  }
+  // ★文字をドラッグでなぞった範囲（＝ブラウザのテキスト選択）からも拾う（2026-07-29）。
+  //   アーチにした見出しなどを「なぞって選んで Ctrl+G」が一番自然なのに、ツールの複数選択(selEls)とは
+  //   別物なので「2つ以上を選んでください」と言われてしまっていた（ユーザー報告）。
+  function _selFromText(){
+    var sel=null; try{ sel=window.getSelection(); }catch(_){ return []; }
+    if(!sel||!sel.rangeCount||sel.isCollapsed) return [];
+    var rg=sel.getRangeAt(0);
+    var root=rg.commonAncestorContainer;
+    if(root&&root.nodeType===3) root=root.parentElement;
+    if(!root||!root.querySelectorAll) return [];
+    var out=[];
+    [].slice.call(root.querySelectorAll('*')).forEach(function(n){
+      if(n.closest('[id^=__ce]')) return;
+      if(n.children.length) return;                       // いちばん内側の要素だけ（入れ物は取らない）
+      if(!(n.textContent||'').trim()) return;
+      try{ if(rg.intersectsNode(n)) out.push(n); }catch(_){ }
+    });
+    // ★親子で両方拾ったら親だけ残す（子まで印を付けると移動量が二重に足されてバラける・実測）
+    out=out.filter(function(n){ return !out.some(function(p){ return p!==n && p.contains&&p.contains(n); }); });
+    return out;
+  }
+  function groupSel(){
+    var list=(selEls&&selEls.length>1)?selEls.slice():[];
+    if(list.length<2){
+      var tl=_selFromText();
+      if(tl.length>1) list=tl;
+    }
+    if(list.length<2){
+      if(msg) msg.textContent='2つ以上を選んでから Ctrl+G を押してください（Ctrlを押しながらクリック／余白からドラッグで囲む／文字はドラッグでなぞる）';
+      ceFlash('🧩 2つ以上を選んでから Ctrl+G を押してください');
+      return;
+    }
+    // 既にグループの印を持つものが混ざっていたら、そのIDに合流する＝あとから1つ足せる
+    var gid=null;
+    list.some(function(n){ var g=n.getAttribute('data-cegid'); if(g){ gid=g; return true; } return false; });
+    if(!gid) gid='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    var n0=0;
+    list.forEach(function(n){
+      try{ pushUndo(n); }catch(_){ }
+      n.setAttribute('data-cegid', gid); n0++;
+      // ⚠子孫にも印を付けると、親子の両方に移動量が足されて二重に動く（実測でバラけた）。印は選んだ本人だけ。
+    });
+    markDirty();
+    try{ var _s=window.getSelection(); if(_s&&_s.removeAllRanges) _s.removeAllRanges(); }catch(_){ }  // なぞった青を消す
+    groupBlink(list);
+    var m='🧩 '+list.length+'個をグループにしました（どれか1つを掴めば全部いっしょに動きます）';
+    if(msg) msg.textContent=m+'／Ctrl+Shift+G でほどく';
+    ceFlash(m);
+  }
+  function groupMates(el){
+    var g=el&&el.getAttribute&&el.getAttribute('data-cegid');
+    if(!g) return null;
+    var l=[].slice.call(document.querySelectorAll('[data-cegid="'+g+'"]'));
+    // ★親も同じグループにいる子は外す：親が動けば子も一緒に動くので、両方に足すと二重に動いてバラける。
+    //   外した結果が1個（＝みんなを含む親だけ）でも、それを動かせば中身ごと動くので返す。
+    l=l.filter(function(n){ return !l.some(function(p){ return p!==n && p.contains&&p.contains(n); }); });
+    return l.length?l:null;
+  }
+  function ungroupSel(){
+    var base=(selEls&&selEls.length)?selEls.slice():(curEl?[curEl]:[]);
+    var ids={}, n=0;
+    base.forEach(function(x){ var g=x&&x.getAttribute&&x.getAttribute('data-cegid'); if(g) ids[g]=1; });
+    var keys=Object.keys(ids);
+    if(!keys.length){
+      if(msg) msg.textContent='グループになっているものを選んでから Ctrl+Shift+G を押してください';
+      ceFlash('🧩 グループになっているものを選んでから Ctrl+Shift+G');
+      return;
+    }
+    keys.forEach(function(g){
+      [].slice.call(document.querySelectorAll('[data-cegid="'+g+'"]')).forEach(function(x){ try{ pushUndo(x); }catch(_){ } x.removeAttribute('data-cegid'); n++; });
+    });
+    markDirty();
+    var m='🧩 グループを解除しました（'+n+'個・それぞれ別々に動かせます）';
+    if(msg) msg.textContent=m;
+    ceFlash(m);
+  }
+  document.addEventListener('keydown',function(e){
+    if(!(e.ctrlKey||e.metaKey)||e.altKey) return;
+    if((e.key||'').toLowerCase()!=='g') return;
+    var ae=document.activeElement;
+    if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.isContentEditable)) return;
+    e.preventDefault(); e.stopPropagation();
+    if(e.shiftKey) ungroupSel(); else groupSel();
+  },true);
   var _forceEl=null;  // ⬆外側選択用：次のcontextmenuでpickTargetを使わずこの要素を選ぶ
   function eachSel(fn){ (selEls.length?selEls:(curEl?[curEl]:[])).forEach(fn); }
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
@@ -9120,13 +9520,19 @@ html.__ce_altmode{cursor:text}
               bs.el.style.setProperty('max-width','none','important');
               shx=bs.w-w2;  // 左端がカーソルに付いてくるよう、増えた分だけ左へずらす
             }
-            if(d.k.indexOf('s')>=0){
-              var hh=Math.max(40, bs.h+dy);
-              bs.el.style.setProperty('min-height',Math.round(hh)+'px','important');
+            // ★高さは min-height ではなく height で当てる（2026-07-29）。
+            //   min-height は「最小の高さ」なので、中身の高さより小さくできない＝
+            //   伸ばせるのに縮められない（「下から上に行けない」の正体・ユーザー報告）。
+            //   元CSSの min-height に負けないよう 0 を明示し、padding込みで測れるよう border-box にする。
+            function _setH(elx, px){
+              elx.style.setProperty('height', Math.round(px)+'px','important');
+              elx.style.setProperty('min-height','0','important');
+              elx.style.setProperty('box-sizing','border-box','important');
             }
+            if(d.k.indexOf('s')>=0){ _setH(bs.el, Math.max(20, bs.h+dy)); }
             if(d.k.indexOf('n')>=0){
-              var h2=Math.max(40, bs.h-dy);
-              bs.el.style.setProperty('min-height',Math.round(h2)+'px','important');
+              var h2=Math.max(20, bs.h-dy);
+              _setH(bs.el, h2);
               shy=bs.h-h2;  // 上端がカーソルに付いてくるよう、増えた分だけ上へずらす
             }
             if(shx||shy) setPos(bs.el, bs.tx+shx, bs.ty+shy);
@@ -9313,6 +9719,8 @@ html.__ce_altmode{cursor:text}
     var spans=splitChars(el);
     if(!spans.length){ el.innerHTML=el.__fxHTML; el.__fxHTML=null; if(msg)msg.textContent='⚠ ここには文字が無いので文字アニメは使えません。画像には「ふわっと出現」「ズームイン」「ぼやけて出現」などを選んでください'; return; }
     var stag=fxParam(a,'stag')||45, dur=fxParam(a,'dur')||(a.loop?1600:340), dist=fxParam(a,'dist')||16, amp=fxParam(a,'amp')||10, start=null;
+    // 跳ね具合はスライダーで変わるので、プレビューのカーブも毎回作り直す（本番CSSと同じ形にそろえる）
+    var SPRING=cubicBezier(.34, _fxBnc(a), .64, 1);
     function frame(ts){
       if(start===null)start=ts; var tt=ts-start;
       for(var i=0;i<spans.length;i++){ var sp=spans[i];
@@ -9329,7 +9737,7 @@ html.__ce_altmode{cursor:text}
         }
         else {
           // 本番CSS(fxa_cpre)＝ばねカーブ(少し行き過ぎて戻る)。opacityだけ0〜1に留める
-          var lt=tt-i*stag, q=lt<=0?0:EASE_SPRING(Math.min(1,lt/dur));
+          var lt=tt-i*stag, q=lt<=0?0:SPRING(Math.min(1,lt/dur));
           sp.style.opacity=Math.max(0,Math.min(1,q)); sp.style.transform='translateY('+(dist*(1-q))+'px)';
         }
       }
@@ -9478,7 +9886,8 @@ html.__ce_altmode{cursor:text}
     +'html.fxa-on .fxa_pre.fxa_wp.fxa_in,html.fxa-on .fxa_pre.fxa_cl.fxa_in,html.fxa-on .fxa_pre.fxa_cc.fxa_in{clip-path:inset(-25% -1px -25% -1px)!important}'
     +'html.fxa-on .fxa_pre.fxa_cpre,html.fxa-on .fxa_pre.fxa_tw{opacity:1;transform:none;transition:none}'
     +'.fxa_ch{display:inline-block}'
-    +'html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,26px));transition:opacity var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1),transform var(--fxa-dur,.34s) cubic-bezier(.34,1.56,.64,1)}'
+    // 跳ね具合は --fxa-bnc（cubic-bezierの行き過ぎ量）で調整する。大きいほど上に飛び跳ねてから戻る
+    +'html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,26px));transition:opacity var(--fxa-dur,.34s) cubic-bezier(.34,var(--fxa-bnc,1.56),.64,1),transform var(--fxa-dur,.34s) cubic-bezier(.34,var(--fxa-bnc,1.56),.64,1)}'
     +'html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,32ms))}'
     +'html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}'
     +'html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}'
@@ -9625,9 +10034,15 @@ html.__ce_altmode{cursor:text}
   if(document.querySelector('.fxa_pre,.fxa_wave,.fxa_ch,.fxa_hl,.fxa_cnt,.fxa_ud,[class*="fxa_lp_"]')){ var _or=document.getElementById('fxa-run'); if(_or) _or.remove(); ensureFxAssets(); }
   function fxClearClasses(el){
     [].slice.call(el.classList).forEach(function(c){ if(c.indexOf('fxa_')===0 && c!=='fxa_ch') el.classList.remove(c); });
-    ['--fxa-dur','--fxa-dist','--fxa-scale','--fxa-blur','--fxa-deg','--fxa-amp','--fxa-stag'].forEach(function(p){ el.style.removeProperty(p); });
+    ['--fxa-dur','--fxa-dist','--fxa-scale','--fxa-blur','--fxa-deg','--fxa-amp','--fxa-stag','--fxa-bnc'].forEach(function(p){ el.style.removeProperty(p); });
   }
   function _fxDist(el,a){ el.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
+  // 跳ね具合 0〜100 を cubic-bezier の行き過ぎ量 1.0〜3.0 に変換する（0＝跳ねずになめらか）
+  function _fxBnc(a){
+    var v=fxParam(a,'bnc');
+    if(v==null||isNaN(v)) v=30;                       // 既定30＝これまでの1.6相当
+    return Math.round((1+v/50)*100)/100;
+  }
   // 出現アニメを要素に直接かけると、その要素自身のCSSアニメ（ボタンのループ鼓動など）がtransformを毎フレーム
   // 上書きして「せり上がり等の動きが出ない」。→ そういう要素だけラッパーで包み、ラッパー側で出現させる
   // （中の要素は自分のアニメ・ホバーをそのまま保てる）。
@@ -9711,7 +10126,10 @@ html.__ce_altmode{cursor:text}
       else {
         el.classList.add('fxa_pre'); el.classList.add(a.type?'fxa_tw':'fxa_cpre');
         el.style.setProperty('--fxa-stag', fxParam(a,'stag')+'ms');
-        if(!a.type) el.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px');
+        if(!a.type){
+          el.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px');
+          el.style.setProperty('--fxa-bnc', String(_fxBnc(a)));     // 跳ね具合
+        }
         el.classList.add('fxa_in');  // 編集中はすぐ見えるように（保存時にfxa_inは外す＝再生に戻る）
         _fxShown=el;
       }
@@ -9996,7 +10414,8 @@ html.__ce_altmode{cursor:text}
 
   // ===== ⌨ ショートカットキー（マウス位置の要素に既存機能を発火・設定で変更／家↔会社同期） =====
   // 割り当ては localStorage['__ce_shortcuts']（{op:key}）＋サーバー(/api/shortcuts)で家↔会社共有。
-  var SC_DEF={ txt:'t', edit:'e', img:'g', photo:'f', fx:'a', fav:'o' };
+  // g＝写真を加工（よく使うので押しやすいキーに・2026-07-29 要望）／画像を追加は i（image）へ移動
+  var SC_DEF={ txt:'t', edit:'e', img:'i', photo:'g', fx:'a', fav:'o', shapes:'b' };
   // op=処理／label=設定パネルの説明／mid=対応する右クリックメニュー項目ID（[t]表示に使う・無い操作はnull）
   var SC_META=[
     {op:'txt',   label:'✏ 文字を追加（カーソル位置に新規）', mid:'__ce_q_txt'},
@@ -10004,7 +10423,8 @@ html.__ce_altmode{cursor:text}
     {op:'img',   label:'🖼 画像を追加（カーソル位置）',       mid:'__ce_q_img'},
     {op:'photo', label:'🖼 写真を加工（カーソル下の画像）',   mid:'__ce_cmdeco'},
     {op:'fx',    label:'✨ 動きを付ける（アニメを選ぶ）',      mid:'__ce_q_fx'},
-    {op:'fav',   label:'⭐ お気に入りメニュー（保存・切替・追加）', mid:'__ce_q_fav'}
+    {op:'fav',   label:'⭐ お気に入りメニュー（保存・切替・追加）', mid:'__ce_q_fav'},
+    {op:'shapes',label:'🔶 図形バーを出す／閉じる（〇・線・アイコン）', mid:'__ce_shapes'}
   ];
   var _scKeys=null;
   function scKeys(){
@@ -10041,6 +10461,8 @@ html.__ce_altmode{cursor:text}
     w.observe(document.body,{childList:true,subtree:true});
   }
   function scRun(op){
+    // 🔶図形バーは「どの要素を狙っているか」に関係なく出せる＝対象を決める前に処理する
+    if(op==='shapes'){ try{ closeMenu(); }catch(_){} openShapeBar(); return; }
     var cx=_ceCX, cy=_ceCY;
     var under=document.elementFromPoint(cx,cy);
     var overUI = under && (under.closest('#__ce')||under.closest('#__ce_cm')||under.closest('#__ce_pk')||under.closest('#__ce_dlyp')||under.closest('#__ce_scmenu')||under.closest('#__ce_scset'));
@@ -10901,12 +11323,13 @@ html.__ce_altmode{cursor:text}
   }
   document.addEventListener('mousemove',function(e){
     if(!(dActive&&dragEl)) return;
+    _asStart(e.clientX, e.clientY);
     var tx=dOX+(e.clientX-dSX), ty=dOY+(e.clientY-dSY);
     if(e.shiftKey){ _gdLine('v',null); _gdLine('h',null); }  // Shift＝吸着せず自由に動かす
     else { var sn=_gdSnap(dragEl,tx,ty); tx=sn.tx; ty=sn.ty; }
     setPos(dragEl, tx, ty);
   },true);
-  document.addEventListener('mouseup',function(e){ if(dActive){ dActive=false; document.body.style.userSelect=''; _gdEnd(); pushUndo(dragEl);
+  document.addEventListener('mouseup',function(e){ _asStop(); if(dActive){ dActive=false; document.body.style.userSelect=''; _gdEnd(); pushUndo(dragEl);
     e.stopPropagation(); _hdlDrag=true; setTimeout(function(){ _hdlDrag=false; },150);  // ドラッグ直後のclickでページJSが発火（リンク遷移等）しないようやり過ごす
   } },true);
   // ★普通にクリックしてつかむと、ボタンを押さなくてもその場で即ドラッグできる（既定の動き）。
@@ -10975,8 +11398,24 @@ html.__ce_altmode{cursor:text}
       var isText=(rr!==r), pad=isText?6:1;
       var full=(rr.left>=m.l-pad && rr.right<=m.r+pad && rr.top>=m.t-pad && rr.bottom<=m.b+pad);
       var cx=(rr.left+rr.right)/2, cy=(rr.top+rr.bottom)/2;
-      var center=(!isText)&&(cx>=m.l && cx<=m.r && cy>=m.t && cy<=m.b);
-      if(full||center) inside.push(n);
+      var center=(cx>=m.l && cx<=m.r && cy>=m.t && cy<=m.b);
+      // ★傾けた文字（アーチ等）は箱が斜めに膨らんで枠からはみ出すため、"全部入った"判定だけだと
+      //   囲んだのに選ばれない（実報告：13文字のつもりが5個）。中心が枠内＋6割以上重なっていれば拾う。
+      //   （枠の外へ長く伸びる説明文は重なりが小さいので、これまでどおり巻き込まれない）
+      var ix=Math.max(0, Math.min(rr.right,m.r)-Math.max(rr.left,m.l));
+      var iy=Math.max(0, Math.min(rr.bottom,m.b)-Math.max(rr.top,m.t));
+      var cover=(ix*iy)/Math.max(1, rr.width*rr.height);
+      if(full || (!isText&&center) || (isText&&center&&cover>=0.6)) inside.push(n);
+    });
+    // ★「入れ物」は選ばない（2026-07-29）：枠いっぱいに広がる箱を掴むと、中身ではなく器が動いて
+    //   ページ全体が斜めにずれる事故になる（実報告）。枠の9割を覆う箱・画面級の箱は候補から外し、
+    //   その中身のほうを選ぶ。大きな箱そのものを動かしたい時は右クリック→🖱掴んで動かす。
+    var _mqW=Math.max(1,m.r-m.l), _mqH=Math.max(1,m.b-m.t);
+    inside=inside.filter(function(n){
+      var r=n.getBoundingClientRect();
+      if(r.width>=_mqW*0.9 && r.height>=_mqH*0.9) return false;
+      if(r.width>=window.innerWidth*0.9 && r.height>=window.innerHeight*0.7) return false;
+      return true;
     });
     // 親も枠内なら親だけ残す（1文字span等の破片でなく「まとまり」を選ぶ）
     var set=new Set(inside);
@@ -11016,7 +11455,9 @@ html.__ce_altmode{cursor:text}
     }
     if(_hitSel){
       el=_hitSel;
-      if(selEls.length>1) _aGrp=selEls.map(function(x){ return {el:x, ox:+x.getAttribute('data-cetx')||0, oy:+x.getAttribute('data-cety')||0}; });
+      // 複数選択中はその全員／単体でも🧩グループの印があれば仲間ぜんぶを同じ量だけ動かす
+      var _gl=(selEls.length>1)?selEls:groupMates(el);
+      if(_gl&&_gl.length) _aGrp=_gl.map(function(x){ return {el:x, ox:+x.getAttribute('data-cetx')||0, oy:+x.getAttribute('data-cety')||0}; });
     } else if(el.tagName==='IMG'){
       // 未選択の画像も、ぴったり包む枠があれば枠ごと掴む（右クリックの自動親選択と同じルール）
       var _pw2=el.parentElement;
@@ -11025,6 +11466,13 @@ html.__ce_altmode{cursor:text}
         if(_rp2.width<=_ri2.width*1.5+40 && _rp2.height<=_ri2.height*1.5+40) el=_pw2;
       }
     }
+    // 選択していない状態でいきなり掴んだ時も、🧩グループの印があれば仲間ぜんぶを動かす
+    if(!_aGrp){
+      var _gm=groupMates(el);
+      if(_gm&&_gm.length) _aGrp=_gm.map(function(x){ return {el:x, ox:+x.getAttribute('data-cetx')||0, oy:+x.getAttribute('data-cety')||0}; });
+    }
+    // 🧩グループを掴んだことが分かるように知らせる（効いていない時は出ない＝原因の切り分けになる）
+    if(_aGrp&&_aGrp.length>1&&msg) msg.textContent='🧩 グループ '+_aGrp.length+'個をまとめて動かします';
     // ★入れ物の「余白」スタート＝範囲選択（2026-07-19）：クリック直下(e.target)が
     //   「子要素2個以上・自分は文字を直接持たない・そこそこ大きい」＝リストやグリッドの背景なら、
     //   入れ物ごと掴まずに範囲選択を始める（Figmaと同じ感覚）。中身（文字・画像）を掴んだ時は従来どおり即ドラッグ。
@@ -11046,18 +11494,47 @@ html.__ce_altmode{cursor:text}
     // ★セクション/ヘッダー/フッター丸ごとは「普通のドラッグ」では動かさない（2026-07-11ガード）。
     //   余白部分を掴んでスクロール/選択したつもりが、セクション全体に translate が付いて保存で焼き込まれ
     //   「全ブロックが約200pxずれたカンプ」が実際にできてしまった。動かしたい時は右クリック→🖱 掴んで動かす。
-    if(!_hitSel && /^(SECTION|HEADER|FOOTER|MAIN|BODY|HTML)$/.test(el.tagName)){ _mqStart(e); return; }
+    if(!_hitSel && /^(SECTION|HEADER|FOOTER|MAIN|BODY|HTML)$/.test(el.tagName)){ _aGrp=null; _mqStart(e); return; }
     // ★ページ丸ごと級の入れ物（クローンの全体ラッパーdiv等）も普通ドラッグ禁止。
     //   これが動くと「body全体が一気に左に寄る」事故になる（実際に発生）。動かしたい時は右クリック→🖱。
-    if(!_hitSel){ var _gr=el.getBoundingClientRect(); if(_gr.width>=window.innerWidth*0.95 && _gr.height>=window.innerHeight*1.2){ _mqStart(e); return; } }
+    if(!_hitSel){ var _gr=el.getBoundingClientRect(); if(_gr.width>=window.innerWidth*0.95 && _gr.height>=window.innerHeight*1.2){ _aGrp=null; _mqStart(e); return; } }
     _altEl=el; _altActive=true; _aSX=e.clientX; _aSY=e.clientY;
     _aOX=+el.getAttribute('data-cetx')||0; _aOY=+el.getAttribute('data-cety')||0;
     __gd=_gdCollect(el);  // 📏 整列ガイドの吸着候補を集める（普通ドラッグ＝この経路が本命）
     document.body.style.userSelect='none'; e.preventDefault(); e.stopPropagation();
   },true);
   var _aMoved=false;  // 実際に動かしたか（3px超）。動かした時だけ選択を残す＝クリックだけなら従来通り解除
+  // ===== ドラッグ中のオートスクロール（2026-07-29）=====
+  //   ★これが無いと「画面に収まらない距離」を運べない＝下にあるものを上へ持って行けない（実報告）。
+  //   画面の上端/下端に寄せている間だけ自動でスクロールし、掴んだ時の基準も同じだけずらす
+  //   （ずらさないとスクロールぶん要素が置いていかれる）。
+  var _asRAF=null, _asMX=0, _asMY=0;
+  function _asTick(){
+    _asRAF=null;
+    if(!_altActive && !dActive) return;
+    var edge=80, sp=0, y=_asMY;
+    if(y<edge) sp=-Math.max(6, Math.round((edge-y)/2));
+    else if(y>window.innerHeight-edge) sp=Math.max(6, Math.round((y-(window.innerHeight-edge))/2));
+    if(sp){
+      var b=window.pageYOffset;
+      window.scrollBy(0, sp);
+      var moved=window.pageYOffset-b;
+      if(moved){
+        _aSY-=moved; dSY-=moved;
+        if(_altActive&&_altEl){
+          var dx=_asMX-_aSX, dy=_asMY-_aSY;
+          if(_aGrp) _aGrp.forEach(function(g){ setPos(g.el, g.ox+dx, g.oy+dy); });
+          else setPos(_altEl, _aOX+dx, _aOY+dy);
+        } else if(dActive&&dragEl){ setPos(dragEl, dOX+(_asMX-dSX), dOY+(_asMY-dSY)); }
+      }
+    }
+    _asRAF=requestAnimationFrame(_asTick);
+  }
+  function _asStart(x,y){ _asMX=x; _asMY=y; if(!_asRAF) _asRAF=requestAnimationFrame(_asTick); }
+  function _asStop(){ if(_asRAF){ cancelAnimationFrame(_asRAF); _asRAF=null; } }
   document.addEventListener('mousemove',function(e){
     if(!_altActive||!_altEl) return;
+    _asStart(e.clientX, e.clientY);
     var dx=e.clientX-_aSX, dy=e.clientY-_aSY;
     if(Math.abs(dx)+Math.abs(dy)>3) _aMoved=true;
     var tx=_aOX+dx, ty=_aOY+dy;
@@ -11067,6 +11544,7 @@ html.__ce_altmode{cursor:text}
     else setPos(_altEl, tx, ty);
   },true);
   document.addEventListener('mouseup',function(){
+    _asStop();
     if(_altActive){
       var _pk=_altEl; _altActive=false; document.body.style.userSelect=''; _altEl=null; _gdEnd(); pushUndo(_pk);
       // 動かした直後はmouseup後のclickで選択が閉じてしまうので、やり過ごす（伸縮ハンドルのガードを共用）
@@ -11443,6 +11921,7 @@ html.__ce_altmode{cursor:text}
   function _isStandaloneBox(el){
     if(!el||el.nodeType!==1) return false;
     var cl=el.classList;
+    if(cl&&(cl.contains('ce_psel')||cl.contains('ce_shape'))) return true;   // ツールが置いた部品は単体で掴める
     // ツールが1文字ずつ包んだ断片は今までどおり親へ上る（アニメ用のinline-blockに引っかからないように）
     if(cl&&(cl.contains('fxa_ch')||cl.contains('imp-char')||cl.contains('ch')||cl.contains('fxa_ln')||cl.contains('fxa_lni'))) return false;
     // ★1〜2文字は基本「分割された文字の断片」＝親へ上る。ただし“アイコンの箱”だけは例外（2026-07-28）。
@@ -11533,6 +12012,12 @@ html.__ce_altmode{cursor:text}
     return {z:z, lifted:lifted};
   }
   function pickTarget(el){
+    // 🧩グループの一員は、それ自身を掴む（親に吸い上げると印が見つからず仲間が付いてこない）
+    if(el&&el.getAttribute&&el.getAttribute('data-cegid')) return el;
+    // ★ツールが置いた部品（🔓実体化した飾り・🔶図形）は、それ自身を掴む＝親に吸い上げない。
+    //   「01」のような1〜2文字のspanは「分割された文字の断片」と見なされて親が選ばれ、
+    //   ハンドルは出るのに掴んでも動かない、という報告が出た（2026-07-29）。
+    if(el&&el.classList&&(el.classList.contains('ce_psel')||el.classList.contains('ce_shape'))) return el;
     var INLINE={SPAN:1,B:1,I:1,EM:1,STRONG:1,SMALL:1,MARK:1,U:1,FONT:1,WBR:1,BR:1};
     var cur=el, hops=0;
     while(cur && cur.parentElement && cur!==document.body && hops<10 && INLINE[cur.tagName]
@@ -11743,6 +12228,52 @@ html.__ce_altmode{cursor:text}
     var st=document.createElement('style'); st.id='ce-psoff';
     st.textContent='.cepsoff-b::before{content:none!important}.cepsoff-a::after{content:none!important}';
     (document.head||document.documentElement).appendChild(st);
+  }
+  // ===== 🔓 疑似要素(::before/::after)を「本物の要素」に作り替えて掴めるようにする（2026-07-29・要望）=====
+  //   ★「01」のような大きな飾り数字はCSSの content で描かれていてDOMに実体が無い＝掴めない・動かせない・
+  //   🎯レイヤー選択にも出てこない。見た目をそのままコピーした span を置き、元の疑似要素は消す
+  //   （＝見た目は変わらないまま、普通の要素として掴める・色も大きさも変えられる）。
+  var PS_COPY=['position','top','right','bottom','left','width','height','display','box-sizing',
+    'padding','margin','font-family','font-size','font-weight','font-style','line-height','letter-spacing',
+    'text-align','white-space','color','background-color','background-image','background-size','background-position',
+    'background-repeat','border-radius','box-shadow','opacity','z-index','transform','transform-origin',
+    'writing-mode','text-shadow','-webkit-text-fill-color','align-items','justify-content'];
+  function psList(el){
+    var out=[];
+    if(!el||!el.tagName) return out;
+    ['before','after'].forEach(function(w){
+      if(el.classList&&el.classList.contains(w==='after'?'cepsoff-a':'cepsoff-b')) return;   // 作り替え済み
+      var cs; try{ cs=getComputedStyle(el,'::'+w); }catch(_){ return; }
+      if(!cs) return;
+      var ct=cs.content||'';
+      if(!ct||ct==='none'||ct==='normal') return;
+      var txt=ct.replace(/^["']|["']$/g,'');
+      var w0=parseFloat(cs.width)||0, h0=parseFloat(cs.height)||0;
+      if(!txt && (w0<2||h0<2)) return;                       // 中身も大きさも無い＝見えていない
+      out.push({which:w, text:txt.slice(0,10), img:/^url\(/.test(ct)});
+    });
+    return out;
+  }
+  function psMaterialize(el, which){
+    var cs; try{ cs=getComputedStyle(el,'::'+which); }catch(_){ return null; }
+    if(!cs) return null;
+    var ct=cs.content||'';
+    if(!ct||ct==='none'||ct==='normal') return null;
+    var sp=document.createElement('span');
+    sp.className='ce_psel'; sp.setAttribute('data-cepsel', which);
+    PS_COPY.forEach(function(pr){
+      var v=cs.getPropertyValue(pr);
+      if(!v||v==='auto'||v==='none'||v==='normal') return;
+      sp.style.setProperty(pr, v);
+    });
+    if(cs.display==='inline') sp.style.setProperty('display','inline-block');   // inlineのままだとドラッグで1pxも動かない
+    if(/^url\(/.test(ct)) sp.style.setProperty('background-image', ct);         // 画像contentは背景として持たせる
+    else sp.textContent=ct.replace(/^["']|["']$/g,'');
+    _psCss();
+    el.classList.add(which==='after'?'cepsoff-a':'cepsoff-b');                  // 元の飾りは消す（二重に見えないように）
+    if(which==='after') el.appendChild(sp); else el.insertBefore(sp, el.firstChild);
+    markDirty();
+    return sp;
   }
   // 🎨 セクションの背景色を変える（AIなし・即反映）＝右クリックから直接開く浮動パネル。
   //   ①このページのセクション色 ②ページで使用中の色（頻度順） ③自由な色 から選ぶ。
@@ -12070,12 +12601,13 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_secbg','🎨 セクションの背景色を変える（AIなし・即反映）'],
     ['__ce_q_txtbg','🖌 文字の背景に色を塗る（行ごと・AIなし）'],
     ['__ce_q_vline','▎ 文字の左に縦線を引く（引用風・AIなし）'],
-    ['__ce_q_deco','🎨 この飾りの色・形・傾きを変える']
+    ['__ce_q_deco','🎨 この飾りの色・形・傾きを変える'],
+    ['__ce_q_psgrab','🔓 数字や飾り（01など）を掴めるようにする']
   ];
   // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
   //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
   var QM_DEF_LAYOUT=[
-    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_bgsz','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg','__ce_q_vline','__ce_q_deco',
+    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_bgsz','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg','__ce_q_vline','__ce_q_deco','__ce_q_psgrab',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
@@ -12688,8 +13220,18 @@ html.__ce_altmode{cursor:text}
     (function(){
       var _dq=null;
       try{ _dq=dqHitAt(qx,qy,curEl); }catch(_){ }
-      if(!_dq){ delete _qmM['__ce_q_deco']; return; }
-      _qmM['__ce_q_deco']='🎨 '+(DQ_NAME[dqKind(_dq)]||'飾り')+'の色・形・傾きを変える';
+      if(_dq){ _qmM['__ce_q_deco']='🎨 '+(DQ_NAME[dqKind(_dq)]||'飾り')+'の色・形・傾きを変える'; return; }
+      var _bd=null; try{ _bd=dqBorderAt(qx,qy); }catch(_){ }
+      if(_bd){ _qmM['__ce_q_deco']='➖ この線（'+(BD_SIDE[_bd.side]||'')+'の線）の色・太さ・種類を変える'; return; }
+      delete _qmM['__ce_q_deco'];
+    })();
+    // 🔓 CSSで描かれた飾り（01などの疑似要素）がある時だけ出す＝掴める形に作り替える
+    (function(){
+      var _ps=[];
+      try{ _ps=psList(curEl); }catch(_){ }
+      if(!_ps.length){ delete _qmM['__ce_q_psgrab']; return; }
+      var _nm=_ps[0].text||(_ps[0].img?'画像の飾り':'飾り');
+      _qmM['__ce_q_psgrab']='🔓 「'+_nm+'」を掴めるようにする（動かす・色を変える）';
     })();
     // 🅰 まとめて文字調整（複数選択時のみ）：フォント種はページで使用中のものを頻度順に出す＋定番を後ろに
     var mfRow='';
@@ -13854,10 +14396,28 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_secbg'){ var _sbe=curEl; closeMenu(); openSecBg(_sbe,qx,qy); return; }
       if(t.id==='__ce_q_txtbg'){ var _tbe=curEl; closeMenu(); openTextBg(_tbe,qx,qy); return; }
       if(t.id==='__ce_q_vline'){ var _vle=curEl; closeMenu(); openVLine(_vle,qx,qy); return; }
+      if(t.id==='__ce_q_psgrab'){
+        var _pge=curEl; closeMenu();
+        var _lst=[]; try{ _lst=psList(_pge); }catch(_){ }
+        if(!_lst.length){ if(msg) msg.textContent='ここには作り替えられる飾りがありませんでした'; return; }
+        pushUndo(_pge);
+        var _made=null;
+        _lst.forEach(function(o){ var s=psMaterialize(_pge, o.which); if(s&&!_made) _made=s; });
+        if(_made){
+          curEl=_made; selEls=[_made];
+          try{ _made.classList.add('__ce_sel'); showHandles(_made); }catch(_){}
+          if(msg) msg.textContent='🔓 掴めるようにしました（そのままドラッグで移動／右クリックで色・大きさ・動きも付けられます）';
+        } else if(msg) msg.textContent='作り替えに失敗しました';
+        return;
+      }
       if(t.id==='__ce_q_deco'){
-        var _dqe=null; try{ _dqe=dqHitAt(qx,qy,curEl); }catch(_){ }
+        var _dqe=null,_bde=null;
+        try{ _dqe=dqHitAt(qx,qy,curEl); }catch(_){ }
+        if(!_dqe){ try{ _bde=dqBorderAt(qx,qy); }catch(_){ } }
         var _dx=qx,_dy=qy; closeMenu();
-        if(_dqe) openDecoQuick(_dqe,_dx,_dy); else if(msg) msg.textContent='ここには飾りが見つかりませんでした';
+        if(_dqe) openDecoQuick(_dqe,_dx,_dy);
+        else if(_bde) openLineQuick(_bde,_dx,_dy);
+        else if(msg) msg.textContent='ここには飾り・線が見つかりませんでした';
         return;
       }
       if(t.id==='__ce_q_addline'){
@@ -13954,9 +14514,15 @@ html.__ce_altmode{cursor:text}
     if(!_wasForced&&window.__ceDblSel&&window.__ceDblSel.isConnected&&(window.__ceDblSel===e.target||window.__ceDblSel.contains(e.target))){ el=window.__ceDblSel; }
     window.__ceDblSel=null;
     if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
-    if(!_wasForced) el=_descendOverlay(el, e.clientX, e.clientY);  // 透明な膜は貫通して下の実体を掴む（⬆外側選択のときは貫通させない）
+    // ★ツールで置いた部品（🔶図形・🔓実体化した飾り・背景の飾り）は「透明な膜」ではないので
+    //   貫通させない。ここを通すと、丸を右クリックしたのに下の文章ブロックが選ばれ、
+    //   動きを付けると文章のほうに付いてしまう（実報告・2026-07-29）。
+    var _isToolPart=!!(el&&el.classList&&(el.classList.contains('ce_shape')||el.classList.contains('ce_psel')
+      ||el.classList.contains('ce_bgdeco')||el.classList.contains('ce_ringdeco')||el.classList.contains('ce_outlinedeco')
+      ||(el.getAttribute&&el.getAttribute('data-celine'))));
+    if(!_wasForced && !_isToolPart) el=_descendOverlay(el, e.clientX, e.clientY);  // 透明な膜は貫通して下の実体を掴む（⬆外側選択のときは貫通させない）
     // 別の枝の入れ物が上にかぶっている時は、実際に見えている文字のほうを掴む（重なりを直さなくても選べる）
-    if(!_wasForced){
+    if(!_wasForced && !_isToolPart){
       var _tx=_textAt(e.clientX, e.clientY);
       if(_tx && _tx!==el && !el.contains(_tx) && !_tx.contains(el)) el=_tx;
     }

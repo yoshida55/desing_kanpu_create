@@ -1,8 +1,9 @@
 {
 "txt": "t",
 "edit": "e",
-"img": "g",
-"photo": "f",
+"img": "i",
+"photo": "g",
 "fx": "a",
-"fav": "o"
+"fav": "o",
+"shapes": "b"
 }
