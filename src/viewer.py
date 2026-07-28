@@ -3049,8 +3049,10 @@ html.__ce_altmode{cursor:text}
       }catch(_){}
     }, 2500);   // 遅れて読み込まれる画像を巻き込まないよう少し待つ
   }
-  if(document.readyState==='complete') _warnBrokenImages();
-  else window.addEventListener('load', _warnBrokenImages);
+  // ページを開いたら、前に作った飾りにも「クリックして調整できる」状態を付け直す（古いカンプでも効く）
+  function _bootDeco(){ _warnBrokenImages(); try{ dqArm(); }catch(_){ } }
+  if(document.readyState==='complete') _bootDeco();
+  else window.addEventListener('load', _bootDeco);
   // 🖼 画像を追加：画像要素を置く→すぐドラッグで移動できる（差し替え・サイズ調整は右クリックで）。
   // px/py（ページ座標）を渡すとそこへ置く＝右クリックメニューの「ここに画像を追加」用。省略時は画面中央あたり。
   function insertImageEl(url, idx, px, py){
@@ -6192,6 +6194,37 @@ html.__ce_altmode{cursor:text}
   //   親が大きい（左に文章＋右に写真／セクション丸ごと 等）と、飾りが親いっぱいに広がって
   //   「セクション全体が青くなった」ように見える（実報告）。写真の実寸を測って、その周りだけに置く。
   //   ★測るのは offsetLeft/Top/Width/Height（rectは出現アニメのtransform途中の値を拾うため使わない）
+  // ★位置は offsetLeft/Top だけでは足りない（2026-07-29 実測で判明）
+  //   カンプの写真は「自由配置＋ツールのtranslate」で動かしてあることが多い。offsetLeftは
+  //   translateを含まない＝飾りだけ"写真が元いた場所"に置かれて右下へ大きく飛ぶ
+  //   （実測：img.offsetLeft=1087 なのに実際の表示は x=524／差 -563px＝報告どおり右下にポツンと出た）。
+  //   ⭕大きさは offsetWidth/Height のまま（transformで変わらない＝出現アニメ中でも安定）
+  //   ⭕位置だけ translate を足す（rect差分は出現アニメ途中の値を拾うので使わない）
+  function _pxOf(v, base){
+    if(!v) return 0;
+    var n=parseFloat(v); if(!isFinite(n)) return 0;
+    return (v.indexOf('%')>=0) ? n*(base||0)/100 : n;   // translateの%は要素自身の大きさが基準
+  }
+  function _txOf(el){
+    var x=0, y=0, cs=null;
+    try{ cs=getComputedStyle(el); }catch(_){ return null; }
+    var t=cs.transform||'';                       // ① transform: translate(...) 系
+    if(t&&t!=='none'){
+      var done=false;
+      try{ var m=new DOMMatrixReadOnly(t); if(isFinite(m.e)&&isFinite(m.f)){ x+=m.e; y+=m.f; done=true; } }catch(_){ }
+      if(!done){ var mm=/matrix\(([^)]+)\)/.exec(t); if(mm){ var v=mm[1].split(',').map(parseFloat); x+=v[4]||0; y+=v[5]||0; } }
+    }
+    // ★② 単体プロパティ translate（2026-07-29 実測で判明・ここが本命）
+    //   このツールが要素を動かすのに使っているのは transform ではなく **こっち**（rotate/scaleも単体プロパティ）。
+    //   transformだけ見ていると matrix(1,0,0,1,0,0)＝「動いていない」判定になり、飾りが元の位置に取り残される。
+    var tr=cs.translate||'';
+    if(tr&&tr!=='none'){
+      var p=tr.trim().split(' ').filter(Boolean);   // 計算値は "-562.9px -189px" の形（単一スペース区切り）
+      x+=_pxOf(p[0], el.offsetWidth); y+=_pxOf(p[1], el.offsetHeight);
+    }
+    if(!x&&!y) return null;
+    return {x:x, y:y};
+  }
   function _decoBox(host){
     if(!host) return null;
     var img=null;
@@ -6200,8 +6233,11 @@ html.__ce_altmode{cursor:text}
     var iw=img.offsetWidth, ih=img.offsetHeight;
     if(iw<20||ih<20) return null;
     var hw=host.clientWidth||host.offsetWidth||1, hh=host.clientHeight||host.offsetHeight||1;
-    if(hw<=iw*1.15 && hh<=ih*1.15) return null;   // 親がほぼ写真サイズ＝今までどおりでよい
-    return {x:img.offsetLeft, y:img.offsetTop, w:iw, h:ih, hw:hw, hh:hh};
+    var t=_txOf(img), mx=t?t.x:0, my=t?t.y:0;
+    // 写真自体をtranslateで動かしてある時は、親が写真と同じ大きさでも箱合わせが要る
+    // （inset方式だと親基準＝写真だけ動いて飾りが取り残される）
+    if(Math.abs(mx)<1 && Math.abs(my)<1 && hw<=iw*1.15 && hh<=ih*1.15) return null;
+    return {x:img.offsetLeft+mx, y:img.offsetTop+my, w:iw, h:ih, hw:hw, hh:hh};
   }
   function _decoFit(el, box, x, y, w, h){        // %で置く＝画面幅が変わっても写真に付いていく
     ['inset','right','bottom'].forEach(function(p){ el.style.removeProperty(p); });
@@ -6216,7 +6252,10 @@ html.__ce_altmode{cursor:text}
     var cols=(bg.dataset.cols||'').split('|').filter(Boolean);
     if(cols.length<3){ cols=_bgColsFrom(bg); if(cols.length>=3) bg.dataset.cols=cols.join('|'); }
     var dir=bg.dataset.dir||'br', mode=bg.dataset.mode||'shift', D=parseFloat(bg.dataset.size||'26');
-    if(cols.length>=3) bg.style.background=_bgGradCss(cols,dir,mode);
+    // 濃さは opacity でなく色のアルファで持つ（アニメを付けても薄さが飛ばない）
+    var _al=parseFloat(bg.dataset.alpha||'1');
+    var _cc=(_al<1)?cols.map(function(c){ return _rgbaWith(c,_al); }):cols;
+    if(_cc.length>=3) bg.style.background=_bgGradCss(_cc,dir,mode);
     var box=_decoBox(bg.parentElement);
     if(box){                                   // 写真の箱に合わせて置く（親が大きい時）
       if(mode==='halo'){
@@ -6269,7 +6308,9 @@ html.__ce_altmode{cursor:text}
     if(!bg){
       bg=document.createElement('div'); bg.className='ce_bgdeco'; bg.setAttribute('aria-hidden','true');
       bg.dataset.size='26'; bg.dataset.shape='round'; bg.dataset.dir='br'; bg.dataset.mode='shift';
-      bg.style.cssText='position:absolute;z-index:-1;pointer-events:none;border-radius:'+BG_SHAPES.round+';background:radial-gradient(60% 55% at 50% 45%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%);';
+      // pointer-events:auto ＝飾りを直接クリックして色/薄さ/形を変えられるようにするため（2026-07-29）。
+      // 写真より後ろ(z-index:-1)なので、写真の上をクリックしても写真が優先＝じゃまにならない。
+      bg.style.cssText='position:absolute;z-index:-1;pointer-events:auto;cursor:pointer;border-radius:'+BG_SHAPES.round+';background:radial-gradient(60% 55% at 50% 45%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%);';
       _bgPlace(bg, 26, 'br');                        // 右下へずらして色帯を覗かせる（初期）
       target.insertBefore(bg, target.firstChild);   // 先頭＝一番後ろに置く
     }
@@ -6301,7 +6342,7 @@ html.__ce_altmode{cursor:text}
     bg.dataset.cols=(cols||[]).join('|');
     _bgPaint(bg);
     markDirty();
-    msg.textContent='背景の飾りを敷きました（保存で確定）。色が見えない時は「☀ 後光」を押すと写真の全周にふんわり広がります';
+    msg.textContent='背景の飾りを敷きました。★この飾りを直接クリックすると、色・薄さ・形・傾きをその場で変えられます（保存で確定）';
   }
   // ☀後光（全周にふんわり）↔ ◧ずらす（右下などに色帯）を切り替える
   function toggleBackdropMode(el){
@@ -6376,7 +6417,7 @@ html.__ce_altmode{cursor:text}
     ensureRingCss();
     if(!ring){
       ring=document.createElement('div'); ring.className='ce_ringdeco'; ring.setAttribute('aria-hidden','true');
-      ring.style.cssText='position:absolute;inset:-9%;z-index:-1;pointer-events:none;border-radius:50%;';
+      ring.style.cssText='position:absolute;inset:-9%;z-index:-1;pointer-events:auto;cursor:pointer;border-radius:50%;';
       target.insertBefore(ring, target.firstChild);
     }
     _unhideDeco(ring);
@@ -6391,7 +6432,7 @@ html.__ce_altmode{cursor:text}
     ring.style.borderStyle='solid';
     ring.style.borderWidth='1px';
     markDirty();
-    msg.textContent='輪郭だけのリングを重ねました（ゆっくり回転・保存で確定／同じ色をもう一度押すと外す）';
+    msg.textContent='輪郭だけのリングを重ねました（ゆっくり回転）。★リングを直接クリックすると色・太さ・形を変えられます';
   }
   // 🖼 四角い縁取り線をずらして重ねる（塗りつぶし無し・回転しない・写真がもう1枚後ろにあるような奥行き）。
   //   リングと違い角丸四角形で、位置を上下左右にずらして「奥にもう1枚ある」ように見せる。
@@ -6403,23 +6444,36 @@ html.__ce_altmode{cursor:text}
   // 画像がある場合は「親基準の%オフセット」だと親に余白がある時にズレて見える（斜めに見えない原因）ので、
   // 画像そのものの実寸(offsetLeft/Top/Width/Height)を測って、そこから斜めにずらした位置に直接置く。
   function _outlineImg(el){ return el.tagName==='IMG' ? el : (el.querySelector && el.querySelector('img')); }
+  // 角丸は写真と同じ形にそろえる（見本のように"もう1枚後ろにある"感を出すため。写真が特殊な角丸でも追従）
+  function _outlineRadius(img, target){
+    var r='';
+    try{ if(img) r=getComputedStyle(img).borderRadius||''; }catch(_){ }
+    if(!r||/^0(px|%)?$/.test(r)){ try{ r=getComputedStyle(target).borderRadius||''; }catch(_){ } }
+    if(!r||/^0(px|%)?$/.test(r)) return '32px';
+    return r;
+  }
+  var OUT_DIRS=['br','tr','tl','bl'];
+  var OUT_DIRNAME={br:'右下',tr:'右上',tl:'左上',bl:'左下'};
   function _positionOutline(ol, img, target, dir){
-    var shift=16, dx = dir==='tr'?shift:-shift, dy = dir==='tr'?-shift:shift;
-    if(img && img.parentElement===target){
-      ol.style.left=(img.offsetLeft+dx)+'px';
-      ol.style.top=(img.offsetTop+dy)+'px';
+    dir=OUT_DIRS.indexOf(dir)>=0?dir:'br';
+    var s=parseFloat(ol.dataset.shift||'28');
+    var dx=(dir==='br'||dir==='tr')? s : -s, dy=(dir==='br'||dir==='bl')? s : -s;
+    if(img && img.offsetParent===target){
+      var t=_txOf(img), mx=t?t.x:0, my=t?t.y:0;   // ★写真をtranslateで動かしてある分を足す（足さないと線だけ元の位置に残る）
+      ol.style.left=(img.offsetLeft+mx+dx)+'px';
+      ol.style.top=(img.offsetTop+my+dy)+'px';
       ol.style.width=img.offsetWidth+'px';
       ol.style.height=img.offsetHeight+'px';
       ol.style.right='auto'; ol.style.bottom='auto';
     } else {
-      // 画像を持たない要素そのものを囲む場合は、要素自身基準で少し斜めにずらす
+      // 画像を持たない要素そのものを囲む場合は、要素自身基準で斜めにずらす
       ol.style.left='auto'; ol.style.top='auto'; ol.style.width='auto'; ol.style.height='auto';
-      ol.style.inset = dir==='tr' ? '-16px -16px 16px 16px' : '16px 16px -16px -16px';
+      ol.style.inset = (dy)+'px '+(-dx)+'px '+(-dy)+'px '+(dx)+'px';
     }
   }
+  function _outlineTarget(el){ var img=_outlineImg(el); return {img:img, target: img ? (img.parentElement||el) : el}; }
   function toggleOutline(el, colorKey){
-    var img=_outlineImg(el);
-    var target = img ? (img.parentElement||el) : el;
+    var g=_outlineTarget(el), img=g.img, target=g.target;
     if(!target || target===document.body){ msg.textContent='ここには追加できません'; return; }
     var ol=target.querySelector(':scope > .ce_outlinedeco');
     if(ol && ol.dataset.outline===colorKey){ ol.remove(); markDirty(); msg.textContent='縁取り線を消しました（保存で確定）'; return; }
@@ -6428,29 +6482,38 @@ html.__ce_altmode{cursor:text}
     target.style.setProperty('overflow','visible','important');
     if(!ol){
       ol=document.createElement('div'); ol.className='ce_outlinedeco'; ol.setAttribute('aria-hidden','true');
-      ol.dataset.dir='tr';
-      ol.style.cssText='position:absolute;z-index:-1;pointer-events:none;border-radius:32px;border-style:solid;border-width:2px;';
+      ol.dataset.dir='br'; ol.dataset.shift='28';    // 既定＝右下へ28px（見本の「もう1枚後ろにある」見え方）
+      ol.style.cssText='position:absolute;z-index:-1;pointer-events:auto;cursor:pointer;border-style:solid;border-width:2px;';
       // 既にある背景ブロブ(ce_bgdeco)より後ろに置くと隠れて見えなくなる（同じz-index:-1同士はDOM順で後が上）。
       // 写真(position:staticのimg)より必ず後ろに描画される点は変わらないので、末尾に足してブロブより手前に出す。
       target.appendChild(ol);
     }
     _unhideDeco(ol);
-    _positionOutline(ol, img, target, ol.dataset.dir||'tr');
+    ol.style.borderRadius=_outlineRadius(img, target);   // 写真と同じ角丸にそろえる
+    _positionOutline(ol, img, target, ol.dataset.dir||'br');
     ol.dataset.outline=colorKey;
     ol.style.borderColor=OUTLINE_COLORS[colorKey]||OUTLINE_COLORS.blue;
     markDirty();
-    msg.textContent='縁取り線をずらして重ねました（保存で確定／同じ色をもう一度押すと外す／向きは↔で変更）';
+    msg.textContent='縁取り線をずらして重ねました（↔で向き・＋－でずらす量）。★線を直接クリックすると色・太さ・傾きも変えられます';
   }
   function flipOutlineDir(el){
-    var img=_outlineImg(el);
-    var target = img ? (img.parentElement||el) : el;
-    var ol = target && target.querySelector(':scope > .ce_outlinedeco');
+    var g=_outlineTarget(el), ol=g.target && g.target.querySelector(':scope > .ce_outlinedeco');
     if(!ol){ msg.textContent='先に縁取り線の色を選んで追加してください'; return; }
-    var nd = ol.dataset.dir==='tr' ? 'bl' : 'tr';
+    var nd=OUT_DIRS[(OUT_DIRS.indexOf(ol.dataset.dir||'br')+1)%OUT_DIRS.length];
     ol.dataset.dir=nd;
-    _positionOutline(ol, img, target, nd);
+    _positionOutline(ol, g.img, g.target, nd);
     markDirty();
-    msg.textContent='縁取り線の向きを変えました（保存で確定）';
+    msg.textContent='縁取り線のずらす向き：'+OUT_DIRNAME[nd];
+  }
+  // ずらす量（＝どれだけ覗かせるか）を増減する
+  function nudgeOutlineShift(el, delta){
+    var g=_outlineTarget(el), ol=g.target && g.target.querySelector(':scope > .ce_outlinedeco');
+    if(!ol){ msg.textContent='先に縁取り線の色を選んで追加してください'; return; }
+    var next=Math.max(6, Math.min(140, (parseFloat(ol.dataset.shift||'28'))+delta));
+    ol.dataset.shift=String(next);
+    _positionOutline(ol, g.img, g.target, ol.dataset.dir||'br');
+    markDirty();
+    msg.textContent='縁取り線のずらす量：'+next+'px';
   }
   function openGradPicker(el){
     if(!el){ msg.textContent='対象がありません'; return; }
@@ -6518,7 +6581,10 @@ html.__ce_altmode{cursor:text}
       +'<button class="go2" data-outline="soft" style="background:#555;margin:0">▢ 淡い</button>'
       +'<button class="go2" data-outline="blue" style="background:#555;margin:0">▢ 水色</button>'
       +'<button class="go2" data-outline="dark" style="background:#555;margin:0">▢ 濃いめ</button></div>'
-      +'<button class="go2" id="__ce_outdir" style="background:#888;margin-top:6px">↔ ずらす向きを変える</button>'
+      +'<div class="__ce_size" style="grid-template-columns:repeat(3,1fr);margin-top:6px">'
+      +'<button class="go2" id="__ce_outdir" style="background:#888;margin:0">↔ 向き</button>'
+      +'<button class="go2" id="__ce_outsm" style="background:#888;margin:0">－ 近づける</button>'
+      +'<button class="go2" id="__ce_outbg" style="background:#888;margin:0">＋ ずらす</button></div>'
       +'<div class="cap" style="margin:2px 0 8px">同じ色をもう一度押すと縁取り線を外せます</div>'
       +'</div>';
     document.body.appendChild(ov);
@@ -6558,8 +6624,271 @@ html.__ce_altmode{cursor:text}
       var ob=e.target.closest('button[data-outline]');
       if(ob){ toggleOutline(el, ob.getAttribute('data-outline')); return; }
       if(e.target.id==='__ce_outdir'){ flipOutlineDir(el); return; }
+      if(e.target.id==='__ce_outsm'){ nudgeOutlineShift(el, -8); return; }   // 写真に近づける
+      if(e.target.id==='__ce_outbg'){ nudgeOutlineShift(el, 8); return; }    // もっとずらして覗かせる
     });
   }
+  // ===== 🔵 飾り・線を「クリックして、その場で調整」（2026-07-29・要望）=====
+  //   ★これまでは 右クリック→🖼写真を加工→🌸背景の飾り と3階層たどらないと色ひとつ変えられなかった。
+  //   飾りそのものをクリック＝一番短い導線。小さい板をその場に出す（idが__ce始まり＝保存時に自動で消える）。
+  var DQ_COLORS=[['#7fd0e6','みず'],['#a8ecdd','ミント'],['#f9a9c4','さくら'],['#ffb49b','ゆうやけ'],
+                 ['#bda9f2','ラベンダー'],['#cfd8e4','グレー'],['#f0c14b','やまぶき'],['#2b2b30','黒']];
+  var DQ_NAME={bg:'🌸 背景の飾り',ring:'⭕ リング',outline:'▢ 縁取り線',line:'➖ 線',shape:'🔶 図形・線'};
+  function dqKind(el){
+    if(!el||!el.classList) return '';
+    if(el.classList.contains('ce_bgdeco')) return 'bg';
+    if(el.classList.contains('ce_ringdeco')) return 'ring';
+    if(el.classList.contains('ce_outlinedeco')) return 'outline';
+    if(el.classList.contains('ce_shape')) return 'shape';
+    if(el.getAttribute&&el.getAttribute('data-celine')) return 'line';
+    return '';
+  }
+  // 前に作った飾り（pointer-events:noneで焼き込まれている）にも後からクリック可能を付ける
+  function dqArm(root){
+    try{
+      [].slice.call((root||document).querySelectorAll('.ce_bgdeco,.ce_ringdeco,.ce_outlinedeco')).forEach(function(n){
+        n.style.setProperty('pointer-events','auto'); n.style.setProperty('cursor','pointer');
+      });
+    }catch(_){ }
+  }
+  var DQ_SEL='.ce_bgdeco,.ce_ringdeco,.ce_outlinedeco,.ce_shape,[data-celine]';
+  function dqHit(t){
+    if(!t||!t.closest) return null;
+    if(t.closest('[id^=__ce]')) return null;                 // ツール自身のUIの上は対象外
+    return t.closest(DQ_SEL);
+  }
+  // ★飾りは写真の後ろ(z-index:-1)にいるので、上に透明なコンテナが1枚あるだけでクリックを横取りされる
+  //   （実測：飾りのはみ出し帯を押しても DIV.container が返ってきて板が出なかった）。
+  //   そこで重なりを手前から全部見る。ただし飾りより手前に「中身のあるもの（写真・背景色・文字）」が
+  //   あれば、そちらが本命なので飾りは拾わない＝写真をクリックした時にじゃまをしない。
+  // ★「文字を持つ要素」で切ると外れる：段落の箱は広く、飾りが覗いている余白まで箱に含まれる
+  //   （実測：写真の右にはみ出た帯を押しても、上に段落の箱があるだけで飾りを選べなかった）。
+  //   なので実際の行（テキストノードの矩形）に当たっているかまで見る。
+  function _dqTextAt(n,x,y){
+    for(var i=0;i<n.childNodes.length;i++){
+      var c=n.childNodes[i];
+      if(c.nodeType!==3||!(c.textContent||'').trim()) continue;
+      var rects;
+      try{ var r=document.createRange(); r.selectNodeContents(c); rects=r.getClientRects(); }catch(_){ continue; }
+      for(var j=0;j<rects.length;j++){
+        var q=rects[j];
+        if(x>=q.left&&x<=q.right&&y>=q.top&&y<=q.bottom) return true;
+      }
+    }
+    return false;
+  }
+  function _dqInk(n,x,y){
+    if(!n||n.nodeType!==1) return false;
+    var cs; try{ cs=getComputedStyle(n); }catch(_){ return false; }
+    if(parseFloat(cs.opacity||'1')<0.05) return false;      // 出現アニメ待ちで透明＝まだ見えていない
+    var tg=n.tagName;
+    if(tg==='IMG'||tg==='VIDEO'||tg==='CANVAS'||tg==='SVG'||tg==='BUTTON'||tg==='A'||tg==='INPUT') return true;
+    if(cs.backgroundImage&&cs.backgroundImage!=='none') return true;
+    var bc=cs.backgroundColor||'';
+    if(bc&&bc!=='transparent'&&bc.indexOf('rgba(0, 0, 0, 0)')<0) return true;
+    return _dqTextAt(n,x,y);
+  }
+  function dqHitAt(x,y,t){
+    var d=dqHit(t); if(d) return d;
+    var list=[];
+    try{ list=document.elementsFromPoint(x,y)||[]; }catch(_){ return null; }
+    for(var i=0;i<list.length;i++){
+      var n=list[i];
+      if(n.closest&&n.closest('[id^=__ce]')) continue;
+      var hit=(n.closest&&n.closest(DQ_SEL))||null;
+      if(hit) return hit;
+      if(_dqInk(n,x,y)) return null;      // 飾りより手前に中身がある＝そっちが本命
+    }
+    return null;
+  }
+  // 色に「薄さ」を混ぜる（rgb/rgba/#hex → rgba）
+  function _rgbaWith(col, a){
+    var m=/rgba?\(([^)]+)\)/.exec(col||'');
+    if(m){ var v=m[1].split(',').map(function(s){return parseFloat(s);}); return 'rgba('+v[0]+','+v[1]+','+v[2]+','+a+')'; }
+    var h=(col||'').trim().replace('#','');
+    if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    if(h.length>=6) return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';
+    return col;
+  }
+  function _alphaOf(col){ var m=/rgba\(([^)]+)\)/.exec(col||''); if(m){ var v=m[1].split(','); return v.length>3?parseFloat(v[3]):1; } return 1; }
+  function dqColor(el, hex){
+    var k=dqKind(el); pushUndo(el);
+    var a=parseFloat(el.getAttribute('data-cedqa')||'1');
+    if(k==='bg'){ el.dataset.cols=_colsFromOne(hex).join('|'); el.dataset.alpha=String(a); _bgPaint(el); }
+    else{
+      el.setAttribute('data-cedqbase',hex);
+      var col=(a<1)?_rgbaWith(hex,a):hex;
+      if(k==='ring'||k==='outline'){ el.style.setProperty('border-color',col,'important'); el.style.setProperty('border-style','solid','important'); }
+      else el.style.setProperty('background',col,'important');
+    }
+    markDirty();
+  }
+  // ★「薄く」を opacity でやってはいけない（2026-07-29 実測）
+  //   アニメを付けると purgeInlineFx が opacity を無条件で消す＝薄さが飛んで
+  //   「アニメを付けたら色が濃く（青く）なった」に見える。色のアルファで持てば消されないし、
+  //   出現アニメ側の opacity 制御ともケンカしない。
+  function dqFade(el, d){
+    var k=dqKind(el); pushUndo(el);
+    el.style.removeProperty('opacity');                       // 旧方式で薄くしていた分は捨てる
+    var a=Math.max(0.08, Math.min(1, (parseFloat(el.getAttribute('data-cedqa')||'1'))+d));
+    a=Math.round(a*100)/100;
+    el.setAttribute('data-cedqa', String(a));
+    if(k==='bg'){ el.dataset.alpha=String(a); _bgPaint(el); }
+    else{
+      var base=el.getAttribute('data-cedqbase');
+      if(!base){
+        base=(k==='ring'||k==='outline')?(getComputedStyle(el).borderTopColor||'#888888')
+                                        :(getComputedStyle(el).backgroundColor||'#888888');
+        el.setAttribute('data-cedqbase', base);
+      }
+      var col=_rgbaWith(base, Math.round(_alphaOf(base)*a*100)/100);
+      if(k==='ring'||k==='outline') el.style.setProperty('border-color',col,'important');
+      else el.style.setProperty('background',col,'important');
+    }
+    markDirty(); return a;
+  }
+  function dqShape(el, shape){
+    pushUndo(el);
+    el.style.setProperty('border-radius', BG_SHAPES[shape]||BG_SHAPES.oval);
+    if(dqKind(el)==='bg') el.dataset.shape=shape;
+    markDirty();
+  }
+  function dqBigger(el, d){
+    var k=dqKind(el); pushUndo(el);
+    if(k==='bg'){
+      el.dataset.size=String(Math.max(8,Math.min(200,(parseFloat(el.dataset.size||'26'))+d)));
+      _bgPaint(el);
+    }else if(k==='outline'){
+      var tg=el.parentElement, im=tg?tg.querySelector('img'):null;
+      el.dataset.shift=String(Math.max(6,Math.min(140,(parseFloat(el.dataset.shift||'28'))+(d>0?8:-8))));
+      _positionOutline(el, im, tg, el.dataset.dir||'br');
+    }else if(k==='ring'){
+      var w=Math.max(1,Math.min(20,(parseFloat(getComputedStyle(el).borderTopWidth)||1)+(d>0?1:-1)));
+      el.style.setProperty('border-width',w+'px','important');
+    }else{
+      // 線（細長い）は太さ、それ以外の図形は縦横まとめて拡大縮小する
+      var ew=el.offsetWidth, eh=el.offsetHeight;
+      if(eh<=8&&ew>eh) el.style.setProperty('height',Math.max(1,Math.min(60,eh+(d>0?1:-1)))+'px','important');
+      else if(ew<=8&&eh>ew) el.style.setProperty('width',Math.max(1,Math.min(60,ew+(d>0?1:-1)))+'px','important');
+      else { var r2=(d>0?1.12:0.89); el.style.setProperty('width',Math.round(ew*r2)+'px','important'); el.style.setProperty('height',Math.round(eh*r2)+'px','important'); }
+    }
+    markDirty();
+  }
+  function dqMove(el, dx, dy){
+    pushUndo(el);
+    if(dqKind(el)==='bg'){
+      if(dx===0&&dy===0){ el.dataset.ox='0'; el.dataset.oy='0'; }
+      else { el.dataset.ox=String((parseFloat(el.dataset.ox||'0'))+dx); el.dataset.oy=String((parseFloat(el.dataset.oy||'0'))+dy); }
+      _bgPaint(el);
+    }else{
+      var ox=(dx===0&&dy===0)?0:(parseFloat(el.getAttribute('data-cedqx')||'0'))+dx;
+      var oy=(dx===0&&dy===0)?0:(parseFloat(el.getAttribute('data-cedqy')||'0'))+dy;
+      el.setAttribute('data-cedqx',String(ox)); el.setAttribute('data-cedqy',String(oy));
+      if(ox||oy) el.style.setProperty('translate', ox+'px '+oy+'px');
+      else el.style.removeProperty('translate');
+    }
+    markDirty();
+  }
+  // ⤴ 少し斜めに（おしゃれ度の調整）。線は既存の回転(data-cero)に合わせる＝他の機能とケンカしない。
+  function dqTilt(el, deg){
+    pushUndo(el);
+    if(dqKind(el)==='line'){ rotateBy(el, deg); markDirty(); return; }
+    var cur=(parseFloat(el.getAttribute('data-cedqr')||'0'))+deg;
+    el.setAttribute('data-cedqr',String(cur));
+    el.style.setProperty('rotate', cur+'deg');
+    markDirty();
+  }
+  function dqTiltReset(el){
+    if(dqKind(el)==='line'){ var c=+el.getAttribute('data-cero')||0; if(c) rotateBy(el,-c); }
+    else { el.removeAttribute('data-cedqr'); el.style.removeProperty('rotate'); }
+    markDirty();
+  }
+  function dqFlipDir(bg){
+    var order=['br','tr','tl','bl'];
+    bg.dataset.dir=order[(order.indexOf(bg.dataset.dir||'br')+1)%order.length];
+    _bgPaint(bg); markDirty();
+    if(msg) msg.textContent='ずらす向き：'+({br:'右下',tr:'右上',tl:'左上',bl:'左下'}[bg.dataset.dir]);
+  }
+  function openDecoQuick(el, x, y){
+    var k=dqKind(el); if(!k) return;
+    var old=document.getElementById('__ce_dqp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    var B='background:#eef2f7;color:#333;border:1px solid #d7e0ea;border-radius:6px;padding:4px 8px;cursor:pointer;font:inherit';
+    function sw(c,t){ return '<button class="__ce_dqsw" data-c="'+c+'" title="'+esc(t)+'" style="width:24px;height:24px;border:1px solid rgba(0,0,0,.25);border-radius:5px;cursor:pointer;background:'+c+';padding:0;margin:2px 2px 0 0;vertical-align:middle"></button>'; }
+    var h='<b>'+DQ_NAME[k]+'</b><span style="opacity:.6;font-size:11px">（選択中）</span>'
+      +'<div style="opacity:.7;margin:6px 0 2px">色</div><div>'+DQ_COLORS.map(function(c){return sw(c[0],c[1]);}).join('')
+      +'<input type="color" class="__ce_dqc" title="好きな色" style="width:32px;height:24px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle;margin-left:4px"></div>'
+      +'<div style="opacity:.7;margin-top:8px">濃さ（薄くするとふんわり）</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-op="-0.15" style="'+B+'">◻ 薄く</button><button data-op="0.15" style="'+B+'">◼ 濃く</button></div>';
+    h+='<div style="opacity:.7;margin-top:8px">かたち（角の丸み）</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">'
+      +'<button data-sh="oval" style="'+B+'">⬭ 丸</button><button data-sh="blob" style="'+B+'">💧 しずく</button>'
+      +'<button data-sh="round" style="'+B+'">▢ 角丸</button><button data-sh="square" style="'+B+'">◻ 四角</button></div>';
+    h+='<div style="opacity:.7;margin-top:8px">'+(k==='line'?'太さ':(k==='ring'?'線の太さ':'大きさ'))+'</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-sz="-14" style="'+B+'">－ 小さく</button><button data-sz="14" style="'+B+'">＋ 大きく</button></div>';
+    if(k==='bg'){
+      h+='<div style="opacity:.7;margin-top:8px">向き・位置</div>'
+        +'<div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap"><button data-dir="1" style="'+B+'">↔ 向き</button>'
+        +'<button data-mv="-10,0" style="'+B+'">←</button><button data-mv="10,0" style="'+B+'">→</button>'
+        +'<button data-mv="0,-10" style="'+B+'">↑</button><button data-mv="0,10" style="'+B+'">↓</button>'
+        +'<button data-mv="0,0" style="'+B+'">⟲</button></div>';
+    }
+    h+='<div style="opacity:.7;margin-top:8px">⤴ 傾き（少し斜めにするとおしゃれ）</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-ro="-3" style="'+B+'">↖ 左へ</button><button data-ro="3" style="'+B+'">↗ 右へ</button><button data-ror="1" style="'+B+'">⟲ まっすぐ</button></div>'
+      +'<div style="display:flex;gap:6px;margin-top:10px">'
+      +'<button data-del="1" style="background:#c0392b;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">🚫 消す</button>'
+      +'<button data-x="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">閉じる</button></div>';
+    var p=document.createElement('div'); p.id='__ce_dqp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:300px');
+    p.innerHTML=h;
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    var hadOl=el.style.outline;                       // 選択中の目印（閉じたら必ず戻す＝保存に残さない）
+    el.style.setProperty('outline','2px dashed #2f6fd0');
+    p.__close=function(){
+      if(hadOl) el.style.outline=hadOl; else el.style.removeProperty('outline');
+      if(p.__off) p.__off();
+      p.remove();
+    };
+    var offFn=function(ev){ if(p.parentElement && !p.contains(ev.target)) p.__close(); };
+    p.__off=function(){ document.removeEventListener('mousedown',offFn,true); };
+    setTimeout(function(){ document.addEventListener('mousedown',offFn,true); },0);
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var t=ev.target;
+      if(t.getAttribute('data-x')){ p.__close(); return; }
+      if(t.getAttribute('data-del')){ p.__close(); pushUndo(el); el.remove(); markDirty(); if(msg) msg.textContent='消しました（💾保存で確定・⟲戻すで取り消せます）'; return; }
+      var c=t.closest('.__ce_dqsw'); if(c){ dqColor(el,c.getAttribute('data-c')); if(msg) msg.textContent='色を変えました（💾保存で確定）'; return; }
+      var op=t.getAttribute('data-op'); if(op){ var n=dqFade(el,parseFloat(op)); if(msg) msg.textContent='濃さ：'+Math.round(n*100)+'%'; return; }
+      var sh=t.getAttribute('data-sh'); if(sh){ dqShape(el,sh); return; }
+      var sz=t.getAttribute('data-sz'); if(sz){ dqBigger(el,parseFloat(sz)); return; }
+      if(t.getAttribute('data-dir')){ dqFlipDir(el); return; }
+      var mv=t.getAttribute('data-mv'); if(mv){ var a=mv.split(','); dqMove(el,parseFloat(a[0]),parseFloat(a[1])); return; }
+      var ro=t.getAttribute('data-ro'); if(ro){ dqTilt(el,parseFloat(ro)); if(msg) msg.textContent='少し斜めにしました（もう一度押すともっと傾きます）'; return; }
+      if(t.getAttribute('data-ror')){ dqTiltReset(el); return; }
+    });
+    p.querySelector('.__ce_dqc').addEventListener('input',function(){ dqColor(el,this.value); });
+  }
+  // 左クリックで飾り・線を選ぶ（4px以上動いたらドラッグ扱い＝板は出さない）
+  var _dqX=0,_dqY=0,_dqDown=null;
+  document.addEventListener('mousedown',function(e){
+    if(e.button!==0) return;
+    _dqX=e.clientX; _dqY=e.clientY; _dqDown=dqHitAt(e.clientX,e.clientY,e.target);
+    // 飾りは既存のドラッグ機構に渡さない（掴んで動かすと_bgPaintの再計算と食い違うため。位置は板の矢印で動かす）
+    // 線・図形は普通の要素なので、これまでどおり掴んで動かせるようにそのまま通す
+    if(_dqDown){ var _kk=dqKind(_dqDown); if(_kk!=='line'&&_kk!=='shape') e.stopPropagation(); }
+  },true);
+  // ★clickではなくmouseupで見る（2026-07-29 実測）
+  //   図形や線は既存のドラッグ機構が mousedown を掴んで preventDefault するので、
+  //   実際のマウス操作では click が飛んでこない＝「押しても板が出ない」になっていた。
+  document.addEventListener('mouseup',function(e){
+    if(e.button!==0) return;
+    var d=_dqDown; _dqDown=null;
+    if(!d) return;
+    if(Math.abs(e.clientX-_dqX)>4||Math.abs(e.clientY-_dqY)>4) return;   // 動かしていたらドラッグ＝板は出さない
+    if(d!==dqHitAt(e.clientX,e.clientY,e.target)) return;
+    openDecoQuick(d, e.clientX+10, e.clientY+10);
+  },true);
   // 🖼 写真を白フチで囲む（ポラロイド/カード風・AIなし・即反映）。右上だけ角丸を大きめに。
   //   borderで白い台紙を作るので余計なラッパーは足さない。もう一度押すと外す。
   function toggleWhiteFrame(el){
@@ -8866,7 +9195,11 @@ html.__ce_altmode{cursor:text}
   function purgeInlineFx(el){
     if(!el) return;
     el.__cePrevSt=null;
+    // ★飾り（🌸グラデ/⭕リング/▢縁取り線）の ぼかし は残す：消すとアニメを付けた瞬間に見た目が変わる
+    var _isDeco=el.classList&&(el.classList.contains('ce_bgdeco')||el.classList.contains('ce_ringdeco')||el.classList.contains('ce_outlinedeco'));
+    var _keepFil=_isDeco?el.style.getPropertyValue('filter'):'';
     ['opacity','filter','clip-path','text-shadow','animation','transition'].forEach(function(p){ el.style.removeProperty(p); });
+    if(_keepFil) el.style.setProperty('filter', _keepFil);
     var edited=['data-cetx','data-cety','data-cesx','data-cesy','data-cero','data-cebt'].some(function(a){ return el.getAttribute(a)!=null; });
     if(edited){ applyTf(el); } else { ['transform','translate','rotate','scale'].forEach(function(p){ el.style.removeProperty(p); }); }
   }
@@ -10989,9 +11322,11 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu','#__ce_tbgp','#__ce_secp','#__ce_pkpos','#__ce_bgp','#__ce_ruler','#__ce_grab'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu','#__ce_tbgp','#__ce_vlp','#__ce_dqp','#__ce_secp','#__ce_pkpos','#__ce_bgp','#__ce_ruler','#__ce_grab'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
+    // 飾りを選択中の青い点線（編集用の目印）が焼き込まれないように必ず外す
+    [].slice.call(doc.querySelectorAll('.ce_bgdeco,.ce_ringdeco,.ce_outlinedeco,[data-celine]')).forEach(function(n){ n.style.removeProperty('outline'); });
     // ★保険：↑の一覧に書き足し忘れたパネルを開いたまま💾保存すると、パネルがHTMLに焼き込まれて
     //   「開くたびに出るのに閉じられない板」になる（実例：🖌文字の背景パレット __ce_tbgp）。
     //   id が __ce で始まる要素はツールのUIだけなので、丸ごと掃除する。
@@ -11534,6 +11869,71 @@ html.__ce_altmode{cursor:text}
     });
     p.querySelector('#__ce_tbgc').addEventListener('input',function(){ textBgApply(el,this.value); });
   }
+  // ▎文字の左に縦線を引く（引用ブロック風・AIなし・即反映）。
+  //   ★要素を増やさず border-left ＋ padding-left だけで作る＝掴んで移動もそのまま効き、保存でも壊れない。
+  //   カンプの文字は自由配置(position:absolute)が多くて margin が効かないことがあるが、border/paddingは効く。
+  var VL_COLORS=[['#5ec8c8','ミント'],['#4aa3e0','水色'],['#2f6fd0','青'],['#f6a94a','オレンジ'],['#e46a8b','ピンク'],['#8a7ce0','むらさき'],['#2b2b30','黒'],['#c9d3e0','グレー']];
+  function vlineApply(el, opt){
+    if(!el||!(el.textContent||'').trim()){ if(msg) msg.textContent='文字のある要素を右クリックしてから使ってください'; return null; }
+    opt=opt||{};
+    var col=opt.color||el.getAttribute('data-cevlc')||VL_COLORS[0][0];
+    var w=(opt.w!=null)?opt.w:parseFloat(el.getAttribute('data-cevlw')||'4');
+    var gap=(opt.gap!=null)?opt.gap:parseFloat(el.getAttribute('data-cevlg')||'18');
+    w=Math.max(1,Math.min(24,w)); gap=Math.max(0,Math.min(90,gap));
+    pushUndo(el);
+    el.setAttribute('data-cevl','1');
+    el.setAttribute('data-cevlc',col); el.setAttribute('data-cevlw',String(w)); el.setAttribute('data-cevlg',String(gap));
+    el.style.setProperty('border-left', w+'px solid '+col,'important');
+    el.style.setProperty('padding-left', gap+'px','important');
+    markDirty();
+    return el;
+  }
+  function vlineRemove(el){
+    if(!el) return;
+    pushUndo(el);
+    ['data-cevl','data-cevlc','data-cevlw','data-cevlg'].forEach(function(a){ el.removeAttribute(a); });
+    el.style.removeProperty('border-left'); el.style.removeProperty('padding-left');
+    markDirty();
+  }
+  function openVLine(el,x,y){
+    var old=document.getElementById('__ce_vlp'); if(old) old.remove();
+    if(!el||!(el.textContent||'').trim()){ if(msg) msg.textContent='文字のある要素を右クリックしてから使ってください'; return; }
+    var BS='background:#eef2f7;color:#333;border:1px solid #d7e0ea;border-radius:6px;padding:4px 9px;cursor:pointer';
+    function sw(c,t){ return '<button class="__ce_vlsw" data-c="'+c+'" title="'+esc(t)+'" style="width:26px;height:26px;border:1px solid rgba(0,0,0,.28);border-radius:5px;cursor:pointer;background:'+c+';padding:0;margin:2px;vertical-align:middle"></button>'; }
+    var cur=el.getAttribute('data-cevl');
+    var p=document.createElement('div'); p.id='__ce_vlp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:330px');
+    p.innerHTML='<b>▎ 文字の左に縦線を引く（〈'+el.tagName.toLowerCase()+'〉）</b>'
+      +'<div style="opacity:.7;margin:6px 0 2px">色（押すと即つきます）</div>'
+      +'<div>'+VL_COLORS.map(function(c){return sw(c[0],c[1]);}).join('')
+      +'<input type="color" id="__ce_vlc" value="'+(el.getAttribute('data-cevlc')||'#5ec8c8')+'" title="好きな色" style="width:34px;height:26px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle;margin-left:4px"></div>'
+      +'<div style="opacity:.7;margin-top:8px">線の太さ</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-w="-1" style="'+BS+'">－ 細く</button><button data-w="1" style="'+BS+'">＋ 太く</button>'
+      +'<button data-w="0" data-wset="4" style="'+BS+'">⟲ 4px</button></div>'
+      +'<div style="opacity:.7;margin-top:8px">文字との間隔</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-g="-4" style="'+BS+'">← 詰める</button><button data-g="4" style="'+BS+'">→ 離す</button></div>'
+      +'<div style="display:flex;gap:6px;margin-top:10px">'
+      +'<button data-off="1" style="background:#c0392b;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">✕ 縦線を消す</button>'
+      +'<button data-x="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">閉じる</button></div>'
+      +(cur?'':'<div style="opacity:.6;margin-top:6px;font-size:11px">色を押すとこの行の左に縦線が付きます（💾保存で確定）</div>');
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      if(ev.target.getAttribute('data-x')){ p.remove(); return; }
+      if(ev.target.getAttribute('data-off')){ vlineRemove(el); if(msg) msg.textContent='縦線を消しました（💾保存で確定）'; return; }
+      var b=ev.target.closest('.__ce_vlsw');
+      if(b){ vlineApply(el,{color:b.getAttribute('data-c')}); if(msg) msg.textContent='文字の左に縦線を引きました（💾保存で確定・⟲戻すで取り消し）'; return; }
+      var ws=ev.target.getAttribute('data-wset');
+      if(ws){ vlineApply(el,{w:parseFloat(ws)}); if(msg) msg.textContent='線の太さ：'+ws+'px'; return; }
+      var w=ev.target.getAttribute('data-w');
+      if(w!=null){ var nw=parseFloat(el.getAttribute('data-cevlw')||'4')+parseFloat(w); vlineApply(el,{w:nw}); if(msg) msg.textContent='線の太さ：'+Math.max(1,Math.min(24,nw))+'px'; return; }
+      var g=ev.target.getAttribute('data-g');
+      if(g!=null){ var ng=parseFloat(el.getAttribute('data-cevlg')||'18')+parseFloat(g); vlineApply(el,{gap:ng}); if(msg) msg.textContent='文字との間隔：'+Math.max(0,Math.min(90,ng))+'px'; return; }
+    });
+    p.querySelector('#__ce_vlc').addEventListener('input',function(){ vlineApply(el,{color:this.value}); });
+  }
   function openDecoKill(el,x,y){
     var old=document.getElementById('__ce_pskill'); if(old) old.remove();
     var items=[];
@@ -11668,12 +12068,14 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_unfix','📌 画面への貼り付きを解除（一緒にスクロール）'],
     ['__ce_q_pin','📌 スクロールしても画面に貼り付ける（固定ヘッダー等）'],
     ['__ce_q_secbg','🎨 セクションの背景色を変える（AIなし・即反映）'],
-    ['__ce_q_txtbg','🖌 文字の背景に色を塗る（行ごと・AIなし）']
+    ['__ce_q_txtbg','🖌 文字の背景に色を塗る（行ごと・AIなし）'],
+    ['__ce_q_vline','▎ 文字の左に縦線を引く（引用風・AIなし）'],
+    ['__ce_q_deco','🎨 この飾りの色・形・傾きを変える']
   ];
   // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
   //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
   var QM_DEF_LAYOUT=[
-    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_bgsz','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg',
+    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_bgsz','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg','__ce_q_vline','__ce_q_deco',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
@@ -12278,8 +12680,16 @@ html.__ce_altmode{cursor:text}
     (function(){
       var _te=curEl;
       var ok=_te && (_te.textContent||'').trim().length>0 && !/^(SECTION|HEADER|FOOTER|MAIN|BODY|HTML|IMG|SVG)$/.test(_te.tagName);
-      if(!ok){ delete _qmM['__ce_q_txtbg']; return; }
+      if(!ok){ delete _qmM['__ce_q_txtbg']; delete _qmM['__ce_q_vline']; return; }
       _qmM['__ce_q_txtbg']='🖌 文字の背景に色を塗る（〈'+_te.tagName.toLowerCase()+'〉の行・AIなし）';
+      _qmM['__ce_q_vline']=(_te.getAttribute('data-cevl')?'▎ 左の縦線を調整する（色・太さ・間隔）':'▎ 文字の左に縦線を引く（引用風・AIなし）');
+    })();
+    // 🎨 右クリックした場所に飾り（丸・リング・縁取り線・図形/線）があるときだけ出す
+    (function(){
+      var _dq=null;
+      try{ _dq=dqHitAt(qx,qy,curEl); }catch(_){ }
+      if(!_dq){ delete _qmM['__ce_q_deco']; return; }
+      _qmM['__ce_q_deco']='🎨 '+(DQ_NAME[dqKind(_dq)]||'飾り')+'の色・形・傾きを変える';
     })();
     // 🅰 まとめて文字調整（複数選択時のみ）：フォント種はページで使用中のものを頻度順に出す＋定番を後ろに
     var mfRow='';
@@ -13443,6 +13853,13 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_pskill'){ var _pke=curEl; closeMenu(); openDecoKill(_pke,qx,qy); return; }
       if(t.id==='__ce_q_secbg'){ var _sbe=curEl; closeMenu(); openSecBg(_sbe,qx,qy); return; }
       if(t.id==='__ce_q_txtbg'){ var _tbe=curEl; closeMenu(); openTextBg(_tbe,qx,qy); return; }
+      if(t.id==='__ce_q_vline'){ var _vle=curEl; closeMenu(); openVLine(_vle,qx,qy); return; }
+      if(t.id==='__ce_q_deco'){
+        var _dqe=null; try{ _dqe=dqHitAt(qx,qy,curEl); }catch(_){ }
+        var _dx=qx,_dy=qy; closeMenu();
+        if(_dqe) openDecoQuick(_dqe,_dx,_dy); else if(msg) msg.textContent='ここには飾りが見つかりませんでした';
+        return;
+      }
       if(t.id==='__ce_q_addline'){
         // ➕ 実要素の線：疑似要素と違い、掴んで移動・右クリック→要素削除・色変え（写真加工の背景色）が全部効く
         var _ln=document.createElement('div');
@@ -13496,7 +13913,7 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
