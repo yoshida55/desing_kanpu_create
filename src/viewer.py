@@ -2744,6 +2744,8 @@ html.__ce_altmode{cursor:text}
     <div class="lbl plain">🎨 一括改善の手本（ストックの登録サイトに寄せる）</div>
     <select id="__ce_ref"><option value="">なし（AIおまかせ）</option></select>
     <button class="im" id="__ce_improve" style="background:#7c3aed;color:#fff">🚀 ページ全体を今風に（一括改善）</button>
+    <div class="lbl plain">🔶 図形を置く（〇・四角・線／色はこのPCに記憶・AIなし）</div>
+    <button class="im" id="__ce_shapes" style="background:#0b6bcb;color:#fff">🔶 図形バーを出す（画面の下）</button>
     <div class="lbl plain">🎬 オープニング演出（開いた瞬間に幕→フェードで本体へ・AIなし）</div>
     <button class="im" id="__ce_op_add" style="background:#0b6bcb;color:#fff">🎬 フェードのオープニングを付ける</button>
     <button class="im" id="__ce_op_edit" style="background:#eaf2fd;color:#0b4e8a;border:1px solid #bcd8f7">👁 オープニングを出す／隠す（ロゴ・文字は右クリックで差し替え）</button>
@@ -2873,6 +2875,126 @@ html.__ce_altmode{cursor:text}
       else { el.style.whiteSpace='normal'; el.style.maxWidth=Math.max(10,99-pct).toFixed(1)+'%'; }
     });
     return el;
+  }
+  // ===== 🔶 図形バー（〇・四角・線をどこにでも置く・AIなし・2026-07-28） =====
+  //   画面下に出しっぱなしのバー。押した瞬間に「今見えている画面の中央」へ図形を1つ置く。
+  //   置いた図形はただのdiv＝掴んで移動・■で伸縮・右クリックで動き/重なり順も付けられる
+  //   （専用の編集画面を作らない＝覚えることを増やさない）。
+  //   色はマイ色に記憶（背景の飾りと同じ置き場＝どちらで登録しても両方に出る）。
+  //   ★バーのidは "__ce" 始まり＝💾保存時に自動で除去される（板が焼き込まれる事故が起きない）
+  var SHAPE_ST={col:'#7fd0e6', fill:1, op:1};
+  // 形の作り方（clip-pathは中身の無い飾りなので安全に使える）
+  var SHAPE_DEF={
+    circle:{lb:'⭕ 丸',  css:'width:180px;height:180px;border-radius:50%;'},
+    rect:  {lb:'▭ 四角', css:'width:220px;height:140px;border-radius:14px;'},
+    line:  {lb:'／ 線',  css:'width:260px;height:4px;border-radius:3px;'},
+    pill:  {lb:'⬭ 帯',  css:'width:260px;height:70px;border-radius:999px;'},
+    tri:   {lb:'🔺 三角', css:'width:180px;height:160px;clip-path:polygon(50% 0%,100% 100%,0% 100%);'},
+    star:  {lb:'⭐ 星',  css:'width:170px;height:170px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);'},
+    blob:  {lb:'💧 しずく', css:'width:190px;height:190px;border-radius:62% 38% 55% 45% / 45% 55% 42% 58%;'}
+  };
+  // ★「今いじっている図形」を自前で覚える（2026-07-28）。
+  //   バーのボタンを押すと、ページ側の捕捉フェーズの処理が先に走って選択(curEl)が外れるため、
+  //   curEl頼みだと「色を変えても選択中の図形に反映されない」。触った図形をここに控える。
+  var _lastShape=null;
+  document.addEventListener('mousedown',function(e){
+    try{ var s=e.target&&e.target.closest&&e.target.closest('.ce_shape'); if(s) _lastShape=s; }catch(_){}
+  },true);
+  try{ var _shs=JSON.parse(localStorage.getItem('__ce_shapest')||'null'); if(_shs&&_shs.col){ SHAPE_ST.col=_shs.col; SHAPE_ST.fill=_shs.fill?1:0; } }catch(_){}
+  function _shapeStSave(){ try{ localStorage.setItem('__ce_shapest', JSON.stringify(SHAPE_ST)); }catch(_){} }
+  function shapePaint(el, col, fill, op){
+    var kind=el.getAttribute('data-ceshape')||'rect';
+    // ★三角・星はclip-pathで形を作る＝borderは形どおりに切られて出ないので、必ず塗りで描く
+    var noBorder=(kind==='line'||kind==='tri'||kind==='star');
+    if(noBorder||fill){ el.style.setProperty('background',col); el.style.removeProperty('border'); }
+    else { el.style.setProperty('background','transparent'); el.style.setProperty('border','3px solid '+col); }
+    if(op!=null) el.style.setProperty('opacity', String(op));
+  }
+  // 透明度を1段ずつ（0.05〜1）。選んでいる図形と、次に置く図形の両方に効く
+  function shapeOpacity(delta){
+    var t=(_lastShape&&document.contains(_lastShape))?_lastShape:null;
+    var cur=t?(parseFloat(t.style.opacity)||1):SHAPE_ST.op;
+    var next=Math.max(0.05, Math.min(1, Math.round((cur+delta)*100)/100));
+    SHAPE_ST.op=next; _shapeStSave();
+    if(t){ t.style.setProperty('opacity', String(next)); markDirty(); }
+    return next;
+  }
+  function addShape(kind){
+    var d=document.createElement('div');
+    d.className='ce_shape'; d.setAttribute('data-ceshape',kind);
+    var def=SHAPE_DEF[kind]||SHAPE_DEF.rect;
+    d.setAttribute('style','box-sizing:border-box;'+def.css);
+    shapePaint(d, SHAPE_ST.col, SHAPE_ST.fill, SHAPE_ST.op);
+    placeFree(d, (window.scrollX||0)+window.innerWidth/2, (window.scrollY||0)+window.innerHeight/2);
+    // placeFreeは文字用に max-width / white-space を足す＝〇が横だけ縮んで楕円になるので外す
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      d.style.removeProperty('max-width'); d.style.removeProperty('white-space');
+    }); });
+    myColsAdd(SHAPE_ST.col);      // 使った色はマイ色に残す（次も1クリックで同じ色）
+    _lastShape=d;                 // 置いた直後は「これをいじっている」＝色替えがすぐ効く
+    markDirty();
+    try{ closeMenu(); }catch(_){}
+    curEl=d; selEls=[d]; d.classList.add('__ce_sel');
+    try{ showHandles(d); }catch(_){}
+    if(msg) msg.textContent='🔶 図形を置きました（掴んで移動／■で大きさ／右クリックで動き・重なり順）';
+    return d;
+  }
+  function openShapeBar(){
+    var old=document.getElementById('__ce_shapebar');
+    if(old){ old.remove(); if(msg) msg.textContent='図形バーを閉じました'; return; }   // もう一度押すと閉じる
+    var bar=document.createElement('div'); bar.id='__ce_shapebar';
+    bar.setAttribute('style','position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2147483000;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #c9c9d2;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.26);padding:8px 12px;font:13px/1.4 system-ui,sans-serif;max-width:96vw;flex-wrap:wrap');
+    function btn(id,lb,bg){
+      return '<button data-sb="'+id+'" style="background:'+(bg||'#f2f2f4')+';color:'+(bg?'#fff':'#1d1d1f')+';border:1px solid '+(bg||'#d5d5dc')+';border-radius:9px;padding:6px 11px;cursor:pointer;font:inherit">'+lb+'</button>';
+    }
+    function render(){
+      var chips=myColsGet().map(function(c){
+        return '<span class="__ce_shc" data-c="'+c+'" title="'+esc(c)+'" style="display:inline-block;width:22px;height:22px;border-radius:6px;border:2px solid '+(c===SHAPE_ST.col?'#0b6bcb':'rgba(0,0,0,.18)')+';background:'+c+';cursor:pointer;vertical-align:middle"></span>';
+      }).join('');
+      var shapes=Object.keys(SHAPE_DEF).map(function(k){ return btn(k, SHAPE_DEF[k].lb); }).join('');
+      bar.innerHTML='<b style="font-size:12px;color:#5b6472">🔶 図形</b>'
+        +shapes
+        +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
+        +btn('fill', SHAPE_ST.fill?'● 塗り':'○ フチだけ')
+        +btn('opm','－ 薄く')+btn('opp','＋ 濃く')
+        +'<span style="font-size:11px;color:#5b6472">'+Math.round(SHAPE_ST.op*100)+'%</span>'
+        +'<input type="color" id="__ce_shcol" value="'+SHAPE_ST.col+'" title="色を選ぶ（このPCに記憶）" style="width:38px;height:28px;padding:0;border:1px solid #d5d5dc;border-radius:7px;cursor:pointer">'
+        +chips
+        +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
+        +btn('x','✕');
+    }
+    function repaintSel(){    // 直前に置いた／触った図形に、色と塗りの変更をその場で反映
+      var t=(_lastShape&&document.contains(_lastShape))?_lastShape
+           :((curEl&&curEl.getAttribute&&curEl.getAttribute('data-ceshape'))?curEl:null);
+      if(t){ shapePaint(t,SHAPE_ST.col,SHAPE_ST.fill,null); markDirty(); }
+    }
+    render();
+    document.body.appendChild(bar);
+    // バーの中の操作はページ側へ伝えない（選択が外れる・ドラッグが始まるのを防ぐ）
+    bar.addEventListener('mousedown',function(e){ e.stopPropagation(); });
+    bar.addEventListener('click',function(e){
+      e.stopPropagation();
+      var b=e.target.closest('[data-sb]');
+      if(b){
+        var k=b.getAttribute('data-sb');
+        if(k==='x'){ bar.remove(); return; }
+        if(k==='fill'){ SHAPE_ST.fill=SHAPE_ST.fill?0:1; _shapeStSave(); render(); repaintSel(); return; }
+        if(k==='opm'||k==='opp'){                                   // 透明度（薄く／濃く）
+          var v=shapeOpacity(k==='opm'?-0.1:0.1); render();
+          if(msg) msg.textContent='🔶 濃さ '+Math.round(v*100)+'%（0に近いほど透明・次に置く図形にも効きます）';
+          return;
+        }
+        addShape(k); render(); return;
+      }
+      var c=e.target.closest('.__ce_shc');
+      if(c){ SHAPE_ST.col=c.getAttribute('data-c'); _shapeStSave(); render(); repaintSel(); }
+    });
+    bar.addEventListener('input',function(e){
+      if(e.target.id!=='__ce_shcol') return;
+      SHAPE_ST.col=e.target.value; _shapeStSave(); repaintSel();
+    });
+    bar.addEventListener('change',function(e){ if(e.target.id==='__ce_shcol'){ myColsAdd(e.target.value); render(); } });
+    if(msg) msg.textContent='🔶 図形バーを出しました（押すと画面の中央に置きます／色はこのPCに記憶します）';
   }
   // ★掴めない要素の救済（2026-07-20）：クローン元サイトの<header>等が pointer-events:none を
   //   持つことがある（固定ヘッダーの透明部分で下のページを触らせる定番の書き方）。
@@ -3853,6 +3975,8 @@ html.__ce_altmode{cursor:text}
     if(hidden){ s.setAttribute('data-paused','1'); s.style.display='flex'; s.style.opacity='1'; msg.textContent='オープニングを表示中（ロゴ/文字を右クリックで差し替え）。もう一度押すと隠せます'; }
     else { s.style.display='none'; msg.textContent='オープニングを隠しました（保存版では開いた時に自動で流れます）'; }
   }
+  var shapesBtn=document.getElementById('__ce_shapes');           // 🔶 図形バーの出し入れ
+  if(shapesBtn) shapesBtn.addEventListener('click',openShapeBar);
   var opAddBtn=document.getElementById('__ce_op_add');
   if(opAddBtn) opAddBtn.addEventListener('click',addOpening);
   var opEditBtn=document.getElementById('__ce_op_edit');
@@ -5999,6 +6123,14 @@ html.__ce_altmode{cursor:text}
     round: '40px',                                          // 角丸四角
     square:'0'                                               // 四角
   };
+  // ★「🚫この飾りを消す」で隠した飾りは display:none が残る（保存すればファイルにも残る）。
+  //   その状態で色や形を選んでも見えない＝「グラデがつかない」ように見える（実際に起きた）。
+  //   飾りを付け直す操作は必ずここを通して、隠した状態を解除する。
+  function _unhideDeco(n){
+    if(!n) return;
+    if(n.getAttribute('data-ceflatvis')!=null){ n.style.removeProperty('display'); n.removeAttribute('data-ceflatvis'); }
+    if(n.style.getPropertyValue('display')==='none') n.style.removeProperty('display');
+  }
   function bgTarget(el){
     var t = el.tagName==='IMG' ? (el.parentElement||el) : el;   // imgには子を入れられないので親に敷く
     return (!t||t===document.body) ? null : t;
@@ -6007,6 +6139,69 @@ html.__ce_altmode{cursor:text}
   //   ★旧方式は左右対称(inset:-N%)で、写真が不透明だと真裏に完全に隠れて色が見えなかった
   //     （大きくしても薄い縁が広がるだけ）。同じ大きさのパネルをdir方向へDpxずらし、
   //     その2辺を写真の外へ確実にはみ出させる＝色の帯が必ず見える（デザインの「オフセット色面」）。
+  // ★グラデが「効かない」ように見えた原因（2026-07-28 実測で判明）
+  //   飾りは写真と同じ大きさをDpxずらして置くだけ＝見えるのは外側のフチ帯だけ。
+  //   なのに色は「中心が濃い→外へいくほど白」の放射グラデだったので、
+  //   覗いている帯の色は実測 #fbeef4（ほぼ白）。色を選んでも変わらないのは当然だった。
+  //   → ①ずらす向きの角へ濃い色が来る線形グラデにする ②「☀後光」＝全周にふんわり広げる形を足す。
+  var BG_ANG={br:'135deg',bl:'225deg',tr:'45deg',tl:'315deg'};
+  function _bgGradCss(cols, dir, mode){
+    if(!cols||cols.length<3) return '';
+    if(mode==='halo')   // 後光＝中心は写真の裏なので、外に出る 50〜82% の位置に色を置く
+      return 'radial-gradient(62% 62% at 50% 50%, '+cols[2]+' 0%, '+cols[1]+' 52%, rgba(255,255,255,0) 82%)';
+    return 'linear-gradient('+(BG_ANG[dir]||BG_ANG.br)+', '+cols[0]+' 0%, '+cols[1]+' 42%, '+cols[2]+' 100%)';
+  }
+  // ★この改修より前に作った飾りは色を持っていない（背景の文字列しか無い）。
+  //   そのまま形だけ変えると、また"外側が白い"古いグラデのままで色が出ない＝
+  //   今のグラデから色を読み取って、明るい順に 薄い/中間/濃い として引き継ぐ。
+  function _bgColsFrom(bg){
+    var s='';
+    try{ s=getComputedStyle(bg).backgroundImage||''; }catch(_){ }
+    var re=/rgba?\(([^)]+)\)/g, m, list=[];
+    while((m=re.exec(s))){
+      var v=m[1].split(',').map(parseFloat);
+      if(v.length>3&&v[3]<0.05) continue;                       // 透明は色として数えない
+      var lum=0.299*v[0]+0.587*v[1]+0.114*v[2];
+      if(!list.some(function(x){ return Math.abs(x.lum-lum)<2; })) list.push({c:'rgb('+v[0]+','+v[1]+','+v[2]+')', lum:lum});
+    }
+    if(list.length<2) return [];
+    list.sort(function(a,b){ return b.lum-a.lum; });             // 明るい→暗い
+    return [list[0].c, list[Math.floor(list.length/2)].c, list[list.length-1].c];
+  }
+  // 好きな色1つから「薄い・中間・濃い」を自動で作る（素人に3色選ばせない＝1色だけ選べばいい）
+  function _mixW(hex, w){
+    var m=(hex||'').replace('#','');
+    if(m.length===3) m=m[0]+m[0]+m[1]+m[1]+m[2]+m[2];
+    if(m.length<6) return hex;
+    var r=parseInt(m.slice(0,2),16), g=parseInt(m.slice(2,4),16), b=parseInt(m.slice(4,6),16);
+    return 'rgb('+Math.round(r+(255-r)*w)+','+Math.round(g+(255-g)*w)+','+Math.round(b+(255-b)*w)+')';
+  }
+  function _colsFromOne(hex){ return [_mixW(hex,0.84), _mixW(hex,0.45), hex]; }
+  // 🎨 自分で選んだ色は「マイ色」としてこのPCに記憶する（次に開いた時も並ぶ）
+  function myColsGet(){ try{ return JSON.parse(localStorage.getItem('__ce_bgmycols')||'[]'); }catch(_){ return []; } }
+  function myColsPut(a){ try{ localStorage.setItem('__ce_bgmycols', JSON.stringify(a.slice(0,10))); }catch(_){} }
+  function myColsAdd(hex){ var a=myColsGet().filter(function(c){ return c!==hex; }); a.unshift(hex); myColsPut(a); }
+  function myColsDel(hex){ myColsPut(myColsGet().filter(function(c){ return c!==hex; })); }
+  // 色・形・大きさ・向き・モードを飾りdivに塗り直す（どのボタンからも必ずここを通す）
+  function _bgPaint(bg){
+    // ★区切りは「|」：色が rgb(255,217,230) のようにカンマを含むので , で繋ぐと壊れる
+    var cols=(bg.dataset.cols||'').split('|').filter(Boolean);
+    if(cols.length<3){ cols=_bgColsFrom(bg); if(cols.length>=3) bg.dataset.cols=cols.join('|'); }
+    var dir=bg.dataset.dir||'br', mode=bg.dataset.mode||'shift', D=parseFloat(bg.dataset.size||'26');
+    if(cols.length>=3) bg.style.background=_bgGradCss(cols,dir,mode);
+    if(mode==='halo'){
+      ['top','right','bottom','left'].forEach(function(p){ bg.style.removeProperty(p); });
+      bg.style.setProperty('inset', (-D-14)+'px');                        // 全周に広げる
+      bg.style.setProperty('filter','blur('+Math.max(16,Math.round(D*0.7))+'px)');
+    }else{
+      _bgPlace(bg, D, dir);
+      bg.style.setProperty('filter','blur(2px)');
+    }
+    // 手で動かしたぶん（←↑↓→）。位置の指定(top/left)とは別に持つので、形や大きさを変えてもズレない
+    var ox=parseFloat(bg.dataset.ox||'0'), oy=parseFloat(bg.dataset.oy||'0');
+    if(ox||oy) bg.style.setProperty('transform','translate('+ox+'px,'+oy+'px)');
+    else bg.style.removeProperty('transform');
+  }
   function _bgPlace(bg, D, dir){
     dir=dir||'br';
     var t,r,b,l;                                   // 覗く辺は -D（外へはみ出す）／隠れる辺は +D（写真の下に潜る）
@@ -6017,28 +6212,67 @@ html.__ce_altmode{cursor:text}
     bg.style.removeProperty('inset');
     bg.style.top=t+'px'; bg.style.right=r+'px'; bg.style.bottom=b+'px'; bg.style.left=l+'px';
   }
-  // 対象に飾りdivが無ければ作る（既にあれば取得するだけ）。形・大きさ・向きの調整はこれを使い回す。
-  function ensureBackdrop(target){
+  // 飾りは1つの要素に何個でも置ける（重ねて雲みたいにできる）。今いじっている1枚＝data-act="1"。
+  function bgList(target){ return target?[].slice.call(target.querySelectorAll(':scope > .ce_bgdeco')):[]; }
+  function bgActive(target){
+    var l=bgList(target); if(!l.length) return null;
+    return l.filter(function(n){ return n.dataset.act==='1'; })[0] || l[l.length-1];
+  }
+  function bgSetActive(target, bg){ bgList(target).forEach(function(n){ if(n===bg) n.dataset.act='1'; else n.removeAttribute('data-act'); }); }
+  // 対象に飾りdivが無ければ作る（既にあれば「今いじっている1枚」を返す）。newOne=true で必ずもう1枚足す。
+  function ensureBackdrop(target, newOne){
     if(getComputedStyle(target).position==='static') target.style.setProperty('position','relative');
     target.style.setProperty('isolation','isolate');   // 負のz-indexが祖先の後ろへ抜けないよう囲む
     // 角丸写真は親にoverflow:hiddenが付いていることが多く、それだとはみ出す飾りが見えない→強制で見えるようにする
     target.style.setProperty('overflow','visible','important');
-    var bg=target.querySelector(':scope > .ce_bgdeco');
+    var bg=newOne?null:bgActive(target);
     if(!bg){
       bg=document.createElement('div'); bg.className='ce_bgdeco'; bg.setAttribute('aria-hidden','true');
-      bg.dataset.size='26'; bg.dataset.shape='round'; bg.dataset.dir='br';
+      bg.dataset.size='26'; bg.dataset.shape='round'; bg.dataset.dir='br'; bg.dataset.mode='shift';
       bg.style.cssText='position:absolute;z-index:-1;pointer-events:none;border-radius:'+BG_SHAPES.round+';background:radial-gradient(60% 55% at 50% 45%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%);';
       _bgPlace(bg, 26, 'br');                        // 右下へずらして色帯を覗かせる（初期）
       target.insertBefore(bg, target.firstChild);   // 先頭＝一番後ろに置く
     }
+    bgSetActive(target, bg);
+    _unhideDeco(bg);      // 前に「🚫消す」で隠していたら、色を選んだ時点で必ず出す
     return bg;
   }
-  function applyBackdrop(el, grad){
+  // ＋ もう1つ足す（2枚目は少しずらして置く＝重なって1枚に見えないように）
+  function addBackdrop(el){
+    var target=bgTarget(el); if(!target) return null;
+    var n=bgList(target).length;
+    var bg=ensureBackdrop(target, true);
+    bg.dataset.ox=String(30*n); bg.dataset.oy=String(-24*n);
+    _bgPaint(bg); markDirty();
+    if(msg) msg.textContent='飾りをもう1つ足しました（今いじっているのは '+(n+1)+' 枚目です）';
+    return bg;
+  }
+  // ←↑↓→ で今いじっている飾りだけを動かす
+  function nudgeBackdrop(el, dx, dy){
+    var target=bgTarget(el); if(!target) return;
+    var bg=ensureBackdrop(target);
+    if(dx===0&&dy===0){ bg.dataset.ox='0'; bg.dataset.oy='0'; }
+    else{ bg.dataset.ox=String((parseFloat(bg.dataset.ox||'0'))+dx); bg.dataset.oy=String((parseFloat(bg.dataset.oy||'0'))+dy); }
+    _bgPaint(bg); markDirty();
+  }
+  function applyBackdrop(el, cols){
     var target=bgTarget(el); if(!target){ msg.textContent='ここには敷けません（すぐ外側の箱を右クリックしてください）'; return; }
     var bg=ensureBackdrop(target);
-    bg.style.background=grad;
+    bg.dataset.cols=(cols||[]).join('|');
+    _bgPaint(bg);
     markDirty();
-    msg.textContent='背景の飾りを要素の後ろに敷きました（保存で確定）。下の「形」「大きさ」でも調整できます';
+    msg.textContent='背景の飾りを敷きました（保存で確定）。色が見えない時は「☀ 後光」を押すと写真の全周にふんわり広がります';
+  }
+  // ☀後光（全周にふんわり）↔ ◧ずらす（右下などに色帯）を切り替える
+  function toggleBackdropMode(el){
+    var target=bgTarget(el); if(!target) return;
+    var bg=ensureBackdrop(target);
+    var next=(bg.dataset.mode==='halo')?'shift':'halo';
+    bg.dataset.mode=next;
+    _bgPaint(bg);
+    markDirty();
+    if(msg) msg.textContent=(next==='halo')?'☀ 後光：写真の全周にふんわり広げました（大きさで広がりを調整できます）':'◧ ずらす：写真の外へ色帯を覗かせます';
+    return next;
   }
   function setBackdropShape(el, shape){
     var target=bgTarget(el); if(!target) return;
@@ -6053,7 +6287,7 @@ html.__ce_altmode{cursor:text}
     var cur=parseFloat(bg.dataset.size||'26');
     var next=Math.max(8, Math.min(120, cur+delta));   // 覗く量(px)。大きいほど色帯が太く見える
     bg.dataset.size=String(next);
-    _bgPlace(bg, next, bg.dataset.dir||'br');
+    _bgPaint(bg);
     markDirty();
   }
   // ずらす向きを 右下→右上→左上→左下 と切り替える（色帯を出したい辺を選べる）
@@ -6063,16 +6297,20 @@ html.__ce_altmode{cursor:text}
     var order=['br','tr','tl','bl'];
     var next=order[(order.indexOf(bg.dataset.dir||'br')+1)%order.length];
     bg.dataset.dir=next;
-    _bgPlace(bg, parseFloat(bg.dataset.size||'26'), next);
+    _bgPaint(bg);        // 向きを変えたら濃い色の来る角も一緒に付け替える（帯が白くならないように）
     markDirty();
     if(msg) msg.textContent='ずらす向き：'+({br:'右下',tr:'右上',tl:'左上',bl:'左下'}[next]);
   }
+  // 今いじっている1枚だけ消す（複数あるとき全部消えないように）
   function removeBackdrop(el){
-    var target=bgTarget(el); if(!target) return;
-    var bg=target.querySelector(':scope > .ce_bgdeco');
+    var target=bgTarget(el); if(!target) return 0;
+    var bg=bgActive(target);
     if(bg) bg.remove();
+    var rest=bgList(target);
+    if(rest.length) bgSetActive(target, rest[rest.length-1]);
     markDirty();
-    msg.textContent='背景の飾りを消しました（保存で確定）';
+    msg.textContent=rest.length?('飾りを1枚消しました（残り '+rest.length+' 枚）'):'背景の飾りを消しました（保存で確定）';
+    return rest.length;
   }
   // ⭕ 輪郭だけのリング（塗りつぶし無し・ゆっくり回転）。背景の飾り(グラデ)とは別レイヤーで重ねて使える。
   var RING_COLORS={
@@ -6101,6 +6339,7 @@ html.__ce_altmode{cursor:text}
       ring.style.cssText='position:absolute;inset:-9%;z-index:-1;pointer-events:none;border-radius:50%;';
       target.insertBefore(ring, target.firstChild);
     }
+    _unhideDeco(ring);
     ring.dataset.ring=colorKey;
     ring.style.borderColor=RING_COLORS[colorKey]||RING_COLORS.soft;
     ring.style.borderStyle='solid';
@@ -6149,6 +6388,7 @@ html.__ce_altmode{cursor:text}
       // 写真(position:staticのimg)より必ず後ろに描画される点は変わらないので、末尾に足してブロブより手前に出す。
       target.appendChild(ol);
     }
+    _unhideDeco(ol);
     _positionOutline(ol, img, target, ol.dataset.dir||'tr');
     ol.dataset.outline=colorKey;
     ol.style.borderColor=OUTLINE_COLORS[colorKey]||OUTLINE_COLORS.blue;
@@ -6168,24 +6408,59 @@ html.__ce_altmode{cursor:text}
   }
   function openGradPicker(el){
     if(!el){ msg.textContent='対象がありません'; return; }
+    // 色は「薄い→中間→濃い」の3つで持つ（濃い色が必ず"見えている側"へ来るように塗り分けるため）
     var GRADS=[
-     ['そら（水色）','radial-gradient(60% 55% at 50% 45%, #cdeafe 0%, #e8f4ff 45%, #eef1fb 100%)'],
-     ['みず×ミント','radial-gradient(50% 45% at 68% 28%, #bdf3ea 0%, rgba(189,243,234,0) 60%), radial-gradient(60% 55% at 38% 62%, #cfe6ff 0%, #eef2fb 75%)'],
-     ['さくら（桃）','radial-gradient(60% 55% at 50% 45%, #ffd9e6 0%, #ffe9f0 45%, #fbeef4 100%)'],
-     ['ゆうやけ（暖）','radial-gradient(55% 50% at 30% 30%, #ffe0c2 0%, rgba(255,224,194,0) 60%), radial-gradient(60% 55% at 70% 65%, #ffd0d6 0%, #fdeef0 75%)'],
-     ['ラベンダー','radial-gradient(60% 55% at 50% 45%, #e2d7ff 0%, #eee9ff 45%, #f3f0fb 100%)'],
-     ['やわらかグレー','radial-gradient(60% 55% at 50% 40%, #eef1f5 0%, #f6f8fb 60%, #ffffff 100%)']
+     ['そら（水色）',    ['#eaf6ff','#bfe0fb','#8fc7f0']],
+     ['みず×ミント',    ['#e9fbf6','#a8ecdd','#7fd0e6']],
+     ['さくら（桃）',    ['#fff0f5','#ffd0e0','#f9a9c4']],
+     ['ゆうやけ（暖）',  ['#fff2e6','#ffd8b8','#ffb49b']],
+     ['ラベンダー',      ['#f4f0ff','#ddd0ff','#bda9f2']],
+     ['やわらかグレー',  ['#f8fafc','#e7ecf3','#cfd8e4']]
     ];
     var SHAPE_H=[['oval','⬭ 丸型'],['blob','💧 しずく型'],['round','▢ 角丸四角'],['square','◻ 四角']];
-    var items=GRADS.map(function(g,i){return '<div class="it" data-i="'+i+'"><div style="height:80px;background:'+g[1]+'"></div><span>'+esc(g[0])+'</span></div>';}).join('');
+    var items=GRADS.map(function(g,i){return '<div class="it" data-i="'+i+'"><div style="height:80px;background:'+_bgGradCss(g[1],'br','shift')+'"></div><span>'+esc(g[0])+'</span></div>';}).join('');
     var shapeH=SHAPE_H.map(function(s){return '<button class="go2" data-shape="'+s[0]+'" style="background:#0b6bcb;margin:0">'+s[1]+'</button>';}).join('');
+    // 🎨 自分の色＋マイ色（このPCに記憶）／🧩 何枚目をいじっているかのチップ
+    function myRow(){
+      var my=myColsGet();
+      var chips=my.map(function(c){
+        return '<span class="__ce_myc" data-c="'+c+'" title="'+esc(c)+'（クリックで敷く／✕で削除）" style="position:relative;display:inline-block;width:30px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,.2);background:'+_bgGradCss(_colsFromOne(c),'br','shift')+';cursor:pointer;margin:0 5px 5px 0;vertical-align:middle">'
+          +'<b class="__ce_mycx" data-c="'+c+'" style="position:absolute;top:-6px;right:-6px;width:15px;height:15px;line-height:14px;text-align:center;border-radius:50%;background:#c0392b;color:#fff;font-size:10px;cursor:pointer">✕</b></span>';
+      }).join('');
+      return '<div class="cap" style="margin-top:12px">🎨 好きな色で作る（1色選ぶと薄い→濃いを自動で作ります）</div>'
+        +'<div style="display:flex;align-items:center;gap:6px;margin:4px 0 6px">'
+        +'<input type="color" id="__ce_bgmyc" value="#7fd0e6" style="width:44px;height:30px;padding:0;border:1px solid #ccc;border-radius:6px;cursor:pointer">'
+        +'<button class="go2" id="__ce_bgmyg" style="background:#0b6bcb;margin:0;flex:1">この色で敷く＋マイ色に登録</button></div>'
+        +(chips?('<div class="cap" style="margin:2px 0 4px">マイ色（このPCに保存・クリックで敷く）</div><div>'+chips+'</div>'):'');
+    }
+    function layerRow(){
+      var target=bgTarget(el), list=bgList(target), act=bgActive(target);
+      var chips=list.map(function(n,i){
+        var on=(n===act);
+        return '<button class="go2 __ce_bglayer" data-i="'+i+'" style="background:'+(on?'#c026a6':'#888')+';margin:0">'+(on?'●':'○')+' '+(i+1)+'枚目</button>';
+      }).join('');
+      return '<div class="cap" style="margin-top:12px">🧩 飾りは何枚でも重ねられます（今いじっている1枚だけが変わります）</div>'
+        +'<div class="__ce_size" style="grid-template-columns:repeat(auto-fit,minmax(84px,1fr))">'+chips
+        +'<button class="go2" id="__ce_bgadd" style="background:#0b6bcb;margin:0">＋ もう1つ</button></div>';
+    }
     var ov=document.createElement('div'); ov.id='__ce_pk';
     ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>背景の飾りを選ぶ（要素の後ろ・AIなし）</h4><div class="gr">'+items+'</div>'
+      +'<div id="__ce_bgmy">'+myRow()+'</div>'
+      +'<div id="__ce_bglayers">'+layerRow()+'</div>'
       +'<div class="cap" style="margin-top:12px">かたち</div>'
       +'<div class="__ce_size" style="grid-template-columns:repeat(4,1fr)">'+shapeH+'</div>'
-      +'<div class="cap" style="margin-top:10px">大きさ（写真の外へ覗く色帯の太さ）・ずらす向き</div>'
+      +'<div class="cap" style="margin-top:10px">出し方（☀後光＝全周にふんわり／◧ずらす＝右下などに色帯）</div>'
+      +'<div class="__ce_size" style="grid-template-columns:1fr"><button class="go2" id="__ce_bgmode" style="background:#c026a6;margin:0">☀ 後光にする ↔ ◧ ずらす</button></div>'
+      +'<div class="cap" style="margin-top:10px">大きさ（覗く色帯の太さ／後光の広がり）・ずらす向き</div>'
       +'<div class="__ce_size" style="grid-template-columns:repeat(3,1fr)"><button class="go2" id="__ce_bgsm" style="background:#888;margin:0">－ 細く</button><button class="go2" id="__ce_bgbg" style="background:#888;margin:0">＋ 太く</button><button class="go2" id="__ce_bgdir" style="background:#0b6bcb;margin:0">↔ ずらす向き</button></div>'
-      +'<button class="go2" id="__ce_bgrm" style="background:#c0392b">🚫 飾りを消す</button>'
+      +'<div class="cap" style="margin-top:10px">↕ 位置を動かす（今いじっている1枚だけ・10pxずつ）</div>'
+      +'<div class="__ce_size" style="grid-template-columns:repeat(5,1fr)">'
+      +'<button class="go2 __ce_bgmv" data-x="-10" data-y="0" style="background:#888;margin:0">←</button>'
+      +'<button class="go2 __ce_bgmv" data-x="10" data-y="0" style="background:#888;margin:0">→</button>'
+      +'<button class="go2 __ce_bgmv" data-x="0" data-y="-10" style="background:#888;margin:0">↑</button>'
+      +'<button class="go2 __ce_bgmv" data-x="0" data-y="10" style="background:#888;margin:0">↓</button>'
+      +'<button class="go2 __ce_bgmv" data-x="0" data-y="0" data-rst="1" style="background:#555;margin:0">⟲ 位置</button></div>'
+      +'<button class="go2" id="__ce_bgrm" style="background:#c0392b">🚫 この1枚を消す</button>'
       +'<div class="cap" style="margin-top:12px">⭕ 輪郭だけのリングを重ねる（ゆっくり回転・お洒落に・任意）</div>'
       +'<div class="__ce_size" style="grid-template-columns:repeat(3,1fr)">'
       +'<button class="go2" data-ring="soft" style="background:#555;margin:0">⭕ 淡い</button>'
@@ -6201,16 +6476,37 @@ html.__ce_altmode{cursor:text}
       +'<div class="cap" style="margin:2px 0 8px">同じ色をもう一度押すと縁取り線を外せます</div>'
       +'</div>';
     document.body.appendChild(ov);
+    // 枚数や登録色が変わったら、その行だけ描き直す（パネルを閉じずに続けて作業できる）
+    function reMy(){ var n=ov.querySelector('#__ce_bgmy'); if(n) n.innerHTML=myRow(); }
+    function reLayers(){ var n=ov.querySelector('#__ce_bglayers'); if(n) n.innerHTML=layerRow(); }
     ov.addEventListener('click',function(e){
       if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
       var it=e.target.closest('.it');
-      if(it){ applyBackdrop(el, GRADS[+it.dataset.i][1]); return; }
+      if(it){ applyBackdrop(el, GRADS[+it.dataset.i][1]); reLayers(); return; }
+      // ✕ マイ色を捨てる（色チップより先に判定する＝✕を押したのに敷かれてしまうのを防ぐ）
+      var mx=e.target.closest('.__ce_mycx');
+      if(mx){ myColsDel(mx.getAttribute('data-c')); reMy(); return; }
+      var mc=e.target.closest('.__ce_myc');
+      if(mc){ applyBackdrop(el, _colsFromOne(mc.getAttribute('data-c'))); reLayers(); return; }
+      if(e.target.id==='__ce_bgmyg'){                                      // 好きな色で敷く＋登録
+        var hx=(ov.querySelector('#__ce_bgmyc')||{}).value||'#7fd0e6';
+        applyBackdrop(el, _colsFromOne(hx)); myColsAdd(hx); reMy(); reLayers();
+        if(msg) msg.textContent='この色で敷いて「マイ色」に登録しました（次に開いた時も出ます）';
+        return;
+      }
+      var lb=e.target.closest('.__ce_bglayer');
+      if(lb){ var t2=bgTarget(el), l2=bgList(t2); bgSetActive(t2, l2[+lb.getAttribute('data-i')]); reLayers();
+        if(msg) msg.textContent='いじる飾りを '+(+lb.getAttribute('data-i')+1)+' 枚目に変えました'; return; }
+      if(e.target.id==='__ce_bgadd'){ addBackdrop(el); reLayers(); return; }
+      var mv=e.target.closest('.__ce_bgmv');
+      if(mv){ nudgeBackdrop(el, +mv.getAttribute('data-x'), +mv.getAttribute('data-y')); return; }
       var sb=e.target.closest('button[data-shape]');
       if(sb){ setBackdropShape(el, sb.getAttribute('data-shape')); return; }
+      if(e.target.id==='__ce_bgmode'){ toggleBackdropMode(el); return; }   // ☀後光 ↔ ◧ずらす
       if(e.target.id==='__ce_bgsm'){ setBackdropSize(el, -14); return; }   // 細く＝覗く色帯を減らす
       if(e.target.id==='__ce_bgbg'){ setBackdropSize(el, 14); return; }    // 太く＝覗く色帯を増やす
       if(e.target.id==='__ce_bgdir'){ flipBackdropDir(el); return; }       // ずらす向きを切替
-      if(e.target.id==='__ce_bgrm'){ removeBackdrop(el); ov.remove(); return; }
+      if(e.target.id==='__ce_bgrm'){ var rest=removeBackdrop(el); if(rest) reLayers(); else ov.remove(); return; }
       var rb=e.target.closest('button[data-ring]');
       if(rb){ toggleRing(el, rb.getAttribute('data-ring')); return; }
       var ob=e.target.closest('button[data-outline]');
@@ -6334,16 +6630,34 @@ html.__ce_altmode{cursor:text}
     if(h===document.body) h=el;
     return h;
   }
-  function _glowStyle(d, side, size, op, spread){
-    d.style.cssText='position:absolute;bottom:6%;'+side+':4%;width:'+size+'%;aspect-ratio:1 / 1;'
-      +'border-radius:50%;pointer-events:none;z-index:2;'
+  // ★光の置き場は「写真の箱の中」に限定する（2026-07-28修正）。
+  //   旧版は host（＝imgの親）いっぱいに bottom:6%/left:4% で置いていたため、親が
+  //   「左に文章・右に写真」のような大きな箱だと、白い円が左の文章の上に乗って文字が消えた（実際に起きた）。
+  //   写真の実寸(offsetLeft/Top/Width/Height)を測って、その中の左下・右下に置き直す。
+  //   ★サイズは getBoundingClientRect ではなく offset系で測る（出現アニメのtransform中の値を拾わない）。
+  function _glowStyle(d, side, size, op, spread, host){
+    var bg='border-radius:50%;pointer-events:none;z-index:2;'
       +'background:radial-gradient(circle, rgba(255,255,255,'+op+') 0%, rgba(255,255,255,0) '+spread+'%)';
+    var img=null;
+    try{ img=(host&&(host.__ceGlowImg||host.querySelector('img,video')))||null; }catch(_){}
+    if(img && host && img.offsetParent===host && img.offsetWidth>20 && img.offsetHeight>20){
+      var hw=host.clientWidth||host.offsetWidth||1, hh=host.clientHeight||host.offsetHeight||1;
+      var iw=img.offsetWidth, ih=img.offsetHeight, ix=img.offsetLeft, iy=img.offsetTop;
+      var sz=Math.min(iw,ih)*size/100;
+      var x=(side==='left') ? (ix+iw*0.04) : (ix+iw-sz-iw*0.04);
+      var y=iy+ih-sz-ih*0.06;
+      d.style.cssText='position:absolute;left:'+(x/hw*100).toFixed(2)+'%;top:'+(y/hh*100).toFixed(2)+'%;'
+        +'width:'+(sz/hw*100).toFixed(2)+'%;aspect-ratio:1 / 1;'+bg;
+      return;
+    }
+    // 写真が特定できない時だけ従来どおり箱の左下・右下（要素そのものに光らせたい場合）
+    d.style.cssText='position:absolute;bottom:6%;'+side+':4%;width:'+size+'%;aspect-ratio:1 / 1;'+bg;
   }
   function _glowAdd(host, size, op, spread){
     if(getComputedStyle(host).position==='static'){ host.style.setProperty('position','relative'); host.setAttribute('data-ceglowpos','1'); }
     ['left','right'].forEach(function(side){
       var d=document.createElement('div'); d.className='ceglow-spot ceglow-'+side[0];
-      _glowStyle(d, side, size, op, spread); host.appendChild(d);
+      _glowStyle(d, side, size, op, spread, host); host.appendChild(d);
     });
     host.setAttribute('data-ceglow', size+'|'+op+'|'+spread);
     markDirty();
@@ -6357,6 +6671,8 @@ html.__ce_altmode{cursor:text}
   function glowSpots(el){
     var host=_glowHost(el);
     if(!host){ msg.textContent='対象がありません'; return; }
+    // どの写真に光らせるかを覚える（親が大きい時に写真の中へ置くため）
+    try{ host.__ceGlowImg=(el.tagName==='IMG'||el.tagName==='VIDEO')?el:(el.querySelector&&el.querySelector('img,video'))||null; }catch(_){}
     // 既に付いているか＝子の.ceglow-spotの有無で判定（属性が消えても堅牢）
     if(!host.querySelector('.ceglow-spot')){ _glowAdd(host, 30, 0.85, 70); msg.textContent='ふわっとした白い光を付けました（同じボタンで大きさ・濃さを調整・外せます）'; }
     openGlowPanel(host);
@@ -6380,7 +6696,7 @@ html.__ce_altmode{cursor:text}
     document.body.appendChild(ov);
     function _apply(){
       [].slice.call(host.querySelectorAll('.ceglow-spot')).forEach(function(d){
-        _glowStyle(d, d.classList.contains('ceglow-l')?'left':'right', size, op, spread);
+        _glowStyle(d, d.classList.contains('ceglow-l')?'left':'right', size, op, spread, host);
       });
       host.setAttribute('data-ceglow', size+'|'+op+'|'+spread); markDirty();
     }
@@ -6833,6 +7149,16 @@ html.__ce_altmode{cursor:text}
   //   従来は el.innerHTML=文字 で丸ごと書き換えていたので strong/span が消え、
   //   入れ物の16px明朝が出てしまっていた（実測で確認）。
   //   → 中の文字ノードだけを1対1で入れ替えれば、タグ＝見た目はそのまま残る。
+  // ★入力した空白を画面にも出す（2026-07-29）。HTMLは「行頭・行末・連続した半角スペース」を潰すので、
+  //   打っても消えたように見えていた。潰される分だけ NBSP（改行しない空白）に置き換えて見た目どおり残す。
+  //   文中の1個の半角スペースはそのまま（NBSPにすると折り返せなくなるため）。
+  function _keepSpaces(s){
+    var NB=String.fromCharCode(160);
+    function rep(m){ return Array(m.length+1).join(NB); }
+    return String(s==null?'':s).split(/\\n/).map(function(ln){
+      return ln.replace(/^ +/,rep).replace(/ +$/,rep).replace(/ {2,}/g,rep);
+    }).join('\\n');
+  }
   function _brTextNodes(el){
     var out=[], w=document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n;
     while((n=w.nextNode())){
@@ -6845,7 +7171,8 @@ html.__ce_altmode{cursor:text}
   function _brKeepTags(el, val){
     var nodes=_brTextNodes(el);
     if(nodes.length<2) return false;                       // 文字が1か所だけの要素は従来どおりでよい
-    var lines=val.split(/\\n/).map(function(s){ return s.trim(); }).filter(function(s){ return s!==''; });
+    // ★trimしない：打った空白（行頭のインデント等）を消さずに、潰れる分だけNBSPにして残す
+    var lines=_keepSpaces(val).split(/\\n/).filter(function(s){ return s.trim()!==''; });
     if(lines.length!==nodes.length) return false;          // 行数が変わったら1対1にできない
     nodes.forEach(function(t,i){
       t.nodeValue=lines[i];
@@ -6972,7 +7299,7 @@ html.__ce_altmode{cursor:text}
           return;
         }
         // 行頭の半角スペースはHTMLだと潰れて見えない → &nbsp;にして見た目どおり残す（全角スペースは元々残る）
-        var _bht=esc(ta.value).replace(/\\n/g,'<br>');
+        var _bht=esc(_keepSpaces(ta.value)).replace(/\\n/g,'<br>');
         _bht=_bht.replace(/(^|<br>)( +)/g,function(_m,_p,_sp){ return _p+Array(_sp.length+1).join('&nbsp;'); });
         el.innerHTML=_bht;
         // 🌈アーチ中なら、新しい文面を元テキストとして控え直してアーチをかけ直す（改行反映で平らに戻るのを防ぐ）
@@ -7443,6 +7770,104 @@ html.__ce_altmode{cursor:text}
     el.style.setProperty('background-image','none','important');
     el.style.setProperty('border','none','important');
     el.style.setProperty('box-shadow','none','important');
+    markDirty(); return true;
+  }
+  // ===== 🎨 背景・フチ・影を消す（AIなし・2026-07-28） =====
+  // ★「色のついたカードを透明にしたい」が今までどこからも出来なかった。
+  //   radiusFlat（◽裏の四角）は "角丸の写真の裏で直角がはみ出している箱" が見つかった時しか出ないので、
+  //   ふつうの色つきカード（グラデ帯・薄い枠・影つき）には一生届かない＝別の入口として用意する。
+  //   自分→外側4段の「見た目を持っている箱」を並べ、🎨背景 / ▭フチ / ☁影 を1つずつトグルで消す。
+  // ★元のインラインstyleを data-ceflat* に控えてから上書きする＝「戻す」で元の値に戻る
+  //   （消す時に removeProperty するだけだと、元から付いていた指定まで永久に失われる）
+  var FLAT_P={bg:['background-color','background-image'],
+              bd:['border-top-style','border-right-style','border-bottom-style','border-left-style'],
+              sh:['box-shadow'], vis:['display']};
+  // 飾りの代表色（ボタンに小さな色の四角を出す＝「このピンクのこと」と目で分かる）
+  function _flatSw(cs){
+    var c=cs.backgroundColor||'';
+    if(c&&c!=='transparent'&&c.indexOf('rgba(0, 0, 0, 0)')<0) return c;
+    var m=(cs.backgroundImage||'').match(/rgba?\([^)]+\)/);
+    if(m) return m[0];
+    var b=cs.borderTopColor||''; return (b&&b.indexOf('rgba(0, 0, 0, 0)')<0)?b:'';
+  }
+  function flatScan(el){
+    var out=[], t=el;
+    for(var i=0; t && i<5; i++, t=t.parentElement){
+      if(!t||t===document.body||t.tagName==='HTML') break;
+      if(t.closest&&t.closest('[id^="__ce"]')) continue;   // ツール自身のパネルは対象外
+      var cs; try{ cs=getComputedStyle(t); }catch(_){ continue; }
+      var r=t.getBoundingClientRect();
+      if(r.width>=16&&r.height>=10){
+        var bgc=cs.backgroundColor||'', bimg=cs.backgroundImage||'';
+        var hasC=!!bgc&&bgc!=='transparent'&&bgc.indexOf('rgba(0, 0, 0, 0)')<0;
+        var hasI=!!bimg&&bimg!=='none';
+        var hasB=false;
+        ['top','right','bottom','left'].forEach(function(sd){
+          if(cs.getPropertyValue('border-'+sd+'-style')!=='none'&&parseFloat(cs.getPropertyValue('border-'+sd+'-width'))>0) hasB=true;
+        });
+        var hasS=!!cs.boxShadow&&cs.boxShadow!=='none';
+        var oBg=t.getAttribute('data-ceflatbg')!=null, oBd=t.getAttribute('data-ceflatbd')!=null, oSh=t.getAttribute('data-ceflatsh')!=null;
+        if(hasC||hasI||hasB||hasS||oBg||oBd||oSh){
+          var lb=(i===0)?'ここ〈'+t.tagName.toLowerCase()+'〉':'外側'+i+'〈'+t.tagName.toLowerCase()+'〉';
+          out.push({el:t, sw:_flatSw(cs), name:lb+' '+Math.round(r.width)+'×'+Math.round(r.height),
+            bg:(hasC||hasI||oBg), bd:(hasB||oBd), sh:(hasS||oSh),
+            tag:(hasC?' 🎨色':'')+(hasI?' 🖼絵':'')+(hasB?' ▭フチ':'')+(hasS?' ☁影':'')+((oBg||oBd||oSh)?' 【消し済み】':'')});
+        }
+      }
+      if(/^(SECTION|HEADER|FOOTER|MAIN)$/.test(t.tagName)) break;  // ページの器まで再帰したら打ち切り
+    }
+    out=out.slice(0,4);
+    // ★「後ろに浮いている飾り」（ピンクの丸・にじみ・リング等）は先祖ではないので上の輪では絶対に拾えない。
+    //   さらに pointer-events:none なので右クリックでも掴めない＝ここに出さないと素人には消す手段が無い。
+    //   ツール製(ce_bgdeco/ce_outlinedeco)もクローン元デザインの飾りも同じ扱いで並べる。
+    try{
+      var host=el.closest('section,header,footer,main')||document.body;
+      var r0=el.getBoundingClientRect(), near=[], far=[];
+      [].slice.call(host.querySelectorAll('div,span,i,b,em,figure,aside')).slice(0,600).forEach(function(n){
+        if(n===el||n.contains(el)) return;
+        if(n.closest&&n.closest('[id^="__ce"]')) return;
+        if((n.textContent||'').trim()!=='') return;                          // 文字が入っていたら飾りではない
+        if(n.querySelector&&n.querySelector('img,video,svg,picture,canvas,input,button,a')) return;
+        var c2; try{ c2=getComputedStyle(n); }catch(_){ return; }
+        var floaty=(c2.pointerEvents==='none')||(parseFloat(c2.zIndex)<0)||/ce_bgdeco|ce_outlinedeco/.test(n.className||'');
+        if(!floaty) return;
+        if(c2.position!=='absolute'&&c2.position!=='fixed') return;
+        var off=(n.getAttribute('data-ceflatvis')!=null);
+        var shape=(c2.backgroundImage&&c2.backgroundImage!=='none')
+          ||(c2.backgroundColor&&c2.backgroundColor!=='transparent'&&c2.backgroundColor.indexOf('rgba(0, 0, 0, 0)')<0)
+          ||(c2.borderStyle&&c2.borderStyle!=='none'&&parseFloat(c2.borderWidth)>0)||(c2.filter&&c2.filter!=='none');
+        if(!shape&&!off) return;
+        var r2=n.getBoundingClientRect();
+        if(!off&&(r2.width<24||r2.height<24)) return;
+        var rd=parseFloat(c2.borderTopLeftRadius)||0;
+        var it={el:n, sw:_flatSw(c2), bg:false, bd:false, sh:false, deco:true,
+          name:'🌸 後ろに浮いている飾り〈'+n.tagName.toLowerCase()+'〉'+Math.round(r2.width)+'×'+Math.round(r2.height)+(rd?'（丸み）':''),
+          tag:off?' 【消し済み】':''};
+        var hit=!(r2.right<r0.left||r2.left>r0.right||r2.bottom<r0.top||r2.top>r0.bottom);  // 選んだ要素と重なっているか
+        (hit?near:far).push(it);
+      });
+      out=out.concat(near.slice(0,3));
+      if(!near.length) out=out.concat(far.slice(0,2));   // 重なっていなくても同じセクション内なら候補に出す
+    }catch(_){}
+    return out.slice(0,7);
+  }
+  // 1種類を消す／戻す（同じボタンでトグル＝押し間違えても怖くない）。戻り値 true=今消した
+  function flatOff(it,key){
+    var el=it.el, a='data-ceflat'+key, props=FLAT_P[key]||[];
+    var saved=el.getAttribute(a);
+    if(saved!=null){                                   // ← 戻す
+      props.forEach(function(p){ el.style.removeProperty(p); });
+      if(key==='bd') el.style.removeProperty('border-style');
+      try{ var o=JSON.parse(saved); Object.keys(o).forEach(function(p){ el.style.setProperty(p,o[p][0],o[p][1]); }); }catch(_){}
+      el.removeAttribute(a); markDirty(); return false;
+    }
+    var sv={};                                         // ← 消す（先に元の値を控える）
+    props.forEach(function(p){ var v=el.style.getPropertyValue(p); if(v) sv[p]=[v, el.style.getPropertyPriority(p)]; });
+    el.setAttribute(a, JSON.stringify(sv));
+    if(key==='bg'){ el.style.setProperty('background-color','transparent','important'); el.style.setProperty('background-image','none','important'); }
+    else if(key==='bd'){ el.style.setProperty('border-style','none','important'); }
+    else if(key==='vis'){ el.style.setProperty('display','none','important'); }   // 浮いてる飾りは消さずに隠す＝戻せる
+    else { el.style.setProperty('box-shadow','none','important'); }
     markDirty(); return true;
   }
   // ===== 📏 余白を詰める（AIなし・2026-07-21） =====
@@ -8716,7 +9141,27 @@ html.__ce_altmode{cursor:text}
     +'html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,79%),var(--hlc,#ffe66d) var(--hlt0,79%),var(--hlc,#ffe66d) var(--hlt1,91%),transparent var(--hlt1,91%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:slice;box-decoration-break:slice}'
     // 〰 点線下線のアニメ版（2026-07-19）：マーカーと同じ--hlw(0〜100)で左→右にスーッと引かれる。
     //   点線はborderでなくrepeating-gradientで描く＝マーカーの仕組み(sweepHl/--hldur/data-cedelay)を丸ごと共用できる。色は--udc。
-    +'html body .fxa_ud.fxa_ud{background-image:repeating-linear-gradient(90deg,var(--udc,#0b6bcb) 0 6px,transparent 6px 11px)!important;background-repeat:no-repeat!important;background-position:left 100%!important;background-size:calc(var(--hlw,0) * 1%) 3px!important;padding-bottom:.15em;-webkit-box-decoration-break:slice;box-decoration-break:slice}';
+    +'html body .fxa_ud.fxa_ud{background-image:repeating-linear-gradient(90deg,var(--udc,#0b6bcb) 0 6px,transparent 6px 11px)!important;background-repeat:no-repeat!important;background-position:left 100%!important;background-size:calc(var(--hlw,0) * 1%) 3px!important;padding-bottom:.15em;-webkit-box-decoration-break:slice;box-decoration-break:slice}'
+    // ★★ ページ自前の出現アニメに負けない（2026-07-28・実測で判明した「動きが付かない」の正体）
+    //   カンプ側CSSに `.reveal.is-visible{opacity:1!important;transform:none!important}` があり、
+    //   ページ自身のIntersectionObserverがスクロール時に is-visible を付け直す。
+    //   fxaの隠し状態(.fxa_pre)は!important無しなので必ず負ける＝`.reveal`を持つ要素だけ
+    //   「動きを付けたのに一切動かない」になっていた（実例：p.lead.reveal「下記は9時30分…」）。
+    //   ここだけ!importantで取り返す。★全部 html.fxa-on 配下＝JSが動かない環境では1行も効かないので
+    //   「JSが無ければ中身が全部見える」という保険は壊れない。
+    +'html.fxa-on .fxa_pre:not(.fxa_in):not(.fxa_cpre):not(.fxa_tw):not(.fxa_lines):not(.fxa_wp):not(.fxa_cl):not(.fxa_cc){opacity:0!important}'
+    +'html.fxa-on .fxa_pre.fxa_y:not(.fxa_in){transform:translateY(var(--fxa-dist,28px))!important}'
+    +'html.fxa-on .fxa_pre.fxa_yd:not(.fxa_in){transform:translateY(calc(-1*var(--fxa-dist,36px)))!important}'
+    +'html.fxa-on .fxa_pre.fxa_xl:not(.fxa_in){transform:translateX(calc(-1*var(--fxa-dist,48px)))!important}'
+    +'html.fxa-on .fxa_pre.fxa_xr:not(.fxa_in){transform:translateX(var(--fxa-dist,48px))!important}'
+    +'html.fxa-on .fxa_pre.fxa_s:not(.fxa_in){transform:scale(var(--fxa-scale,.86))!important}'
+    +'html.fxa-on .fxa_pre.fxa_ry:not(.fxa_in){transform:perspective(800px) rotateY(var(--fxa-deg,90deg))!important}'
+    +'html.fxa-on .fxa_pre.fxa_fl:not(.fxa_in){transform:perspective(1200px) rotateY(var(--fxa-deg,80deg))!important}'
+    +'html.fxa-on .fxa_pre.fxa_clip:not(.fxa_in){transform:translateY(var(--fxa-dist,40px))!important}'
+    +'html.fxa-on .fxa_pre.fxa_bl:not(.fxa_in){filter:blur(var(--fxa-blur,14px))!important}'
+    +'html.fxa-on .fxa_pre.fxa_cl:not(.fxa_in){clip-path:inset(0 100% 0 0)!important}'
+    +'html.fxa-on .fxa_pre.fxa_cc:not(.fxa_in){clip-path:inset(0 50% 0 50%)!important}'
+    +'html.fxa-on .fxa_pre.fxa_wp:not(.fxa_in){clip-path:inset(0 100% 0 0)!important}';
   // スクロールで画面に入ったら再生。JS無効なら全部表示（消えない保険）。"__ce"を含めない＝保存で残る。
   // ★時間トリガー(setTimeout)は使わない＝「スクロールで画面に入った時に1回だけ再生」に統一。
   //   IntersectionObserverだけで判定→発火したらunobserve（1回きり）。上部の要素は監視開始時に即発火＝読み込みで再生。
@@ -8789,7 +9234,8 @@ html.__ce_altmode{cursor:text}
     +'var cd=el.getAttribute("data-cedelay"); var gd=cd!=null?+cd:groupDelay(el); if(gd>0) setTimeout(go,gd); else go(); }'
     +'if(!("IntersectionObserver" in window)){all().forEach(reveal);return;}'
     +'var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){reveal(t);});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});'
-    +'function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}'  // 初回描画(fxa_pre隠れ状態)を1フレーム待ってから監視開始＝上部要素も一瞬で終わらずスライドする
+    +'function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}'
+    +'window.fxaObs=obs;'   // ★編集中に新しく動きを付けた要素も監視に入れる（付けた直後は監視対象外だった）  // 初回描画(fxa_pre隠れ状態)を1フレーム待ってから監視開始＝上部要素も一瞬で終わらずスライドする
     +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",obs);else obs();})();';
   // CSSは「消して足す」でなく内容だけ差し替える（一瞬スタイルが消えるチラつき・前のアニメへの干渉を防ぐ）
   function _fxInjCss(){ var st=document.getElementById('fxa-css'); if(st){ if(st.textContent!==FX_CSS) st.textContent=FX_CSS; return; } st=document.createElement('style'); st.id='fxa-css'; st.textContent=FX_CSS; (document.head||document.documentElement).appendChild(st); }
@@ -8846,17 +9292,33 @@ html.__ce_altmode{cursor:text}
   }
   function applyBake(el,k){
     var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ まず動きを選んでください'; return; }
+    var _fxShown=null;   // 付け終わったあとに1回だけ再生して見せる相手
     ensureFxAssets();
     fxUnwrap(el);  // 既存の出現ラッパーがあれば解除して素の要素に戻す（付け直し対応）
     stopAnim(el); purgeInlineFx(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);  // 2回目以降も必ずプレーン文字から＋一括改善の文字アニメを外す（上書き消え防止）
     // ★ドラッグ/拡大で付いた transition:none / animation:none を外す。これが残ると出現もループも一瞬で終わって「動かない」に見える。
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
+    // ★インラインの transform:none!important も外す（2026-07-28）。
+    //   位置調整・余白そろえ等を通った要素には applyTf が transform:none!important を焼き込む。
+    //   インラインの!importantはCSS側の!importantより強いので、動き（translateY等）が1pxも効かない
+    //   ＝「薄く出るだけで動かない」になる。ズレの値は translate/rotate/scale が持つので位置は変わらない。
+    if(el.style.getPropertyValue('transform')==='none') el.style.removeProperty('transform');
     // ★保険が付けた「見せるクラス」が過去の保存で焼き込まれていると、ページCSSの
     //   .inview{opacity:1!important;transform:none!important} 等に負けて出現アニメが一切効かない
     //   （実際に起きた：3D回転を付けても動かない）。reveal系の要素だけ、その場で外して主導権を取り戻す。
     if(el.matches && el.matches('[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]')){
       ['in','show','is-visible','active','visible','in-view','inview','animated','revealed','aos-animate','is-inview','is-show','reveal-show','show-up','on','enter'].forEach(function(c){ el.classList.remove(c); });
     }
+    // ★動きは常に「1つだけ」にする（2026-07-28）。ページ自身の出現アニメのトリガークラスを外す。
+    //   残っているとページ側(.reveal等)とツール側(fxa)が同時に動き、右下→左上のような斜めの変な動きになる。
+    //   外したクラスは data-cerevcls に覚えておき、動きを消した時に元へ戻す。
+    ['reveal','stagger'].forEach(function(c){
+      if(el.classList.contains(c)){
+        el.classList.remove(c);
+        var k=el.getAttribute('data-cerevcls')||'';
+        if(k.split(' ').indexOf(c)<0) el.setAttribute('data-cerevcls',(k?k+' ':'')+c);
+      }
+    });
     el.style.setProperty('--fxa-dur', (fxParam(a,'dur')||800)+'ms');  // a.dは説明文なので使わない
     if(a.g==='loop'){
       if(a.dir==='ps'){ el.style.setProperty('--fxa-amp', (fxParam(a,'amp')/100)); el.classList.add('fxa_lp_pulse'); }
@@ -8872,6 +9334,7 @@ html.__ce_altmode{cursor:text}
         el.style.setProperty('--fxa-stag', fxParam(a,'stag')+'ms');
         if(!a.type) el.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px');
         el.classList.add('fxa_in');  // 編集中はすぐ見えるように（保存時にfxa_inは外す＝再生に戻る）
+        _fxShown=el;
       }
     } else if(a.g==='lines'){
       // 行マスク：<br>区切りで行に分割して包む（戻すのはfxUnsplit）。--iは行番号＝時差の元
@@ -8879,7 +9342,7 @@ html.__ce_altmode{cursor:text}
       if(!lns.length){ el.style.removeProperty('--fxa-dur'); if(msg)msg.textContent='⚠ ここには文字が無いので行マスクは付けられません'; return; }
       el.classList.add('fxa_pre'); el.classList.add('fxa_lines');
       el.style.setProperty('--fxa-stag', fxParam(a,'stag')+'ms');
-      el.classList.add('fxa_in');
+      el.classList.add('fxa_in'); _fxShown=el;
     } else if(a.g==='cnt'){
       var mm=(el.textContent||'').match(/[-+]?[\\d,]+(?:\\.\\d+)?/);
       if(!mm){ el.style.removeProperty('--fxa-dur'); if(msg)msg.textContent='⚠ ここには数字が無いのでカウントアップは付けられません（例：120件・98%）'; return; }
@@ -8908,9 +9371,22 @@ html.__ce_altmode{cursor:text}
       else if(a.dir==='cc'){ host.classList.add('fxa_cc'); }
       else if(a.dir==='clip'){ host.classList.add('fxa_clip'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
       host.classList.add('fxa_in');
+      _fxShown=host;
     }
+    // ★付けた直後に1回だけ再生して見せる（今までは「見えている状態」で終わるので
+    //   本当に付いたのか分からず、「動かない」と誤解する原因になっていた）
+    if(_fxShown){
+      (function(n){
+        try{
+          n.classList.remove('fxa_in'); void n.offsetWidth;   // 隠し状態を1フレーム挟んでtransitionを走らせる
+          requestAnimationFrame(function(){ n.classList.add('fxa_in'); });
+          setTimeout(function(){ n.classList.add('fxa_in'); },500);  // 保険：rAFが来ない環境でも必ず見える状態で終わる
+        }catch(_){ n.classList.add('fxa_in'); }
+      })(_fxShown);
+    }
+    try{ if(window.fxaObs) window.fxaObs(); }catch(_){}   // 監視に入れる（保存し直さなくてもスクロール再生が効く）
     markDirty();
-    if(msg) msg.textContent='✅ 付けました。ヘッダの「💾 変更を保存」で残ります（スクロールで再生）';
+    if(msg) msg.textContent='✅ 付けました（今1回再生しました）。ヘッダの「💾 変更を保存」で残ります';
   }
   // 付けた動き（出現/ループ/文字アニメ）を全部外して素の要素に戻す（AIなし・即反映）。
   function removeBake(el){
@@ -8919,6 +9395,9 @@ html.__ce_altmode{cursor:text}
     // 🕊 飛行ルートも外す（属性を消すとランタイムのループは次フレームで自動停止する）
     if(el.getAttribute('data-fxa-fly')!=null||el.getAttribute('data-cefly')!=null){ el.removeAttribute('data-fxa-fly'); el.removeAttribute('data-cefly'); el.ceflyGen=(el.ceflyGen||0)+1; }
     stopAnim(el); clearPreviewStyle(el); fxClearClasses(el); fxUnsplit(el); fxStripImpLetters(el);
+    // 焼き込み時に外したページ側のトリガークラス(.reveal等)を戻す＝元のページの動きに戻す
+    var _rv=el.getAttribute('data-cerevcls');
+    if(_rv){ _rv.split(' ').forEach(function(c){ if(c) el.classList.add(c); }); el.removeAttribute('data-cerevcls'); }
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
     markDirty();
     if(msg) msg.textContent='この要素の動きを消しました（保存で確定）';
@@ -10585,7 +11064,21 @@ html.__ce_altmode{cursor:text}
     var cl=el.classList;
     // ツールが1文字ずつ包んだ断片は今までどおり親へ上る（アニメ用のinline-blockに引っかからないように）
     if(cl&&(cl.contains('fxa_ch')||cl.contains('imp-char')||cl.contains('ch')||cl.contains('fxa_ln')||cl.contains('fxa_lni'))) return false;
-    if((el.textContent||'').trim().length<=2) return false;   // 1〜2文字＝分割された文字の断片
+    // ★1〜2文字は基本「分割された文字の断片」＝親へ上る。ただし“アイコンの箱”だけは例外（2026-07-28）。
+    //   例：NEWSの行末の丸い「→」＝<i>36×36・display:grid・border 1px・border-radius:50%。
+    //   今までは断片扱いで親のリンク全体が選ばれ、矢印そのものを掴めなかった。
+    if((el.textContent||'').trim().length<=2){
+      var si; try{ si=getComputedStyle(el); }catch(_){ return false; }
+      if(si.display==='inline') return false;
+      var w=el.offsetWidth, h=el.offsetHeight;
+      if(w<16||h<16) return false;
+      var hasBd=(parseFloat(si.borderTopWidth)>0&&si.borderTopStyle!=='none');
+      var hasBg=(si.backgroundColor&&si.backgroundColor!=='rgba(0, 0, 0, 0)'&&si.backgroundColor!=='transparent')
+                ||(si.backgroundImage&&si.backgroundImage!=='none');
+      var rad=parseFloat(si.borderTopLeftRadius)||0;
+      var square=(w>=24&&h>=24&&Math.max(w,h)/Math.min(w,h)<=1.6);
+      return !!(hasBd||hasBg||rad>=4||square);
+    }
     var st; try{ st=getComputedStyle(el); }catch(_){ return false; }
     if((st.writingMode||'').indexOf('vertical')===0) return true;              // 縦書き＝意図して作った塊
     if(st.position==='absolute'||st.position==='fixed') return true;           // 浮かせて置いてある
@@ -10598,6 +11091,65 @@ html.__ce_altmode{cursor:text}
       if(/(flex|grid)/.test(ps.display)) return true;
     }
     return false;
+  }
+  // 🔼🔽 重なり順を「相手より確実に上（下）」にする（2026-07-28）。
+  //   ★z-indexを1ずつ足すだけでは勝てない：①相手の数字が大きい ②自分が別の"重なりの部屋"
+  //   (stacking context：transform/opacity/isolation/z-index持ちの親)の中にいると、中でいくら数字を
+  //   上げても部屋ごと後ろのまま。実際「🔼手前を何度押してもキャプションカードの下から出てこない」報告あり。
+  //   → 重なっている相手の数字を実測して跳び越し、それでも上に出なければ親を1段ずつ一緒に上げる（最大4段）。
+  function _zNum(n){ var v=parseInt(getComputedStyle(n).zIndex,10); return isNaN(v)?null:v; }
+  function _zRivals(el){
+    var r=el.getBoundingClientRect(), out=[];
+    if(!r.width||!r.height) return out;
+    [].slice.call(document.body.querySelectorAll('div,section,figure,article,aside,p,span,a,img,h1,h2,h3,ul,li')).slice(0,2500).forEach(function(n){
+      if(n===el||el.contains(n)||n.contains(el)) return;
+      // ★ツール自身のUI（青い■ハンドル・メニュー・パネル）は相手に数えない。
+      //   これを外すと z-index 2147483646 のハンドルを相手だと思って、数字が一気に最大値まで飛ぶ（実際に起きた）
+      if(n.id&&n.id.indexOf('__ce')===0) return;
+      if(String(n.className||'').indexOf('__ce')>=0) return;
+      if(n.closest&&n.closest('[id^="__ce"]')) return;
+      var b=n.getBoundingClientRect();
+      if(b.width<6||b.height<6) return;
+      if(b.right<=r.left||b.left>=r.right||b.bottom<=r.top||b.top>=r.bottom) return;   // 重なっていない
+      out.push(n);
+    });
+    return out;
+  }
+  // 重なっている場所で実際に一番上に出ているか。画面の外にあって判定できない時は null を返す
+  //   （nullを「まだ下」と誤解すると、親を無駄に4段まで持ち上げてしまう）
+  function _zOnTop(el){
+    var r=el.getBoundingClientRect();
+    if(r.bottom<0||r.top>window.innerHeight||r.right<0||r.left>window.innerWidth) return null;
+    var x=Math.round(Math.max(2,Math.min(r.left+r.width/2, window.innerWidth-3)));
+    var y=Math.round(Math.max(2,Math.min(r.top+r.height/2, window.innerHeight-3)));
+    var hit=document.elementFromPoint(x,y);
+    if(!hit) return null;
+    if(hit.closest&&hit.closest('[id^="__ce"]')) return null;   // ツールのメニューが上に乗っている＝判定できない
+    return (hit===el||el.contains(hit));
+  }
+  function zStack(el, back){
+    if(!el) return {z:0,lifted:0};
+    var best=null;
+    _zRivals(el).forEach(function(n){        // 相手側の"部屋"の数字を拾う（自分に一番近い祖先の値）
+      var t=n;
+      while(t&&t!==document.body){ var z=_zNum(t); if(z!==null){ if(best===null||(back?z<best:z>best)) best=z; break; } t=t.parentElement; }
+    });
+    if(best===null) best=0;
+    var z=Math.max(-999, Math.min(9999, back?best-1:best+1));   // 数字が青天井に飛ばないよう上限を付ける
+    function put(n){
+      if(getComputedStyle(n).position==='static') n.style.setProperty('position','relative','important');
+      n.style.setProperty('z-index', z, 'important');
+    }
+    put(el);
+    var lifted=0, p=el.parentElement;
+    // まだ上に出ていなければ、親の"部屋"ごと一緒に上げる（セクションまで・最大4段）
+    for(var i=0;i<4 && p && p!==document.body && !/^(SECTION|HEADER|FOOTER|MAIN)$/.test(p.tagName); i++){
+      if(back) break;                       // 後ろへ送る時は親を触らない（他が巻き添えになる）
+      var top=_zOnTop(el);
+      if(top===true||top===null) break;     // 出ている／判定できない時はここで止める
+      put(p); lifted++; p=p.parentElement;
+    }
+    return {z:z, lifted:lifted};
   }
   function pickTarget(el){
     var INLINE={SPAN:1,B:1,I:1,EM:1,STRONG:1,SMALL:1,MARK:1,U:1,FONT:1,WBR:1,BR:1};
@@ -11418,6 +11970,29 @@ html.__ce_altmode{cursor:text}
         }).join('')
         +'</div>';
     }
+    // 🎨 背景・フチ・影を消す（AIなし・2026-07-28）＝色つきカードをその場で透明にする。
+    // ★「見つかったこと」の中ではなく本命メニュー側に置く：⑲の教訓（発見できない機能は無い機能と同じ）
+    var flatQ=flatScan(curEl), flatRowQ='';
+    if(flatQ.length){
+      flatRowQ='<div style="background:#f6f0ff;border-bottom:1px solid #ddd0f2;padding:6px 10px 7px;font-size:12px;border-radius:7px">'
+        +'<b>🎨 背景・フチを消す</b>（'+flatQ.length+'件・AIなし）<br>'
+        +'<span style="font-size:10.5px;color:#7a6a8a">触れると赤枠でどれか分かります／押すと透明になる・もう一度押すと戻る。🌸は後ろに浮いている飾り（ピンクの丸など右クリックで掴めないもの）</span>'
+        +flatQ.map(function(it,i){
+          function bt(k,t,on){
+            return on?('<button class="__ce_flz" data-i="'+i+'" data-k="'+k+'" style="background:#fff;border:1px solid #d3c2ee;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:11px;font-family:inherit;color:#1d1d1f;white-space:nowrap">'+t+'</button>'):'';
+          }
+          // 色の四角＝「このピンクのこと」が言葉なしで分かる（浮いてる飾りは実体を指せないので特に重要）
+          var sw=it.sw?('<span style="flex:none;width:13px;height:13px;border-radius:3px;border:1px solid rgba(0,0,0,.2);background:'+it.sw+'"></span>'):'';
+          return '<div style="display:flex;align-items:center;gap:4px;margin:4px 0 0">'
+            +sw
+            +'<span style="flex:1;font-size:11px;color:#1d1d1f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(it.name+it.tag)+'">'+esc(it.name+it.tag)+'</span>'
+            +bt('bg','🎨背景',it.bg)+bt('bd','▭フチ',it.bd)+bt('sh','☁影',it.sh)
+            +(it.deco
+              ?'<button class="__ce_flz" data-i="'+i+'" data-k="vis" style="background:#d6455c;border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:11px;font-family:inherit;color:#fff;white-space:nowrap">🚫この飾りを消す</button>'
+              :'<button class="__ce_flz" data-i="'+i+'" data-k="all" style="background:#7c5cd6;border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:11px;font-family:inherit;color:#fff;white-space:nowrap">✨全部</button>')
+            +'</div>';
+        }).join('')+'</div>';
+    }
     // ◽ 角丸の写真の「裏の四角」＝直角のケースが角からはみ出している時、⌒丸く/✕消すで隠す（AIなし）
     var radQ=radiusScan(curEl), radRowQ='';
     if(radQ.length){
@@ -11853,7 +12428,7 @@ html.__ce_altmode{cursor:text}
       : '';
     // 背景が複数ある時のサムネ一覧は縦に長いので、本命メニューの下へ回す（1枚の時の1行は上のまま）
     var bgTop=(bgQ.length===1)?bgRowQ:'', bgBottom=(bgQ.length>1)?bgRowQ:'';
-    qm.innerHTML=selRowQ+mfRow+szRow+ovRowQ+spRow+bgTop+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    qm.innerHTML=selRowQ+mfRow+szRow+ovRowQ+spRow+bgTop+flatRowQ+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
       +bgBottom
       +noticeQ
@@ -12534,6 +13109,25 @@ html.__ce_altmode{cursor:text}
         if(msg) msg.textContent='飾りを'+r+'（💾保存で確定・⟲戻すで取り消し）';
       });
     });
+    // 🎨 背景・フチ・影を消すの配線＝ホバーで赤枠→押すとトグル（何度でも戻せる）
+    [].slice.call(qm.querySelectorAll('.__ce_flz')).forEach(function(b){
+      var it=flatQ[+b.getAttribute('data-i')]; if(!it) return;
+      var k=b.getAttribute('data-k'), lb0=b.textContent;
+      b.addEventListener('mouseenter',function(){ try{ it.el.__flz=it.el.style.getPropertyValue('outline'); it.el.style.setProperty('outline','2px solid #ff3b30','important'); }catch(_){} });
+      b.addEventListener('mouseleave',function(){ try{ if(it.el.__flz) it.el.style.setProperty('outline',it.el.__flz,'important'); else it.el.style.removeProperty('outline'); }catch(_){} });
+      b.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        try{ it.el.style.removeProperty('outline'); }catch(_){}
+        var on;
+        if(k==='all'){
+          var want=(it.el.getAttribute('data-ceflatbg')==null);   // 1つも消していなければ「全部消す」
+          ['bg','bd','sh'].forEach(function(k2){ if((it.el.getAttribute('data-ceflat'+k2)!=null)!==want) flatOff(it,k2); });
+          on=want;
+        } else on=flatOff(it,k);
+        this.textContent=on?'↩ 戻す':lb0;
+        if(msg) msg.textContent='🎨 '+(on?'透明にしました':'戻しました')+'（💾保存で確定・⟲戻すで取り消し）';
+      });
+    });
     // ◽ 裏の四角のカドを隠す（⌒角丸／✕見た目消す）の配線＝ホバーで赤枠→押すとトグル
     [].slice.call(qm.querySelectorAll('.__ce_rrz,.__ce_rhz')).forEach(function(b){
       var it=radQ[+b.getAttribute('data-i')]; if(!it) return;
@@ -12761,12 +13355,10 @@ html.__ce_altmode{cursor:text}
         return;
       }
       if(t.id==='__ce_q_zup'||t.id==='__ce_q_zdn'){
-        // 重なり順（z-index）。手前に出したい方を🔼、背景にしたい方はそのまま or 🔽
-        var zcs=getComputedStyle(curEl); if(zcs.position==='static') curEl.style.setProperty('position','relative','important');
-        var z=parseInt(curEl.style.zIndex||zcs.zIndex,10); if(isNaN(z)) z=0;
-        z+=(t.id==='__ce_q_zup'?1:-1);
-        curEl.style.setProperty('z-index', z, 'important');
-        markDirty(); msg.textContent='🔼 重なり順: '+z+'（大きいほど手前・保存で確定）';
+        var _zr=zStack(curEl, t.id==='__ce_q_zdn');
+        markDirty();
+        msg.textContent=(t.id==='__ce_q_zup'?'🔼 手前に出しました':'🔽 後ろに送りました')
+          +'（重なり順 '+_zr.z+(_zr.lifted?'／親の箱も'+_zr.lifted+'個いっしょに調整':'')+'・💾保存で確定）';
         return;
       }
       if(t.id==='__ce_q_secadd'){ closeMenu(); var ab=document.getElementById('__ce_favadd'); if(ab) ab.click(); return; }
