@@ -160,6 +160,71 @@ a:hover { opacity: 0.7; }
 .header__logo__words { display: flex; flex-direction: column; gap: 0.04rem; line-height: 1; letter-spacing: 0.03em; }
 .header__logo__eyebrow { color: #87b798; font-size: 0.5rem; font-weight: 700; letter-spacing: 0.12em; }
 .header__logo__name { color: #4e795b; font-size: 1.18rem; font-weight: 700; letter-spacing: 0.08em; }
+</style><script id="it-layout-runtime">
+(function () {
+  if (window.itLayoutRuntimeLoaded) return;
+  window.itLayoutRuntimeLoaded = true;
+  function set(el, values) {
+    if (!el) return;
+    Object.keys(values).forEach(function (key) { el.style.setProperty(key, values[key], 'important'); });
+  }
+  function reset(selector) {
+    document.querySelectorAll(selector).forEach(function (el) {
+      set(el, { translate: '0', transform: 'none' });
+    });
+  }
+  function applyLayout() {
+    var mobile = window.matchMedia('(max-width: 767px)').matches;
+    var hero = document.querySelector('.fv');
+    var bg = document.querySelector('.fv__bg');
+    var picture = document.querySelector('.fv__bg picture');
+    var image = document.querySelector('.fv__bg picture img');
+    var copyBlock = document.querySelector('.fv__txt_blk');
+    var copy = document.querySelector('.fv__txt');
+    var news = document.querySelector('.fv__news');
+    var concept = document.querySelector('.top01');
+    var conceptBlock = document.querySelector('.top01__blk01');
+    var conceptText = document.querySelector('.top01__txt_blk');
+    var conceptVisual = document.querySelector('.top01__img_blk');
+    var conceptImage = document.querySelector('.top01__img01');
+    var conceptImageInner = document.querySelector('.top01__img01 img');
+    var contactImage = document.querySelector('.contact_blk__img');
+    var contactImageInner = document.querySelector('.contact_blk__img img');
+    reset('.fv__news__ttl,.fv__news__ul,.fv__news__cat,.fv__news__link,.fv__news__link a');
+    reset('.top01__txt_blk > *, .top01 > .wrap01 > .link01, .top01__img01, .top01__img02');
+    set(hero, { position: 'relative', marginBottom: mobile ? '56px' : '88px', minHeight: mobile ? 'auto' : '760px', padding: mobile ? '5.5rem 0 2.5rem' : '0', overflow: 'hidden', background: 'linear-gradient(118deg, #f7fbf8 0%, #fbfcfa 48%, #eaf3ed 100%)' });
+    if (mobile) {
+      set(bg, { position: 'relative', inset: 'auto', height: '58vw', margin: '0 5% 1.4rem', zIndex: '0' });
+      set(picture, { display: 'block', position: 'absolute', inset: '0', translate: '0', width: '100%', height: '100%', maxWidth: 'none', minHeight: '0', overflow: 'hidden', borderRadius: '24px', boxShadow: '0 18px 38px rgba(52,80,62,.16)' });
+      set(copyBlock, { position: 'relative', left: 'auto', top: 'auto', translate: '0', width: '90%', height: 'auto', margin: '0 auto 1.25rem', zIndex: '3' });
+      set(news, { position: 'relative', left: 'auto', right: 'auto', bottom: 'auto', translate: '0', width: '90%', height: 'auto', margin: '0 auto', padding: '1.2rem', zIndex: '4' });
+    } else {
+      set(bg, { position: 'absolute', inset: '0', translate: '0', zIndex: '0' });
+      set(picture, { display: 'block', position: 'absolute', right: '70px', left: 'auto', top: '104px', translate: '0', width: 'min(59vw, 1050px)', height: 'min(39vw, 620px)', maxWidth: 'none', minHeight: '0', overflow: 'hidden', borderRadius: '34px', boxShadow: '0 26px 58px rgba(52,80,62,.18)' });
+      set(copyBlock, { position: 'absolute', left: '110px', top: '172px', translate: '0', width: '470px', height: 'auto', margin: '0', zIndex: '3' });
+      set(news, { position: 'absolute', left: '110px', right: 'auto', bottom: '46px', translate: '0', width: '700px', height: 'auto', maxWidth: 'none', minHeight: '0', margin: '0', padding: '1.35rem 1.55rem', zIndex: '4' });
+    }
+    set(image, { display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', background: 'transparent', border: '0', borderRadius: 'inherit', boxShadow: 'none' });
+    set(copy, { translate: '0', transform: 'none', padding: '1.25rem 1.4rem', borderLeft: '4px solid #91bd78', borderRadius: '0 18px 18px 0', background: 'rgba(255,255,255,.84)', boxShadow: '0 12px 32px rgba(60,86,66,.08)', color: '#38483d', fontSize: 'clamp(14px,1.05vw,17px)', lineHeight: '2' });
+    set(news, { background: 'rgba(255,255,255,.92)', border: '1px solid rgba(145,190,155,.33)', borderRadius: '22px', boxShadow: '0 18px 42px rgba(53,88,65,.12)' });
+    set(concept, { padding: mobile ? '34px 0 72px' : '58px 0 110px', background: 'linear-gradient(180deg,#fff 0%,#f6faf5 100%)' });
+    set(conceptBlock, { display: mobile ? 'block' : 'flex', alignItems: 'center', gap: mobile ? '0' : '72px', paddingBottom: mobile ? '34px' : '56px' });
+    set(conceptText, { width: mobile ? '90%' : '48%', margin: mobile ? '0 auto' : '0' });
+    set(conceptVisual, { width: mobile ? '90%' : '48%', margin: mobile ? '2rem auto 0' : '0' });
+    set(conceptImage, { translate: '0', width: '100%', height: 'auto', maxWidth: 'none', minHeight: '0', padding: '0', margin: '0' });
+    set(conceptImageInner, { display: 'block', width: '100%', borderRadius: '28px', boxShadow: '0 22px 46px rgba(56,85,64,.16)' });
+    set(contactImage, { width: mobile ? '90%' : 'min(35vw,460px)', height: mobile ? '180px' : '320px', right: mobile ? '5%' : '2.2rem', top: mobile ? '1.2rem' : '-2rem', overflow: 'hidden', borderRadius: '24px' });
+    set(contactImageInner, { width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'right center' });
+  }
+  function boot() {
+    applyLayout();
+    [120, 900, 2600, 4200].forEach(function (delay) { window.setTimeout(applyLayout, delay); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('resize', applyLayout);
+}());
+</script><style>
 .header__menu__ul { column-gap: 1.625rem; font-weight: bold; }
 .header__menu__a:hover { color: rgb(138, 199, 90); opacity: 1; }
 .header__menu-btn { position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; width: 3.75rem; height: 3.75rem; border-radius: 50%; background-color: rgb(138, 199, 90); margin-right: 2.36111%; margin-left: 5%; z-index: 10; cursor: pointer; }
