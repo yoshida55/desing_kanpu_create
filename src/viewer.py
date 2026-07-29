@@ -2719,6 +2719,8 @@ html.__ce_altmode{cursor:text}
     <div class="lbl plain">📍 動かした跡の一覧（ドラッグ移動を1個ずつ確認して選んで戻す・わざと動かした所は残せる・AIなし）</div>
     <button class="im" id="__ce_unshift" style="background:#a04b00;color:#fff">📍 動かした跡を一覧で見る</button>
     <button class="im" id="__ce_btncolor" style="background:#0b6e4f;color:#fff">🎨 全ボタンをテーマ色に統一</button>
+    <div class="lbl plain">🎨 使っている色を置き換える（ヘッダーの色もOK・変数なしのクローンでも効く・AIなし）</div>
+    <button class="im" id="__ce_colrepbtn" style="background:#0b6bcb;color:#fff">🎨 ヘッダー・文字・背景の色を置き換える（Shift+ダブルクリックでも開く）</button>
     <div class="lbl plain">➖ 区切り線（各セクションの先頭に短い線・AIなし。不要な所は右クリック→削除）</div>
     <div class="row" style="gap:10px;align-items:center">
       <label style="font-size:12px;color:#555">太さ<input id="__ce_divline_h" type="number" value="2" min="1" max="20" style="width:52px;margin-left:4px"></label>
@@ -2752,6 +2754,8 @@ html.__ce_altmode{cursor:text}
     <div class="lbl plain">⭐ セクションのお気に入り（保存は右クリック→⭐・AIなし）</div>
     <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
     <button class="im" id="__ce_favadd" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">➕ お気に入りからセクションを追加（場所を選ぶ）</button>
+    <button class="im" id="__ce_hdpick" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🧢 ヘッダーの種類を選ぶ（標準6種＋⭐保存分）</button>
+    <button class="im" id="__ce_ftpick" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🦶 フッターの種類を選ぶ（⭐保存分）</button>
     <div class="lbl plain">🎨 おしゃれ度チェック（AIが有名サイト基準で採点＋改善点）</div>
     <button class="im" id="__ce_stylecheck" style="background:#c026a6;color:#fff">🎨 おしゃれ度をチェック</button>
     <button class="im" id="__ce_autopolish" style="background:#7c3aed;color:#fff">🎯 チェックして自動で磨く（採点→改善を一括・AI）</button>
@@ -5177,6 +5181,154 @@ html.__ce_altmode{cursor:text}
       })()}
     ];
   }
+  // 🎨 使っている色を置き換える（2026-07-30・AIなし）
+  //   ★なぜ必要か：ツールの「ベース色」は CSS変数(--accent等)を書き換える方式なので、
+  //     変数を持たないクローン系カンプでは丸ごと無効になる（ヘッダーの色が変えられない実報告）。
+  //     そこで「画面で実際に使われている色」を拾い、色→色で置換する＝変数の有無に関係なく効く。
+  //   ★当て方は inline の !important：クローン元CSSは詳細度が高く、普通の指定では勝てない。
+  //   ★半透明(rgba)は透明度を保ったまま色だけ差し替える（薄い帯が急に濃くなるのを防ぐ）。
+  var CR_PROPS=['backgroundColor','color','borderTopColor','borderRightColor','borderBottomColor','borderLeftColor'];
+  function crNorm(c){
+    c=(c||'').trim();
+    if(!c||c==='transparent'||c==='none') return '';
+    if(/,\\s*0\\)\\s*$/.test(c)) return '';        // 完全に透明な色は対象外
+    return c;
+  }
+  function crKebab(p){ return p.replace(/[A-Z]/g,function(m){ return '-'+m.toLowerCase(); }); }
+  function crEls(root){
+    var out=[root].concat([].slice.call(root.querySelectorAll('*')));
+    return out.slice(0,4000).filter(function(el){ return !(el.closest&&el.closest('[id^="__ce"]')); });
+  }
+  function crCollect(root){
+    var map={};
+    crEls(root).forEach(function(el){
+      var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
+      CR_PROPS.forEach(function(p){
+        if(p.indexOf('border')===0 && !(parseFloat(cs['border'+p.replace('border','').replace('Color','')+'Width']||'0')>0)) return;
+        var v=crNorm(cs[p]); if(!v) return;
+        (map[v]=map[v]||{n:0}).n++;
+      });
+      var bi=cs.backgroundImage||'';
+      if(bi && bi!=='none'){
+        (bi.match(/rgba?\\([^)]+\\)/g)||[]).forEach(function(v){
+          v=crNorm(v); if(!v) return; (map[v]=map[v]||{n:0}).n++;
+        });
+      }
+    });
+    return Object.keys(map).map(function(k){ return {c:k,n:map[k].n}; })
+      .sort(function(a,b){ return b.n-a.n; }).slice(0,28);
+  }
+  function crApply(oldC,newHex,root){
+    var am=oldC.match(/^rgba\\([^,]+,[^,]+,[^,]+,\\s*([0-9.]+)\\)/);
+    var alpha=am?parseFloat(am[1]):1, val=newHex;
+    if(alpha<1){
+      var h=newHex.replace('#',''); if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+      val='rgba('+parseInt(h.slice(0,2),16)+', '+parseInt(h.slice(2,4),16)+', '+parseInt(h.slice(4,6),16)+', '+alpha+')';
+    }
+    var cnt=0;
+    crEls(root).forEach(function(el){
+      var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
+      var hit=false;
+      CR_PROPS.forEach(function(p){
+        if(cs[p]!==oldC) return;
+        if(p.indexOf('border')===0 && !(parseFloat(cs['border'+p.replace('border','').replace('Color','')+'Width']||'0')>0)) return;
+        try{ pushUndo(el); }catch(_){}
+        el.style.setProperty(crKebab(p),val,'important');
+        // クローン元CSSは -webkit-text-fill-color を持つことがあり、これが残ると文字色が変わらない
+        if(p==='color') el.style.setProperty('-webkit-text-fill-color',val,'important');
+        hit=true;
+      });
+      var bi=cs.backgroundImage||'';
+      if(bi && bi!=='none' && bi.indexOf(oldC)>=0){
+        try{ pushUndo(el); }catch(_){}
+        el.style.setProperty('background-image',bi.split(oldC).join(val),'important');
+        hit=true;
+      }
+      if(hit) cnt++;
+    });
+    try{ markDirty(); }catch(_){}
+    return cnt;
+  }
+  function openColorReplace(scopeEl){
+    var old=document.getElementById('__ce_colrep'); if(old) old.remove();
+    var here=scopeEl||document.body;
+    var sec=(here.closest&&here.closest('section,header,footer,main'))||document.body;
+    var p=document.createElement('div'); p.id='__ce_colrep';
+    p.setAttribute('style','position:fixed;right:16px;top:70px;z-index:2147483646;width:334px;max-height:78vh;overflow:auto;background:#fff;border:1px solid #d0d0d5;border-radius:12px;box-shadow:0 16px 44px rgba(0,0,0,.28);padding:10px 12px;font:12.5px/1.6 system-ui,sans-serif;color:#1d1d1f');
+    function label(el){
+      if(el===document.body) return 'ページ全体';
+      var t=el.tagName.toLowerCase();
+      return t+(el.className?('.'+String(el.className).trim().split(/\\s+/)[0]):'');
+    }
+    function render(){
+      var root=(p.querySelector('input[name=__crsc]:checked')||{}).value==='all'?document.body
+             :(p.querySelector('input[name=__crsc]:checked')||{}).value==='sec'?sec:here;
+      var list=crCollect(root);
+      var sw=list.map(function(it,i){
+        return '<button class="__crsw" data-i="'+i+'" title="'+it.c+'（'+it.n+'箇所）" '
+          +'style="width:38px;height:30px;border:1px solid rgba(0,0,0,.2);border-radius:6px;background:'+it.c+';cursor:pointer;padding:0;position:relative">'
+          +'<span style="position:absolute;right:1px;bottom:0;font-size:9px;color:#000;background:rgba(255,255,255,.75);border-radius:3px;padding:0 2px">'+it.n+'</span></button>';
+      }).join('');
+      p.querySelector('#__crgrid').innerHTML=sw||'<div style="color:#999">色が見つかりませんでした</div>';
+      p.__crlist=list; p.__crroot=root;
+      p.querySelector('#__crinfo').textContent='範囲：'+label(root)+'（'+list.length+'色）';
+    }
+    p.innerHTML='<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'
+      +'<b style="flex:1">🎨 使っている色を置き換える</b>'
+      +'<button id="__crx" style="border:none;background:#eee;border-radius:999px;padding:1px 9px;cursor:pointer">×</button></div>'
+      +'<div style="font-size:11px;color:#777;margin-bottom:6px">変えたい色をクリック → 新しい色を選ぶ。CSS変数が無いクローンでも効きます</div>'
+      +'<div style="display:flex;gap:10px;margin-bottom:6px;font-size:11.5px">'
+      +'<label><input type="radio" name="__crsc" value="here" checked> この中</label>'
+      +'<label><input type="radio" name="__crsc" value="sec"> セクション</label>'
+      +'<label><input type="radio" name="__crsc" value="all"> ページ全体</label></div>'
+      +'<div id="__crinfo" style="font-size:11px;color:#0b6bcb;margin-bottom:4px"></div>'
+      +'<div id="__crgrid" style="display:flex;flex-wrap:wrap;gap:4px"></div>'
+      +'<div id="__crpick" style="display:none;margin-top:8px;border-top:1px solid #eee;padding-top:8px">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'
+      +'<span id="__crfrom" style="width:34px;height:26px;border:1px solid rgba(0,0,0,.2);border-radius:5px"></span>'
+      +'<span>→</span><input type="color" id="__crto" style="width:46px;height:30px;padding:1px;border:1px solid #d0d0d5;border-radius:6px;cursor:pointer">'
+      +'<button id="__crgo" style="flex:1;border:none;background:#0b6bcb;color:#fff;border-radius:7px;padding:7px;font-weight:700;cursor:pointer">置き換える</button></div>'
+      +'<div id="__crmsg" style="font-size:11px;color:#555"></div></div>'
+      // ★背景が「透明」の帯は、置き換える色が存在しないので上のスウォッチには出ない。
+      //   （2段構えのヘッダーで、下段だけ色が変えられない実報告・2026-07-30）
+      //   その場合はここから直接塗る＝無い色は置き換えではなく「付ける」しかない。
+      +'<div style="border-top:1px solid #eee;margin-top:9px;padding-top:8px">'
+      +'<div style="font-size:11px;color:#777;margin-bottom:5px">背景が透明な帯は上の一覧に出ません（塗る色が無いため）。その場合はここから直接付けます。</div>'
+      +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<input type="color" id="__crbgc" value="#0b6bcb" style="width:46px;height:30px;padding:1px;border:1px solid #d0d0d5;border-radius:6px;cursor:pointer">'
+      +'<button id="__crbg" style="flex:1;border:none;background:#0b6e4f;color:#fff;border-radius:7px;padding:7px;font-weight:700;cursor:pointer">この場所に背景色を付ける</button></div>'
+      +'<div id="__crbgt" style="font-size:11px;color:#0b6bcb;margin-top:3px"></div>'
+      +'<div id="__crmsg2" style="font-size:11px;color:#555"></div></div>';
+    document.body.appendChild(p);
+    render();
+    p.querySelector('#__crx').addEventListener('click',function(){ p.remove(); });
+    [].forEach.call(p.querySelectorAll('input[name=__crsc]'),function(r){ r.addEventListener('change',render); });
+    p.querySelector('#__crgrid').addEventListener('click',function(ev){
+      var b=ev.target.closest('.__crsw'); if(!b) return;
+      var it=p.__crlist[+b.getAttribute('data-i')]; if(!it) return;
+      p.__crsel=it;
+      p.querySelector('#__crpick').style.display='';
+      p.querySelector('#__crfrom').style.background=it.c;
+      p.querySelector('#__crmsg').textContent=it.c+' を '+it.n+'箇所で使っています';
+    });
+    p.querySelector('#__crbgt').textContent='対象：'+label(here)+'（Shift+ダブルクリックした場所）';
+    p.querySelector('#__crbg').addEventListener('click',function(){
+      try{ pushUndo(here); }catch(_){}
+      here.style.setProperty('background-color', p.querySelector('#__crbgc').value, 'important');
+      here.style.setProperty('background-image','none','important');   // 画像やグラデが乗っていると色が見えないので外す
+      try{ markDirty(); }catch(_){}
+      p.querySelector('#__crmsg2').textContent='✅ '+label(here)+' に背景色を付けました（⟲戻す・💾保存で確定）';
+      if(msg) msg.textContent='🎨 '+label(here)+' に背景色を付けました。💾保存で確定してください';
+      render();
+    });
+    p.querySelector('#__crgo').addEventListener('click',function(){
+      var it=p.__crsel; if(!it){ return; }
+      var n=crApply(it.c, p.querySelector('#__crto').value, p.__crroot);
+      p.querySelector('#__crmsg').textContent=n?('✅ '+n+'個の要素を塗り替えました（⟲戻す・💾保存で確定）'):'該当が見つかりませんでした';
+      if(msg) msg.textContent='🎨 色を置き換えました（'+n+'個）。💾保存で確定してください';
+      render();
+    });
+  }
   // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
   // 編集バー（①で選ぶ）と右クリックメニュー（右クリック位置）の両方から呼べるよう関数化。
   function favSwapOpen(target){
@@ -5253,8 +5405,28 @@ html.__ce_altmode{cursor:text}
       });
     }).catch(function(){ msg.textContent='お気に入り一覧の取得に失敗しました'; });
   }
+  var colRepBtn=document.getElementById('__ce_colrepbtn');
+  if(colRepBtn) colRepBtn.addEventListener('click',function(){
+    // ①で選んだセクション → 無ければヘッダー → 無ければページ全体、の順で範囲の初期値を決める
+    var t=null; try{ t=curSecEl(); }catch(_){}
+    if(!t) t=document.querySelector('header')||document.body;
+    openColorReplace(t);
+  });
   var favListBtn=document.getElementById('__ce_favlist');
   if(favListBtn) favListBtn.addEventListener('click',function(){ favSwapOpen(curSecEl()); });
+  // 🧢/🦶 ヘッダー・フッターは「①で範囲を選んでから🔀」の2段構えで、実際に見つけられない事故が起きた
+  //   （2026-07-30・検索でも当たらない＝ボタン名に「ヘッダー」の文字が無かった）。
+  //   専用ボタンを置いて1クリックで一覧を出す。名前に「ヘッダー」が入るので曖昧検索にも必ず出る。
+  [['__ce_hdpick','header','ヘッダー'],['__ce_ftpick','footer','フッター']].forEach(function(t){
+    var b=document.getElementById(t[0]);
+    if(!b) return;
+    b.addEventListener('click',function(){
+      var el=document.querySelector(t[1]);
+      if(!el && t[1]==='header'){ try{ el=findTopBar(); }catch(_){ } }
+      if(!el){ msg.textContent=t[2]+'（ページ'+(t[1]==='header'?'上':'下')+'部の横長の帯）が見つかりません'; return; }
+      favSwapOpen(el);
+    });
+  });
   // 🗑 セクションを削除：一覧から選んで消す（AIなし・行にマウスを載せると本体を赤枠で示す）
   function secDeleteOpen(defEl){
     var parts=[].slice.call(document.querySelectorAll('header,section,footer')).filter(function(x){ return !x.closest('[id^="__ce"]') && !(x.parentElement&&x.parentElement.closest('section')); });
@@ -12411,7 +12583,8 @@ html.__ce_altmode{cursor:text}
     // ★ツールが置いた部品（🔓実体化した飾り・🔶図形）は、それ自身を掴む＝親に吸い上げない。
     //   「01」のような1〜2文字のspanは「分割された文字の断片」と見なされて親が選ばれ、
     //   ハンドルは出るのに掴んでも動かない、という報告が出た（2026-07-29）。
-    if(el&&el.classList&&(el.classList.contains('ce_psel')||el.classList.contains('ce_shape'))) return el;
+    if(el&&el.classList&&(el.classList.contains('ce_psel')||el.classList.contains('ce_shape')
+       ||el.classList.contains('ce_tnode'))) return el;   // ce_tnode＝裸の文字を包んだ入れ物（親に吸い上げない）
     var INLINE={SPAN:1,B:1,I:1,EM:1,STRONG:1,SMALL:1,MARK:1,U:1,FONT:1,WBR:1,BR:1};
     var cur=el, hops=0;
     while(cur && cur.parentElement && cur!==document.body && hops<10 && INLINE[cur.tagName]
@@ -13855,7 +14028,12 @@ html.__ce_altmode{cursor:text}
         '影 シャドウ ぼかし',
         '角丸 丸み 角',
         '消す 削除 非表示 隠す 戻す 元に戻す やり直す',
-        '保存 書き出し 出力 ダウンロード 本番 コーディング'
+        '保存 書き出し 出力 ダウンロード 本番 コーディング',
+        // ★「ヘッダー」で探しても当たらなかった実例（2026-07-30）。ヘッダーの入れ替えは
+        //   ボタン名に「ヘッダー」が入っておらず「🔀 お気に入りからセクションを切り替え」なので、
+        //   言い換えで橋渡しする。フッター・ナビ・ロゴも同じ導線。
+        'ヘッダー ヘッダ フッター ふったー ナビ ナビゲーション メニューバー 上のバー ロゴ 切り替え 入れ替え 差し替え お気に入り 部品',
+        'セクション 節 ブロック 並べ替え 順番 追加 増やす 複製'
       ].map(function(s){ return s.split(' '); });
       function norm(s){
         s=(s||'').toLowerCase();
@@ -14959,6 +15137,54 @@ html.__ce_altmode{cursor:text}
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
+  // 🎯 カーソルの真下にある「文字を直接持つ一番小さい要素」を探す（2026-07-30）。
+  //   見出しの中に「NEWS」と「お知らせ」が兄弟で並ぶ形だと、塊（h2）が選ばれて片方だけ掴めない。
+  //   ★子孫の文字ではなく「自分が直接持っているテキスト」で判定するのがミソ。
+  //     子孫込み(textContent)で見ると入れ物まで該当してしまい、また塊が選ばれる。
+  function _deepTextAt(root,x,y){
+    if(!root||!root.querySelectorAll) return null;
+    var best=null, bestArea=Infinity;
+    var all=[].slice.call(root.querySelectorAll('*'));
+    for(var i=0;i<all.length && i<3000;i++){
+      var el=all[i];
+      if(el.closest&&el.closest('[id^="__ce"]')) continue;
+      var own=false;
+      for(var n=el.firstChild;n;n=n.nextSibling){
+        if(n.nodeType===3 && (n.nodeValue||'').trim()){ own=true; break; }
+      }
+      if(!own) continue;
+      var r=el.getBoundingClientRect();
+      if(r.width<1||r.height<1) continue;
+      if(x<r.left-2||x>r.right+2||y<r.top-2||y>r.bottom+2) continue;
+      var a=r.width*r.height;
+      if(a<bestArea){ best=el; bestArea=a; }
+    }
+    return best;
+  }
+  // 🔓 「その文字だけを指す入れ物」がDOMに無い裸のテキストノードを、その場で span に包んで掴めるようにする。
+  //   実例：<h2><span>NEWS</span>お知らせ</h2> の「お知らせ」は要素ではないので、どんな選び方をしても
+  //   h2（＝NEWS込み）しか掴めなかった（2026-07-30・実報告。3回直しを外した真犯人）。
+  //   ★包むだけなので見た目は変わらない（display も触らない）。§7㉗の疑似要素「実体化」と同じ考え方。
+  //   ★テキストノードの位置は Range.getClientRects で測る（§7㉖で既に使っている手法）。
+  function _wrapTextNodeAt(el,x,y){
+    if(!el||!el.firstChild||el.closest&&el.closest('[id^="__ce"]')) return null;
+    for(var n=el.firstChild;n;n=n.nextSibling){
+      if(n.nodeType!==3) continue;
+      if(!(n.nodeValue||'').trim()) continue;
+      var rg=null; try{ rg=document.createRange(); rg.selectNodeContents(n); }catch(_){ continue; }
+      var rs=rg.getClientRects(), hit=false;
+      for(var i=0;i<rs.length;i++){
+        var r=rs[i];
+        if(x>=r.left-2&&x<=r.right+2&&y>=r.top-2&&y<=r.bottom+2){ hit=true; break; }
+      }
+      if(!hit) continue;
+      var sp=document.createElement('span');
+      sp.className='ce_tnode'; sp.setAttribute('data-cetnode','1');
+      try{ n.parentNode.insertBefore(sp,n); sp.appendChild(n); }catch(_){ return null; }
+      return sp;
+    }
+    return null;
+  }
   // 🎯 Figma式ダブルクリック：1回目＝右クリックと同じ塊を選択、以降ダブルクリックのたびに
   //   クリック位置の子へ1段ずつ潜る（文字そのものまで届く）。メニューは開かず選択だけ＝
   //   潜り終わったら右クリックでメニュー（下のcontextmenuが __ceDblSel を優先して拾う）。
@@ -14966,8 +15192,31 @@ html.__ce_altmode{cursor:text}
     if(window.__ceFlyMode||window.__ceInspOn) return;
     var t=e.target;
     if(!t||t.nodeType!==1) return;
-    if(t.closest&&(t.closest('[id^="__ce"]')||t.closest('.__ce_hdl'))) return;
+    if(t.closest&&t.closest('[id^="__ce"]')) return;
+    // ★選択中に出る伸縮ハンドル(.__ce_hdl)が文字の上に重なっていると、ダブルクリックがハンドルに
+    //   吸われて何も起きない（「画面下に何も出ない」＝ここで止まっていた・2026-07-30）。
+    //   ハンドルは操作用の小さな四角なので、ここでは貫通して下の中身を対象にする。
+    if(t.closest&&t.closest('.__ce_hdl')){
+      var _uh=document.elementsFromPoint(e.clientX,e.clientY), _t2=null;
+      for(var _k=0;_k<_uh.length;_k++){
+        var _e2=_uh[_k];
+        if(!_e2||!_e2.closest) continue;
+        if(_e2.closest('.__ce_hdl')||_e2.closest('[id^="__ce"]')) continue;
+        _t2=_e2; break;
+      }
+      if(!_t2) return;
+      t=_t2;
+    }
     if(t.isContentEditable) return;                     // 文字編集中の単語選択はそのまま
+    // 🎨 Shift+ダブルクリック＝その場で「色を置き換える」を開く（ヘッダーの色替えの最短ルート）。
+    //   素のダブルクリックはFigma式の潜り込み選択に使われているので、修飾キーで住み分ける。
+    if(e.shiftKey){
+      e.preventDefault();
+      var _ct=null; try{ _ct=pickTarget(_realTarget(e)); }catch(_){}
+      openColorReplace(_ct||t);
+      if(msg) msg.textContent='🎨 色の置き換えを開きました（範囲は「この中／セクション／ページ全体」で切り替え）';
+      return;
+    }
     var next=null;
     if(curEl&&curEl===t){ if(msg) msg.textContent='🎯 ここが一番奥です（右クリックでメニュー・Escで解除）'; return; }
     if(curEl&&curEl.contains(t)){
@@ -14976,16 +15225,58 @@ html.__ce_altmode{cursor:text}
       next=c||t;
     }else{
       next=pickTarget(_realTarget(e));                  // 最初は右クリックと同じ掴み方
+      // ★枠だけの図形（背景が透明な ce_shape）が上に乗っていると、その中の文字を永久に掴めない
+      //   （NEWSの飾り枠の中の「お知らせ」で発覚・2026-07-30）。右クリックでは図形自身を選べる必要が
+      //   あるので貫通させないが、ダブルクリックは「中身へ潜る」操作なので、ここでは貫通させる。
+      if(next && next.classList && next.classList.contains('ce_shape')){
+        var _bg=''; try{ _bg=getComputedStyle(next).backgroundColor||''; }catch(_){}
+        if(_bg==='transparent' || /,\\s*0\\)\\s*$/.test(_bg)){
+          var _u=document.elementsFromPoint(e.clientX,e.clientY);
+          for(var _i=0;_i<_u.length;_i++){
+            var _c=_u[_i];
+            if(!_c || !_c.closest) continue;
+            if(_c.closest('[id^="__ce"]')) continue;
+            if(_c.classList && _c.classList.contains('ce_shape')) continue;
+            if(!(_c.textContent||'').trim()) continue;   // 文字を持つものまで潜る
+            var _p=pickTarget(_c); if(_p){ next=_p; break; }
+          }
+        }
+      }
       if(next) next=_descendOverlay(next,e.clientX,e.clientY);
+      // ★塊ではなく「カーソル下の文字そのもの」まで一気に降りる（2026-07-30・要望）。
+      //   見出しの中に文字が2つ並ぶ形（NEWS＋お知らせ）で、片方だけ掴めない報告があったため。
+      //   塊のほうを選びたい時は右クリック→「⬆ 外側を選ぶ」で戻れる。
+      if(next){
+        var _dt=_deepTextAt(next, e.clientX, e.clientY);
+        if(_dt && _dt!==next && next.contains(_dt)) next=_dt;
+        // ★それでも塊のままなら「入れ物を持たない裸の文字」なので、その場で包んで単体で掴めるようにする
+        var _wn=_wrapTextNodeAt(next, e.clientX, e.clientY);
+        if(_wn) next=_wn;
+      }
+    }
+    // 1段ずつ潜る側でも同じ手当てをする（既に何か選択している状態から「お知らせ」を掴む流れ）
+    if(next && next!==document.body){
+      var _wn2=_wrapTextNodeAt(next, e.clientX, e.clientY);
+      if(_wn2) next=_wn2;
     }
     if(!next||next===document.body||next.tagName==='HTML') return;
     if(next.closest&&next.closest('[id^="__ce"]')) return;
     closeMenu();
     curEl=next; next.classList.add('__ce_sel'); selEls=[next];
     window.__ceDblSel=next;
+    // ★選んだらそのまま動かせるようにする（2026-07-30・要望）。
+    //   右クリックで自動ドラッグONにするのは §7⑨ で文字選択ができなくなり撤回した経緯があるが、
+    //   ダブルクリックは「これを触る」と明示した操作なので、ここでONにしても文字選択の邪魔にならない。
+    // ★display:inline のままだと translate が効かず1pxも動かない（§7㉗と同じ罠）。
+    //   文字だけの span を掴めるようにしたので、ここで必ず inline-block に直しておく。
+    try{
+      if(getComputedStyle(next).display==='inline') next.style.setProperty('display','inline-block','important');
+    }catch(_){}
+    var _dragOK=false; try{ setDragOn(next); _dragOK=true; }catch(_){}
     if(msg){
       var d=next.tagName.toLowerCase()+(next.className&&typeof next.className==='string'?'.'+next.className.split(' ')[0]:'');
-      msg.textContent='🎯 '+d+' を選択（もう一度ダブルクリック＝1段奥へ／右クリック＝メニュー／Esc＝解除）';
+      msg.textContent='🎯 '+d+' を選択'+(_dragOK?'／そのままドラッグで移動できます':'')
+        +'（もう一度ダブルクリック＝1段奥へ／右クリック＝メニュー／Esc＝解除）';
     }
   },true);
   document.addEventListener('contextmenu',function(e){
