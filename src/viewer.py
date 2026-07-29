@@ -3273,7 +3273,10 @@ html.__ce_altmode{cursor:text}
   // ⚠命名注意：スクリプト本文・ラッパー属性に「__ce」「data-ce」を含めないこと。
   //   保存時の掃除がscriptを/__ce/で除去し、⭐部品保存がdata-ce*属性を剥がすため（実装済みの仕様）。
   //   だから data-slshow / data-slint / data-sldur / __sl_run という名前にしてある。
-  var SL_RUN='(function(){function boot(){var ws=document.querySelectorAll("[data-slshow]");for(var i=0;i<ws.length;i++)(function(w){if(w.__slOn)return;w.__slOn=1;var imgs=[].slice.call(w.querySelectorAll("img"));if(imgs.length<2)return;var iv=parseInt(w.getAttribute("data-slint"))||4000;var du=parseInt(w.getAttribute("data-sldur"))||1200;var cur=0;for(var j=0;j<imgs.length;j++){imgs[j].style.transition="opacity "+(du/1000)+"s";imgs[j].style.setProperty("opacity",j===0?"1":"0","important");}setInterval(function(){cur=(cur+1)%imgs.length;for(var k=0;k<imgs.length;k++)imgs[k].style.setProperty("opacity",k===cur?"1":"0","important");},iv);})(ws[i]);}window.__slBoot=boot;if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();})();';
+  // ★切り替え方式（2026-07-30 改良）：古い画像と新しい画像を同時にフェードさせると、中間で
+  //   両方が半透明になり下地が透けて「白く抜ける谷」ができる（フェード2.5秒なら白い時間も2〜3秒）。
+  //   → 新しい画像を「上に重ねてフェードイン」させ、隠れ切ってから古い画像を消す。谷が出ない。
+  var SL_RUN='(function(){function boot(){var ws=document.querySelectorAll("[data-slshow]");for(var i=0;i<ws.length;i++)(function(w){if(w.__slOn)return;w.__slOn=1;var imgs=[].slice.call(w.querySelectorAll("img"));if(imgs.length<2)return;var iv=parseInt(w.getAttribute("data-slint"))||4000;var du=parseInt(w.getAttribute("data-sldur"))||1200;var cur=0;for(var j=0;j<imgs.length;j++){var im=imgs[j];im.style.transition="opacity "+(du/1000)+"s";if(!im.style.position)im.style.position=(j===0?"relative":"absolute");im.style.zIndex=(j===0?"1":"0");im.style.setProperty("opacity",j===0?"1":"0","important");}setInterval(function(){var pv=cur;cur=(cur+1)%imgs.length;imgs[cur].style.zIndex="2";imgs[cur].style.setProperty("opacity","1","important");setTimeout(function(){imgs[pv].style.setProperty("opacity","0","important");imgs[pv].style.zIndex="0";imgs[cur].style.zIndex="1";},du+80);},iv);})(ws[i]);}window.__slBoot=boot;if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();})();';
   function ensureSlRun(){
     if(!document.getElementById('__sl_run')){
       var s=document.createElement('script'); s.id='__sl_run'; s.textContent=SL_RUN;
@@ -3281,20 +3284,48 @@ html.__ce_altmode{cursor:text}
     }
     if(window.__slBoot) window.__slBoot();
   }
-  function slideMake(el){
+  function slideMake(el,cx,cy){
     // すでにスライドショーの中で押された → 解除（1枚目の画像だけ残す）
     var w0=el&&el.closest&&el.closest('[data-slshow]');
     if(w0){
-      if(!confirm('この場所のスライドショーを解除して、1枚目の画像だけに戻しますか？')) return;
+      // ★confirm も prompt と同じ理由で使わない（ダイアログ抑止が一度入ると常に false ＝
+      //   「押しても何も起きない」になる）。⟲戻すで復元できるので即実行し、案内を出す。
+      try{ pushUndo(w0.parentElement||w0); }catch(_){}
       var base=w0.querySelector('img');
       if(base){ base.style.removeProperty('opacity'); base.style.removeProperty('transition'); w0.parentNode.insertBefore(base,w0); }
       w0.remove(); markDirty();
-      msg.textContent='🖼 スライドショーを解除しました（💾保存で確定）';
+      msg.textContent='🖼 スライドショーを解除して1枚目の画像に戻しました（間違えたら ⟲戻す・💾保存で確定）';
       return;
     }
-    if(!el||el.tagName!=='IMG'){ msg.textContent='スライドショーにしたい画像の上で右クリックしてください'; return; }
-    var iv=parseFloat(window.prompt('切り替えの間隔（秒）＝1枚を見せる時間','4')); if(isNaN(iv)) return; iv=Math.max(1,Math.min(60,iv));
-    var fd=parseFloat(window.prompt('フェードの長さ（秒）＝「ゆっくり切り替わる」なら2〜3がおすすめ','1.2')); if(isNaN(fd)) return; fd=Math.max(0.2,Math.min(10,fd));
+    // ★<picture>やアニメのラッパー、figure等の「入れ物」が選ばれている事がある。
+    //   中に画像が1枚だけならそれを対象にする＝「画像の上で右クリックして」で弾かれて
+    //   スライドショーが作れない、を防ぐ（2026-07-30・実報告。解除したあと作れない原因）。
+    //   ★ただし「入れ物の中に1枚だけ」で拾うのは危険：大きな箱（セクション等）に1枚しか画像が
+    //     無いと、離れた場所の画像が対象になる（「一番下のセクションに追加される」報告・2026-07-30）。
+    //     まず右クリックした座標の真下にある画像を探し、それが取れない時だけ小さな入れ物に限って拾う。
+    if(el && el.tagName!=='IMG'){
+      var _hit=null;
+      try{
+        if(cx!=null&&cy!=null){
+          var _us=document.elementsFromPoint(cx,cy);
+          for(var _i=0;_i<_us.length;_i++){
+            var _u=_us[_i];
+            if(_u&&_u.tagName==='IMG'&&!(_u.closest&&_u.closest('[id^="__ce"]'))){ _hit=_u; break; }
+          }
+        }
+      }catch(_){}
+      if(!_hit && el.querySelectorAll && /^(PICTURE|FIGURE|A|SPAN|P)$/.test(el.tagName)){
+        var _ims=[].slice.call(el.querySelectorAll('img'));
+        if(_ims.length===1) _hit=_ims[0];       // 写真1枚を包んでいるだけの小さな入れ物なら安全
+      }
+      if(_hit) el=_hit;
+    }
+    if(!el||el.tagName!=='IMG'){ msg.textContent='スライドショーにしたい画像の上で右クリックしてください（画像を含む入れ物なら中の画像が1枚の時だけ自動で拾います）'; return; }
+    // ★window.prompt をやめてパネル内の入力欄にした（2026-07-30・実報告）。
+    //   Chromeは「このページでこれ以上ダイアログを表示しない」を一度チェックすると、以降 prompt() が
+    //   問答無用で null を返す。すると isNaN で静かに return ＝「ボタンを押しても何も反応しない」に見える。
+    //   ブラウザのダイアログに依存しない作りにすれば、この事故は起きない。
+    var iv=4, fd=1.2;
     fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
       var ups=d.uploads||[];
       if(!ups.length){ msg.textContent='アップロード画像がまだありません。先に「🖼 画像を追加」からアップロードしてください'; return; }
@@ -3303,6 +3334,10 @@ html.__ce_altmode{cursor:text}
       var ov=document.createElement('div'); ov.id='__ce_pk';
       ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🖼 スライドショーにする画像を順番にクリック（右クリックした今の画像が1枚目・選んだ順に続く）</h4>'
         +'<div class="gr">'+items+'</div>'
+        +'<div style="display:flex;gap:12px;align-items:center;margin-top:10px;font-size:12.5px;color:#333">'
+        +'<label>切り替え間隔 <input id="__ce_sliv" type="number" value="4" min="1" max="60" step="0.5" style="width:64px">秒</label>'
+        +'<label>フェード <input id="__ce_slfd" type="number" value="1.2" min="0.2" max="10" step="0.1" style="width:64px">秒</label>'
+        +'<span style="color:#888;font-size:11px">ゆっくり切り替えたいならフェード2〜3秒</span></div>'
         +'<button class="go2" id="__ce_slok" style="display:block;width:100%;background:#1a7f37;margin-top:10px">✔ この順番でスライドショー化（0枚選択中）</button></div>';
       document.body.appendChild(ov);
       var okb=ov.querySelector('#__ce_slok');
@@ -3321,7 +3356,10 @@ html.__ce_altmode{cursor:text}
           return;
         }
         if(e.target.id==='__ce_slok'){
-          if(!picked.length){ alert('切り替え先の画像を1枚以上クリックで選んでください'); return; }
+          if(!picked.length){ okb.textContent='⚠ 切り替え先の画像を1枚以上クリックで選んでください'; return; }
+          // 秒数はパネルの入力欄から読む（ブラウザのダイアログに頼らない）
+          var _iv=parseFloat((ov.querySelector('#__ce_sliv')||{}).value); if(!isNaN(_iv)) iv=Math.max(1,Math.min(60,_iv));
+          var _fd=parseFloat((ov.querySelector('#__ce_slfd')||{}).value); if(!isNaN(_fd)) fd=Math.max(0.2,Math.min(10,_fd));
           ov.remove();
           var disp=''; try{ disp=getComputedStyle(el).display; }catch(_){}
           var br=''; try{ br=getComputedStyle(el).borderRadius; }catch(_){}
@@ -15007,7 +15045,7 @@ html.__ce_altmode{cursor:text}
         var _pe=curEl, _pim=(_pe&&_pe.tagName==='IMG')?_pe:((_pe&&_pe.querySelector)?_pe.querySelector('img'):null);
         var _psi=secIndexOf(_pe); closeMenu(); openPhotoDecoPicker(_pe,_pim,_psi); return;
       }
-      if(t.id==='__ce_q_slide'){ var sle=curEl; closeMenu(); slideMake(sle); return; }
+      if(t.id==='__ce_q_slide'){ var sle=curEl, sx=qx, sy=qy; closeMenu(); slideMake(sle,sx,sy); return; }
       if(t.id==='__ce_q_fx'){ _bigFull=true; _bigFxFocus=true; _forceEl=curEl; curEl.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:qx,clientY:qy})); return; }
       if(t.id==='__ce_q_fly'){ var ft=curEl; closeMenu(); startFlightDraw(ft); return; }
       if(t.id==='__ce_q_dly'){ var dle=curEl; closeMenu(); dlyOpen(dle,qx,qy); return; }
@@ -15278,6 +15316,10 @@ html.__ce_altmode{cursor:text}
     if(!el||!el.parentElement) return false;
     if(el.classList&&el.classList.contains('fxa_ch')) return true;
     var own=(el.textContent||'').trim();
+    // ★文字を持たない要素（画像・図形など）は「文字の断片」ではない。
+    //   ここを空文字で通すと、画像が親に吸い上げられて「画像の上で右クリックして」と弾かれる
+    //   ＝スライドショーや写真加工が作れなくなる（2026-07-30・実報告）。
+    if(!own) return false;
     if(own.length>2) return false;
     var sibs=el.parentElement.children, n=0, short=0;
     for(var i=0;i<sibs.length;i++){
