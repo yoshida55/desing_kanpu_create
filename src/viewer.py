@@ -15459,6 +15459,15 @@ html.__ce_altmode{cursor:text}
       var _tx=_textAt(e.clientX, e.clientY);
       if(_tx && _tx!==el && !el.contains(_tx) && !_tx.contains(el)) el=_tx;
     }
+    // ★1文字ずつに割られた文字（スタッガー等）を右クリックした時は、まとめ役の親まで戻す（2026-07-30・要望）。
+    //   1文字だけに色や動きが付くと使えないため、選択・編集・右クリックで挙動をそろえる。
+    //   ⬆外側選択(_wasForced)の時は触らない＝意図して親を選んでいる操作を邪魔しない。
+    if(!_wasForced){
+      var _rg=0;
+      while(el && _charFrag(el) && el.parentElement && el.parentElement!==document.body && _rg++<8){
+        el=el.parentElement;
+      }
+    }
     // ※「クリックがすり抜ける絵」は勝手に掴み替えない（文字の上を右クリックした時に横取りする誤爆が
     //   実測で出たため）。代わりにクイックメニューの先頭に「この絵を選ぶ」を出して選ばせる（_peRowQ）。
     // 🖼画像は「枠（親）ごと」がほぼ常に正解：親が画像をぴったり包むラッパー（figure/div等）なら
