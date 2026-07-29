@@ -3277,13 +3277,42 @@ html.__ce_altmode{cursor:text}
   //   両方が半透明になり下地が透けて「白く抜ける谷」ができる（フェード2.5秒なら白い時間も2〜3秒）。
   //   → 新しい画像を「上に重ねてフェードイン」させ、隠れ切ってから古い画像を消す。谷が出ない。
   var SL_RUN='(function(){function boot(){var ws=document.querySelectorAll("[data-slshow]");for(var i=0;i<ws.length;i++)(function(w){if(w.__slOn)return;w.__slOn=1;var imgs=[].slice.call(w.querySelectorAll("img"));if(imgs.length<2)return;var iv=parseInt(w.getAttribute("data-slint"))||4000;var du=parseInt(w.getAttribute("data-sldur"))||1200;var cur=0;for(var j=0;j<imgs.length;j++){var im=imgs[j];im.style.transition="opacity "+(du/1000)+"s";if(!im.style.position)im.style.position=(j===0?"relative":"absolute");im.style.zIndex=(j===0?"1":"0");im.style.setProperty("opacity",j===0?"1":"0","important");}setInterval(function(){var pv=cur;cur=(cur+1)%imgs.length;imgs[cur].style.zIndex="2";imgs[cur].style.setProperty("opacity","1","important");setTimeout(function(){imgs[pv].style.setProperty("opacity","0","important");imgs[pv].style.zIndex="0";imgs[cur].style.zIndex="1";},du+80);},iv);})(ws[i]);}window.__slBoot=boot;if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();})();';
+  var SL_VER='2';   // ★方式を変えたら上げる（1=同時フェード／2=上に重ねてフェードイン）
   function ensureSlRun(){
-    if(!document.getElementById('__sl_run')){
-      var s=document.createElement('script'); s.id='__sl_run'; s.textContent=SL_RUN;
+    var s=document.getElementById('__sl_run');
+    // ★以前は「あれば作らない」だったので、古い版が焼き込まれたカンプでは新方式に永久に入れ替わらず、
+    //   白く抜ける・同じ画像だけ繰り返す、が直らなかった（2026-07-30・実報告）。版が違えば入れ替える。
+    if(s && s.getAttribute('data-slver')!==SL_VER){
+      s.remove(); s=null;
+      // ⚠古い版の setInterval は止める手段が無い（タイマーIDを持っていない）。
+      //   そこで画像を作り直して参照を切る＝古いタイマーは外れた幽霊要素を触るだけになり無害化される。
+      [].slice.call(document.querySelectorAll('[data-slshow]')).forEach(function(w){
+        w.__slOn=0;
+        [].slice.call(w.querySelectorAll('img')).forEach(function(im){
+          var c=im.cloneNode(true);
+          c.style.removeProperty('opacity'); c.style.removeProperty('transition');
+          c.style.removeProperty('z-index');
+          if(im.parentNode) im.parentNode.replaceChild(c,im);
+        });
+      });
+    }
+    if(!s){
+      s=document.createElement('script'); s.id='__sl_run'; s.setAttribute('data-slver',SL_VER); s.textContent=SL_RUN;
       document.body.appendChild(s);   // createElementで足すと今すぐ実行される＝編集画面でもその場で動き出す
     }
     if(window.__slBoot) window.__slBoot();
   }
+  // 既に作ってあるスライドショーも開いた時に新方式へ入れ替える（作り直さなくても直る）
+  (function(){
+    // 実体が無くても「古い再生スクリプトだけ残っている」ページは入れ替える。
+    // これが無いと、開いたままのページに古い版が居座り、直したのに白く抜けたまま＝原因が分からなくなる。
+    function up(){
+      if(document.querySelector('[data-slshow]')||document.getElementById('__sl_run')){
+        try{ ensureSlRun(); }catch(_){ }
+      }
+    }
+    if(document.readyState==='complete') setTimeout(up,300); else window.addEventListener('load',function(){ setTimeout(up,300); });
+  })();
   function slideMake(el,cx,cy){
     // すでにスライドショーの中で押された → 解除（1枚目の画像だけ残す）
     var w0=el&&el.closest&&el.closest('[data-slshow]');
