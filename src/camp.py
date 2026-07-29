@@ -113,8 +113,13 @@ _REVIEW_FALLBACK = _SAFE_START + """
         var cs=getComputedStyle(e);
         var hid=(parseFloat(cs.opacity)===0)||(cs.visibility==='hidden');
         if(hid && inOverlay(e)) continue;
-        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; }
-        if(cs.visibility==='hidden'){ e.style.visibility='visible'; }
+        /* ★ここで当てた「強制表示」には必ず印(data-cesafe)を付ける（2026-07-29）。
+           印が無いと💾保存でそのまま焼き込まれ、要素は永久に「最初から表示・動かない」になる。
+           保存のたびに数が増え、実例のカンプでは23個の出現アニメが死んでいた
+           （オープニングを付けて「幕が開いても何も動かない」で発覚）。
+           印があれば cleanHtml が保存前に剥がせる＝開き直せば保険がまた効くので見た目は変わらない。 */
+        if(parseFloat(cs.opacity)===0){ e.style.setProperty('opacity','1','important'); e.style.transform='none'; e.style.animation='none'; e.setAttribute('data-cesafe','1'); }
+        if(cs.visibility==='hidden'){ e.style.visibility='visible'; e.setAttribute('data-cesafe','1'); }
       }
     }, 2500);
   }

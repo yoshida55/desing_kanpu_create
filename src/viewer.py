@@ -2768,6 +2768,8 @@ html.__ce_altmode{cursor:text}
     <button class="im" id="__ce_secswap" style="background:#0e7490;color:#fff">🔃 セクション並べ替え（順番を入れ替える）</button>
     <button class="im" id="__ce_bigclean" style="background:#4d7c0f;color:#fff">🧹 大掃除（分割span・残骸を消してソースを軽く）</button>
     <button class="im" id="__ce_bk" style="background:#475569;color:#fff">🗂 バックアップを取る（今の保存状態を複製）</button>
+    <div class="lbl plain">🛑 アニメを止める（編集中だけ・全部を「動き終わった形」で固定／保存版には残りません）</div>
+    <button class="im" id="__ce_stopanim" style="background:#f2f2f4;color:#1d1d1f;border:1px solid #ddd">🛑 アニメを全部止める</button>
     <div class="msg" id="__ce_msg">💡 直したい所を<b>右クリック</b>すると、その要素に直接アニメ・指示が出せます</div>
   </div>
 </div>
@@ -3122,7 +3124,28 @@ html.__ce_altmode{cursor:text}
     }, 2500);   // 遅れて読み込まれる画像を巻き込まないよう少し待つ
   }
   // ページを開いたら、前に作った飾りにも「クリックして調整できる」状態を付け直す（古いカンプでも効く）
-  function _bootDeco(){ _warnBrokenImages(); try{ dqArm(); }catch(_){ } }
+  // 🧯 すでに焼き込まれてしまった「強制表示」を開いた時に剥がす（2026-07-29・既存カンプの自己修復）。
+  //   印(data-cesafe)が付く前に保存されたぶんは、保険が書く3点セットが揃っている事だけが手がかり：
+  //   opacity:1 !important ＋ animation-name:none ＋ transform:none。デザインの意図では有り得ない組み合わせ。
+  //   剥がした結果まだ透明なら、2.5秒後に保険がまた見せる＝真っ白になる事故は起きない。
+  function _unbakeSafety(){
+    var n=0;
+    try{
+      [].slice.call(document.querySelectorAll('[style*="opacity"]')).forEach(function(el){
+        if(!el.style||(el.closest&&(el.closest('#__ce')||el.closest('#__op_screen')))) return;
+        if(el.classList&&el.classList.contains('fxa_pre')) return;          // ツールで付けた動きは触らない
+        if(el.style.getPropertyValue('opacity')!=='1') return;
+        if(el.style.getPropertyPriority('opacity')!=='important') return;
+        if(el.style.animationName!=='none') return;                        // 保険が animation:none を当てた印
+        el.style.removeProperty('opacity'); el.style.removeProperty('animation');
+        if(el.style.getPropertyValue('transform')==='none') el.style.removeProperty('transform');
+        n++;
+      });
+    }catch(_){}
+    if(n && msg) msg.textContent='🧯 動かなくなっていた出現アニメ '+n+' 個を元に戻しました（保険の焼き込みを剥がしました・💾保存で確定）';
+    return n;
+  }
+  function _bootDeco(){ _warnBrokenImages(); try{ dqArm(); }catch(_){ } try{ opUpgrade(); }catch(_){ } try{ _unbakeSafety(); }catch(_){ } }
   if(document.readyState==='complete') _bootDeco();
   else window.addEventListener('load', _bootDeco);
   // 🖼 画像を追加：画像要素を置く→すぐドラッグで移動できる（差し替え・サイズ調整は右クリックで）。
@@ -4022,6 +4045,70 @@ html.__ce_altmode{cursor:text}
     if(im && (im.currentSrc||im.src)) return im.currentSrc||im.src;
     return PH_LOGO;
   }
+  // ★幕の並べ方（中央そろえ）は必ずこのCSSで持つ（2026-07-29）。
+  //   インラインstyleだけで持たせていたら、保存時の後片付けで display:flex が消えて幕が block になり、
+  //   ロゴ/文字が左上に寄る事故が起きた。id が __ce 始まりでないので保存版にもそのまま残る＝単体でも正しく出る。
+  //   !important は付けない：隠す時のインライン display:none を勝たせる必要があるため（#idの優先度で十分勝てる）。
+  function opEnsureCss(){
+    if(!document.getElementById('__op_screen')) return null;
+    var st=document.getElementById('__op_css');
+    if(!st){ st=document.createElement('style'); st.id='__op_css'; document.head.appendChild(st); }
+    st.textContent='#__op_screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;'
+      +'margin:0;padding:0;text-align:center}'
+      +'#__op_screen>*{position:static;margin:0;max-width:92vw}'
+      // 幕が出ている間はページ側のCSSアニメを一時停止＝ヒーローが幕の裏で先に動き終わるのを防ぐ。
+      // ★止めるのは animation だけ（中身は隠さない）。万一JSが転んで解除できなくても、
+      //   ページが真っ白のまま固まらないようにするため。
+      +'html.op-wait body>*:not(#__op_screen):not([id^="__ce"]),'
+      +'html.op-wait body>*:not(#__op_screen):not([id^="__ce"]) *{animation-play-state:paused!important}';
+    return st;
+  }
+  // 幕の再生スクリプト本体（保存版でもこれがそのまま動く）
+  // ★body の先頭に置く＝最初の1フレーム目から幕が出る。末尾に置くとヒーローが先に描かれて
+  //   「ヒーローのアニメ→幕→アニメ済みのヒーロー」という順序になる（実際に起きた・2026-07-29）。
+  var OP_RUN='(function(){if(window.__opRan)return;window.__opRan=1;'
+    +'var d=document,s=d.getElementById("__op_screen");if(!s)return;var h=d.documentElement;'
+    +'function release(){h.classList.remove("op-wait");window.__opWait=0;'
+    +'try{window.dispatchEvent(new Event("ce-op-done"));}catch(_){}}'
+    +'if(s.getAttribute("data-paused")==="1"){release();return;}'
+    +'if(getComputedStyle(s).display==="none"){release();return;}'
+    +'h.classList.add("op-wait");window.__opWait=1;'
+    +'s.style.transition="opacity .6s ease";s.style.opacity="0";'
+    +'requestAnimationFrame(function(){requestAnimationFrame(function(){s.style.opacity="1";});});'
+    +'setTimeout(function(){if(s.getAttribute("data-paused")==="1"){release();return;}s.style.opacity="0";'
+    +'setTimeout(function(){s.style.display="none";release();},650);},1800);'
+    +'setTimeout(release,8000);})();';   // 保険：何があってもページのアニメは必ず動き出す
+  // <head>に置く先出しスクリプト。ページの中身が描かれる前に「待て」の合図を出す役だけ。
+  // ★readyStateが loading の時（＝本当のページ読み込み中）だけ効く＝編集中に差し込んでも誤発動しない。
+  var OP_EARLY='if(document.readyState==="loading"){document.documentElement.classList.add("op-wait");window.__opWait=1;}';
+  // 既存カンプ（幕が末尾にある古い作り）を開いた時に、正しい並びへ直す
+  function opUpgrade(){
+    var sc=document.getElementById('__op_screen'); if(!sc) return;
+    window.__opRan=1;                                   // 編集中に差し込んだ拍子に幕が再生されないように
+    opEnsureCss();
+    var b=document.body;
+    if(!document.getElementById('__op_early')){
+      var e=document.createElement('script'); e.id='__op_early'; e.textContent=OP_EARLY;
+      document.head.appendChild(e);
+    }
+    if(b.firstElementChild!==sc) b.insertBefore(sc, b.firstChild);   // 幕を先頭へ
+    var run=document.getElementById('__op_run');
+    if(run) run.remove();
+    var r=document.createElement('script'); r.id='__op_run'; r.textContent=OP_RUN;
+    sc.parentNode.insertBefore(r, sc.nextSibling);                   // 幕のすぐ後ろへ
+  }
+  // 幕そのものを掴んで動かしてしまった跡（ドラッグの translate 等）を落として中央に戻す
+  function opCenter(){
+    var sc=document.getElementById('__op_screen'); if(!sc) return;
+    opEnsureCss();
+    [sc, sc.firstElementChild].forEach(function(n){
+      if(!n) return;
+      ['translate','rotate','scale','transform','left','top','right','bottom','position'].forEach(function(p){ n.style.removeProperty(p); });
+      ['data-cetx','data-cety','data-cebt'].forEach(function(a){ n.removeAttribute(a); });
+    });
+    sc.style.display='flex';
+    markDirty();
+  }
   function addOpening(){
     var old=document.getElementById('__op_screen'); if(old) old.remove();
     var oldjs=document.getElementById('__op_run'); if(oldjs) oldjs.remove();
@@ -4033,21 +4120,114 @@ html.__ce_altmode{cursor:text}
     inner.innerHTML='<img id="__op_logo" src="'+_opLogoSrc()+'" alt="ロゴ" style="height:72px;width:auto">'
       +'<span id="__op_title" style="font-size:44px;font-weight:800;letter-spacing:.02em;color:#2b3a4a;font-family:system-ui,sans-serif">'+esc(_opTitle())+'</span>';
     sc.appendChild(inner);
-    document.body.appendChild(sc);
-    // 焼き込み用の再生スクリプト（保存版・単体表示で動く。編集バーがある時は自動退場だけさせて本体を触れるように）
-    var js=document.createElement('script'); js.id='__op_run';
-    js.textContent="(function(){var s=document.getElementById('__op_screen');if(!s)return;if(s.getAttribute('data-paused')==='1')return;s.style.transition='opacity .6s ease';s.style.opacity='0';requestAnimationFrame(function(){requestAnimationFrame(function(){s.style.opacity='1';});});setTimeout(function(){if(s.getAttribute('data-paused')==='1')return;s.style.opacity='0';setTimeout(function(){s.style.display='none';},650);},1800);})();";
-    document.body.appendChild(js);
+    document.body.insertBefore(sc, document.body.firstChild);   // ★先頭に置く（§7 ㉜）
+    opUpgrade();                                                // CSS・先出しスクリプト・再生スクリプトを正しい並びで置く
     markDirty();
-    msg.textContent='オープニングを付けました。ロゴ/文字を右クリックで差し替え→「💾 保存」で確定。本体を触るときは「👁 出す／隠す」で一旦隠せます';
+    opBarShow();
+    msg.textContent='オープニングを付けました。画面下のバーで直せます（終わったら「✔ 修正完了」→「💾 保存」）';
+  }
+  // 🎬 オープニング編集バー（幕の上に出す・2026-07-29）
+  //   ★幕は全画面なので、出したままだと本体を触れない＝「戻り方が分からない」状態になっていた。
+  //     直す操作と「✔ 修正完了」を幕の上にまとめて、ここだけ見れば終われるようにする。
+  //   id が __ce 始まり＝💾保存時に自動で除去される（焼き込まれない）。
+  function opBarHide(){ var b=document.getElementById('__ce_opbar'); if(b) b.remove(); }
+  function opBarShow(){
+    opBarHide();
+    var sc=document.getElementById('__op_screen'); if(!sc) return;
+    var BTN='background:#3a3a44;color:#fff;border:none;border-radius:8px;padding:7px 11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:system-ui,sans-serif';
+    var b=document.createElement('div'); b.id='__ce_opbar';
+    b.setAttribute('style','position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:2147483005;'
+      +'background:#1d1d1f;color:#fff;border-radius:14px;padding:10px 12px;display:flex;gap:7px;flex-wrap:wrap;'
+      +'align-items:center;justify-content:center;box-shadow:0 14px 40px rgba(0,0,0,.42);'
+      +'font:13px/1.4 system-ui,sans-serif;max-width:94vw');
+    // ★文字の書き換えに prompt() を使ってはいけない（2026-07-29・ユーザー報告）。
+    //   Chromeは同じページで繰り返しダイアログが出ると「これ以上ダイアログを表示しない」を出し、
+    //   以後 prompt は黙って null を返す＝「押しても何も起きない・直しても反映されない」になる。
+    //   バーに入力欄を置いて、打った文字がその場で入るようにする（確定操作すら要らない）。
+    var _opT=document.getElementById('__op_title')||sc.querySelector('span');
+    var _opTv=_opT?String(_opT.textContent||'').trim():'';
+    b.innerHTML='<span style="font-weight:700;margin-right:2px">🎬 オープニングを編集中</span>'
+      +'<button data-op="logo" style="'+BTN+'">🖼 ロゴを変える</button>'
+      +'<label style="'+BTN+';display:inline-flex;align-items:center;gap:5px">✏ 文字'
+        +'<input data-op="text" type="text" value="'+esc(_opTv)+'" placeholder="オープニングの文字" '
+        +'style="width:180px;padding:3px 6px;border:1px solid #6b6b8a;border-radius:5px;'
+        +'background:#fff!important;color:#111!important;-webkit-text-fill-color:#111!important;'
+        +'font:13px/1.4 system-ui,sans-serif"></label>'
+      +'<label style="'+BTN+';display:inline-flex;align-items:center;gap:5px">🎨 背景'
+        +'<input type="color" data-op="bg" value="#eef4ff" style="width:26px;height:22px;padding:0;border:none;border-radius:4px;cursor:pointer;background:none"></label>'
+      +'<button data-op="center" style="'+BTN+'">⤺ 中央にそろえる</button>'
+      +'<button data-op="play" style="'+BTN+';background:#0b6bcb">▶ 動きを試す</button>'
+      +'<button data-op="del" style="'+BTN+';background:#7f1d1d">🗑 消す</button>'
+      +'<button data-op="done" style="'+BTN+';background:#22c55e;color:#08240f">✔ 修正完了</button>';
+    document.body.appendChild(b);
+    b.addEventListener('input',function(ev){
+      var k=ev.target.getAttribute('data-op'), s=document.getElementById('__op_screen');
+      if(!s) return;
+      if(k==='bg'){ s.style.background=ev.target.value; markDirty(); return; }
+      if(k==='text'){                                  // 打った字がその場で幕に入る
+        var tt=document.getElementById('__op_title')||s.querySelector('span');
+        if(!tt){ if(msg) msg.textContent='⚠ オープニングの文字が見つかりません'; return; }
+        tt.textContent=ev.target.value; markDirty();
+      }
+    });
+    b.addEventListener('click',function(ev){
+      var t=ev.target.closest('[data-op]'); if(!t) return;
+      var k=t.getAttribute('data-op'), s=document.getElementById('__op_screen');
+      if(k==='bg'||k==='text'||!s) return;
+      if(k==='logo'){
+        var lg=document.getElementById('__op_logo')||s.querySelector('img');
+        if(!lg){ msg.textContent='ロゴ画像が見つかりません'; return; }
+        openPicker({el:lg, type:'img', url:lg.currentSrc||lg.src});
+        return;
+      }
+      if(k==='center'){ opCenter(); ceFlash('⤺ 中央にそろえました'); return; }
+      if(k==='play'){ opPlay(); return; }
+      if(k==='del'){
+        // ★confirm() も prompt と同じでブラウザに抑止されると黙って false を返す。
+        //   1回目は「本当に消す？」に変わるだけ＝2回押して初めて消える（ダイアログに頼らない）。
+        if(t.getAttribute('data-arm')!=='1'){
+          t.setAttribute('data-arm','1'); t.textContent='🗑 本当に消す？';
+          setTimeout(function(){ if(t&&t.parentNode){ t.removeAttribute('data-arm'); t.textContent='🗑 消す'; } },4000);
+          return;
+        }
+        s.remove();
+        ['__op_run','__op_css'].forEach(function(id){ var n=document.getElementById(id); if(n) n.remove(); });
+        opBarHide(); markDirty();
+        msg.textContent='🗑 オープニングを消しました（💾 保存で確定）';
+        return;
+      }
+      if(k==='done'){
+        s.style.display='none'; opBarHide();
+        msg.textContent='✔ オープニングの修正を終えました。「💾 変更を保存」で確定してください（保存版では開いた時に自動で流れます）';
+        ceFlash('✔ 修正完了（💾保存で確定）');
+      }
+    });
+  }
+  // ▶ 本番と同じ動き（フェードイン→1.8秒→フェードアウト）をその場で1回だけ再生する
+  function opPlay(){
+    var s=document.getElementById('__op_screen'); if(!s) return;
+    opBarHide();
+    s.style.display='flex'; s.style.transition='opacity .6s ease'; s.style.opacity='0';
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ s.style.opacity='1'; }); });
+    setTimeout(function(){
+      s.style.opacity='0';
+      setTimeout(function(){
+        s.style.display='none'; s.style.removeProperty('transition'); s.style.removeProperty('opacity');
+        msg.textContent='▶ 再生しました（保存版でもこの動きです）。もう一度直すときは「👁 オープニングを出す／隠す」';
+      },700);
+    },1800);
   }
   // 幕の表示/非表示を切り替え（編集用）。出す時は data-paused=1 で止めて右クリック編集できるように。
   function toggleOpening(){
     var s=document.getElementById('__op_screen');
     if(!s){ msg.textContent='先に「🎬 フェードのオープニングを付ける」を押してください'; return; }
     var hidden=(s.style.display==='none'||getComputedStyle(s).display==='none'||parseFloat(getComputedStyle(s).opacity)===0);
-    if(hidden){ s.setAttribute('data-paused','1'); s.style.display='flex'; s.style.opacity='1'; msg.textContent='オープニングを表示中（ロゴ/文字を右クリックで差し替え）。もう一度押すと隠せます'; }
-    else { s.style.display='none'; msg.textContent='オープニングを隠しました（保存版では開いた時に自動で流れます）'; }
+    if(hidden){
+      s.setAttribute('data-paused','1'); opEnsureCss(); s.style.display='flex'; s.style.opacity='1';
+      opBarShow();
+      msg.textContent='オープニングを表示中。画面下のバーで直せます（終わったら「✔ 修正完了」）';
+    }
+    else { s.style.display='none'; opBarHide(); msg.textContent='オープニングを隠しました（保存版では開いた時に自動で流れます）'; }
   }
   var shapesBtn=document.getElementById('__ce_shapes');           // 🔶 図形バーの出し入れ
   if(shapesBtn) shapesBtn.addEventListener('click',openShapeBar);
@@ -4279,6 +4459,58 @@ html.__ce_altmode{cursor:text}
       .then(function(r){ return r.json(); })
       .then(function(j){ if(msg) msg.textContent=j.ok?('🗂 バックアップを作りました（ホームの履歴一覧に「🗂バックアップ」の名前で並びます）'):('⚠ '+(j.message||'バックアップ失敗')); })
       .catch(function(){ if(msg) msg.textContent='⚠ バックアップに失敗しました'; });
+  });
+  // 🛑 アニメを全部止める（編集中だけの一時停止・2026-07-29）
+  //   ★「消す」のではなく「動き終わった形で固定する」。animation/transitionを切るだけだと
+  //     出現前(opacity:0)のまま固まって真っ白になるので、出現系だけ見える状態に上書きする。
+  //   ★保存版には残さない：注入するのは <style id="__ce_noanimcss"> 1枚だけで、cleanHtmlの
+  //     除去リストに明示してある（<style>は「id^=__ce 丸ごと除去」の例外なので書かないと焼き込まれる・§7㉔）。
+  //   ★translate: は触らない：このツールのドラッグ移動が translate を使っているため（§7㉕）。
+  //     transform だけ none にすれば、出現アニメのズレは消えて手で動かした位置は残る。
+  var NOANIM_SHOW='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_lines,.fxa_ch,.fxa_lni,.fxa_hl,.fxa_ud,'
+    +'.scrollanime,.updown,.downup,.slide-left,.slide-right,.scaleup,.eachTextAnime,'
+    +'[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],'
+    +'[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
+  function noAnimCss(){
+    // ツール自身のUI(#__ce…)は止めない＝編集バー・パネルの操作感はそのまま
+    var kill='html.__ce_noanim *:not([id^="__ce"]):not([id^="__ce"] *)';
+    var show=NOANIM_SHOW.split(',').map(function(s){ return 'html.__ce_noanim '+s.trim(); }).join(',');
+    return kill+','+kill+'::before,'+kill+'::after{animation:none!important;transition:none!important}'
+      +'html.__ce_noanim{scroll-behavior:auto!important}'
+      +'html.__ce_noanim #__op_screen{display:none!important}'
+      +show+'{opacity:1!important;transform:var(--fxa-tf0,none)!important;filter:none!important;clip-path:none!important}';
+  }
+  function stopAnimSet(on){
+    var st=document.getElementById('__ce_noanimcss');
+    if(on){
+      if(!st){ st=document.createElement('style'); st.id='__ce_noanimcss'; document.head.appendChild(st); }
+      st.textContent=noAnimCss();
+      document.documentElement.classList.add('__ce_noanim');
+      // 出現待ちのものは「出たあと」の状態にしておく（マーカー/下線は--hlwを引き切る）
+      [].slice.call(document.querySelectorAll('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_lines')).forEach(function(n){ n.classList.add('fxa_in'); });
+      [].slice.call(document.querySelectorAll('.fxa_hl,.fxa_ud')).forEach(function(n){ n.style.setProperty('--hlw',100); n.classList.add('fxa_in'); });
+    } else {
+      document.documentElement.classList.remove('__ce_noanim');
+      if(st) st.remove();
+      [].slice.call(document.querySelectorAll('.fxa_in')).forEach(function(n){ n.classList.remove('fxa_in'); });
+      [].slice.call(document.querySelectorAll('.fxa_hl,.fxa_ud')).forEach(function(n){ n.style.setProperty('--hlw',0); });
+    }
+    var b=document.getElementById('__ce_stopanim');
+    if(b){
+      b.textContent=on?'▶ アニメを動かす（元に戻す）':'🛑 アニメを全部止める';
+      b.style.background=on?'#b91c1c':'#f2f2f4';
+      b.style.color=on?'#fff':'#1d1d1f';
+    }
+  }
+  window.__ceNoAnimSet=stopAnimSet;                                   // Escの最後の砦などから呼べるよう公開
+  var stopAnimBtn=document.getElementById('__ce_stopanim');
+  if(stopAnimBtn) stopAnimBtn.addEventListener('click',function(){
+    var on=!document.documentElement.classList.contains('__ce_noanim');
+    stopAnimSet(on);
+    ceFlash(on?'🛑 アニメを全部止めました（もう一度押すと戻ります）':'▶ アニメを元に戻しました');
+    if(msg) msg.textContent=on
+      ? '🛑 アニメ停止中：出現・ループ・文字送りを全部止めて「動き終わった形」で固定中です。この状態は保存版には残りません（💾保存してもアニメは消えません）'
+      : '▶ アニメを元に戻しました（スクロールするとまた再生されます）';
   });
   // 📦 本番化キット（AIなし・一瞬）。そうじ済み見本＋anim部品＋変換指示.md＋規約を1フォルダに書き出す
   var prodBtn=document.getElementById('__ce_prod');
@@ -9474,6 +9706,12 @@ html.__ce_altmode{cursor:text}
       {k:'ne', cur:'nesw-resize', t:'⤢ 右上へ伸縮'},
       {k:'sw', cur:'nesw-resize', t:'⤢ 左下へ伸縮'}
     ];
+    // ★細い図形（線など）では8個の■が重なって、狙って掴めない（2026-07-29・ユーザー報告）。
+    //   高さ4pxの線だと上/下/四隅がぜんぶ4px以内に密集し、横に伸ばしたいのに角を掴んで
+    //   高さまで変わってしまう。細い時は角を出さず、上下の■は外側へ離して置く。
+    var _r0=el.getBoundingClientRect();
+    var _thinH=(el.offsetHeight||_r0.height)<24, _thinW=(el.offsetWidth||_r0.width)<24;
+    if(_thinH||_thinW) defs=defs.filter(function(d){ return d.k.length===1; });
     // 複数選択なら選択した全員に■を出す（Excelと同じ＝どれが選択中か一目で分かる）
     var targets=(selEls.length?selEls:[el]);
     _hdls={list:[]};
@@ -9490,7 +9728,15 @@ html.__ce_altmode{cursor:text}
         // 複数選択中は選択した全部に同じ量を掛ける（各要素の元サイズ・元位置を最初に控える）
         var bases=(selEls.length?selEls:[tgt]).map(function(x){
           var rr=x.getBoundingClientRect();
-          return {el:x, w:rr.width, h:rr.height, tx:+x.getAttribute('data-cetx')||0, ty:+x.getAttribute('data-cety')||0};
+          // ★大きさは offsetWidth/Height で測る（rectは回転や出現アニメのtransformを含む）。
+          //   ／斜め線(rotate:-28deg)はrectだと高さが実際の3pxではなく百数十pxに見え、
+          //   その値で高さを固定すると「線が太い板になる」（2026-07-29）。
+          var ow=x.offsetWidth||rr.width, oh=x.offsetHeight||rr.height;
+          // 細い図形（線など）は1pxまで縮められるようにする。★下限20px固定が
+          //   「線の高さを縮められない／横に伸ばすと高さが出る」の正体だった（ユーザー報告）。
+          var thin=(x.classList&&x.classList.contains('ce_shape'))||oh<20||ow<20;
+          return {el:x, w:ow, h:oh, minw:(thin?2:40), minh:(thin?1:20),
+                  tx:+x.getAttribute('data-cetx')||0, ty:+x.getAttribute('data-cety')||0};
         });
         // 横方向だけのドラッグ（e/w）では高さを今の実寸で固定する。
         // 中の画像は幅に合わせて縦横比で背が伸びる＝「全体がひろがって」レイアウトを押すため、
@@ -9510,12 +9756,12 @@ html.__ce_altmode{cursor:text}
           bases.forEach(function(bs){
             var shx=0, shy=0;
             if(d.k.indexOf('e')>=0){
-              var w=Math.max(40, bs.w+dx);
+              var w=Math.max(bs.minw, bs.w+dx);
               bs.el.style.setProperty('width',Math.round(w)+'px','important');
               bs.el.style.setProperty('max-width','none','important');
             }
             if(d.k.indexOf('w')>=0){
-              var w2=Math.max(40, bs.w-dx);
+              var w2=Math.max(bs.minw, bs.w-dx);
               bs.el.style.setProperty('width',Math.round(w2)+'px','important');
               bs.el.style.setProperty('max-width','none','important');
               shx=bs.w-w2;  // 左端がカーソルに付いてくるよう、増えた分だけ左へずらす
@@ -9529,9 +9775,9 @@ html.__ce_altmode{cursor:text}
               elx.style.setProperty('min-height','0','important');
               elx.style.setProperty('box-sizing','border-box','important');
             }
-            if(d.k.indexOf('s')>=0){ _setH(bs.el, Math.max(20, bs.h+dy)); }
+            if(d.k.indexOf('s')>=0){ _setH(bs.el, Math.max(bs.minh, bs.h+dy)); }
             if(d.k.indexOf('n')>=0){
-              var h2=Math.max(20, bs.h-dy);
+              var h2=Math.max(bs.minh, bs.h-dy);
               _setH(bs.el, h2);
               shy=bs.h-h2;  // 上端がカーソルに付いてくるよう、増えた分だけ上へずらす
             }
@@ -9554,8 +9800,10 @@ html.__ce_altmode{cursor:text}
       if(!_hdls) return;
       _hdls.list.forEach(function(x){
         var n=x.node, k=x.d.k, r=x.el.getBoundingClientRect();
-        var lx=(k.indexOf('w')>=0)?(r.left-6):((k.indexOf('e')>=0)?(r.right-6):(r.left+r.width/2-6));
-        var tp=(k.indexOf('n')>=0)?(r.top-6):((k.indexOf('s')>=0)?(r.bottom-6):(r.top+r.height/2-6));
+        // 細い図形は上下(左右)の■を外側へ逃がす＝真ん中の■と重ならず、狙って掴める
+        var ox=(r.width<24)?11:0, oy=(r.height<24)?11:0;
+        var lx=(k.indexOf('w')>=0)?(r.left-6-ox):((k.indexOf('e')>=0)?(r.right-6+ox):(r.left+r.width/2-6));
+        var tp=(k.indexOf('n')>=0)?(r.top-6-oy):((k.indexOf('s')>=0)?(r.bottom-6+oy):(r.top+r.height/2-6));
         n.style.left=lx+'px'; n.style.top=tp+'px';
       });
       _hdlRaf=requestAnimationFrame(loop);
@@ -10022,9 +10270,21 @@ html.__ce_altmode{cursor:text}
     +'var cd=el.getAttribute("data-cedelay"); var gd=cd!=null?+cd:groupDelay(el); if(gd>0) setTimeout(go,gd); else go(); }'
     +'if(!("IntersectionObserver" in window)){all().forEach(reveal);return;}'
     +'var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var t=en.target;io.unobserve(t);requestAnimationFrame(function(){reveal(t);});}});},{threshold:0,rootMargin:"0px 0px -18% 0px"});'
-    +'function obs(){requestAnimationFrame(function(){all().forEach(function(el){io.observe(el);});});}'
+    // only: true=オープニングの幕の中だけ / false=幕の外だけ / 省略=全部
+    // ★幕の中身（ロゴ・文字）は幕が出ている今この瞬間に動かないと意味がない。
+    //   ここを分けずに全部待たせていたため、ロゴに動きを付けても幕が消えた後（＝見えない所）で
+    //   再生され、「付けたのに変な動きになる」状態だった（2026-07-29）。
+    +'function obs(only){requestAnimationFrame(function(){all().forEach(function(el){'
+    +'if(only!=null){var inOp=!!(el.closest&&el.closest("#__op_screen"));if(inOp!==only)return;}'
+    +'io.observe(el);});});}'
     +'window.fxaObs=obs;'   // ★編集中に新しく動きを付けた要素も監視に入れる（付けた直後は監視対象外だった）  // 初回描画(fxa_pre隠れ状態)を1フレーム待ってから監視開始＝上部要素も一瞬で終わらずスライドする
-    +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",obs);else obs();})();';
+    // ★オープニングの幕が出ている間は監視を始めない（幕の裏で出現アニメが終わってしまうのを防ぐ）。
+    //   幕が消えたら "ce-op-done" が飛んでくる。保険で7秒後にも必ず動き出す（二重に呼んでも
+    //   IntersectionObserver.observe は同じ要素なら無視されるので副作用なし）。
+    +'function boot(){if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",function(){obs();});else obs();}'
+    +'if(window.__opWait){'
+    +'if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",function(){obs(true);});else obs(true);'  // 幕の中身は今すぐ動かす
+    +'window.addEventListener("ce-op-done",boot,{once:true});setTimeout(boot,7000);}else boot();})();';
   // CSSは「消して足す」でなく内容だけ差し替える（一瞬スタイルが消えるチラつき・前のアニメへの干渉を防ぐ）
   function _fxInjCss(){ var st=document.getElementById('fxa-css'); if(st){ if(st.textContent!==FX_CSS) st.textContent=FX_CSS; return; } st=document.createElement('style'); st.id='fxa-css'; st.textContent=FX_CSS; (document.head||document.documentElement).appendChild(st); }
   // runは「無ければ足すだけ」＝既にあれば再実行しない（毎回の焼き込みで再実行→重複observer→前のアニメが乱れるのを防ぐ）
@@ -10185,8 +10445,65 @@ html.__ce_altmode{cursor:text}
     markDirty();
     if(msg) msg.textContent='✅ 付けました（今1回再生しました）。ヘッダの「💾 変更を保存」で残ります';
   }
+  // 動きが実際に付いている要素（自分・外側・中）を集める。
+  // ★右クリックした<img>ではなく、外側の<picture>や<p>に動きが付いていることが多い。
+  //   自分だけ見ていたので「🚫動きを消すを押しても消えない」報告が出た（2026-07-29・実例：
+  //   <p class="top02__tree"><picture class="fxa_y fxa_pre"><span><span><img …></span></span></picture></p>
+  //   ＝imgのクラスは空なのに、動きは2つ外側のpictureに付いていた）。
+  var FX_HOST_SEL='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_lines,.fxa_hl,.fxa_cnt,.fxa_ud,.fxa_wave,.fxa_wrap,'
+    +'[class*="fxa_lp_"],[data-fxa-fly],[data-cefly]';
+  function fxHosts(el){
+    var out=[];
+    function add(n){ if(n&&n.nodeType===1&&out.indexOf(n)<0) out.push(n); }
+    add(el);
+    // 外へ最大5段まで（セクションの器は越えない＝隣のブロックの動きまで巻き込まないため）
+    var p=el.parentElement, hop=0;
+    while(p && hop<5 && p!==document.body && !/^(SECTION|HEADER|FOOTER|MAIN|ARTICLE)$/.test(p.tagName)){
+      try{ if(p.matches&&p.matches(FX_HOST_SEL)) add(p); }catch(_){}
+      p=p.parentElement; hop++;
+    }
+    try{ [].slice.call(el.querySelectorAll(FX_HOST_SEL)).forEach(add); }catch(_){}
+    return out;
+  }
   // 付けた動き（出現/ループ/文字アニメ）を全部外して素の要素に戻す（AIなし・即反映）。
   function removeBake(el){
+    if(!el) return;
+    var hosts=fxHosts(el);
+    if(hosts.length>1){                       // 自分以外にも動きの持ち主がいた＝まとめて外す
+      hosts.forEach(function(n){ if(n!==el) removeBakeOne(n); });
+    }
+    removeBakeOne(el);
+    // ★クローン元サイトのCSSで動いているアニメを止める（2026-07-29・実例：
+    //   `.top02__tree img{animation:treeanime 2s infinite alternate}` ＝ ゆらゆら揺れ続ける木のイラスト）。
+    //   これはクラスにもインラインにも現れない「CSSファイル側の指定」なので、
+    //   クラスを外す・インラインのanimationを消すだけでは絶対に止まらない。
+    //   しかも removeBakeOne の `style.removeProperty('animation')` が、以前止めていた
+    //   inline の animation:none まで消してしまい「消したのにまた動き出す」原因になっていた。
+    var stopped=0;
+    try{
+      [el].concat([].slice.call(el.querySelectorAll('*'))).slice(0,400).forEach(function(n){
+        if(!n.style) return;
+        var an=''; try{ an=getComputedStyle(n).animationName; }catch(_){ return; }
+        if(an && an!=='none'){ n.style.setProperty('animation','none','important'); stopped++; }
+      });
+    }catch(_){}
+    // クラスは外れたのに設定値(--fxa-*)だけ中の要素に残ることがある。害は無いが
+    // 「消したのに残っている」ように見えるので一緒に掃除する（まだ動きが付いている要素は触らない）。
+    try{
+      var FXVARS=['--fxa-dur','--fxa-dist','--fxa-scale','--fxa-blur','--fxa-deg','--fxa-amp','--fxa-stag','--fxa-bnc'];
+      [].slice.call(el.querySelectorAll('[style*="--fxa-"]')).concat([el]).forEach(function(n){
+        if(!n.style) return;
+        if(n.matches&&n.matches(FX_HOST_SEL)) return;
+        FXVARS.forEach(function(p){ n.style.removeProperty(p); });
+      });
+    }catch(_){}
+    markDirty();
+    var tail=(hosts.length>1?('・外側/中の '+(hosts.length-1)+' 個ぶんも一緒に'):'')
+      +(stopped?('・元サイトのCSSで動いていた '+stopped+' 個も止めました'):'');
+    if(msg) msg.textContent='この要素の動きを消しました'+tail+'（💾保存で確定）';
+    try{ ceFlash('🚫 動きを消しました（'+(hosts.length+stopped)+'箇所）'); }catch(_){}
+  }
+  function removeBakeOne(el){
     if(!el) return;
     fxUnwrap(el);  // 自分のCSSアニメ用に包んだラッパーがあれば解除
     // 🕊 飛行ルートも外す（属性を消すとランタイムのループは次フレームで自動停止する）
@@ -10196,8 +10513,6 @@ html.__ce_altmode{cursor:text}
     var _rv=el.getAttribute('data-cerevcls');
     if(_rv){ _rv.split(' ').forEach(function(c){ if(c) el.classList.add(c); }); el.removeAttribute('data-cerevcls'); }
     el.style.removeProperty('transition'); el.style.removeProperty('animation');
-    markDirty();
-    if(msg) msg.textContent='この要素の動きを消しました（保存で確定）';
   }
   // ===== ⏳ 演出タイミング（AIなし・無料）＝旧⏱順番モードを一覧型に統合（2026-07-12） =====
   function seqAnimKey(el){
@@ -11800,7 +12115,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu','#__ce_tbgp','#__ce_vlp','#__ce_dqp','#__ce_secp','#__ce_pkpos','#__ce_bgp','#__ce_ruler','#__ce_grab'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu','#__ce_tbgp','#__ce_vlp','#__ce_dqp','#__ce_secp','#__ce_pkpos','#__ce_bgp','#__ce_ruler','#__ce_grab','#__ce_noanimcss','#__ce_opbar'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // 飾りを選択中の青い点線（編集用の目印）が焼き込まれないように必ず外す
@@ -11822,6 +12137,27 @@ html.__ce_altmode{cursor:text}
     [].slice.call(doc.querySelectorAll('[style*="__ceax"]')).forEach(function(n){ n.style.removeProperty('animation'); });
     // 焼き込みアニメの一時「表示中」クラス(fxa_in)は外す＝保存版はスクロールで再生に戻す（付けた設定fxa_pre等は残す）
     [].slice.call(doc.querySelectorAll('.fxa_in')).forEach(function(n){ n.classList.remove('fxa_in'); });
+    // 🧯 保険の「強制表示」(data-cesafe)を剥がす（2026-07-29）。
+    //   カンプ内の保険は2.5秒後に「透明のままの要素」をopacity:1!important＋animation:noneで見せる。
+    //   これが保存で焼き込まれると、その要素は次に開いた時から永久に動かない（保存のたびに増える）。
+    //   開き直せば保険がまた効く＝見た目は変わらないので、保存版からは必ず落とす。
+    //   印が付く前に保存されたぶんは、保険が書く3点セット（opacity:1!important＋animation-name:none）
+    //   で見分ける。デザインの意図では有り得ない組み合わせなので誤爆しない。
+    (function(){
+      var list=[].slice.call(doc.querySelectorAll('[data-cesafe],[style*="opacity"]'));
+      list.forEach(function(n){
+        if(!n.style) return;
+        if(n.classList&&n.classList.contains('fxa_pre')) return;     // ツールで付けた動きは触らない
+        var marked=n.hasAttribute&&n.hasAttribute('data-cesafe');
+        var sig=(n.style.getPropertyValue('opacity')==='1'
+                 && n.style.getPropertyPriority('opacity')==='important'
+                 && n.style.animationName==='none');
+        if(!marked&&!sig) return;
+        ['opacity','animation','visibility'].forEach(function(p){ n.style.removeProperty(p); });
+        if(n.style.getPropertyValue('transform')==='none') n.style.removeProperty('transform');
+        n.removeAttribute('data-cesafe');
+      });
+    })();
     // カンプ内の保険スクリプトがスクロール時に付ける「見せるクラス」16種も外す（保険は開き直せばまた動く）。
     // ★焼き込まれると (1)開き直しても出現アニメが「最初から表示済み」になる
     //   (2)ページCSSに .inview{opacity:1!important} 等があると、あとから付けたfxaの動きが永久に効かない
@@ -11872,7 +12208,12 @@ html.__ce_altmode{cursor:text}
     [].slice.call(doc.querySelectorAll('[style*="cursor: move"],[style*="cursor:move"]')).forEach(function(n){ n.style.removeProperty('cursor'); });
     // オープニングの幕：編集用に「止めて表示」していた状態(data-paused/インライン)を解除＝保存版は開いた時に自動再生に戻す
     var _op=doc.querySelector('#__op_screen');
-    if(_op){ _op.removeAttribute('data-paused'); _op.style.removeProperty('display'); _op.style.removeProperty('opacity'); _op.style.removeProperty('transition'); }
+    // ★display は消してはいけない：幕の中央そろえは display:flex で成り立っているので、
+    //   消すと block に落ちてロゴ/文字が左上に寄る（実際に起きた・2026-07-29）。編集用の
+    //   display:none / flex どちらの状態からでも、保存版は必ず flex に戻す。
+    if(_op){ _op.removeAttribute('data-paused'); _op.style.display='flex'; _op.style.removeProperty('opacity'); _op.style.removeProperty('transition'); }
+    // 「幕が出ている間はページのアニメを止める」印は編集中の一時状態＝保存に残すと次に開いた時ずっと止まる
+    doc.classList.remove('op-wait');
     [].slice.call(doc.querySelectorAll('script')).forEach(function(s){ if(/__ce/.test(s.textContent)) s.remove(); });
     [].slice.call(doc.querySelectorAll('style')).forEach(function(s){ if(/#__ce/.test(s.textContent)) s.remove(); });
     // 🔗 リンク無効化の一時退避(data-cehref)が保存に紛れないよう必ず元のhrefへ戻す
@@ -14972,6 +15313,52 @@ def _guard_letter_splitters(html: str) -> str:
 
 
 _FXA_RUN_RE = re.compile(r'<script id="fxa-run">.*?</script>', re.DOTALL)
+_OP_RUN_RE = re.compile(r'<script id="__op_run">.*?</script>', re.DOTALL)
+# オープニングの幕：先出しスクリプト（ページの中身が描かれる前に「待て」の合図を出すだけ）と、
+# 幕の再生スクリプトの最新版。既存カンプにも配信時に当てる＝開き直しただけで順番が直る。
+_OP_CSS_TAG = (
+    '<style id="__op_css">#__op_screen{position:fixed;inset:0;display:flex;align-items:center;'
+    'justify-content:center;margin:0;padding:0;text-align:center}'
+    '#__op_screen>*{position:static;margin:0;max-width:92vw}'
+    'html.op-wait body>*:not(#__op_screen):not([id^="__ce"]),'
+    'html.op-wait body>*:not(#__op_screen):not([id^="__ce"]) *{animation-play-state:paused!important}</style>')
+_OP_EARLY_TAG = ('<script id="__op_early">if(document.readyState==="loading")'
+                 '{document.documentElement.classList.add("op-wait");window.__opWait=1;}</script>')
+_OP_RUN_TAG = (
+    '<script id="__op_run">(function(){if(window.__opRan)return;window.__opRan=1;'
+    'var d=document,s=d.getElementById("__op_screen");if(!s)return;var h=d.documentElement;'
+    'function release(){h.classList.remove("op-wait");window.__opWait=0;'
+    'try{window.dispatchEvent(new Event("ce-op-done"));}catch(_){}}'
+    'if(s.getAttribute("data-paused")==="1"){release();return;}'
+    'if(getComputedStyle(s).display==="none"){release();return;}'
+    'h.classList.add("op-wait");window.__opWait=1;'
+    's.style.transition="opacity .6s ease";s.style.opacity="0";'
+    'requestAnimationFrame(function(){requestAnimationFrame(function(){s.style.opacity="1";});});'
+    'setTimeout(function(){if(s.getAttribute("data-paused")==="1"){release();return;}s.style.opacity="0";'
+    'setTimeout(function(){s.style.display="none";release();},650);},1800);'
+    'setTimeout(release,8000);})();</script>')
+
+
+def _upgrade_opening(html: str) -> str:
+    """幕(#__op_screen)を持つ既存カンプに、最新の再生スクリプトと先出しスクリプトを当てる。
+
+    ★狙い：オープニングより先にヒーローのアニメが動き出してしまう順番の崩れを、
+      開き直しただけで直す（幕そのものをbody先頭へ動かすのは編集バー側 opUpgrade が行い、💾保存で確定する）。
+    """
+    if 'id="__op_screen"' not in html:
+        return html
+    html = _OP_RUN_RE.sub(_OP_RUN_TAG, html, count=1)
+    head = ""
+    if 'id="__op_css"' not in html:
+        head += _OP_CSS_TAG
+    if 'id="__op_early"' not in html:
+        head += _OP_EARLY_TAG
+    if head:
+        low = html.lower()
+        i = low.find("</head>")
+        if i >= 0:
+            html = html[:i] + head + html[i:]
+    return html
 _SAFE_BLOCK_RE = re.compile(re.escape(camp._SAFE_START) + r".*?" + re.escape(camp._SAFE_END), re.DOTALL)
 
 
@@ -14985,6 +15372,7 @@ def _inject_edit_bar(html: str, filename: str) -> str:
     # 古い版は2.5秒後にfxaの文字span(fxa_ch)まで強制表示し、タイプライター等が"出た状態で固定"される不具合があった。
     # 最新版はfxa要素を除外する→既存ファイルもこの差し替えで直る。
     html = _SAFE_BLOCK_RE.sub(lambda m: camp._REVIEW_FALLBACK, html)
+    html = _upgrade_opening(html)   # オープニングの順番（幕→ヒーロー）を既存カンプにも当てる
     bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename)).replace(
         "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider))
     low = html.lower()
