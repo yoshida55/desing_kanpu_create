@@ -244,6 +244,9 @@ _KEEPJS_SAFETY = """
     var all = document.querySelectorAll("body *");
     for (var i = 0; i < all.length; i++) {
       var e = all[i];
+      /* ★ツールが付けた文字アニメ(fxa_*)は「これから出る」ので透明なのが正常。
+         強制表示するとタイプライター等が"出た状態で固定"され、二度と再生されない(2026-07-30)。 */
+      if (e.closest && e.closest('[class*="fxa_"]')) continue;
       var cs = getComputedStyle(e);
       var hidden = (parseFloat(cs.opacity) === 0) || (cs.visibility === "hidden");
       if (hidden && inHiddenOverlay(e)) continue;

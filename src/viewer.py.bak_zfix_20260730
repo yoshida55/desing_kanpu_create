@@ -2807,7 +2807,7 @@ html.__ce_altmode{cursor:text}
     var removed=0;
     [].slice.call(document.querySelectorAll('body *')).forEach(function(el){
       if(el.id && el.id.indexOf('__ce')===0) return;
-      if(el.closest && (el.closest('[id^="__ce"]'))) return;
+      if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return;
       var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
       if(cs.pointerEvents!=='none') return;                        // クリックで消せない装飾だけを対象
       if((el.textContent||'').trim()!=='') return;                 // 文字を含むものは飾りではない
@@ -2842,7 +2842,7 @@ html.__ce_altmode{cursor:text}
   function placeFree(el, pageX, pageY){
     var host=null;
     [].slice.call(document.querySelectorAll('header,section,footer')).some(function(s){
-      if(s.closest('[id^="__ce"]')) return false;
+      if(s.closest('#__ce')||s.closest('#__ce_cm')) return false;
       // ★position:fixed/sticky の器には入れない（2026-07-20）：固定ヘッダーは「画面に貼り付いた」ままなので
       //   ページ座標での上端が常に今のスクロール位置＝どこをクリックしても「ここに入る」と判定されてしまう。
       //   その中に置くと、追加した画像がページと一緒にスクロールせず全ページに居座る（実際に起きた）。
@@ -3093,7 +3093,7 @@ html.__ce_altmode{cursor:text}
   function _scanPlaced(){
     try{
       [].slice.call(document.querySelectorAll('body>*,header>*,section>*,footer>*')).forEach(function(el){
-        if(el.closest('[id^="__ce"]')) return;
+        if(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
         var s=el.style;
         if(s.position==='absolute' && s.left && s.zIndex) _wakePlaced(el);
       });
@@ -3145,40 +3145,7 @@ html.__ce_altmode{cursor:text}
     if(n && msg) msg.textContent='🧯 動かなくなっていた出現アニメ '+n+' 個を元に戻しました（保険の焼き込みを剥がしました・💾保存で確定）';
     return n;
   }
-  // 🧯 クローンの保険(__clone_safety)は4秒後に「透明な要素」を全部 opacity:1!important で見せる。
-  //   打ち込み待ちの文字(.fxa_ch)まで巻き込むため、タイプライター等が一度も再生されない（2026-07-30）。
-  //   ★_unbakeSafety とは別物：あちらは animation-name:none を目印にするが、クローンの保険は
-  //     opacity と transform しか書かないので素通りしていた。ここで文字アニメ側だけを後始末する。
-  //   ★インラインの !important はCSSでは上書きできない＝JSで剥がすしかない。
-  function _fixCharAnimSafety(){
-    var hosts=[], n=0;
-    try{
-      [].slice.call(document.querySelectorAll('[class*="fxa_"] [style*="opacity"],[class*="fxa_"][style*="opacity"]')).forEach(function(el){
-        if(el.closest && el.closest('[id^="__ce"]')) return;
-        if(el.style.getPropertyValue('opacity')!=='1') return;
-        if(el.style.getPropertyPriority('opacity')!=='important') return;
-        el.style.removeProperty('opacity');
-        if(el.style.getPropertyValue('transform')==='none') el.style.removeProperty('transform');
-        var h=el.closest('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_lines,.fxa_wave');
-        if(h && hosts.indexOf(h)<0) hosts.push(h);
-        n++;
-      });
-      // 剥がしただけでは「出たまま」なので、その場で再生し直す（void offsetWidth＝やり直しの合図）
-      hosts.forEach(function(h){ if(h.classList.contains('fxa_in')){ h.classList.remove('fxa_in'); void h.offsetWidth; h.classList.add('fxa_in'); } });
-    }catch(_){}
-    return n;
-  }
-  function _bootDeco(){
-    _warnBrokenImages(); try{ dqArm(); }catch(_){ } try{ opUpgrade(); }catch(_){ } try{ _unbakeSafety(); }catch(_){ }
-    try{ _fixCharAnimSafety(); }catch(_){ }
-    // 古いクローンは保険が内蔵されたまま＝4秒後にまた塗られるので、その直後にもう一度だけ後始末する
-    if(document.getElementById('__clone_safety')){
-      setTimeout(function(){
-        var k=_fixCharAnimSafety();
-        if(k && msg) msg.textContent='🧯 古い保険が文字アニメを止めていたので直しました（'+k+'個・💾保存で確定）';
-      }, 4300);
-    }
-  }
+  function _bootDeco(){ _warnBrokenImages(); try{ dqArm(); }catch(_){ } try{ opUpgrade(); }catch(_){ } try{ _unbakeSafety(); }catch(_){ } }
   if(document.readyState==='complete') _bootDeco();
   else window.addEventListener('load', _bootDeco);
   // 🖼 画像を追加：画像要素を置く→すぐドラッグで移動できる（差し替え・サイズ調整は右クリックで）。
@@ -3375,7 +3342,7 @@ html.__ce_altmode{cursor:text}
   var normBtn=document.getElementById('__ce_normalize');
   if(normBtn) normBtn.addEventListener('click',function(){
     if(!confirm('全体を一律にそろえます（AIなし・即反映）：\\n・誤ドラッグで中身の箱に残ったズレ(translate)を掃除\\n・セクションの上下余白 100px\\n・セクションの左右余白 → 多数派の値にそろえる（左右別々に判定・明らかに違うものはそのまま＝意図的な余白として残す）\\n・中身の箱（.container等）の幅も多数派にそろえる（右端のズレを解消）\\n・主要見出し(H1/H2/H3)のサイズ・太さ・行間\\n・本文の行間を1.8に（読みやすく＝呼吸感）\\n・影(box-shadow)を1種類に統一\\n\\n気に入らなければ「⟲ 戻す」で戻せます。実行しますか？')) return;
-    function _skip(el){ return el.closest && (el.closest('[id^="__ce"]')); }
+    function _skip(el){ return el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')); }
     // カード等の小見出し・小さい文字は対象外（そこまで大きく/広くすると崩れるため）
     function _inCard(el){ var n=el; while(n && n!==document.body){ var c=(n.className&&n.className.toString())||''; if(/card|item|bubble|benefit|badge|chip|tag|nav|menu|footer|col/i.test(c)) return true; n=n.parentElement; } return false; }
     var secN=0, hN=0, pN=0;
@@ -3499,7 +3466,7 @@ html.__ce_altmode{cursor:text}
     var STD_SHADOW='0 4px 16px rgba(0,0,0,.08)', shN=0;
     [].forEach.call(document.querySelectorAll('body *'),function(el){
       if(el.id && el.id.indexOf('__ce')===0) return;
-      if(el.closest && (el.closest('[id^="__ce"]'))) return;
+      if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return;
       var bs=''; try{ bs=getComputedStyle(el).boxShadow; }catch(_){ return; }
       if(bs && bs!=='none'){ el.style.setProperty('box-shadow',STD_SHADOW,'important'); shN++; }
     });
@@ -3515,7 +3482,7 @@ html.__ce_altmode{cursor:text}
   if(unshiftBtn) unshiftBtn.addEventListener('click',function(){
     var oldP=document.getElementById('__ce_shp'); if(oldP) oldP.remove();
     var moved=[].slice.call(document.querySelectorAll('[data-cetx],[data-cety]')).filter(function(el){
-      if(el.closest && (el.closest('[id^="__ce"]'))) return false;
+      if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_shp'))) return false;
       return ((+el.getAttribute('data-cetx'))||0)!==0 || ((+el.getAttribute('data-cety'))||0)!==0;
     });
     if(!moved.length){ msg.textContent='ドラッグで動かした跡は見つかりませんでした'; return; }
@@ -3606,7 +3573,7 @@ html.__ce_altmode{cursor:text}
     var n=0, seen=[];
     [].forEach.call(els,function(el){
       if(el.id && el.id.indexOf('__ce')===0) return;
-      if(el.closest && (el.closest('[id^="__ce"]'))) return;
+      if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return;
       if(seen.indexOf(el)>-1) return; seen.push(el);
       var c=(el.className&&el.className.toString())||'';
       if(/secondary|outline|ghost|line|sub/i.test(c)){   // サブボタン＝同色の枠線に
@@ -3649,10 +3616,10 @@ html.__ce_altmode{cursor:text}
     // 元のCSS/inlineを丸ごとキャッシュ（毎回ここから塗り直す＝リアルタイム＆連続変更OK）。編集UIは除く。
     var _sCache=[], _iCache=[];
     [].forEach.call(document.querySelectorAll('style'), function(st){ if(/#__ce|__ce_/.test(st.textContent)) return; _sCache.push({el:st, orig:st.textContent}); });
-    [].forEach.call(document.querySelectorAll('[style]'), function(el){ if(el.id && el.id.indexOf('__ce')===0) return; if(el.closest && (el.closest('[id^="__ce"]'))) return; _iCache.push({el:el, orig:el.getAttribute('style')}); });
+    [].forEach.call(document.querySelectorAll('[style]'), function(el){ if(el.id && el.id.indexOf('__ce')===0) return; if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return; _iCache.push({el:el, orig:el.getAttribute('style')}); });
     // SVGの色は fill= / stop-color= などの「属性」で塗られている＝styleとは別。これも拾って塗り替える。
     var _aCache=[]; ['fill','stroke','stop-color','flood-color','lighting-color','color'].forEach(function(attr){
-      [].forEach.call(document.querySelectorAll('['+attr+']'), function(el){ if(el.closest && (el.closest('[id^="__ce"]'))) return; var v=el.getAttribute(attr); if(v && /#[0-9a-fA-F]{3,8}|rgba?\\(/.test(v)) _aCache.push({el:el, attr:attr, orig:v}); });
+      [].forEach.call(document.querySelectorAll('['+attr+']'), function(el){ if(el.closest && (el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk'))) return; var v=el.getAttribute(attr); if(v && /#[0-9a-fA-F]{3,8}|rgba?\\(/.test(v)) _aCache.push({el:el, attr:attr, orig:v}); });
     });
     // 元テキストから色トークンを頻度付きで集める（無彩色=グレー/黒/白は除外＝文字色を守る）
     var _allTok=(function(){
@@ -5433,9 +5400,6 @@ html.__ce_altmode{cursor:text}
     {k:'rise',b:'せり上がり',d:'下からスッと上へ',g:'in',dir:'clip',sl:[{k:'dist',l:'移動量',min:10,max:140,def:40},{k:'dur',l:'速さ',min:200,max:2200,def:900,u:'ms'}]},
     {k:'stagger',b:'一文字ずつ',d:'文字が順に出現',g:'char',sl:[{k:'stag',l:'文字の間隔',min:15,max:150,def:32,u:'ms'},{k:'dist',l:'跳ねる高さ（移動量）',min:0,max:180,def:26},{k:'bnc',l:'跳ね具合（大きいほど飛び跳ねる）',min:0,max:100,def:30},{k:'dur',l:'速さ',min:150,max:900,def:340,u:'ms'}]},
     {k:'typewriter',b:'タイプライター',d:'打ち込み風',g:'char',type:1,sl:[{k:'stag',l:'打つ速さ',min:20,max:200,def:60,u:'ms'}]},
-    // にじみ出る：ぼかしを解きながらゆっくり浮かび上がる。1文字の時間(dur)を文字の間隔(stag)より
-    // ずっと長くすることで隣の文字と重なり、カタカタせず「染み込む」ように見える（2026-07-30）。
-    {k:'soak',b:'にじみ出る',d:'ゆったり染み込むように',g:'char',type:2,sl:[{k:'stag',l:'文字の間隔',min:40,max:400,def:140,u:'ms'},{k:'dur',l:'にじむ速さ（1文字）',min:600,max:3000,def:1600,u:'ms'},{k:'blur',l:'にじみの強さ',min:2,max:24,def:10,u:'px'}]},
     {k:'wave',b:'波打ち',d:'文字が波打つ(ループ)',g:'char',loop:1,sl:[{k:'amp',l:'ゆれ幅',min:4,max:30,def:10},{k:'dur',l:'速さ',min:800,max:3000,def:1600,u:'ms'}]},
     {k:'glow',b:'ネオングロー',d:'光る(ループ)',g:'loop',glow:1,sl:[{k:'dur',l:'速さ',min:600,max:3200,def:1800,u:'ms'}]},
     {k:'pulse',b:'脈打つ',d:'鼓動(ループ)',g:'loop',dir:'ps',sl:[{k:'amp',l:'強さ',min:2,max:20,def:6,u:'%'},{k:'dur',l:'速さ',min:600,max:3000,def:1400,u:'ms'}]},
@@ -6394,14 +6358,14 @@ html.__ce_altmode{cursor:text}
       if(mm && mm[1] && mm[1].indexOf('data:')!==0 && !_has(n)){ cands.push({el:n,type:'bg',url:mm[1]}); }
     }
     document.elementsFromPoint(cx, cy).forEach(function(n){
-      if(!n.closest || n.closest('[id^="__ce"]')) return;
+      if(!n.closest || n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
       if(n.tagName==='IMG'){ if(!_has(n)) cands.push({el:n,type:'img',url:n.currentSrc||n.src}); return; }
       _addBg(n);
     });
     // pointer-events:none の装飾など、座標検出で拾えない背面の背景画像も、矩形が重なれば候補に足す
     var scope=(el&&el.closest&&el.closest('section'))||document.body;
     [].slice.call(scope.querySelectorAll('*')).forEach(function(n){
-      if(n.closest('[id^="__ce"]')) return;
+      if(n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
       var r=n.getBoundingClientRect();
       if(!r.width||cx<r.left||cx>r.right||cy<r.top||cy>r.bottom) return;
       if(n.tagName==='IMG'){ if(!_has(n)) cands.push({el:n,type:'img',url:n.currentSrc||n.src}); return; }
@@ -9324,7 +9288,7 @@ html.__ce_altmode{cursor:text}
   (function(){
     var pop=null, curSpan=null, savedRange=null, curHl=null, curUdot=null;
     function hidePop(){ if(pop){ pop.remove(); pop=null; } curSpan=null; savedRange=null; curHl=null; curUdot=null; }
-    function inUI(node){ var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('[id^="__ce"]')||el.closest('#__ce_selc')||el.closest('#__ce_toast')); }
+    function inUI(node){ var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')); }
     // 選んだ範囲に色を当てる。中に色付きの子span（1文字ずつの.fxa_ch等の!important）があると
     // 囲むだけでは負けるので、子孫の色も全部この色で上書きする。
     function _forceColor(root, color){
@@ -10420,12 +10384,8 @@ html.__ce_altmode{cursor:text}
       if(!spans.length){ el.style.removeProperty('--fxa-dur'); if(msg)msg.textContent='⚠ ここには文字が無いので文字アニメは付けられません。画像には「ふわっと出現」「ズームイン」「ぼやけて出現」などを選んでください'; return; }
       if(a.loop){ el.style.setProperty('--fxa-amp', fxParam(a,'amp')+'px'); el.classList.add('fxa_wave'); }
       else {
-        el.classList.add('fxa_pre'); el.classList.add(a.type===2?'fxa_sk':(a.type?'fxa_tw':'fxa_cpre'));
+        el.classList.add('fxa_pre'); el.classList.add(a.type?'fxa_tw':'fxa_cpre');
         el.style.setProperty('--fxa-stag', fxParam(a,'stag')+'ms');
-        if(a.type===2){  // にじみ出る：1文字の時間とぼかし量を持たせる（隣と重なって滑らかに見える）
-          el.style.setProperty('--fxa-dur', (fxParam(a,'dur')||1600)+'ms');
-          el.style.setProperty('--fxa-blur', (fxParam(a,'blur')||10)+'px');
-        }
         if(!a.type){
           el.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px');
           el.style.setProperty('--fxa-bnc', String(_fxBnc(a)));     // 跳ね具合
@@ -10448,17 +10408,11 @@ html.__ce_altmode{cursor:text}
     } else {
       // 出現(in)：要素自身にCSSアニメ(ボタンのループ等)がある時だけラッパーで包み、それに出現をかける
       // （transformの奪い合いを回避＝せり上がり等がちゃんと動く。中の要素は自分のアニメ・ホバーを保つ）。
-      var host=el, an='none', _fixed=false;
+      var host=el, an='none';
       try{ an=getComputedStyle(el).animationName||'none'; }catch(_){}
-      try{ _fixed=(getComputedStyle(el).position==='fixed'); }catch(_){}
       // 自分のCSSアニメ持ちだけラッパーに出現をかける（transformの奪い合い回避）。
       // 移動は translate 個別プロパティに乗っているので、出現アニメ(transform)と両立＝移動要素もそのまま付けてOK。
-      // ★position:fixed だけは絶対に包まない（2026-07-30）：中身が浮くのでラッパーの高さが0になり、
-      //   さらに画面の上に出てしまうため「見えたら再生」の合図が永久に来ない＝開始位置(-36px等)で
-      //   固まったまま降りてこない。固定ヘッダーで実際に発生した。代わりに要素自身に直接かけ、
-      //   ケンカする元アニメだけ止める（動きは常に1つだけ、の原則どおり）。
-      if(an!=='none' && _fixed){ el.style.setProperty('animation','none','important'); }
-      else if(an!=='none'){ host=fxWrap(el); }
+      if(an!=='none'){ host=fxWrap(el); }
       host.style.setProperty('--fxa-dur', (fxParam(a,'dur')||800)+'ms');
       host.classList.add('fxa_pre');
       if(a.dir==='y'){ host.classList.add('fxa_y'); host.style.setProperty('--fxa-dist', fxParam(a,'dist')+'px'); }
@@ -10826,10 +10780,10 @@ html.__ce_altmode{cursor:text}
     if(op==='shapes'){ try{ closeMenu(); }catch(_){} openShapeBar(); return; }
     var cx=_ceCX, cy=_ceCY;
     var under=document.elementFromPoint(cx,cy);
-    var overUI = under && (under.closest('[id^="__ce"]'));
+    var overUI = under && (under.closest('#__ce')||under.closest('#__ce_cm')||under.closest('#__ce_pk')||under.closest('#__ce_dlyp')||under.closest('#__ce_scmenu')||under.closest('#__ce_scset'));
     // 右クリックで選択済みの要素(curEl)があればそれを最優先で対象にする＝マウスがメニューの上でも効く。
     // 無ければ従来どおりマウス直下の要素で発火する。
-    var sel=(curEl&&document.body.contains(curEl)&&!curEl.closest('[id^="__ce"]'))?curEl:null;
+    var sel=(curEl&&document.body.contains(curEl)&&!curEl.closest('#__ce')&&!curEl.closest('#__ce_cm'))?curEl:null;
     var el, px, py, uForEdit;
     if(sel){
       el=sel; uForEdit=sel;
@@ -11697,7 +11651,7 @@ html.__ce_altmode{cursor:text}
   //   文字を選んで下線/マーカー/文字色を付けたい時だけ、Altキーを押しながら選ぶ
   //   （Alt無しだとドラッグが割り込むので、Alt有りの時だけ従来通り文字選択に譲る）。
   var _altEl=null, _altActive=false, _aSX=0,_aSY=0,_aOX=0,_aOY=0;
-  function _inUI2(node){ if(window.__ceFlyMode||window.__ceInspOn) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('[id^="__ce"]')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')||el.closest('#__ce_pskill')||el.closest('#__ce_sbgp')||el.closest('#__ce_scset')||el.closest('#__ce_scmenu')||el.closest('#__ce_bgp')||el.closest('#__ce_ruler')||el.closest('#__ce_grab')); }
+  function _inUI2(node){ if(window.__ceFlyMode||window.__ceInspOn) return true; var el=node&&(node.nodeType===1?node:node.parentElement); return el&&el.closest&&(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')||el.closest('#__ce_selc')||el.closest('#__ce_toast')||el.closest('.__ce_hdl')||el.closest('#__ce_dlyp')||el.closest('#__ce_shp')||el.closest('#__ce_pskill')||el.closest('#__ce_sbgp')||el.closest('#__ce_scset')||el.closest('#__ce_scmenu')||el.closest('#__ce_bgp')||el.closest('#__ce_ruler')||el.closest('#__ce_grab')); }
   var _aGrp=null;  // 🧩一括移動用：複数選択中に掴んだら、選択全員の開始位置を控えて同じ移動量を足す
   // 🔲 ドラッグ範囲選択（マーキー・2026-07-19）：セクション余白など「ドラッグしても何も起きない場所」から
   // ドラッグすると青い点線枠が出て、枠に完全に入った要素をまとめて複数選択（Ctrl+クリックと同じselEls状態）。
@@ -12053,7 +12007,7 @@ html.__ce_altmode{cursor:text}
     _lkT=setTimeout(function(){ [].slice.call(document.querySelectorAll('a[data-cehref]')).forEach(function(x){ x.setAttribute('href', x.getAttribute('data-cehref')); x.removeAttribute('data-cehref'); }); },600);
   },true);
   window.addEventListener('click',function(e){
-    if(e.target&&e.target.closest&&(e.target.closest('[id^="__ce"]')||e.target.closest('.__ce_hdl'))) return;  // ツールUIは素通し
+    if(e.target&&e.target.closest&&(e.target.closest('#__ce')||e.target.closest('#__ce_cm')||e.target.closest('#__ce_pk')||e.target.closest('#__ce_dlyp')||e.target.closest('#__ce_flypn')||e.target.closest('.__ce_hdl'))) return;  // ツールUIは素通し
     // ドラッグで動かした直後のclickは丸ごと無効化＝ページ自前のJS（カードクリックで遷移等）も発火させない
     if(_hdlDrag){ e.preventDefault(); e.stopPropagation(); return; }
     var a=e.target.closest&&e.target.closest('a[href]');
@@ -12072,7 +12026,7 @@ html.__ce_altmode{cursor:text}
   // 🔗 リンク/画像のブラウザ標準ドラッグ（リンクを掴んで運ぶ・ゴースト画像）を編集中は止める
   // ＝<a>の行やリンク付きカードも、普通の要素と同じようにドラッグ移動できるようになる
   document.addEventListener('dragstart',function(e){
-    if(e.target&&e.target.closest&&(e.target.closest('[id^="__ce"]'))) return;
+    if(e.target&&e.target.closest&&(e.target.closest('#__ce')||e.target.closest('#__ce_cm'))) return;
     e.preventDefault();
   },true);
   // 位置/大きさを変えたら、ヘッダの保存ボタンを「💾 変更を保存」に変えて緑で目立たせる（ボタンは1つに統一）
@@ -12546,7 +12500,7 @@ html.__ce_altmode{cursor:text}
     var under=document.elementsFromPoint(e.clientX, e.clientY);
     for(var i=0;i<under.length;i++){
       var c=under[i];
-      if(c.closest('[id^="__ce"]')) continue;
+      if(c.closest('#__ce')||c.closest('#__ce_cm')||c.closest('#__ce_pk')) continue;
       if(_clearPixel(c, e.clientX, e.clientY)) continue;
       return c;
     }
@@ -12558,7 +12512,7 @@ html.__ce_altmode{cursor:text}
     var under=document.elementsFromPoint(x, y);
     for(var i=0;i<under.length;i++){
       var c=under[i];
-      if(c.closest('[id^="__ce"]')) continue;
+      if(c.closest('#__ce')||c.closest('#__ce_cm')||c.closest('#__ce_pk')) continue;
       if(_clearPixel(c, x, y)) continue;  // 追加した飾り画像の透明部分は素通り
       var pc=pickTarget(c);
       if(!_seeThrough(pc)) return pc;   // 実体のある要素が見つかったらそこを選ぶ
@@ -12680,14 +12634,14 @@ html.__ce_altmode{cursor:text}
     function sw(c,t){ return '<button class="__ce_sbgsw" data-c="'+c+'" title="'+esc(t||c)+'" style="width:24px;height:24px;border:1px solid rgba(0,0,0,.28);border-radius:5px;cursor:pointer;background:'+c+';padding:0;margin:2px;vertical-align:middle"></button>'; }
     var secSw=[], seen={};
     [].slice.call(document.querySelectorAll('header,section,footer')).forEach(function(s,i){
-      if(s.closest('[id^="__ce"]')) return;
+      if(s.closest('#__ce')||s.closest('#__ce_cm')) return;
       var c=''; try{ c=getComputedStyle(s).backgroundColor; }catch(_){ return; }
       if(!_colOk(c)||seen[c]) return; seen[c]=1;
       secSw.push(sw(c,(i+1)+'番目('+s.tagName.toLowerCase()+')の背景 '+c));
     });
     var cnt={};
     [].slice.call(document.querySelectorAll('body *')).slice(0,1500).forEach(function(n){
-      if(n.closest('[id^="__ce"]')) return;
+      if(n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
       var cs; try{ cs=getComputedStyle(n); }catch(_){ return; }
       [cs.backgroundColor, cs.color].forEach(function(c){ if(_colOk(c)) cnt[c]=(cnt[c]||0)+1; });
     });
@@ -12761,7 +12715,7 @@ html.__ce_altmode{cursor:text}
     function sw(c,t){ return '<button class="__ce_tbgsw" data-c="'+c+'" title="'+esc(t||c)+'" style="width:24px;height:24px;border:1px solid rgba(0,0,0,.28);border-radius:5px;cursor:pointer;background:'+c+';padding:0;margin:2px;vertical-align:middle"></button>'; }
     var cnt={};
     [].slice.call(document.querySelectorAll('body *')).slice(0,1500).forEach(function(n){
-      if(n.closest('[id^="__ce"]')) return;
+      if(n.closest('#__ce')||n.closest('#__ce_cm')||n.closest('#__ce_pk')) return;
       var cs; try{ cs=getComputedStyle(n); }catch(_){ return; }
       [cs.backgroundColor, cs.color].forEach(function(c){ if(_colOk(c)) cnt[c]=(cnt[c]||0)+1; });
     });
@@ -14900,7 +14854,7 @@ html.__ce_altmode{cursor:text}
     // 🎯ダブルクリックで潜って選んだ要素の上で右クリック＝その選択を保ってメニューを出す
     if(!_wasForced&&window.__ceDblSel&&window.__ceDblSel.isConnected&&(window.__ceDblSel===e.target||window.__ceDblSel.contains(e.target))){ el=window.__ceDblSel; }
     window.__ceDblSel=null;
-    if(!el||el.closest('[id^="__ce"]')) return;
+    if(!el||el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
     // ★ツールで置いた部品（🔶図形・🔓実体化した飾り・背景の飾り）は「透明な膜」ではないので
     //   貫通させない。ここを通すと、丸を右クリックしたのに下の文章ブロックが選ばれ、
     //   動きを付けると文章のほうに付いてしまう（実報告・2026-07-29）。
@@ -15184,7 +15138,7 @@ html.__ce_altmode{cursor:text}
         // ①各セクション（ヘッダー/フッター含む）の背景色＝「このHPの色」から選べる
         var secSw=[], seen={};
         [].slice.call(document.querySelectorAll('header,section,footer')).forEach(function(s,i){
-          if(s.closest('[id^="__ce"]')) return;
+          if(s.closest('#__ce')||s.closest('#__ce_cm')) return;
           var c=''; try{ c=getComputedStyle(s).backgroundColor; }catch(_){ return; }
           if(!_colOk(c)||seen[c]) return; seen[c]=1;
           secSw.push(sw(c,(i+1)+'番目('+s.tagName.toLowerCase()+')の背景 '+c));
@@ -15192,7 +15146,7 @@ html.__ce_altmode{cursor:text}
         // ②ページで使われている色（文字色・背景色を頻度順に・上と重複しない色だけ）
         var cnt={};
         [].slice.call(document.querySelectorAll('body *')).slice(0,1500).forEach(function(el){
-          if(el.closest('[id^="__ce"]')) return;
+          if(el.closest('#__ce')||el.closest('#__ce_cm')||el.closest('#__ce_pk')) return;
           var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
           [cs.backgroundColor, cs.color].forEach(function(c){ if(_colOk(c)) cnt[c]=(cnt[c]||0)+1; });
         });
@@ -15301,7 +15255,7 @@ _SERVE_SAFETY = """
     var all=document.querySelectorAll('body *');
     for(var i=0;i<all.length;i++){
       var e=all[i];
-      if(e.closest('[id^="__ce"]')) continue;
+      if(e.closest('#__ce')||e.closest('#__ce_cm')||e.closest('#__ce_pk')||e.closest('#__ce_toast')) continue;
       /* fxaの焼き込みアニメ(要素・その中の文字span・ラッパー含む)は監視が担当するので、掃除は一切触らない。
          ★特に .fxa_ch(1文字span)を強制表示すると、下部のタイプライター/一文字ずつが「出た状態で固定」され再生されない。 */
       if(e.closest('.fxa_pre')||e.closest('.fxa_wrap')) continue;
