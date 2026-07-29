@@ -3159,7 +3159,7 @@ html.__ce_altmode{cursor:text}
         if(el.style.getPropertyPriority('opacity')!=='important') return;
         el.style.removeProperty('opacity');
         if(el.style.getPropertyValue('transform')==='none') el.style.removeProperty('transform');
-        var h=el.closest('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_lines,.fxa_wave');
+        var h=el.closest('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines,.fxa_wave');
         if(h && hosts.indexOf(h)<0) hosts.push(h);
         n++;
       });
@@ -4467,8 +4467,8 @@ html.__ce_altmode{cursor:text}
     if(!chN&&!junk&&!emp){ if(msg) msg.textContent='🧹 掃除する物が見つかりませんでした（もう軽い状態です）'; return; }
     if(!confirm('🧹 大掃除します：\\n・文字分割span '+chN+'個 → 素のテキストへ（一文字ずつ系の動きは解除）\\n・残骸style '+junk+'件\\n・空のspan/div '+emp+'個\\n\\n⟲（Ctrl+Z）で戻せます。実行しますか？')) return;
     fxUnsplit(document.body);
-    [].slice.call(document.querySelectorAll('.fxa_tw,.fxa_cpre,.fxa_wave,.fxa_lines')).forEach(function(e){
-      e.classList.remove('fxa_tw','fxa_cpre','fxa_wave','fxa_lines');
+    [].slice.call(document.querySelectorAll('.fxa_tw,.fxa_cpre,.fxa_sk,.fxa_wave,.fxa_lines')).forEach(function(e){
+      e.classList.remove('fxa_tw','fxa_cpre','fxa_sk','fxa_wave','fxa_lines');
       e.style.removeProperty('--fxa-stag'); e.style.removeProperty('--fxa-bnc');
       if(!/fxa_(y|yd|xl|xr|s|bl|ry|fl|wp|cl|cc|clip)( |$)/.test(e.className)){ e.classList.remove('fxa_pre','fxa_in'); e.style.removeProperty('--fxa-dist'); }
     });
@@ -4500,7 +4500,7 @@ html.__ce_altmode{cursor:text}
   //     除去リストに明示してある（<style>は「id^=__ce 丸ごと除去」の例外なので書かないと焼き込まれる・§7㉔）。
   //   ★translate: は触らない：このツールのドラッグ移動が translate を使っているため（§7㉕）。
   //     transform だけ none にすれば、出現アニメのズレは消えて手で動かした位置は残る。
-  var NOANIM_SHOW='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_lines,.fxa_ch,.fxa_lni,.fxa_hl,.fxa_ud,'
+  var NOANIM_SHOW='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines,.fxa_ch,.fxa_lni,.fxa_hl,.fxa_ud,'
     +'.scrollanime,.updown,.downup,.slide-left,.slide-right,.scaleup,.eachTextAnime,'
     +'[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],'
     +'[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
@@ -4520,7 +4520,7 @@ html.__ce_altmode{cursor:text}
       st.textContent=noAnimCss();
       document.documentElement.classList.add('__ce_noanim');
       // 出現待ちのものは「出たあと」の状態にしておく（マーカー/下線は--hlwを引き切る）
-      [].slice.call(document.querySelectorAll('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_lines')).forEach(function(n){ n.classList.add('fxa_in'); });
+      [].slice.call(document.querySelectorAll('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines')).forEach(function(n){ n.classList.add('fxa_in'); });
       [].slice.call(document.querySelectorAll('.fxa_hl,.fxa_ud')).forEach(function(n){ n.style.setProperty('--hlw',100); n.classList.add('fxa_in'); });
     } else {
       document.documentElement.classList.remove('__ce_noanim');
@@ -4788,7 +4788,7 @@ html.__ce_altmode{cursor:text}
       var M=[['fxa_yd','rv rv-down'],['fxa_y','rv rv-up'],['fxa_xl','rv rv-left'],['fxa_xr','rv rv-right'],
         ['fxa_s','rv rv-zoom'],['fxa_bl','rv rv-blur'],['fxa_ry','rv rv-flip'],['fxa_clip','rv rv-up'],
         ['fxa_fl','rv rv-page'],['fxa_wp','rv rv-curtain-l'],['fxa_cl','rv rv-curtain-l'],['fxa_cc','rv rv-curtain-c'],
-        ['fxa_lines','rv-lines'],['fxa_cpre','chars'],['fxa_tw','chars'],['fxa_wave','chars lp-wave'],
+        ['fxa_lines','rv-lines'],['fxa_cpre','chars'],['fxa_tw','chars'],['fxa_sk','chars'],['fxa_wave','chars lp-wave'],
         ['fxa_lp_pulse','lp-pulse'],['fxa_lp_float','lp-float'],['fxa_lp_bounce','lp-bounce'],['fxa_lp_glow','lp-glow'],
         ['fxa_hl','mk'],['fxa_ud','ud'],['fxa_cnt','cnt']];
       var out=[];
@@ -10175,6 +10175,12 @@ html.__ce_altmode{cursor:text}
     +'html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,32ms))}'
     +'html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}'
     +'html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}'
+    // にじみ出る：ぼかしを解きながら、ゆっくり浮かび上がる。1文字の時間(--fxa-dur)を文字の間隔
+    // (--fxa-stag)より長く取るので隣同士が重なり、タイプライターのようなカタカタ感が出ない。
+    +'html.fxa-on .fxa_pre.fxa_sk{opacity:1;transform:none;transition:none}'
+    +'html.fxa-on .fxa_sk .fxa_ch{opacity:0;filter:blur(var(--fxa-blur,10px));transform:translateY(6px);'
+    +'transition:opacity var(--fxa-dur,1.6s) cubic-bezier(.25,.46,.45,.94),filter var(--fxa-dur,1.6s) cubic-bezier(.25,.46,.45,.94),transform var(--fxa-dur,1.6s) cubic-bezier(.25,.46,.45,.94)}'
+    +'html.fxa-on .fxa_sk.fxa_in .fxa_ch{opacity:1;filter:blur(0);transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,140ms))}'
     +'@keyframes fxa_pulse{0%,100%{transform:scale(1)}50%{transform:scale(calc(1 + var(--fxa-amp,.06)))}}'
     +'@keyframes fxa_float{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-1*var(--fxa-amp,12px)))}}'
     +'@keyframes fxa_bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(calc(-1*var(--fxa-amp,18px)))}60%{transform:translateY(0)}80%{transform:translateY(calc(-.4*var(--fxa-amp,18px)))}}'
@@ -10496,7 +10502,7 @@ html.__ce_altmode{cursor:text}
   //   自分だけ見ていたので「🚫動きを消すを押しても消えない」報告が出た（2026-07-29・実例：
   //   <p class="top02__tree"><picture class="fxa_y fxa_pre"><span><span><img …></span></span></picture></p>
   //   ＝imgのクラスは空なのに、動きは2つ外側のpictureに付いていた）。
-  var FX_HOST_SEL='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_lines,.fxa_hl,.fxa_cnt,.fxa_ud,.fxa_wave,.fxa_wrap,'
+  var FX_HOST_SEL='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines,.fxa_hl,.fxa_cnt,.fxa_ud,.fxa_wave,.fxa_wrap,'
     +'[class*="fxa_lp_"],[data-fxa-fly],[data-cefly]';
   function fxHosts(el){
     var out=[];
@@ -10567,6 +10573,7 @@ html.__ce_altmode{cursor:text}
     if(c.contains('fxa_ud')) return 'ud';
     if(c.contains('fxa_cnt')) return 'count';
     if(c.contains('fxa_tw')) return 'typewriter';
+    if(c.contains('fxa_sk')) return 'soak';
     if(c.contains('fxa_cpre')) return 'stagger';
     if(c.contains('fxa_lines')) return 'lines';
     if(c.contains('fxa_yd')) return 'fadedown';
@@ -13813,7 +13820,12 @@ html.__ce_altmode{cursor:text}
       : '';
     // 背景が複数ある時のサムネ一覧は縦に長いので、本命メニューの下へ回す（1枚の時の1行は上のまま）
     var bgTop=(bgQ.length===1)?bgRowQ:'', bgBottom=(bgQ.length>1)?bgRowQ:'';
-    qm.innerHTML=selRowQ+mfRow+szRow+ovRowQ+spRow+bgTop+flatRowQ+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    // 🔎 やりたいことで探す（言い換え表＝一瞬・無料／当たらない時だけAI）
+    var searchRowQ='<div style="padding:6px 6px 2px">'
+      +'<input id="__ce_qsearch" type="text" placeholder="🔎 やりたいことで探す（例：余白を取りたい）" '
+      +'style="width:100%;font-size:12.5px;padding:6px 9px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit;box-sizing:border-box">'
+      +'<div id="__ce_qsres"></div></div>';
+    qm.innerHTML=searchRowQ+selRowQ+mfRow+szRow+ovRowQ+spRow+bgTop+flatRowQ+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
       +bgBottom
       +noticeQ
@@ -13823,6 +13835,89 @@ html.__ce_altmode{cursor:text}
       +'<button id="__ce_q_sckey" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⌨ キー設定</button>'
       +'<button id="__ce_q_edit" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
     document.body.appendChild(qm);
+    // 🔎 メニューの曖昧検索（2026-07-30）
+    //   項目が増えて「どこにあるか分からない」を解消する。まず言い換え表でローカル検索（一瞬・無料）、
+    //   1件も当たらなかった時だけ Gemini に聞く＝ふだんは費用ゼロ。
+    //   ★結果は本物のボタンを押す代理ボタンで出す：畳んだサブメニューの中の項目にも届く。
+    (function(){
+      var inp=qm.querySelector('#__ce_qsearch'), res=qm.querySelector('#__ce_qsres');
+      if(!inp||!res) return;
+      // 言い換え表：入力にこの行のどれかが含まれていたら、その行の語ぜんぶで探す
+      var SYN=[
+        '余白 すきま 隙間 間隔 マージン パディング 詰める 空ける あける スペース ゆとり 広げる 狭める',
+        '大きさ サイズ 拡大 縮小 大きく 小さく 幅 高さ 太く 細く 伸ばす 縮める',
+        '動き アニメ アニメーション 出現 演出 タイミング 遅延 ディレイ 順番',
+        '色 カラー 背景 塗る 文字色 グラデ グラデーション 透明 薄く',
+        '位置 場所 動かす 移動 ドラッグ ずらす そろえる 揃える 整列 中央 寄せる',
+        '文字 テキスト 書体 フォント 行間 字間 太字 見出し',
+        '画像 写真 img 差し替え 切り抜き トリミング 背景画像',
+        '線 ボーダー 枠 罫線 下線 区切り マーカー',
+        '影 シャドウ ぼかし',
+        '角丸 丸み 角',
+        '消す 削除 非表示 隠す 戻す 元に戻す やり直す',
+        '保存 書き出し 出力 ダウンロード 本番 コーディング'
+      ].map(function(s){ return s.split(' '); });
+      function norm(s){
+        s=(s||'').toLowerCase();
+        // カタカナ→ひらがな（「マージン」と「まーじん」を同じ扱いにする）
+        s=s.replace(/[\\u30a1-\\u30f6]/g,function(c){ return String.fromCharCode(c.charCodeAt(0)-0x60); });
+        return s.replace(/[\\s\\u3000・、。！？…]/g,'');
+      }
+      var pool=[].slice.call(qm.querySelectorAll('.__ce_qi')).filter(function(b){
+        return !b.classList.contains('__ce_gbtn');
+      });
+      // ★全体メニュー(#__ce)の項目も対象にする。右クリック側に出ていない機能（余白をそろえる等）は
+      //   ここにしかなく、含めないと「余白を取りたい」がローカルで当たらずAI行きになってしまう。
+      var full=document.getElementById('__ce');
+      if(full){
+        pool=pool.concat([].slice.call(full.querySelectorAll('button')).filter(function(b){
+          return (b.textContent||'').trim().length>1;
+        }));
+      }
+      var items=pool.map(function(b){
+        var lb=(b.textContent||'').replace(/\\s+/g,' ').trim();
+        return { el:b, label:lb, key:norm(lb) };
+      });
+      function expand(q){
+        var nq=norm(q), terms=[nq];
+        SYN.forEach(function(row){
+          if(row.some(function(w){ return nq.indexOf(norm(w))>=0; })) row.forEach(function(w){ terms.push(norm(w)); });
+        });
+        return terms.filter(function(t){ return t.length>=1; });
+      }
+      function render(list,note){
+        res.innerHTML='';
+        if(note){ var d=document.createElement('div'); d.style.cssText='font-size:11px;color:#8a8a90;padding:4px 4px 0'; d.textContent=note; res.appendChild(d); }
+        list.slice(0,8).forEach(function(it){
+          var b=document.createElement('button');
+          b.style.cssText='display:block;width:100%;text-align:left;background:#f4f8ff;border:1px solid #d6e4fb;border-radius:7px;padding:6px 9px;margin:3px 0 0;cursor:pointer;font-size:12.5px;font-family:inherit;color:#1d1d1f';
+          b.textContent=it.label;
+          b.addEventListener('click',function(ev){ ev.stopPropagation(); it.el.click(); });
+          res.appendChild(b);
+        });
+      }
+      var tmr=null;
+      inp.addEventListener('mousedown',function(ev){ ev.stopPropagation(); });
+      inp.addEventListener('input',function(){
+        var q=inp.value.trim();
+        if(tmr){ clearTimeout(tmr); tmr=null; }
+        if(!q){ res.innerHTML=''; return; }
+        var terms=expand(q);
+        var hits=items.filter(function(it){ return terms.some(function(t){ return t && it.key.indexOf(t)>=0; }); });
+        if(hits.length){ render(hits,'見つかった項目（押すとその機能が開きます）'); return; }
+        render([],'🤖 AIに聞いています…');
+        tmr=setTimeout(function(){
+          fetch('/api/menu_search',{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({q:q,labels:items.map(function(it){ return it.label; })})})
+          .then(function(r){ return r.json(); })
+          .then(function(d){
+            if(d.message){ render([],d.message); return; }
+            var got=(d.idx||[]).map(function(i){ return items[i]; }).filter(Boolean);
+            render(got, got.length?('🤖 AIが選んだ候補'):'該当が見つかりませんでした');
+          }).catch(function(){ render([],'AI検索に届きませんでした'); });
+        },450);
+      });
+    })();
     // 🖱 メニュー自体を掴んで動かせるようにする（下に隠れた要素を見たい時に邪魔になるため）。
     //   ボタン・入力の上では動かさない＝押す操作は今まで通り。位置はこのPCに記憶する。
     (function(){
@@ -15426,6 +15521,71 @@ def _inject_edit_bar(html: str, filename: str) -> str:
         i = low.rfind("</body>")
         return html[:i] + bar + html[i:]
     return html + bar
+
+
+@app.route("/api/menu_search", methods=["POST"])
+def api_menu_search():
+    """🔎 メニューの曖昧検索（AI担当・2026-07-30）。
+
+    ブラウザ側でまず言い換え表を使ったローカル検索を行い、**当たらなかった時だけ**ここへ来る。
+    ＝ふだんは無料・一瞬で終わり、AIの費用が出るのは「言葉が表に無かった時」だけ。
+
+    受け取り: {"q": "余白を取りたい", "labels": ["＋高くする", "🖱 掴んで動かす", ...]}
+    返す:     {"idx": [3, 7], "by": "gemini"}  ← labels の何番目が近いか（近い順）
+
+    ★モデルは既定で gemini-3.5-flash-lite（Lite系の最新・入力$0.30/出力$2.50 per 1M）。
+      生成用のモデル設定とは別に持つ：カンプ生成は高品質モデル、こちらは短文なので最安で足りる。
+    """
+    import urllib.request
+
+    data = request.get_json(silent=True) or {}
+    q = (data.get("q") or "").strip()
+    labels = [str(x) for x in (data.get("labels") or [])][:400]
+    if not q or not labels:
+        return jsonify({"idx": [], "by": "none"})
+
+    gcfg = config.CONFIG.gemini
+    if not getattr(gcfg, "enabled", False):
+        return jsonify({"idx": [], "by": "nokey",
+                        "message": "AI検索を使うには ⚙設定 で Gemini のAPIキーを入れてください"})
+
+    model = os.environ.get("DESIGN_STOCK_GEMINI_MENU_MODEL", "gemini-3.5-flash-lite")
+    numbered = "\n".join(f"{i}: {s}" for i, s in enumerate(labels))
+    prompt = (
+        "あなたはデザインツールのメニュー検索です。\n"
+        "利用者のやりたいことに合うメニュー項目を、下の一覧から選んでください。\n"
+        "・近い順に最大5件\n"
+        "・番号だけをJSON配列で返す（例: [12,3]）\n"
+        "・該当が無ければ []\n"
+        "・説明や前置きは書かない\n\n"
+        f"【やりたいこと】{q}\n\n【メニュー一覧】\n{numbered}\n"
+    )
+    body = {
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": {"maxOutputTokens": 200, "temperature": 0},
+    }
+    url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+           f"{model}:generateContent?key={gcfg.api_key}")
+    try:
+        req = urllib.request.Request(
+            url, data=_json.dumps(body).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            res = _json.loads(resp.read().decode("utf-8"))
+        text = "".join(p.get("text", "") for p in res["candidates"][0]["content"]["parts"])
+    except Exception as exc:  # ネット断・キー間違い等でもUIは止めない
+        log.warning("メニューAI検索に失敗: %s", exc)
+        return jsonify({"idx": [], "by": "error", "message": "AI検索に届きませんでした（通信かキーを確認）"})
+
+    m = re.search(r"\[[^\]]*\]", text)          # 前置きが付いても配列だけ拾う
+    idx: list[int] = []
+    if m:
+        try:
+            idx = [int(v) for v in _json.loads(m.group(0)) if 0 <= int(v) < len(labels)]
+        except Exception:
+            idx = []
+    return jsonify({"idx": idx[:5], "by": "gemini", "model": model})
 
 
 @app.route("/camp/<path:filename>")
