@@ -160,71 +160,6 @@ a:hover { opacity: 0.7; }
 .header__logo__words { display: flex; flex-direction: column; gap: 0.04rem; line-height: 1; letter-spacing: 0.03em; }
 .header__logo__eyebrow { color: #87b798; font-size: 0.5rem; font-weight: 700; letter-spacing: 0.12em; }
 .header__logo__name { color: #4e795b; font-size: 1.18rem; font-weight: 700; letter-spacing: 0.08em; }
-</style><script id="it-layout-runtime">
-(function () {
-  if (window.itLayoutRuntimeLoaded) return;
-  window.itLayoutRuntimeLoaded = true;
-  function set(el, values) {
-    if (!el) return;
-    Object.keys(values).forEach(function (key) { el.style.setProperty(key, values[key], 'important'); });
-  }
-  function reset(selector) {
-    document.querySelectorAll(selector).forEach(function (el) {
-      set(el, { translate: '0', transform: 'none' });
-    });
-  }
-  function applyLayout() {
-    var mobile = window.matchMedia('(max-width: 767px)').matches;
-    var hero = document.querySelector('.fv');
-    var bg = document.querySelector('.fv__bg');
-    var picture = document.querySelector('.fv__bg picture');
-    var image = document.querySelector('.fv__bg picture img');
-    var copyBlock = document.querySelector('.fv__txt_blk');
-    var copy = document.querySelector('.fv__txt');
-    var news = document.querySelector('.fv__news');
-    var concept = document.querySelector('.top01');
-    var conceptBlock = document.querySelector('.top01__blk01');
-    var conceptText = document.querySelector('.top01__txt_blk');
-    var conceptVisual = document.querySelector('.top01__img_blk');
-    var conceptImage = document.querySelector('.top01__img01');
-    var conceptImageInner = document.querySelector('.top01__img01 img');
-    var contactImage = document.querySelector('.contact_blk__img');
-    var contactImageInner = document.querySelector('.contact_blk__img img');
-    reset('.fv__news__ttl,.fv__news__ul,.fv__news__cat,.fv__news__link,.fv__news__link a');
-    reset('.top01__txt_blk > *, .top01 > .wrap01 > .link01, .top01__img01, .top01__img02');
-    set(hero, { position: 'relative', marginBottom: mobile ? '56px' : '88px', minHeight: mobile ? 'auto' : '760px', padding: mobile ? '5.5rem 0 2.5rem' : '0', overflow: 'hidden', background: 'linear-gradient(118deg, #f7fbf8 0%, #fbfcfa 48%, #eaf3ed 100%)' });
-    if (mobile) {
-      set(bg, { position: 'relative', inset: 'auto', height: '58vw', margin: '0 5% 1.4rem', zIndex: '0' });
-      set(picture, { display: 'block', position: 'absolute', inset: '0', translate: '0', width: '100%', height: '100%', maxWidth: 'none', minHeight: '0', overflow: 'hidden', borderRadius: '24px', boxShadow: '0 18px 38px rgba(52,80,62,.16)' });
-      set(copyBlock, { position: 'relative', left: 'auto', top: 'auto', translate: '0', width: '90%', height: 'auto', margin: '0 auto 1.25rem', zIndex: '3' });
-      set(news, { position: 'relative', left: 'auto', right: 'auto', bottom: 'auto', translate: '0', width: '90%', height: 'auto', margin: '0 auto', padding: '1.2rem', zIndex: '4' });
-    } else {
-      set(bg, { position: 'absolute', inset: '0', translate: '0', zIndex: '0' });
-      set(picture, { display: 'block', position: 'absolute', right: '70px', left: 'auto', top: '104px', translate: '0', width: 'min(59vw, 1050px)', height: 'min(39vw, 620px)', maxWidth: 'none', minHeight: '0', overflow: 'hidden', borderRadius: '34px', boxShadow: '0 26px 58px rgba(52,80,62,.18)' });
-      set(copyBlock, { position: 'absolute', left: '110px', top: '172px', translate: '0', width: '470px', height: 'auto', margin: '0', zIndex: '3' });
-      set(news, { position: 'absolute', left: '110px', right: 'auto', bottom: '46px', translate: '0', width: '700px', height: 'auto', maxWidth: 'none', minHeight: '0', margin: '0', padding: '1.35rem 1.55rem', zIndex: '4' });
-    }
-    set(image, { display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', background: 'transparent', border: '0', borderRadius: 'inherit', boxShadow: 'none' });
-    set(copy, { translate: '0', transform: 'none', padding: '1.25rem 1.4rem', borderLeft: '4px solid #91bd78', borderRadius: '0 18px 18px 0', background: 'rgba(255,255,255,.84)', boxShadow: '0 12px 32px rgba(60,86,66,.08)', color: '#38483d', fontSize: 'clamp(14px,1.05vw,17px)', lineHeight: '2' });
-    set(news, { background: 'rgba(255,255,255,.92)', border: '1px solid rgba(145,190,155,.33)', borderRadius: '22px', boxShadow: '0 18px 42px rgba(53,88,65,.12)' });
-    set(concept, { padding: mobile ? '34px 0 72px' : '58px 0 110px', background: 'linear-gradient(180deg,#fff 0%,#f6faf5 100%)' });
-    set(conceptBlock, { display: mobile ? 'block' : 'flex', alignItems: 'center', gap: mobile ? '0' : '72px', paddingBottom: mobile ? '34px' : '56px' });
-    set(conceptText, { width: mobile ? '90%' : '48%', margin: mobile ? '0 auto' : '0' });
-    set(conceptVisual, { width: mobile ? '90%' : '48%', margin: mobile ? '2rem auto 0' : '0' });
-    set(conceptImage, { translate: '0', width: '100%', height: 'auto', maxWidth: 'none', minHeight: '0', padding: '0', margin: '0' });
-    set(conceptImageInner, { display: 'block', width: '100%', borderRadius: '28px', boxShadow: '0 22px 46px rgba(56,85,64,.16)' });
-    set(contactImage, { width: mobile ? '90%' : 'min(35vw,460px)', height: mobile ? '180px' : '320px', right: mobile ? '5%' : '2.2rem', top: mobile ? '1.2rem' : '-2rem', overflow: 'hidden', borderRadius: '24px' });
-    set(contactImageInner, { width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'right center' });
-  }
-  function boot() {
-    applyLayout();
-    [120, 900, 2600, 4200].forEach(function (delay) { window.setTimeout(applyLayout, delay); });
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
-  window.addEventListener('resize', applyLayout);
-}());
-</script><style>
 .header__menu__ul { column-gap: 1.625rem; font-weight: bold; }
 .header__menu__a:hover { color: rgb(138, 199, 90); opacity: 1; }
 .header__menu-btn { position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; width: 3.75rem; height: 3.75rem; border-radius: 50%; background-color: rgb(138, 199, 90); margin-right: 2.36111%; margin-left: 5%; z-index: 10; cursor: pointer; }
@@ -5051,7 +4986,7 @@ ul.ucart_featured_body .thumtitle a, .widget_ucart_featured .thumtitle a, .sideb
             
             <p class="fv__txt scrollanime downup fadeIn no_delay" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="-54.359375" data-cety="96" style="translate: -54.3594px 96px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; transform: none; opacity: 1 !important;">あしたばの会は、病気療養中の生活から<br class="disp_sp">社会復帰（就労）までをサポートします。<br>療養中の不安や就労にむけたお悩みなど、<br class="disp_sp">いっしょに乗り越えていきましょう。</p>
         </div>
-        <div class="fv__news scrollanime downup fadeIn" style="transform: matrix(1, 0, 0, 1, 0, 0) !important; translate: 608.82px 332px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; opacity: 1 !important; width: 757px !important; max-width: none !important; height: 272px !important; min-height: 0px !important; box-sizing: border-box !important;" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="608.8203125" data-cety="332">
+        <div class="fv__news scrollanime downup fadeIn" style="transform: matrix(1, 0, 0, 1, 0, 0) !important; translate: 0px 332px !important; left: auto !important; right: 110px !important; margin: 0px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; opacity: 1 !important; width: 757px !important; max-width: none !important; height: 272px !important; min-height: 0px !important; box-sizing: border-box !important;" data-cebt="matrix(1, 0, 0, 1, 0, 0)" data-cetx="608.8203125" data-cety="332">
             <h2 class="fv__news__ttl" data-cebt="" data-cetx="84.6248779296875" data-cety="-15.015625" style="translate: 84.6249px -15.0156px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;"><span class="fv__news__ttl__en eachTextAnime appeartext"><span style="animation-delay:.0s;">N</span><span style="animation-delay:.1s;">E</span><span style="animation-delay:.2s;">W</span><span style="animation-delay:.3s;">S</span></span>お知らせ</h2>
             <ul class="fv__news__ul" style="translate: -49.8672px -1px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="-49.8671875" data-cety="-1">
                                <!-- ▽ ループ開始 ▽ -->
@@ -5118,7 +5053,7 @@ ul.ucart_featured_body .thumtitle a, .widget_ucart_featured .thumtitle a, .sideb
                 <a class="link01__a link01__a--news link01__a--white" href="https://www.npo-ashitaba.or.jp/topics" data-cebt="" data-cetx="-22.0059814453125" data-cety="222" style="translate: -22.006px 222px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;">すべて見る</a>
             </p>
         </div>
-    <div style="z-index: 99; font-weight: 700; color: rgb(51, 51, 51); line-height: 1.4; padding: 4px 8px; white-space: normal; position: absolute; left: 69.6%; top: 198px; font-size: 46.9px !important; max-width: none !important; translate: -730.375px -118.859px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; height: 70px !important; width: 740px !important; min-height: 0px !important; box-sizing: border-box !important; --fxa-dur: 340ms; --fxa-stag: 96ms; --fxa-dist: 4px; --fxa-bnc: 1;" data-cebt="" data-cetx="-730.375" data-cety="-118.859375" class="fxa_pre fxa_cpre"><span class="fxa_ch" style="display: inline-block; --i: 0;">就</span><span class="fxa_ch" style="display: inline-block; --i: 1;">労</span><span class="fxa_ch" style="display: inline-block; --i: 2;">継</span><span class="fxa_ch" style="display: inline-block; --i: 3;">続</span><span class="fxa_ch" style="display: inline-block; --i: 4;">支</span><span class="fxa_ch" style="display: inline-block; --i: 5;">援</span><span class="fxa_ch" style="display: inline-block; --i: 6;">事</span><span class="fxa_ch" style="display: inline-block; --i: 7;">業</span><span class="fxa_ch" style="display: inline-block; --i: 8;">所</span><span class="fxa_ch" style="display: inline-block; --i: 9;">B</span><span class="fxa_ch" style="display: inline-block; --i: 10;">型</span>　<span style="color: rgb(17, 228, 98) !important; -webkit-text-fill-color: rgb(17, 228, 98) !important;"><span class="fxa_ch" style="display: inline-block; --i: 11;">ろ</span><span class="fxa_ch" style="display: inline-block; --i: 12;">ぴ</span><span class="fxa_ch" style="display: inline-block; --i: 13;">あ</span></span></div><div class="ce_shape" data-ceshape="icon" data-ceicon="→" style="box-sizing: border-box; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; line-height: 1; background: rgb(228, 230, 127); color: rgb(255, 255, 255); opacity: 1; position: absolute; z-index: 99; left: 50.4%; top: 480px; translate: 297.969px 104.547px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="297.96875" data-cety="104.546875">→</div><div class="ce_shape" data-ceshape="rect" style="border-radius: 14px; background: transparent; opacity: 1; position: absolute; z-index: 99; left: 50.4%; top: 480px; border: 3px solid rgb(228, 230, 127); box-sizing: border-box !important; width: 634px !important; height: 262px !important; translate: 286.211px 80.5625px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; max-width: none !important; min-height: 0px !important;" data-cebt="" data-cetx="286.2109375" data-cety="80.5625"></div></section>
+    <div style="z-index: 99; font-weight: 700; color: rgb(51, 51, 51); line-height: 1.4; padding: 4px 8px; white-space: normal; position: absolute; left: 69.6%; top: 198px; font-size: 46.9px !important; max-width: none !important; translate: -730.375px -118.859px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; height: 70px !important; width: 740px !important; min-height: 0px !important; box-sizing: border-box !important; --fxa-dur: 340ms; --fxa-stag: 96ms; --fxa-dist: 4px; --fxa-bnc: 1;" data-cebt="" data-cetx="-730.375" data-cety="-118.859375" class="fxa_pre fxa_cpre"><span class="fxa_ch" style="display: inline-block; --i: 0;">就</span><span class="fxa_ch" style="display: inline-block; --i: 1;">労</span><span class="fxa_ch" style="display: inline-block; --i: 2;">継</span><span class="fxa_ch" style="display: inline-block; --i: 3;">続</span><span class="fxa_ch" style="display: inline-block; --i: 4;">支</span><span class="fxa_ch" style="display: inline-block; --i: 5;">援</span><span class="fxa_ch" style="display: inline-block; --i: 6;">事</span><span class="fxa_ch" style="display: inline-block; --i: 7;">業</span><span class="fxa_ch" style="display: inline-block; --i: 8;">所</span><span class="fxa_ch" style="display: inline-block; --i: 9;">B</span><span class="fxa_ch" style="display: inline-block; --i: 10;">型</span>　<span style="color: rgb(17, 228, 98) !important; -webkit-text-fill-color: rgb(17, 228, 98) !important;"><span class="fxa_ch" style="display: inline-block; --i: 11;">ろ</span><span class="fxa_ch" style="display: inline-block; --i: 12;">ぴ</span><span class="fxa_ch" style="display: inline-block; --i: 13;">あ</span></span></div><div class="ce_shape" data-ceshape="icon" data-ceicon="→" style="box-sizing: border-box; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; line-height: 1; background: rgb(228, 230, 127); color: rgb(255, 255, 255); opacity: 1; position: absolute; z-index: 99; left: 50.4%; top: 480px; translate: 0px 104.547px !important; left: auto !important; right: 748px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important;" data-cebt="" data-cetx="297.96875" data-cety="104.546875">→</div><div class="ce_shape" data-ceshape="rect" style="border-radius: 14px; background: transparent; opacity: 1; position: absolute; z-index: 99; left: 50.4%; top: 480px; border: 3px solid rgb(228, 230, 127); box-sizing: border-box !important; width: 634px !important; height: 262px !important; translate: 0px 80.5625px !important; left: auto !important; right: 169px !important; rotate: 0deg !important; scale: 1 !important; transform-origin: center center !important; max-width: none !important; min-height: 0px !important;" data-cebt="" data-cetx="286.2109375" data-cety="80.5625"></div></section>
 	<!--/メインイメージ-->
 	
 	<section class="top01" style="position: relative;">
