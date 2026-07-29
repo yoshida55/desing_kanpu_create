@@ -5329,6 +5329,109 @@ html.__ce_altmode{cursor:text}
       render();
     });
   }
+  // ⇕ 押した場所の「縦の空間」を広げる／狭める（2026-07-30・AIなし）
+  //   ★margin/padding を足す方式は採らない：カンプは position:absolute が多くて効かない事があり、
+  //     クローン元CSSの !important にも負ける。空のdivを1枚差し込むのが一番確実で、消すのも簡単。
+  //   ★差し込む位置は「押したYがどの隙間に入るか」を実測して決める＝決め打ちしないのでどのカンプでも効く。
+  //   ★中身が全部 position:absolute の所（FV等）は"隙間"の概念が無いので、
+  //     囲っているセクションの min-height を伸ばす方式へ自動で切り替える。
+  function _flowKids(el){
+    if(!el||!el.children) return [];
+    return [].slice.call(el.children).filter(function(c){
+      if(c.closest&&c.closest('[id^="__ce"]')) return false;
+      if(c.tagName==='SCRIPT'||c.tagName==='STYLE'||c.tagName==='BR') return false;
+      var cs=null; try{ cs=getComputedStyle(c); }catch(_){ return false; }
+      if(!cs||cs.position==='absolute'||cs.position==='fixed'||cs.display==='none') return false;
+      return c.getBoundingClientRect().height>0;
+    });
+  }
+  function _spacerHost(el){
+    var cur=el;
+    while(cur&&cur!==document.body){
+      var cs=null; try{ cs=getComputedStyle(cur); }catch(_){}
+      if(cs&&cs.position!=='absolute'&&cs.position!=='fixed'&&_flowKids(cur).length>0) return cur;
+      cur=cur.parentElement;
+    }
+    return _flowKids(document.body).length>0?document.body:null;
+  }
+  function openSpacer(el,y){
+    var oldp=document.getElementById('__ce_vsp'); if(oldp) oldp.remove();
+    var host=_spacerHost(el||document.body);
+    var mode='spacer', sp=null, secEl=null, where='';
+    if(host){
+      var kids=_flowKids(host), before=null;
+      for(var i=0;i<kids.length;i++){
+        var r=kids[i].getBoundingClientRect();
+        if(y < r.top + r.height/2){ before=kids[i]; break; }
+      }
+      // 直前に作った空間が隣にあればそれを伸ばす（押すたびに空divが増えるのを防ぐ）
+      var nb=before?before.previousElementSibling:host.lastElementChild;
+      if(nb&&nb.getAttribute&&nb.getAttribute('data-cespacer')){ sp=nb; }
+      else{
+        sp=document.createElement('div');
+        sp.className='ce_spacer'; sp.setAttribute('data-cespacer','1');
+        sp.style.setProperty('height','40px');
+        sp.style.setProperty('width','100%');
+        sp.style.setProperty('flex','0 0 auto');   // flexの親でも潰れないように
+        try{ pushUndo(host); }catch(_){}
+        if(before) host.insertBefore(sp,before); else host.appendChild(sp);
+      }
+      where=host.tagName.toLowerCase()+(host.className&&typeof host.className==='string'?('.'+host.className.trim().split(/\\s+/)[0]):'')
+        +(before?'（'+before.tagName.toLowerCase()+' の上）':'（いちばん下）');
+    }else{
+      mode='section';
+      secEl=(el&&el.closest)?el.closest('section,header,footer,main'):null;
+      if(!secEl){ if(msg) msg.textContent='ここには縦の空間を作れませんでした（セクションの中で試してください）'; return; }
+      where=secEl.tagName.toLowerCase()+' の高さを伸ばす（中身が自由配置なので隙間を作れないため）';
+    }
+    function nowPx(){
+      if(mode==='spacer') return Math.round(parseFloat(sp.style.height)||0);
+      var cs=getComputedStyle(secEl);
+      return Math.round(parseFloat(cs.minHeight)||secEl.offsetHeight||0);
+    }
+    var p=document.createElement('div'); p.id='__ce_vsp';
+    function setPx(v){
+      v=Math.max(0,Math.round(v));
+      if(mode==='spacer'){ sp.style.setProperty('height',v+'px'); }
+      else{ try{ pushUndo(secEl); }catch(_){} secEl.style.setProperty('min-height',v+'px','important'); }
+      try{ markDirty(); }catch(_){}
+      var f=p.querySelector('#__vspnum'); if(f) f.textContent=nowPx()+'px';
+    }
+    p.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:2147483646;background:#fff;border:1px solid #d0d0d5;border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.26);padding:9px 12px;font:12.5px/1.6 system-ui,sans-serif;color:#1d1d1f;max-width:94vw');
+    p.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'
+      +'<b>⇕ 縦の空間を広げる</b><span id="__vspnum" style="color:#0b6bcb;font-weight:700"></span>'
+      +'<button id="__vspx" style="margin-left:auto;border:none;background:#eee;border-radius:999px;padding:1px 9px;cursor:pointer">×</button></div>'
+      +'<div style="font-size:11px;color:#777;margin-bottom:6px">'+esc(where)+'</div>'
+      +'<div style="display:flex;gap:5px;align-items:center">'
+      +'<button class="__vspb" data-d="-40" style="border:1px solid #ddd;background:#f7f7f9;border-radius:7px;padding:5px 9px;cursor:pointer">−40</button>'
+      +'<button class="__vspb" data-d="-10" style="border:1px solid #ddd;background:#f7f7f9;border-radius:7px;padding:5px 9px;cursor:pointer">−10</button>'
+      +'<button class="__vspb" data-d="10" style="border:1px solid #ddd;background:#f7f7f9;border-radius:7px;padding:5px 9px;cursor:pointer">＋10</button>'
+      +'<button class="__vspb" data-d="40" style="border:1px solid #ddd;background:#f7f7f9;border-radius:7px;padding:5px 9px;cursor:pointer">＋40</button>'
+      +'<span id="__vspdrag" title="上下にドラッグで調整" style="cursor:ns-resize;background:#0b6bcb;color:#fff;border-radius:7px;padding:5px 12px;user-select:none">⇕ ドラッグ</span>'
+      +(mode==='spacer'?'<button id="__vspdel" style="border:1px solid #f0c0c0;background:#fdeeee;color:#b03636;border-radius:7px;padding:5px 9px;cursor:pointer">消す</button>':'')
+      +'</div>';
+    document.body.appendChild(p);
+    setPx(nowPx());
+    p.querySelector('#__vspx').addEventListener('click',function(){ p.remove(); });
+    [].forEach.call(p.querySelectorAll('.__vspb'),function(b){
+      b.addEventListener('click',function(){ setPx(nowPx()+(+b.getAttribute('data-d'))); });
+    });
+    var dl=p.querySelector('#__vspdel');
+    if(dl) dl.addEventListener('click',function(){
+      try{ pushUndo(sp.parentElement); }catch(_){}
+      sp.remove(); try{ markDirty(); }catch(_){}
+      p.remove(); if(msg) msg.textContent='⇕ 作った縦の空間を消しました';
+    });
+    // ⇕ ドラッグで調整（下へ引くほど広がる）
+    (function(){
+      var dg=false, sy=0, st=0;
+      var g=p.querySelector('#__vspdrag');
+      g.addEventListener('mousedown',function(ev){ dg=true; sy=ev.clientY; st=nowPx(); ev.preventDefault(); });
+      document.addEventListener('mousemove',function(ev){ if(!dg) return; setPx(st+(ev.clientY-sy)); });
+      document.addEventListener('mouseup',function(){ dg=false; });
+    })();
+    if(msg) msg.textContent='⇕ 縦の空間を作りました（数字ボタンかドラッグで調整・💾保存で確定）';
+  }
   // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
   // 編集バー（①で選ぶ）と右クリックメニュー（右クリック位置）の両方から呼べるよう関数化。
   function favSwapOpen(target){
@@ -8407,6 +8510,14 @@ html.__ce_altmode{cursor:text}
   // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
+    // ★1文字ずつに割られた文字（スタッガー／タイプライター／にじみ出る等）を掴んだ状態で開くと、
+    //   その1文字だけが編集対象になってしまう。文字列ごと直せるよう、まとめ役の親まで戻す
+    //   （2026-07-30・要望）。判定はクラス名ではなく「短い兄弟が並ぶ」で動的に見るので、
+    //   クローン元サイトが自前で割ったものにも効く。
+    var _bg=0;
+    while(el && _charFrag(el) && el.parentElement && el.parentElement!==document.body && _bg++<8){
+      el=el.parentElement;
+    }
     // Alt+ドラッグで文字を選択中なら「その選択文字だけ」を編集対象にする（spanで包む・2026-07-20）
     if(window.__ceSel&&window.__ceSel.has&&window.__ceSel.has()&&window.__ceSel.wrapSpan){
       var _w=window.__ceSel.wrapSpan();
@@ -11137,10 +11248,26 @@ html.__ce_altmode{cursor:text}
     var ts=window.getSelection&&window.getSelection();
     if(ts&&!ts.isCollapsed) return;  // 文字を選択している＝普通のテキストコピー優先
     if(k==='c'){
-      if(!curEl||!document.contains(curEl)){ if(msg) msg.textContent='先に右クリックでコピーしたい要素を選んでください'; return; }
-      var n=curEl.cloneNode(true);
+      // ★図形・線・飾り（🔶図形/⭕リング/▢縁取り/🌸グラデ）は「左クリックで掴む」仕組みなので
+      //   curEl に入らず、Ctrl+C が効かなかった（2026-07-30・要望）。
+      //   マウス位置にそれらがあれば優先し、無ければ直前に触った図形を使う＝図形全般がコピーできる。
+      var src=curEl, hov=null;
+      try{
+        var us=document.elementsFromPoint(_ceCX,_ceCY);
+        for(var ui=0;ui<us.length;ui++){
+          var u=us[ui];
+          if(!u||!u.closest) continue;
+          if(u.closest('[id^="__ce"]')) continue;
+          var dq=u.closest(DQ_SEL);
+          if(dq){ hov=dq; break; }
+        }
+      }catch(_){}
+      if(hov) src=hov;
+      else if((!src||!document.contains(src)) && _lastShape && document.contains(_lastShape)) src=_lastShape;
+      if(!src||!document.contains(src)){ if(msg) msg.textContent='先に右クリックでコピーしたい要素を選んでください（図形・線はその上にマウスを置いて Ctrl+C）'; return; }
+      var n=src.cloneNode(true);
       n.classList.remove('__ce_sel','__ce_hl','__ce_sechl');
-      _ceClip={html:n.outerHTML, tag:curEl.tagName};
+      _ceClip={html:n.outerHTML, tag:src.tagName};
       e.preventDefault();
       if(msg) msg.textContent='📋 コピーしました。貼り付けたい場所にマウスを置いて Ctrl+V';
       return;
@@ -14003,6 +14130,7 @@ html.__ce_altmode{cursor:text}
       +bgBottom
       +noticeQ
       +'<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
+      +row('__ce_q_vspace','⇕ ここの縦の空間を広げる（余白を作る・AIなし）')
       +row('__ce_q_full','⚙ すべての編集メニュー…')
       +'<div style="display:flex;justify-content:flex-end;gap:10px;padding:0 8px 3px">'
       +'<button id="__ce_q_sckey" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⌨ キー設定</button>'
@@ -14850,6 +14978,7 @@ html.__ce_altmode{cursor:text}
     qm.addEventListener('mouseover',function(ev){ var b2=ev.target.closest('.__ce_qi'); [].slice.call(qm.querySelectorAll('.__ce_qi')).forEach(function(x){ x.style.background=(x===b2)?'#eef4ff':'none'; }); });
     qm.addEventListener('click',function(ev){
       var t=ev.target.closest('.__ce_qi'); if(!t) return;
+      if(t.id==='__ce_q_vspace'){ var vse=curEl, vsy=qy; closeMenu(); openSpacer(vse, vsy); return; }
       if(t.id==='__ce_q_up'){ selectParent(false); return; }
       if(t.id==='__ce_q_txt'){
         if(addMode){
@@ -15141,6 +15270,23 @@ html.__ce_altmode{cursor:text}
   //   見出しの中に「NEWS」と「お知らせ」が兄弟で並ぶ形だと、塊（h2）が選ばれて片方だけ掴めない。
   //   ★子孫の文字ではなく「自分が直接持っているテキスト」で判定するのがミソ。
   //     子孫込み(textContent)で見ると入れ物まで該当してしまい、また塊が選ばれる。
+  // ★1文字ずつに割られた文字（アニメ用の分割）は、1文字だけ掴めても意味がない。
+  //   ツールが割った .fxa_ch だけでなく、クローン元サイトが自前で割ったもの
+  //   （<span>N</span><span>E</span>… animation-delay付き）も同じなので、クラス名では判定しない。
+  //   「自分の文字が1〜2文字で、兄弟も短いものが並んでいる」＝分割の断片、と動的に見分ける。
+  function _charFrag(el){
+    if(!el||!el.parentElement) return false;
+    if(el.classList&&el.classList.contains('fxa_ch')) return true;
+    var own=(el.textContent||'').trim();
+    if(own.length>2) return false;
+    var sibs=el.parentElement.children, n=0, short=0;
+    for(var i=0;i<sibs.length;i++){
+      var s=(sibs[i].textContent||'').trim();
+      if(!s) continue;
+      n++; if(s.length<=2) short++;
+    }
+    return n>=2 && short>=Math.max(2, Math.floor(n*0.7));
+  }
   function _deepTextAt(root,x,y){
     if(!root||!root.querySelectorAll) return null;
     var best=null, bestArea=Infinity;
@@ -15159,6 +15305,11 @@ html.__ce_altmode{cursor:text}
       var a=r.width*r.height;
       if(a<bestArea){ best=el; bestArea=a; }
     }
+    // ★1文字ずつの断片に当たったら「まとめ役」の親まで戻す＝文字列ごと選べる（1文字だけ掴めても使えない）
+    var guard=0;
+    while(best && _charFrag(best) && best.parentElement && best!==root && guard++<8){
+      best=best.parentElement;
+    }
     return best;
   }
   // 🔓 「その文字だけを指す入れ物」がDOMに無い裸のテキストノードを、その場で span に包んで掴めるようにする。
@@ -15168,6 +15319,9 @@ html.__ce_altmode{cursor:text}
   //   ★テキストノードの位置は Range.getClientRects で測る（§7㉖で既に使っている手法）。
   function _wrapTextNodeAt(el,x,y){
     if(!el||!el.firstChild||el.closest&&el.closest('[id^="__ce"]')) return null;
+    // ★1文字ずつに割られた断片の中では包まない。包むと「N」だけ選ばれて文字列ごと掴めなくなる
+    //   （スタッガー系アニメを付けた文字で実際に起きた・2026-07-30）。
+    if(_charFrag(el)) return null;
     for(var n=el.firstChild;n;n=n.nextSibling){
       if(n.nodeType!==3) continue;
       if(!(n.nodeValue||'').trim()) continue;
@@ -15258,6 +15412,12 @@ html.__ce_altmode{cursor:text}
     if(next && next!==document.body){
       var _wn2=_wrapTextNodeAt(next, e.clientX, e.clientY);
       if(_wn2) next=_wn2;
+    }
+    // ★どの経路を通っても、最後に「1文字ずつの断片」ならまとめ役の親まで戻す＝文字列ごと選べる。
+    //   1文字だけ選べても色も動きも付けられず使えないため（スタッガー系アニメで実報告・2026-07-30）。
+    var _cg=0;
+    while(next && _charFrag(next) && next.parentElement && next.parentElement!==document.body && _cg++<8){
+      next=next.parentElement;
     }
     if(!next||next===document.body||next.tagName==='HTML') return;
     if(next.closest&&next.closest('[id^="__ce"]')) return;
