@@ -7864,8 +7864,17 @@ html.__ce_altmode{cursor:text}
     var h='<div class="__ce_dqmv" style="cursor:move;user-select:none;margin:-2px -4px 2px;padding:2px 4px 4px">'
       +'<b>'+DQ_NAME[k]+'</b><span style="opacity:.6;font-size:11px">（選択中）</span>'
       +'<span style="float:right;opacity:.45;font-size:11px">✥ ここを掴んで移動</span></div>'
+      // 🎨 前に使った色をここにも出す（2026-07-31・報告「図形の色は覚えてないよね？」）。
+      //   カラー入力の初期値も直近の色にする（毎回まっ黒から選び直すのをやめる）。
+      +(function(){
+        var rc=boxColsGet();
+        return rc.length?('<div style="opacity:.7;margin:6px 0 2px">前に使った色（このPCに記憶）</div>'
+          +'<div id="__ce_dqrec">'+rc.map(function(c){return sw(c,c+'（前に使った色）');}).join('')+'</div>'):'';
+      })()
       +'<div style="opacity:.7;margin:6px 0 2px">色</div><div>'+DQ_COLORS.map(function(c){return sw(c[0],c[1]);}).join('')
-      +'<input type="color" class="__ce_dqc" title="好きな色" style="width:32px;height:24px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle;margin-left:4px"></div>'
+      +'<input type="color" class="__ce_dqc" title="好きな色（選ぶと記憶します）" value="'
+      + (function(){ var r=boxColsGet()[0]; return (r&&/^#[0-9a-f]{6}$/i.test(r))?r:'#7fd0e6'; })()
+      +'" style="width:32px;height:24px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle;margin-left:4px"></div>'
       +'<div style="opacity:.7;margin-top:8px">濃さ（薄くするとふんわり）</div>'
       +'<div style="display:flex;gap:5px;margin-top:3px"><button data-op="-0.15" style="'+B+'">◻ 薄く</button><button data-op="0.15" style="'+B+'">◼ 濃く</button></div>';
     // かたちを4種類→13種類に（2026-07-31・要望「四角っぽい・ななめ・水彩っぽいのも」）
@@ -7937,7 +7946,13 @@ html.__ce_altmode{cursor:text}
       var t=ev.target;
       if(t.getAttribute('data-x')){ p.__close(); return; }
       if(t.getAttribute('data-del')){ p.__close(); pushUndo(el); el.remove(); markDirty(); if(msg) msg.textContent='消しました（💾保存で確定・⟲戻すで取り消せます）'; return; }
-      var c=t.closest('.__ce_dqsw'); if(c){ dqColor(el,c.getAttribute('data-c')); if(msg) msg.textContent='色を変えました（💾保存で確定）'; return; }
+      var c=t.closest('.__ce_dqsw');
+      if(c){
+        var cv=c.getAttribute('data-c');
+        dqColor(el,cv); boxColsPut(cv);                 // 使った色を覚える（次からこの板の上に出る）
+        if(msg) msg.textContent='色を変えました（この色は次からも「前に使った色」に出ます・💾保存で確定）';
+        return;
+      }
       var op=t.getAttribute('data-op'); if(op){ var n=dqFade(el,parseFloat(op)); if(msg) msg.textContent='濃さ：'+Math.round(n*100)+'%'; return; }
       var sh=t.getAttribute('data-sh'); if(sh){ dqShape(el,sh); return; }
       var sz=t.getAttribute('data-sz'); if(sz){ dqBigger(el,parseFloat(sz)); return; }
@@ -7980,7 +7995,12 @@ html.__ce_altmode{cursor:text}
       var ro=t.getAttribute('data-ro'); if(ro){ dqTilt(el,parseFloat(ro)); if(msg) msg.textContent='少し斜めにしました（もう一度押すともっと傾きます）'; return; }
       if(t.getAttribute('data-ror')){ dqTiltReset(el); return; }
     });
-    p.querySelector('.__ce_dqc').addEventListener('input',function(){ dqColor(el,this.value); });
+    // 色を選んでいる最中は毎回は覚えない（スライドの通り道の色でリストが埋まるため・止まってから残す）
+    var _dqcT=null;
+    p.querySelector('.__ce_dqc').addEventListener('input',function(){
+      var v=this.value; dqColor(el,v);
+      clearTimeout(_dqcT); _dqcT=setTimeout(function(){ boxColsPut(v); }, 500);
+    });
   }
   // ===== ➖ 実体のない線（要素のborder）も掴めるようにする（2026-07-29・要望）=====
   //   一覧の区切り線などは <div> ではなく border-bottom で描かれている＝DOMに実体が無く、
@@ -11871,7 +11891,15 @@ html.__ce_altmode{cursor:text}
       var _big=false;
       try{ var _r=te?te.getBoundingClientRect():null;
         _big=!!_r&&(_r.width*_r.height)>(window.innerWidth*window.innerHeight*0.4); }catch(_){}
-      if(!te||te===document.body||!_own(te)||_big){
+      // ★1文字ずつspanに割れている文字（タイプライター等の fxa_ch）は、親に「直接の文字」が
+      //   1つも無いので上の探索に引っかからない＝右クリックで選んで E を押しても
+      //   「編集できる文字がありません」になっていた（2026-07-31・報告）。
+      //   割れているだけで文字はあるので、選んだ要素そのものを対象にする。
+      if((!te||!_own(te)) && sel && (sel.textContent||'').trim()
+         && (sel.querySelector('.fxa_ch,.imp-char') || (sel.className||'').toString().indexOf('fxa_')>=0)){
+        te=sel; _big=false;
+      }
+      if(!te||te===document.body||(!_own(te)&&!(te.textContent||'').trim())||_big){
         if(msg) msg.textContent='ここには編集できる文字がありません（直したい文字の上にマウスを置いて押してください）';
         return;
       }
@@ -12167,11 +12195,10 @@ html.__ce_altmode{cursor:text}
     +'prevFl=fl;'
     +'if(cfg.f)el.style.setProperty("scale",(fl?-bsx:bsx)+" "+bsy,"important");'
     +'el.style.setProperty("rotate",(bro+(bsx<0?-cur:cur)).toFixed(1)+"deg","important");}'
-    // ★編集中だけ：飛び終わったら素の位置へ戻す＝画面の外に置き去りにならず、いつでも掴める
-    +'if(cfg.l||p<1)requestAnimationFrame(step);'
-    +'else if(window.__ceEdit){setTimeout(function(){if(el.ceflyGen!==gen)return;'
-    +'el.style.setProperty("translate",bx+"px "+by+"px","important");'
-    +'el.style.setProperty("rotate",bro+"deg","important");},600);}}'
+    // ★飛び終わりはそのまま（画面の外なら外のまま）。編集中に元の位置へ戻すと
+    //   「戻ってくるのが気になる」（ユーザー報告）ので、代わりに画面の左下に小さな点を置き、
+    //   そこから編集できるようにした（flyDotsArm）。
+    +'if(cfg.l||p<1)requestAnimationFrame(step);}'
     +'requestAnimationFrame(step);}'
     +'function start(el){var cd=el.getAttribute("data-cedelay");if(cd!=null&&+cd>0)setTimeout(function(){fly(el);},+cd);else fly(el);}'
     // 監視した相手が「入れ物」のときは、その中の飛ぶ要素(ceflyFor)を飛ばす
@@ -12356,6 +12383,14 @@ html.__ce_altmode{cursor:text}
       +'<button id="__ce_fly_rr" style="border:1px solid #cfe0fb;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f">↻ 右に回す</button>'
       +'<button id="__ce_fly_mir" style="border:1px solid #cfe0fb;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f">⇄ 左右反転</button>'
       +'<span style="font-size:11px;color:#888">飛ぶ時の傾きはこの姿勢が基準（保存で残る）</span>'
+      // 大きさもここで変えられるように（2026-07-31・要望）。ルートは中心からの相対なので形は崩れない。
+      +'<span style="width:1px;height:20px;background:#e2e2e8;margin:0 2px"></span>'
+      +'<span style="font-size:12px;color:#555">大きさ</span>'
+      +'<button data-fsz="0.87" style="border:1px solid #cfe0fb;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f">－ 小さく</button>'
+      +'<button data-fsz="1.15" style="border:1px solid #cfe0fb;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f">＋ 大きく</button>'
+      +'<button data-fsz="reset" style="border:1px solid #ddd;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;background:#f5f5f7;color:#444">⟲ 元の大きさ</button>'
+      +'<span id="__ce_fly_szv" style="font-size:12px;color:#0369a1;font-weight:700">'
+      + Math.round(Math.abs(parseFloat((_fly.el.getAttribute('data-cesx'))||1))*100)+'%</span>'
       +'</div>'
       // 🛫 スタート地点を画面の外へ（2026-07-31・要望）。画面の外から入ってくる演出用。
       +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">'
@@ -12490,6 +12525,7 @@ html.__ce_altmode{cursor:text}
     ensureFlyRun();
     markDirty(); flyEnd();
     flyPark(el);                              // ★前の位置が一瞬残るのを防ぐ（先に新しいスタート地点へ置く）
+    try{ flyDotsArm(); }catch(_){ }           // 左下の入口を作り直す（新しく飛ぶ絵が増えた時用）
     if(window.ceflyArm) window.ceflyArm(el);  // その場で1回飛んで見せる（保存後はスクロールで画面に入った時に再生）
     if(msg) msg.textContent='✅ 飛行ルートを付けました（💾変更を保存で残る・開くと画面に入った時に飛びます）';
   }
@@ -12537,6 +12573,44 @@ html.__ce_altmode{cursor:text}
     try{ applyTf(el); }catch(_){ }                  // data-cetx/cety の素の位置へ戻す
   }
   window.__ceFlyHome=flyHome;
+  // 🔹 画面の左下に「飛ぶ絵」への入口を小さく置く（2026-07-31・要望）。
+  // ★飛び終わりが画面の外だと、その絵はクリックもダブルクリックもできない＝二度と直せない。
+  //   かといって編集中だけ元の位置へ戻すと「戻ってくるのが気になる」（報告）。
+  //   →絵はそのままにして、代わりに目立たない点を置く。id が __ce 始まり＝保存時に自動で消える。
+  function flyDotsArm(){
+    var list=[].slice.call(document.querySelectorAll('[data-fxa-fly],[data-cefly]'))
+              .filter(function(n){ return !(n.closest&&n.closest('[id^="__ce"]')); });
+    var box=document.getElementById('__ce_flydots');
+    if(!list.length){ if(box) box.remove(); return; }
+    if(!box){
+      box=document.createElement('div'); box.id='__ce_flydots';
+      box.setAttribute('style','position:fixed;left:10px;bottom:10px;z-index:2147483200;'
+        +'display:flex;gap:6px;align-items:center;font:11px/1.4 system-ui,sans-serif');
+      document.body.appendChild(box);
+    }
+    box.innerHTML='';
+    list.forEach(function(el,i){
+      var d=document.createElement('button');
+      d.title='🕊 飛ぶ絵'+(i+1)+'：クリックでルートを編集（この点は保存されません）';
+      d.setAttribute('style','width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.25);'
+        +'background:rgba(11,107,203,.45);cursor:pointer;padding:0;opacity:.55;transition:opacity .15s,transform .15s');
+      d.addEventListener('mouseenter',function(){ d.style.opacity='1'; d.style.transform='scale(1.35)';
+        try{ el.style.setProperty('outline','2px dashed #0b6bcb'); }catch(_){ } });
+      d.addEventListener('mouseleave',function(){ d.style.opacity='.55'; d.style.transform='';
+        try{ el.style.removeProperty('outline'); }catch(_){ } });
+      d.addEventListener('click',function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        try{ el.style.removeProperty('outline'); }catch(_){ }
+        if(window.__ceFlyEdit) window.__ceFlyEdit(el);
+      });
+      box.appendChild(d);
+    });
+    var t=document.createElement('span');
+    t.setAttribute('style','opacity:.45;color:#333;background:rgba(255,255,255,.7);border-radius:6px;padding:1px 6px');
+    t.textContent='🕊 飛ぶ絵の編集';
+    box.appendChild(t);
+  }
+  window.__ceFlyDots=flyDotsArm;
   function flyEnd(){
     if(!_fly) return;
     try{ flyHome(_fly.el); }catch(_){ }   // 編集をやめた/終えた時は必ず掴める場所に戻す
@@ -12586,12 +12660,42 @@ html.__ce_altmode{cursor:text}
     var pn=document.createElement('div'); pn.id='__ce_flypn';
     pn.setAttribute('style','position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483005;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.28);padding:10px 14px;font-family:system-ui,sans-serif;font-size:13px;color:#1d1d1f;max-width:94vw');
     document.body.appendChild(cv); document.body.appendChild(pn);
+    // 🖐 この板も掴んで動かせるようにする（2026-07-31・報告「飛ばす時の編集ボックスが動かせない」）。
+    // ★中央そろえに transform を使っているので、動かす前に外す＝つかんだ位置とズレないようにする。
+    //   線を描くのは下の canvas 側（cvのmousedown）なので、板の上で掴んでも描画は始まらない。
+    pn.addEventListener('mousedown',function(){
+      if(pn.style.transform){
+        var r=pn.getBoundingClientRect();
+        pn.style.transform=''; pn.style.left=Math.round(r.left)+'px'; pn.style.top=Math.round(r.top)+'px';
+      }
+    },true);
+    panelDrag(pn);
     _fly={el:el, raw:[], anchors:[], smooth:'smooth', mode:'c', dur:4, rot:true, flip:true, tilt:60, loop:false, drawing:false, dragIdx:-1, cv:cv, pn:pn};
     window.__ceFlyMode=true;
     // パネルの操作（作り直しても効くよう委譲で1回だけ張る）
     pn.addEventListener('click',function(ev){
       var sm=ev.target.closest('[data-sm]');
       if(sm){ flyStopPrev(); _fly.smooth=sm.getAttribute('data-sm'); flyRefit(); flyPanelFull(); return; }
+      // 大きさを変える（2026-07-31・要望）。★scale は data-cesx/cesy で持つのが約束＝
+      //   飛行ランタイムも反転の時にこの値を読むので、ここを直せば飛んでいる間もその大きさになる。
+      var fsz=ev.target.closest('[data-fsz]');
+      if(fsz){
+        var el0=_fly.el, v=fsz.getAttribute('data-fsz');
+        var sx=parseFloat(el0.getAttribute('data-cesx'))||1, sy=parseFloat(el0.getAttribute('data-cesy'))||1;
+        var neg=(sx<0);                                   // 左右反転している絵は符号を保つ
+        var ns, nsy;
+        if(v==='reset'){ ns=1; nsy=1; }
+        else { var m=parseFloat(v)||1;
+               ns=Math.max(0.2,Math.min(6,Math.abs(sx)*m));
+               nsy=Math.max(0.2,Math.min(6,Math.abs(sy)*m)); }
+        el0.setAttribute('data-cesx', String(neg?-ns:ns));
+        el0.setAttribute('data-cesy', String(nsy));
+        try{ applyTf(el0); }catch(_){ }
+        markDirty();
+        var sv=document.getElementById('__ce_fly_szv'); if(sv) sv.textContent=Math.round(ns*100)+'%';
+        if(msg) msg.textContent='🕊 飛ぶ絵の大きさ：'+Math.round(ns*100)+'%（▶試すで確認・💾保存で確定）';
+        return;
+      }
       // 🛫🛬 入口／出口を「辺＋位置1〜5」で決める（2026-07-31・要望）
       var fes=ev.target.closest('[data-fes]'), fen=ev.target.closest('[data-fen]');
       if(fes||fen){
@@ -12662,8 +12766,9 @@ html.__ce_altmode{cursor:text}
   (function(){
     function tell(){
       if(!document.querySelector('[data-fxa-fly],[data-cefly]')) return;
-      if(msg) msg.textContent='🕊 飛ぶ動きは編集中は止めています（元の位置に置いてあるので掴めます）。'
-        +'ダブルクリックでルート編集・▶で確認・保存版では自動で飛びます';
+      try{ flyDotsArm(); }catch(_){ }
+      if(msg) msg.textContent='🕊 飛ぶ絵があります。絵をダブルクリック、'
+        +'または画面の左下の小さな点からルートを編集できます（点は保存されません）';
     }
     if(document.readyState==='complete') setTimeout(tell,1200); else window.addEventListener('load',function(){ setTimeout(tell,1200); });
   })();
@@ -14101,10 +14206,27 @@ html.__ce_altmode{cursor:text}
   // ★このPCに記憶（localStorage）＝カンプを開き直しても、別のカンプでも同じ色がすぐ出せる。
   //   図形バー(__ce_shapest)・🖍マーカー(__ce_hlcolors)と同じ流儀に合わせた。
   function boxColsGet(){ try{ return JSON.parse(localStorage.getItem('__ce_boxcols')||'[]')||[]; }catch(_){ return []; } }
+  // ★覚える時に必ず #rrggbb へそろえる（2026-07-31）。ページから拾った色は rgb(…) 形式で来るが、
+  //   色を当てる側には hex しか受け取らない所（背景の飾りの配色計算など）があり、
+  //   そのまま渡すと**押しても色が変わらない**（無言で失敗する）。入口でそろえておけば起きない。
+  function _toHex(c){
+    c=(c||'').trim();
+    if(/^#[0-9a-f]{6}$/i.test(c)) return c.toLowerCase();
+    if(/^#[0-9a-f]{3}$/i.test(c)) return ('#'+c[1]+c[1]+c[2]+c[2]+c[3]+c[3]).toLowerCase();
+    var m=/rgba?\\(([^)]+)\\)/.exec(c);
+    if(m){
+      var v=m[1].split(',').map(function(s){ return Math.max(0,Math.min(255,Math.round(parseFloat(s)))); });
+      if(v.length>=3&&v.every(function(x){ return isFinite(x); })){
+        return '#'+v.slice(0,3).map(function(x){ return ('0'+x.toString(16)).slice(-2); }).join('');
+      }
+    }
+    return '';
+  }
   function boxColsPut(c){
-    if(!c||c==='transparent') return;
-    var a=boxColsGet().filter(function(x){ return x!==c; });
-    a.unshift(c);
+    var hex=_toHex(c);
+    if(!hex||hex==='#000000'&&!/^#0{6}$/i.test((c||'').trim())) { if(!hex) return; }
+    var a=boxColsGet().filter(function(x){ return x!==hex; });
+    a.unshift(hex);
     try{ localStorage.setItem('__ce_boxcols', JSON.stringify(a.slice(0,10))); }catch(_){ }
   }
   // 🖌 文字の背景ボックスのパレット（右クリックから直接開く浮動パネル・openSecBg と同じ作り）
@@ -14359,6 +14481,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_frmfit','🧲 掴む枠を見た目の位置に合わせる'],
     ['__ce_q_pskill','➖ 線・飾りを消す（border・疑似要素）'],
     ['__ce_q_addline','➕ 線を追加（実要素・掴んで動かせる）'],
+    ['__ce_q_edit','✏ この文字を編集（改行や文言を直す）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
     ['__ce_q_rst','⟲ 位置・サイズをリセット'],
     ['__ce_q_unfix','📌 画面への貼り付きを解除（一緒にスクロール）'],
@@ -14372,7 +14495,7 @@ html.__ce_altmode{cursor:text}
   // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
   //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
   var QM_DEF_LAYOUT=[
-    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_img','__ce_q_imgswap','__ce_q_bgsz','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg','__ce_q_vline','__ce_q_deco','__ce_q_psgrab',
+    'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_edit','__ce_q_img','__ce_q_imgswap','__ce_q_bgsz','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg','__ce_q_vline','__ce_q_deco','__ce_q_psgrab',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
@@ -16495,6 +16618,8 @@ html.__ce_altmode{cursor:text}
         if(msg) msg.textContent='➕ 右クリックした要素のすぐ上に線（実要素・2px）を置きました。掴んで移動・右クリックで削除/調整できます（💾保存で確定）';
         return;
       }
+      // ✏ 右クリックで選んだ文字をその場で編集（Eキーと同じ処理・メニューからも入れるようにした）
+      if(t.id==='__ce_q_edit'){ scRun('edit'); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
       if(t.id==='__ce_q_pin'){
