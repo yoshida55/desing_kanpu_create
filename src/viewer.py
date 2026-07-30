@@ -12240,9 +12240,55 @@ html.__ce_altmode{cursor:text}
     }
     return el;
   }
+  // 🧹 焼き込まれてしまった「桁外れの重なり順」を開いた時に直す（2026-07-30）。
+  //   既存カンプには 2147480000 が z-index として保存済み＝上に何を置いても裏に潜る。
+  //   ツール自身のUI(__ce*)とオープニングの幕(__op_screen)は本当にその値が必要なので触らない。
+  function zRepair(){
+    var hit=[];
+    try{
+      [].slice.call(document.querySelectorAll('[style*="z-index"]')).forEach(function(n){
+        if(n.id&&(n.id.indexOf('__ce')===0||n.id.indexOf('__op')===0)) return;
+        if(n.closest&&(n.closest('[id^="__ce"]')||n.closest('#__op_screen'))) return;
+        var v=parseInt(n.style.zIndex,10);
+        if(!isNaN(v)&&Math.abs(v)>=1000000) hit.push(n);
+      });
+    }catch(_){}
+    if(!hit.length) return 0;
+    var z=_pinZ();
+    hit.forEach(function(n){ n.style.setProperty('z-index',String(z),'important'); });
+    return hit.length;
+  }
+  (function(){
+    function go(){
+      var n=0; try{ n=zRepair(); }catch(_){ }
+      if(n&&msg){
+        markDirty();
+        msg.textContent='🧹 重なり順が桁外れだった '+n+' 箇所を直しました（'+
+          '上に画像や文字を乗せても裏に潜らなくなります・💾保存で確定・⟲で戻せます）';
+      }
+    }
+    if(document.readyState==='complete') setTimeout(go,600); else window.addEventListener('load',function(){ setTimeout(go,600); });
+  })();
   function pinIsFixed(el){
     var cs; try{ cs=getComputedStyle(el); }catch(_){ return false; }
     return cs.position==='fixed'||cs.position==='sticky'||el.hasAttribute('data-cepin');
+  }
+  // 📌貼り付け用の重なり順。「ページの中身より前」であれば十分で、大きすぎてはいけない。
+  // ★地雷（2026-07-30・実害）：ここは 2147480000（ほぼ最大値）を直書きしていた。
+  //   貼り付けたセクションが最強になり、あとから乗せた画像・文字が**必ず裏に潜って掴めない**
+  //   （実測：<section class="fv"> が2147480000／乗せた鳥は49で永久に見えない）。
+  //   ページ内の実際の最大値を測って、そのすぐ上に置く。
+  function _pinZ(){
+    var mx=0;
+    try{
+      [].slice.call(document.querySelectorAll('body *')).slice(0,1500).forEach(function(n){
+        if(n.id&&(n.id.indexOf('__ce')===0||n.id.indexOf('__op')===0)) return;
+        if(n.closest&&(n.closest('[id^="__ce"]')||n.closest('#__op_screen'))) return;
+        var v=parseInt(getComputedStyle(n).zIndex,10);
+        if(!isNaN(v)&&v>mx&&v<100000) mx=v;      // 桁外れの値は「壊れた値」なので基準にしない
+      });
+    }catch(_){}
+    return Math.max(100, Math.min(mx+10, 99999));
   }
   function pinFix(el, edge){
     edge=edge||'top';
@@ -12250,7 +12296,7 @@ html.__ce_altmode{cursor:text}
     el.style.setProperty('position','sticky','important');
     el.style.setProperty(edge,'0','important');
     el.style.setProperty(edge==='top'?'bottom':'top','auto','important');
-    el.style.setProperty('z-index','2147480000','important');   // ページの中身より前・ツールUIより後ろ
+    el.style.setProperty('z-index',String(_pinZ()),'important');   // ページの中身より前・でも常識的な値
     // 背景が透けていると貼り付いた時に下の文字と重なって読めない → 薄い白を保険で敷く
     var bg=cs&&cs.backgroundColor;
     if(!bg || bg==='rgba(0, 0, 0, 0)' || bg==='transparent'){
