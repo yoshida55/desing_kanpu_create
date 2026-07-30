@@ -2866,7 +2866,19 @@ html.__ce_altmode{cursor:text}
   //   （実際に起きた）。セクション相対の%なら、どの幅でも「そのセクションのその辺り」に居続ける。
   function placeFree(el, pageX, pageY){
     var host=null;
-    [].slice.call(document.querySelectorAll('header,section,footer')).some(function(s){
+    // ★ヒーロー（スライドショー／ヘッダーから外に出した大きな中身）の上に置く時は、
+    //   セクションの中に入れない（2026-07-31・報告「スライドショーの所だけ文字が出ない」）。
+    //   セクションは自分の重なりの土台(stacking context)を作るので、中に入れた文字は
+    //   どれだけ大きい数字を付けても**その土台ごと**ヒーロー（や z-index:50 のヘッダー）の下に沈む。
+    //   ヒーローと同じ土俵（body直下）に置けば、数字の大小どおりに前へ出せる。
+    var _overHero=false;
+    try{
+      var _hx=pageX-(window.scrollX||0), _hy=pageY-(window.scrollY||0);
+      _overHero=([].slice.call(document.elementsFromPoint(_hx,_hy)||[])).some(function(n){
+        return n&&n.closest&&!n.closest('[id^="__ce"]')&&n.closest('[data-slshow],[data-ceheroout]');
+      });
+    }catch(_){}
+    if(!_overHero) [].slice.call(document.querySelectorAll('header,section,footer')).some(function(s){
       if(s.closest('[id^="__ce"]')) return false;
       // ★position:fixed/sticky の器には入れない（2026-07-20）：固定ヘッダーは「画面に貼り付いた」ままなので
       //   ページ座標での上端が常に今のスクロール位置＝どこをクリックしても「ここに入る」と判定されてしまう。
@@ -2894,7 +2906,33 @@ html.__ce_altmode{cursor:text}
           if(_n&&_n.nodeType===1&&!(_n.closest&&_n.closest('[id^="__ce"]'))){ _zu=_n; break; }
         }
       }catch(_){}
-      el.style.zIndex=_freeZIndex(_zu||host);
+      var _z=_freeZIndex(_zu||host);
+      // ★ヒーロー（スライドショー／ヘッダーから外に出した大きな中身）は position:absolute で
+      //   DOMの後ろの方に居るため、同じ重なり順だと**あとから足した文字より手前**に描かれる。
+      //   ＝「文字を追加したのに出てこない（背面にある）」になる（2026-07-31・報告）。
+      //   置く場所にヒーローが重なっているなら、必ずその上の数字にする。
+      try{
+        var _vx2=pageX-(window.scrollX||0), _vy2=pageY-(window.scrollY||0);
+        ([].slice.call(document.elementsFromPoint(_vx2,_vy2)||[])).forEach(function(_n){
+          if(!_n||_n.nodeType!==1) return;
+          var _hero=_n.closest&&_n.closest('[data-slshow],[data-ceheroout]');
+          if(!_hero) return;
+          var _hz=parseInt(getComputedStyle(_hero).zIndex,10);
+          if(isNaN(_hz)) _hz=0;
+          if(_z<=_hz+1) _z=_hz+2;
+        });
+      }catch(_){}
+      // ★ヒーローの上に置く時は「ヘッダーより手前」まで上げる（2026-07-31・報告）。
+      //   _freeZIndex は既定で「ヘッダーの1つ下」を返す（ナビを隠さない配慮）。
+      //   ところがヒーローがヘッダーの中にあると、その配慮のせいで必ずヒーローの下に潜る。
+      if(_overHero){
+        try{
+          var _hd=document.querySelector('header,.site-header,[class*="header"]');
+          var _hz2=_hd?parseInt(getComputedStyle(_hd).zIndex,10):NaN;
+          if(!isNaN(_hz2)&&_z<=_hz2) _z=_hz2+2;
+        }catch(_){}
+      }
+      el.style.zIndex=_z;
     }
     if(!host){  // セクションの外（ページ余白）だけは従来どおりbody基準
       el.style.left=Math.round(pageX)+'px'; el.style.top=Math.round(pageY)+'px';
@@ -3274,6 +3312,10 @@ html.__ce_altmode{cursor:text}
     try{
       [].slice.call(document.querySelectorAll('.fxa_pre[data-cedelay],[data-fxa-fly][data-cedelay]')).forEach(function(el){
         if(el.closest&&el.closest('[id^="__ce"]')) return;
+        // ★⏳一覧で自分で決めた遅らせは絶対に消さない（2026-07-31・報告「すぐ記録がはずれる」）。
+        //   この自動お掃除は「知らないうちに真っ白になる」を防ぐためのもので、
+        //   本人が意図して付けた演出まで消してしまっては本末転倒だった。
+        if(el.getAttribute('data-cedelayok')) return;
         var d=+el.getAttribute('data-cedelay')||0; if(d<600) return;   // 一瞬の遅れは邪魔にならない
         var r=el.getBoundingClientRect();
         if(!(r.bottom>0&&r.top<vh)) return;                            // 画面外＝スクロールで見る物は関係ない
@@ -6104,7 +6146,15 @@ html.__ce_altmode{cursor:text}
     {k:'curtain',b:'カーテン開き(左から)',d:'左端から幕が開く',g:'in',dir:'cl',sl:[{k:'dur',l:'速さ',min:300,max:2200,def:900,u:'ms'}]},
     {k:'curtainc',b:'カーテン開き(真ん中)',d:'真ん中から左右へ開く',g:'in',dir:'cc',sl:[{k:'dur',l:'速さ',min:300,max:2200,def:900,u:'ms'}]},
     {k:'pageflip',b:'📖 ページめくり',d:'本をめくるように現れる',g:'in',dir:'fl',sl:[{k:'deg',l:'めくれ角度',min:40,max:120,def:80,u:'°'},{k:'dur',l:'速さ',min:300,max:2200,def:900,u:'ms'}]},
-    {k:'count',b:'🔢 カウントアップ',d:'数字が0から増えて止まる',g:'cnt',sl:[{k:'dur',l:'速さ',min:400,max:3000,def:1200,u:'ms'}]}
+    {k:'count',b:'🔢 カウントアップ',d:'数字が0から増えて止まる',g:'cnt',sl:[{k:'dur',l:'速さ',min:400,max:3000,def:1200,u:'ms'}]},
+    // ▼2026-07-31追加（要望）：色の帯が先に出て、そのあと文字が出る。帯と文字を別々に動かせる。
+    //   ★背景色は要素から読み取って ::before に移す＝元の見た目のまま「帯だけ」動かせるようにする。
+    {k:'bgtext', b:'🎨 背景→文字（左から）', d:'色の帯が左から広がり、あとで文字',g:'bgt',bgd:'l',
+      sl:[{k:'dur',l:'帯の速さ',min:300,max:2400,def:900,u:'ms'},{k:'tdly',l:'文字が出るまで',min:0,max:1800,def:450,u:'ms'}]},
+    {k:'bgtextc',b:'🎨 背景→文字（真ん中から）',d:'色の帯が中央から左右へ',g:'bgt',bgd:'c',
+      sl:[{k:'dur',l:'帯の速さ',min:300,max:2400,def:900,u:'ms'},{k:'tdly',l:'文字が出るまで',min:0,max:1800,def:450,u:'ms'}]},
+    {k:'bgtextf',b:'🎨 背景→文字（淡くふわっと）',d:'色がにじむように出て、あとで文字',g:'bgt',bgd:'f',
+      sl:[{k:'dur',l:'帯の速さ',min:400,max:3000,def:1200,u:'ms'},{k:'tdly',l:'文字が出るまで',min:0,max:1800,def:520,u:'ms'}]}
   ];
   // 「このセクションをおしゃれに」ボタンの一括指示。中身は保ちつつ誌面として作り直す。
   // ★「角丸＋影＋等間隔」の箱揃えに逃げるのが修正AIの癖なので、レイアウトのメリハリを最優先で指示する。
@@ -7751,9 +7801,30 @@ html.__ce_altmode{cursor:text}
   function _alphaOf(col){ var m=/rgba\(([^)]+)\)/.exec(col||''); if(m){ var v=m[1].split(','); return v.length>3?parseFloat(v[3]):1; } return 1; }
   function dqColor(el, hex){
     var k=dqKind(el); pushUndo(el);
+    // 🎨「背景→文字」を付けた要素は、色を描いているのが本体ではなく ::before（--fxa-bgc / --fxa-bgi）。
+    //   ここを直さないと、本体を塗っても透明のままで**色が変わらない**（2026-07-31・報告）。
+    //   水彩は色そのものが模様(グラデ)に焼かれているので、描き直してから取り込む。
+    if(el.classList&&el.classList.contains('fxa_bgt')){
+      el.setAttribute('data-cedqbase',hex);
+      el.setAttribute('data-cebgc',hex);
+      el.style.setProperty('--fxa-bgc',hex);
+      if(el.getAttribute('data-cewater')){
+        el.style.removeProperty('background-image'); el.style.removeProperty('background-color');
+        paintWater(el,hex,null);
+        var _bi=''; try{ _bi=getComputedStyle(el).backgroundImage; }catch(_){ }
+        el.setAttribute('data-cebgi',_bi||'none');
+        el.style.setProperty('--fxa-bgi',_bi||'none');
+        el.style.setProperty('background-color','transparent','important');
+        el.style.setProperty('background-image','none','important');
+      } else {
+        el.setAttribute('data-cebgi','none');
+        el.style.setProperty('--fxa-bgi','none');
+      }
+      markDirty(); return;
+    }
     if(el.getAttribute('data-cewater')){ el.setAttribute('data-cedqbase',hex); paintWater(el,hex,null); markDirty(); return; }
     var a=parseFloat(el.getAttribute('data-cedqa')||'1');
-    if(k==='bg'){ el.dataset.cols=_colsFromOne(hex).join('|'); el.dataset.alpha=String(a); _bgPaint(el); }
+    if(k==='bg'){ el.dataset.cols=_colsFromOne(hex).join('|'); el.dataset.alpha=String(a); _bgPaint(el); bgtSync(el); }
     else{
       el.setAttribute('data-cedqbase',hex);
       var col=(a<1)?_rgbaWith(hex,a):hex;
@@ -7784,7 +7855,23 @@ html.__ce_altmode{cursor:text}
       if(k==='ring'||k==='outline') el.style.setProperty('border-color',col,'important');
       else el.style.setProperty('background',col,'important');
     }
+    bgtSync(el);        // 🎨背景→文字を付けた要素は、塗った結果をアニメ用の層へ移す（でないと見た目が変わらない）
     markDirty(); return a;
+  }
+  // 🎨「背景→文字」を付けた要素は、色を描いているのが本体ではなく ::before（--fxa-bgc/--fxa-bgi）。
+  // 本体を塗ったあとにこれを呼んで、塗った結果をそちらへ移す＝濃さも色も今までどおり効く。
+  // ★これが無いと「押しても薄くならない・色が変わらない」になる（2026-07-31・報告2件の共通原因）。
+  function bgtSync(el){
+    if(!el||!el.classList||!el.classList.contains('fxa_bgt')) return;
+    var cs=null; try{ cs=getComputedStyle(el); }catch(_){ return; }
+    var c=cs.backgroundColor, im=cs.backgroundImage;
+    var nc=(c&&c!=='transparent'&&!/rgba\\([^)]*,\\s*0\\)/.test(c))?c:'transparent';
+    var ni=(im&&im!=='none')?im:'none';
+    if(nc==='transparent'&&ni==='none') return;      // 何も塗られていない＝触らない
+    el.setAttribute('data-cebgc',nc); el.setAttribute('data-cebgi',ni);
+    el.style.setProperty('--fxa-bgc',nc); el.style.setProperty('--fxa-bgi',ni);
+    el.style.setProperty('background-color','transparent','important');
+    el.style.setProperty('background-image','none','important');
   }
   function dqShape(el, shape){
     pushUndo(el);
@@ -7793,8 +7880,9 @@ html.__ce_altmode{cursor:text}
     // ★切り抜きを使わない形に戻す時は clip-path を必ず消す（残ると次の形が欠けたままになる）。
     var r=(typeof v==='string')?v:(v.r||'0'), c=(typeof v==='string')?'':(v.c||'');
     el.style.setProperty('border-radius', r);
-    if(c){ el.style.setProperty('clip-path', c); el.style.setProperty('-webkit-clip-path', c); }
-    else { el.style.removeProperty('clip-path'); el.style.removeProperty('-webkit-clip-path'); }
+    // ★印を付ける：動きを付ける時の掃除(purgeInlineFx)に消させないため（消えると四角に戻る）
+    if(c){ el.style.setProperty('clip-path', c); el.style.setProperty('-webkit-clip-path', c); el.setAttribute('data-ceclip','1'); }
+    else { el.style.removeProperty('clip-path'); el.style.removeProperty('-webkit-clip-path'); el.removeAttribute('data-ceclip'); }
     if(dqKind(el)==='bg') el.dataset.shape=shape;
     markDirty();
   }
@@ -10810,9 +10898,15 @@ html.__ce_altmode{cursor:text}
     el.__cePrevSt=null;
     // ★飾り（🌸グラデ/⭕リング/▢縁取り線）の ぼかし は残す：消すとアニメを付けた瞬間に見た目が変わる
     var _isDeco=el.classList&&(el.classList.contains('ce_bgdeco')||el.classList.contains('ce_ringdeco')||el.classList.contains('ce_outlinedeco'));
-    var _keepFil=_isDeco?el.style.getPropertyValue('filter'):'';
+    // ★水彩(data-cewater)の「にじみ」は filter:blur で作っている。ここで消すと
+    //   動きを付けた瞬間にフチがくっきりして**別の形に見える**（2026-07-31・報告）。
+    var _keepFil=(_isDeco||el.getAttribute&&el.getAttribute('data-cewater'))?el.style.getPropertyValue('filter'):'';
+    // ★かたちの「ななめ・はけ跡・ななめ帯」は clip-path で切り抜いて作っている。
+    //   これも消すと四角に戻る＝「形をつけてからアニメを付けると形が戻る」の正体。
+    var _keepClip=(el.getAttribute&&el.getAttribute('data-ceclip'))?el.style.getPropertyValue('clip-path'):'';
     ['opacity','filter','clip-path','text-shadow','animation','transition'].forEach(function(p){ el.style.removeProperty(p); });
     if(_keepFil) el.style.setProperty('filter', _keepFil);
+    if(_keepClip){ el.style.setProperty('clip-path', _keepClip); el.style.setProperty('-webkit-clip-path', _keepClip); }
     var edited=['data-cetx','data-cety','data-cesx','data-cesy','data-cero','data-cebt'].some(function(a){ return el.getAttribute(a)!=null; });
     if(edited){ applyTf(el); } else { ['transform','translate','rotate','scale'].forEach(function(p){ el.style.removeProperty(p); }); }
   }
@@ -11162,12 +11256,33 @@ html.__ce_altmode{cursor:text}
     +'html.fxa-on .fxa_pre.fxa_bl:not(.fxa_in){filter:blur(var(--fxa-blur,14px))!important}'
     +'html.fxa-on .fxa_pre.fxa_cl:not(.fxa_in){clip-path:inset(0 100% 0 0)!important}'
     +'html.fxa-on .fxa_pre.fxa_cc:not(.fxa_in){clip-path:inset(0 50% 0 50%)!important}'
-    +'html.fxa-on .fxa_pre.fxa_wp:not(.fxa_in){clip-path:inset(0 100% 0 0)!important}';
+    +'html.fxa-on .fxa_pre.fxa_wp:not(.fxa_in){clip-path:inset(0 100% 0 0)!important}'
+    // 🎨 背景→文字（2026-07-31）。★.fxa_pre は使わない：あれは要素ごと透明にするので、
+    //   先に出したい「色の帯」まで消えてしまう。この動きは自前の初期状態を持つ。
+    //   色は ::before に持たせ、文字は中の .fxa_bgtxt に入れて別々に動かす。
+    +'.fxa_bgt{position:relative}'
+    // ★色だけでなく模様(background-image＝水彩のグラデ)も引き継ぐ。色だけだと形が変わる（実報告）
+    +'html.fxa-on .fxa_bgt::before{content:"";position:absolute;inset:0;'
+    +'background-color:var(--fxa-bgc,#8fd6a8);background-image:var(--fxa-bgi,none);'
+    +'background-size:100% 100%;background-repeat:no-repeat;background-position:center;'
+    +'border-radius:inherit;z-index:0;pointer-events:none;'
+    +'transition:clip-path var(--fxa-dur,.9s) cubic-bezier(.22,.8,.24,1),opacity var(--fxa-dur,.9s) ease,filter var(--fxa-dur,.9s) ease}'
+    +'html.fxa-on .fxa_bgt>.fxa_bgtxt{position:relative;z-index:1;opacity:0;transition:opacity .5s ease}'
+    +'html.fxa-on .fxa_bgt.fxa_in>.fxa_bgtxt{opacity:1;transition-delay:var(--fxa-tdly,.45s)}'
+    // 左から
+    +'html.fxa-on .fxa_bgt.fxa_bgl:not(.fxa_in)::before{clip-path:inset(0 100% 0 0)}'
+    +'html.fxa-on .fxa_bgt.fxa_bgl.fxa_in::before{clip-path:inset(0 0 0 0)}'
+    // 真ん中から左右へ
+    +'html.fxa-on .fxa_bgt.fxa_bgc:not(.fxa_in)::before{clip-path:inset(0 50% 0 50%)}'
+    +'html.fxa-on .fxa_bgt.fxa_bgc.fxa_in::before{clip-path:inset(0 0 0 0)}'
+    // 淡くふわっと（にじむ）
+    +'html.fxa-on .fxa_bgt.fxa_bgf:not(.fxa_in)::before{opacity:0;filter:blur(14px)}'
+    +'html.fxa-on .fxa_bgt.fxa_bgf.fxa_in::before{opacity:1;filter:blur(0)}';
   // スクロールで画面に入ったら再生。JS無効なら全部表示（消えない保険）。"__ce"を含めない＝保存で残る。
   // ★時間トリガー(setTimeout)は使わない＝「スクロールで画面に入った時に1回だけ再生」に統一。
   //   IntersectionObserverだけで判定→発火したらunobserve（1回きり）。上部の要素は監視開始時に即発火＝読み込みで再生。
   var FX_RUN='(function(){var d=document,h=d.documentElement;'
-    +'if(!d.querySelector(".fxa_pre,.fxa_hl,.fxa_cnt,.fxa_ud")){return;}h.classList.add("fxa-on");'
+    +'if(!d.querySelector(".fxa_pre,.fxa_hl,.fxa_cnt,.fxa_ud,.fxa_bgt")){return;}h.classList.add("fxa-on");'
     +'[].slice.call(d.querySelectorAll(".fxa_pre")).forEach(function(el){if(el.style.transform)el.style.removeProperty("transform");});'  // 自動修復：出現アニメ要素に焼き込まれた古いtransform(プレビュー残骸)を消す＝過去に固まった分も開くだけで直る
     // ★地雷（2026-07-25修正）：再生後の .fxa_in は transform:none!important で「アニメ用のtransform」を
     //   消しているが、これは要素が元々持っているtransform（例：固定ヘッダーの translateX(-50%) 中央寄せ）も
@@ -11214,7 +11329,7 @@ html.__ce_altmode{cursor:text}
     +'function st(ts){if(last!==null)acc+=Math.min(64,ts-last);last=ts;var p=Math.min(1,acc/dur),e=1-Math.pow(1-p,3);'
     +'el.textContent=pre+fmt(tgt*e)+suf;if(p<1)requestAnimationFrame(st);else{el.innerHTML=keep;el.classList.add("fxa_in");}}'
     +'requestAnimationFrame(st);}'
-    +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in),.fxa_cnt:not(.fxa_in),.fxa_ud:not(.fxa_in)"));}'
+    +'function all(){return [].slice.call(d.querySelectorAll(".fxa_pre:not(.fxa_in),.fxa_hl:not(.fxa_in),.fxa_cnt:not(.fxa_in),.fxa_ud:not(.fxa_in),.fxa_bgt:not(.fxa_in)"));}'
     // 🔢グループ表示：data-cegrp="1/2/3"の要素は①→②→③の順にまとめて動く（グループ間0.3s・グループ内は0.15sずつ）
     +'function groupDelay(el){var g=+el.getAttribute("data-cegrp")||0;if(!g)return 0;'
     +'var mem=[].slice.call(d.querySelectorAll(\\'[data-cegrp="\\'+g+\\'"]\\'));var idx=mem.indexOf(el);'
@@ -11325,6 +11440,24 @@ html.__ce_altmode{cursor:text}
       }
     }
     var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ まず動きを選んでください'; return; }
+    // ★かたち(clip-path)と水彩のにじみ(filter:blur)は、動きを付ける途中の掃除であちこちから
+    //   消される（purgeInlineFx／プレビューの後始末など）。1か所ずつ塞ぐと必ず取りこぼすので、
+    //   ここで控えて「付け終わった直後」に書き戻す（2026-07-31・報告「形をつけてアニメを付けると形が戻る」）。
+    if(el&&el.getAttribute&&(el.getAttribute('data-ceclip')||el.getAttribute('data-cewater'))){
+      var _keepC=el.style.getPropertyValue('clip-path'), _keepF=el.style.getPropertyValue('filter'), _kel=el;
+      // ★1回だけでは足りない：プレビューの後始末が「あとから」消しに来るタイミングがある。
+      //   数回に分けて書き戻す（既に入っていれば何もしない＝副作用なし）。
+      [0,120,400,900].forEach(function(ms){
+        setTimeout(function(){
+          try{
+            if(_keepC&&!_kel.style.getPropertyValue('clip-path')){
+              _kel.style.setProperty('clip-path',_keepC); _kel.style.setProperty('-webkit-clip-path',_keepC);
+            }
+            if(_keepF&&!_kel.style.getPropertyValue('filter')) _kel.style.setProperty('filter',_keepF);
+          }catch(_){ }
+        },ms);
+      });
+    }
     var _fxShown=null;   // 付け終わったあとに1回だけ再生して見せる相手
     ensureFxAssets();
     fxUnwrap(el);  // 既存の出現ラッパーがあれば解除して素の要素に戻す（付け直し対応）
@@ -11376,6 +11509,54 @@ html.__ce_altmode{cursor:text}
         el.classList.add('fxa_in');  // 編集中はすぐ見えるように（保存時にfxa_inは外す＝再生に戻る）
         _fxShown=el;
       }
+    } else if(a.g==='bgt'){
+      // 🎨 背景→文字（2026-07-31・要望）。色の帯を ::before に移し、文字は中の span に入れて別々に動かす。
+      // ★背景色は「その要素か、中の背景spanか、親」のどれかにある。見つけた所から色を取り、
+      //   その場所の背景は透明にする（元の色は --fxa-bgc に持たせて ::before が描く）。
+      var host=el, bc='', bi='none';
+      // ★一度この動きを付けると本体の背景は透明になる。種類を選び直した時に見失わないよう、
+      //   最初に見つけた背景を data-cebgc / data-cebgi に控えて以後はそれを使う（実測で踏んだ）。
+      // ★色(background-color)だけでなく**模様(background-image)も持っていく**。
+      //   水彩の形は複数の radial-gradient で描かれているので、色だけ移すと
+      //   ただの角丸の楕円になってしまう（報告「かたちまで変わった」）。
+      (function(){
+        var cand=[el].concat([].slice.call(el.querySelectorAll('.fxa_bgt,.ce_txtbg'))).concat([el.parentElement]);
+        for(var i=0;i<cand.length;i++){
+          var n=cand[i]; if(!n||n.nodeType!==1||!n.getAttribute) continue;
+          if(n.getAttribute('data-cebgc')!=null||n.getAttribute('data-cebgi')!=null){
+            host=n; bc=n.getAttribute('data-cebgc')||''; bi=n.getAttribute('data-cebgi')||'none'; return;
+          }
+        }
+        for(var j=0;j<cand.length;j++){
+          var m=cand[j]; if(!m||m.nodeType!==1) continue;
+          var cs=null; try{ cs=getComputedStyle(m); }catch(_){ continue; }
+          var c=cs.backgroundColor, im=cs.backgroundImage;
+          var hasC=c&&c!=='transparent'&&!/rgba\\([^)]*,\\s*0\\)/.test(c);
+          var hasI=im&&im!=='none';
+          if(hasC||hasI){ host=m; bc=hasC?c:'transparent'; bi=hasI?im:'none'; return; }
+        }
+      })();
+      if(!bc&&(!bi||bi==='none')){ bc='#8fd6a8'; host=el; if(msg) msg.textContent='⚠ 背景が見つからないので緑で仮置きしました（色は右クリック→🖌で変えられます）'; }
+      // 文字を包む（既に包んであれば使い回す＝二重に包まない）
+      var tw=host.querySelector(':scope > .fxa_bgtxt');
+      if(!tw){
+        tw=document.createElement('span'); tw.className='fxa_bgtxt';
+        while(host.firstChild) tw.appendChild(host.firstChild);
+        host.appendChild(tw);
+      }
+      if(host.getAttribute('data-cebgc')==null) host.setAttribute('data-cebgc', bc||'transparent'); // 元の背景を控える
+      if(host.getAttribute('data-cebgi')==null) host.setAttribute('data-cebgi', bi||'none');
+      host.style.setProperty('--fxa-bgc', bc||'transparent');
+      host.style.setProperty('--fxa-bgi', bi||'none');
+      // 描くのは::before側。本体は色も模様も消す（両方消さないと二重に見える）
+      host.style.setProperty('background-color','transparent','important');
+      host.style.setProperty('background-image','none','important');
+      host.style.setProperty('--fxa-dur', fxParam(a,'dur')+'ms');
+      host.style.setProperty('--fxa-tdly', fxParam(a,'tdly')+'ms');
+      host.classList.add('fxa_bgt');
+      host.classList.add(a.bgd==='c'?'fxa_bgc':(a.bgd==='f'?'fxa_bgf':'fxa_bgl'));
+      if(host!==el){ try{ el.classList.remove('fxa_pre'); }catch(_){ } }
+      _fxShown=host;
     } else if(a.g==='lines'){
       // 行マスク：<br>区切りで行に分割して包む（戻すのはfxUnsplit）。--iは行番号＝時差の元
       var lns=splitLines(el);
@@ -11439,7 +11620,7 @@ html.__ce_altmode{cursor:text}
   //   自分だけ見ていたので「🚫動きを消すを押しても消えない」報告が出た（2026-07-29・実例：
   //   <p class="top02__tree"><picture class="fxa_y fxa_pre"><span><span><img …></span></span></picture></p>
   //   ＝imgのクラスは空なのに、動きは2つ外側のpictureに付いていた）。
-  var FX_HOST_SEL='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines,.fxa_hl,.fxa_cnt,.fxa_ud,.fxa_wave,.fxa_wrap,'
+  var FX_HOST_SEL='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines,.fxa_hl,.fxa_cnt,.fxa_ud,.fxa_wave,.fxa_wrap,.fxa_bgt,'
     +'[class*="fxa_lp_"],[data-fxa-fly],[data-cefly]';
   function fxHosts(el){
     var out=[];
@@ -11505,8 +11686,84 @@ html.__ce_altmode{cursor:text}
     if(msg) msg.textContent='この要素の動きを消しました'+tail+'（💾保存で確定）';
     try{ ceFlash('🚫 動きを消しました（'+(hosts.length+stopped)+'箇所）'); }catch(_){}
   }
+  // 📤 ヘッダーの中に入ってしまっている「大きな中身（ヒーロー等）」を外へ出す（2026-07-31・要望）。
+  // ★なぜ要るか：クローン元では上の帯(<header>)の中にヒーロー全体が入っていることがある。
+  //   すると「ヘッダーを動かすとヒーローも動く」「ヘッダーが透明な間はヒーローも消える」など、
+  //   本来関係ないはずの物が連動して壊れる（今日だけで2回踏んだ）。入れ物を分ければ根から消える。
+  // ★見た目は変えない：出す前のページ座標を測り、出したあとに left/top で同じ場所へ置き直す。
+  //   元から position:absolute なので、外へ出しても他の要素のレイアウトは動かない。
+  function heroOut(el){
+    var hd=(el&&el.closest)?el.closest('header'):null;
+    if(!hd) hd=document.querySelector('header');
+    if(!hd){ if(msg) msg.textContent='ヘッダーが見つかりませんでした'; return; }
+    var hr=hd.getBoundingClientRect();
+    var lim=Math.max(hr.height*2, window.innerHeight*0.35);   // 帯の2倍か画面の35%より大きい物＝はみ出している
+    var cand=[].slice.call(hd.children).concat([].slice.call(hd.querySelectorAll('[data-slshow],picture,figure')));
+    var out=[], seen=[];
+    cand.forEach(function(n){
+      if(!n||n.nodeType!==1||seen.indexOf(n)>=0) return; seen.push(n);
+      if(n.closest&&n.closest('[id^="__ce"]')) return;
+      var r=n.getBoundingClientRect();
+      if(r.height<lim) return;
+      if(out.some(function(p){ return p.contains&&p.contains(n); })) return;   // 親が既に対象なら重複しない
+      out.push(n);
+    });
+    if(!out.length){ if(msg) msg.textContent='ヘッダーからはみ出している大きな中身は見つかりませんでした（ヘッダーの上で右クリックして試してください）'; return; }
+    // ★出す前の帯の高さを控える（2026-07-31）。中身を抜くと帯の高さが変わることがあり
+    //   （実測 63px→73px）、読み込み時に「ヘッダーが細くなって戻る」ように見える原因になる。
+    var hdH=Math.round(hd.offsetHeight);
+    var moved=0;
+    out.forEach(function(n){
+      try{ pushUndo(n); }catch(_){ }
+      var r=n.getBoundingClientRect();
+      var px=r.left+(window.scrollX||0), py=r.top+(window.scrollY||0);
+      // ★大きさは offsetWidth/offsetHeight で測る（CLAUDE.mdの約束）。
+      //   getBoundingClientRect は transform（出現アニメの途中のscale等）が混ざった「見た目の箱」を返すので、
+      //   その値で固定すると保存して開き直した時に別の大きさになる（実報告「保存すると小さくなる」）。
+      var w=Math.round(n.offsetWidth), h=Math.round(n.offsetHeight);
+      hd.parentNode.insertBefore(n, hd.nextSibling);          // ヘッダーのすぐ後ろへ（兄弟にする）
+      n.setAttribute('data-ceheroout','1');
+      n.style.setProperty('position','absolute','important');
+      if(w>4) n.style.setProperty('width', w+'px','important');   // 帯の大きさに依存していた分を固定
+      if(h>4) n.style.setProperty('height',h+'px','important');
+      // 位置合わせは2回まわす：1回目で大きさを固定したぶん箱がずれることがあるため
+      for(var _pass=0;_pass<2;_pass++){
+        n.style.setProperty('left','0px','important'); n.style.setProperty('top','0px','important');
+        var r1=n.getBoundingClientRect();
+        n.style.setProperty('left', Math.round(px-(r1.left+(window.scrollX||0)))+'px','important');
+        n.style.setProperty('top',  Math.round(py-(r1.top +(window.scrollY||0)))+'px','important');
+      }
+      moved++;
+    });
+    // 帯の高さが変わっていたら元の高さに固定＝読み込み時に太さが揺れない
+    var hdH2=Math.round(hd.offsetHeight);
+    if(hdH>4&&Math.abs(hdH2-hdH)>1){
+      try{ pushUndo(hd); }catch(_){ }
+      hd.style.setProperty('height', hdH+'px','important');
+      hd.style.setProperty('min-height','0','important');
+      hd.style.setProperty('box-sizing','border-box','important');
+    }
+    try{ slideToBack(); }catch(_){ }
+    markDirty();
+    if(msg) msg.textContent='📤 '+moved+'個をヘッダーの外に出しました'
+      +((hdH>4&&Math.abs(hdH2-hdH)>1)?('／帯の高さも'+hdH+'pxに固定しました'):'')
+      +'。見た目は同じ位置のままで、これ以降ヘッダーを動かしても付いてきません（⟲で戻せます・💾保存で確定）';
+  }
   function removeBakeOne(el){
     if(!el) return;
+    // 🎨 背景→文字：色を本体へ戻し、文字の包みをほどく。★これをしないと
+    //   動きを消したのに背景が透明のまま＝「色が消えた」に見える。
+    if(el.classList&&el.classList.contains('fxa_bgt')){
+      var keep=el.getAttribute('data-cebgc'), keepI=el.getAttribute('data-cebgi');
+      ['fxa_bgt','fxa_bgl','fxa_bgc','fxa_bgf'].forEach(function(c){ el.classList.remove(c); });
+      ['--fxa-bgc','--fxa-bgi','--fxa-tdly'].forEach(function(p){ el.style.removeProperty(p); });
+      el.style.removeProperty('background-color'); el.style.removeProperty('background-image');
+      if(keep&&keep!=='transparent') el.style.setProperty('background-color', keep);
+      if(keepI&&keepI!=='none') el.style.setProperty('background-image', keepI);
+      el.removeAttribute('data-cebgc'); el.removeAttribute('data-cebgi');
+      var tw=el.querySelector(':scope > .fxa_bgtxt');
+      if(tw){ while(tw.firstChild) el.insertBefore(tw.firstChild, tw); tw.remove(); }
+    }
     fxUnwrap(el);  // 自分のCSSアニメ用に包んだラッパーがあれば解除
     // 🕊 飛行ルートも外す（属性を消すとランタイムのループは次フレームで自動停止する）
     if(el.getAttribute('data-fxa-fly')!=null||el.getAttribute('data-cefly')!=null){ el.removeAttribute('data-fxa-fly'); el.removeAttribute('data-cefly'); el.ceflyGen=(el.ceflyGen||0)+1; }
@@ -11519,6 +11776,7 @@ html.__ce_altmode{cursor:text}
   // ===== ⏳ 演出タイミング（AIなし・無料）＝旧⏱順番モードを一覧型に統合（2026-07-12） =====
   function seqAnimKey(el){
     var c=el.classList;
+    if(c.contains('fxa_bgt')) return c.contains('fxa_bgc')?'bgtextc':(c.contains('fxa_bgf')?'bgtextf':'bgtext');
     if(c.contains('fxa_hl')) return 'hl';
     if(c.contains('fxa_ud')) return 'ud';
     if(c.contains('fxa_cnt')) return 'count';
@@ -11548,7 +11806,7 @@ html.__ce_altmode{cursor:text}
   // 🕊 空飛ぶルート（紙飛行機など）も演出の一員なので、この一覧で順番・速さを扱えるようにする（2026-07-30・要望）。
   // ★速さの持ち方が他と違う：出現アニメは --fxa-dur / マーカーは --hldur だが、
   //   飛行は data-fxa-fly のJSONの d（ミリ秒）に入っている。読み書きを専用に分ける。
-  var DLY_SEL='.fxa_hl,.fxa_pre,.fxa_cnt,.fxa_ud,[data-fxa-fly],[data-cefly]';
+  var DLY_SEL='.fxa_hl,.fxa_pre,.fxa_cnt,.fxa_ud,.fxa_bgt,[data-fxa-fly],[data-cefly]';
   function _isFly(c){ return !!(c&&c.getAttribute&&(c.getAttribute('data-fxa-fly')!=null||c.getAttribute('data-cefly')!=null)); }
   function _flyCfg(c){
     try{ return JSON.parse(c.getAttribute('data-fxa-fly')||c.getAttribute('data-cefly')||'null')||null; }catch(_){ return null; }
@@ -11686,8 +11944,14 @@ html.__ce_altmode{cursor:text}
     if(!wide && !forced && items.length<2){ scope=document.body; items=collect(scope); wide=true; auto=true; }
     items=items.slice(0, wide?40:20);
     if(!items.length){ if(msg) msg.textContent='このページに動きが見つかりません（先に「✨動きを付ける」やマーカーを付けてください）'; return; }
-    // 今の遅らせ順に並べる（同点はDOM順）＝一覧がそのまま再生順に見える
+    // 並び順＝①自分で並べ替えた順(data-ceord) ②遅らせの順 ③DOM順。
+    // ★↑↓で並べ替えた順番は、開き直すと消えていた（報告「記録がはずれる」）。
+    //   並べ替えた時点で data-ceord に番号を焼くので、次に開いても同じ並びで出る。
     items=items.map(function(n,i){ return {el:n,i:i}; }).sort(function(a,b){
+      var oa=a.el.getAttribute('data-ceord'), ob=b.el.getAttribute('data-ceord');
+      if(oa!=null&&ob!=null) return (+oa)-(+ob);
+      if(oa!=null) return -1;
+      if(ob!=null) return 1;
       var da=+a.el.getAttribute('data-cedelay')||0, db=+b.el.getAttribute('data-cedelay')||0;
       return (da-db)||(a.i-b.i);
     }).map(function(o){ return o.el; });
@@ -11729,7 +11993,9 @@ html.__ce_altmode{cursor:text}
       +'<div id="__ce_dlyrows" style="margin-top:6px">'+rowsHtml()+'</div>'
       +'<div style="margin-top:8px;display:flex;align-items:center;gap:6px">間隔<input id="__ce_dlyiv" type="number" value="600" min="100" step="100" style="width:62px;padding:2px 4px;border-radius:5px;border:none">ms'
       +'<button id="__ce_dlystep" title="上の並び順どおりに遅らせを自動で刻む" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:4px 9px;cursor:pointer">⏱ 上から順に刻む</button>'
-      +'<button id="__ce_dlyhdr" title="ページ上部のヘッダー帯に「上から降りる」を付けて、全部の後に出す" style="background:#0e7490;color:#fff;border:none;border-radius:6px;padding:4px 9px;cursor:pointer">🧢 最後にヘッダーを下ろす</button></div>'
+      +'<button id="__ce_dlyhdr" title="ページ上部のヘッダー帯に「上から降りる」を付けて、全部の後に出す" style="background:#0e7490;color:#fff;border:none;border-radius:6px;padding:4px 9px;cursor:pointer">🧢 最後にヘッダーを下ろす</button>'
+      // ヘッダーが動くと、その下や中にある物まで釣られて揺れて見えることがある（2026-07-31・要望）
+      +'<button id="__ce_dlyhdrx" title="ヘッダー帯の「上から降りる」を外す。読み込み時にヘッダーが動かなくなり、まわりが揺れて見えるのも止まる" style="background:#7c3a3a;color:#fff;border:none;border-radius:6px;padding:4px 9px;cursor:pointer">🧢 ヘッダーの降りるをやめる</button></div>'
       +'<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'
       +'<button id="__ce_dlyflow" style="background:#6366f1;color:#fff;border:none;border-radius:7px;padding:5px 10px;cursor:pointer">▶ 全体の流れ</button>'
       +'<button id="__ce_dlyok" style="background:#22c55e;color:#fff;border:none;border-radius:7px;padding:5px 10px;cursor:pointer;font-weight:700">✔ 決定</button>'
@@ -11742,7 +12008,13 @@ html.__ce_altmode{cursor:text}
     _dlyP=p;
     var rowsBox=p.querySelector('#__ce_dlyrows');
     function redraw(){ rowsBox.innerHTML=rowsHtml(); }
-    function setDelay(c,v){ v=Math.max(0,Math.round(v)); if(v>0) c.setAttribute('data-cedelay',v); else c.removeAttribute('data-cedelay'); markDirty(); }
+    // ★自分で決めた値には印(data-cedelayok)を付ける＝開き直しても自動お掃除に消されない。
+    function setDelay(c,v){
+      v=Math.max(0,Math.round(v));
+      if(v>0){ c.setAttribute('data-cedelay',v); c.setAttribute('data-cedelayok','1'); }
+      else { c.removeAttribute('data-cedelay'); c.removeAttribute('data-cedelayok'); }
+      markDirty();
+    }
     function setDur(c,v){
       v=Math.max(100,Math.round(v));
       if(_isFly(c)){ _flySetDur(c,v); _flyReplay(c); }                       // 🕊 飛行は所要時間そのもの＝変えたらすぐ飛び直す
@@ -11750,18 +12022,32 @@ html.__ce_altmode{cursor:text}
       else c.style.setProperty('--fxa-dur',v+'ms');
       markDirty();
     }
+    // ★速さを変えても「もう出たあと」なので画面は変わらない＝効いていないように見える（報告）。
+    //   数字を打ち終わって0.6秒たったら、その1つを自動で再生して見せる。
+    var _dlyPv=null;
     rowsBox.addEventListener('input',function(ev){
       var row=ev.target.closest('.__dlyrow'); if(!row) return;
       var c=items[+row.getAttribute('data-i')];
       if(ev.target.getAttribute('data-k')==='d') setDelay(c,+ev.target.value||0);
       if(ev.target.getAttribute('data-k')==='s') setDur(c,+ev.target.value||800);
+      clearTimeout(_dlyPv);
+      _dlyPv=setTimeout(function(){
+        try{ dlyPreview(c); }catch(_){ }
+        if(msg) msg.textContent='▶ 変えた設定で1回再生しました（全部の流れを見るなら「▶ 全体の流れ」）';
+      }, 600);
     });
     rowsBox.addEventListener('click',function(ev){
       var row=ev.target.closest('.__dlyrow'); if(!row) return;
       var i=+row.getAttribute('data-i'), c=items[i];
       if(ev.target.getAttribute('data-pl')){ dlyPreview(c); return; }
       var mv=ev.target.getAttribute('data-mv');
-      if(mv){ var j=i+(+mv); if(j<0||j>=items.length) return; items.splice(i,1); items.splice(j,0,c); redraw(); return; }
+      if(mv){
+        var j=i+(+mv); if(j<0||j>=items.length) return;
+        items.splice(i,1); items.splice(j,0,c);
+        // 並べ替えた順番をその場で焼く＝開き直しても同じ並びで出る（💾保存で確定）
+        items.forEach(function(n,k){ n.setAttribute('data-ceord', k); });
+        markDirty(); redraw(); return;
+      }
       if(ev.target.classList.contains('__dlylbl')){ try{ c.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){} c.classList.add('__ce_sel'); setTimeout(function(){ c.classList.remove('__ce_sel'); },1200); }
     });
     p.querySelector('#__ce_dlystep').addEventListener('click',function(){
@@ -11782,6 +12068,19 @@ html.__ce_altmode{cursor:text}
       redraw();
       flowRun(scope); if(!scope.contains(host)) dlyPreview(host);
       if(msg) msg.textContent='🧢 ヘッダーが最後（'+(mx+iv)+'ms後）に上から降りるようにしました。💾保存で残ります';
+    });
+    // 🧢 ヘッダーの「上から降りる」を外す（読み込み時にヘッダーが動かなくなる）
+    p.querySelector('#__ce_dlyhdrx').addEventListener('click',function(){
+      var bar=findTopBar();
+      if(!bar){ if(msg) msg.textContent='ヘッダー帯が見つかりません（ページ上部の横長バーが対象です）'; return; }
+      var host=bar.classList.contains('fxa_pre')?bar:((bar.closest&&bar.closest('.fxa_pre'))||bar);
+      var had=(host.className||'').toString().indexOf('fxa_')>=0;
+      try{ removeBake(host); }catch(_){ }
+      var ix=items.indexOf(host); if(ix>=0) items.splice(ix,1);
+      redraw(); markDirty();
+      if(msg) msg.textContent=had
+        ?'🧢 ヘッダーの「上から降りる」をやめました。読み込み時にヘッダーが動かないので、まわりが揺れて見えるのも止まります（💾保存で確定・⟲で戻せます）'
+        :'🧢 ヘッダーには出現の動きが付いていませんでした（別の原因かもしれません）';
     });
     p.querySelector('#__ce_dlyscope').addEventListener('click',function(){ dlyOpen(el,x,y,!wide,true); });
     p.querySelector('#__ce_dlyflow').addEventListener('click',function(){ flowRun(scope); if(msg){} });
@@ -11840,17 +12139,31 @@ html.__ce_altmode{cursor:text}
   })();
   // 文字を追加：空の要素を置いて即編集パネルを開く。何も入力せず閉じたら（Escape/×）空要素を残さず消す。
   function _scAddText(px,py){
-    var nd=document.createElement('div'); nd.textContent='';
-    nd.setAttribute('style','z-index:'+_freeZIndex()+';font-size:32px;font-weight:700;color:#333;font-family:inherit;line-height:1.4;padding:4px 8px;white-space:nowrap');
-    placeFree(nd,px,py); markDirty(); openBreakEditor(nd);
-    var w=new MutationObserver(function(){
-      if(document.getElementById('__ce_pk')) return;          // 編集パネルはまだ開いている
-      w.disconnect();
-      if(!(nd.textContent||'').replace(/[\\s\\u200b]/g,'')){    // 何も入力されていない＝空要素を残さない
-        if(nd.parentNode) nd.parentNode.removeChild(nd);
-      }
-    });
-    w.observe(document.body,{childList:true,subtree:true});
+    var nd=document.createElement('div');
+    // ★最初から文字を入れておく（2026-07-31・報告「追加しても反映されない」）。
+    //   空のまま置くと 16×8px の見えない箱になり、追加できたのか分からない。
+    //   さらに「何も入力しなければ消す」作りだったので、気づかないうちに消えていた。
+    nd.textContent='ここに文字';
+    // ★z-index はここで決めない（2026-07-31）。先に入れてしまうと placeFree の
+    //   「置く場所の重なりを見て決める」計算が丸ごと素通りし、スライドショーの上に置いた文字が
+    //   必ず裏へ潜る（実測：置き場所を見れば51になるのに、ここで49に固定されていた）。
+    nd.setAttribute('style','font-size:32px;font-weight:700;color:#333;font-family:inherit;line-height:1.4;padding:4px 8px;white-space:nowrap');
+    placeFree(nd,px,py); markDirty();
+    // 置いた場所が見えているか確かめて、知らせる（画面の外なら気づけるように）
+    try{
+      var r=nd.getBoundingClientRect();
+      var vis=(r.width>0&&r.height>0&&r.bottom>0&&r.top<window.innerHeight&&r.right>0&&r.left<window.innerWidth);
+      if(msg) msg.textContent=vis
+        ?'✏ 「ここに文字」を置きました。そのまま書き換えてください（掴んで移動・右クリックで色や大きさ）'
+        :'✏ 文字を置きましたが画面の外です。画面を少しスクロールすると見つかります';
+      nd.classList.add('__ce_sel'); setTimeout(function(){ nd.classList.remove('__ce_sel'); },1600);
+    }catch(_){ }
+    openBreakEditor(nd);
+    // ★「空なら自動で消す」見張りは撤去した（2026-07-31・報告「出てくるけど閉じると消える」）。
+    //   DOMが少しでも動いた瞬間に発火するため、編集バーが中身を組み替えている一瞬を
+    //   「空になった」と誤読して、置いたばかりの文字を消してしまっていた。
+    //   最初から「ここに文字」が入っているので、空の箱が残る心配はもう無い。
+    //   要らない時は右クリック →🗑 で消せる。
   }
   function scRun(op){
     // 🔶図形バーは「どの要素を狙っているか」に関係なく出せる＝対象を決める前に処理する
@@ -11898,6 +12211,18 @@ html.__ce_altmode{cursor:text}
       if((!te||!_own(te)) && sel && (sel.textContent||'').trim()
          && (sel.querySelector('.fxa_ch,.imp-char') || (sel.className||'').toString().indexOf('fxa_')>=0)){
         te=sel; _big=false;
+      }
+      // ★写真やスライドショーの上で押した時に、親をたどって<header>まで登り
+      //   「ロゴやメニューの文字」を編集対象にしてしまうのを止める（2026-07-31・報告）。
+      //   登った先が帯（header/nav/footer）なら、それは狙った文字ではない。
+      // ★断るのは「押した所に文字が1つも無い（＝写真の上）」時だけにする（2026-07-31・報告
+      //   「Eが効かなくなった」）。最初は帯まで登ったら常に断る作りにしたが、それだと
+      //   帯の中にある普通の文字まで編集できなくなっていた＝止めすぎだった。
+      if(te&&te!==uForEdit&&/^(HEADER|NAV|FOOTER)$/.test(te.tagName)
+         && !(uForEdit&&(uForEdit.textContent||'').trim())){
+        if(msg) msg.textContent='ここは写真（文字ではない）なので編集できません。'
+          +'直したい文字そのものの上にマウスを置いて押してください';
+        return;
       }
       if(!te||te===document.body||(!_own(te)&&!(te.textContent||'').trim())||_big){
         if(msg) msg.textContent='ここには編集できる文字がありません（直したい文字の上にマウスを置いて押してください）';
@@ -12017,9 +12342,17 @@ html.__ce_altmode{cursor:text}
       var n=src.cloneNode(true);
       n.classList.remove('__ce_sel','__ce_hl','__ce_sechl');
       _ceClip={html:n.outerHTML, tag:src.tagName};
+      // ★このPCに一時保存する（2026-07-31・要望「別のカンプにも貼りたい」）。
+      //   ページの変数だけだと、別のカンプを開いた時点で消えて貼れない。
+      //   保存先は同じ 127.0.0.1 なのでカンプをまたいで共有される。
+      try{ localStorage.setItem('__ce_clip', JSON.stringify(_ceClip)); }catch(_){ }
       e.preventDefault();
-      if(msg) msg.textContent='📋 コピーしました。貼り付けたい場所にマウスを置いて Ctrl+V';
+      if(msg) msg.textContent='📋 コピーしました。貼り付けたい場所にマウスを置いて Ctrl+V（別のカンプを開いて貼ってもOK）';
       return;
+    }
+    // 別のカンプで Ctrl+V ＝ページの変数は空なので、このPCの一時保存から読み直す
+    if(!_ceClip){
+      try{ var _st=JSON.parse(localStorage.getItem('__ce_clip')||'null'); if(_st&&_st.html) _ceClip=_st; }catch(_){ }
     }
     // ★スクショ貼り付け（📋→セクション）と共存させる：内部コピーが無い時は、すぐ文句を言わずに
     //   paste イベント（この直後に来る）が画像を拾えるか待つ。拾えたら _psWait を false にされる。
@@ -14482,6 +14815,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_pskill','➖ 線・飾りを消す（border・疑似要素）'],
     ['__ce_q_addline','➕ 線を追加（実要素・掴んで動かせる）'],
     ['__ce_q_edit','✏ この文字を編集（改行や文言を直す）'],
+    ['__ce_q_heroout','📤 ヘッダーの中の大きな中身を外に出す（位置はそのまま）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
     ['__ce_q_rst','⟲ 位置・サイズをリセット'],
     ['__ce_q_unfix','📌 画面への貼り付きを解除（一緒にスクロール）'],
@@ -14499,7 +14833,7 @@ html.__ce_altmode{cursor:text}
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
-    'sep:🧹 整える・消す','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
+    'sep:🧹 整える・消す','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
   ];
   function qmDefMap(){ var m={}; QM_DEFS.forEach(function(d){ m[d[0]]=d[1]; }); return m; }
@@ -16620,6 +16954,7 @@ html.__ce_altmode{cursor:text}
       }
       // ✏ 右クリックで選んだ文字をその場で編集（Eキーと同じ処理・メニューからも入れるようにした）
       if(t.id==='__ce_q_edit'){ scRun('edit'); return; }
+      if(t.id==='__ce_q_heroout'){ var _ho=curEl; closeMenu(); heroOut(_ho); return; }
       if(t.id==='__ce_q_fxrm'){ eachSel(removeBake); closeMenu(); return; }
       if(t.id==='__ce_q_rst'){ eachSel(resetPos); markDirty(); closeMenu(); return; }
       if(t.id==='__ce_q_pin'){
