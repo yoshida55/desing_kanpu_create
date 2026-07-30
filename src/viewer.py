@@ -2751,6 +2751,7 @@ html.__ce_altmode{cursor:text}
     <div class="lbl plain">🎬 オープニング演出（開いた瞬間に幕→フェードで本体へ・AIなし）</div>
     <button class="im" id="__ce_op_add" style="background:#0b6bcb;color:#fff">🎬 フェードのオープニングを付ける</button>
     <button class="im" id="__ce_op_edit" style="background:#eaf2fd;color:#0b4e8a;border:1px solid #bcd8f7">👁 オープニングを出す／隠す（ロゴ・文字は右クリックで差し替え）</button>
+    <button class="im" id="__ce_op_del" style="background:#fdecea;color:#a8231b;border:1px solid #f3bdb7" title="幕・待機スクリプトごと取り外します。白い開始と、元サイトの動きとのズレが無くなります">🗑 オープニングを外す（もう出さない）</button>
     <div class="lbl plain">⭐ セクションのお気に入り（保存は右クリック→⭐・AIなし）</div>
     <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
     <button class="im" id="__ce_favadd" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">➕ お気に入りからセクションを追加（場所を選ぶ）</button>
@@ -2828,15 +2829,28 @@ html.__ce_altmode{cursor:text}
   //   ★地雷：ここを本文より高い決め打ち値（旧:60）にすると、スクロール中にヘッダーの上へ来た瞬間
   //   要素がヘッダーを覆って見える（サイトごとにヘッダーのz-indexは違うので決め打ちは危険）。
   //   ページの実際のヘッダーを探し、それより必ず低い値にする（見つからなければ本文より上の無難な値）。
-  function _freeZIndex(){
+  function _freeZIndex(over){
+    var z=5;
     try{
       var hdr=document.querySelector('header,.site-header,[class*="header"]');
       if(hdr){
-        var z=parseInt(getComputedStyle(hdr).zIndex,10);
-        if(!isNaN(z)) return Math.max(1, z-1);
+        var hz=parseInt(getComputedStyle(hdr).zIndex,10);
+        if(!isNaN(hz)) z=Math.max(1, hz-1);
       }
     }catch(_){}
-    return 5;
+    // ★置く場所を覆っている「重なりの親」より必ず手前にする（2026-07-30・ユーザー報告）。
+    //   実害：クローン元の <section class="fv"> が z-index 2147480000（過去の操作で最大値へ飛んだ）
+    //   だったため、その上に置いた画像が z=49 で永久に裏へ潜り「乗せたのに見えない・掴めない」。
+    //   置き先の先祖を辿って、いちばん大きい z より1つ上を使う（ツールUIの2147483001より下に抑える）。
+    try{
+      for(var a=over; a&&a.nodeType===1&&a!==document.body&&a!==document.documentElement; a=a.parentElement){
+        if(a.id&&a.id.indexOf('__ce')===0) continue;      // ツール自身のUIは相手に数えない
+        if(a.closest&&a.closest('[id^="__ce"]')) continue;
+        var v=parseInt(getComputedStyle(a).zIndex,10);
+        if(!isNaN(v)&&v>z) z=Math.min(v+1, 2147480500);
+      }
+    }catch(_){}
+    return z;
   }
   // ※文字/画像の「追加」ボタンは編集バーから廃止（右クリックメニューに統一・2026-07-11）。
   //   下のinsertImageEl/openAddImagePickerは右クリックメニューの「🖼 画像を追加」が使うので残す。
@@ -2859,7 +2873,22 @@ html.__ce_altmode{cursor:text}
     el.style.position='absolute';
     // ★z-index必須：カンプの.container等がz-index:2を持つことが多く、無指定(auto)だと
     //   貼り付け/追加した要素がその下に潜り「重なった場所で二度と掴めない」（Ctrl+V貼り付けで実際に発生）
-    if(!el.style.zIndex) el.style.zIndex=_freeZIndex();
+    //   ★置く場所の真下にある要素を渡す＝その重なりより手前の数字を選ばせる（スライドの上に乗せる用）
+    if(!el.style.zIndex){
+      var _zu=null;
+      // ★elementFromPoint 単体はダメ：画像を選ぶパネル(#__ce_pk)が画面いっぱいに出ている最中なので
+      //   必ずツールUIが返る＝真下のセクションを見られない（実測でここに引っかかった）。
+      //   重なりを手前から全部見て、ツールUIでない最初の要素を使う。
+      try{
+        var _vx=pageX-(window.scrollX||0), _vy=pageY-(window.scrollY||0);
+        var _st=document.elementsFromPoint(_vx,_vy)||[];
+        for(var _i=0;_i<_st.length;_i++){
+          var _n=_st[_i];
+          if(_n&&_n.nodeType===1&&!(_n.closest&&_n.closest('[id^="__ce"]'))){ _zu=_n; break; }
+        }
+      }catch(_){}
+      el.style.zIndex=_freeZIndex(_zu||host);
+    }
     if(!host){  // セクションの外（ページ余白）だけは従来どおりbody基準
       el.style.left=Math.round(pageX)+'px'; el.style.top=Math.round(pageY)+'px';
       document.body.appendChild(el); return el;
@@ -3192,7 +3221,10 @@ html.__ce_altmode{cursor:text}
     var img=document.createElement('img'); img.src=url;
     var x=(px!=null?Math.round(px):Math.round((window.scrollX||window.pageXOffset||0)+window.innerWidth*0.30))+idx*24;
     var y=(py!=null?Math.round(py):Math.round((window.scrollY||window.pageYOffset||0)+window.innerHeight*0.32))+idx*24;
-    img.setAttribute('style','z-index:'+_freeZIndex()+';width:260px;height:auto;cursor:move');
+    // ★z-index はここで決め打ちしない：placeFree が「置く場所の真下にある物より手前」を計算する。
+    //   ここで先に入れてしまうと placeFree の計算が使われず、大きなz-index（例:2147480000のセクション）
+    //   の上に置いた画像が永久に裏へ潜る（実測でここに引っかかった・2026-07-30）。
+    img.setAttribute('style','width:260px;height:auto;cursor:move');
     placeFree(img, x, y);
     markDirty();
     if(idx===0){ try{ img.scrollIntoView({block:'center'}); }catch(_){} }
@@ -4433,6 +4465,27 @@ html.__ce_altmode{cursor:text}
     }
     else { s.style.display='none'; opBarHide(); msg.textContent='オープニングを隠しました（保存版では開いた時に自動で流れます）'; }
   }
+  // 🗑 オープニングを完全に外す（2026-07-30・ユーザー要望）
+  // ★👁「出す／隠す」は編集中だけ隠すもので、保存時に必ず表示へ戻る作りだった
+  //   （cleanHtml が data-paused を外して display:flex に戻す＝「消したのに保存すると復活」）。
+  //   ＝幕をやめる手段が無かったので、ここで本当に取り外す。
+  // ★幕本体だけ消しても足りない：<head>の __op_early が残ると読み込み時に op-wait が付き、
+  //   出現アニメが "ce-op-done" を待って**7秒間なにも動かない**（保険のタイマーまで待つ）。
+  //   待機スクリプトとCSSも一緒に外し、待ちを今すぐ解除する。
+  function removeOpening(){
+    var n=0;
+    ['__op_screen','__op_run','__op_early','__op_css'].forEach(function(id){
+      var e=document.getElementById(id); if(e){ e.remove(); n++; }
+    });
+    try{ document.documentElement.classList.remove('op-wait'); }catch(_){}
+    try{ window.__opWait=0; window.dispatchEvent(new Event('ce-op-done')); }catch(_){}
+    try{ opBarHide(); }catch(_){}
+    if(!n){ msg.textContent='オープニングは付いていません（外すものがありません）'; return; }
+    markDirty();
+    msg.textContent='🗑 オープニングを外しました（'+n+'個）。白い開始と、元サイトの動きとのズレが無くなります・💾保存で確定・⟲で戻せます';
+  }
+  var opDelBtn=document.getElementById('__ce_op_del');
+  if(opDelBtn) opDelBtn.addEventListener('click',removeOpening);
   var shapesBtn=document.getElementById('__ce_shapes');           // 🔶 図形バーの出し入れ
   if(shapesBtn) shapesBtn.addEventListener('click',openShapeBar);
   var opAddBtn=document.getElementById('__ce_op_add');
@@ -10260,6 +10313,36 @@ html.__ce_altmode{cursor:text}
   // 画像は枠(figure/div)に overflow:hidden で切り取られていることが多く、その場合は
   // 中の<img>をいくら伸縮しても見た目のサイズが1pxも変わらない（枠が見た目を決めている）。
   // ＝切り取っている枠があればそれを返す。切り取っていなければ画像自身が見た目そのもの。
+  // 🖼 スライドショーの中を掴んだら「箱」を伸縮対象にする（2026-07-30・ユーザー要望）。
+  //   重ねた画像は箱いっぱい(100%)なので、箱を変えれば**3枚まとめて**同じ大きさに変わる。
+  //   1枚ずつ変えたいという要望が出たら、その時に選べるようにする（今は「3つ一緒でいい」）。
+  function slBox(x){
+    if(!x||!x.closest) return x;
+    var w=x.closest('[data-slshow]');
+    return w||x;
+  }
+  // 伸縮の前に、箱の今の大きさをpxで固定し、中の画像を全部「箱いっぱい」に敷き直す。
+  // ★これをやらないと：1枚目だけ自分の幅を持ったまま残り、箱を縮めても1枚目が付いてこない
+  //   （＝1枚目と2枚目以降で大きさが違う、という見え方になる）。
+  function slFitAll(w){
+    if(!w||!w.getAttribute||w.getAttribute('data-slshow')==null) return false;
+    var r=w.getBoundingClientRect();
+    if(r.width>4&&r.height>4){
+      w.style.setProperty('width',Math.round(r.width)+'px','important');
+      w.style.setProperty('height',Math.round(r.height)+'px','important');
+      w.style.setProperty('min-height','0','important');
+      w.style.setProperty('box-sizing','border-box','important');
+    }
+    [].slice.call(w.querySelectorAll('img')).forEach(function(im){
+      im.style.setProperty('position','absolute','important');
+      im.style.setProperty('inset','0','important');
+      im.style.setProperty('width','100%','important');
+      im.style.setProperty('height','100%','important');
+      im.style.setProperty('object-fit','cover','important');
+      im.style.removeProperty('margin');
+    });
+    return true;
+  }
   function szBox(x){
     if(!x||x.tagName!=='IMG') return x;
     var p=x.parentElement; if(!p||p===document.body) return x;
@@ -10301,7 +10384,8 @@ html.__ce_altmode{cursor:text}
     var _thinH=(el.offsetHeight||_r0.height)<24, _thinW=(el.offsetWidth||_r0.width)<24;
     if(_thinH||_thinW) defs=defs.filter(function(d){ return d.k.length===1; });
     // 複数選択なら選択した全員に■を出す（Excelと同じ＝どれが選択中か一目で分かる）
-    var targets=(selEls.length?selEls:[el]);
+    // ★スライドショーの中を選んだ時は箱に■を出す＝箱を伸縮すれば3枚まとめて変わる
+    var targets=(selEls.length?selEls:[el]).map(slBox);
     _hdls={list:[]};
     targets.forEach(function(tgt){
     defs.forEach(function(d){
@@ -10312,9 +10396,11 @@ html.__ce_altmode{cursor:text}
         // 要素の移動ドラッグ(_dDown)や文字選択にイベントを渡さない＝掴んだら伸縮だけ
         ev.preventDefault(); ev.stopPropagation(); _hdlDrag=true;
         var sx=ev.clientX, sy=ev.clientY;
-        (selEls.length?selEls:[tgt]).forEach(_freezeSiblings);  // 隣の列・兄弟が動かないよう先に凍結
+        var _rz=(selEls.length?selEls:[tgt]).map(slBox);        // スライドショーは箱を伸縮する
+        _rz.forEach(slFitAll);                                  // 中の画像を全部「箱いっぱい」に敷き直す
+        _rz.forEach(_freezeSiblings);                           // 隣の列・兄弟が動かないよう先に凍結
         // 複数選択中は選択した全部に同じ量を掛ける（各要素の元サイズ・元位置を最初に控える）
-        var bases=(selEls.length?selEls:[tgt]).map(function(x){
+        var bases=_rz.map(function(x){
           var rr=x.getBoundingClientRect();
           // ★大きさは offsetWidth/Height で測る（rectは回転や出現アニメのtransformを含む）。
           //   ／斜め線(rotate:-28deg)はrectだと高さが実際の3pxではなく百数十pxに見え、
@@ -12973,7 +13059,27 @@ html.__ce_altmode{cursor:text}
     }
     return {z:z, lifted:lifted};
   }
+  // 🖼 スライドショーの中で「いま見えている1枚」を返す（2026-07-30・ユーザー要望）。
+  //   3枚が同じ場所にピッタリ重なっているので、どれが掴まれるかは重なり順まかせだった。
+  //   赤が出ている時は赤、緑が出ている時は緑を触りたい＝不透明度がいちばん高い1枚を選ぶ。
+  function slFront(w){
+    if(!w||!w.querySelectorAll) return null;
+    var best=null, bo=-1;
+    [].slice.call(w.querySelectorAll('img')).forEach(function(im){
+      var o=0; try{ o=parseFloat(getComputedStyle(im).opacity); }catch(_){ }
+      if(!isFinite(o)) o=0;
+      if(o>bo){ bo=o; best=im; }
+    });
+    return best;
+  }
   function pickTarget(el){
+    // 🖼 スライドショーの「スライド自身」を掴んだ時だけ、今見えている1枚に付け替える。
+    //   ★上に乗せた別の画像（鳥など）や文字は付け替えない（2026-07-30・ユーザー要望）。
+    //     ここを「入れ物の中なら全部」にすると、スライドの上に置いた鳥が永久に掴めなくなる。
+    var _slw=(el&&el.parentElement&&el.parentElement.getAttribute
+              &&el.parentElement.getAttribute('data-slshow')!=null&&el.tagName==='IMG')?el.parentElement
+             :((el&&el.getAttribute&&el.getAttribute('data-slshow')!=null)?el:null);
+    if(_slw){ var _sf=slFront(_slw); if(_sf) return _sf; }
     // 🧩グループの一員は、それ自身を掴む（親に吸い上げると印が見つからず仲間が付いてこない）
     if(el&&el.getAttribute&&el.getAttribute('data-cegid')) return el;
     // ★ツールが置いた部品（🔓実体化した飾り・🔶図形）は、それ自身を掴む＝親に吸い上げない。
@@ -14194,7 +14300,10 @@ html.__ce_altmode{cursor:text}
     (function(){
       var _sw=(curEl&&curEl.closest)?curEl.closest('[data-slshow]'):null;
       if(!_sw) return;   // 作っていない所は既定の文字のまま
-      _qmM['__ce_q_slide']='🖼 スライドショーを選び直す・解除（今 全'+_sw.querySelectorAll('img').length+'枚）';
+      // ★どの1枚を掴んでいるかを必ず出す（3枚が同じ場所に重なっていて目では区別できないため）
+      var _sl=[].slice.call(_sw.querySelectorAll('img')), _si=_sl.indexOf(curEl);
+      _qmM['__ce_q_slide']='🖼 スライドショーを選び直す・解除（全'+_sl.length+'枚'
+        +(_si>=0?('・今つかんでいるのは '+(_si+1)+'枚目'):'')+'）';
     })();
     // 🧲 掴む枠が見た目からズレている時だけ出す＝どっちへ何pxズレているかを文字で見せる
     //   （透明な枠は目で見えないので、数字で言わないと「何を直すのか」が伝わらない）
@@ -15949,6 +16058,10 @@ html.__ce_altmode{cursor:text}
     //   自動で親を選ぶ＝1回のドラッグで画像も裏の枠も一緒に動く。セクション等の大きな器は選ばない。
     if(!_wasForced && el.tagName==='IMG'){
       var _pw=el.parentElement;
+      // ★スライドショーの入れ物には吸い上げない（2026-07-30・ユーザー要望）。
+      //   3枚が同じ場所に重なっているので、入れ物を選ぶと「今見えている1枚」を触れなくなる。
+      //   ＝赤が出ている時は赤、緑の時は緑を掴めるようにする。大きさ変更だけは箱側で受ける(slBox)。
+      if(_pw && _pw.getAttribute && _pw.getAttribute('data-slshow')!=null) _pw=null;
       // ★セクション級の器は「枠」ではないので絶対に選ばない（大きい画像だと寸法比だけでは弾けず、
       //   ヘッダー丸ごとが選ばれて動かせてしまった）。
       if(_pw && !/^(SECTION|HEADER|FOOTER|MAIN|BODY|HTML)$/.test(_pw.tagName) && !_undraggable(_pw)){
