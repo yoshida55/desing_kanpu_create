@@ -1836,7 +1836,7 @@ def api_remove_bg_url():
 
 @app.route("/api/remove_bg", methods=["POST"])
 def api_remove_bg():
-    """アップロード画像の背景を除去 → 透過PNGを新規アップロードとして保存する（rembg・AIなし）。"""
+    """アップロード画像の背景を除去 → 透過PNGを新規アップロードとして保存する（このPCの中だけで処理・無料）。"""
     data = request.get_json(silent=True) or {}
     fn = (data.get("file") or "").strip()
     src = config.UPLOAD_DIR / fn
@@ -2602,22 +2602,27 @@ _EDIT_BAR = """
 .__ce_hl{outline:3px solid #ff8a00 !important;outline-offset:2px;cursor:pointer !important}
 .__ce_sechl{outline:3px solid #e8a300 !important;outline-offset:-3px;box-shadow:0 0 0 3px rgba(232,163,0,.2) inset !important}
 #__ce_pk{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center}
-#__ce_pk .bx{background:#fff;border-radius:12px;padding:16px;max-width:640px;width:92%;max-height:80vh;overflow:auto;font-family:system-ui,sans-serif;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+#__ce_pk .bx{background:#fff;border-radius:12px;padding:16px;max-width:720px;width:92%;max-height:80vh;overflow:auto;font-family:system-ui,sans-serif;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+/* 🔍 画像・セクションを「選ぶ」パネルだけ大きくする（2026-07-30・要望「見づらいのでもう少し大きく」）。
+   ★:has() で中身を見て広げる＝⭐お気に入り一覧など「文字だけのパネル」は今までの幅のまま。
+   全部を広げると、短いリストが横に間延びして逆に読みにくくなる。 */
+#__ce_pk .bx:has(.gr),#__ce_pk .bx:has(.secgr){max-width:1120px;max-height:88vh}
 #__ce_pk h4{cursor:move;user-select:none}
 #__ce_pk h4{margin:0 0 12px;font-size:15px}
-#__ce_pk .secgr{display:grid;grid-template-columns:repeat(auto-fill,160px);gap:10px;justify-content:center}
-#__ce_pk .sit{position:relative;width:160px;border:1px solid #e2e2e6;border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
+#__ce_pk .secgr{display:grid;grid-template-columns:repeat(auto-fill,224px);gap:12px;justify-content:center}
+#__ce_pk .sit{position:relative;width:224px;border:1px solid #e2e2e6;border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
 #__ce_pk .sit:hover{border-color:#e8a300;box-shadow:0 6px 16px rgba(0,0,0,.18)}
-#__ce_pk .sit .pv{width:160px;height:101px;overflow:hidden;background:#fff;pointer-events:none}
-#__ce_pk .sit .pv iframe{width:1200px;height:760px;border:none;transform:scale(.1333);transform-origin:top left}
-#__ce_pk .sit .nm{font-size:11px;font-weight:700;color:#1d1d1f;padding:5px 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#__ce_pk .sit .del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:999px;width:20px;height:20px;cursor:pointer;font-size:12px;line-height:18px;padding:0}
+#__ce_pk .sit .pv{width:224px;height:142px;overflow:hidden;background:#fff;pointer-events:none}
+/* 縮小率は 224/1200＝0.1867。幅を変えたらこの数字も必ず合わせる（ズレると中身が切れる） */
+#__ce_pk .sit .pv iframe{width:1200px;height:760px;border:none;transform:scale(.1867);transform-origin:top left}
+#__ce_pk .sit .nm{font-size:12px;font-weight:700;color:#1d1d1f;padding:6px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#__ce_pk .sit .del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:999px;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:20px;padding:0}
 #__ce_pk .cl{float:right;cursor:pointer;font-size:18px;font-weight:700;color:#888}
-#__ce_pk .gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+#__ce_pk .gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
 #__ce_pk .it{border:1px solid #eee;border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
 #__ce_pk .it:hover{border-color:#2b6cb0;box-shadow:0 4px 12px rgba(0,0,0,.15)}
-#__ce_pk .it img{width:100%;height:80px;object-fit:cover;display:block;background:#eef2f7}
-#__ce_pk .it span{display:block;font-size:11px;color:#555;padding:4px 6px}
+#__ce_pk .it img{width:100%;height:140px;object-fit:cover;display:block;background:#eef2f7}
+#__ce_pk .it span{display:block;font-size:12px;color:#555;padding:5px 7px}
 #__ce_pk .favgr{display:grid;grid-template-columns:1fr;gap:8px}
 #__ce_pk .favgr .it{padding:10px 12px;cursor:pointer}
 #__ce_pk .favgr .it.now{border-color:#e8a300;background:#fffaf0}
@@ -2748,9 +2753,9 @@ html.__ce_altmode{cursor:text}
     <button class="im" id="__ce_improve" style="background:#7c3aed;color:#fff">🚀 ページ全体を今風に（一括改善）</button>
     <div class="lbl plain">🔶 図形を置く（〇・四角・線／色はこのPCに記憶・AIなし）</div>
     <button class="im" id="__ce_shapes" style="background:#0b6bcb;color:#fff">🔶 図形バーを出す（画面の下）</button>
-    <div class="lbl plain">🎬 オープニング演出（開いた瞬間に幕→フェードで本体へ・AIなし）</div>
+    <div class="lbl plain">🎬 オープニング演出（幕→フェードで本体へ・AIなし）<br><span style="opacity:.75">※編集中は流しません（白い待ちが出ないように）。保存版では自動で流れます</span></div>
     <button class="im" id="__ce_op_add" style="background:#0b6bcb;color:#fff">🎬 フェードのオープニングを付ける</button>
-    <button class="im" id="__ce_op_edit" style="background:#eaf2fd;color:#0b4e8a;border:1px solid #bcd8f7">👁 オープニングを出す／隠す（ロゴ・文字は右クリックで差し替え）</button>
+    <button class="im" id="__ce_op_edit" style="background:#eaf2fd;color:#0b4e8a;border:1px solid #bcd8f7" title="出すと画面下に専用バーが出て、▶で本番と同じ動きを1回だけ確認できます">👁 オープニングを出す／隠す（▶で本番の動きを確認・文字は右クリックで差し替え）</button>
     <button class="im" id="__ce_op_del" style="background:#fdecea;color:#a8231b;border:1px solid #f3bdb7" title="幕・待機スクリプトごと取り外します。白い開始と、元サイトの動きとのズレが無くなります">🗑 オープニングを外す（もう出さない）</button>
     <div class="lbl plain">⭐ セクションのお気に入り（保存は右クリック→⭐・AIなし）</div>
     <button class="im" id="__ce_favlist" style="background:#fff3d6;color:#8a5a00;border:1px solid #f0d38a">🔀 お気に入りからセクションを切り替え</button>
@@ -3201,8 +3206,43 @@ html.__ce_altmode{cursor:text}
     }catch(_){}
     return n;
   }
+  // 🧯 ⏳遅らせのせいで「開いた瞬間ファーストビューが真っ白」になるのを自動で防ぐ（2026-07-30・要望）
+  // ★実際に踏んだ形：<header> に data-cedelay="3600" が付いていて、その中にヒーローの
+  //   スライドショー(1911×948)が入っていた＝ヘッダーが出るまで3.6秒、画面全部が空っぽ。
+  //   ヘッダー自身の箱は 1440×64 と小さいので、**中の要素まで見ないと気づけない**。
+  // 小さい飾りの遅らせは普通の演出なので触らない。「画面の3割以上を覆う」物だけが対象。
+  function _fixBlankingDelay(){
+    var vw=window.innerWidth||1, vh=window.innerHeight||1, hit=[];
+    function cover(r){
+      var w=Math.min(r.right,vw)-Math.max(r.left,0), h=Math.min(r.bottom,vh)-Math.max(r.top,0);
+      return Math.max(0,w)*Math.max(0,h);
+    }
+    try{
+      [].slice.call(document.querySelectorAll('.fxa_pre[data-cedelay],[data-fxa-fly][data-cedelay]')).forEach(function(el){
+        if(el.closest&&el.closest('[id^="__ce"]')) return;
+        var d=+el.getAttribute('data-cedelay')||0; if(d<600) return;   // 一瞬の遅れは邪魔にならない
+        var r=el.getBoundingClientRect();
+        if(!(r.bottom>0&&r.top<vh)) return;                            // 画面外＝スクロールで見る物は関係ない
+        var big=cover(r), kids=el.querySelectorAll?el.querySelectorAll('*'):[];
+        for(var i=0;i<kids.length&&i<300;i++){ big=Math.max(big,cover(kids[i].getBoundingClientRect())); }
+        if(big < vw*vh*0.30) return;                                   // 小さい物の遅らせは演出＝そのまま
+        try{ pushUndo(el); }catch(_){}
+        el.removeAttribute('data-cedelay');
+        el.classList.add('fxa_in');                                    // その場で出す（開き直さなくていい）
+        hit.push(Math.round(d));
+      });
+    }catch(_){}
+    if(hit.length && msg){
+      msg.textContent='🧯 開いた時に画面が'+(Math.max.apply(null,hit)/1000).toFixed(1)
+        +'秒ほど真っ白になる設定（⏳遅らせ）が'+hit.length+'件あったので外しました'
+        +'（画面の大部分を覆う要素の遅らせだけが対象・⟲で戻せます・💾保存で確定）';
+      markDirty();
+    }
+    return hit.length;
+  }
   function _bootDeco(){
     _warnBrokenImages(); try{ dqArm(); }catch(_){ } try{ opUpgrade(); }catch(_){ } try{ _unbakeSafety(); }catch(_){ }
+    try{ _fixBlankingDelay(); }catch(_){ }
     try{ _fixCharAnimSafety(); }catch(_){ }
     // 古いクローンは保険が内蔵されたまま＝4秒後にまた塗られるので、その直後にもう一度だけ後始末する
     if(document.getElementById('__clone_safety')){
@@ -3258,7 +3298,7 @@ html.__ce_altmode{cursor:text}
       //   ＝機能があるのに一生たどり着けない状態だった（発見できない機能は無い機能と同じ）。
       var items = ups.length
         ? ups.map(function(u){return '<div class="it" data-src="'+u.url+'" style="position:relative"><img src="'+u.url+'"><span>'+esc(u.caption||u.file)+'</span>'
-            +'<button data-rmbg="'+esc(u.file)+'" title="人物や商品を切り抜いて透過PNGにする（AIなし・無料・ローカル処理）" style="position:absolute;right:5px;top:5px;background:rgba(17,17,17,.78);color:#fff;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;font-family:inherit">✂ 背景を除去</button>'
+            +'<button data-rmbg="'+esc(u.file)+'" title="人物や商品を切り抜いて透過PNGにする（このPCの中だけで処理・無料・数秒）" style="position:absolute;right:5px;top:5px;background:rgba(17,17,17,.78);color:#fff;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;font-family:inherit">✂ 背景を除去</button>'
             +'</div>';}).join('')
         : '<div style="color:#999">まだアップロード画像がありません。下から新しく追加できます</div>';
       var ov=document.createElement('div'); ov.id='__ce_pk';
@@ -3338,6 +3378,19 @@ html.__ce_altmode{cursor:text}
     }
     if(window.__slBoot) window.__slBoot();
   }
+  // 🖼 スライドショーは常に「いちばん奥」に置く（2026-07-30・要望）。
+  // ★これが無いと、あとから追加した文字や画像がスライドの裏に潜って見えない。
+  //   スライドの入れ物がクローン元の大きな z-index（実例：49）を持っていて、新しく置いた物に勝つため。
+  //   入れ物を z-index:0 にすれば、中の画像（0/1/2）はその中だけで重なり、外に置いた物には必ず負ける。
+  function slideToBack(){
+    var n=0;
+    try{
+      [].slice.call(document.querySelectorAll('[data-slshow]')).forEach(function(w){
+        if(w.style.getPropertyValue('z-index')!=='0'){ w.style.setProperty('z-index','0'); n++; }
+      });
+    }catch(_){}
+    return n;
+  }
   // 既に作ってあるスライドショーも開いた時に新方式へ入れ替える（作り直さなくても直る）
   (function(){
     // 実体が無くても「古い再生スクリプトだけ残っている」ページは入れ替える。
@@ -3346,8 +3399,31 @@ html.__ce_altmode{cursor:text}
       if(document.querySelector('[data-slshow]')||document.getElementById('__sl_run')){
         try{ ensureSlRun(); }catch(_){ }
       }
+      try{ slideToBack(); }catch(_){ }
     }
     if(document.readyState==='complete') setTimeout(up,300); else window.addEventListener('load',function(){ setTimeout(up,300); });
+  })();
+  // 🖼 スライドショーを「ダブルクリック」→ 写真を選び直す画面（2026-07-30・要望で1回クリックから変更）。
+  // ★click / dblclick イベントで判定してはいけない（§7 ㉖と同じ地雷）：ドラッグ機構が mousedown を
+  //   掴んで preventDefault するので、実際のマウス操作では飛んで来ないことがある。
+  //   mouseup を自分で数える＝「400ms以内に2回・どちらも移動4px未満」をダブルクリックと見なす。
+  (function(){
+    var dx=0, dy=0, lastT=0, lastX=0, lastY=0;
+    document.addEventListener('mousedown',function(e){ dx=e.clientX; dy=e.clientY; },true);
+    document.addEventListener('mouseup',function(e){
+      if(e.button!==0) return;                                            // 右クリックは今までどおりメニュー
+      if(Math.abs(e.clientX-dx)>4||Math.abs(e.clientY-dy)>4){ lastT=0; return; }  // ドラッグ＝移動なので数えない
+      var now=Date.now(), near=(Math.abs(e.clientX-lastX)<8&&Math.abs(e.clientY-lastY)<8);
+      var dbl=(now-lastT<400)&&near;
+      lastT=dbl?0:now; lastX=e.clientX; lastY=e.clientY;                  // 3回目が続けて反応しないよう1回リセット
+      if(!dbl) return;
+      if(window.__ceInspOn||window.__ceFlyMode) return;                   // 🔍/🕊 モード中は邪魔しない
+      var t=e.target;
+      if(!t||!t.closest||t.closest('[id^="__ce"]')) return;               // ツールのUIの上は無視
+      var w=t.closest('[data-slshow]'); if(!w) return;
+      if(document.getElementById('__ce_pk')) return;                      // 画像パネルを開いている最中は二重に出さない
+      try{ slidePanel(w.querySelector('img'), w); }catch(_){}
+    });
   })();
   // スライドショーを解除して1枚目だけに戻す
   function slideUndo(w0){
@@ -3427,8 +3503,11 @@ html.__ce_altmode{cursor:text}
     var fd=edit?((parseInt(wrap.getAttribute('data-sldur'))||1200)/1000):1.2;
     var now=[];
     if(edit){
+      // ★1枚目も選び直せるようにする（2026-07-31・報告「2枚目しか画像を選べない」）。
+      //   以前は slice(1)＝1枚目を「変えられない土台」として一覧から外していた。
+      //   今は全部を候補に入れ、選んだ順の1番目がそのまま1枚目になる。
       var _all=[].slice.call(wrap.querySelectorAll('img'));
-      now=_all.slice(1).map(function(im){ return im.getAttribute('src')||''; });
+      now=_all.map(function(im){ return im.getAttribute('src')||''; });
     }
     fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
       var ups=d.uploads||[];
@@ -3438,7 +3517,7 @@ html.__ce_altmode{cursor:text}
       var ov=document.createElement('div'); ov.id='__ce_pk';
       ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span>'
         +'<h4>'+(edit
-            ? ('🖼 スライドショーを選び直す（今は全'+(now.length+1)+'枚。緑の番号が今入っている画像）')
+            ? ('🖼 スライドショーを選び直す（今は全'+now.length+'枚。緑の番号＝出る順番。1枚目から選び直せます）')
             : '🖼 スライドショーにする画像を順番にクリック（右クリックした今の画像が1枚目・選んだ順に続く）')+'</h4>'
         +'<div class="gr">'+items+'</div>'
         +'<div style="display:flex;gap:12px;align-items:center;margin-top:10px;font-size:12.5px;color:#333">'
@@ -3455,7 +3534,8 @@ html.__ce_altmode{cursor:text}
       var sync=function(){
         [].forEach.call(ov.querySelectorAll('.it'),function(x){
           var b=x.querySelector('[data-badge]'), n=picked.indexOf(x.getAttribute('data-src'));
-          if(b){ b.style.display=n>-1?'block':'none'; b.textContent=n>-1?String(n+2):''; }   // +2＝今の画像が1枚目だから
+          // 番号＝出る順番。選び直しでは1枚目から選ぶので n+1、新規では今の画像が1枚目なので n+2
+          if(b){ b.style.display=n>-1?'block':'none'; b.textContent=n>-1?String(n+(edit?1:2)):''; }
           x.style.outline=n>-1?'3px solid #1a7f37':'';
         });
         okb.textContent='✔ '+(edit?'この順番に作り直す':'この順番でスライドショー化')+'（'+picked.length+'枚選択中）';
@@ -3473,6 +3553,8 @@ html.__ce_altmode{cursor:text}
         }
         if(e.target.id==='__ce_slok'){
           if(!picked.length){ okb.textContent='⚠ 切り替え先の画像を1枚以上クリックで選んでください'; return; }
+          // 選び直しは1枚目も含めて選ぶので、2枚ないとスライドショーにならない
+          if(edit&&picked.length<2){ okb.textContent='⚠ 2枚以上えらんでください（1枚だと切り替わりません）'; return; }
           // 秒数はパネルの入力欄から読む（ブラウザのダイアログに頼らない）
           var _iv=parseFloat((ov.querySelector('#__ce_sliv')||{}).value); if(!isNaN(_iv)) iv=Math.max(1,Math.min(60,_iv));
           var _fd=parseFloat((ov.querySelector('#__ce_slfd')||{}).value); if(!isNaN(_fd)) fd=Math.max(0.2,Math.min(10,_fd));
@@ -3486,6 +3568,7 @@ html.__ce_altmode{cursor:text}
             [].slice.call(box.querySelectorAll('img')).forEach(function(im){ if(im!==b0) im.remove(); });
             var c0=b0.cloneNode(true);
             ['opacity','transition','z-index'].forEach(function(p){ c0.style.removeProperty(p); });
+            c0.src=picked[0];        // ★1枚目も選んだとおりに差し替える（土台の画像を固定しない）
             b0.parentNode.replaceChild(c0,b0); base=c0;
             box.__slOn=0;
           } else {
@@ -3529,15 +3612,17 @@ html.__ce_altmode{cursor:text}
           }
           box.setAttribute('data-slint',Math.round(iv*1000));
           box.setAttribute('data-sldur',Math.round(fd*1000));
-          picked.forEach(function(u){
+          // 選び直しでは picked[0] を土台（1枚目）に当てたので、重ねるのは2枚目から
+          (edit?picked.slice(1):picked).forEach(function(u){
             var im=document.createElement('img'); im.src=u;
             im.setAttribute('style','position:absolute;inset:0;width:100% !important;height:100% !important;object-fit:cover;margin:0;opacity:0'+(br&&br!=='0px'?(';border-radius:'+br):''));
             box.appendChild(im);
           });
           ensureSlRun();
+          slideToBack();
           markDirty();
           msg.textContent='🖼 スライドショーを'+(edit?'作り直しました':'作りました')
-            +'（間隔'+iv+'秒・フェード'+fd+'秒・全'+(picked.length+1)+'枚）。'
+            +'（間隔'+iv+'秒・フェード'+fd+'秒・全'+(edit?picked.length:picked.length+1)+'枚）。'
             +'選び直し・解除＝同じ画像を右クリック→同じボタン。💾保存で確定';
         }
       });
@@ -4323,10 +4408,13 @@ html.__ce_altmode{cursor:text}
     window.__opRan=1;                                   // 編集中に差し込んだ拍子に幕が再生されないように
     opEnsureCss();
     var b=document.body;
-    if(!document.getElementById('__op_early')){
-      var e=document.createElement('script'); e.id='__op_early'; e.textContent=OP_EARLY;
-      document.head.appendChild(e);
-    }
+    /* ★中身は毎回「本物」に上書きする（2026-07-30）。編集中はサーバーが『幕を流さない版』の
+       __op_early / __op_run を配るので、ここで戻さないと💾保存でそちらが焼き込まれ、
+       保存版のオープニングが二度と流れなくなる（__op_early が window.__opRan=1 を立てるため）。
+       本物の OP_EARLY は readyState==='loading' の時だけ効く＝いま差し込んでも誤発動しない。 */
+    var e=document.getElementById('__op_early');
+    if(!e){ e=document.createElement('script'); e.id='__op_early'; document.head.appendChild(e); }
+    e.textContent=OP_EARLY;
     if(b.firstElementChild!==sc) b.insertBefore(sc, b.firstChild);   // 幕を先頭へ
     var run=document.getElementById('__op_run');
     if(run) run.remove();
@@ -6515,7 +6603,7 @@ html.__ce_altmode{cursor:text}
     }
     return null;
   }
-  // ✂ 背景の絵・飾りを切り抜いて透過にする／もう一度で元に戻す（<img>と同じrembgを使う）
+  // ✂ 背景の絵・飾りを切り抜いて透過にする／もう一度で元に戻す（<img>と同じ /api/remove_bg_url を使う）
   function bgCutToggle(c, btn, after){
     var lab=btn?btn.textContent:'';
     if(c.__cutOrig){
@@ -6536,7 +6624,7 @@ html.__ce_altmode{cursor:text}
       return;
     }
     if(btn){ btn.textContent='✂ 切り抜き中…'; btn.disabled=true; btn.style.opacity='.7'; }
-    if(msg) msg.textContent='✂ 切り抜き中です（10〜30秒かかります）';
+    if(msg) msg.textContent='✂ 切り抜き中です（数秒かかります）';
     var src=c.url;
     fetch('/api/remove_bg_url',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({src:src, camp:FILE})}).then(function(r){return r.json();}).then(function(d){
@@ -6608,7 +6696,7 @@ html.__ce_altmode{cursor:text}
       +'<button id="__ce_bgp_zdn" title="赤枠のものを奥へ戻す（手前に出す前の重なりに戻します）" style="'+_bs+'">⬇ 赤枠を奥へ</button></div>'
       +'<div id="__ce_bgp_cv" style="font-size:10.5px;color:#9fd0ff;margin-top:2px;min-height:14px"></div>'
       +'<div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap"><button id="__ce_bgp_nr" style="'+_bs+'">繰り返しを止める</button>'
-      +'<button id="__ce_bgp_cut" title="人物や商品だけを残して背景を透明にする（AIなし・無料・10〜30秒）" style="'+_bs+';background:#7c3aed;border-color:#7c3aed">✂ 切り抜いて透過</button>'
+      +'<button id="__ce_bgp_cut" title="人物や商品だけを残して背景を透明にする（このPCの中だけで処理・無料・数秒）" style="'+_bs+';background:#7c3aed;border-color:#7c3aed">✂ 切り抜いて透過</button>'
       +'<button id="__ce_bgp_del" title="この絵を消す（もう一度押すと戻る・箱やレイアウトはそのまま）" style="'+_bs+';background:#7a2b2b;border-color:#9b3d3d">✕ この絵を消す</button>'
       +'<button id="__ce_bgp_rs" style="'+_bs+'">⟲ 元に戻す</button></div>'
       +'<div id="__ce_bgp_tip" style="font-size:10.5px;opacity:.7;margin-top:6px">💾保存で確定／Escで閉じる</div>';
@@ -6845,7 +6933,7 @@ html.__ce_altmode{cursor:text}
       zStep(-1);
     });
     p.querySelector('#__ce_bgp_nr').addEventListener('click',function(){ apply('background-repeat','no-repeat'); });
-    // ✂ 背景の絵・飾りも切り抜いて透過にする（<img>と同じrembgを使う。もう一度押すと元の絵に戻る）
+    // ✂ 背景の絵・飾りも切り抜いて透過にする（<img>と同じ切り抜きを使う。もう一度押すと元の絵に戻る）
     p.querySelector('#__ce_bgp_cut').addEventListener('click',function(){ bgCutToggle(cur(), this, sync); });
     // ✕ この絵を消す（もう一度で戻る）。飾りは丸ごと非表示、背景は絵だけ外す＝箱やレイアウトは動かさない
     p.querySelector('#__ce_bgp_del').addEventListener('click',function(){
@@ -7987,7 +8075,7 @@ html.__ce_altmode{cursor:text}
     markDirty();
     msg.textContent='はみ出しキャプションカードを付けました。文字は「✏文字を編集」、位置はドラッグで調整→保存で確定（もう一度押すと外せる）';
   }
-  // ✂ 今カンプに置いてある写真の背景を切り抜いて、その場で透過画像に差し替える（AIなし・無料）。
+  // ✂ 今カンプに置いてある写真の背景を切り抜いて、その場で透過画像に差し替える（このPCの中だけで処理・無料）。
   //   元に戻せるよう、切り抜く前のsrcを data-cebgorig に控える（もう一度押すと戻る）。
   function cutoutImg(imgEl, btn){
     if(!imgEl){ msg.textContent='写真の上で右クリックしてから使ってください'; return; }
@@ -8000,7 +8088,7 @@ html.__ce_altmode{cursor:text}
     }
     var src=imgEl.getAttribute('src')||'';
     if(!src){ msg.textContent='この写真のURLが取れませんでした'; return; }
-    if(btn){ btn.textContent='✂ 切り抜き中…（10〜30秒）'; btn.disabled=true; btn.style.opacity='.7'; }
+    if(btn){ btn.textContent='✂ 切り抜き中…（数秒）'; btn.disabled=true; btn.style.opacity='.7'; }
     fetch('/api/remove_bg_url',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({src:src, camp:FILE})}).then(function(r){return r.json();}).then(function(d){
       var ov=document.getElementById('__ce_pk'); if(ov) ov.remove();
@@ -8537,7 +8625,15 @@ html.__ce_altmode{cursor:text}
   var _forceEl=null;  // ⬆外側選択用：次のcontextmenuでpickTargetを使わずこの要素を選ぶ
   function eachSel(fn){ (selEls.length?selEls:(curEl?[curEl]:[])).forEach(fn); }
   try{ lastMenuPos=JSON.parse(localStorage.getItem('__ce_menupos')||'null'); }catch(_){}  // 再読込しても覚える
-  function closeMenu(){ hideHandles(); window.__ceDblSel=null;
+  function closeMenu(){
+    // ★Ctrl+クリックで選んでいる最中は選択を消さない（2026-07-31）。
+    //   「どこかをクリックしたらメニューを閉じる」処理がここを呼ぶため、2個目を選んだ瞬間に
+    //   1個目が外れて **いつまでも2個にならない**＝Ctrl+G が使えなかった（実測で確認）。
+    if(window.__ceCtrlSel && Date.now() < window.__ceCtrlSel){
+      if(curMenu){ curMenu.remove(); curMenu=null; }
+      return;
+    }
+    hideHandles(); window.__ceDblSel=null;
     // 赤枠はメニュー用＝背景パネルが開いている時だけ残す（★行末コメントにすると同じ行の後ろを丸ごと殺す）
     if(!document.getElementById('__ce_bgp')) grabHintHide();
     if(curMenu){curMenu.remove();curMenu=null;} if(curEl){ stopAnim(curEl); clearPreviewStyle(curEl); curEl.classList.remove('__ce_sel');curEl=null;} selEls.forEach(function(x){ stopAnim(x); clearPreviewStyle(x); x.classList.remove('__ce_sel'); }); selEls=[]; curAnim=null; curP={};
@@ -11024,7 +11120,21 @@ html.__ce_altmode{cursor:text}
     w.style.display=(disp&&disp.indexOf('inline')===0)?'inline-block':'block';
     el.parentNode.insertBefore(w,el); w.appendChild(el); return w;
   }
+  // 🧩 グループの1つに動きを付けたら、仲間ぜんぶに同じ動きを付ける（2026-07-31・要望
+  //   「グループ化して、ちゃんとアニメーションと一緒になるように」）。
+  // ★再入り防止(__fxGrp)が要る：中で自分をもう一度呼ぶので、無いと無限ループになる。
+  var __fxGrp=false;
   function applyBake(el,k){
+    if(!__fxGrp && el && el.getAttribute && el.getAttribute('data-cegid')){
+      var mates=groupMates(el);
+      if(mates && mates.length>1){
+        __fxGrp=true;
+        try{
+          mates.forEach(function(m){ if(m!==el) applyBake(m,k); });
+        } finally { __fxGrp=false; }
+        if(msg) setTimeout(function(){ msg.textContent='🧩 グループ '+mates.length+'個に同じ動きを付けました（⏳一覧で順番・速さを調整できます）'; },30);
+      }
+    }
     var a=fxDef(k); if(!a){ if(msg)msg.textContent='⚠ まず動きを選んでください'; return; }
     var _fxShown=null;   // 付け終わったあとに1回だけ再生して見せる相手
     ensureFxAssets();
@@ -11233,7 +11343,32 @@ html.__ce_altmode{cursor:text}
   // ↑↓で順番を入れ替え→「⏱上から順に刻む」でdata-cedelayを間隔刻みに自動割り当て。
   // ⏳遅らせ（data-cedelay）と🐢速さ（--hldur/--fxa-dur）は数値入力で即反映。✖で開いた時点に復元。
   var _dlyP=null;
+  // 🕊 空飛ぶルート（紙飛行機など）も演出の一員なので、この一覧で順番・速さを扱えるようにする（2026-07-30・要望）。
+  // ★速さの持ち方が他と違う：出現アニメは --fxa-dur / マーカーは --hldur だが、
+  //   飛行は data-fxa-fly のJSONの d（ミリ秒）に入っている。読み書きを専用に分ける。
+  var DLY_SEL='.fxa_hl,.fxa_pre,.fxa_cnt,.fxa_ud,[data-fxa-fly],[data-cefly]';
+  function _isFly(c){ return !!(c&&c.getAttribute&&(c.getAttribute('data-fxa-fly')!=null||c.getAttribute('data-cefly')!=null)); }
+  function _flyCfg(c){
+    try{ return JSON.parse(c.getAttribute('data-fxa-fly')||c.getAttribute('data-cefly')||'null')||null; }catch(_){ return null; }
+  }
+  function _flyDur(c){ var g=_flyCfg(c); return (g&&+g.d)||4000; }
+  function _flySetDur(c,v){
+    var g=_flyCfg(c); if(!g) return;
+    g.d=Math.max(200,Math.round(v));
+    c.setAttribute(c.getAttribute('data-fxa-fly')!=null?'data-fxa-fly':'data-cefly', JSON.stringify(g));
+  }
+  function _flyReplay(c){
+    c.ceflyGen=(c.ceflyGen||0)+1;                 // 走っている回を無効にする（ランタイムが世代で判定している）
+    try{ ensureFlyRun(); }catch(_){}
+    var d=+c.getAttribute('data-cedelay')||0;
+    clearTimeout(c.__dlyT);
+    c.__dlyT=setTimeout(function(){ if(window.ceflyArm) window.ceflyArm(c); }, d);
+  }
   function dlyLabel(el){
+    if(_isFly(el)){
+      var tx0=(el.tagName==='IMG')?((el.getAttribute('alt')||'').slice(0,10)):((el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,10));
+      return '🕊 飛ぶ'+(tx0?('「'+tx0+'…」'):'');
+    }
     var k=seqAnimKey(el), def=null;
     for(var i=0;i<FX.length;i++){ if(FX[i].k===k){ def=FX[i]; break; } }
     var nm=(k==='hl')?'🖍 マーカー':(k==='ud')?'〰 下線':(def?def.b:'動き');
@@ -11250,6 +11385,7 @@ html.__ce_altmode{cursor:text}
   function dlyPreview(el){
     clearTimeout(el.__dlyT);
     var d=+el.getAttribute('data-cedelay')||0;
+    if(_isFly(el)){ _flyReplay(el); return; }
     if(el.classList.contains('fxa_hl')||el.classList.contains('fxa_ud')){
       el.classList.remove('fxa_in'); el.style.setProperty('--hlw',0);
       el.__dlyT=setTimeout(function(){ if(window.__fxaSweepHl) window.__fxaSweepHl(el); else { el.style.setProperty('--hlw',100); el.classList.add('fxa_in'); } }, d);
@@ -11284,10 +11420,14 @@ html.__ce_altmode{cursor:text}
   // ▶ 全体の流れ：そのセクション内の全アニメを、各自のdata-cedelayどおりに一斉再生（本番と同じ見え方）
   function flowRun(scope){
     ensureFxAssets();
-    var els=[].slice.call(scope.querySelectorAll('.fxa_pre,.fxa_hl,.fxa_cnt,.fxa_ud'));
-    if(scope.matches&&scope.matches('.fxa_pre,.fxa_hl,.fxa_cnt,.fxa_ud')) els.unshift(scope);
+    var els=[].slice.call(scope.querySelectorAll(DLY_SEL));
+    if(scope.matches&&scope.matches(DLY_SEL)) els.unshift(scope);
     if(!els.length) return;
     function _isSw(el){ return el.classList.contains('fxa_hl')||el.classList.contains('fxa_ud'); }  // --hlwスイープ系（マーカー/下線）
+    // 🕊 飛行は「隠して→出す」ではなく最初から走らせ直す仕組みなので、通し再生では別扱いにする
+    var flys=els.filter(_isFly); els=els.filter(function(e){ return !_isFly(e); });
+    flys.forEach(_flyReplay);
+    if(!els.length) return;
     els.forEach(function(el){
       clearTimeout(el.__dlyT);
       if(_isSw(el)){ el.classList.remove('fxa_in'); el.style.setProperty('--hlw',0); }
@@ -11310,13 +11450,35 @@ html.__ce_altmode{cursor:text}
       }, d+60);
     });
   }
-  function dlyOpen(el,x,y){
+  // wide=true でページ全体を対象にする（2026-07-30・報告「4つ入れているのに1件しか出ない」）。
+  // ★原因：対象が「右クリックした場所のセクション」だけだった。ヒーローが <header> の中にあると
+  //   scope が <header> になり、その中の1件しか出ない＝他のセクションに付けた動きが見えない。
+  //   既定は今までどおりセクション。ただし**1件以下しか無い時は自動でページ全体へ広げる**
+  //   （1行だけの一覧は順番も付けられず役に立たないため）。ボタンでいつでも切り替えられる。
+  // forced=true＝ボタンで明示的に選んだ時。★これが無いと「このセクションだけ」に戻しても
+  //   1件しか無い→また自動でページ全体に広がる＝ボタンが効かないように見える（実測）。
+  function dlyOpen(el,x,y,wide,forced){
     dlyClose();
-    var scope=(el.closest&&el.closest('section,header,footer'))||document.body;
-    var items=[].slice.call(scope.querySelectorAll('.fxa_hl,.fxa_pre,.fxa_cnt,.fxa_ud'));
-    if(scope.matches&&scope.matches('.fxa_hl,.fxa_pre,.fxa_cnt,.fxa_ud')) items.unshift(scope);
-    items=items.slice(0,20);
-    if(!items.length){ if(msg) msg.textContent='このセクションに動きが見つかりません（先に「動きを選ぶ」やマーカーを付けてください）'; return; }
+    var sec=(el&&el.closest&&el.closest('section,header,footer'))||document.body;
+    var scope=wide?document.body:sec, auto=false;
+    function collect(sc){
+      var out=[].slice.call(sc.querySelectorAll(DLY_SEL));
+      if(sc.matches&&sc.matches(DLY_SEL)) out.unshift(sc);
+      // 🕊 飛行はセクションをまたいで置かれていることがある（紙飛行機はヒーローの外側に居がち）ので、
+      //    そのセクションに1つも入っていない時だけ、縦位置が重なっている物を拾って一覧に加える。
+      if(sc!==document.body && !out.some(_isFly)){
+        [].slice.call(document.querySelectorAll('[data-fxa-fly],[data-cefly]')).forEach(function(f){
+          if(f.closest&&f.closest('[id^="__ce"]')) return;
+          var fr=f.getBoundingClientRect(), sr=sc.getBoundingClientRect?sc.getBoundingClientRect():null;
+          if(!sr||(fr.bottom>sr.top&&fr.top<sr.bottom)) out.push(f);
+        });
+      }
+      return out.filter(function(n){ return !(n.closest&&n.closest('[id^="__ce"]')); });
+    }
+    var items=collect(scope);
+    if(!wide && !forced && items.length<2){ scope=document.body; items=collect(scope); wide=true; auto=true; }
+    items=items.slice(0, wide?40:20);
+    if(!items.length){ if(msg) msg.textContent='このページに動きが見つかりません（先に「✨動きを付ける」やマーカーを付けてください）'; return; }
     // 今の遅らせ順に並べる（同点はDOM順）＝一覧がそのまま再生順に見える
     items=items.map(function(n,i){ return {el:n,i:i}; }).sort(function(a,b){
       var da=+a.el.getAttribute('data-cedelay')||0, db=+b.el.getAttribute('data-cedelay')||0;
@@ -11324,10 +11486,13 @@ html.__ce_altmode{cursor:text}
     }).map(function(o){ return o.el; });
     // 開いた時点の値を要素ごと控える＝✖閉じるで元に戻せる（✔決定なら控えを捨てるだけ）
     function _isSw2(c){ return c.classList.contains('fxa_hl')||c.classList.contains('fxa_ud'); }  // --hlwスイープ系（マーカー/下線）
-    var snap=items.map(function(c){ return {el:c, d:c.getAttribute('data-cedelay'), hl:_isSw2(c), dur:_isSw2(c)?c.style.getPropertyValue('--hldur'):c.style.getPropertyValue('--fxa-dur')}; });
+    var snap=items.map(function(c){
+      return {el:c, d:c.getAttribute('data-cedelay'), hl:_isSw2(c), fly:_isFly(c),
+              dur:_isFly(c)?_flyDur(c):(_isSw2(c)?c.style.getPropertyValue('--hldur'):c.style.getPropertyValue('--fxa-dur'))};
+    });
     var p=document.createElement('div'); p.id='__ce_dlyp';
     p.setAttribute('style','position:fixed;z-index:2147483647;background:#1d1d2b;color:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);font:12.5px/1.6 sans-serif;width:440px;max-width:96vw;max-height:72vh;overflow:auto');
-    function durOf(c){ return _isSw2(c)?Math.round((parseFloat(c.style.getPropertyValue('--hldur'))||0.45)*1000):(parseInt(c.style.getPropertyValue('--fxa-dur'))||800); }
+    function durOf(c){ return _isFly(c)?_flyDur(c):(_isSw2(c)?Math.round((parseFloat(c.style.getPropertyValue('--hldur'))||0.45)*1000):(parseInt(c.style.getPropertyValue('--fxa-dur'))||800)); }
     function rowsHtml(){
       return items.map(function(c,i){
         return '<div class="__dlyrow" data-i="'+i+'" style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid #34344a">'
@@ -11348,7 +11513,11 @@ html.__ce_altmode{cursor:text}
       +'-webkit-text-fill-color:#111!important;border:1px solid #6b6b8a!important;opacity:1!important;'
       +'font:700 13px/1.5 sans-serif!important;text-align:right!important;color-scheme:light!important;'
       +'box-shadow:none!important;text-shadow:none!important;-webkit-appearance:auto!important}</style>'
-      +'<b>⏳ 動きの演出（このセクション）</b><span style="opacity:.75;font-size:11px;margin-left:6px">数字はms・変えると即反映</span>'
+      +'<b>⏳ 動きの演出（'+(wide?'ページ全体':'このセクション')+'・'+items.length+'件）</b>'
+      +'<button id="__ce_dlyscope" title="対象を切り替える" style="background:#374151;color:#fff;border:none;border-radius:6px;padding:2px 8px;margin-left:6px;cursor:pointer">'
+      +(wide?'📄 このセクションだけ':'🌐 ページ全体を出す')+'</button>'
+      +'<div style="opacity:.75;font-size:11px;margin-top:2px">数字はms・変えると即反映'
+      +(auto?'／このセクションには1件しか無かったのでページ全体を出しています':'')+'</div>'
       +'<div id="__ce_dlyrows" style="margin-top:6px">'+rowsHtml()+'</div>'
       +'<div style="margin-top:8px;display:flex;align-items:center;gap:6px">間隔<input id="__ce_dlyiv" type="number" value="600" min="100" step="100" style="width:62px;padding:2px 4px;border-radius:5px;border:none">ms'
       +'<button id="__ce_dlystep" title="上の並び順どおりに遅らせを自動で刻む" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:4px 9px;cursor:pointer">⏱ 上から順に刻む</button>'
@@ -11365,7 +11534,13 @@ html.__ce_altmode{cursor:text}
     var rowsBox=p.querySelector('#__ce_dlyrows');
     function redraw(){ rowsBox.innerHTML=rowsHtml(); }
     function setDelay(c,v){ v=Math.max(0,Math.round(v)); if(v>0) c.setAttribute('data-cedelay',v); else c.removeAttribute('data-cedelay'); markDirty(); }
-    function setDur(c,v){ v=Math.max(100,Math.round(v)); if(_isSw2(c)) c.style.setProperty('--hldur',(v/1000)+'s'); else c.style.setProperty('--fxa-dur',v+'ms'); markDirty(); }
+    function setDur(c,v){
+      v=Math.max(100,Math.round(v));
+      if(_isFly(c)){ _flySetDur(c,v); _flyReplay(c); }                       // 🕊 飛行は所要時間そのもの＝変えたらすぐ飛び直す
+      else if(_isSw2(c)) c.style.setProperty('--hldur',(v/1000)+'s');
+      else c.style.setProperty('--fxa-dur',v+'ms');
+      markDirty();
+    }
     rowsBox.addEventListener('input',function(ev){
       var row=ev.target.closest('.__dlyrow'); if(!row) return;
       var c=items[+row.getAttribute('data-i')];
@@ -11399,11 +11574,13 @@ html.__ce_altmode{cursor:text}
       flowRun(scope); if(!scope.contains(host)) dlyPreview(host);
       if(msg) msg.textContent='🧢 ヘッダーが最後（'+(mx+iv)+'ms後）に上から降りるようにしました。💾保存で残ります';
     });
+    p.querySelector('#__ce_dlyscope').addEventListener('click',function(){ dlyOpen(el,x,y,!wide,true); });
     p.querySelector('#__ce_dlyflow').addEventListener('click',function(){ flowRun(scope); if(msg){} });
     p.querySelector('#__ce_dlyok').addEventListener('click',function(){ dlyClose(); if(msg) msg.textContent='⏳ 演出を反映しました。💾保存で残ります'; });
     p.querySelector('#__ce_dlyx').addEventListener('click',function(){
       snap.forEach(function(s){
         if(s.d!=null) s.el.setAttribute('data-cedelay',s.d); else s.el.removeAttribute('data-cedelay');
+        if(s.fly){ _flySetDur(s.el, s.dur); return; }
         var prop=s.hl?'--hldur':'--fxa-dur';
         if(s.dur) s.el.style.setProperty(prop,s.dur); else s.el.style.removeProperty(prop);
       });
@@ -12504,8 +12681,39 @@ html.__ce_altmode{cursor:text}
       ?('🧩 '+picked.length+'個を範囲選択しました（そのままドラッグ＝まとめて移動／右クリック＝まとめて操作）')
       :'範囲内に選べる要素がありませんでした';
   }
+  // ★Ctrl+クリックの複数選択（2026-07-31）。案内文には昔から「Ctrlを押しながらクリック」と
+  //   書いてあったのに、**実装が無かった**（selEls に足す場所が範囲選択と図形設置しか無かった）。
+  //   そのため Ctrl+G を押しても「2つ以上を選んでください」で弾かれ、
+  //   ユーザーからは「グループ化しても一緒に動かない」に見えていた（実測で確認）。
+  document.addEventListener('mousedown',function(e){
+    if(!(e.ctrlKey||e.metaKey) || e.altKey || e.shiftKey || e.button!==0) return;
+    if(_inUI2(e.target)) return;
+    var t=_realTarget(e), el=pickTarget(t);
+    if(!el||_undraggable(el)) return;
+    e.preventDefault(); e.stopPropagation();
+    _hdlDrag=true; setTimeout(function(){ _hdlDrag=false; },150);   // 直後のclickを1拍だけ無効化
+    window.__ceCtrlSel=Date.now()+600;                              // この間は closeMenu に選択を消させない
+    var i=selEls.indexOf(el);
+    if(i>=0){ selEls.splice(i,1); el.classList.remove('__ce_sel'); }  // もう一度Ctrl+クリック＝選択を外す
+    else { selEls.push(el); el.classList.add('__ce_sel'); }
+    curEl=selEls.length?selEls[selEls.length-1]:null;
+    if(msg) msg.textContent=selEls.length
+      ?('🧩 '+selEls.length+'個を選択中'+(selEls.length>1?'（Ctrl+G でグループにすると、まとめて動かせます）':'（Ctrlを押しながら他もクリック）'))
+      :'選択を解除しました';
+  },true);
+  // ★Ctrl+クリックの click / mouseup は必ず止める（2026-07-31）。止めないと、この後ろで動く
+  //   「どこかをクリックしたらメニューを閉じる」処理が closeMenu() を呼び、selEls が空になる＝
+  //   2個目を選んだ瞬間に1個目が外れて、いつまでも2個にならない（実測でここに引っかかった）。
+  ['click','mouseup'].forEach(function(ev){
+    document.addEventListener(ev,function(e){
+      if(!(e.ctrlKey||e.metaKey) || e.altKey || e.shiftKey || e.button!==0) return;
+      if(_inUI2(e.target)) return;
+      e.preventDefault(); e.stopPropagation();
+    },true);
+  });
   document.addEventListener('mousedown',function(e){
     if(e.altKey || e.button!==0 || _inUI2(e.target)) return;
+    if(e.ctrlKey||e.metaKey) return;   // Ctrl+クリックは上の複数選択が担当＝ドラッグを始めない
     // Shift+ドラッグ＝要素の上からでも範囲選択（行が横幅いっぱいで余白が無いレイアウト用）
     if(e.shiftKey){ _mqStart(e); e.preventDefault(); return; }
     var _mt=_realTarget(e);   // 追加した飾り画像の透明部分から始めた時は下の要素を掴む
@@ -16251,7 +16459,20 @@ html.__ce_altmode{cursor:text}
       var ak=ev.target.closest('#__fx_grid button');
       if(ak){ selectFx(ak.getAttribute('data-ak'), ak); return; }
       var apl=ev.target.closest('#__fx_apply');
-      if(apl){ if(!curAnim){ msg.textContent='まず上から動きを選んでください'; return; } eachSel(function(x){ applyBake(x, curAnim); }); if(selEls.length>1&&msg) msg.textContent='✅ '+selEls.length+'個にまとめて付けました（💾保存で残る）'; return; }
+      if(apl){
+        if(!curAnim){ msg.textContent='まず上から動きを選んでください'; return; }
+        // ★入れ子は外側だけに付ける（2026-07-31・報告「文字と青い箱を一緒に選ぶと動きが固まる」）。
+        //   親と子の両方に .fxa_pre を付けると、子は親の opacity:0 の中でさらに自分も透明＝
+        //   親が現れるまで動き出せず「固まった」ように見える。transformも二重にかかって位置がずれる。
+        //   親が動けば中身も一緒に動くので、外側だけに付けるのが正しい（🧩グループと同じ考え方）。
+        var _fxT=(selEls.length?selEls.slice():(curEl?[curEl]:[]));
+        var _fxN=_fxT.length;
+        _fxT=_fxT.filter(function(n){ return !_fxT.some(function(p){ return p!==n && p.contains && p.contains(n); }); });
+        _fxT.forEach(function(x){ applyBake(x, curAnim); });
+        if(msg&&_fxN>1) msg.textContent='✅ '+_fxT.length+'個に付けました'
+          +(_fxN>_fxT.length?('（中に入っている'+(_fxN-_fxT.length)+'個は外側と一緒に動くので除きました）'):'')+'／💾保存で残る';
+        return;
+      }
       var gb=ev.target.closest('#__ce_grp button');
       if(gb){
         var gv=gb.getAttribute('data-grp');
@@ -16485,8 +16706,35 @@ _SERVE_SAFETY = """
     }
     return false;
   }
+  /* ★「再生されなかった出現アニメ」を拾う（2026-07-30）。
+     .fxa_pre は監視(IntersectionObserver)が .fxa_in を付けて初めて見える。監視が張られる前に
+     描き終わっていた・保険の焼き込みを剥がした後だった等で取りこぼすと **永久に透明のまま**になる。
+     下の掃除は fxa を触らない約束なので誰も助けない＝ヘッダーやヒーローが出ないまま（実報告）。
+     ★実際に踏んだ形：ヒーローのスライドショーが <header> の中にあり、そのヘッダーが再生されず
+       opacity:0 → 中身ごと丸ごと真っ白。子を調べても opacity:1 なので原因が見えない。
+     ここでは opacity を殴らず .fxa_in を付ける＝本来のアニメが遅れて再生されるだけ。
+     画面に入っているものだけが対象＝下の方はスクロールした時に普通に再生される。
+     early=true（読み込み直後）は **遅らせ設定が無いものだけ**。遅らせ/グループは「わざと後から出す」
+     設定なので、ここで横取りすると順番に出る演出が一斉に出てしまう（camp.py に実報告あり）。 */
+  function wakeFxa(early){
+    try{
+      [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')).forEach(function(el){
+        var r=el.getBoundingClientRect();
+        if(!(r.bottom>0 && r.top<(window.innerHeight||0))) return;
+        var cd=+el.getAttribute('data-cedelay')||0, grp=el.getAttribute('data-cegrp');
+        if(!cd && !grp){ el.classList.add('fxa_in'); return; }   /* 遅らせ無し＝もう出ているはず＝取りこぼし */
+        if(early) return;                                        /* 遅らせ有りは監視に任せる（早すぎる横取りを避ける） */
+        /* 最後の砦：待ち時間は**ページを開いた時から**数える。cd をまるまる待つと、既に2秒以上
+           たっているのに更に数秒待つ＝白い時間が延びる（実測で悪化した）。 */
+        var el0=el, left=cd-((window.performance&&performance.now)?performance.now():0);
+        if(left>0) setTimeout(function(){ el0.classList.add('fxa_in'); }, left);
+        else el.classList.add('fxa_in');
+      });
+    }catch(_){}
+  }
   /* 従来の保険：透明/非表示のまま残った要素を強制表示（fxaは上の監視(IntersectionObserver)が担当するので触らない）。 */
   function sweep(){
+    wakeFxa(false);
     var all=document.querySelectorAll('body *');
     for(var i=0;i<all.length;i++){
       var e=all[i];
@@ -16507,7 +16755,16 @@ _SERVE_SAFETY = """
       if(cp && cp!=='none' && cp.indexOf('polygon')<0 && /100%|inset\\(1/.test(cp)){ e.style.setProperty('clip-path','none','important'); e.style.setProperty('-webkit-clip-path','none','important'); }
     }
   }
-  function run(){ fxaStart(); setTimeout(sweep, 2200); }
+  /* ★取りこぼしは「早い段階」で拾う（2026-07-30・ユーザー報告「開くと白い／出るまで4秒かかる」）。
+     監視(FX_RUN)は DOMContentLoaded で張られ、画面内なら次のフレームで再生される。
+     260ms たっても遅らせ設定なしの .fxa_pre が透明のままなら取りこぼし確定＝ここで起こす。
+     2.2秒の掃除だけに任せていた頃は、ヘッダー配下のヒーローが出るまで4秒かかっていた。 */
+  function run(){
+    fxaStart();
+    setTimeout(function(){ wakeFxa(true); }, 260);
+    setTimeout(function(){ wakeFxa(true); }, 900);   /* 画像の読み込みでレイアウトが動いた分をもう一度 */
+    setTimeout(sweep, 2200);
+  }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run); else run();
 })();
 </script>
@@ -16549,6 +16806,10 @@ def _guard_letter_splitters(html: str) -> str:
 
 _FXA_RUN_RE = re.compile(r'<script id="fxa-run">.*?</script>', re.DOTALL)
 _OP_RUN_RE = re.compile(r'<script id="__op_run">.*?</script>', re.DOTALL)
+_OP_EARLY_RE = re.compile(r'<script id="__op_early">.*?</script>', re.DOTALL)
+_OP_CSS_RE = re.compile(r'<style id="__op_css">.*?</style>', re.DOTALL)
+# <html class="… op-wait …"> が焼き込まれていた場合に、そのクラスだけ抜く
+_OP_WAIT_CLS_RE = re.compile(r'(<html\b[^>]*\bclass="[^"]*?)\s*\bop-wait\b', re.IGNORECASE)
 # オープニングの幕：先出しスクリプト（ページの中身が描かれる前に「待て」の合図を出すだけ）と、
 # 幕の再生スクリプトの最新版。既存カンプにも配信時に当てる＝開き直しただけで順番が直る。
 _OP_CSS_TAG = (
@@ -16573,21 +16834,58 @@ _OP_RUN_TAG = (
     'setTimeout(function(){s.style.display="none";release();},650);},1800);'
     'setTimeout(release,8000);})();</script>')
 
+# ★編集中（ツールで開いている時）は幕を流さない版（2026-07-30・ユーザー報告「開くと2〜3秒真っ白」）。
+#   幕の既定色は radial-gradient(#eafff6→#eef4ff→#ffffff)＝ほぼ白。その約2.5秒のあいだ op-wait が
+#   ページ側のアニメを止めるので、開くたびに「白い画面が2〜3秒」続いていた（実測：幕591ms→2822ms、
+#   中身が出そろうのは3.7s）。編集は何度も開き直すので、待ち時間がそのまま作業の邪魔になる。
+#   ＝編集中だけ即座に中身を出す。保存版・👁プレビューは今までどおり流れる（cleanHtmlがdisplayを戻す）。
+_OP_SKIP_RUN_TAG = (
+    '<script id="__op_run">(function(){window.__opRan=1;window.__opWait=0;'
+    'var d=document,s=d.getElementById("__op_screen"),h=d.documentElement;'
+    'if(s)s.style.display="none";h.classList.remove("op-wait");'
+    'try{window.dispatchEvent(new Event("ce-op-done"));}catch(_){}})();</script>')
+# 先出しスクリプトも無効化する。★これを残すと head の時点で op-wait が付き、
+#   幕を消しても「アニメだけ止まったまま」になる（保険の8秒タイマーまで待つ）。
+#   DOMContentLoaded の処理は、__op_run を持たない古いカンプ用の保険。
+_OP_SKIP_EARLY_TAG = (
+    '<script id="__op_early">window.__opRan=1;window.__opWait=0;'
+    'document.addEventListener("DOMContentLoaded",function(){'
+    'var s=document.getElementById("__op_screen");if(s)s.style.display="none";'
+    'document.documentElement.classList.remove("op-wait");'
+    'try{window.dispatchEvent(new Event("ce-op-done"));}catch(_){}});</script>')
 
-def _upgrade_opening(html: str) -> str:
+
+def _upgrade_opening(html: str, editing: bool = False) -> str:
     """幕(#__op_screen)を持つ既存カンプに、最新の再生スクリプトと先出しスクリプトを当てる。
 
     ★狙い：オープニングより先にヒーローのアニメが動き出してしまう順番の崩れを、
       開き直しただけで直す（幕そのものをbody先頭へ動かすのは編集バー側 opUpgrade が行い、💾保存で確定する）。
+    editing=True（ツールで開いた時）は幕を流さない版を当てる＝開いた瞬間から編集できる。
+    幕は消さずに display:none にするだけなので、👁/▶ でいつでも確認でき、💾保存すれば元に戻る。
     """
     if 'id="__op_screen"' not in html:
+        # ★幕だけ消えて「待て」の合図(__op_early)が残った“みなしご”を掃除する（2026-07-30）。
+        #   __op_early は読み込み時に html.op-wait を付けるだけの役で、外すのは幕の再生スクリプト
+        #   (__op_run)。幕を手で消したカンプは外す役がいないので **op-wait が永久に残り、
+        #   ページのアニメが全部止まったまま＝開いても中身が出ない**（実測：4秒たっても出ない）。
+        #   🗑ボタン(removeOpening)は3つまとめて外すが、それ以前に作られたカンプが壊れたまま残る。
+        #   ここで丸ごと消す＝この状態で💾保存すれば、単体HTMLでも二度と起きない。
+        if 'id="__op_early"' in html or 'id="__op_css"' in html:
+            html = _OP_EARLY_RE.sub("", html, count=1)
+            html = _OP_RUN_RE.sub("", html, count=1)
+            html = _OP_CSS_RE.sub("", html, count=1)
+            html = _OP_WAIT_CLS_RE.sub(r"\1", html, count=1)
         return html
-    html = _OP_RUN_RE.sub(_OP_RUN_TAG, html, count=1)
+    run_tag = _OP_SKIP_RUN_TAG if editing else _OP_RUN_TAG
+    early_tag = _OP_SKIP_EARLY_TAG if editing else _OP_EARLY_TAG
+    html = _OP_RUN_RE.sub(run_tag, html, count=1)
+    if 'id="__op_early"' in html:
+        html = _OP_EARLY_RE.sub(early_tag, html, count=1)
     head = ""
     if 'id="__op_css"' not in html:
         head += _OP_CSS_TAG
     if 'id="__op_early"' not in html:
-        head += _OP_EARLY_TAG
+        head += early_tag
     if head:
         low = html.lower()
         i = low.find("</head>")
@@ -16607,7 +16905,7 @@ def _inject_edit_bar(html: str, filename: str) -> str:
     # 古い版は2.5秒後にfxaの文字span(fxa_ch)まで強制表示し、タイプライター等が"出た状態で固定"される不具合があった。
     # 最新版はfxa要素を除外する→既存ファイルもこの差し替えで直る。
     html = _SAFE_BLOCK_RE.sub(lambda m: camp._REVIEW_FALLBACK, html)
-    html = _upgrade_opening(html)   # オープニングの順番（幕→ヒーロー）を既存カンプにも当てる
+    html = _upgrade_opening(html, editing=True)   # 幕→ヒーローの順番を当てる＋編集中は幕を流さない
     bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename)).replace(
         "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider))
     low = html.lower()

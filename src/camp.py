@@ -82,7 +82,31 @@ _REVIEW_FALLBACK = _SAFE_START + """
   // ★data-cedelay（⏳演出の遅らせ）を尊重して見せる。ここが即表示だと、fxa側が遅らせを守っても
   //   ページCSSの .reveal.in{...!important} が先に全部見せてしまい「全要素が同時に出る」（実際に起きた）
   function showD(el){ var d=+el.getAttribute('data-cedelay')||0; if(d>0){ setTimeout(function(){ show(el); }, d); } else show(el); }
+  // ★「再生されなかった出現アニメ(.fxa_pre)」を起こす（2026-07-30）。
+  //   .fxa_pre は監視(fxa-run)が .fxa_in を付けて初めて見える。取りこぼすと下の強制表示は
+  //   fxa を触らない約束なので誰も助けず、永久に透明のまま＝ページが真っ白に見える。
+  //   実際に踏んだ形：ヒーローのスライドショーが <header> の中にあり、そのヘッダーが再生されず
+  //   opacity:0 → 中身ごと丸ごと消えた（子を調べても opacity:1 なので原因が見えない）。
+  //   opacity を殴らず .fxa_in を付ける＝本来のアニメが遅れて再生されるだけ。画面内のものだけ。
+  //   early=true は「遅らせ設定が無いもの」だけ＝順番に出す演出を横取りしない。
+  function wakeFxa(early){
+    try{
+      [].slice.call(document.querySelectorAll('.fxa_pre:not(.fxa_in)')).forEach(function(el){
+        var r=el.getBoundingClientRect();
+        if(!(r.bottom>0 && r.top<(window.innerHeight||0))) return;
+        var cd=+el.getAttribute('data-cedelay')||0, grp=el.getAttribute('data-cegrp');
+        if(!cd && !grp){ el.classList.add('fxa_in'); return; }
+        if(early) return;
+        // 最後の砦：待ち時間はページを開いた時から数える（まるまる待つと白い時間が延びる）
+        var el0=el, left=cd-((window.performance&&performance.now)?performance.now():0);
+        if(left>0) setTimeout(function(){ el0.classList.add('fxa_in'); }, left);
+        else el.classList.add('fxa_in');
+      });
+    }catch(_){}
+  }
   function run(){
+    setTimeout(function(){ wakeFxa(true); }, 260);
+    setTimeout(function(){ wakeFxa(true); }, 900);   // 画像読み込みでレイアウトが動いた分をもう一度
     var els=document.querySelectorAll(SEL);
     if(els.length && ('IntersectionObserver' in window)){
       var io=new IntersectionObserver(function(es){
@@ -106,6 +130,10 @@ _REVIEW_FALLBACK = _SAFE_START + """
     // すべて強制表示する。これで独自クラスの出現アニメ(stagger等)が
     // トリガー不発でも"真っ黒に消える"ことを根絶する（カンプは全部見えるのが正）。
     setTimeout(function(){
+      /* ★再生されなかった出現アニメ(.fxa_pre)を先に拾う（2026-07-30）。下の強制表示はfxaを触らない
+         約束なので、監視を取りこぼした要素は誰も助けず永久に透明のままになる（ヘッダーが出ない等）。
+         opacityを殴らず .fxa_in を付ける＝本来のアニメが遅れて再生されるだけ。画面内のものだけ。 */
+      wakeFxa(false);
       var all=document.querySelectorAll('body *');
       for(var i=0;i<all.length;i++){
         var e=all[i];
