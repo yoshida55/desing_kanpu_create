@@ -3276,13 +3276,17 @@ html.__ce_altmode{cursor:text}
   // ★切り替え方式（2026-07-30 改良）：古い画像と新しい画像を同時にフェードさせると、中間で
   //   両方が半透明になり下地が透けて「白く抜ける谷」ができる（フェード2.5秒なら白い時間も2〜3秒）。
   //   → 新しい画像を「上に重ねてフェードイン」させ、隠れ切ってから古い画像を消す。谷が出ない。
-  var SL_RUN='(function(){function boot(){var ws=document.querySelectorAll("[data-slshow]");for(var i=0;i<ws.length;i++)(function(w){if(w.__slOn)return;w.__slOn=1;var imgs=[].slice.call(w.querySelectorAll("img"));if(imgs.length<2)return;var iv=parseInt(w.getAttribute("data-slint"))||4000;var du=parseInt(w.getAttribute("data-sldur"))||1200;var cur=0;for(var j=0;j<imgs.length;j++){var im=imgs[j];im.style.transition="opacity "+(du/1000)+"s";if(!im.style.position)im.style.position=(j===0?"relative":"absolute");im.style.zIndex=(j===0?"1":"0");im.style.setProperty("opacity",j===0?"1":"0","important");}setInterval(function(){var pv=cur;cur=(cur+1)%imgs.length;imgs[cur].style.zIndex="2";imgs[cur].style.setProperty("opacity","1","important");setTimeout(function(){imgs[pv].style.setProperty("opacity","0","important");imgs[pv].style.zIndex="0";imgs[cur].style.zIndex="1";},du+80);},iv);})(ws[i]);}window.__slBoot=boot;if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();})();';
-  var SL_VER='2';   // ★方式を変えたら上げる（1=同時フェード／2=上に重ねてフェードイン）
+  // ★フェード≧間隔だと setTimeout が次の回と重なり、共有変数 cur が入れ替わって
+  //   「消えたまま／同じ画像のまま」になる。①次の番号を local(nx) で捕まえる ②フェードを間隔未満に丸める。
+  var SL_RUN='(function(){function boot(){var ws=document.querySelectorAll("[data-slshow]");for(var i=0;i<ws.length;i++)(function(w){if(w.__slOn)return;w.__slOn=1;var imgs=[].slice.call(w.querySelectorAll("img"));if(imgs.length<2)return;var iv=parseInt(w.getAttribute("data-slint"))||4000;var du=parseInt(w.getAttribute("data-sldur"))||1200;if(du+150>iv)du=Math.max(200,iv-150);var cur=0;for(var j=0;j<imgs.length;j++){var im=imgs[j];im.style.transition="opacity "+(du/1000)+"s";if(!im.style.position)im.style.position=(j===0?"relative":"absolute");im.style.zIndex=(j===0?"1":"0");im.style.setProperty("opacity",j===0?"1":"0","important");}setInterval(function(){var pv=cur,nx=(cur+1)%imgs.length;cur=nx;imgs[nx].style.zIndex="2";imgs[nx].style.setProperty("opacity","1","important");setTimeout(function(){imgs[pv].style.setProperty("opacity","0","important");imgs[pv].style.zIndex="0";imgs[nx].style.zIndex="1";},du+80);},iv);})(ws[i]);}window.__slBoot=boot;if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();})();';
+  var SL_VER='3';   // 記録用（実際の入れ替え判定は本体の文字列比較。上げ忘れても事故らない）
   function ensureSlRun(){
     var s=document.getElementById('__sl_run');
-    // ★以前は「あれば作らない」だったので、古い版が焼き込まれたカンプでは新方式に永久に入れ替わらず、
-    //   白く抜ける・同じ画像だけ繰り返す、が直らなかった（2026-07-30・実報告）。版が違えば入れ替える。
-    if(s && s.getAttribute('data-slver')!==SL_VER){
+    // ★版番号(data-slver)ではなく**本体の文字列そのもの**を比べる（2026-07-30 作り直し）。
+    //   実害を出した地雷：SL_RUNの中身を直したのに SL_VER を上げ忘れると、保存済みカンプは
+    //   「data-slver=2 なのに本体は旧方式」のまま＝版チェックが一致して永久に入れ替わらない。
+    //   実際にユーザーのカンプがその状態だった（本体は旧方式・属性は2）。文字列比較なら上げ忘れが起きない。
+    if(s && s.textContent!==SL_RUN){
       s.remove(); s=null;
       // ⚠古い版の setInterval は止める手段が無い（タイマーIDを持っていない）。
       //   そこで画像を作り直して参照を切る＝古いタイマーは外れた幽霊要素を触るだけになり無害化される。
@@ -3313,19 +3317,26 @@ html.__ce_altmode{cursor:text}
     }
     if(document.readyState==='complete') setTimeout(up,300); else window.addEventListener('load',function(){ setTimeout(up,300); });
   })();
-  function slideMake(el,cx,cy){
-    // すでにスライドショーの中で押された → 解除（1枚目の画像だけ残す）
-    var w0=el&&el.closest&&el.closest('[data-slshow]');
-    if(w0){
-      // ★confirm も prompt と同じ理由で使わない（ダイアログ抑止が一度入ると常に false ＝
-      //   「押しても何も起きない」になる）。⟲戻すで復元できるので即実行し、案内を出す。
-      try{ pushUndo(w0.parentElement||w0); }catch(_){}
-      var base=w0.querySelector('img');
-      if(base){ base.style.removeProperty('opacity'); base.style.removeProperty('transition'); w0.parentNode.insertBefore(base,w0); }
-      w0.remove(); markDirty();
-      msg.textContent='🖼 スライドショーを解除して1枚目の画像に戻しました（間違えたら ⟲戻す・💾保存で確定）';
-      return;
+  // スライドショーを解除して1枚目だけに戻す
+  function slideUndo(w0){
+    try{ pushUndo(w0.parentElement||w0); }catch(_){}
+    var base=w0.querySelector('img');
+    if(base){
+      base.style.removeProperty('opacity'); base.style.removeProperty('transition');
+      base.style.removeProperty('z-index');
+      w0.parentNode.insertBefore(base,w0);
     }
+    w0.remove(); markDirty();
+    msg.textContent='🖼 スライドショーを解除して1枚目の画像に戻しました（間違えたら ⟲戻す・💾保存で確定）';
+  }
+  function slideMake(el,cx,cy){
+    // ★すでにスライドショーの中で押された時は「無言で解除」しない（2026-07-30・作り直し）。
+    //   旧仕様は押すたびにON/OFFが入れ替わる作りで、設定を変えようともう一度押した人が
+    //   気づかないまま解除していた（＝スライドが1枚に戻り「同じ画像しか出ない」に見える）。
+    //   実際にユーザーのカンプが、実行スクリプトだけ残って入れ物が無い＝解除された跡の状態だった。
+    //   今は「画像を選び直す」画面を開き、解除はその中の赤いボタンだけにする。
+    var w0=el&&el.closest&&el.closest('[data-slshow]');
+    if(w0){ slidePanel(w0.querySelector('img'), w0); return; }
     // ★<picture>やアニメのラッパー、figure等の「入れ物」が選ばれている事がある。
     //   中に画像が1枚だけならそれを対象にする＝「画像の上で右クリックして」で弾かれて
     //   スライドショーが作れない、を防ぐ（2026-07-30・実報告。解除したあと作れない原因）。
@@ -3343,45 +3354,89 @@ html.__ce_altmode{cursor:text}
           }
         }
       }catch(_){}
-      if(!_hit && el.querySelectorAll && /^(PICTURE|FIGURE|A|SPAN|P)$/.test(el.tagName)){
-        var _ims=[].slice.call(el.querySelectorAll('img'));
-        if(_ims.length===1) _hit=_ims[0];       // 写真1枚を包んでいるだけの小さな入れ物なら安全
+      // ★「中に1枚だけ」の縛りをやめた（2026-07-30・実報告「画像をクリックしないと画面が出ない」）。
+      //   タグ名の決め打ちもやめる（div/li等で包まれた写真が拾えず入口で弾かれていた）。
+      //   代わりに大きさで安全を確保：入れ物が「いちばん大きい画像の3倍」以内なら、その写真の
+      //   入れ物と見なして中の最大画像を拾う。セクションのような大きな箱では拾わない（遠くの画像に
+      //   付いてしまう事故＝「一番下のセクションに追加される」報告の再発防止）。
+      if(!_hit && el.querySelectorAll){
+        var _ims=[].slice.call(el.querySelectorAll('img')).filter(function(im){
+          if(im.closest&&im.closest('[id^="__ce"]')) return false;
+          var r=im.getBoundingClientRect(); return r.width>=24&&r.height>=24;
+        });
+        if(_ims.length){
+          _ims.sort(function(a,b){
+            var ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect();
+            return (rb.width*rb.height)-(ra.width*ra.height);
+          });
+          var _br=_ims[0].getBoundingClientRect(), _er=el.getBoundingClientRect();
+          if((_er.width*_er.height)<=(_br.width*_br.height)*3+40000) _hit=_ims[0];
+        }
       }
       if(_hit) el=_hit;
     }
-    if(!el||el.tagName!=='IMG'){ msg.textContent='スライドショーにしたい画像の上で右クリックしてください（画像を含む入れ物なら中の画像が1枚の時だけ自動で拾います）'; return; }
+    if(!el||el.tagName!=='IMG'){
+      msg.textContent='スライドショーにする写真が決められませんでした。写真の上で右クリックしてください'
+        +'（大きな箱やセクションの上で押すと、離れた画像に付いてしまうので拾いません）';
+      return;
+    }
+    slidePanel(el, null);
+  }
+  // 画像を選ぶ画面。wrap を渡すと「作り直し（選び直し）」モードになる
+  function slidePanel(el, wrap){
+    if(!el){ msg.textContent='元になる画像が見つかりませんでした'; return; }
     // ★window.prompt をやめてパネル内の入力欄にした（2026-07-30・実報告）。
     //   Chromeは「このページでこれ以上ダイアログを表示しない」を一度チェックすると、以降 prompt() が
     //   問答無用で null を返す。すると isNaN で静かに return ＝「ボタンを押しても何も反応しない」に見える。
     //   ブラウザのダイアログに依存しない作りにすれば、この事故は起きない。
-    var iv=4, fd=1.2;
+    var edit=!!wrap;
+    // 作り直しモードでは今の設定・今選ばれている画像を初期値にする（＝「選び直し」ができる）
+    var iv=edit?((parseInt(wrap.getAttribute('data-slint'))||4000)/1000):4;
+    var fd=edit?((parseInt(wrap.getAttribute('data-sldur'))||1200)/1000):1.2;
+    var now=[];
+    if(edit){
+      var _all=[].slice.call(wrap.querySelectorAll('img'));
+      now=_all.slice(1).map(function(im){ return im.getAttribute('src')||''; });
+    }
     fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
       var ups=d.uploads||[];
       if(!ups.length){ msg.textContent='アップロード画像がまだありません。先に「🖼 画像を追加」からアップロードしてください'; return; }
-      var picked=[];
+      var picked=now.slice();
       var items=ups.map(function(u){return '<div class="it" data-src="'+u.url+'" style="position:relative"><img src="'+u.url+'"><span>'+esc(u.caption||u.file)+'</span><b data-badge="1" style="display:none;position:absolute;left:6px;top:6px;background:#1a7f37;color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px"></b></div>';}).join('');
       var ov=document.createElement('div'); ov.id='__ce_pk';
-      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>🖼 スライドショーにする画像を順番にクリック（右クリックした今の画像が1枚目・選んだ順に続く）</h4>'
+      ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span>'
+        +'<h4>'+(edit
+            ? ('🖼 スライドショーを選び直す（今は全'+(now.length+1)+'枚。緑の番号が今入っている画像）')
+            : '🖼 スライドショーにする画像を順番にクリック（右クリックした今の画像が1枚目・選んだ順に続く）')+'</h4>'
         +'<div class="gr">'+items+'</div>'
         +'<div style="display:flex;gap:12px;align-items:center;margin-top:10px;font-size:12.5px;color:#333">'
-        +'<label>切り替え間隔 <input id="__ce_sliv" type="number" value="4" min="1" max="60" step="0.5" style="width:64px">秒</label>'
-        +'<label>フェード <input id="__ce_slfd" type="number" value="1.2" min="0.2" max="10" step="0.1" style="width:64px">秒</label>'
+        +'<label>切り替え間隔 <input id="__ce_sliv" type="number" value="'+iv+'" min="1" max="60" step="0.5" style="width:64px">秒</label>'
+        +'<label>フェード <input id="__ce_slfd" type="number" value="'+fd+'" min="0.2" max="10" step="0.1" style="width:64px">秒</label>'
         +'<span style="color:#888;font-size:11px">ゆっくり切り替えたいならフェード2〜3秒</span></div>'
-        +'<button class="go2" id="__ce_slok" style="display:block;width:100%;background:#1a7f37;margin-top:10px">✔ この順番でスライドショー化（0枚選択中）</button></div>';
+        +'<button class="go2" id="__ce_slok" style="display:block;width:100%;background:#1a7f37;margin-top:10px">✔ '
+        +(edit?'この順番に作り直す':'この順番でスライドショー化')+'（'+picked.length+'枚選択中）</button>'
+        // ★解除はここだけ（右クリックの押し直しでは解除しない＝気づかず消える事故の防止）
+        +(edit?('<button class="go2" id="__ce_sloff" style="display:block;width:100%;background:#c0392b;margin-top:6px">🗑 スライドショーを解除して1枚に戻す</button>'):'')
+        +'</div>';
       document.body.appendChild(ov);
       var okb=ov.querySelector('#__ce_slok');
+      var sync=function(){
+        [].forEach.call(ov.querySelectorAll('.it'),function(x){
+          var b=x.querySelector('[data-badge]'), n=picked.indexOf(x.getAttribute('data-src'));
+          if(b){ b.style.display=n>-1?'block':'none'; b.textContent=n>-1?String(n+2):''; }   // +2＝今の画像が1枚目だから
+          x.style.outline=n>-1?'3px solid #1a7f37':'';
+        });
+        okb.textContent='✔ '+(edit?'この順番に作り直す':'この順番でスライドショー化')+'（'+picked.length+'枚選択中）';
+      };
+      sync();   // 作り直しモードでは開いた時点で今の選択が緑の番号で見える
       ov.addEventListener('click',function(e){
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+        if(e.target.id==='__ce_sloff'){ ov.remove(); slideUndo(wrap); return; }
         var it=e.target.closest('.it');
         if(it){
           var src=it.getAttribute('data-src'), ix=picked.indexOf(src);
           if(ix>-1) picked.splice(ix,1); else picked.push(src);
-          [].forEach.call(ov.querySelectorAll('.it'),function(x){
-            var b=x.querySelector('[data-badge]'), n=picked.indexOf(x.getAttribute('data-src'));
-            if(b){ b.style.display=n>-1?'block':'none'; b.textContent=n>-1?String(n+2):''; }   // +2＝今の画像が1枚目だから
-            x.style.outline=n>-1?'3px solid #1a7f37':'';
-          });
-          okb.textContent='✔ この順番でスライドショー化（'+picked.length+'枚選択中）';
+          sync();
           return;
         }
         if(e.target.id==='__ce_slok'){
@@ -3390,23 +3445,68 @@ html.__ce_altmode{cursor:text}
           var _iv=parseFloat((ov.querySelector('#__ce_sliv')||{}).value); if(!isNaN(_iv)) iv=Math.max(1,Math.min(60,_iv));
           var _fd=parseFloat((ov.querySelector('#__ce_slfd')||{}).value); if(!isNaN(_fd)) fd=Math.max(0.2,Math.min(10,_fd));
           ov.remove();
-          var disp=''; try{ disp=getComputedStyle(el).display; }catch(_){}
-          var br=''; try{ br=getComputedStyle(el).borderRadius; }catch(_){}
-          var wrap=document.createElement('span');
-          wrap.setAttribute('data-slshow','1');
-          wrap.setAttribute('data-slint',Math.round(iv*1000));
-          wrap.setAttribute('data-sldur',Math.round(fd*1000));
-          // 元画像を包む：元画像がそのまま大きさの基準（下敷き）になり、追加画像は上に重ねて絶対配置
-          wrap.style.cssText='position:relative;display:'+((disp==='inline'||disp==='inline-block')?'inline-block':'block')+';max-width:100%;line-height:0';
-          el.parentNode.insertBefore(wrap,el); wrap.appendChild(el);
+          var base=el, box=wrap;
+          var br=''; try{ br=getComputedStyle(base).borderRadius; }catch(_){}
+          if(edit){
+            // 追加ぶんだけ捨てて作り直す。★元画像はクローンで置き換える＝止められない古い
+            //   setInterval の参照を切る（タイマーIDを持っていないので、これが唯一の止め方）
+            var b0=box.querySelector('img');
+            [].slice.call(box.querySelectorAll('img')).forEach(function(im){ if(im!==b0) im.remove(); });
+            var c0=b0.cloneNode(true);
+            ['opacity','transition','z-index'].forEach(function(p){ c0.style.removeProperty(p); });
+            b0.parentNode.replaceChild(c0,b0); base=c0;
+            box.__slOn=0;
+          } else {
+            var bcs=null; try{ bcs=getComputedStyle(base); }catch(_){}
+            var disp=bcs?bcs.display:'';
+            var brc=base.getBoundingClientRect();
+            // ★元画像が「自由配置(absolute/fixed)」だと、包んだ入れ物の中身が全部absoluteになり
+            //   入れ物の高さが0になる。重ねた画像は inset:0 なので0サイズ＝見えない。
+            //   結果：元画像だけ見えて「同じ画像のまま」、しかも元画像が消える番になると
+            //   何も無い＝「白い空白が長い」になる（2026-07-30・実報告の正体）。
+            //   → 位置は入れ物へ移し、元画像は入れ物いっぱいに敷き直す。
+            var abs=!!(bcs&&(bcs.position==='absolute'||bcs.position==='fixed'));
+            box=document.createElement('span');
+            box.setAttribute('data-slshow','1');
+            if(abs){
+              var st='position:'+bcs.position+';display:block;line-height:0'
+                +';width:'+Math.round(brc.width)+'px;height:'+Math.round(brc.height)+'px';
+              ['left','top','right','bottom','zIndex','margin','marginLeft','marginTop','translate','rotate','scale','transform','transformOrigin'].forEach(function(p){
+                var v=base.style[p]; if(v) st+=';'+p.replace(/[A-Z]/g,function(c){return '-'+c.toLowerCase();})+':'+v;
+              });
+              box.style.cssText=st;
+              base.parentNode.insertBefore(box,base); box.appendChild(base);
+              // 中の元画像は入れ物いっぱいへ（位置指定は入れ物が持つので消す）
+              ['left','top','right','bottom','translate','rotate','scale','transform','margin','margin-left','margin-top'].forEach(function(p){ base.style.removeProperty(p); });
+              base.style.setProperty('position','absolute','important');
+              base.style.setProperty('inset','0','important');
+              base.style.setProperty('width','100%','important');
+              base.style.setProperty('height','100%','important');
+              if(!base.style.objectFit) base.style.setProperty('object-fit','cover','important');
+            } else {
+              // 通常配置：元画像が大きさの基準（下敷き）。
+              // ★幅を実測px で必ず入れる（2026-07-30・ユーザー指摘「一番大きい幅に合わせられている？」）。
+              //   display:block の入れ物は幅が"親いっぱい"になる＝重ねた画像(width:100%)が
+              //   元の写真より横に伸びて別サイズで表示される。写真の実寸に釘付けする。
+              //   高さも実測で下限を入れる（元画像が読み込み前だと0になり「見えない」事故になる）。
+              box.style.cssText='position:relative;display:'+((disp==='inline'||disp==='inline-block')?'inline-block':'block')+';max-width:100%;line-height:0'
+                +(brc.width>4?(';width:'+Math.round(brc.width)+'px'):'')
+                +(brc.height>4?(';min-height:'+Math.round(brc.height)+'px'):'');
+              base.parentNode.insertBefore(box,base); box.appendChild(base);
+            }
+          }
+          box.setAttribute('data-slint',Math.round(iv*1000));
+          box.setAttribute('data-sldur',Math.round(fd*1000));
           picked.forEach(function(u){
             var im=document.createElement('img'); im.src=u;
             im.setAttribute('style','position:absolute;inset:0;width:100% !important;height:100% !important;object-fit:cover;margin:0;opacity:0'+(br&&br!=='0px'?(';border-radius:'+br):''));
-            wrap.appendChild(im);
+            box.appendChild(im);
           });
           ensureSlRun();
           markDirty();
-          msg.textContent='🖼 スライドショーにしました（間隔'+iv+'秒・フェード'+fd+'秒・全'+(picked.length+1)+'枚）。解除＝同じ画像を右クリック→同じボタン。💾保存で確定';
+          msg.textContent='🖼 スライドショーを'+(edit?'作り直しました':'作りました')
+            +'（間隔'+iv+'秒・フェード'+fd+'秒・全'+(picked.length+1)+'枚）。'
+            +'選び直し・解除＝同じ画像を右クリック→同じボタン。💾保存で確定';
         }
       });
     }).catch(function(){ msg.textContent='通信エラー（アップロード一覧が取れませんでした）'; });
@@ -9956,6 +10056,108 @@ html.__ce_altmode{cursor:text}
   }
   function setPos(el,x,y){ _cebt(el); el.setAttribute('data-cetx',x); el.setAttribute('data-cety',y); applyTf(el); }
   function nudge(el,dx,dy){ setPos(el,(+el.getAttribute('data-cetx')||0)+dx,(+el.getAttribute('data-cety')||0)+dy); }
+  // ===== 🧲 掴む枠（透明な枠・空きスペース）を見た目の位置に合わせる（2026-07-30） =====
+  // ★このツールのドラッグは translate で動かす＝**レイアウト上の箱は元の場所に残る**。
+  //   見た目と箱が離れると「白い所を掴むと離れた所の物が選ばれる」「白い空きが残る」になる。
+  //   さらに厄介なのは、アニメ用ラッパー span[data-fxpw]（absolute）が枠で、中身だけ translate で
+  //   飛んでいる型：枠と中身は**同じ1個の要素として選ばれる**ので、整列（2個必要）では直せない。
+  // ここでは「ズレを箱そのものの位置（left/top・なければmargin）へ移し替える」。
+  //   見た目は1pxも動かさず、掴む枠だけが見た目の場所へ来る。
+  // 中身（子孫）が実際に描かれている範囲。ツールのUI・見えないものは数えない。
+  function inkBoxOf(el){
+    if(!el||!el.querySelectorAll) return null;
+    var lo=[1e9,1e9], hi=[-1e9,-1e9], n=0;
+    var list=[].slice.call(el.querySelectorAll('*')).slice(0,600);
+    for(var i=0;i<list.length;i++){
+      var c=list[i];
+      if(c.id&&c.id.indexOf('__ce')===0) continue;
+      if(c.closest&&c.closest('[id^=__ce]')) continue;
+      if(c.classList&&c.classList.contains('__ce_hdl')) continue;
+      var cs=null; try{ cs=getComputedStyle(c); }catch(_){ continue; }
+      if(cs.display==='none'||cs.visibility==='hidden'||parseFloat(cs.opacity)===0) continue;
+      var r=c.getBoundingClientRect();
+      if(r.width<4||r.height<4) continue;
+      if(r.left<lo[0])lo[0]=r.left; if(r.top<lo[1])lo[1]=r.top;
+      if(r.right>hi[0])hi[0]=r.right; if(r.bottom>hi[1])hi[1]=r.bottom;
+      n++;
+    }
+    if(!n) return null;
+    return {l:lo[0], t:lo[1], w:hi[0]-lo[0], h:hi[1]-lo[1]};
+  }
+  // ①中身が箱の外へ飛んでいる型（子を1つずつドラッグしたカンプで起きる）。
+  //   ★判定は「中身のまん中が箱の外にあるか」。px差で判定すると padding のぶんで毎回引っかかる。
+  function frameFitInk(el){
+    var ink=inkBoxOf(el); if(!ink) return null;
+    var r=el.getBoundingClientRect(); if(!(r.width>0&&r.height>0)) return null;
+    var icx=ink.l+ink.w/2, icy=ink.t+ink.h/2;
+    if(icx>=r.left-4&&icx<=r.right+4&&icy>=r.top-4&&icy<=r.bottom+4) return null;   // 中に収まっている
+    // 内側余白ぶんは残す＝箱の中で中身が端に張り付かず、元の見た目のまま収まる
+    var cs=getComputedStyle(el);
+    var pl=(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.borderLeftWidth)||0);
+    var pt=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.borderTopWidth)||0);
+    return {dx:ink.l-(r.left+pl), dy:ink.t-(r.top+pt), ink:ink};
+  }
+  // ②箱そのものがズレていて、枠（親のアニメ用ラッパー／自分のleft-top）が置いていかれている型
+  function frameFitFrame(el){
+    var t=null; try{ t=_txOf(el); }catch(_){ }
+    if(!t||(Math.abs(t.x)<2&&Math.abs(t.y)<2)) return null;
+    var pw=el.parentElement;
+    if(pw&&pw.getAttribute&&pw.getAttribute('data-fxpw')){
+      var cs=null; try{ cs=getComputedStyle(pw); }catch(_){ }
+      if(cs&&(cs.position==='absolute'||cs.position==='fixed')) return {kind:'wrap', box:pw, t:t};
+    }
+    var cs2=null; try{ cs2=getComputedStyle(el); }catch(_){ }
+    if(cs2&&(cs2.position==='absolute'||cs2.position==='fixed')) return {kind:'self', box:el, t:t};
+    return {kind:'flow', box:el, t:t};   // 通常配置＝marginで箱ごと動かす（隣を押す可能性あり）
+  }
+  function frameFitInfo(el){
+    if(!el||el===document.body) return null;
+    var ik=null; try{ ik=frameFitInk(el); }catch(_){ }
+    if(ik) return {kind:'ink', x:ik.dx, y:ik.dy};
+    var fr=null; try{ fr=frameFitFrame(el); }catch(_){ }
+    if(fr) return {kind:fr.kind, x:fr.t.x, y:fr.t.y};
+    return null;
+  }
+  function frameFitApply(el){
+    if(!el||el===document.body) return null;
+    var done=[];
+    // ①まず箱を「中身が飛んで行った先」へ持っていく。
+    //   箱を動かすと中身も一緒に動くので、直下の子を同じ量だけ逆に戻す＝中身は1pxも動かない。
+    var ik=null; try{ ik=frameFitInk(el); }catch(_){ }
+    if(ik&&(Math.abs(ik.dx)>2||Math.abs(ik.dy)>2)){
+      var kids=[].slice.call(el.children).filter(function(c){
+        return c.nodeType===1 && !(c.id&&c.id.indexOf('__ce')===0) && c.tagName!=='SCRIPT' && c.tagName!=='STYLE';
+      });
+      setPos(el,(+el.getAttribute('data-cetx')||0)+ik.dx,(+el.getAttribute('data-cety')||0)+ik.dy);
+      kids.forEach(function(c){
+        setPos(c,(+c.getAttribute('data-cetx')||0)-ik.dx,(+c.getAttribute('data-cety')||0)-ik.dy);
+      });
+      done.push({kind:'ink', x:Math.round(ik.dx), y:Math.round(ik.dy), n:kids.length});
+    }
+    // ②そのうえで、透明な枠を箱の位置へ持ってくる（①で箱が動いた分もここで吸収される）
+    var f=null; try{ f=frameFitFrame(el); }catch(_){ }
+    if(f){
+      var tx=f.t.x, ty=f.t.y, box=f.box;
+      if(f.kind==='flow'){
+        var cs=getComputedStyle(el);
+        var ml=parseFloat(cs.marginLeft)||0, mt=parseFloat(cs.marginTop)||0;
+        el.style.setProperty('margin-left',Math.round(ml+tx)+'px','important');
+        el.style.setProperty('margin-top',Math.round(mt+ty)+'px','important');
+      } else {
+        var bs=getComputedStyle(box);
+        var l=parseFloat(bs.left), tp=parseFloat(bs.top);
+        if(!isFinite(l)) l=box.offsetLeft||0;
+        if(!isFinite(tp)) tp=box.offsetTop||0;
+        box.style.setProperty('left',Math.round(l+tx)+'px','important');
+        box.style.setProperty('top',Math.round(tp+ty)+'px','important');
+        box.style.setProperty('right','auto','important');    // right/bottom指定が残ると left が効かない
+        box.style.setProperty('bottom','auto','important');
+      }
+      setPos(el,0,0);   // ズレを0に。上で枠を同じ量動かしてあるので見た目は変わらない
+      done.push({kind:f.kind, x:Math.round(tx), y:Math.round(ty)});
+    }
+    return done.length?done:null;
+  }
   // fx=横倍率, fy=縦倍率（1なら変えない）。横だけ長く/縦だけ長く/等倍を1関数で。
   function scaleBy(el,fx,fy){
     _cebt(el);
@@ -13353,6 +13555,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_zup','🔼 重なりを手前に'],
     ['__ce_q_zdn','🔽 重なりを後ろに'],
     ['__ce_q_align','⁝ 兄弟の行をそろえる（ズレ掃除）'],
+    ['__ce_q_frmfit','🧲 掴む枠を見た目の位置に合わせる'],
     ['__ce_q_pskill','➖ 線・飾りを消す（border・疑似要素）'],
     ['__ce_q_addline','➕ 線を追加（実要素・掴んで動かせる）'],
     ['__ce_q_fxrm','🚫 動きを消す'],
@@ -13372,7 +13575,7 @@ html.__ce_altmode{cursor:text}
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
-    'sep:🧹 整える・消す','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
+    'sep:🧹 整える・消す','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
   ];
   function qmDefMap(){ var m={}; QM_DEFS.forEach(function(d){ m[d[0]]=d[1]; }); return m; }
@@ -13986,6 +14189,25 @@ html.__ce_altmode{cursor:text}
       if(_bd){ _qmM['__ce_q_deco']='➖ この線（'+(BD_SIDE[_bd.side]||'')+'の線）の色・太さ・種類を変える'; return; }
       delete _qmM['__ce_q_deco'];
     })();
+    // 🖼 すでにスライドショーになっている所では「選び直す」と分かる文字にする
+    //   （同じ文字のままだと、設定を変えようと押した人が気づかずに解除していた・実報告）
+    (function(){
+      var _sw=(curEl&&curEl.closest)?curEl.closest('[data-slshow]'):null;
+      if(!_sw) return;   // 作っていない所は既定の文字のまま
+      _qmM['__ce_q_slide']='🖼 スライドショーを選び直す・解除（今 全'+_sw.querySelectorAll('img').length+'枚）';
+    })();
+    // 🧲 掴む枠が見た目からズレている時だけ出す＝どっちへ何pxズレているかを文字で見せる
+    //   （透明な枠は目で見えないので、数字で言わないと「何を直すのか」が伝わらない）
+    (function(){
+      var _ff=null; try{ _ff=frameFitInfo(curEl); }catch(_){ }
+      if(!_ff){ delete _qmM['__ce_q_frmfit']; return; }
+      // ズレの向きは「枠から見てどっちに動かすか」で言う（数字だけだと符号の意味が分からない）
+      var _fd=(_ff.x<0?'左':'右')+Math.abs(Math.round(_ff.x))+'px・'
+             +(_ff.y<0?'上':'下')+Math.abs(Math.round(_ff.y))+'px';
+      _qmM['__ce_q_frmfit']=(_ff.kind==='ink')
+        ? ('🧲 空っぽの箱を中身の位置へ持ってくる（中身が '+_fd+' に飛び出しています）')
+        : ('🧲 掴む枠を見た目の位置に合わせる（枠を '+_fd+' 動かして重ねます）');
+    })();
     // 🔓 CSSで描かれた飾り（01などの疑似要素）がある時だけ出す＝掴める形に作り替える
     (function(){
       var _ps=[];
@@ -14061,6 +14283,45 @@ html.__ce_altmode{cursor:text}
           +'<option value="wh">両方（幅と高さ）</option><option value="w">幅だけ</option><option value="h">高さだけ</option></select> '
           +'<span style="font-size:10.5px;color:#888">今 '+_szSm+' 〜 '+_szBg+'px</span>'
           +'</div>';
+      }
+    }
+    // 📐 位置をそろえる（複数選択時のみ・パワポ/Figmaの「配置」相当・AIなし）
+    // 既にある📏吸着ガイドは「ドラッグ中に近づいたら吸い付く」＝1個ずつ手で寄せる道具。
+    // 掴む相手を間違えると別の要素が動く（複数選択・🧩グループが残っていると特に）ので、
+    // ここは「選んだもの全部の端／中央を数値でピタリ合わせる」ボタンにする＝手ブレ0で揃う。
+    var alRow='';
+    if(multi){
+      var _alN=0, _alFix=0;
+      selEls.forEach(function(x){
+        if(!x||_undraggable(x)) return;
+        var r; try{ r=x.getBoundingClientRect(); }catch(_){ return; }
+        if(!(r.width>0&&r.height>0)) return;
+        _alN++;
+        try{ if(getComputedStyle(x).position==='static') _alFix++; }catch(_){}
+      });
+      if(_alN>1){
+        var _alB='background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer';
+        alRow='<div style="background:#f1eefc;border-bottom:1px solid #d8cff2;padding:6px 10px 7px;font-size:12px;line-height:2.1;border-radius:7px;max-width:295px;box-sizing:border-box">'
+          +'<b>🧲 位置をそろえる（'+_alN+'個・AIなし）</b><br>'
+          +'<span style="opacity:.8">よこ</span> '
+          +'<button class="__ce_alb" data-k="l" title="左端をそろえる" style="'+_alB+'">⬅ 左</button> '
+          +'<button class="__ce_alb" data-k="cx" title="左右の中心をそろえる（縦一列に並ぶ）" style="'+_alB+'">⬄ 中央</button> '
+          +'<button class="__ce_alb" data-k="r" title="右端をそろえる" style="'+_alB+'">➡ 右</button><br>'
+          +'<span style="opacity:.8">たて</span> '
+          +'<button class="__ce_alb" data-k="t" title="上端をそろえる（横一列に並ぶ）" style="'+_alB+'">⬆ 上</button> '
+          +'<button class="__ce_alb" data-k="cy" title="上下の中心をそろえる" style="'+_alB+'">⬍ 中</button> '
+          +'<button class="__ce_alb" data-k="b" title="下端をそろえる" style="'+_alB+'">⬇ 下</button><br>'
+          +'<span style="opacity:.8">等間隔</span> '
+          +'<button class="__ce_alb" data-k="dx" title="左右の隙間を全部同じにする（両端は動かさない・3個以上）" style="'+_alB+'">⇹ よこ</button> '
+          +'<button class="__ce_alb" data-k="dy" title="上下の隙間を全部同じにする（両端は動かさない・3個以上）" style="'+_alB+'">⇳ たて</button><br>'
+          +'<span style="opacity:.8">そろえる先</span> '
+          +'<select id="__ce_al_ref" style="font-size:11px;padding:2px;border:1px solid #ccd;border-radius:5px;max-width:180px">'
+          +'<option value="edge">いちばん端のもの（おすすめ）</option>'
+          +'<option value="first">最初に選んだもの（動かさない）</option></select>'
+          +'<div style="font-size:10.5px;color:#6b5b95;line-height:1.45;margin-top:3px;max-width:275px">'
+          +'ドラッグと違って掴み間違いが起きません。⟲で戻せます'
+          +(_alFix?('<br>⚠ 通常配置が'+_alFix+'個：ずらし（translate）で寄せるので、他の行と重なることがあります'):'')
+          +'</div></div>';
       }
     }
     // 📏 余白の定番（自分で決めた値をボタンにして当てる・AIなし）
@@ -14192,7 +14453,7 @@ html.__ce_altmode{cursor:text}
       +'<input id="__ce_qsearch" type="text" placeholder="🔎 やりたいことで探す（例：余白を取りたい）" '
       +'style="width:100%;font-size:12.5px;padding:6px 9px;border:1px solid #d0d0d5;border-radius:8px;font-family:inherit;box-sizing:border-box">'
       +'<div id="__ce_qsres"></div></div>';
-    qm.innerHTML=searchRowQ+selRowQ+mfRow+szRow+ovRowQ+spRow+bgTop+flatRowQ+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
+    qm.innerHTML=searchRowQ+selRowQ+mfRow+szRow+alRow+ovRowQ+spRow+bgTop+flatRowQ+lineRowQ+(multi?'<div style="padding:5px 10px 2px;font-size:11px;color:#888">🧩 '+selEls.length+'個を選択中（全部に効く）</div>':'')
       +qmBuildList(_qmM,row)   // 見出しごとに畳んで「親メニュー ▸ サブメニュー」にする
       +bgBottom
       +noticeQ
@@ -14473,6 +14734,95 @@ html.__ce_altmode{cursor:text}
       qm.querySelector('#__ce_sz_max').addEventListener('click',function(ev){ ev.stopPropagation(); szDo('max'); });
       qm.querySelector('#__ce_sz_mid').addEventListener('click',function(ev){ ev.stopPropagation(); szDo('mid'); });
       qm.querySelector('#__ce_sz_min').addEventListener('click',function(ev){ ev.stopPropagation(); szDo('min'); });
+    }
+    // 📐 位置をそろえるの配線（メニューは閉じない＝左→中央と当て比べできる）
+    if(multi&&qm.querySelector('.__ce_alb')){
+      // ★位置は getBoundingClientRect（＝見た目の箱）で読む。
+      //   このツールが要素を動かすのに使うのは単体プロパティ translate なので offsetLeft には
+      //   移動ぶんが入らない（§7 ㉕の地雷）。rect には入るので、rectで読んで
+      //   「足りない差のぶんだけ translate を足す」なら座標の原点が何であっても合う。
+      // ★translate はレイアウトを動かさない＝1個動かしても他の要素の位置は変わらない。
+      //   だから「全員の今の位置を先に測る→順に寄せる」で破綻しない（reflowの心配がない）。
+      var alBox=function(el){
+        var r=el.getBoundingClientRect();
+        return {l:r.left,t:r.top,r:r.right,b:r.bottom,w:r.width,h:r.height,cx:r.left+r.width/2,cy:r.top+r.height/2};
+      };
+      var alVal=function(b,k){
+        return (k==='l'||k==='dx')?b.l:(k==='r')?b.r:(k==='cx')?b.cx:(k==='t'||k==='dy')?b.t:(k==='b')?b.b:b.cy;
+      };
+      var alMove=function(el,dx,dy){
+        var tx=(+el.getAttribute('data-cetx')||0)+dx, ty=(+el.getAttribute('data-cety')||0)+dy;
+        setPos(el, Math.round(tx*100)/100, Math.round(ty*100)/100);
+      };
+      var alList=function(){
+        var out=[], seen=[];
+        selEls.forEach(function(x){
+          if(!x) return;
+          var box=szBox(x);                        // 画像は切り取り枠＝見えている箱をそろえる（サイズそろえと同じ流儀）
+          if(seen.indexOf(box)>=0||_undraggable(box)) return;
+          var b; try{ b=alBox(box); }catch(_){ return; }
+          if(!(b.w>0&&b.h>0)) return;
+          seen.push(box); out.push({el:box,b:b});
+        });
+        return out;
+      };
+      var alDo=function(k){
+        var list=alList();
+        if(list.length<2){ if(msg) msg.textContent='そろえるには2個以上を選んでください（Ctrl+クリックで足せます）'; return; }
+        var vert=(k==='t'||k==='cy'||k==='b'||k==='dy');
+        var refm='edge'; var _rs=qm.querySelector('#__ce_al_ref'); if(_rs&&_rs.value) refm=_rs.value;
+        var want=[], label='', extra='';
+        if(k==='dx'||k==='dy'){
+          // 等間隔：両端は動かさず、間のものを「隙間が全部同じ」になる位置へ配る
+          if(list.length<3){ if(msg) msg.textContent='等間隔は3個以上を選んでください（今 '+list.length+'個）'; return; }
+          var srt=list.slice().sort(function(a,b){ return vert?(a.b.t-b.b.t):(a.b.l-b.b.l); });
+          var span=vert?(srt[srt.length-1].b.b-srt[0].b.t):(srt[srt.length-1].b.r-srt[0].b.l);
+          var used=0; srt.forEach(function(o){ used+=vert?o.b.h:o.b.w; });
+          var gap=(span-used)/(srt.length-1);
+          var cur=vert?srt[0].b.b:srt[0].b.r;
+          for(var i=1;i<srt.length-1;i++){
+            want.push({el:srt[i].el, tgt:cur+gap});
+            cur=cur+gap+(vert?srt[i].b.h:srt[i].b.w);
+          }
+          label=(vert?'⇳ たて':'⇹ よこ')+'に等間隔で並べ'; extra='隙間は '+Math.round(gap)+'px。';
+        } else {
+          // 端そろえ：目標の座標を1つ決めて、そこへ全員を寄せる
+          var g;
+          if(refm==='first'){
+            g=alVal(list[0].b,k);                 // 最初に選んだものは動かさない＝そこが基準
+          } else if(k==='cx'||k==='cy'){
+            // 中央は「選んだもの全体のまん中」に寄せる。どれか1個の中心に寄せると全部が片側へ動いて見える
+            var lo=Math.min.apply(null,list.map(function(o){ return vert?o.b.t:o.b.l; }));
+            var hi=Math.max.apply(null,list.map(function(o){ return vert?o.b.b:o.b.r; }));
+            g=(lo+hi)/2;
+          } else {
+            var vs=list.map(function(o){ return alVal(o.b,k); });
+            g=(k==='l'||k==='t')?Math.min.apply(null,vs):Math.max.apply(null,vs);
+          }
+          list.forEach(function(o){ want.push({el:o.el, tgt:g}); });
+          label={l:'⬅ 左',cx:'⬄ 中央',r:'➡ 右',t:'⬆ 上',cy:'⬍ 中',b:'⬇ 下'}[k]+'にそろえ';
+        }
+        // ★2周する：1周目で寄せたあと測り直し、残ったズレを詰める。
+        //   親が縮小(scale)されていると translate 100px が見た目100pxにならないため、
+        //   「当てる→測る→残りを足す」でしか最後の数pxは揃わない（サイズそろえと同じ考え方）。
+        var moved=0;
+        for(var pass=0;pass<2;pass++){
+          want.forEach(function(o){
+            var b; try{ b=alBox(o.el); }catch(_){ return; }
+            var d=o.tgt-alVal(b,k);
+            if(Math.abs(d)<0.5) return;
+            if(vert) alMove(o.el,0,d); else alMove(o.el,d,0);
+            if(!pass) moved++;
+          });
+        }
+        try{ markDirty(); }catch(_){}
+        if(msg) msg.textContent='🧲 '+label+'ました（'+list.length+'個のうち '+moved+'個を動かしました'
+          +(refm==='first'&&k!=='dx'&&k!=='dy'?'・基準＝最初に選んだもの':'')+'）。'+extra+'💾保存で残ります・⟲で戻せます';
+      };
+      if(qm.querySelector('#__ce_al_ref')) qm.querySelector('#__ce_al_ref').addEventListener('click',function(ev){ ev.stopPropagation(); });
+      [].slice.call(qm.querySelectorAll('.__ce_alb')).forEach(function(b){
+        b.addEventListener('click',function(ev){ ev.stopPropagation(); alDo(this.getAttribute('data-k')); });
+      });
     }
     // 📏 余白の定番の配線（メニューは閉じない＝5rem→10remと当て比べできる）
     if(qm.querySelector('#__ce_sp_ed')){
@@ -15023,23 +15373,46 @@ html.__ce_altmode{cursor:text}
       });
       qm.querySelector('#__ce_q_seludc').addEventListener('input',function(){ if(selApiQ.hasUd()) selApiQ.underline(this.value); });
     }
-    // メニューは右クリック位置から少し離して出す（真上に出ると、いじりたい要素がメニューで隠れて
-    // 変化が見えない）。それでも選んだ要素にかぶるなら、要素の右横（無理なら左横）へ逃がす。
+    // メニューは「いじりたい要素にかぶらない場所」に出す（2026-07-30・ユーザー報告で作り直し）。
+    // ★困っていたこと：右クリックした真上にメニューが出るので、重なっている要素を選び直す・
+    //   赤枠のハイライトを見る、といった操作がメニューで塞がれて先に進めない。
+    // ★旧実装は「420px以下の小さい要素」だけ横へ逃がしていた＝大きい箱（セクション・カード）では
+    //   毎回かぶる。サイズで線を引くのをやめ、**実際にかぶる面積で決める**方式にした。
+    //   候補（要素の右/左/下/上・画面の四隅・カーソルの右下）を並べ、かぶりが最小の所を選ぶ。
+    //   同じなら**カーソルに近い方**を選ぶ（遠くへ飛ぶと目線が迷子になる）。
     (function(){
-      var gapX=24, gapY=18, w=qm.offsetWidth, h=qm.offsetHeight;
-      var mx=e.clientX+gapX, my=e.clientY+gapY;
-      try{
-        // 小さい要素（文字ブロック等）は、メニューが上に乗ると何を直しているのか見えなくなるので横へ逃がす。
-        // 大きい要素はどう置いてもかぶるので、カーソルの近く（＝目線の近く）のまま。遠くへ飛ぶと迷子になる。
-        var er=(curEl&&curEl.getBoundingClientRect)?curEl.getBoundingClientRect():null;
-        if(er&&er.width>0&&er.width<=420&&er.height<=420
-           &&!(mx>er.right||mx+w<er.left||my>er.bottom||my+h<er.top)){
-          if(er.right+gapX+w<=window.innerWidth-8) mx=er.right+gapX;
-          else if(er.left-gapX-w>=8) mx=er.left-gapX-w;
-        }
-      }catch(_){}
-      qm.style.left=Math.max(6,Math.min(mx, window.innerWidth-w-8))+'px';
-      qm.style.top=Math.max(6,Math.min(my, window.innerHeight-h-8))+'px';
+      var gapX=24, gapY=18, M=8;
+      var w=qm.offsetWidth, h=qm.offsetHeight, W=window.innerWidth, H=window.innerHeight;
+      var er=null; try{ er=(curEl&&curEl.getBoundingClientRect)?curEl.getBoundingClientRect():null; }catch(_){ }
+      if(er&&!(er.width>0&&er.height>0)) er=null;
+      var clampX=function(v){ return Math.max(M, Math.min(v, W-w-M)); };
+      var clampY=function(v){ return Math.max(M, Math.min(v, H-h-M)); };
+      var ovOf=function(x,y){
+        if(!er) return 0;
+        var iw=Math.min(x+w,er.right)-Math.max(x,er.left);
+        var ih=Math.min(y+h,er.bottom)-Math.max(y,er.top);
+        return (iw>0&&ih>0)?(iw*ih):0;
+      };
+      // ★手で動かした場所があり、そこがかぶらないなら最優先＝ユーザーの選んだ置き場所を尊重する
+      if(lastMenuPos){
+        var lx=clampX(lastMenuPos.left), ly=clampY(lastMenuPos.top);
+        if(ovOf(lx,ly)===0){ qm.style.left=lx+'px'; qm.style.top=ly+'px'; return; }
+      }
+      var cand=[[e.clientX+gapX, e.clientY+gapY]];      // 今までの場所（カーソルの右下）
+      if(er){
+        cand.push([er.right+gapX, er.top]);             // 要素の右
+        cand.push([er.left-gapX-w, er.top]);            // 要素の左
+        cand.push([er.left, er.bottom+gapY]);           // 要素の下
+        cand.push([er.left, er.top-gapY-h]);            // 要素の上
+      }
+      cand.push([M,M],[W-w-M,M],[M,H-h-M],[W-w-M,H-h-M]);   // 画面の四隅（大きい要素の逃げ場）
+      var best=null;
+      cand.forEach(function(c){
+        var x=clampX(c[0]), y=clampY(c[1]);
+        var ov=ovOf(x,y), d=Math.abs(x-e.clientX)+Math.abs(y-e.clientY);
+        if(!best||ov<best.ov-1||(ov<=best.ov+1&&d<best.d)) best={x:x,y:y,ov:ov,d:d};
+      });
+      qm.style.left=best.x+'px'; qm.style.top=best.y+'px';
     })();
     curMenu=qm;
     qm.addEventListener('mouseover',function(ev){ var b2=ev.target.closest('.__ce_qi'); [].slice.call(qm.querySelectorAll('.__ce_qi')).forEach(function(x){ x.style.background=(x===b2)?'#eef4ff':'none'; }); });
@@ -15218,6 +15591,37 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_secadd'){ closeMenu(); var ab=document.getElementById('__ce_favadd'); if(ab) ab.click(); return; }
       if(t.id==='__ce_q_secswap'){ var sw=curEl.closest('section,header,footer'); closeMenu(); favSwapOpen(sw); return; }
       if(t.id==='__ce_q_secdel'){ var de=curEl.closest('section,header,footer'); closeMenu(); secDeleteOpen(de); return; }
+      if(t.id==='__ce_q_frmfit'){
+        // 見た目は動かさず、掴む枠（透明な枠・空きスペース）だけを見た目の位置へ持ってくる。
+        // ★見た目が1pxでも動いたら失敗なので、当てる前後の rect を測って結果に出す（黙って崩さない）。
+        // ★測るのは「中身が描かれている場所」。箱そのものは動かすのが目的なので、
+        //   箱の rect で見張ると必ず「動いた」判定になってしまう。
+        var _fmeas=function(x){
+          var i=null; try{ i=inkBoxOf(x); }catch(_){ }
+          if(i) return [i.l,i.t];
+          var r=x.getBoundingClientRect(); return [r.left,r.top];
+        };
+        var _fl=(selEls.length?selEls.slice():[curEl]), _fdone=[], _fmove=0, _fink=0, _fflow=0;
+        _fl.forEach(function(x){
+          if(!x) return;
+          var _b4=_fmeas(x);
+          var steps=frameFitApply(x);
+          if(!steps) return;
+          var _af=_fmeas(x);
+          steps.forEach(function(s){ if(s.kind==='ink') _fink++; if(s.kind==='flow') _fflow++; });
+          _fdone.push(steps);
+          if(Math.abs(_af[0]-_b4[0])>1.5||Math.abs(_af[1]-_b4[1])>1.5) _fmove++;
+        });
+        closeMenu();
+        if(!_fdone.length){ msg.textContent='この要素の枠はズレていません（動かした跡がありません）'; return; }
+        markDirty();
+        msg.textContent='🧲 枠と中身の位置をそろえました（'+_fdone.length+'個'
+          +(_fink?('・うち'+_fink+'個は空っぽの箱を中身の所へ移動'):'')+'）。'
+          +(_fmove?('⚠'+_fmove+'個は中身も動いてしまいました＝⟲で戻せます。'):'中身の見た目は変わっていません。')
+          +(_fflow?('⚠'+_fflow+'個は通常配置なので余白（margin）で動かしました＝隣がずれたら⟲で戻してください。'):'')
+          +'これで白い所を掴んでも狙ったものが選べます・💾保存で確定';
+        return;
+      }
       if(t.id==='__ce_q_align'){
         // 右クリックした行と「同じ形の兄弟」（同じ親・同じタグ・同じクラス）を探し、
         // 各行に個別に焼き込まれたズレの元（移動・回転・インライン余白・寄せ）を掃除→共通CSSの位置に戻る＝そろう。
