@@ -8950,12 +8950,52 @@ html.__ce_altmode{cursor:text}
     var m=(c||'').match(/\\d+/g); if(!m||m.length<3) return '#000000';
     return '#'+m.slice(0,3).map(function(x){return ('0'+(+x).toString(16)).slice(-2);}).join('');
   }
+  // 🔡 内側に「自前の文字サイズ」を持つ子孫を集める（親と computed が違う＝自分で指定している、と判定）。
+  // ★クローン元の見出しは <div>…<span style="font-size:56px !important">文字</span>…</div> のような入れ子が多く、
+  //   外側の箱にだけ font-size を当てても内側が勝つ＝表示は1pxも変わらない（実測：箱に26.8pxを書いても表示は56pxのまま）。
+  //   クラス名では判定できない（ツール製の ce_tnode も、クローン元が自前で付けた span も同じ形）ので実測で見分ける。
+  function _fsKids(el){
+    var out=[];
+    [].slice.call(el.querySelectorAll('*')).slice(0,600).forEach(function(d){
+      if(d.closest('[id^="__ce"]')) return;
+      if(!(d.textContent||'').trim()) return;              // 文字を持たない飾りは対象外
+      var p=d.parentElement; if(!p) return;
+      var ps=parseFloat(getComputedStyle(p).fontSize)||0;
+      var ds=parseFloat(getComputedStyle(d).fontSize)||0;
+      if(ds && Math.abs(ds-ps)>0.5) out.push([d, ds]);
+    });
+    return out;
+  }
+  // ⟲で完全に戻せるよう、元のインライン font-size を最初の1回だけ控える（"56px!" ＝ !important 付き）
+  function _fsRemember(d){
+    if(d.getAttribute('data-cefs')!==null) return;
+    var v=d.style.getPropertyValue('font-size');
+    d.setAttribute('data-cefs', v?(v+(d.style.getPropertyPriority('font-size')==='important'?'!':'')):'');
+  }
+  function _fsRestore(d){
+    var o=d.getAttribute('data-cefs'); if(o===null) return;
+    d.style.removeProperty('font-size');
+    if(o) d.style.setProperty('font-size', o.replace(/!$/,''), /!$/.test(o)?'important':'');
+    d.removeAttribute('data-cefs');
+  }
   // 文字の大きさを倍率で変える（factor=0でリセット）。歪まないよう font-size を直接いじる。
+  // 中に大きさの違う文字があっても、全部を同じ倍率で変える＝大小の比率はそのまま保たれる。
   function _fontSize(el, factor){
-    if(!factor){ el.style.removeProperty('font-size'); markDirty(); return; }
+    if(!factor){
+      if(el.getAttribute('data-cefs')!==null) _fsRestore(el); else el.style.removeProperty('font-size');
+      [].forEach.call(el.querySelectorAll('[data-cefs]'), _fsRestore);
+      markDirty(); return;
+    }
+    var kids=_fsKids(el);                                  // ★親を変える前に測る（変えた後だと差が消えて拾えない）
     var cur=parseFloat(getComputedStyle(el).fontSize)||16;
+    _fsRemember(el);
     el.style.setProperty('font-size', (cur*factor).toFixed(1)+'px', 'important');
+    kids.forEach(function(k){
+      _fsRemember(k[0]);
+      k[0].style.setProperty('font-size', (k[1]*factor).toFixed(1)+'px', 'important');
+    });
     markDirty();
+    if(kids.length) msg.textContent='文字の大きさを変えました（中の'+kids.length+'か所も同じ倍率で／保存で確定）';
   }
   // 行間（ラインハイト）を変える。delta=0.15で広く/-0.15で狭く/reset=trueで元に戻す。単位なし比率で入れる。
   function _lineHeight(el, delta, reset){
@@ -9321,7 +9361,13 @@ html.__ce_altmode{cursor:text}
       var n1=document.getElementById('__ce_brffnow');
       if(n1) n1.innerHTML='今のフォント：<b>'+esc(f||'（不明）')+'</b>'+(document.getElementById('__ce_fontall')?'　<span style="color:#7c3aed">※ページ全部に適用中</span>':'');
       var n2=document.getElementById('__ce_brfsnow');
-      if(n2) n2.textContent='今 '+(Math.round((parseFloat(cs.fontSize)||0)*10)/10)+'px';
+      // ★箱のfont-sizeだけ出すと、中のspanが自前で大きさを持つ見出しでは
+      //   「今26.8px」なのに画面の文字は56px＝数字が別物に見える。実際に見えている一番大きい文字を出す。
+      if(n2){
+        var _box=Math.round((parseFloat(cs.fontSize)||0)*10)/10, _big=_box;
+        _fsKids(el).forEach(function(k){ var v=Math.round(k[1]*10)/10; if(v>_big) _big=v; });
+        n2.textContent='今 '+_big+'px'+(_big!==_box?'（枠は'+_box+'px）':'');
+      }
       var n3=document.getElementById('__ce_brlhnow');
       if(n3){ var lh=parseFloat(cs.lineHeight), fs=parseFloat(cs.fontSize)||16;
         n3.textContent=isFinite(lh)?('今 '+(Math.round(lh/fs*100)/100)+'倍（'+Math.round(lh)+'px）'):'今 標準'; }
