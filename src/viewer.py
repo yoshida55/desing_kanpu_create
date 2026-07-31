@@ -2819,6 +2819,9 @@ html.__ce_altmode{cursor:text}
     var removed=0;
     [].slice.call(document.querySelectorAll('body *')).forEach(function(el){
       if(el.id && el.id.indexOf('__ce')===0) return;
+      // 🎨水彩ふうのフィルタ定義（cewc_defs）は見えない部品だが、消すとページ中の水彩が一斉に外れる
+      if(el.id && el.id.indexOf('cewc_')===0) return;
+      if(el.closest && (el.closest('[id^="cewc_defs"]'))) return;
       if(el.closest && (el.closest('[id^="__ce"]'))) return;
       var cs; try{ cs=getComputedStyle(el); }catch(_){ return; }
       if(cs.pointerEvents!=='none') return;                        // クリックで消せない装飾だけを対象
@@ -5782,7 +5785,27 @@ html.__ce_altmode{cursor:text}
     var oldp=document.getElementById('__ce_vsp'); if(oldp) oldp.remove();
     var host=_spacerHost(el||document.body);
     var mode='spacer', sp=null, secEl=null, where='';
-    if(host){
+    // ★押した場所がすでに作った余白の中なら、新しく作らずそれを調整する。
+    //   これが無いと同じ所で2回押すたびに余白が増え、値も40pxに戻る（実測：1個→2個・200px→40px）。
+    //   ユーザーからは「さっき広げた余白に戻れない／掴めない」に見える。
+    var _reuse=null;
+    try{
+      var _n=el;
+      while(_n && _n!==document.body){ if(_n.getAttribute&&_n.getAttribute('data-cespacer')){ _reuse=_n; break; } _n=_n.parentElement; }
+      if(!_reuse){
+        // 近くにある余白（押した高さが余白の範囲に入っている物）を拾う
+        var _all=[].slice.call(document.querySelectorAll('[data-cespacer]'));
+        for(var _k=0;_k<_all.length;_k++){
+          var _r=_all[_k].getBoundingClientRect();
+          if(_r.height>0 && y>=_r.top-6 && y<=_r.bottom+6){ _reuse=_all[_k]; break; }
+        }
+      }
+    }catch(_){ }
+    if(_reuse){
+      sp=_reuse; host=_reuse.parentElement;
+      where=(host?host.tagName.toLowerCase():'')+'（さっき作った余白を調整）';
+    }
+    else if(host){
       var kids=_flowKids(host), before=null;
       for(var i=0;i<kids.length;i++){
         var r=kids[i].getBoundingClientRect();
@@ -5797,6 +5820,8 @@ html.__ce_altmode{cursor:text}
         sp.style.setProperty('height','40px');
         sp.style.setProperty('width','100%');
         sp.style.setProperty('flex','0 0 auto');   // flexの親でも潰れないように
+        sp.style.setProperty('cursor','ns-resize');
+        sp.style.setProperty('pointer-events','auto');   // 親のpointer-events:noneを継がない（掴めなくなる）
         try{ pushUndo(host); }catch(_){}
         if(before) host.insertBefore(sp,before); else host.appendChild(sp);
       }
@@ -5854,8 +5879,58 @@ html.__ce_altmode{cursor:text}
       document.addEventListener('mousemove',function(ev){ if(!dg) return; setPx(st+(ev.clientY-sy)); });
       document.addEventListener('mouseup',function(){ dg=false; });
     })();
-    if(msg) msg.textContent='⇕ 縦の空間を作りました（数字ボタンかドラッグで調整・💾保存で確定）';
+    if(msg) msg.textContent='⇕ 縦の空間を作りました（余白そのものを上下にドラッグしても伸縮できます・💾保存で確定）';
   }
+  // ⇕ 作った余白（ce_spacer）を「その場で掴んで」伸縮できるようにする（2026-07-31・実報告）
+  //   ★空のdivなので、パネルを閉じると二度と掴めなかった＝「余白を掴めなくて下げられない」の正体。
+  //   パネルの⇕ドラッグは板の上のボタンで、素人には「余白そのものを引っぱる」ほうが自然。
+  (function(){
+    var sp=null, sy=0, st=0;
+    function armCursors(){
+      [].slice.call(document.querySelectorAll('[data-cespacer]')).forEach(function(n){
+        n.style.setProperty('cursor','ns-resize');
+        // ★親から pointer-events:none を継いでいると、余白は当たり判定から消える
+        //   （実測：自分の矩形の中心で elementsFromPoint を見ても自分が出てこなかった）。
+        n.style.setProperty('pointer-events','auto');
+      });
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',armCursors); else armCursors();
+    // ★余白の上に「透明な画像や器」がかぶさっていると、mousedown の相手が余白にならず掴めない
+    //   （実測：白く見えている場所なのに elementsFromPoint の先頭が IMG だった）。
+    //   重なりを手前から見て、実際に中身が描かれている物が無ければ余白を掴む（§7㉖と同じ流儀）。
+    function _spacerAt(ev){
+      var t=(ev.target&&ev.target.closest)?ev.target.closest('[data-cespacer]'):null;
+      if(t) return t;
+      var list=[]; try{ list=document.elementsFromPoint(ev.clientX,ev.clientY)||[]; }catch(_){ return null; }
+      for(var i=0;i<list.length;i++){
+        var n=list[i];
+        if(n.closest&&n.closest('[id^="__ce"]')) continue;      // ツールのUIの上は無視
+        var sp2=n.closest?n.closest('[data-cespacer]'):null;
+        if(sp2) return sp2;
+        if(_dqInk(n,ev.clientX,ev.clientY)) return null;        // 手前に本物の中身がある＝そちらが対象
+      }
+      return null;
+    }
+    document.addEventListener('mousedown',function(ev){
+      if(ev.button!==0) return;
+      var t=_spacerAt(ev);
+      if(!t) return;
+      sp=t; sy=ev.clientY; st=parseFloat(t.style.height)||t.offsetHeight||0;
+      t.style.setProperty('cursor','ns-resize');
+      try{ pushUndo(t.parentElement); }catch(_){ }
+      ev.preventDefault(); ev.stopPropagation();     // 下の要素のドラッグ機構に取られないように
+    },true);
+    document.addEventListener('mousemove',function(ev){
+      if(!sp) return;
+      var v=Math.max(0,Math.round(st+(ev.clientY-sy)));
+      sp.style.setProperty('height',v+'px');
+      if(msg) msg.textContent='⇕ 余白 '+v+'px（そのまま上下にドラッグ／💾保存で確定）';
+    },true);
+    document.addEventListener('mouseup',function(){
+      if(!sp) return;
+      sp=null; try{ markDirty(); }catch(_){ }
+    },true);
+  })();
   // 🔀 お気に入りからセクションを切り替え（プレビューから選ぶ→AIなしで差し替え）
   // 編集バー（①で選ぶ）と右クリックメニュー（右クリック位置）の両方から呼べるよう関数化。
   function favSwapOpen(target){
@@ -6541,7 +6616,11 @@ html.__ce_altmode{cursor:text}
       document.body.appendChild(ov);
       attachPickerSearch(ov);
       ov.addEventListener('click',function(e){
-        if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){ ov.remove(); return; }
+        // ★閉じただけ（選ばなかった）時に呼び出し元へ知らせる。これが無いと🏞写真の帯が
+        //   「灰色の空っぽの帯」だけ残って何も起きない状態になる（実報告）。
+        if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){
+          ov.remove(); if(cand.cancel){ try{ cand.cancel(); }catch(_){ } } return;
+        }
         var it=e.target.closest('.it'); if(!it) return;
         if(!cand||!cand.el){ msg.textContent='対象が見つかりません'; ov.remove(); return; }
         ov.remove(); msg.textContent='差し替え中…';
@@ -6568,7 +6647,12 @@ html.__ce_altmode{cursor:text}
           var pic=cand.el.closest?cand.el.closest('picture'):null;
           if(pic){ [].slice.call(pic.querySelectorAll('source')).forEach(function(s){s.removeAttribute('srcset');}); }
         }
-        markDirty(); saveLayout();
+        markDirty();
+        // ★saveLayout() はファイルに書き込んだ後 location.reload() する。続けて処理したい呼び出し
+        //   （🏞写真の帯）では、リロードで作りかけの状態が消えて「帯はできたのに留まらない」になる
+        //   （実測で踏んだ）。しかも勝手に保存されるので、まだ確認していない変更まで確定してしまう。
+        if(!cand.nosave) saveLayout();
+        if(cand.done){ try{ cand.done(url); }catch(_){ } }   // 選び終わったあとに続けたい処理（写真の帯など）
       });
     }).catch(function(){msg.textContent='画像一覧の取得に失敗';});
   }
@@ -8380,6 +8464,145 @@ html.__ce_altmode{cursor:text}
       msg.textContent='切り抜きに失敗しました（サーバーに届いていません）';
     });
   }
+  // 🎨 写真そのものを「水彩ふう」に見せる（AIなし・無料・即反映／2026-07-31 要望）
+  //   狙い＝3DCGやツヤのある素材が水彩イラストのページで1つだけ浮くのを馴染ませる。
+  //   ★フィルタなので「本物の水彩画に描き直す」わけではない。元がCGなら質感は完全には消えない。
+  //   仕組み＝SVGフィルタ(feTurbulence+feDisplacementMap)でフチをゆらして「にじみ」を作り、
+  //   そのあとCSSのblur/saturate/contrast/brightnessで水彩の「淡さ」を足す。
+  //   ★<img>専用にする：要素に filter を当てると子（文字）まで一緒ににじむため。
+  var WCFX_NM=['にじみ','やわらか','うすい','しっかり'];
+  //   ds=ゆらし量 / bl=ぼかしpx / sa=彩度 / co=コントラスト / br=明るさ / fq=にじみの細かさ
+  var WCFX_BASE=[
+    {ds: 9, bl:0.6, sa:1.20, co:0.86, br:1.06, fq:'0.014 0.018'},
+    {ds: 5, bl:1.2, sa:1.10, co:0.80, br:1.10, fq:'0.010 0.012'},
+    {ds: 5, bl:0.8, sa:0.80, co:0.75, br:1.18, fq:'0.012 0.015'},
+    {ds:14, bl:0.4, sa:1.35, co:0.90, br:1.02, fq:'0.020 0.026'}
+  ];
+  var WCFX_STR=[0.6,1.0,1.6], WCFX_SNM=['弱','中','強'];
+  var WCFX_NS='http://www.w3.org/2000/svg';
+  // フィルタ定義の置き場。★idを __ce で始めない：保存時に「id^=__ce は丸ごと除去」されるため（§7㉔）。
+  //   ここが消えると保存版で filter:url(#…) が迷子になり、水彩が外れた見た目で焼き付く。
+  function wcfxDefs(){
+    var s=document.getElementById('cewc_defs');
+    if(!s){
+      s=document.createElementNS(WCFX_NS,'svg'); s.id='cewc_defs';
+      s.setAttribute('aria-hidden','true');
+      s.setAttribute('style','position:absolute;width:0;height:0;overflow:hidden;pointer-events:none');
+      document.body.appendChild(s);
+    }
+    return s;
+  }
+  function wcfxEnsure(p, st){
+    var id='cewc_f'+p+st;
+    if(document.getElementById(id)) return id;
+    var b=WCFX_BASE[p];
+    var f=document.createElementNS(WCFX_NS,'filter');
+    f.setAttribute('id',id);
+    // にじみで外へはみ出すぶん、フィルタ領域を広げておかないとフチが四角く切れる
+    f.setAttribute('x','-15%'); f.setAttribute('y','-15%');
+    f.setAttribute('width','130%'); f.setAttribute('height','130%');
+    f.setAttribute('color-interpolation-filters','sRGB');
+    var t=document.createElementNS(WCFX_NS,'feTurbulence');
+    t.setAttribute('type','fractalNoise'); t.setAttribute('baseFrequency',b.fq);
+    t.setAttribute('numOctaves','4'); t.setAttribute('seed',String(3+p*7)); t.setAttribute('result','wcn');
+    var d=document.createElementNS(WCFX_NS,'feDisplacementMap');
+    d.setAttribute('in','SourceGraphic'); d.setAttribute('in2','wcn');
+    d.setAttribute('scale',(b.ds*WCFX_STR[st]).toFixed(1));
+    d.setAttribute('xChannelSelector','R'); d.setAttribute('yChannelSelector','G');
+    f.appendChild(t); f.appendChild(d); wcfxDefs().appendChild(f);
+    return id;
+  }
+  function wcfxApply(el, p, st, fade){
+    if(!el) return;
+    var b=WCFX_BASE[p], k=WCFX_STR[st], id=wcfxEnsure(p,st);
+    function mix(v){ return (1+(v-1)*k).toFixed(3); }   // 効き具合ぶんだけ「1からの差」を伸縮する
+    el.style.setProperty('filter',
+      'url(#'+id+') blur('+(b.bl*k).toFixed(2)+'px) saturate('+mix(b.sa)+') contrast('+mix(b.co)+') brightness('+mix(b.br)+')',
+      'important');
+    // 🫧 フチを溶かす：四角い写真の輪郭が残っていると、いくらにじませても「貼った感」が消えない
+    if(fade){
+      var m='radial-gradient(ellipse at center, #000 52%, rgba(0,0,0,0) 94%)';
+      el.style.setProperty('-webkit-mask-image',m); el.style.setProperty('mask-image',m);
+    }else{
+      el.style.removeProperty('-webkit-mask-image'); el.style.removeProperty('mask-image');
+    }
+    el.setAttribute('data-cewcfx', p+'|'+st+'|'+(fade?1:0));
+    markDirty();
+  }
+  function wcfxClear(el){
+    if(!el) return;
+    el.style.removeProperty('filter');
+    el.style.removeProperty('-webkit-mask-image'); el.style.removeProperty('mask-image');
+    el.removeAttribute('data-cewcfx');
+    markDirty();
+  }
+  function wcfxState(el){
+    var v=(el&&el.getAttribute('data-cewcfx'))||''; if(!v) return null;
+    var a=v.split('|');
+    return {p:(+a[0]||0), st:(a[1]==null?1:+a[1]), fade:(a[2]==='1')};
+  }
+  function openWaterFxPanel(imgEl){
+    if(!imgEl){ msg.textContent='対象の写真がありません'; return; }
+    var old=document.getElementById('__ce_wcp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    var cur=wcfxState(imgEl)||{p:0, st:1, fade:false};
+    var B='border:1px solid #cfd8e3;background:#fff;border-radius:6px;padding:4px 8px;cursor:pointer;font:12px sans-serif';
+    var ON=';background:#0d9488;color:#fff;border-color:#0d9488';
+    var p=document.createElement('div'); p.id='__ce_wcp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;'
+      +'border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:320px');
+    function draw(){
+      var s=wcfxState(imgEl);
+      p.innerHTML='<div class="__ce_wcmv" style="font-weight:700;margin-bottom:6px;cursor:move">🎨 水彩ふうにする</div>'
+        +'<div style="opacity:.7">種類</div>'
+        +'<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap">'
+        + WCFX_NM.map(function(nm,i){ return '<button data-wp="'+i+'" style="'+B+((s&&s.p===i)?ON:'')+'">'+nm+'</button>'; }).join('')
+        +'</div>'
+        +'<div style="opacity:.7;margin-top:8px">効き具合</div>'
+        +'<div style="display:flex;gap:4px;margin-top:3px">'
+        + WCFX_SNM.map(function(nm,i){ return '<button data-ws="'+i+'" style="'+B+((s&&s.st===i)?ON:'')+'">'+nm+'</button>'; }).join('')
+        +'</div>'
+        +'<div style="display:flex;gap:5px;margin-top:8px">'
+        +'<button data-wf="1" style="'+B+((s&&s.fade)?ON:'')+'">🫧 フチを溶かす</button></div>'
+        +'<div style="opacity:.6;font-size:11px;margin-top:6px">四角い輪郭が残ると「貼った感」が消えません。'
+        +'背景が単色の写真は先に ✂切り抜く と効きます。</div>'
+        +'<div style="display:flex;gap:6px;margin-top:10px">'
+        +'<button data-wr="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">⟲ 元に戻す</button>'
+        +'<button data-wx="1" style="background:#0b6bcb;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">閉じる</button></div>';
+      try{ panelDrag(p, p.querySelector('.__ce_wcmv')); }catch(_){ }
+    }
+    draw();
+    document.body.appendChild(p);
+    // 写真の近くに出す＝効きを見ながら押せる。
+    // ★ただし写真の上に重ねない：右に入らなければ左へ逃がす（画面右端の写真だと板が写真を隠して
+    //   「効いているのか分からない」になる・実測で踏んだ）。
+    var r=imgEl.getBoundingClientRect(), pw=p.offsetWidth, ph=p.offsetHeight;
+    var lx=r.right+10;
+    if(lx+pw > window.innerWidth-8) lx=r.left-10-pw;                       // 右がダメなら左
+    if(lx < 6) lx=Math.max(6, Math.min(r.left, window.innerWidth-pw-8));   // どちらも無理なら画面内へ
+    p.style.left=lx+'px';
+    p.style.top =Math.max(6,Math.min(r.top, window.innerHeight-ph-8))+'px';
+    p.__close=function(){ if(p.__off) p.__off(); p.remove(); };
+    var ctxFn=function(){ if(p.parentElement) p.__close(); };
+    p.__off=function(){ document.removeEventListener('contextmenu',ctxFn,true); };
+    setTimeout(function(){ document.addEventListener('contextmenu',ctxFn,true); },0);
+    p.addEventListener('mousedown',function(ev){ ev.stopPropagation(); },true);
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var t=ev.target, s=wcfxState(imgEl)||{p:0,st:1,fade:false};
+      if(t.getAttribute('data-wx')){ p.__close(); return; }
+      if(t.getAttribute('data-wr')){ pushUndo(imgEl); wcfxClear(imgEl); draw(); msg.textContent='水彩をやめました（元の写真に戻しました）'; return; }
+      var wp=t.getAttribute('data-wp'), ws=t.getAttribute('data-ws'), wf=t.getAttribute('data-wf');
+      if(wp==null && ws==null && !wf) return;
+      pushUndo(imgEl);
+      if(wp!=null) s.p=+wp;
+      if(ws!=null) s.st=+ws;
+      if(wf) s.fade=!s.fade;
+      wcfxApply(imgEl, s.p, s.st, s.fade);
+      draw();
+      msg.textContent='🎨 水彩「'+WCFX_NM[s.p]+'／'+WCFX_SNM[s.st]+'」にしました（💾保存で確定・⟲戻すで取り消せます）';
+    });
+  }
+
   // 🖼 写真を加工：白フチ／はみ出しカード／背景の飾り／背景に設定／水彩(AI) の入口をまとめた1つのボタン用ピッカー。
   //   ボタンを増やさず、選択肢はこの中の一覧から選ぶ形にする。
   function openPhotoDecoPicker(el, imgEl, sIdx){
@@ -8398,6 +8621,9 @@ html.__ce_altmode{cursor:text}
       // ★<img>でない「要素の背景として敷かれた写真」もここから切り抜けるようにする。
       //   素人目にはどちらも同じ写真で、img/背景の違いは見えない（実報告：ボタンが出ず迷子になった）。
       +((!imgEl&&bgOfEl(el))?'<button class="go2" id="__ce_pdcutbg" style="background:#7c3aed;margin-bottom:8px">✂ この背景の写真を切り抜く（透過・AIなし・無料）</button>':'')
+      // 🎨 写真そのものを水彩ふうに（AIなし）。上の「背後に水彩画像を敷く」(AI課金)とは別物なので
+      //   並べて置き、無料のほうを先に出す＝素人が間違って課金側を押さないように。
+      +(imgEl?'<button class="go2" id="__ce_pdwcfx" style="background:#0d9488;margin-bottom:8px">🎨 この写真を水彩ふうにする（AIなし・無料）</button>':'')
       +(imgEl?'<button class="go2" id="__ce_pdwater" style="background:#c026a6">🎨 背後に水彩画像を敷く（AI・数十円）</button>':'')
       +'</div>';
     document.body.appendChild(ov);
@@ -8414,6 +8640,7 @@ html.__ce_altmode{cursor:text}
         if(_bc) bgCutToggle(_bc, e.target);
         return;
       }
+      if(e.target.id==='__ce_pdwcfx'){ ov.remove(); openWaterFxPanel(imgEl); return; }
       if(e.target.id==='__ce_pdwater'){ ov.remove(); openBgPicker(imgEl, sIdx); return; }
     });
   }
@@ -10946,12 +11173,17 @@ html.__ce_altmode{cursor:text}
     var _isDeco=el.classList&&(el.classList.contains('ce_bgdeco')||el.classList.contains('ce_ringdeco')||el.classList.contains('ce_outlinedeco'));
     // ★水彩(data-cewater)の「にじみ」は filter:blur で作っている。ここで消すと
     //   動きを付けた瞬間にフチがくっきりして**別の形に見える**（2026-07-31・報告）。
-    var _keepFil=(_isDeco||el.getAttribute&&el.getAttribute('data-cewater'))?el.style.getPropertyValue('filter'):'';
+    // ★🎨水彩ふう(data-cewcfx)も filter で作っている。ここで消すと動きを付けた瞬間に
+    //   元のツヤツヤした写真に戻る＝「水彩にしたのにアニメを付けたら外れた」になる。
+    var _hasFx=el.getAttribute&&(el.getAttribute('data-cewater')||el.getAttribute('data-cewcfx'));
+    var _keepFil=(_isDeco||_hasFx)?el.style.getPropertyValue('filter'):'';
+    // 元の !important も一緒に控える（付け直しで優先度が落ちるとページ側CSSに負ける）
+    var _keepFilP=_keepFil?el.style.getPropertyPriority('filter'):'';
     // ★かたちの「ななめ・はけ跡・ななめ帯」は clip-path で切り抜いて作っている。
     //   これも消すと四角に戻る＝「形をつけてからアニメを付けると形が戻る」の正体。
     var _keepClip=(el.getAttribute&&el.getAttribute('data-ceclip'))?el.style.getPropertyValue('clip-path'):'';
     ['opacity','filter','clip-path','text-shadow','animation','transition'].forEach(function(p){ el.style.removeProperty(p); });
-    if(_keepFil) el.style.setProperty('filter', _keepFil);
+    if(_keepFil) el.style.setProperty('filter', _keepFil, _keepFilP);
     if(_keepClip){ el.style.setProperty('clip-path', _keepClip); el.style.setProperty('-webkit-clip-path', _keepClip); }
     var edited=['data-cetx','data-cety','data-cesx','data-cesy','data-cero','data-cebt'].some(function(a){ return el.getAttribute(a)!=null; });
     if(edited){ applyTf(el); } else { ['transform','translate','rotate','scale'].forEach(function(p){ el.style.removeProperty(p); }); }
@@ -13380,6 +13612,230 @@ html.__ce_altmode{cursor:text}
     el.removeAttribute('data-cepin');
     markDirty();
   }
+  // 🏞 背景を留めて、次のセクションを上に通す（2026-07-31 要望）
+  //   ヒーローがその場に留まり、続きのセクションがその上にかぶさりながら昇ってくる演出。
+  //   ★JSを使わない：position:sticky と z-index だけで作る＝💾保存したカンプ単体でもそのまま動く。
+  //   仕組み＝留める側を sticky＋z-index:0（最背面）にし、後ろに続く兄弟を z-index:1（手前）に上げる。
+  function _ovPageBg(){
+    var els=[document.body, document.documentElement];
+    for(var i=0;i<els.length;i++){
+      var c=''; try{ c=getComputedStyle(els[i]).backgroundColor; }catch(_){ }
+      if(c && c!=='transparent' && c.indexOf('rgba(0, 0, 0, 0)')<0) return c;
+    }
+    return '#ffffff';
+  }
+  // ★position:sticky は「先祖のどれか1つでも overflow が visible 以外」だと完全に無効になる。
+  //   クローン元CSSはだいたい overflow-x:hidden を持っているので、そのままだと
+  //   「ボタンを押しても何も起きない」になる（sticky の一番の地雷）。
+  // ★ただし visible に開けてはいけない：隠れていた物が出てきて横スクロールが伸びる
+  //   （実測 docW 1627px → 2242px・見た目が左にズレて崩れた）。
+  //   `overflow:clip` は「はみ出しを隠す」は同じで**スクロール容器を作らない**ので sticky が効く。これが正解。
+  //   auto/scroll は本物のスクロール領域なので触らない（触ると中身が出てしまう）＝効かない旨だけ返す。
+  function _ovFreeAncestors(el){
+    var n=el.parentElement, hit=0, blocked=0;
+    while(n && n!==document.documentElement){
+      var cs=null; try{ cs=getComputedStyle(n); }catch(_){ }
+      if(cs){
+        var ox=cs.overflowX, oy=cs.overflowY, need=false;
+        if(ox==='auto'||ox==='scroll'||oy==='auto'||oy==='scroll'){ blocked++; }
+        else{
+          // 書き換える前に「元のインライン指定」を控える（computedではなくインラインを戻す）
+          var so=n.style.getPropertyValue('overflow'),
+              sx=n.style.getPropertyValue('overflow-x'),
+              sy=n.style.getPropertyValue('overflow-y');
+          if(ox==='hidden'){ n.style.setProperty('overflow-x','clip','important'); need=true; }
+          if(oy==='hidden'){ n.style.setProperty('overflow-y','clip','important'); need=true; }
+          if(need){ n.setAttribute('data-ceovsav', so+'|'+sx+'|'+sy); hit++; }
+        }
+      }
+      n=n.parentElement;
+    }
+    return {fixed:hit, blocked:blocked};
+  }
+  function _ovRestoreAncestors(){
+    [].slice.call(document.querySelectorAll('[data-ceovsav]')).forEach(function(n){
+      var a=(n.getAttribute('data-ceovsav')||'').split('|');
+      ['overflow','overflow-x','overflow-y'].forEach(function(p){ n.style.removeProperty(p); });
+      if(a[0]) n.style.setProperty('overflow',a[0]);
+      if(a[1]) n.style.setProperty('overflow-x',a[1]);
+      if(a[2]) n.style.setProperty('overflow-y',a[2]);
+      n.removeAttribute('data-ceovsav');
+    });
+  }
+  // どこを「留める側」にするか。★「一番余地が大きい候補」を選ぶ作りにしたら、ページ全体を親に持つ
+  //   73pxのナビ〈header〉が選ばれた（実測）。押した場所と違う物が留まるのは分かりにくいので、
+  //   📌貼り付けと同じく「右クリックした所から外へ辿って最初のセクション」に統一する。
+  // ★sticky が留まっていられる距離＝「親の下端 − 自分の下端」。
+  //   ここを「親の高さ − 自分の高さ」で出していたら、実際は300pxで剥がれるのに
+  //   2665px あると表示して警告が出なかった（実測で踏んだ）。自分より下の余白だけが効く。
+  function _ovRoom(t){
+    var p=t.parentElement; if(!p) return 0;
+    try{ return Math.round(p.getBoundingClientRect().bottom - t.getBoundingClientRect().bottom); }
+    catch(_){ return 0; }
+  }
+  // ★このツールのドラッグ移動は translate。自分や先祖に残っていると、sticky で top:0 に留めても
+  //   その分ずれて見える（実測：section 129px＋article -33px＝96px 下で止まった）。
+  //   ずれ総量を測って top で打ち消す＝カンプを壊さずに真上へ留められる。
+  function _ovShiftY(el){
+    var y=0, n=el;
+    while(n && n!==document.documentElement){
+      var cs=null; try{ cs=getComputedStyle(n); }catch(_){ }
+      if(cs){
+        var t=cs.translate;
+        if(t && t!=='none'){ var pr=t.split(' '); if(pr.length>1) y+=parseFloat(pr[1])||0; }
+        var m=cs.transform;
+        if(m && m!=='none' && m.indexOf('matrix(')===0){
+          var v=m.slice(m.indexOf('(')+1,-1).split(',');
+          if(v.length===6) y+=parseFloat(v[5])||0;
+        }
+      }
+      n=n.parentElement;
+    }
+    return Math.round(y);
+  }
+  // ★「箱は小さいのに中身が下へはみ出している」セクションには当ててはいけない（2026-07-31・実報告）。
+  //   このカンプの <header> は高さ73pxしかないのに、中に 1911×948 のヒーローが入っている（§7㉝）。
+  //   箱の下端で計算すると「余地5013px＝十分」に見えるが、実際は次のブロックがヒーローに
+  //   最初から重なっているので、手前に上げた瞬間ヒーローが隠れて**画面が真っ白になる**（実際に起きた）。
+  //   直し方は 🧍「ヘッダーの中の大きな中身を外に出す」を先に実行すること。
+  function _ovSpill(t){
+    var r, max;
+    try{ r=t.getBoundingClientRect(); max=r.bottom; }catch(_){ return 0; }
+    // ★「小さな部品が下にはみ出している」のは危なくない（実測：63pxのボタンが2828px下にあった＝
+    //   自由配置のカンプでは普通のこと）。それを数えたせいで、正常に使える緑のセクションまで
+    //   「2827pxはみ出しています」と誤ってブロックした（実報告）。
+    //   危ないのは <header>（箱73px／中身966px）のように**箱に収まらない大きな塊**だけなので、大きさで足切りする。
+    var need=Math.max(200, (r.height||0)*0.5);
+    var ns=t.querySelectorAll('*'), lim=Math.min(ns.length,300);
+    for(var i=0;i<lim;i++){
+      var q; try{ q=ns[i].getBoundingClientRect(); }catch(_){ continue; }
+      if(q.width>40 && q.height>=need && q.bottom>max) max=q.bottom;
+    }
+    return Math.round(max-r.bottom);
+  }
+  // ★中に別のセクションを抱えている物は「器」であってセクションではない（2026-07-31・実報告）。
+  //   このカンプの <article> はページ全体の入れ物で、右クリックの場所によってはこれが最寄りになる。
+  //   器に当てても「中身が3794pxはみ出しています」と言われ続けて永久に使えないので、器だと明示する。
+  function _ovIsWrapper(t){
+    try{ return !!t.querySelector('section,header,footer,main,article'); }catch(_){ return false; }
+  }
+  // ★はみ出しの良し悪しは「px」ではなく「箱の高さに対する比」で見る。
+  //   px で切ったら（150px超で禁止）、実際には正しく動いていた section.top01（箱1220px・はみ出し714px）まで
+  //   止めてしまった。危ないのは <header>（箱73pxに対して958pxはみ出し）のように**箱より中身が大きい**時だけ。
+  function _ovInfo(t){
+    var sp=_ovSpill(t), h=t.offsetHeight||0;
+    return {el:t, room:_ovRoom(t), spill:sp, spillBad:(sp>Math.max(150,h))};
+  }
+  function overpassTarget(el){
+    var t=el, i, wrap=null;
+    for(i=0,t=el;t&&i<8&&t.tagName!=='BODY'&&t.tagName!=='HTML';i++,t=t.parentElement){
+      if(/^(HEADER|FOOTER|SECTION|MAIN|ARTICLE)$/.test(t.tagName)){
+        if(_ovIsWrapper(t)){ if(!wrap) wrap=t; continue; }        // 器は飛ばして外側を探し続ける
+        return _ovInfo(t);
+      }
+    }
+    // セクションが無いカンプ用の逃げ道＝body/main 直下の箱を使う
+    for(i=0,t=el;t&&i<8&&t.tagName!=='BODY'&&t.tagName!=='HTML';i++,t=t.parentElement){
+      if(t.parentElement && /^(BODY|MAIN)$/.test(t.parentElement.tagName)){
+        if(_ovIsWrapper(t)){ if(!wrap) wrap=t; continue; }
+        return _ovInfo(t);
+      }
+    }
+    return wrap ? {el:wrap, room:0, spill:0, wrapper:true} : null;
+  }
+  function overpassIsOn(el){ return !!(el && el.getAttribute && el.getAttribute('data-ceovpass')); }
+  // 🏞 写真の帯を足す（2026-07-31 要望「みどりの下に写真を置いて、それを留めて下のセクションに追い抜かせたい」）
+  //   ★「🖼画像を追加」で置いた写真では実現できない：あれは position:absolute の浮いた要素になり、
+  //     sticky は**流れの中にある要素にしか効かない**。だから留められる「帯（section）」を作る必要がある。
+  //   帯は背景画像として写真を敷く＝高さを自由に決められて、cover で綺麗に収まる。
+  function addPhotoBand(sec){
+    if(!sec || !sec.parentNode){ msg.textContent='帯を入れる場所が見つかりません'; return; }
+    var band=document.createElement('section');
+    band.className='ce_photoband';
+    band.setAttribute('data-cepband','1');
+    band.style.cssText='position:relative;width:100%;height:80vh;min-height:420px;'
+      +'background-color:#e9eef2;background-size:cover;background-position:center;background-repeat:no-repeat';
+    sec.parentNode.insertBefore(band, sec.nextSibling);
+    var room=_ovRoom(band);
+    // ★留めるのは「写真を選んだ後」ではなく**帯を作った時点で**行う。
+    //   選ぶ前は留まっていないので、写真を選ばずに閉じると「灰色の帯が普通にスクロールするだけ」に
+    //   なっていた（実報告）。作った瞬間に留めれば、写真の有無に関係なく動きが確認できる。
+    var r=null, err='';
+    try{ r=overpassOn(band); }catch(ex){ err=(ex&&ex.message)||String(ex); }
+    markDirty();
+    var how=(room<300)
+      ? '。ただしこの位置は下に続く中身が足りないので、ほとんど留まりません（余白'+Math.max(0,room)+'px）。'
+        +'もっと上のセクションの下に足すと長く留まります'
+      : '（約'+room+'px分スクロールする間、下のセクション'+((r&&r.next)||0)+'個が上を通ります）';
+    if(err) how='（⚠留める処理で失敗しました：'+err+'。帯を右クリック→🏞 で留めてください）';
+    msg.textContent='🏞 写真の帯を足して留めました'+how+'。続けて写真を選んでください';
+    openPicker({el:band, type:'bg', fresh:true, nosave:true,
+      done:function(){
+        msg.textContent='🏞 写真の帯ができました'+how
+          +'。写真を変える時は帯を右クリック→🖼写真を加工／やめる時は🏞／消す時は🗑・💾保存で確定';
+      },
+      // ★選ばずに閉じたら帯ごと片付ける。灰色の空っぽの帯が残ると「何も起きない」ように見える。
+      cancel:function(){
+        try{ overpassOff(band); }catch(_){ }
+        band.remove(); markDirty();
+        msg.textContent='写真を選ばなかったので、帯は入れずに元に戻しました（もう一度やるなら右クリック→🏞 写真の帯）';
+      }
+    });
+  }
+  function overpassOn(el){
+    var prev=document.querySelector('[data-ceovpass]');
+    if(prev && prev!==el) overpassOff(prev);          // 留める背景は1つだけ（2つあると重なり順が読めない）
+    pushUndo(el);
+    var fr=_ovFreeAncestors(el), freed=fr.fixed;
+    el.setAttribute('data-ceovpass','1');
+    el.style.setProperty('position','sticky','important');
+    // ドラッグの跡(translate)で下にずれる分を top で打ち消して、画面のいちばん上で留める
+    var shift=_ovShiftY(el);
+    el.style.setProperty('top', (shift ? (-shift)+'px' : '0'), 'important');
+    el.style.setProperty('z-index','0','important');
+    // 後ろに続く兄弟を手前へ。★透けているものは地の色を敷く＝留めた背景が透けて見えるのを防ぐ。
+    // ★ここを「兄弟すべて」にすると事故る（実測：240個を持ち上げ239個を塗りつぶした）。
+    //   クローンのbody直下には小さな部品が大量に並ぶため、見えている大きな塊だけに絞る。
+    var bg=_ovPageBg(), n=el.nextElementSibling, cnt=0, painted=0;
+    while(n){
+      var skip=/^(SCRIPT|STYLE|LINK|TEMPLATE|NOSCRIPT|BR)$/.test(n.tagName)
+        || (n.id&&(n.id.indexOf('__ce')===0||n.id.indexOf('__op')===0));
+      if(!skip){
+        var cs2=null; try{ cs2=getComputedStyle(n); }catch(_){ }
+        // 画面に出ない物・浮いている物(absolute/fixed)は触らない＝触ると配置が壊れる
+        var use=cs2 && cs2.display!=='none' && cs2.visibility!=='hidden'
+          && cs2.position!=='fixed' && cs2.position!=='absolute' && (n.offsetHeight||0)>=40;
+        if(use){
+          n.setAttribute('data-ceovnext','1');
+          n.style.setProperty('position','relative','important');
+          n.style.setProperty('z-index','1','important');
+          // 地の色は「大きな塊が透けている時」だけ。小物まで塗ると見た目が変わってしまう。
+          var c=cs2.backgroundColor||'';
+          if((n.offsetHeight||0)>=200 && (!c || c==='transparent' || c.indexOf('rgba(0, 0, 0, 0)')>=0)){
+            n.style.setProperty('background-color',bg,'important');
+            n.setAttribute('data-ceovbg','1'); painted++;
+          }
+          cnt++;
+        }
+      }
+      n=n.nextElementSibling;
+    }
+    markDirty();
+    return {freed:freed, next:cnt, painted:painted, blocked:fr.blocked, shift:shift};
+  }
+  function overpassOff(el){
+    if(!el) return;
+    ['position','top','z-index'].forEach(function(p){ el.style.removeProperty(p); });
+    el.removeAttribute('data-ceovpass');
+    [].slice.call(document.querySelectorAll('[data-ceovnext]')).forEach(function(n){
+      n.style.removeProperty('position'); n.style.removeProperty('z-index');
+      if(n.getAttribute('data-ceovbg')){ n.style.removeProperty('background-color'); n.removeAttribute('data-ceovbg'); }
+      n.removeAttribute('data-ceovnext');
+    });
+    _ovRestoreAncestors();
+    markDirty();
+  }
+
   function unfixEl(el){
     var p=_unfixPlan(el);
     if(!p) return false;
@@ -13972,6 +14428,8 @@ html.__ce_altmode{cursor:text}
     });
     // 飾りを選択中の青い点線（編集用の目印）が焼き込まれないように必ず外す
     [].slice.call(doc.querySelectorAll('.ce_bgdeco,.ce_ringdeco,.ce_outlinedeco,[data-celine]')).forEach(function(n){ n.style.removeProperty('outline'); });
+    // ⇕余白は編集用に ns-resize カーソルを付けている。納品物には要らないので保存時に外す。
+    [].slice.call(doc.querySelectorAll('[data-cespacer]')).forEach(function(n){ n.style.removeProperty('cursor'); n.style.removeProperty('outline'); });
     // ★保険：↑の一覧に書き足し忘れたパネルを開いたまま💾保存すると、パネルがHTMLに焼き込まれて
     //   「開くたびに出るのに閉じられない板」になる（実例：🖌文字の背景パレット __ce_tbgp）。
     //   id が __ce で始まる要素はツールのUIだけなので、丸ごと掃除する。
@@ -14866,6 +15324,8 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_rst','⟲ 位置・サイズをリセット'],
     ['__ce_q_unfix','📌 画面への貼り付きを解除（一緒にスクロール）'],
     ['__ce_q_pin','📌 スクロールしても画面に貼り付ける（固定ヘッダー等）'],
+    ['__ce_q_overpass','🏞 背景を留めて、次のセクションを上に通す（AIなし）'],
+    ['__ce_q_photoband','🏞 このセクションの下に写真の帯を足す（留められる背景・AIなし）'],
     ['__ce_q_secbg','🎨 セクションの背景色を変える（AIなし・即反映）'],
     ['__ce_q_txtbg','🖌 文字の背景に色を塗る（行ごと・AIなし）'],
     ['__ce_q_vline','▎ 文字の左に縦線を引く（引用風・AIなし）'],
@@ -14878,7 +15338,7 @@ html.__ce_altmode{cursor:text}
     'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_edit','__ce_q_img','__ce_q_imgswap','__ce_q_bgsz','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg','__ce_q_vline','__ce_q_deco','__ce_q_psgrab',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
-    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix',
+    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix','__ce_q_overpass','__ce_q_photoband',
     'sep:🧹 整える・消す','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
   ];
@@ -15469,6 +15929,28 @@ html.__ce_altmode{cursor:text}
       if(!_pt || pinIsFixed(_pt)){ delete _qmM['__ce_q_pin']; return; }
       var _nm=_pt.tagName.toLowerCase();
       _qmM['__ce_q_pin']='📌 スクロールしても画面に貼り付ける（〈'+_nm+'〉を上に固定）';
+    })();
+    // 🏞 背景を留めて上を通す：セクション級の相手がいる時だけ出す。既にONなら「やめる」に変える。
+    //   ★留まる余地（親が自分よりどれだけ高いか）も出す＝押す前に「効かない場所」が分かる。
+    // 🏞 写真の帯：ふつうのセクション（器でない）が最寄りの時だけ出す＝どこに挟むかが明確な時だけ
+    (function(){
+      var _pb=overpassTarget(curEl);
+      if(!_pb || _pb.wrapper){ delete _qmM['__ce_q_photoband']; return; }
+      _qmM['__ce_q_photoband']='🏞 〈'+_pb.el.tagName.toLowerCase()+'〉の下に写真の帯を足す（留められる背景・AIなし）';
+    })();
+    (function(){
+      var _ot=overpassTarget(curEl);
+      if(!_ot){ delete _qmM['__ce_q_overpass']; return; }
+      var _on=document.querySelector('[data-ceovpass]');
+      if(_on){ _qmM['__ce_q_overpass']='🏞 背景を留めるのをやめる（〈'+_on.tagName.toLowerCase()+'〉を元に戻す）'; return; }
+      var _nm=_ot.el.tagName.toLowerCase();
+      _qmM['__ce_q_overpass']=(_ot.wrapper)
+        ? '🏞 背景を留めて上を通す（⚠ここは〈'+_nm+'〉＝ページ全体の器です。セクションの中で右クリックしてください）'
+      : (_ot.spillBad)
+        ? '🏞 背景を留めて上を通す（⚠〈'+_nm+'〉は中身が'+_ot.spill+'pxはみ出していて今は当てられません）'
+      : (_ot.room<300)
+        ? '🏞 背景を留めて上を通す（〈'+_nm+'〉・⚠下の余白が'+_ot.room+'pxしか無く効きにくい）'
+        : '🏞 背景を留めて、次のセクションを上に通す（〈'+_nm+'〉・約'+_ot.room+'px留まる）';
     })();
     // 🎨 背景色は「セクション/ヘッダー/フッターの中」でだけ出す（塗る相手が無い所では隠す）
     (function(){
@@ -17010,6 +17492,53 @@ html.__ce_altmode{cursor:text}
         msg.textContent='📌 〈'+_pt.tagName.toLowerCase()+'〉を画面の上に貼り付けました（スクロールしても残ります／解除は同じ所を右クリック→📌解除・💾保存で確定）';
         return;
       }
+      if(t.id==='__ce_q_photoband'){
+        var _pb=overpassTarget(curEl);
+        closeMenu();
+        if(!_pb || _pb.wrapper){ msg.textContent='帯を挟むセクションが見つかりません（セクションの中身の上で右クリックしてください）'; return; }
+        addPhotoBand(_pb.el);
+        return;
+      }
+      if(t.id==='__ce_q_overpass'){
+        var _onNow=document.querySelector('[data-ceovpass]');
+        if(_onNow){
+          overpassOff(_onNow); closeMenu();
+          msg.textContent='🏞 背景の留めをやめました（元のスクロールに戻ります・💾保存で確定）';
+          return;
+        }
+        var _ot=overpassTarget(curEl);
+        if(!_ot){ closeMenu(); msg.textContent='この場所には留められるセクションが見つかりませんでした'; return; }
+        if(_ot.wrapper){
+          closeMenu();
+          msg.textContent='⚠ここは〈'+_ot.el.tagName.toLowerCase()+'〉＝ページ全体の入れ物なので留められません。'
+            +'留めたいセクションの中身（見出しや写真の上）で右クリックしてください。';
+          return;
+        }
+        // ★中身がはみ出している箱には当てない。当てると次のブロックが最初からヒーローに重なっていて
+        //   手前に上がった瞬間に隠れる＝画面が真っ白になる（実際に起きた・§7㊷）。先に🧍で外へ出してもらう。
+        if(_ot.spillBad){
+          closeMenu();
+          // ★「先に🧍で外に出せば使える」と案内してはいけない（実測で確認した）。
+          //   🧍 はヒーローを header の外に出すが、出た先でも position:absolute の浮いた要素のままで、
+          //   sticky は「流れの中にある要素」にしか効かない＝結局留められない。素直にそう言う。
+          msg.textContent='⚠〈'+_ot.el.tagName.toLowerCase()+'〉は箱（'+(_ot.el.offsetHeight||0)+'px）より中身が'
+            +_ot.spill+'px下にはみ出しています。このまま留めると次のブロックがヒーローを覆って真っ白になるので当てられません。'
+            +'見出しや本文が入ったふつうのセクションの上で右クリックしてください。';
+          return;
+        }
+        var _r=overpassOn(_ot.el), _nm2=_ot.el.tagName.toLowerCase();
+        closeMenu();
+        // ★留まる距離＝そのセクションの下に親の余白がどれだけあるか。これが短いと
+        //   「少しスクロールしただけで剥がれる」＝ユーザーには「効いていない」に見える（実報告）。
+        var _fix=_r.shift ? '　（ドラッグの跡'+_r.shift+'px分のズレは自動で打ち消しました）' : '';
+        var _blk=_r.blocked ? '　⚠親に本物のスクロール領域が'+_r.blocked+'個あるため効かない場合があります。' : '';
+        msg.textContent=((_ot.room<300)
+          ? '🏞 〈'+_nm2+'〉を留めましたが、このセクションの下は親の余白が'+_ot.room+'pxしか無いので、'
+            +'その分しか留まりません（すぐ剥がれます）。もっと下に中身が続くセクション…ヒーローなど…に当てると効きます'
+          : '🏞 〈'+_nm2+'〉を留めました（約'+_ot.room+'px分スクロールする間、次のセクション'+_r.next+'個が上を通ります／'
+            +'透けていた'+_r.painted+'個に地の色を敷き、'+_r.freed+'個の親のはみ出し設定を直しました・💾保存で確定）')+_fix+_blk;
+        return;
+      }
       if(t.id==='__ce_q_unfix'){
         // ツールで貼り付けた(data-cepin)ものは、器を動かす_unfixPlanでなく専用の解除で確実に外す
         if(curEl&&curEl.closest&&curEl.closest('[data-cepin]')){
@@ -17043,7 +17572,7 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
@@ -17237,6 +17766,11 @@ html.__ce_altmode{cursor:text}
     //   動きを付けると文章のほうに付いてしまう（実報告・2026-07-29）。
     var _isToolPart=!!(el&&el.classList&&(el.classList.contains('ce_shape')||el.classList.contains('ce_psel')
       ||el.classList.contains('ce_bgdeco')||el.classList.contains('ce_ringdeco')||el.classList.contains('ce_outlinedeco')
+      // ★🏞写真の帯も同じ扱い：文字を持たないので「透明な膜」と見なされて貫通され、
+      //   帯を右クリックしたのに下の〈footer〉が選ばれていた（実測で踏んだ）。
+      ||el.classList.contains('ce_photoband')||(el.getAttribute&&el.getAttribute('data-cepband'))
+      // ★⇕で作った余白も同じ（空のdiv）。貫通されると右クリックで調整パネルに戻れない。
+      ||el.classList.contains('ce_spacer')||(el.getAttribute&&el.getAttribute('data-cespacer'))
       ||(el.getAttribute&&el.getAttribute('data-celine'))));
     if(!_wasForced && !_isToolPart) el=_descendOverlay(el, e.clientX, e.clientY);  // 透明な膜は貫通して下の実体を掴む（⬆外側選択のときは貫通させない）
     // 別の枝の入れ物が上にかぶっている時は、実際に見えている文字のほうを掴む（重なりを直さなくても選べる）
