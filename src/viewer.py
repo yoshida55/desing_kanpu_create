@@ -2976,8 +2976,32 @@ html.__ce_altmode{cursor:text}
     star:  {lb:'⭐ 星',  css:'width:170px;height:170px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);'},
     blob:  {lb:'💧 しずく', css:'width:190px;height:190px;border-radius:62% 38% 55% 45% / 45% 55% 42% 58%;'},
     slash: {lb:'／ 斜め線', css:'width:300px;height:3px;border-radius:3px;rotate:-28deg;'},
-    arc:   {lb:'⌒ カーブ線', css:'width:340px;height:340px;border-radius:50%;rotate:-20deg;'}
+    arc:   {lb:'⌒ カーブ線', css:'width:340px;height:340px;border-radius:50%;rotate:-20deg;'},
+    // 🌫 もや＝フチのないぼんやりした光。写真の上に敷いて文字を読みやすくする、背景に色の空気感を足す等、
+    //   帯に限らずどこでも使える（2026-08-01 要望）。実体はただの図形なので、
+    //   ドラッグ移動・大きさ変更・色替え・傾き・動きの付与など既存の機能がそのまま全部効く。
+    haze:  {lb:'🌫 もや',   css:'width:460px;height:280px;border-radius:50%;filter:blur(48px);'},
+    // ✨ ふんわり光＝中心が明るく、外へ向かってゆっくり消えていく光（2026-08-01 要望の見本はこの形）。
+    //   🌫もやは「色の塊をぼかした」ものなので中心がベタ塗り。こちらは radial-gradient なので
+    //   中心から縁まで濃さが連続して変わり、写真の上に置くと自然に白く飛ばせる。
+    glow:  {lb:'✨ ふんわり光', css:'width:660px;height:400px;border-radius:50%;filter:blur(24px);'}
   };
+  // 色（#rgb / #rrggbb / rgb() / rgba()）を、指定した濃さの rgba に直す。★正規表現は使わない
+  //   （埋め込みJSではバックスラッシュの扱いを間違えやすいため・§7の地雷）
+  function _toRgba(c,a){
+    c=(c||'#ffffff').toString().trim();
+    if(c.charAt(0)==='#'){
+      var h=c.slice(1);
+      if(h.length===3) h=h.charAt(0)+h.charAt(0)+h.charAt(1)+h.charAt(1)+h.charAt(2)+h.charAt(2);
+      if(h.length>=6) return 'rgba('+parseInt(h.substr(0,2),16)+','+parseInt(h.substr(2,2),16)+','+parseInt(h.substr(4,2),16)+','+a+')';
+    }
+    var i=c.indexOf('('), j=c.lastIndexOf(')');
+    if(i>0&&j>i){
+      var p=c.slice(i+1,j).split(',');
+      return 'rgba('+(parseFloat(p[0])||0)+','+(parseFloat(p[1])||0)+','+(parseFloat(p[2])||0)+','+a+')';
+    }
+    return 'rgba(255,255,255,'+a+')';
+  }
   // ▶ 丸アイコン（丸の中に記号）7種。見出しの前・リンクの横・箇条書きの先頭に置く小さな飾り。
   //   中身は文字なので、大きさ・色は図形バーの色/塗り、書体はページの書体をそのまま継ぐ。
   var ICON_DEF=[
@@ -3071,7 +3095,15 @@ html.__ce_altmode{cursor:text}
       return;
     }
     // ★三角・星はclip-pathで形を作る＝borderは形どおりに切られて出ないので、必ず塗りで描く
-    var noBorder=(kind==='line'||kind==='tri'||kind==='star'||kind==='slash');
+    if(kind==='glow'){   // ✨ふんわり光＝中心から外へ濃さが連続して消えるグラデーション
+      el.style.setProperty('background','radial-gradient(ellipse at center, '
+        +_toRgba(col,0.95)+' 0%, '+_toRgba(col,0.72)+' 30%, '+_toRgba(col,0.34)+' 55%, '+_toRgba(col,0)+' 76%)','important');
+      el.style.removeProperty('border');
+      if(op!=null) el.style.setProperty('opacity', String(op));
+      return;
+    }
+    // 🌫もやは必ず塗り（フチ線を描くと、ぼかしで二重の輪になってしまう）
+    var noBorder=(kind==='line'||kind==='tri'||kind==='star'||kind==='slash'||kind==='haze');
     if(noBorder||fill){ el.style.setProperty('background',col); el.style.removeProperty('border'); }
     else { el.style.setProperty('background','transparent'); el.style.setProperty('border','3px solid '+col); }
     if(op!=null) el.style.setProperty('opacity', String(op));
@@ -3084,6 +3116,71 @@ html.__ce_altmode{cursor:text}
     SHAPE_ST.op=next; _shapeStSave();
     if(t){ t.style.setProperty('opacity', String(next)); markDirty(); }
     return next;
+  }
+  // 📝 文字セット＝「見出し＋ひとこと」などのまとまりを、どこにでも置ける部品として置く。
+  //   ★帯の中だけの機能にしない（2026-08-01 要望「固定の写真を追加した場合でも、そうじゃない場合でも使えるように」）。
+  //   図形バーから置くので、写真の上でも・ただのセクションの上でも同じ手順で使える。
+  //   ★種類を足したいときは、この配列に1件足すだけ。
+  var TEXTSET_PATS=[
+    {id:'center', nm:'見出し＋ひとこと（中央）', note:'いちばん使いやすい'},
+    {id:'big',    nm:'見出しだけ（大きく）',     note:'言葉を1つだけ見せる'},
+    {id:'left',   nm:'見出し＋ひとこと（左）',   note:'写真の主役が右にある時'},
+    {id:'card',   nm:'白いカード（見出し＋文）', note:'文章が長い時に読みやすい'},
+    {id:'cta',    nm:'見出し＋ボタン',           note:'次の行動に誘導したい時'}
+  ];
+  function _tsHtml(id){
+    var col='#3f4a3d', sub='#5b6b58';
+    var H='font-weight:700;line-height:1.75;letter-spacing:.06em;color:'+col;
+    var P='line-height:2.1;letter-spacing:.04em;color:'+sub;
+    if(id==='big')  return '<div style="font-size:48px;'+H+'">ここから、<br>はじめよう。</div>';
+    if(id==='card') return '<div style="background:rgba(255,255,255,.92);border-radius:22px;padding:40px 46px;'
+      +'box-shadow:0 14px 40px rgba(60,80,60,.14)">'
+      +'<div style="font-size:28px;margin-bottom:16px;'+H+'">わたしたちの想い</div>'
+      +'<div style="font-size:15px;'+P+'">一人ひとりの「できる」を大切に、自分らしく働ける毎日を、一緒につくります。</div></div>';
+    if(id==='cta')  return '<div style="font-size:34px;'+H+'">まずは話してみませんか。</div>'
+      +'<div style="display:inline-block;background:#7fbf4d;color:#fff;font-weight:700;letter-spacing:.08em;'
+      +'padding:16px 46px;border-radius:999px;box-shadow:0 10px 24px rgba(90,150,60,.28)">ご相談はこちら</div>';
+    var h=(id==='left')?'まちの中で、<br>はたらく。':'社会復帰への道を、<br>一歩ずつ、ともに。';
+    var p=(id==='left')?'地域とつながりながら、自分らしい毎日をつくります。':'一人ひとりに合った支援を通して、<br>次の一歩を支えます。';
+    return '<div style="font-size:34px;'+H+'">'+h+'</div><div style="font-size:15px;'+P+'">'+p+'</div>';
+  }
+  function addTextSet(id){
+    var d=document.createElement('div');
+    d.className='ce_textset'; d.setAttribute('data-cetextset',id);
+    var align=(id==='left')?'flex-start':'center';
+    var ta=(id==='left'||id==='card')?'left':'center';
+    d.setAttribute('style','box-sizing:border-box;display:flex;flex-direction:column;gap:16px;'
+      +'align-items:'+align+';text-align:'+ta+';max-width:820px;');
+    d.innerHTML=_tsHtml(id);
+    placeFree(d, (window.scrollX||0)+window.innerWidth/2, (window.scrollY||0)+window.innerHeight/2);
+    // placeFree が文字用に足す折り返し無効を外す（改行が効かなくなるため）
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ d.style.removeProperty('white-space'); }); });
+    _lastShape=d; markDirty();
+    if(msg) msg.textContent='📝 文字セットを置きました（掴んで移動／文字は右クリック→✏で書き換え・💾保存で確定）';
+    return d;
+  }
+  function openTextSetPicker(){
+    var old=document.getElementById('__ce_tsp'); if(old){ old.remove(); return; }
+    var B='border:1px solid #cfd8e3;background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font:12px sans-serif;text-align:left';
+    var p=document.createElement('div'); p.id='__ce_tsp';
+    p.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:74px;z-index:2147483647;background:#fff;'
+      +'color:#1d1d1f;border:1px solid #dbe4ee;border-radius:12px;padding:11px 13px;font:12.5px/1.6 sans-serif;'
+      +'box-shadow:0 14px 40px rgba(0,0,0,.28);max-width:96vw');
+    p.innerHTML='<div style="font-weight:700;margin-bottom:7px">📝 どの文字のかたまりを置きますか？</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;max-width:760px">'
+      + TEXTSET_PATS.map(function(o){
+          return '<button data-ts="'+o.id+'" style="'+B+'">'+o.nm
+            +'<span style="display:block;font-size:10.5px;opacity:.65">'+o.note+'</span></button>';
+        }).join('')
+      +'</div>'
+      +'<div style="opacity:.6;font-size:11px;margin-top:7px">置いたあと掴んで動かせます。写真や🌫もやの上に重ねると見本のようになります。</div>';
+    document.body.appendChild(p);
+    p.addEventListener('mousedown',function(e){ e.stopPropagation(); });
+    p.addEventListener('click',function(e){
+      e.stopPropagation();
+      var t=e.target.closest?e.target.closest('[data-ts]'):null; if(!t) return;
+      addTextSet(t.getAttribute('data-ts')); p.remove();
+    });
   }
   function addShape(kind, sym){
     var d=document.createElement('div');
@@ -3135,6 +3232,9 @@ html.__ce_altmode{cursor:text}
         +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
         +'<b style="font-size:12px;color:#5b6472">アイコン</b>'+icons
         +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
+        // 📝 文字セット：バーにボタンを何個も増やさず、押したら一覧から選ぶ（要望）
+        +btn('tset','📝 文字セット')
+        +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
         +btn('fill', SHAPE_ST.fill?'● 塗り':'○ フチだけ')
         +btn('water', SHAPE_ST.water?'🎨 水彩 ON':'🎨 水彩', SHAPE_ST.water?'#0ea5a3':null)
         +btn('wpat', '🖌 '+WATER_PATS[(SHAPE_ST.wpat||0)%WATER_PATS.length], SHAPE_ST.water?'#0d9488':null)
@@ -3163,7 +3263,8 @@ html.__ce_altmode{cursor:text}
       var b=e.target.closest('[data-sb]');
       if(b){
         var k=b.getAttribute('data-sb');
-        if(k==='x'){ bar.remove(); return; }
+        if(k==='x'){ bar.remove(); var _tp=document.getElementById('__ce_tsp'); if(_tp) _tp.remove(); return; }
+        if(k==='tset'){ openTextSetPicker(); return; }
         if(k==='fill'){ SHAPE_ST.fill=SHAPE_ST.fill?0:1; _shapeStSave(); render(); repaintSel(); return; }
         if(k==='water'){
           SHAPE_ST.water=SHAPE_ST.water?0:1; _shapeStSave(); render(); repaintSel();
@@ -5781,6 +5882,38 @@ html.__ce_altmode{cursor:text}
     }
     return _flowKids(document.body).length>0?document.body:null;
   }
+  // ★高さが直接指定された入れ物の中に物を足すと、入れ物が伸びずに中身が後ろへはみ出して重なる。
+  //   ★伸ばす相手は「すぐ上の親」とは限らない（実測：余白は div.top01__txt_blk の中にできたが、
+  //     高さを固定していたのは3段上の <article> だった＝親だけ直してもフッターが動かず重なった）。
+  //   変更前に先祖の高さを控えておき、変更後に「伸びなかったのに中身が増えた」最初の先祖を伸ばす。
+  function _hostSnap(el){
+    var out=[], n=el&&el.parentElement, i=0;
+    while(n && n!==document.body && i<10){ out.push({n:n,h:n.offsetHeight,s:n.scrollHeight}); n=n.parentElement; i++; }
+    return out;
+  }
+  function _growHosts(snap){
+    for(var i=0;i<snap.length;i++){
+      var n=snap[i].n, grow=n.scrollHeight-snap[i].s;
+      if(grow>2 && n.offsetHeight===snap[i].h){
+        if(n.getAttribute('data-cehgrow')==null) n.setAttribute('data-cehgrow', n.style.getPropertyValue('height')||'');
+        n.style.setProperty('height',(snap[i].h+grow)+'px','important');
+        return n;                     // 1つ伸ばせば、その上は自動で追従する
+      }
+    }
+    return null;
+  }
+  // 足した物を消すとき、伸ばした入れ物の高さを元に戻す
+  function _shrinkHosts(el){
+    var n=el&&el.parentElement, i=0;
+    while(n && n!==document.body && i<10){
+      if(n.getAttribute('data-cehgrow')!=null){
+        var old=n.getAttribute('data-cehgrow');
+        if(old) n.style.setProperty('height',old); else n.style.removeProperty('height');
+        n.removeAttribute('data-cehgrow');
+      }
+      n=n.parentElement; i++;
+    }
+  }
   function openSpacer(el,y){
     var oldp=document.getElementById('__ce_vsp'); if(oldp) oldp.remove();
     var host=_spacerHost(el||document.body);
@@ -5801,7 +5934,14 @@ html.__ce_altmode{cursor:text}
         }
       }
     }catch(_){ }
-    if(_reuse){
+    // 🏞写真の帯は「隙間を足す」のではなく帯そのものを高くしたい。同じパネルを使い回して高さを変える。
+    var _band=(el&&el.closest)?el.closest('[data-cepband]'):null;
+    if(_band){
+      mode='band'; sp=_band; host=_band.parentElement;
+      sp.style.setProperty('min-height','0');     // 作った時の min-height:420px が邪魔で縮められない
+      where='🏞 写真の帯の高さ';
+    }
+    else if(_reuse){
       sp=_reuse; host=_reuse.parentElement;
       where=(host?host.tagName.toLowerCase():'')+'（さっき作った余白を調整）';
     }
@@ -5823,7 +5963,10 @@ html.__ce_altmode{cursor:text}
         sp.style.setProperty('cursor','ns-resize');
         sp.style.setProperty('pointer-events','auto');   // 親のpointer-events:noneを継がない（掴めなくなる）
         try{ pushUndo(host); }catch(_){}
+        // 挿入で伸びなかった入れ物（もっと上かもしれない）を伸ばす
+        var _snap=_hostSnap(before||host.lastElementChild||host);
         if(before) host.insertBefore(sp,before); else host.appendChild(sp);
+        _growHosts(_snap);
       }
       where=host.tagName.toLowerCase()+(host.className&&typeof host.className==='string'?('.'+host.className.trim().split(/\\s+/)[0]):'')
         +(before?'（'+before.tagName.toLowerCase()+' の上）':'（いちばん下）');
@@ -5834,14 +5977,37 @@ html.__ce_altmode{cursor:text}
       where=secEl.tagName.toLowerCase()+' の高さを伸ばす（中身が自由配置なので隙間を作れないため）';
     }
     function nowPx(){
+      if(mode==='band') return Math.round(sp.offsetHeight||0);   // 80vh 等で始まるので実測値を使う
       if(mode==='spacer') return Math.round(parseFloat(sp.style.height)||0);
       var cs=getComputedStyle(secEl);
       return Math.round(parseFloat(cs.minHeight)||secEl.offsetHeight||0);
     }
+    // 「まとめて広げる」用の目安の大きさ。画面1つ分＝今のブラウザの高さ、セクション1つ分＝隣のセクションの高さ。
+    var _vspBig=(function(){
+      var vh=Math.round(window.innerHeight||800), sec=0;
+      try{
+        var cands=[];
+        if(sp){ cands.push(sp.previousElementSibling, sp.nextElementSibling); }
+        if(secEl) cands.push(secEl);
+        cands.forEach(function(c){
+          if(!c||!c.tagName) return;
+          if(/^(SECTION|HEADER|FOOTER|ARTICLE|MAIN)$/.test(c.tagName) && c.offsetHeight>sec) sec=c.offsetHeight;
+        });
+        if(!sec && sp && sp.closest){ var s=sp.closest('section,header,footer'); if(s) sec=s.offsetHeight; }
+      }catch(_){ }
+      return {vh:vh, half:Math.round(vh/2), sec:Math.round(sec)};
+    })();
     var p=document.createElement('div'); p.id='__ce_vsp';
     function setPx(v){
       v=Math.max(0,Math.round(v));
-      if(mode==='spacer'){ sp.style.setProperty('height',v+'px'); }
+      // ★帯も余白も同じ手当てが要る（2026-08-01・実報告）。高さを直接指定した入れ物の中で
+      //   広げても入れ物が伸びず、はみ出した中身が後ろに重なって「下のセクションが縮んだ」に見える。
+      if(mode==='band'||mode==='spacer'){
+        var _sn=_hostSnap(sp);
+        if(mode==='band') sp.style.setProperty('height',v+'px','important');
+        else sp.style.setProperty('height',v+'px');
+        _growHosts(_sn);
+      }
       else{ try{ pushUndo(secEl); }catch(_){} secEl.style.setProperty('min-height',v+'px','important'); }
       try{ markDirty(); }catch(_){}
       var f=p.querySelector('#__vspnum'); if(f) f.textContent=nowPx()+'px';
@@ -5857,7 +6023,14 @@ html.__ce_altmode{cursor:text}
       +'<button class="__vspb" data-d="10" style="border:1px solid #ddd;background:#f7f7f9;border-radius:7px;padding:5px 9px;cursor:pointer">＋10</button>'
       +'<button class="__vspb" data-d="40" style="border:1px solid #ddd;background:#f7f7f9;border-radius:7px;padding:5px 9px;cursor:pointer">＋40</button>'
       +'<span id="__vspdrag" title="上下にドラッグで調整" style="cursor:ns-resize;background:#0b6bcb;color:#fff;border-radius:7px;padding:5px 12px;user-select:none">⇕ ドラッグ</span>'
-      +(mode==='spacer'?'<button id="__vspdel" style="border:1px solid #f0c0c0;background:#fdeeee;color:#b03636;border-radius:7px;padding:5px 9px;cursor:pointer">消す</button>':'')
+      // ★一気に広げる用。★値は px で入れる：100vh のような単位で焼き込むと、あとで
+      //   画面サイズや実装先の環境で高さが変わってしまう（ユーザー要望「vhで固定されると困る」）。
+      +'</div><div style="display:flex;gap:5px;align-items:center;margin-top:6px;flex-wrap:wrap">'
+      +'<span style="color:#777;font-size:11px;flex:none">まとめて</span>'
+      +'<button class="__vspb" data-d="'+_vspBig.half+'" style="border:1px solid #ddd;background:#eef4fb;border-radius:7px;padding:5px 9px;cursor:pointer">＋半画面 '+_vspBig.half+'px</button>'
+      +'<button class="__vspb" data-d="'+_vspBig.vh+'" style="border:1px solid #ddd;background:#eef4fb;border-radius:7px;padding:5px 9px;cursor:pointer">＋1画面ぶん '+_vspBig.vh+'px</button>'
+      +(_vspBig.sec?'<button class="__vspb" data-d="'+_vspBig.sec+'" style="border:1px solid #ddd;background:#eef7ee;border-radius:7px;padding:5px 9px;cursor:pointer">＋セクション1つ分 '+_vspBig.sec+'px</button>':'')
+      +((mode==='spacer'||mode==='band')?'<button id="__vspdel" style="border:1px solid #f0c0c0;background:#fdeeee;color:#b03636;border-radius:7px;padding:5px 9px;cursor:pointer">'+(mode==='band'?'帯を消す':'消す')+'</button>':'')
       +'</div>';
     document.body.appendChild(p);
     setPx(nowPx());
@@ -5868,8 +6041,10 @@ html.__ce_altmode{cursor:text}
     var dl=p.querySelector('#__vspdel');
     if(dl) dl.addEventListener('click',function(){
       try{ pushUndo(sp.parentElement); }catch(_){}
-      sp.remove(); try{ markDirty(); }catch(_){}
-      p.remove(); if(msg) msg.textContent='⇕ 作った縦の空間を消しました';
+      if(mode==='band'){ try{ bandRemove(sp); }catch(_){ } }   // 留めた設定＋伸ばした入れ物の高さも戻す
+      else { _shrinkHosts(sp); sp.remove(); }   // 余白のために伸ばした入れ物の高さも元に戻す
+      try{ markDirty(); }catch(_){}
+      p.remove(); if(msg) msg.textContent=(mode==='band'?'🏞 写真の帯を消しました':'⇕ 作った縦の空間を消しました');
     });
     // ⇕ ドラッグで調整（下へ引くほど広がる）
     (function(){
@@ -11175,7 +11350,9 @@ html.__ce_altmode{cursor:text}
     //   動きを付けた瞬間にフチがくっきりして**別の形に見える**（2026-07-31・報告）。
     // ★🎨水彩ふう(data-cewcfx)も filter で作っている。ここで消すと動きを付けた瞬間に
     //   元のツヤツヤした写真に戻る＝「水彩にしたのにアニメを付けたら外れた」になる。
-    var _hasFx=el.getAttribute&&(el.getAttribute('data-cewater')||el.getAttribute('data-cewcfx'));
+    // ★🌫もや(data-ceshape=haze)も filter:blur で形を作っている。消すと四角い板に戻る。
+    var _hasFx=el.getAttribute&&(el.getAttribute('data-cewater')||el.getAttribute('data-cewcfx')
+      ||el.getAttribute('data-ceshape')==='haze'||el.getAttribute('data-ceshape')==='glow');
     var _keepFil=(_isDeco||_hasFx)?el.style.getPropertyValue('filter'):'';
     // 元の !important も一緒に控える（付け直しで優先度が落ちるとページ側CSSに負ける）
     var _keepFilP=_keepFil?el.style.getPropertyPriority('filter'):'';
@@ -13744,6 +13921,154 @@ html.__ce_altmode{cursor:text}
     return wrap ? {el:wrap, room:0, spill:0, wrapper:true} : null;
   }
   function overpassIsOn(el){ return !!(el && el.getAttribute && el.getAttribute('data-ceovpass')); }
+  // 🏞 帯の中身（文字レイアウト）のパターン。★ボタンをバーに増やさず、押したら一覧から選ぶ形にする
+  //   （2026-08-01 要望「バーに追加すると増えすぎるからサブメニューで何種類か選べるように」）。
+  //   ★あとから種類を足せるよう、この配列に1件足すだけで増える作りにしてある。
+  var BAND_PATS=[
+    {id:'none',   nm:'写真だけ',                 note:'文字なし'},
+    {id:'center', nm:'中央に見出し＋ひとこと',   note:'いちばん使いやすい'},
+    {id:'big',    nm:'中央に見出しだけ（大きく）', note:'言葉を1つだけ見せる'},
+    {id:'left',   nm:'左下に寄せる',             note:'写真の主役が右にある時'},
+    {id:'card',   nm:'白いカードを中に置く',     note:'文章が長い時に読みやすい'},
+    {id:'cta',    nm:'見出し＋ボタン',           note:'次の行動に誘導したい時'}
+  ];
+  var BAND_VEIL=[0,0.35,0.55,0.72];      // 写真の上に敷く白いベールの濃さ（0＝なし）
+  // 帯の高さを広げた時に写真をどう扱うか。★既定の cover は「枠を埋める」ので、
+  //   高くするほど写真が拡大される＝ユーザーの言う「ドアップになっていく」（2026-08-01・報告）。
+  var BAND_FIT=[
+    {id:'cover', nm:'切り取って埋める', note:'広げるとドアップになる'},
+    {id:'width', nm:'幅に合わせる',     note:'広げてもズームしない（高いと上下に地の色）'},
+    {id:'whole', nm:'全体を見せる',     note:'上下に余白が出ることがある'}
+  ];
+  function bandFitApply(band, id){
+    if(!band) return;
+    if(id==='width'){
+      // 横幅だけ100%に固定＝高さを変えても写真の大きさは変わらない
+      band.style.setProperty('background-size','100% auto','important');
+    }else if(id==='whole'){
+      band.style.setProperty('background-size','contain','important');
+    }else{
+      band.style.setProperty('background-size','cover','important');
+    }
+    band.style.setProperty('background-repeat','no-repeat','important');
+    band.style.setProperty('background-position','center','important');
+    band.setAttribute('data-cebandfit', id);
+    markDirty();
+  }
+  function _bandTxtCol(){ return '#3f4a3d'; }
+  function bandPatApply(band, id, veil){
+    if(!band) return;
+    try{ pushUndo(band); }catch(_){ }
+    [].slice.call(band.querySelectorAll('.ce_bandtxt,.ce_bandveil')).forEach(function(n){ n.remove(); });
+    band.setAttribute('data-cebandpat', id);
+    band.setAttribute('data-cebandveil', String(veil));
+    if(id==='none'){ markDirty(); return; }
+    if(veil>0){
+      var v=document.createElement('div'); v.className='ce_bandveil';
+      v.setAttribute('style','position:absolute;inset:0;background:rgba(255,255,255,'+veil+');pointer-events:none');
+      band.appendChild(v);
+    }
+    var col=_bandTxtCol(), sub='#5b6b58';
+    var box=document.createElement('div'); box.className='ce_bandtxt';
+    var base='position:absolute;inset:0;display:flex;flex-direction:column;gap:16px;padding:6% 7%;';
+    var H='font-weight:700;line-height:1.75;letter-spacing:.06em;color:'+col;
+    var P='line-height:2.1;letter-spacing:.04em;color:'+sub;
+    if(id==='center'){
+      box.setAttribute('style', base+'align-items:center;justify-content:center;text-align:center');
+      box.innerHTML='<div style="font-size:34px;'+H+'">社会復帰への道を、<br>一歩ずつ、ともに。</div>'
+        +'<div style="font-size:15px;'+P+'">一人ひとりに合った支援を通して、<br>次の一歩を支えます。</div>';
+    }else if(id==='big'){
+      box.setAttribute('style', base+'align-items:center;justify-content:center;text-align:center');
+      box.innerHTML='<div style="font-size:48px;'+H+'">ここから、<br>はじめよう。</div>';
+    }else if(id==='left'){
+      box.setAttribute('style', base+'align-items:flex-start;justify-content:flex-end;text-align:left');
+      box.innerHTML='<div style="font-size:32px;'+H+'">まちの中で、<br>はたらく。</div>'
+        +'<div style="font-size:15px;'+P+'">地域とつながりながら、自分らしい毎日をつくります。</div>';
+    }else if(id==='card'){
+      box.setAttribute('style', base+'align-items:center;justify-content:center;text-align:left');
+      box.innerHTML='<div style="max-width:720px;background:rgba(255,255,255,.92);border-radius:22px;padding:40px 46px;'
+        +'box-shadow:0 14px 40px rgba(60,80,60,.14)">'
+        +'<div style="font-size:28px;margin-bottom:16px;'+H+'">わたしたちの想い</div>'
+        +'<div style="font-size:15px;'+P+'">一人ひとりの「できる」を大切に、自分らしく働ける毎日を、一緒につくります。</div></div>';
+    }else if(id==='cta'){
+      box.setAttribute('style', base+'align-items:center;justify-content:center;text-align:center');
+      box.innerHTML='<div style="font-size:34px;'+H+'">まずは話してみませんか。</div>'
+        +'<div style="display:inline-block;background:#7fbf4d;color:#fff;font-weight:700;letter-spacing:.08em;'
+        +'padding:16px 46px;border-radius:999px;box-shadow:0 10px 24px rgba(90,150,60,.28)">ご相談はこちら</div>';
+    }
+    band.appendChild(box);
+    markDirty();
+  }
+  function openBandPatternPanel(band){
+    if(!band){ msg.textContent='対象の帯がありません'; return; }
+    var old=document.getElementById('__ce_bdp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    var curId=band.getAttribute('data-cebandpat')||'none';
+    var curV=parseFloat(band.getAttribute('data-cebandveil')); if(isNaN(curV)) curV=0.55;
+    var B='border:1px solid #cfd8e3;background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font:12px sans-serif;text-align:left';
+    var ON=';background:#0d9488;color:#fff;border-color:#0d9488';
+    var p=document.createElement('div'); p.id='__ce_bdp';
+    p.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:2147483647;background:#fff;'
+      +'color:#1d1d1f;border:1px solid #dbe4ee;border-radius:12px;padding:11px 13px;font:12.5px/1.6 sans-serif;'
+      +'box-shadow:0 14px 40px rgba(0,0,0,.28);max-width:96vw');
+    function draw(){
+      var id=band.getAttribute('data-cebandpat')||'none';
+      var vv=parseFloat(band.getAttribute('data-cebandveil')); if(isNaN(vv)) vv=curV;
+      p.innerHTML='<div class="__ce_bdpmv" style="font-weight:700;margin-bottom:7px;cursor:move">🏞 帯の中身を選ぶ（あとから文字は書き換えられます）</div>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;max-width:760px">'
+        + BAND_PATS.map(function(o){
+            return '<button data-bp="'+o.id+'" style="'+B+(id===o.id?ON:'')+'">'+o.nm
+              +'<span style="display:block;font-size:10.5px;opacity:.65">'+o.note+'</span></button>';
+          }).join('')
+        +'</div>'
+        +'<div style="opacity:.7;margin-top:9px">帯を高くした時の写真の扱い</div>'
+        +'<div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">'
+        + BAND_FIT.map(function(o){
+            var on=((band.getAttribute('data-cebandfit')||'cover')===o.id);
+            return '<button data-bf="'+o.id+'" style="'+B+(on?ON:'')+'">'+o.nm
+              +'<span style="display:block;font-size:10.5px;opacity:.65">'+o.note+'</span></button>';
+          }).join('')
+        +'</div>'
+        +'<div style="opacity:.7;margin-top:9px">写真を白くぼかして文字を読みやすく</div>'
+        +'<div style="display:flex;gap:5px;margin-top:3px">'
+        + BAND_VEIL.map(function(v,i){
+            var lb=['なし','うすい','ふつう','しっかり'][i];
+            return '<button data-bv="'+v+'" style="'+B.replace('text-align:left','')+((Math.abs(vv-v)<0.01)?ON:'')+'">'+lb+'</button>';
+          }).join('')
+        +'</div>'
+        +'<div style="display:flex;gap:6px;margin-top:10px">'
+        +'<button data-bx="1" style="background:#0b6bcb;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer">閉じる</button></div>';
+      try{ panelDrag(p, p.querySelector('.__ce_bdpmv')); }catch(_){ }
+    }
+    draw(); document.body.appendChild(p);
+    p.__close=function(){ p.remove(); };
+    p.addEventListener('mousedown',function(ev){ ev.stopPropagation(); },true);
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var t=ev.target.closest?ev.target.closest('button'):null; if(!t) return;
+      if(t.getAttribute('data-bx')){ p.__close(); return; }
+      var vv=parseFloat(band.getAttribute('data-cebandveil')); if(isNaN(vv)) vv=curV;
+      var bp=t.getAttribute('data-bp'), bv=t.getAttribute('data-bv'), bf=t.getAttribute('data-bf');
+      if(bf!=null){
+        bandFitApply(band, bf); draw();
+        msg.textContent=(bf==='width') ? '🏞 幅に合わせました（帯を高くしても写真は拡大されません・💾保存で確定）'
+          : (bf==='whole') ? '🏞 写真全体を見せます（上下に余白が出ることがあります）'
+          : '🏞 枠いっぱいに埋めます（帯を高くすると写真も拡大されます）';
+        return;
+      }
+      if(bp!=null){ bandPatApply(band, bp, vv); }
+      else if(bv!=null){ bandPatApply(band, band.getAttribute('data-cebandpat')||'center', parseFloat(bv)); }
+      draw();
+      msg.textContent='🏞 帯の中身を変えました（文字は右クリック→✏で書き換え・💾保存で確定）';
+    });
+  }
+  // 🏞帯を消すときの後片付け（留めた設定を外す＋伸ばした入れ物の高さを元に戻す）
+  function bandRemove(band){
+    if(!band) return;
+    try{ overpassOff(band); }catch(_){ }
+    _shrinkHosts(band);            // 帯のために伸ばした入れ物の高さを元に戻す
+    band.remove();
+    try{ markDirty(); }catch(_){ }
+  }
   // 🏞 写真の帯を足す（2026-07-31 要望「みどりの下に写真を置いて、それを留めて下のセクションに追い抜かせたい」）
   //   ★「🖼画像を追加」で置いた写真では実現できない：あれは position:absolute の浮いた要素になり、
   //     sticky は**流れの中にある要素にしか効かない**。だから留められる「帯（section）」を作る必要がある。
@@ -13755,7 +14080,14 @@ html.__ce_altmode{cursor:text}
     band.setAttribute('data-cepband','1');
     band.style.cssText='position:relative;width:100%;height:80vh;min-height:420px;'
       +'background-color:#e9eef2;background-size:cover;background-position:center;background-repeat:no-repeat';
+    // ★入れ物に高さが直接指定されていると、帯を入れても伸びない（実測：article が height:4195px 固定）。
+    //   はみ出した中身が後ろのセクションに重なり、ユーザーには「次の次のセクションが縮んだ」に見える。
+    // ★伸ばす量は「scrollHeight と clientHeight の差」ではない：この article は帯を入れる前から
+    //   3796px はみ出していたので、その式だと 720px のところを 4516px も伸ばしてしまった（実測）。
+    //   **帯を入れたことで増えた分だけ**を測って足す。
+    var _snapB=_hostSnap(sec);
     sec.parentNode.insertBefore(band, sec.nextSibling);
+    _growHosts(_snapB);
     var room=_ovRoom(band);
     // ★留めるのは「写真を選んだ後」ではなく**帯を作った時点で**行う。
     //   選ぶ前は留まっていないので、写真を選ばずに閉じると「灰色の帯が普通にスクロールするだけ」に
@@ -13771,13 +14103,12 @@ html.__ce_altmode{cursor:text}
     msg.textContent='🏞 写真の帯を足して留めました'+how+'。続けて写真を選んでください';
     openPicker({el:band, type:'bg', fresh:true, nosave:true,
       done:function(){
-        msg.textContent='🏞 写真の帯ができました'+how
-          +'。写真を変える時は帯を右クリック→🖼写真を加工／やめる時は🏞／消す時は🗑・💾保存で確定';
+        msg.textContent='🏞 写真の帯ができました'+how+'。続けて中身（文字のレイアウト）を選べます';
+        try{ openBandPatternPanel(band); }catch(_){ }   // 写真の次は「中身のパターン」を選ぶ流れにする
       },
       // ★選ばずに閉じたら帯ごと片付ける。灰色の空っぽの帯が残ると「何も起きない」ように見える。
       cancel:function(){
-        try{ overpassOff(band); }catch(_){ }
-        band.remove(); markDirty();
+        bandRemove(band);
         msg.textContent='写真を選ばなかったので、帯は入れずに元に戻しました（もう一度やるなら右クリック→🏞 写真の帯）';
       }
     });
@@ -13792,28 +14123,38 @@ html.__ce_altmode{cursor:text}
     // ドラッグの跡(translate)で下にずれる分を top で打ち消して、画面のいちばん上で留める
     var shift=_ovShiftY(el);
     el.style.setProperty('top', (shift ? (-shift)+'px' : '0'), 'important');
-    el.style.setProperty('z-index','0','important');
+    el.style.setProperty('z-index','-1','important');
     // 後ろに続く兄弟を手前へ。★透けているものは地の色を敷く＝留めた背景が透けて見えるのを防ぐ。
-    // ★ここを「兄弟すべて」にすると事故る（実測：240個を持ち上げ239個を塗りつぶした）。
-    //   クローンのbody直下には小さな部品が大量に並ぶため、見えている大きな塊だけに絞る。
+    // ★後続のセクションに position:relative を付けてはいけない（2026-08-01・実報告「次の次のセクションが縮む」）。
+    //   relative を付けるとそのセクションが**中の絶対配置の子の基準（containing block）になってしまい**、
+    //   これまで外側を基準に置かれていた中身が一斉に動いて潰れる。カンプは絶対配置だらけなので必ず壊れる。
+    //   代わりに**留める側を z-index:-1 にして後ろへ回す**。後続は一切触らないので副作用ゼロ。
+    el.style.setProperty('z-index','-1','important');
+    // ★後続に position/z-index は触らない（それが「縮む」の原因だった）。
+    //   ただし透けている大きな塊はそのままだと留めた背景が透けて文字が読めないので、
+    //   **地の色を敷くだけ**にする。背景色は配置に一切影響しないので安全。
     var bg=_ovPageBg(), n=el.nextElementSibling, cnt=0, painted=0;
     while(n){
       var skip=/^(SCRIPT|STYLE|LINK|TEMPLATE|NOSCRIPT|BR)$/.test(n.tagName)
         || (n.id&&(n.id.indexOf('__ce')===0||n.id.indexOf('__op')===0));
-      if(!skip){
+      if(!skip && (n.offsetHeight||0)>=200){
         var cs2=null; try{ cs2=getComputedStyle(n); }catch(_){ }
-        // 画面に出ない物・浮いている物(absolute/fixed)は触らない＝触ると配置が壊れる
-        var use=cs2 && cs2.display!=='none' && cs2.visibility!=='hidden'
-          && cs2.position!=='fixed' && cs2.position!=='absolute' && (n.offsetHeight||0)>=40;
-        if(use){
-          n.setAttribute('data-ceovnext','1');
-          n.style.setProperty('position','relative','important');
-          n.style.setProperty('z-index','1','important');
-          // 地の色は「大きな塊が透けている時」だけ。小物まで塗ると見た目が変わってしまう。
+        if(cs2 && cs2.display!=='none' && cs2.visibility!=='hidden'){
           var c=cs2.backgroundColor||'';
-          if((n.offsetHeight||0)>=200 && (!c || c==='transparent' || c.indexOf('rgba(0, 0, 0, 0)')>=0)){
+          if(!c || c==='transparent' || c.indexOf('rgba(0, 0, 0, 0)')>=0){
             n.style.setProperty('background-color',bg,'important');
             n.setAttribute('data-ceovbg','1'); painted++;
+          }
+          // ★セクションとセクションの間の細いすき間から、留めた背景が線のように覗く（実報告：13px）。
+          //   box-shadow を上向きに伸ばして塞ぐ＝配置に一切影響しない。
+          //   大きなすき間（60px超）は「通り過ぎる演出の見せ場」なので塞がない。
+          var pv=n.previousElementSibling;
+          if(pv){
+            var g=0; try{ g=Math.round(n.getBoundingClientRect().top-pv.getBoundingClientRect().bottom); }catch(_){ }
+            if(g>0 && g<=60){
+              n.setAttribute('data-ceovsh', n.style.getPropertyValue('box-shadow')||'');
+              n.style.setProperty('box-shadow','0 -'+g+'px 0 0 '+bg,'important');
+            }
           }
           cnt++;
         }
@@ -13827,10 +14168,19 @@ html.__ce_altmode{cursor:text}
     if(!el) return;
     ['position','top','z-index'].forEach(function(p){ el.style.removeProperty(p); });
     el.removeAttribute('data-ceovpass');
-    [].slice.call(document.querySelectorAll('[data-ceovnext]')).forEach(function(n){
-      n.style.removeProperty('position'); n.style.removeProperty('z-index');
-      if(n.getAttribute('data-ceovbg')){ n.style.removeProperty('background-color'); n.removeAttribute('data-ceovbg'); }
-      n.removeAttribute('data-ceovnext');
+    // ★片付ける印は3種類ある。data-ceovnext だけを見ていると、今の実装で付く
+    //   背景色(data-ceovbg)・すき間ふさぎ(data-ceovsh)が外れず「やめても元に戻らない」になる。
+    //   ceovnext は古い版で焼き込まれたカンプを直すために残してある。
+    [].slice.call(document.querySelectorAll('[data-ceovnext],[data-ceovbg],[data-ceovsh]')).forEach(function(n){
+      if(n.getAttribute('data-ceovnext')!=null){
+        n.style.removeProperty('position'); n.style.removeProperty('z-index'); n.removeAttribute('data-ceovnext');
+      }
+      if(n.getAttribute('data-ceovbg')!=null){ n.style.removeProperty('background-color'); n.removeAttribute('data-ceovbg'); }
+      if(n.getAttribute('data-ceovsh')!=null){
+        var old=n.getAttribute('data-ceovsh');
+        if(old) n.style.setProperty('box-shadow',old); else n.style.removeProperty('box-shadow');
+        n.removeAttribute('data-ceovsh');
+      }
     });
     _ovRestoreAncestors();
     markDirty();
@@ -15326,6 +15676,7 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_pin','📌 スクロールしても画面に貼り付ける（固定ヘッダー等）'],
     ['__ce_q_overpass','🏞 背景を留めて、次のセクションを上に通す（AIなし）'],
     ['__ce_q_photoband','🏞 このセクションの下に写真の帯を足す（留められる背景・AIなし）'],
+    ['__ce_q_bandpat','🏞 帯の中身を選ぶ（文字のレイアウト・AIなし）'],
     ['__ce_q_secbg','🎨 セクションの背景色を変える（AIなし・即反映）'],
     ['__ce_q_txtbg','🖌 文字の背景に色を塗る（行ごと・AIなし）'],
     ['__ce_q_vline','▎ 文字の左に縦線を引く（引用風・AIなし）'],
@@ -15338,7 +15689,7 @@ html.__ce_altmode{cursor:text}
     'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_edit','__ce_q_img','__ce_q_imgswap','__ce_q_bgsz','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_txtbg','__ce_q_vline','__ce_q_deco','__ce_q_psgrab',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
-    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix','__ce_q_overpass','__ce_q_photoband',
+    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix','__ce_q_overpass','__ce_q_photoband','__ce_q_bandpat',
     'sep:🧹 整える・消す','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
   ];
@@ -15932,6 +16283,12 @@ html.__ce_altmode{cursor:text}
     })();
     // 🏞 背景を留めて上を通す：セクション級の相手がいる時だけ出す。既にONなら「やめる」に変える。
     //   ★留まる余地（親が自分よりどれだけ高いか）も出す＝押す前に「効かない場所」が分かる。
+    // ⇕ 写真の帯の上では「余白を作る」ではなく「帯の高さを変える」と出す（同じパネルで両方できる）
+    (function(){
+      var _bd=(curEl&&curEl.closest)?curEl.closest('[data-cepband]'):null;
+      if(!_bd){ delete _qmM['__ce_q_bandpat']; return; }
+      _qmM['__ce_q_vspace']='⇕ この写真の帯の縦幅を変える（今 '+_bd.offsetHeight+'px・AIなし）';
+    })();
     // 🏞 写真の帯：ふつうのセクション（器でない）が最寄りの時だけ出す＝どこに挟むかが明確な時だけ
     (function(){
       var _pb=overpassTarget(curEl);
@@ -16251,7 +16608,10 @@ html.__ce_altmode{cursor:text}
       +row('__ce_q_full','⚙ すべての編集メニュー…')
       +'<div style="display:flex;justify-content:flex-end;gap:10px;padding:0 8px 3px">'
       +'<button id="__ce_q_sckey" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⌨ キー設定</button>'
-      +'<button id="__ce_q_edit" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
+      // ★idは __ce_q_reorder（2026-08-01修正）。以前は __ce_q_edit で「✏この文字を編集」と重複しており、
+      //   ①下の addEventListener が先に出てくる✏の行に付いてしまう ②クリックは委譲側の
+      //   scRun('edit') に食われる、の二重で**押しても並べ替えが出なかった**（実報告）。
+      +'<button id="__ce_q_reorder" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
     document.body.appendChild(qm);
     // 🔎 メニューの曖昧検索（2026-07-30）
     //   項目が増えて「どこにあるか分からない」を解消する。まず言い換え表でローカル検索（一瞬・無料）、
@@ -16373,7 +16733,10 @@ html.__ce_altmode{cursor:text}
       qm.style.cursor='default';
     })();
     qmWireGroups(qm);
-    qm.querySelector('#__ce_q_edit').addEventListener('click',function(ev){ ev.stopPropagation(); qmEditMode(qm); });
+    (function(){
+      var _rb=qm.querySelector('#__ce_q_reorder');
+      if(_rb) _rb.addEventListener('click',function(ev){ ev.stopPropagation(); ev.preventDefault(); qmEditMode(qm); });
+    })();
     qm.querySelector('#__ce_q_sckey').addEventListener('click',function(ev){ ev.stopPropagation(); closeMenu(); scOpenSettings(); });
     // 🅰 まとめて文字調整の配線（メニューを閉じずにその場で効く・インラインstyle!important＝どのCSSにも勝つ）
     if(multi&&qm.querySelector('#__ce_mf_f')){
@@ -17490,6 +17853,12 @@ html.__ce_altmode{cursor:text}
         pinFix(_pt,'top');
         closeMenu();
         msg.textContent='📌 〈'+_pt.tagName.toLowerCase()+'〉を画面の上に貼り付けました（スクロールしても残ります／解除は同じ所を右クリック→📌解除・💾保存で確定）';
+        return;
+      }
+      if(t.id==='__ce_q_bandpat'){
+        var _bd2=(curEl&&curEl.closest)?curEl.closest('[data-cepband]'):null;
+        closeMenu();
+        if(_bd2) openBandPatternPanel(_bd2); else msg.textContent='帯の上で右クリックしてください';
         return;
       }
       if(t.id==='__ce_q_photoband'){
