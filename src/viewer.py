@@ -2573,14 +2573,17 @@ _EDIT_BAR = """
 ::selection{background:rgba(51,144,255,.4)!important;color:inherit!important}
 /* ★編集バーは最前面（2026-07-31・報告「保存を押すとヘッダーが選ばれる」）。
    2147483646＝実質の最大値。パネル類(2147483647)だけが上に来る。 */
-#__ce{position:fixed;right:20px;top:20px;z-index:2147483646;width:480px;max-width:94vw;background:#fff;border:1px solid #e3e3e8;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.32);font-family:system-ui,-apple-system,sans-serif;color:#1d1d1f}
+#__ce{position:fixed;right:8px;top:14px;z-index:2147483646;width:480px;max-width:94vw;background:#fff;border:1px solid #e3e3e8;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.32);font-family:system-ui,-apple-system,sans-serif;color:#1d1d1f}
 #__ce *{box-sizing:border-box}
-#__ce .hd{display:flex;align-items:center;gap:8px;background:#1d1d1f;color:#fff;padding:13px 16px;font-weight:700;font-size:15px;cursor:pointer;border-radius:16px 16px 0 0}
+#__ce .hd{display:flex;align-items:center;gap:6px;background:#1d1d1f;color:#fff;padding:10px 12px;font-weight:700;font-size:15px;cursor:pointer;border-radius:16px 16px 0 0}
 #__ce .hd .t{flex:1}
 #__ce .hd .x{font-size:13px;background:rgba(255,255,255,.18);padding:3px 10px;border-radius:999px}
 #__ce .hd .sv{font-size:12.5px;background:#b8530a;padding:4px 11px;border-radius:999px;font-weight:700;white-space:nowrap}
 #__ce .hd .sv.saved{background:#1a7f37}
 #__ce.min .hd{border-radius:16px}
+/* 畳んでいる時は中身の幅ぴったりにする＝右にできる無駄な余白を無くす（2026-08-01 要望） */
+#__ce.min{width:auto}
+#__ce .hd .x{white-space:nowrap}
 #__ce .bd{padding:14px 16px;display:flex;flex-direction:column;gap:9px;max-height:82vh;overflow:auto}
 #__ce.min .bd{display:none}
 #__ce select,#__ce input{font-size:13.5px;padding:9px 11px;border:1px solid #d0d0d5;border-radius:9px;width:100%;font-family:inherit}
@@ -2713,7 +2716,7 @@ html.__ce_altmode{cursor:text}
 @keyframes __ce_busypulse{0%,100%{outline-color:#7c3aed}50%{outline-color:#d3bef7}}
 </style>
 <div id="__ce" class="min">
-  <div class="hd" id="__ce_hd"><span>✏</span><span class="t">このカンプを直す</span><span id="__ce_rate" title="このカンプの出来を評価（手本ごとのハズレ率集計に使われます）"><span class="rt" data-r="◎">◎</span><span class="rt" data-r="○">○</span><span class="rt" data-r="△">△</span><span class="rt" data-r="✖">✖</span></span><span class="x" id="__ce_homeh" style="background:#2b6cb0" title="ツール（ホーム）に戻る">🏠 ホーム</span><span class="sv" id="__ce_undo" style="background:#555;opacity:.4" title="ひとつ前に戻す">⟲ 戻す</span><span class="sv" id="__ce_apply" style="background:#b45309;display:none" title="この磨き版の内容で、元のカンプを上書きする（上書き前の元は.bakに控えます）">⬆ 元に反映</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">▲ ひらく</span></div>
+  <div class="hd" id="__ce_hd"><span title="このカンプを直す">✏</span><span id="__ce_rate" title="このカンプの出来を評価（手本ごとのハズレ率集計に使われます）"><span class="rt" data-r="◎">◎</span><span class="rt" data-r="○">○</span><span class="rt" data-r="△">△</span><span class="rt" data-r="✖">✖</span></span><span class="x" id="__ce_homeh" style="background:#2b6cb0" title="ツール（ホーム）に戻る">🏠 ホーム</span><span class="x" id="__ce_reopen" style="background:#6b7280" title="このカンプを開き直す（保存していない変更は捨てて、保存済みの状態に戻す）">🔄 開き直す</span><span class="x" id="__ce_palb" style="background:#1a7f37" title="パレット（部品の一時置き場）を開く">📌</span><span class="sv" id="__ce_undo" style="background:#555;opacity:.4" title="ひとつ前に戻す">⟲ 戻す</span><span class="sv" id="__ce_apply" style="background:#b45309;display:none" title="この磨き版の内容で、元のカンプを上書きする（上書き前の元は.bakに控えます）">⬆ 元に反映</span><span class="sv" id="__ce_save">💾 保存</span><span class="x" id="__ce_mn">▲ ひらく</span></div>
   <div class="bd">
     <button class="im" id="__ce_home" style="background:#eef2f7;color:#1d1d1f;border:1px solid #d6deea;font-weight:700">🏠 ツール（ホーム）に戻る</button>
     <div class="lbl plain">🎨 ベース色（テーマ色・AIなし・ページ全体に反映）</div>
@@ -2809,10 +2812,27 @@ html.__ce_altmode{cursor:text}
     if(_dirty && !confirm('保存していない変更があります。ホームに戻ると消えます。よろしいですか？')) return;
     location.href='/?open=camp';  // ホームの「カンプ生成」パネルを開いた状態で戻す
   }
+  // ↩ ホームに「さっきのカンプに戻る」を出すための控え（開くたびに上書き・2026-08-01 要望）
+  try{ if(FILE) localStorage.setItem('__ce_lastcamp', JSON.stringify({file:FILE, at:Date.now()})); }catch(_){}
   var homeBtn=document.getElementById('__ce_home');
   if(homeBtn) homeBtn.addEventListener('click',goHome);
   var homeH=document.getElementById('__ce_homeh');  // ヘッダ側＝畳んでいても常に押せる
   if(homeH) homeH.addEventListener('click',goHome);
+  // 🔄 開き直す＝同じカンプを読み込み直す。ホームへ戻って一覧から探し直す手間をなくす（2026-08-01 要望）。
+  //   ★保存していない変更は消えるので、変更中は必ず聞く。ツール側（viewer.py）を直した後の
+  //     「新しいコードで開き直す」用途も兼ねる。
+  // 📌 パレットを「開くだけ」の入口（右クリック→入れる、しか無いと閉じたら開き直せない）
+  var palB=document.getElementById('__ce_palb');
+  if(palB) palB.addEventListener('click',function(){
+    var p=document.getElementById('__ce_pal');
+    if(p&&p.__close) p.__close(); else openPalette();     // もう一度押すと閉じる
+  });
+  var reopenB=document.getElementById('__ce_reopen');
+  if(reopenB) reopenB.addEventListener('click',function(){
+    if(_dirty && !confirm('保存していない変更は消えます。保存した状態に戻して開き直しますか？')) return;
+    _dirty=false;                       // 「離れますか？」の確認が二重に出ないように
+    location.reload();
+  });
   // 🚫 背景の飾り（わっか/ぼかし等）を消す：pointer-events:none で右クリックできない浮遊装飾をまとめて除去。
   var nodecoBtn=document.getElementById('__ce_nodeco');
   if(nodecoBtn) nodecoBtn.addEventListener('click',function(){
@@ -3574,7 +3594,12 @@ html.__ce_altmode{cursor:text}
           rb.textContent='除去中…（初回はモデル取得で少し待ちます）'; rb.disabled=true;
           fetch('/api/remove_bg',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:rfn})})
             .then(function(r){return r.json();}).then(function(dd){
-              if(!dd.ok){ rb.textContent='✂ 背景を除去'; rb.disabled=false; msg.textContent='背景除去に失敗：'+(dd.message||''); return; }
+              if(!dd.ok){
+                rb.textContent='✂ 背景を除去'; rb.disabled=false;
+                msg.textContent='背景除去に失敗：'+(dd.message||'');
+                try{ ceFlash('✂ '+(dd.message||'背景を除去できませんでした')); }catch(_){}
+                return;
+              }
               ov.remove(); openAddImagePicker(px,py);
               msg.textContent='背景を除去した透過画像を追加しました（一覧の先頭）。クリックで配置できます';
             }).catch(function(){ rb.textContent='✂ 背景を除去'; rb.disabled=false; msg.textContent='通信エラー'; });
@@ -4304,7 +4329,7 @@ html.__ce_altmode{cursor:text}
   // ヘッダを掴んでウィンドウ自体を移動できる（クリックでの開閉と両立：動いた時だけトグルを抑制）
   var hd=document.getElementById('__ce_hd'), hDrag=false, hMoved=false, hSX=0,hSY=0,hL=0,hT=0;
   hd.addEventListener('mousedown',function(e){
-    if(e.target.closest('#__ce_save')||e.target.closest('#__ce_undo')||e.target.closest('#__ce_homeh')||e.target.closest('#__ce_apply')) return;  // 保存・戻す・ホーム・反映ボタンは除外
+    if(e.target.closest('#__ce_save')||e.target.closest('#__ce_undo')||e.target.closest('#__ce_homeh')||e.target.closest('#__ce_reopen')||e.target.closest('#__ce_palb')||e.target.closest('#__ce_apply')) return;  // 保存・戻す・ホーム・開き直す・反映ボタンは除外
     var r=box.getBoundingClientRect();
     hDrag=true; hMoved=false; hSX=e.clientX; hSY=e.clientY; hL=r.left; hT=r.top;
     box.style.right='auto'; box.style.bottom='auto'; box.style.left=hL+'px'; box.style.top=hT+'px';
@@ -5986,6 +6011,108 @@ html.__ce_altmode{cursor:text}
       n=n.parentElement; i++;
     }
   }
+  // ===== 🧹 囲んだ範囲の「縦の空白」を詰める（2026-08-01 要望）=====
+  //   ★空白は要素ではないので選べない。だから Shift+ドラッグで囲んだ範囲を手がかりにする。
+  //   ★「描かれている物」だけを中身と数える：セクションの背景まで中身に数えると、
+  //     背景色が敷いてあるだけの所が「埋まっている」ことになり、空白が1つも見つからない。
+  function _gapIsInk(n,cs,r){
+    if(/^(IMG|SVG|VIDEO|CANVAS|INPUT|BUTTON|SELECT|TEXTAREA|PICTURE)$/.test(n.tagName)) return true;
+    for(var i=0;i<n.childNodes.length;i++){
+      var c=n.childNodes[i];
+      if(c.nodeType===3 && (c.nodeValue||'').trim()) return true;   // 自分が直接持っている文字
+    }
+    if(n.children.length===0 && r.height<=420){                     // 線・図形・小さな飾り
+      if((cs.backgroundImage||'none')!=='none') return true;
+      var bg=cs.backgroundColor||'';
+      if(bg && bg!=='transparent' && !/rgba\(0, 0, 0, 0\)/.test(bg)) return true;
+      if(parseFloat(cs.borderTopWidth||'0')>0||parseFloat(cs.borderBottomWidth||'0')>0) return true;
+    }
+    return false;
+  }
+  function gapScan(t,b){
+    var sy=window.scrollY||0, step=4, n=Math.max(1,Math.ceil((b-t)/step)), used=new Uint8Array(n+2);
+    var all=[].slice.call(document.body.querySelectorAll('*')).slice(0,6000);
+    all.forEach(function(el){
+      if(el.id&&el.id.indexOf('__ce')===0) return;
+      if(el.closest&&el.closest('[id^="__ce"]')) return;
+      if(/^(SCRIPT|STYLE|LINK|META|NOSCRIPT|BR)$/.test(el.tagName)) return;
+      if(el.getAttribute&&el.getAttribute('data-cespacer')!=null) return;   // 余白そのものは中身ではない
+      var cs=null; try{ cs=getComputedStyle(el); }catch(_){ return; }
+      if(cs.display==='none'||cs.visibility==='hidden'||parseFloat(cs.opacity||'1')<0.02) return;
+      var r=el.getBoundingClientRect();
+      if(r.height<2||r.width<2) return;
+      if(!_gapIsInk(el,cs,r)) return;
+      var y0=r.top+sy, y1=y0+r.height;
+      if(y1<=t||y0>=b) return;
+      var i0=Math.max(0,Math.floor((y0-t)/step)), i1=Math.min(n,Math.ceil((y1-t)/step));
+      for(var i=i0;i<=i1;i++) used[i]=1;
+    });
+    var gaps=[], run=-1;
+    for(var i=0;i<=n;i++){
+      if(!used[i]){ if(run<0) run=i; continue; }
+      if(run>=0){ var h=(i-run)*step; if(h>=16) gaps.push({t:t+run*step,b:t+i*step,h:h}); run=-1; }
+    }
+    if(run>=0){ var h2=(n+1-run)*step; if(h2>=16) gaps.push({t:t+run*step,b:t+(n+1)*step,h:h2}); }
+    return gaps;
+  }
+  // 空白の帯を抱えている「いちばん内側の入れ物」（画面外でも探せるようページ座標で判定する）
+  function _gapHost(g){
+    var mid=(g.t+g.b)/2, sy=window.scrollY||0;
+    function pick(sel){
+      var best=null, bestH=1e9;
+      [].slice.call(document.querySelectorAll(sel)).slice(0,4000).forEach(function(s){
+        if(s.closest('[id^="__ce"]')) return;
+        var r=s.getBoundingClientRect(), tp=r.top+sy;
+        if(r.height<g.h+20) return;                       // 帯より小さい入れ物は縮めても意味がない
+        if(mid>=tp && mid<=tp+r.height && r.height<bestH){ best=s; bestH=r.height; }
+      });
+      return best;
+    }
+    // ★セクションの外（ラッパーdivだけの所・ページ末尾など）でも詰められるように、
+    //   見つからなければ器になりうるタグまで広げて探す（2026-08-01・実報告「掴む所が無い場所」）。
+    return pick('section,header,footer,article,main') || pick('div,article,main,section,header,footer');
+  }
+  function gapCollapseOne(g){
+    var done=0, sy=window.scrollY||0;
+    // ① ⇕で作った余白（ce_spacer）があれば、そこを縮めるのがいちばん安全
+    var sps=[].slice.call(document.querySelectorAll('[data-cespacer]'));
+    for(var i=0;i<sps.length&&done<g.h-2;i++){
+      var sp=sps[i], r=sp.getBoundingClientRect(), tp=r.top+sy;
+      if(r.height<1||tp+r.height<=g.t+2||tp>=g.b-2) continue;
+      var cut=Math.min(g.h-done, r.height);
+      var nh=Math.max(0, Math.round(r.height-cut));
+      sp.style.setProperty('height', nh+'px');
+      done+=cut;
+      if(nh<=0){ try{ _shrinkHosts(sp); }catch(_){} sp.remove(); }
+    }
+    if(done>=g.h-2) return done;
+    // ② 入れ物そのものを縮める。★カンプの中身は自由配置が多く、高さを縮めても中身は動かない。
+    //    だから「帯より下にある直下の子」をツールと同じやり方（data-cety）で上へ寄せてから縮める。
+    var host=_gapHost(g); if(!host) return done;
+    var need=g.h-done;
+    [].slice.call(host.children).forEach(function(c){
+      if(c.id&&c.id.indexOf('__ce')===0) return;
+      var r=c.getBoundingClientRect();
+      if(r.top+sy < g.b-2) return;
+      c.setAttribute('data-cety', (+c.getAttribute('data-cety')||0)-need);
+      if(c.getAttribute('data-cetx')==null) c.setAttribute('data-cetx','0');
+      try{ applyTf(c); }catch(_){}
+    });
+    var cur=host.offsetHeight;
+    host.style.setProperty('min-height','0','important');
+    host.style.setProperty('height', Math.max(40, Math.round(cur-need))+'px','important');
+    return done+need;
+  }
+  function gapFixRegion(reg){
+    var gaps=gapScan(reg.t,reg.b);
+    if(!gaps.length){ ceFlash('🧹 囲んだ範囲に詰められる空白はありませんでした'); return; }
+    try{ pushUndo(document.body); }catch(_){}
+    gaps.sort(function(a,b){ return b.t-a.t; });   // ★下から詰める（上を先に詰めると下の座標がずれる）
+    var total=0;
+    gaps.forEach(function(g){ total+=gapCollapseOne(g); });
+    try{ markDirty(); }catch(_){}
+    ceFlash('🧹 '+gaps.length+'か所・合計'+Math.round(total)+'px の空白を詰めました（⟲で戻せます）');
+  }
   // ⇕の「広げる相手」を切り替えられるようにするための下ごしらえ（2026-08-01 要望）。
   //   ★今までは右クリックした場所から自動で決めていたので、狙いと違うもの（帯／別のセクション）が
   //     広がってしまい「選んだセクションじゃないところが大きくなる」報告になった。相手を明示で選べるようにする。
@@ -6938,7 +7065,11 @@ html.__ce_altmode{cursor:text}
     fetch('/api/uploads').then(function(r){return r.json();}).then(function(d){
       var ups=d.uploads||[];
       var items = ups.length
-        ? ups.map(function(u){return '<div class="it" data-src="'+u.url+'"><img src="'+u.url+'"><span>'+esc(u.caption||u.file)+'</span></div>';}).join('')
+        // ★「✂ 背景を除去」をこちらの選び直し画面にも出す（2026-08-01 要望）。
+        //   🖼画像を追加のほうにだけ有って、差し替えの時は一度そちらへ行かないと使えなかった。
+        ? ups.map(function(u){return '<div class="it" data-src="'+u.url+'" style="position:relative"><img src="'+u.url+'"><span>'+esc(u.caption||u.file)+'</span>'
+            +'<button data-rmbg="'+esc(u.file)+'" title="背景を消して透過PNGにする（このPCの中だけで処理・無料・数秒）" style="position:absolute;right:5px;top:5px;background:rgba(17,17,17,.78);color:#fff;border:none;border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;font-family:inherit">✂ 背景を除去</button>'
+            +'</div>';}).join('')
         : '<div style="color:#999">アップロード画像がありません（生成パネルの「🖼自分の画像」で追加してください）</div>';
       var ov=document.createElement('div'); ov.id='__ce_pk';
       ov.innerHTML='<div class="bx"><span class="cl" id="__ce_pkx">×</span><h4>差し替える画像を選ぶ</h4><div class="gr">'+items+'</div></div>';
@@ -6949,6 +7080,26 @@ html.__ce_altmode{cursor:text}
         //   「灰色の空っぽの帯」だけ残って何も起きない状態になる（実報告）。
         if(e.target.id==='__ce_pk'||e.target.id==='__ce_pkx'){
           ov.remove(); if(cand.cancel){ try{ cand.cancel(); }catch(_){ } } return;
+        }
+        // ✂ 背景を除去＝透過PNGを作って一覧の先頭に足す（この画面は閉じずに開き直す）
+        var rb=e.target.closest('[data-rmbg]');
+        if(rb){
+          e.stopPropagation();
+          var rfn=rb.getAttribute('data-rmbg');
+          rb.textContent='除去中…（初回はモデル取得で少し待ちます）'; rb.disabled=true;
+          fetch('/api/remove_bg',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:rfn})})
+            .then(function(r){return r.json();}).then(function(dd){
+              if(!dd.ok){
+                // ★理由は必ず目立つ所に出す。編集バーの小さい文字だけだと「押しても何も起きない」に見える（実報告）
+                rb.textContent='✂ 背景を除去'; rb.disabled=false;
+                if(msg) msg.textContent='背景除去に失敗：'+(dd.message||'');
+                try{ ceFlash('✂ '+(dd.message||'背景を除去できませんでした')); }catch(_){}
+                return;
+              }
+              ov.remove(); openPicker(cand);      // ★cancel は呼ばない（やめたのではなく作り直しただけ）
+              if(msg) msg.textContent='背景を除去した透過画像を一覧の先頭に足しました。そのまま選ぶと差し替わります';
+            }).catch(function(){ rb.textContent='✂ 背景を除去'; rb.disabled=false; if(msg) msg.textContent='通信エラー'; });
+          return;
         }
         var it=e.target.closest('.it'); if(!it) return;
         if(!cand||!cand.el){ msg.textContent='対象が見つかりません'; ov.remove(); return; }
@@ -8954,6 +9105,16 @@ html.__ce_altmode{cursor:text}
     }
     var o=null; MASK_PATS.forEach(function(x){ if(x.id===id) o=x; });
     if(!o) return;
+    // 🚫★ページ全体の入れ物には掛けない（2026-08-01・実報告）。<article>に掛かって
+    //   ページ丸ごとが薄くなり、「関係ないセクションが白い」になった（原因の特定に時間を要した）。
+    //   マスクは中の物すべてに効くので、器に当てると必ず全体が薄くなる。
+    if(/^(BODY|HTML|MAIN|ARTICLE)$/.test(el.tagName)
+       || (el.querySelectorAll && el.querySelectorAll('section,header,footer').length>=2)){
+      var _m='⚠ ここはページ全体の入れ物です。掛けるとページ丸ごとが薄くなるので当てませんでした（⬇で中の写真やセクションを選んでください）';
+      if(msg) msg.textContent=_m;
+      try{ ceFlash(_m); }catch(_){}
+      return;
+    }
     el.style.setProperty('-webkit-mask-image',o.css); el.style.setProperty('mask-image',o.css);
     el.style.setProperty('-webkit-mask-size','100% 100%'); el.style.setProperty('mask-size','100% 100%');
     el.setAttribute('data-cemask', id);
@@ -8961,6 +9122,25 @@ html.__ce_altmode{cursor:text}
   }
   function openMaskPanel(el){
     if(!el){ msg.textContent='対象が見つかりません'; return; }
+    // ★最初の相手は「色も写真も持っていない小さな要素」になりがちで、押しても見た目が変わらない（実報告）。
+    //   自分に塗りが無ければ、塗りを持っている先祖まで自動で上がる（⬆を何回も押させない）。
+    (function(){
+      function _hasPaint(n){
+        if(!n||n===document.body) return false;
+        if(n.tagName==='IMG') return true;
+        var cs=null; try{ cs=getComputedStyle(n); }catch(_){ return false; }
+        if((cs.backgroundImage||'none')!=='none') return true;
+        var bg=cs.backgroundColor||'';
+        return !!(bg && bg!=='transparent' && !/rgba\\(0, 0, 0, 0\\)/.test(bg));
+      }
+      if(_hasPaint(el)) return;
+      var n=el.parentElement, i=0;
+      while(n && n!==document.body && i<8){
+        if(/^(MAIN|ARTICLE)$/.test(n.tagName)) return;    // 器まで登らない（全体が薄くなる）
+        if(_hasPaint(n)){ el=n; return; }
+        n=n.parentElement; i++;
+      }
+    })();
     var old=document.getElementById('__ce_mkp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
     // ★「押しても何も起きない」の正体は、たいてい**効かせた相手が違う**こと（2026-08-01 実報告）。
     //   マスクは押した瞬間に効くので「適用ボタン」は要らない。代わりに
@@ -9487,7 +9667,75 @@ html.__ce_altmode{cursor:text}
     });
     if(n){ try{ markDirty(); }catch(_){} ceFlash(m==='cut'?('✂ 元の'+n+'件を消しました（⟲でも戻せます）'):('📋 元の'+n+'件を戻しました')); }
   }
-  function palLoad(){ try{ var a=JSON.parse(localStorage.getItem(PAL_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(_){ return []; } }
+  // ⬆ いま入れたものを「ひとつ外側（親）」に入れ直す（2026-08-01 要望）。
+  //   ★白い箱などの入れ物は、普通のドラッグでは掴めない仕様（中身が優先される）。
+  //     右クリック→⬆外側を選ぶ、を経由しなくても、入れた直後にここで登り直せるようにする。
+  function _palRetarget(pick, dirLabel){
+    if(!_palLast.length){ ceFlash('先に📌で入れてから押してください'); return; }
+    var last=_palLast.slice();
+    palApplyLast('copy');                       // ✂で消していたら元に戻してから登り降りする
+    var list=palLoad();
+    last.forEach(function(rc){ if(rc.pid) list=list.filter(function(x){ return x.id!==rc.pid; }); });
+    palStore(list);
+    var news=[];
+    last.forEach(function(rc){
+      var t=pick(rc);
+      if(!t||t===document.body||t===document.documentElement) return;
+      if(t.closest&&t.closest('[id^="__ce"]')) return;
+      if(news.some(function(o){ return o.el===t; })) return;
+      news.push({el:t, prev:rc});
+    });
+    palResetLast();
+    var n=0;
+    news.forEach(function(o){
+      if(!palAdd(o.el)) return;
+      n++;
+      var r=_palLast[_palLast.length-1]; if(r) r.prev=o.prev;   // ⬇で戻れるように来た道を覚える
+    });
+    palRender();
+    if(n) ceFlash(dirLabel+'「'+_palName(news[0].el)+'」に入れ直しました');
+    else ceFlash('これ以上は'+(dirLabel.indexOf('⬆')===0?'外側':'内側')+'がありません');
+  }
+  function palUpLast(){
+    _palRetarget(function(rc){ return rc.el&&rc.el.parentElement; }, '⬆ ひとつ外側');
+  }
+  // ⬇ ひとつ内側＝⬆で登りすぎた時に戻る。登った履歴が無ければ「いちばん大きい子」に絞る
+  //   （最初から大きい塊が入ってしまい、狭められなかった＝実報告への対処）
+  function palDownLast(){
+    _palRetarget(function(rc){
+      if(rc.prev&&rc.prev.el&&rc.prev.el.isConnected) return rc.prev.el;
+      var best=null, ba=0;
+      [].slice.call((rc.el&&rc.el.children)||[]).forEach(function(c){
+        if(c.id&&c.id.indexOf('__ce')===0) return;
+        var a=(c.offsetWidth||0)*(c.offsetHeight||0);
+        if(a>ba){ ba=a; best=c; }
+      });
+      return best;
+    }, '⬇ ひとつ内側');
+  }
+  // ★既にパレットに焼き付いてしまった「緑の点線」を洗い落とす（2026-08-01・実報告）。
+  //   入れる側は直したが、直す前に入れた物は localStorage に残るので、読み込む時にも必ず通す。
+  function _palStripOutline(html){
+    if(!html||html.indexOf('outline')<0) return html;
+    try{
+      var d=document.createElement('div'); d.innerHTML=html;
+      [].slice.call(d.querySelectorAll('[style*="outline"]')).forEach(function(n){
+        n.style.removeProperty('outline'); n.style.removeProperty('outline-offset');
+      });
+      return d.innerHTML;
+    }catch(_){ return html; }
+  }
+  function palLoad(){
+    var a=[]; try{ a=JSON.parse(localStorage.getItem(PAL_KEY)||'[]'); }catch(_){ return []; }
+    if(!Array.isArray(a)) return [];
+    var fixed=false;
+    a.forEach(function(it){
+      var h=_palStripOutline(it.html);
+      if(h!==it.html){ it.html=h; fixed=true; }
+    });
+    if(fixed){ try{ localStorage.setItem(PAL_KEY, JSON.stringify(a)); }catch(_){} }
+    return a;
+  }
   function palStore(list){
     try{ localStorage.setItem(PAL_KEY, JSON.stringify(list.slice(0,PAL_MAX))); return true; }
     catch(_){ try{ ceFlash('⚠ パレットがいっぱいです（🗑で古い物を減らしてください）'); }catch(__){} return false; }
@@ -9502,14 +9750,52 @@ html.__ce_altmode{cursor:text}
     c=(''+c).split(/[ \t]+/).filter(function(s){ return s&&s.indexOf('__ce')!==0&&s.indexOf('fxa_')!==0; })[0]||'';
     return '<'+t+'>'+(c?'.'+c:'');
   }
+  // ★サムネは「いちばん大きい画像」を選ぶ（2026-08-01・実報告「絵が違う」）。
+  //   最初に見つかった img だと、隅の小さな飾りが選ばれて別の部品に見える。
   function _palThumb(el){
     try{
       if(el.tagName==='IMG'&&el.src) return el.src;
-      var img=el.querySelector&&el.querySelector('img[src]'); if(img&&img.src) return img.src;
+      // ★「見た目でそのブロックの中にある」画像だけを候補にする（2026-08-01・実報告）。
+      //   このカンプは自由配置なので、DOM上の子が画面では遠くに居ることがあり、
+      //   関係ない絵がサムネになっていた。中心がブロックの矩形に入っているかで判定する。
+      var er=el.getBoundingClientRect();
+      function _inBox(n){
+        var r=n.getBoundingClientRect();
+        var cx=r.left+r.width/2, cy=r.top+r.height/2;
+        return cx>=er.left-8 && cx<=er.right+8 && cy>=er.top-8 && cy<=er.bottom+8;
+      }
+      var best='', ba=0;
+      [].slice.call((el.querySelectorAll&&el.querySelectorAll('img[src]'))||[]).forEach(function(im){
+        var a=(im.offsetWidth||0)*(im.offsetHeight||0);
+        if(a>ba&&a>=3600&&_inBox(im)){ ba=a; best=im.src; }     // 60×60未満の飾りは選ばない
+      });
+      if(best) return best;
       var bg=''; try{ bg=getComputedStyle(el).backgroundImage||''; }catch(_){}
       var m=/url\(["']?([^"')]+)/.exec(bg); if(m) return m[1];
+      // 中の要素が背景画像で絵を持っている場合（写真の帯など）も拾う
+      var kid=null, ka=0;
+      [].slice.call((el.querySelectorAll&&el.querySelectorAll('*'))||[]).slice(0,300).forEach(function(n){
+        var b2=''; try{ b2=getComputedStyle(n).backgroundImage||''; }catch(_){}
+        if(b2.indexOf('url(')<0) return;
+        if(!_inBox(n)) return;
+        var a2=(n.offsetWidth||0)*(n.offsetHeight||0);
+        if(a2>ka){ ka=a2; kid=b2; }
+      });
+      if(kid){ var m2=/url\(["']?([^"')]+)/.exec(kid); if(m2) return m2[1]; }
     }catch(_){}
     return '';
+  }
+  // 絵が無い部品用：背景色と見出しで見分けられるようにする
+  function _palTint(el){
+    try{
+      var n=el, i=0;
+      while(n&&i<4){
+        var bg=getComputedStyle(n).backgroundColor||'';
+        if(bg&&bg!=='transparent'&&!/rgba\\(0, 0, 0, 0\\)/.test(bg)) return bg;
+        n=n.parentElement; i++;
+      }
+    }catch(_){}
+    return '#f2f2f5';
   }
   // 編集用の目印（選択の青枠・ハンドル・ツールのUI）は貯める前に落とす＝貼った先に持ち込まない
   function _palClean(el){
@@ -9518,7 +9804,12 @@ html.__ce_altmode{cursor:text}
       c.classList.remove('__ce_sel','__ce_hl','__ce_sechl','__ce_busy');
       [].slice.call(c.querySelectorAll('[id^="__ce"],.__ce_hdl')).forEach(function(n){ n.remove(); });
       [].slice.call(c.querySelectorAll('.__ce_sel,.__ce_hl,.__ce_sechl,.__ce_busy')).forEach(function(n){ n.classList.remove('__ce_sel','__ce_hl','__ce_sechl','__ce_busy'); });
+      // ★枠線は自分だけでなく子孫からも外す（2026-08-01・実報告「持ってきたら緑の枠が付いている」）。
+      //   ⬆で登り直すと、直前に光らせた子（緑の点線）がまだ点いたまま親ごとコピーされ、焼き付いていた。
       c.style.removeProperty('outline'); c.style.removeProperty('outline-offset');
+      [].slice.call(c.querySelectorAll('[style*="outline"]')).forEach(function(n){
+        n.style.removeProperty('outline'); n.style.removeProperty('outline-offset');
+      });
     }catch(_){}
     return c.outerHTML||'';
   }
@@ -9529,12 +9820,14 @@ html.__ce_altmode{cursor:text}
     if(!html) return false;
     if(html.length>400000){ ceFlash('⚠ 大きすぎてパレットに入れられません'); return false; }
     var list=palLoad();
-    list.unshift({ id:'p'+Date.now()+'_'+Math.round(Math.random()*9999), name:_palName(el), html:html,
+    var _pid='p'+Date.now()+'_'+Math.round(Math.random()*9999);
+    list.unshift({ id:_pid, name:_palName(el), html:html,
                    pos:(cs&&cs.position)||'static', w:el.offsetWidth||0, h:el.offsetHeight||0,
-                   thumb:_palThumb(el), ts:Date.now() });
+                   thumb:_palThumb(el), tint:_palTint(el), ts:Date.now() });
     if(!palStore(list)) return false;
     // 元を消すかどうかは「入れた直後に板で聞く」＝入れる時点では消さない（押し間違えても失わない）
-    _palLast.push({ el:el, parent:el.parentElement, next:el.nextSibling, cut:false });
+    _palLast.push({ el:el, parent:el.parentElement, next:el.nextSibling, cut:false, pid:_pid });
+    try{ groupBlink([el]); }catch(_){}    // ★どこまで入ったかを目で確かめられるように光らせる
     return true;
   }
   // 落とした場所の「差し込む相手」＝ツールUIを除いた最初の実体（インラインなら親まで上がる）
@@ -9557,7 +9850,7 @@ html.__ce_altmode{cursor:text}
     }
     return (n&&n!==document.body&&n!==document.documentElement)?n:null;
   }
-  function palPlace(it,pageX,pageY){
+  function palPlace(it,pageX,pageY,innerOnly){
     var tmp=document.createElement('div');
     tmp.innerHTML=it.html;
     var el=tmp.firstElementChild;
@@ -9566,6 +9859,16 @@ html.__ce_altmode{cursor:text}
     el.removeAttribute('data-cetx'); el.removeAttribute('data-cety');   // 前のドラッグ跡は捨てる
     try{ el.style.removeProperty('translate'); }catch(_){}
     var free=(it.pos==='absolute'||it.pos==='fixed');
+    // ✥中身だけ＝外の箱（大きさ・背景・枠・自由配置）を捨てて、中の文字や写真だけを流し込む。
+    // ★大きな塊は狭い場所に入らない（実報告）。箱を外すと中身の高さぶんに縮むので、どこにでも入る。
+    if(innerOnly){
+      ['width','height','min-width','min-height','max-width','max-height','background','background-color',
+       'background-image','border','border-radius','box-shadow','padding','margin','position','top','left',
+       'right','bottom','translate','transform','rotate','scale','inset','overflow','aspect-ratio']
+        .forEach(function(p){ try{ el.style.removeProperty(p); }catch(_){} });
+      el.style.setProperty('position','static');
+      free=false;                       // 流れの中に差し込む（自由配置にはしない）
+    }
     if(free){
       el.style.position='absolute';
       el.style.removeProperty('right'); el.style.removeProperty('bottom');
@@ -9585,38 +9888,88 @@ html.__ce_altmode{cursor:text}
       }); });
     }else{
       var tgt=_palDropTarget(pageX,pageY,null);
+      // ★大きい塊（セクション級）は「既存セクションの隣」に入れる（2026-08-01・実報告「大きさが変わる」）。
+      //   深い子の隣に入れると親が変わる＝親の最大幅・余白が変わり、同じ物なのに幅が違って見える。
+      //   同じ階層に入れれば、その入れ物のルール（幅・余白）をそのまま受け継ぐので見た目が揃う。
+      var _big=/^(SECTION|HEADER|FOOTER|ARTICLE)$/.test(el.tagName)
+               || (it.w>0 && it.w>=(document.body.clientWidth||1)*0.8);
+      if(_big&&tgt&&tgt.closest){ var _s=tgt.closest('section,header,footer,article'); if(_s&&_s.parentElement) tgt=_s; }
       if(tgt&&tgt.parentElement){
         var r=tgt.getBoundingClientRect(), mid=r.top+(window.scrollY||0)+r.height/2;
         var snap=_hostSnap(tgt);                      // 高さ固定の入れ物でも押し出せるように（§7㊺）
         if(pageY>mid) tgt.parentElement.insertBefore(el,tgt.nextSibling);
         else tgt.parentElement.insertBefore(el,tgt);
         try{ _growHosts(snap, el.offsetHeight); }catch(_){}
+        // 大きい塊でない物は、入れた時と同じ見た目の幅になるよう新しい親に対する%で当て直す
+        if(!_big&&it.w>0) requestAnimationFrame(function(){
+          try{
+            var hw=el.parentElement?el.parentElement.getBoundingClientRect().width:0;
+            if(hw>0&&Math.abs(el.offsetWidth-it.w)>4) el.style.setProperty('width',(it.w/hw*100).toFixed(2)+'%');
+          }catch(_){}
+        });
       }else{
+        // 差し込む相手が見つからない（ページの外側・空っぽの所）＝自由配置で落とした場所に置く
         document.body.appendChild(el);
         try{ placeFree(el,pageX,pageY); }catch(_){}
+        ceFlash('📌 差し込む相手が無かったので、その場所に置きました');
       }
     }
+    // 🖼スライドショーを含む部品は、置いたあとに動かし直す（コピーには「動いている印」が付いてこないため）
+    try{
+      if(window.__slBoot && (el.matches&&el.matches('[data-slshow]') || (el.querySelector&&el.querySelector('[data-slshow]')))){
+        el.__slOn=0;
+        [].slice.call(el.querySelectorAll('[data-slshow]')).forEach(function(w){ w.__slOn=0; });
+        window.__slBoot();
+      }
+    }catch(_){}
     try{ markDirty(); }catch(_){}
     try{ groupBlink([el]); }catch(_){}
     ceFlash('📌 「'+it.name+'」を置きました（💾保存で確定）');
   }
-  function palDragStart(it,e){
+  function palDragStart(it,e,innerOnly){
     var g=document.createElement('div'); g.id='__ce_palghost';
-    g.textContent='📌 '+it.name;
+    g.textContent=(innerOnly?'📌 中身だけ：':'📌 ')+it.name;
     g.style.cssText='position:fixed;z-index:2147483647;pointer-events:none;background:#1a7f37;color:#fff;'
       +'border-radius:8px;padding:6px 12px;font:12px/1.4 system-ui,sans-serif;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,.3)';
     document.body.appendChild(g);
+    // 置く場所の目印（緑の線）＝どこに入るかが見えないと「押しても反応しない」に見える（実報告）
+    var line=document.createElement('div'); line.id='__ce_palline';
+    line.style.cssText='position:fixed;z-index:2147483646;pointer-events:none;height:3px;background:#1a7f37;'
+      +'box-shadow:0 0 0 1px rgba(255,255,255,.8);display:none';
+    document.body.appendChild(line);
+    var _lt=0;
+    function hint(ev){
+      var now=Date.now(); if(now-_lt<60) return; _lt=now;
+      var onUI=!!(ev.target&&ev.target.closest&&ev.target.closest('[id^="__ce"]'));
+      if(onUI){ line.style.display='none'; return; }
+      var tgt=null;
+      try{ tgt=_palDropTarget(ev.clientX+(window.scrollX||0), ev.clientY+(window.scrollY||0), null); }catch(_){}
+      if(!tgt){ line.style.display='none'; return; }
+      var r=tgt.getBoundingClientRect(), below=(ev.clientY>r.top+r.height/2);
+      line.style.display='block';
+      line.style.left=Math.max(0,r.left)+'px';
+      line.style.width=Math.min(r.width,window.innerWidth)+'px';
+      line.style.top=(below?r.bottom:r.top)-1+'px';
+    }
     function mv(ev){
       g.style.left=(ev.clientX+14)+'px'; g.style.top=(ev.clientY+14)+'px';
       var m=70;                                        // 画面の上下端では自動スクロール（画面外へ運べないため）
       if(ev.clientY<m) window.scrollBy(0,-18);
       else if(ev.clientY>window.innerHeight-m) window.scrollBy(0,18);
+      hint(ev);
     }
     function up(ev){
       document.removeEventListener('mousemove',mv,true); document.removeEventListener('mouseup',up,true);
-      g.remove();
-      if(ev.target&&ev.target.closest&&ev.target.closest('[id^="__ce"]')) return;   // 板の上で離した＝置かない
-      palPlace(it, ev.clientX+(window.scrollX||0), ev.clientY+(window.scrollY||0));
+      g.remove(); line.remove();
+      // ★黙って何もしないと「反応しない」に見える。理由は必ず出す（2026-08-01 実報告）
+      if(ev.target&&ev.target.closest&&ev.target.closest('[id^="__ce"]')){
+        ceFlash('📌 板やバーの上では置けません（ページの上で離してください）'); return;
+      }
+      try{
+        palPlace(it, ev.clientX+(window.scrollX||0), ev.clientY+(window.scrollY||0), innerOnly);
+      }catch(err){
+        ceFlash('⚠ 置けませんでした：'+((err&&err.message)||err));
+      }
     }
     mv(e);
     document.addEventListener('mousemove',mv,true); document.addEventListener('mouseup',up,true);
@@ -9639,12 +9992,15 @@ html.__ce_altmode{cursor:text}
         +'box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:grab';
       card.title='掴んで、置きたい場所までドラッグ';
       var th=document.createElement('div');
-      th.style.cssText='height:56px;background:#f2f2f5 '+(it.thumb?('url("'+it.thumb.replace(/"/g,'')+'") center/cover no-repeat'):'')+';'
-        +'display:flex;align-items:center;justify-content:center;font-size:20px;color:#b0b0b6';
-      if(!it.thumb) th.textContent='▦';
+      th.style.cssText='height:124px;background:'+(it.tint||'#f2f2f5')+' '+(it.thumb?('url("'+it.thumb.replace(/"/g,'')+'") center/cover no-repeat'):'')+';'
+        +'display:flex;align-items:center;justify-content:center;font:13px/1.5 system-ui,sans-serif;font-weight:700;'
+        +'color:#5a5a60;text-align:center;padding:10px;overflow:hidden';
+      // 絵が無い部品は、見出しの文字と大きさで見分ける（▦だけだと全部同じに見える）
+      if(!it.thumb) th.textContent=(it.name||'').slice(0,40);
       var nm=document.createElement('div');
-      nm.textContent=it.name;
-      nm.style.cssText='padding:5px 6px;font:11px/1.35 system-ui,sans-serif;color:#1d1d1f;height:31px;overflow:hidden';
+      nm.innerHTML='<div style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(it.name)+'</div>'
+        +'<div style="color:#8a8a90;font-size:11px">'+(it.w||0)+'×'+(it.h||0)+'px</div>';
+      nm.style.cssText='padding:7px 9px 2px;font:12.5px/1.45 system-ui,sans-serif;color:#1d1d1f;overflow:hidden';
       var del=document.createElement('button');
       del.textContent='🗑'; del.title='パレットから消す';
       del.style.cssText='position:absolute;right:3px;top:3px;border:none;background:rgba(255,255,255,.9);border-radius:6px;'
@@ -9660,23 +10016,234 @@ html.__ce_altmode{cursor:text}
         ev.preventDefault(); ev.stopPropagation();
         palDragStart(it,ev);
       },true);
-      var mvb=document.createElement('button');
-      mvb.textContent='✥'; mvb.title='ここを掴んで、置きたい場所までドラッグ';
-      mvb.style.cssText='position:absolute;left:3px;top:3px;border:none;background:rgba(255,255,255,.9);border-radius:6px;'
-        +'cursor:grab;font-size:11px;line-height:1;padding:3px 5px;box-shadow:0 1px 3px rgba(0,0,0,.2)';
-      mvb.addEventListener('mousedown',function(ev){
-        if(ev.button!==0) return;
-        ev.preventDefault(); ev.stopPropagation(); palDragStart(it,ev);
-      },true);
-      card.appendChild(th); card.appendChild(nm); card.appendChild(del); card.appendChild(mvb);
+      // 置き方は2つ：そのまま（箱ごと）／中身だけ（外の箱を外して、文字や写真だけを流し込む）
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;gap:6px;padding:6px 9px 9px';
+      function mkDrag(label,inner,bg,tip){
+        var b=document.createElement('button');
+        b.textContent=label; b.title=tip;
+        b.style.cssText='flex:1;border:1px solid rgba(0,0,0,.15);background:'+bg+';color:#fff;border-radius:8px;'
+          +'cursor:grab;font:12px/1 system-ui,sans-serif;font-weight:700;padding:9px 4px';
+        b.addEventListener('mousedown',function(ev){
+          if(ev.button!==0) return;
+          ev.preventDefault(); ev.stopPropagation(); palDragStart(it,ev,inner);
+        },true);
+        return b;
+      }
+      row.appendChild(mkDrag('✥ そのまま置く',false,'#1a7f37','箱ごと置く（元の大きさのまま）'));
+      row.appendChild(mkDrag('✥ 中身だけ置く',true,'#0b6bcb','外の箱を外して、中の文字・写真だけを置く（狭い場所に入る）'));
+      card.appendChild(th); card.appendChild(nm); card.appendChild(del); card.appendChild(row);
       box.appendChild(card);
     });
+  }
+  // ===== 🎯 指して選ぶモード（2026-08-01 要望「どこまで登録しているか分かりづらい」）=====
+  //   マウスを動かすと、その下の塊を青枠と名前でずっと表示する。ホイールで範囲を広げ／狭め、
+  //   クリックで確定してパレットへ。★入れる前に見えるので ⬆⬇ で試行錯誤しなくて済む。
+  // ★「見えている範囲をそのまま切り取る」（2026-08-01・実報告「枠は大きいのに入れると中身が足りない」）。
+  //   このカンプは、見た目で隣り合う物がDOM上は別の親にぶら下がっている。だから1つの要素を
+  //   取っても見えている物の一部しか入らない。＝**範囲**で拾って、位置を保った1枚の部品に組み直す。
+  function palAddRegion(rect, name){
+    var picked=[];
+    [].slice.call(document.body.querySelectorAll('*')).slice(0,4000).forEach(function(n){
+      if(n.id&&n.id.indexOf('__ce')===0) return;
+      if(n.closest&&n.closest('[id^="__ce"]')) return;
+      if(/^(SCRIPT|STYLE|LINK|META|NOSCRIPT|BR)$/.test(n.tagName)) return;
+      var cs=null; try{ cs=getComputedStyle(n); }catch(_){ return; }
+      if(cs.display==='none'||cs.visibility==='hidden'||parseFloat(cs.opacity||'1')<0.02) return;
+      var r=n.getBoundingClientRect();
+      if(r.width<4||r.height<4) return;
+      var cx=r.left+r.width/2, cy=r.top+r.height/2;
+      if(cx<rect.l||cx>rect.l+rect.w||cy<rect.t||cy>rect.t+rect.h) return;
+      // 入れ物と中身が両方入ると二重になる。外側だけ残す
+      for(var i=0;i<picked.length;i++){
+        if(picked[i].el.contains(n)) return;
+      }
+      picked=picked.filter(function(p){ return !n.contains(p.el); });
+      picked.push({el:n, r:r});
+    });
+    if(!picked.length) return false;
+    var w=document.createElement('div');
+    w.setAttribute('data-cepart','1');
+    w.style.cssText='position:relative;width:'+Math.round(rect.w)+'px;height:'+Math.round(rect.h)+'px';
+    picked.forEach(function(p){
+      var c=null; try{ c=p.el.cloneNode(true); }catch(_){ return; }
+      c.style.setProperty('position','absolute');
+      c.style.setProperty('left',Math.round(p.r.left-rect.l)+'px');
+      c.style.setProperty('top',Math.round(p.r.top-rect.t)+'px');
+      c.style.setProperty('width',Math.round(p.r.width)+'px');
+      c.style.setProperty('height',Math.round(p.r.height)+'px');
+      ['margin','translate','transform','rotate','right','bottom','inset'].forEach(function(k){ c.style.removeProperty(k); });
+      c.removeAttribute('data-cetx'); c.removeAttribute('data-cety');
+      w.appendChild(c);
+    });
+    var html=''; try{ html=_palClean(w); }catch(_){ html=w.outerHTML; }
+    if(!html) return false;
+    var list=palLoad();
+    var pid='p'+Date.now()+'_'+Math.round(Math.random()*9999);
+    // ★切り取った部品は「置いた場所にそのまま」置く（pos:absolute）。
+    //   流れに差し込むと、自由配置だらけのカンプでは全然違う所に飛ぶ（実報告「場所ばらばら」）。
+    list.unshift({ id:pid, name:(name||'切り取った部品'), html:html, pos:'absolute',
+                   w:Math.round(rect.w), h:Math.round(rect.h),
+                   thumb:_palThumb(w)||'', tint:'#eef2f7', ts:Date.now() });
+    if(!palStore(list)) return false;
+    ceFlash('📌 見えている範囲を切り取りました（'+picked.length+'個・'+Math.round(rect.w)+'×'+Math.round(rect.h)+'）');
+    return true;
+  }
+  // ===== 🧱 囲んだ範囲を「ひとつのセクション」にする（2026-08-01・方針転換）=====
+  //   ★コピーして運ぶのをやめる。範囲内の要素を**引っ越し**させて section にまとめれば、
+  //     以後は普通のセクション＝⭐お気に入り・🏞留める・⇕高さ・貼り付け位置が全部そのまま効く。
+  //   ★中身は position:absolute のままにして、section を基準（relative）にする。
+  //     こうすると見た目が1pxも動かない（元が絶対配置だらけなので、流れに戻すと必ず崩れる）。
+  function makeSectionFromRegion(rect){
+    var picked=[];
+    [].slice.call(document.body.querySelectorAll('*')).slice(0,4000).forEach(function(n){
+      if(n.id&&n.id.indexOf('__ce')===0) return;
+      if(n.closest&&n.closest('[id^="__ce"]')) return;
+      if(/^(SCRIPT|STYLE|LINK|META|NOSCRIPT|BR|HTML|BODY)$/.test(n.tagName)) return;
+      var cs=null; try{ cs=getComputedStyle(n); }catch(_){ return; }
+      if(cs.display==='none'||cs.visibility==='hidden') return;
+      if(cs.position==='sticky'||cs.position==='fixed') return;      // 留めた帯・固定ヘッダーは動かさない
+      var r=n.getBoundingClientRect();
+      if(r.width<4||r.height<4) return;
+      var cx=r.left+r.width/2, cy=r.top+r.height/2;
+      if(cx<rect.l||cx>rect.l+rect.w||cy<rect.t||cy>rect.t+rect.h) return;
+      for(var i=0;i<picked.length;i++){ if(picked[i].el.contains(n)) return; }   // 入れ物が入っていれば中身は不要
+      picked=picked.filter(function(p){ return !n.contains(p.el); });
+      picked.push({el:n, r:r});
+    });
+    if(!picked.length) return null;
+    // 置き場所＝いちばん上の要素の位置に section を差し込む（DOMの並びは元の順を保つ）
+    picked.sort(function(a,b){ return a.r.top-b.r.top; });
+    var anchor=picked[0].el, host=anchor.parentElement;
+    if(!host) return null;
+    try{ pushUndo(document.body); }catch(_){}
+    var sec=document.createElement('section');
+    sec.className='ce_part'; sec.setAttribute('data-cepart','1');
+    sec.style.cssText='position:relative;width:100%;height:'+Math.round(rect.h)+'px;box-sizing:border-box';
+    var snap=_hostSnap(anchor);
+    host.insertBefore(sec, anchor);
+    var sr=sec.getBoundingClientRect();
+    picked.forEach(function(p){
+      var r=p.el.getBoundingClientRect();          // 動かす前の見た目の位置を控える
+      sec.appendChild(p.el);
+      p.el.style.setProperty('position','absolute','important');
+      p.el.style.setProperty('left',Math.round(r.left-sr.left)+'px','important');
+      p.el.style.setProperty('top',Math.round(r.top-sr.top)+'px','important');
+      p.el.style.setProperty('width',Math.round(r.width)+'px','important');
+      p.el.style.setProperty('margin','0','important');
+      ['right','bottom','inset','translate','transform'].forEach(function(k){ p.el.style.removeProperty(k); });
+      p.el.removeAttribute('data-cetx'); p.el.removeAttribute('data-cety');
+    });
+    try{ _growHosts(snap, sec.offsetHeight); }catch(_){}
+    try{ markDirty(); }catch(_){}
+    return {sec:sec, n:picked.length};
+  }
+  var _palPick=null;
+  function palPickEnd(){
+    if(!_palPick) return;
+    document.removeEventListener('mousemove',_palPick.mv,true);
+    document.removeEventListener('wheel',_palPick.wh,true);
+    document.removeEventListener('mousedown',_palPick.dn,true);
+    document.removeEventListener('keydown',_palPick.kd,true);
+    if(_palPick.box) _palPick.box.remove();
+    _palPick=null;
+  }
+  window.__cePalPickEnd=palPickEnd;      // Escの「最後の砦」から呼べるように
+  function palPickStart(mode){
+    palPickEnd();
+    var _sec=(mode==='section');
+    var box=document.createElement('div'); box.id='__ce_palpick';
+    var _c=_sec?'#7c3aed':'#0b6bcb';
+    box.style.cssText='position:fixed;z-index:2147483646;pointer-events:none;border:2px solid '+_c+';'
+      +'background:'+(_sec?'rgba(124,58,237,.12)':'rgba(11,107,203,.12)')+';box-shadow:0 0 0 9999px rgba(0,0,0,.06)';
+    var lab=document.createElement('div');
+    lab.style.cssText='position:absolute;left:0;top:-26px;background:'+_c+';color:#fff;font:12px/1.5 system-ui,sans-serif;'
+      +'font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap';
+    box.appendChild(lab);
+    document.body.appendChild(box);
+    var cur=null;
+    // ★枠は「箱の大きさ」ではなく「実際に持っていく中身ぜんぶ」を囲む（2026-08-01・実報告）。
+    //   このカンプは中身が自由配置で箱の外に出ているため、箱だけ見せると
+    //   「画像しか取れていない」ように見えて、どこまで入るのか分からなかった。
+    function _unionRect(el){
+      var r=el.getBoundingClientRect();
+      var l=r.left,t=r.top,rt=r.right,b=r.bottom,n=0;
+      [].slice.call(el.querySelectorAll('*')).slice(0,600).forEach(function(c){
+        if(c.id&&c.id.indexOf('__ce')===0) return;
+        var cs=null; try{ cs=getComputedStyle(c); }catch(_){ return; }
+        if(cs.display==='none'||cs.visibility==='hidden') return;
+        var q=c.getBoundingClientRect();
+        if(q.width<2||q.height<2) return;
+        l=Math.min(l,q.left); t=Math.min(t,q.top); rt=Math.max(rt,q.right); b=Math.max(b,q.bottom);
+        n++;
+      });
+      return {l:l,t:t,w:rt-l,h:b-t,n:n,ow:r.width,oh:r.height};
+    }
+    function show(el){
+      if(!el) return;
+      cur=el;
+      var u=_unionRect(el);
+      box.style.left=u.l+'px'; box.style.top=u.t+'px';
+      box.style.width=Math.max(0,u.w)+'px'; box.style.height=Math.max(0,u.h)+'px';
+      var same=(Math.abs(u.w-u.ow)<3&&Math.abs(u.h-u.oh)<3);
+      lab.textContent=_palName(el)+'（'+Math.round(u.w)+'×'+Math.round(u.h)+'・中身'+u.n+'個'
+        +(same?'':'／箱は'+Math.round(u.ow)+'×'+Math.round(u.oh))+'）';
+    }
+    var st={
+      mv:function(e){
+        if(e.target&&e.target.closest&&e.target.closest('[id^="__ce"]')) return;
+        var n=document.elementFromPoint(e.clientX,e.clientY);
+        if(!n||(n.closest&&n.closest('[id^="__ce"]'))) return;
+        if(n===cur) return;
+        show(n);
+      },
+      wh:function(e){
+        if(!cur) return;
+        e.preventDefault(); e.stopPropagation();
+        if(e.deltaY<0){ var p=cur.parentElement; if(p&&p!==document.body) show(p); }
+        else{
+          var best=null,ba=0;
+          [].slice.call(cur.children).forEach(function(c){
+            if(c.id&&c.id.indexOf('__ce')===0) return;
+            var a=(c.offsetWidth||0)*(c.offsetHeight||0);
+            if(a>ba){ ba=a; best=c; }
+          });
+          if(best) show(best);
+        }
+      },
+      dn:function(e){
+        if(e.target&&e.target.closest&&e.target.closest('[id^="__ce"]')) return;
+        e.preventDefault(); e.stopPropagation();
+        if(e.button!==0){ palPickEnd(); return; }        // 右クリック＝やめる
+        var t=cur, u=t?_unionRect(t):null; palPickEnd();
+        if(!t||!u) return;
+        if(_sec){
+          // 🧱 セクション化＝見た目を保ったまま、範囲内の物を1つの section に引っ越す
+          var made=null; try{ made=makeSectionFromRegion({l:u.l,t:u.t,w:u.w,h:u.h}); }catch(err){ ceFlash('⚠ セクションにできませんでした：'+((err&&err.message)||err)); return; }
+          if(!made){ ceFlash('⚠ この範囲には移せる物がありませんでした'); return; }
+          try{ curEl=made.sec; selEls=[made.sec]; groupBlink([made.sec]); }catch(_){}
+          ceFlash('🧱 '+made.n+'個を1つのセクションにまとめました（⭐お気に入り登録・🏞留める・⇕高さが使えます）');
+          return;
+        }
+        // ★見えている範囲をそのまま切り取る＝別の親にぶら下がっている物も一緒に入る
+        if(palAddRegion({l:u.l,t:u.t,w:u.w,h:u.h}, _palName(t))){ openPalette(); return; }
+        palResetLast(); if(palAdd(t)){ openPalette(); ceFlash('📌 「'+_palName(t)+'」を入れました'); }
+      },
+      kd:function(e){ if(e.key==='Escape'){ e.preventDefault(); palPickEnd(); ceFlash('🎯 選ぶのをやめました'); } },
+      box:box
+    };
+    _palPick=st;
+    document.addEventListener('mousemove',st.mv,true);
+    document.addEventListener('wheel',st.wh,{capture:true,passive:false});
+    document.addEventListener('mousedown',st.dn,true);
+    document.addEventListener('keydown',st.kd,true);
+    ceFlash((_sec?'🧱 セクションにしたい所':'🎯 入れたい所')+'にマウスを乗せてクリック（ホイールで範囲を広げる／狭める・Escでやめる）');
   }
   function openPalette(){
     var p=document.getElementById('__ce_pal');
     if(p){ palRender(); return p; }
     p=document.createElement('div'); p.id='__ce_pal';
-    p.style.cssText='position:fixed;right:16px;top:110px;z-index:2147483647;width:262px;max-height:70vh;overflow:auto;'
+    p.style.cssText='position:fixed;right:16px;top:100px;z-index:2147483647;width:372px;max-height:80vh;overflow:auto;'
       +'background:#fff;border:1px solid #c9c9cf;border-radius:14px;padding:0 0 10px;box-shadow:0 16px 44px rgba(0,0,0,.3);'
       +'font:12px/1.5 system-ui,sans-serif;color:#1d1d1f';
     p.innerHTML='<div class="hd" style="display:flex;align-items:center;gap:6px;padding:9px 11px;background:#f0f0f4;'
@@ -9686,16 +10253,26 @@ html.__ce_altmode{cursor:text}
         +'<button id="__ce_palx" style="margin-left:auto;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;padding:2px 7px">✕</button></div>'
       +'<div class="ask" style="display:none;margin:9px 11px 2px;padding:7px 8px;background:#fffbe8;border:1px solid #f0e0a0;border-radius:9px">'
         +'<div style="font-size:11px;color:#7a6a20;margin-bottom:5px">いま入れた元はどうする？</div>'
+        +'<div style="display:flex;gap:5px;margin-bottom:5px">'
+        +'<button class="askb" data-m="up" style="flex:1;border:1px solid #d0d0d5;background:#fff;border-radius:8px;padding:5px 4px;cursor:pointer;font:11px system-ui,sans-serif">⬆ 外側へ広げる</button>'
+        +'<button class="askb" data-m="down" style="flex:1;border:1px solid #d0d0d5;background:#fff;border-radius:8px;padding:5px 4px;cursor:pointer;font:11px system-ui,sans-serif">⬇ 内側へ狭める</button>'
+        +'</div>'
         +'<div style="display:flex;gap:5px">'
         +'<button class="askb" data-m="copy" style="flex:1;border:1px solid #d0d0d5;background:#fff;border-radius:8px;padding:5px 4px;cursor:pointer;font:11px system-ui,sans-serif">📋 残す</button>'
         +'<button class="askb" data-m="cut"  style="flex:1;border:1px solid #d0d0d5;background:#fff;border-radius:8px;padding:5px 4px;cursor:pointer;font:11px system-ui,sans-serif">✂ 消す</button>'
         +'</div></div>'
-      +'<div style="color:#8a8a8e;font-size:10.5px;padding:8px 11px 7px;line-height:1.6">中身は再起動しても残ります。カードを掴んで置きたい場所へドラッグ。</div>'
-      +'<div class="pl" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 11px"></div>'
+      +'<div style="padding:9px 11px 4px;display:flex;flex-direction:column;gap:6px">'
+        +'<button id="__ce_palsecb" style="width:100%;background:#7c3aed;color:#fff;border:none;border-radius:9px;padding:9px;cursor:pointer;font:12.5px system-ui,sans-serif;font-weight:700">🧱 指した範囲をセクションにする</button>'
+        +'<button id="__ce_palpickb" style="width:100%;background:#0b6bcb;color:#fff;border:none;border-radius:9px;padding:9px;cursor:pointer;font:12.5px system-ui,sans-serif;font-weight:700">🎯 指して選んでパレットに入れる</button>'
+      +'</div>'
+      +'<div style="color:#8a8a8e;font-size:10.5px;padding:2px 11px 7px;line-height:1.6">中身は再起動しても残ります。カードを掴んで置きたい場所へドラッグ。</div>'
+      +'<div class="pl" style="display:grid;grid-template-columns:1fr;gap:9px;padding:0 11px"></div>'
       +'<div style="padding:9px 11px 0"><button id="__ce_palclr" style="width:100%;border:1px solid #f0c0c0;background:#fdeeee;color:#b03636;border-radius:8px;padding:5px;cursor:pointer;font:11px system-ui,sans-serif">🧹 パレットを空にする</button></div>';
     document.body.appendChild(p);
     p.__close=function(){ p.remove(); };     // 中身は localStorage に残るので、閉じても失われない
     p.querySelector('#__ce_palx').onclick=function(){ p.__close(); };
+    p.querySelector('#__ce_palpickb').onclick=function(){ palPickStart(); };
+    p.querySelector('#__ce_palsecb').onclick=function(){ palPickStart('section'); };
     p.querySelector('#__ce_palclr').onclick=function(){
       if(!palLoad().length) return;
       palStore([]); palRender(); ceFlash('🧹 パレットを空にしました');
@@ -9703,8 +10280,11 @@ html.__ce_altmode{cursor:text}
     [].forEach.call(p.querySelectorAll('.askb'),function(b){
       b.addEventListener('mousedown',function(ev){ ev.stopPropagation(); },true);
       b.onclick=function(){
+        var m=b.getAttribute('data-m');
+        if(m==='up'){ palUpLast(); return; }     // 登り降りは続けて押せるよう、帯は消さない
+        if(m==='down'){ palDownLast(); return; }
         // ★その場かぎりの確認なので、押したら消す（ずっと出ていると「これ何？」になる・実報告）
-        palApplyLast(b.getAttribute('data-m'));
+        palApplyLast(m);
         palResetLast(); palRender();
       };
     });
@@ -14911,14 +15491,39 @@ html.__ce_altmode{cursor:text}
   // 🔲 ドラッグ範囲選択（マーキー・2026-07-19）：セクション余白など「ドラッグしても何も起きない場所」から
   // ドラッグすると青い点線枠が出て、枠に完全に入った要素をまとめて複数選択（Ctrl+クリックと同じselEls状態）。
   // 4px未満の動きはただのクリック扱い＝誤発動しない。枠のUIは.__ce_hdl＝保存に紛れない。
-  var _mq=null, _mqBox=null;
+  var _mq=null, _mqBox=null, _mqAuto=null;
+  // ★掴み始めた点は「ページ座標」で覚える（2026-08-01 要望「ドラッグしながらホイールで下まで選びたい」）。
+  //   画面座標のままだとスクロールした瞬間に枠の基準がズレて、見えている範囲しか選べなかった。
   function _mqStart(e){
-    _mq={x:e.clientX,y:e.clientY,on:false,l:0,t:0,r:0,b:0};
+    _mq={x:e.clientX,y:e.clientY,on:false,l:0,t:0,r:0,b:0,
+         px:e.clientX+(window.scrollX||0), py:e.clientY+(window.scrollY||0),
+         lx:e.clientX, ly:e.clientY, pl:0,pt:0,pr:0,pb:0};
     document.addEventListener('mousemove',_mqMove,true);
     document.addEventListener('mouseup',_mqUp,true);
+    window.addEventListener('scroll',_mqScroll,true);   // ホイールで動かしても枠が追いかける
+    // 画面の上下端にカーソルを寄せている間は自動スクロール（マウスを止めても続くので時計で回す）
+    if(_mqAuto) clearInterval(_mqAuto);
+    _mqAuto=setInterval(function(){
+      if(!_mq||!_mq.on) return;
+      var m=90, y=_mq.ly, d=0;
+      if(y<m) d=-Math.ceil((m-y)/4);
+      else if(y>window.innerHeight-m) d=Math.ceil((y-(window.innerHeight-m))/4);
+      if(d) window.scrollBy(0,d);
+    },16);
+  }
+  function _mqScroll(){ if(_mq&&_mq.on) _mqDraw(_mq.lx,_mq.ly); }
+  function _mqDraw(cx,cy){
+    var sx=window.scrollX||0, sy=window.scrollY||0;
+    var ax=_mq.px-sx, ay=_mq.py-sy;                     // 掴み始めた点の「今の画面位置」
+    var l=Math.min(ax,cx), t=Math.min(ay,cy), w=Math.abs(cx-ax), h=Math.abs(cy-ay);
+    _mq.l=l; _mq.t=t; _mq.r=l+w; _mq.b=t+h;
+    _mq.pl=l+sx; _mq.pt=t+sy; _mq.pr=_mq.pl+w; _mq.pb=_mq.pt+h;   // 選ぶ範囲はページ座標で貯める
+    _mqBox.style.left=l+'px'; _mqBox.style.top=t+'px';
+    _mqBox.style.width=w+'px'; _mqBox.style.height=h+'px';
   }
   function _mqMove(e){
     if(!_mq) return;
+    _mq.lx=e.clientX; _mq.ly=e.clientY;
     var dx=Math.abs(e.clientX-_mq.x), dy=Math.abs(e.clientY-_mq.y);
     if(!_mq.on){
       if(dx<4&&dy<4) return;
@@ -14931,18 +15536,24 @@ html.__ce_altmode{cursor:text}
       _mqBox.style.display='block'; document.body.style.userSelect='none';
     }
     e.preventDefault();
-    var l=Math.min(_mq.x,e.clientX), t=Math.min(_mq.y,e.clientY);
-    _mq.l=l; _mq.t=t; _mq.r=l+dx; _mq.b=t+dy;
-    _mqBox.style.left=l+'px'; _mqBox.style.top=t+'px';
-    _mqBox.style.width=dx+'px'; _mqBox.style.height=dy+'px';
+    _mqDraw(e.clientX,e.clientY);
   }
   function _mqUp(){
     document.removeEventListener('mousemove',_mqMove,true);
     document.removeEventListener('mouseup',_mqUp,true);
+    window.removeEventListener('scroll',_mqScroll,true);
+    if(_mqAuto){ clearInterval(_mqAuto); _mqAuto=null; }
     var m=_mq; _mq=null;
     document.body.style.userSelect='';
     if(_mqBox) _mqBox.style.display='none';
     if(!m||!m.on) return;  // 動かしていない＝ただのクリック（何もしない）
+    // ページ座標で貯めた範囲を「今の画面座標」に直す＝この下の判定（要素のrect＝画面座標）と揃う。
+    // これで、スクロールして画面外へ流れた物もまとめて選べる。
+    var _msx=window.scrollX||0, _msy=window.scrollY||0;
+    m.l=m.pl-_msx; m.t=m.pt-_msy; m.r=m.pr-_msx; m.b=m.pb-_msy;
+    // 🧹「囲んだ範囲の余白を詰める」用に、囲んだ範囲（ページ座標）を覚えておく。
+    //   右クリックメニューには、この記憶がある時だけ項目を出す＝ふだんは増えない。
+    if(m.pb-m.pt>60) window.__ceMqRegion={t:m.pt,b:m.pb,l:m.pl,r:m.pr,at:Date.now()};
     // 枠に「完全に入った」見える要素だけ拾う（交差判定だと巨大な親まで拾って事故るため）
     var inside=[];
     [].slice.call(document.body.querySelectorAll('*')).forEach(function(n){
@@ -15415,6 +16026,11 @@ html.__ce_altmode{cursor:text}
     [].slice.call(doc.querySelectorAll('[id^="__ce"]')).forEach(function(n){
       if(/^(STYLE|LINK|SCRIPT)$/.test(n.tagName)) return;
       n.remove();
+    });
+    // 🧩選択やパレットで一瞬光らせる緑の点線が、タイミングによって焼き付くことがある。保存時に必ず外す。
+    [].slice.call(doc.querySelectorAll('[style*="dashed"]')).forEach(function(n){
+      var o=n.style.outline||'';
+      if(/dashed/.test(o)&&/#1a7f37|26, 127, 55/.test(o)){ n.style.removeProperty('outline'); n.style.removeProperty('outline-offset'); }
     });
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
     // 編集UI以外の"見た目に無関係な"拡張機能の断片はここで丸ごと除去する。
@@ -15928,6 +16544,186 @@ html.__ce_altmode{cursor:text}
   // 🎨 セクションの背景色を変える（AIなし・即反映）＝右クリックから直接開く浮動パネル。
   //   ①このページのセクション色 ②ページで使用中の色（頻度順） ③自由な色 から選ぶ。
   //   ⚙大メニューにも同じ機能があるが、右クリックからすぐ届くようにこちらへ切り出した。
+  // ===== 🔎 留めた写真が「透けて見えている所」を一覧にして、1つずつ塞ぐ／開ける（2026-08-01 要望）=====
+  //   ★まとめて塞ぐのはダメ（見せたい穴が1つある）。どこが穴なのかを出して、選ばせるのが正解。
+  function _stickyHoles(){
+    var band=document.querySelector('[data-cepband]');
+    if(!band){
+      // 帯以外の留めた要素にも対応（z-indexが負＝後ろに回している物）
+      [].slice.call(document.querySelectorAll('section,header,div')).some(function(n){
+        var cs=null; try{ cs=getComputedStyle(n); }catch(_){ return false; }
+        if(cs.position==='sticky' && (parseInt(cs.zIndex,10)||0)<0){ band=n; return true; }
+        return false;
+      });
+    }
+    if(!band||!band.parentElement) return {band:null, holes:[]};
+    var sy=window.scrollY||0, holes=[];
+    [].slice.call(band.parentElement.children).forEach(function(c){
+      if(c===band||(c.id&&c.id.indexOf('__ce')===0)) return;
+      if(c.offsetHeight<=40) return;
+      var bg=''; try{ bg=getComputedStyle(c).backgroundColor; }catch(_){}
+      var clear=(!bg||bg==='transparent'||/rgba\\(0, 0, 0, 0\\)/.test(bg));
+      var painted=(c.getAttribute('data-ceovbg')!=null);
+      if(!clear&&!painted) return;                 // 元から色がある＝穴ではない
+      var r=c.getBoundingClientRect();
+      holes.push({kind:'el', el:c, top:Math.round(r.top+sy), h:Math.round(r.height), on:!clear});
+    });
+    // ★ブロックとブロックの「すき間」も穴になる（2026-08-01・実報告「全部塞いでも2つ見える」）。
+    //   すき間はマージン＝誰の背景でもないので、要素をいくら塗っても埋まらない。
+    //   下側の要素に box-shadow を上向きに伸ばして塞ぐ（配置に一切影響しないのが利点・§7㊺と同じ手）。
+    // ★位置は offsetTop で測る。getBoundingClientRect は **sticky が貼りついた今の位置** を返すので、
+    //   帯を含む並びでは「6005pxのすき間」のような嘘の値になる（実報告：全部塞いでも2つ残る）。
+    var host=band.parentElement;
+    var hostTop=host.offsetTop, hostBot=host.offsetTop+host.offsetHeight;
+    var kids=[].slice.call(host.children).filter(function(c){
+      return !(c.id&&c.id.indexOf('__ce')===0) && c.offsetHeight>0;
+    }).map(function(c){ return {el:c, t:c.offsetTop, b:c.offsetTop+c.offsetHeight}; })
+      .sort(function(x,y){ return x.t-y.t; });
+    var pos=hostTop;
+    kids.forEach(function(k){
+      var gap=Math.round(k.t-pos);
+      if(gap>=8) holes.push({kind:'gap', el:k.el, top:Math.round(pos), h:gap, on:!!k.el.getAttribute('data-ceovsh')});
+      pos=Math.max(pos,k.b);
+    });
+    // 最後の要素より下（入れ物の余り）も穴になる。ここは下に要素が無いので埋め板を1枚置く
+    var tail=Math.round(hostBot-pos);
+    if(tail>=8&&kids.length){
+      var lastEl=kids[kids.length-1].el;
+      holes.push({kind:'tail', el:lastEl, top:Math.round(pos), h:tail, on:!!lastEl.getAttribute('data-ceovtail')});
+    }
+    holes.sort(function(x,y){ return x.top-y.top; });
+    return {band:band, holes:holes};
+  }
+  // ⛔ 留める範囲を「ここまで」で終わらせる（2026-08-01・実報告「塞いでも次々と穴が出る」）。
+  //   ★sticky は親の下端で必ず終わる。だから帯とその仲間を器（div）に入れれば、
+  //     その器から下には物理的に出てこない＝穴つぶしのイタチごっこが終わる。
+  //   ★器は position も transform も持たない素のdivにする（持たせると中の絶対配置の基準が変わって崩れる・§7㊺）。
+  function holeStopAt(stopEl){
+    var band=document.querySelector('[data-cepband]');
+    if(!band) return 0;
+    var host=band.parentElement;
+    if(!stopEl||stopEl.parentElement!==host) return 0;
+    // 既に器に入っているなら、いったん外に戻してから作り直す
+    var old=host.querySelector(':scope > [data-ceovwrap]');
+    if(old){ while(old.firstChild) host.insertBefore(old.firstChild, old); old.remove(); }
+    var w=document.createElement('div'); w.setAttribute('data-ceovwrap','1');
+    host.insertBefore(w, band);
+    var n=band, moved=0;
+    while(n && n!==stopEl){ var nx=n.nextElementSibling; w.appendChild(n); moved++; n=nx; }
+    return moved;
+  }
+  function holeUnwrap(){
+    var w=document.querySelector('[data-ceovwrap]'); if(!w||!w.parentElement) return false;
+    var host=w.parentElement;
+    while(w.firstChild) host.insertBefore(w.firstChild, w);
+    w.remove(); return true;
+  }
+  function holeToggle(h, base){
+    // ★いちばん下の余りは「板を1枚足す」より、最後の要素の影を下へ伸ばすほうが確実。
+    //   板は入れ物の高さ固定・flex・overflow の影響を受けて効かないことがある（実報告：塞いでも残った）。
+    //   影は配置に一切影響せず、必ずその要素の上に描かれる。
+    if(h.kind==='tail'){
+      if(h.on){ h.el.style.removeProperty('box-shadow'); h.el.removeAttribute('data-ceovtail'); return; }
+      var prev=h.el.style.boxShadow||'';
+      var add='0 '+(h.h+2)+'px 0 0 '+base;
+      h.el.style.setProperty('box-shadow', prev?(prev+', '+add):add, 'important');
+      h.el.setAttribute('data-ceovtail','1');
+      return;
+    }
+    if(h.kind==='gap'){
+      if(h.on){ h.el.style.removeProperty('box-shadow'); h.el.removeAttribute('data-ceovsh'); }
+      else {
+        h.el.style.setProperty('box-shadow','0 -'+(h.h+2)+'px 0 0 '+base,'important');
+        h.el.setAttribute('data-ceovsh','1');
+      }
+      return;
+    }
+    if(h.on){ h.el.style.removeProperty('background-color'); h.el.removeAttribute('data-ceovbg'); }
+    else { h.el.style.setProperty('background-color',base,'important'); h.el.setAttribute('data-ceovbg','1'); }
+  }
+  function openHolesPanel(){
+    var old=document.getElementById('__ce_holes'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    var d=_stickyHoles();
+    if(!d.band){ ceFlash('留めた写真（🏞の帯）が見つかりませんでした'); return; }
+    var p=document.createElement('div'); p.id='__ce_holes';
+    p.style.cssText='position:fixed;right:16px;top:120px;z-index:2147483647;width:300px;max-height:72vh;overflow:auto;'
+      +'background:#fff;border:1px solid #c9c9cf;border-radius:13px;box-shadow:0 16px 44px rgba(0,0,0,.3);'
+      +'font:12px/1.6 system-ui,sans-serif;color:#1d1d1f;padding:0 0 10px';
+    var _hl=null;
+    function mark(el){
+      if(_hl){ if(_hl.o) _hl.n.style.outline=_hl.o; else _hl.n.style.removeProperty('outline'); _hl=null; }
+      if(!el) return;
+      _hl={n:el,o:el.style.outline};
+      el.style.setProperty('outline','3px solid #0b6bcb'); el.style.setProperty('outline-offset','-3px');
+    }
+    function draw(){
+      var dd=_stickyHoles(), base=''; try{ base=_ovPageBg(); }catch(_){}
+      if(!base) base='#ffffff';
+      var rows=dd.holes.map(function(h,i){
+        var nm=(h.kind==='tail') ? ('▭ いちばん下の余り（'+h.h+'px）')
+          : (h.kind==='gap') ? ('▭ すき間（'+h.h+'px）')
+          : h.el.tagName.toLowerCase()+(h.el.className&&typeof h.el.className==='string'?('.'+h.el.className.trim().split(/[ \t]+/)[0]):'');
+        return '<div class="hr" data-i="'+i+'" style="display:flex;align-items:center;gap:6px;margin:5px 0;padding:6px 7px;'
+          +'border:1px solid #e2e2e8;border-radius:9px;background:'+(h.on?'#f2f7ff':'#fff')+'">'
+          +'<div style="flex:1;overflow:hidden"><b style="font-size:11.5px">'+esc(nm.slice(0,26))+'</b>'
+          +'<div style="color:#8a8a8e;font-size:10.5px">'+h.top+'px から '+h.h+'px'+(h.on?'／今は塞いでいる':'／今は透けている')+'</div></div>'
+          +'<button class="hgo" data-i="'+i+'" title="そこへ移動" style="border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;padding:3px 7px">👁</button>'
+          +'<button class="htg" data-i="'+i+'" style="border:none;border-radius:6px;cursor:pointer;padding:4px 9px;font-weight:700;'
+          +(h.on?'background:#eee;color:#333">透けさせる':'background:#1a7f37;color:#fff">塞ぐ')+'</button>'
+          +(h.kind==='el'?'<button class="hst" data-i="'+i+'" title="ここから下では二度と出ないようにする（留める範囲をここで終える）" style="border:1px solid #b03636;background:#fff;color:#b03636;border-radius:6px;cursor:pointer;padding:4px 7px;font-size:10.5px">⛔ここまで</button>':'')
+          +'</div>';
+      }).join('');
+      p.innerHTML='<div class="hd" style="display:flex;align-items:center;gap:6px;padding:9px 11px;background:#f0f0f4;'
+          +'border-bottom:1px solid #e0e0e6;border-radius:13px 13px 0 0;cursor:move;user-select:none">'
+          +'<span style="font-size:14px;color:#8a8a8e">⠿</span><b style="flex:1;font-size:13px">🔎 留めた写真が見えている所</b>'
+          +'<button id="__ce_holesx" style="border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;padding:2px 7px">✕</button></div>'
+        +'<div style="color:#8a8a8e;font-size:10.5px;padding:8px 11px 0;line-height:1.6">見せたい所だけ「透けさせる」にして、残りは「塞ぐ」を押してください。行に触れると青枠で光ります。</div>'
+        +(document.querySelector('[data-ceovwrap]')
+          ?'<div style="margin:8px 11px 0;padding:7px 8px;background:#eef7ee;border:1px solid #cfe6cf;border-radius:9px">'
+            +'<div style="font-size:11px;color:#2c6b3f">⛔ 留める範囲を区切ってあります（この下には出ません）</div>'
+            +'<button id="__ce_holesuw" style="margin-top:5px;border:1px solid #ccc;background:#fff;border-radius:7px;cursor:pointer;padding:4px 9px;font-size:11px">区切りを解除する</button></div>'
+          :'')
+        +'<div style="padding:2px 11px 0">'+(rows
+          ||'<div style="color:#8a8a8e;padding:10px 0;line-height:1.7">✅ この範囲では透けている所はありません。<br>もっと下でも見せたいときは「区切りを解除する」を押してください。</div>')+'</div>';
+      var _uw=p.querySelector('#__ce_holesuw');
+      if(_uw) _uw.onclick=function(){
+        try{ pushUndo(document.body); }catch(_){}
+        if(holeUnwrap()){ markDirty(); draw(); ceFlash('⛔ 区切りを解除しました（また下まで留まります）'); }
+      };
+      p.querySelector('#__ce_holesx').onclick=function(){ p.__close(); };
+      [].forEach.call(p.querySelectorAll('.hr'),function(row){
+        row.addEventListener('mouseenter',function(){ var h=dd.holes[+row.getAttribute('data-i')]; if(h) mark(h.el); });
+      });
+      p.addEventListener('mouseleave',function(){ mark(null); });
+      [].forEach.call(p.querySelectorAll('.hgo'),function(b){
+        b.onclick=function(ev){ ev.stopPropagation(); var h=dd.holes[+b.getAttribute('data-i')]; if(h){ mark(h.el); try{ h.el.scrollIntoView({block:'center'}); }catch(_){} } };
+      });
+      [].forEach.call(p.querySelectorAll('.hst'),function(b){
+        b.onclick=function(ev){
+          ev.stopPropagation();
+          var h=dd.holes[+b.getAttribute('data-i')]; if(!h) return;
+          try{ pushUndo(document.body); }catch(_){}
+          var moved=holeStopAt(h.el);
+          markDirty(); draw();
+          ceFlash(moved?('⛔ ここ（'+h.top+'px）から下では留めた写真は出てきません（'+moved+'個を器にまとめました）')
+                       :'⛔ ここでは区切れませんでした（帯と同じ並びの物を選んでください）');
+        };
+      });
+      [].forEach.call(p.querySelectorAll('.htg'),function(b){
+        b.onclick=function(ev){
+          ev.stopPropagation();
+          var h=dd.holes[+b.getAttribute('data-i')]; if(!h) return;
+          try{ pushUndo(h.el); }catch(_){}
+          holeToggle(h, base);
+          markDirty(); draw();
+        };
+      });
+      try{ panelDrag(p, p.querySelector('.hd')); }catch(_){}
+    }
+    p.__close=function(){ mark(null); p.remove(); };
+    document.body.appendChild(p);
+    draw();
+  }
   function openSecBg(el,x,y){
     var old=document.getElementById('__ce_sbgp'); if(old) old.remove();
     var target=(el&&el.closest)?el.closest('section,header,footer'):null;
@@ -15938,6 +16734,17 @@ html.__ce_altmode{cursor:text}
       // グラデが上に被って色が見えない時は外す（写真背景url は残す）
       try{ var bi=getComputedStyle(target).backgroundImage; if(bi && bi.indexOf('gradient')>=0 && bi.indexOf('url(')<0) target.style.setProperty('background-image','none','important'); }catch(_){}
       markDirty();
+      // ★色を変えても写真が残っていたら「変わらない」に見える（実報告）。理由と次の手を必ず出す。
+      var _bi2=''; try{ _bi2=getComputedStyle(target).backgroundImage||''; }catch(_){}
+      if(_bi2&&_bi2.indexOf('url(')>=0){
+        var _isBand=!!(target.getAttribute&&target.getAttribute('data-cepband'));
+        var _t=_isBand
+          ? '⚠ ここは「🏞留めた写真の帯」そのものです。色を変えても写真が上に乗っているので見た目は変わりません（帯を右クリック →🏞背景を留めるのをやめる／🖼写真を変える）'
+          : '⚠ このセクションは背景が写真なので、色を変えても見た目は変わりません';
+        if(msg) msg.textContent=_t;
+        try{ ceFlash(_t); }catch(_){}
+        return;
+      }
       if(msg) msg.textContent='セクションの背景色を '+c+' にしました（💾保存で確定・⟲戻すで取り消し）';
     }
     function sw(c,t){ return '<button class="__ce_sbgsw" data-c="'+c+'" title="'+esc(t||c)+'" style="width:24px;height:24px;border:1px solid rgba(0,0,0,.28);border-radius:5px;cursor:pointer;background:'+c+';padding:0;margin:2px;vertical-align:middle"></button>'; }
@@ -15962,7 +16769,14 @@ html.__ce_altmode{cursor:text}
       +'<div style="opacity:.7;margin:6px 0 2px">このページのセクション色</div><div>'+(secSw.join('')||'<span style="color:#999">（なし）</span>')+'</div>'
       +'<div style="opacity:.7;margin-top:6px">ページで使われている色</div><div>'+(pgSw.join('')||'<span style="color:#999">（なし）</span>')+'</div>'
       +'<div style="opacity:.7;margin-top:6px">新しい色（選ぶと即反映）</div><input type="color" id="__ce_sbgc" value="#f5f7fa" style="width:44px;height:26px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle">'
-      +'<button data-x="1" style="margin-left:8px;background:#555;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;vertical-align:middle">✖ 閉じる</button>';
+      // ★透明に戻す：🏞で敷いた「地の色」(data-ceovbg)や元の白が、上の帯・写真を隠していることがある。
+      //   波型の飾りのように「上半分が透明」なセクションでは、これで上の写真が透けて隙間が消える。
+      // ★留めた帯（sticky）は親の下端まで貼りついたまま。後ろのセクションが透明だと下まで透けて
+      //   「同じ写真がまた出てくる」になる（実報告）。地の色を敷いて隠すのが安全（配置に影響しない）。
+      +'<div style="margin-top:8px"><button data-holes="1" style="background:#1a7f37;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">🔎 留めた写真が見えている所を選んで塞ぐ</button></div>'
+      +'<div style="margin-top:6px"><button data-fill="1" style="background:#eef2f7;color:#1d1d1f;border:1px solid #d6deea;border-radius:6px;padding:5px 10px;cursor:pointer">⬇ ここから下をまとめて塞ぐ</button></div>'
+      +'<div style="margin-top:8px"><button data-clr="1" style="background:#eef2f7;color:#1d1d1f;border:1px solid #d6deea;border-radius:6px;padding:4px 10px;cursor:pointer">🫧 背景を透明にする（上が透ける）</button></div>'
+      +'<button data-x="1" style="margin-top:8px;background:#555;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;vertical-align:middle">✖ 閉じる</button>';
     document.body.appendChild(p);
     p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
     p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
@@ -15970,6 +16784,63 @@ html.__ce_altmode{cursor:text}
     p.addEventListener('click',function(ev){
       ev.stopPropagation();
       if(ev.target.getAttribute('data-x')){ p.remove(); return; }
+      if(ev.target.getAttribute('data-holes')){ p.remove(); openHolesPanel(); return; }
+      if(ev.target.getAttribute('data-fill')){
+        var base=''; try{ base=_ovPageBg(); }catch(_){}
+        if(!base) base='#ffffff';
+        try{ pushUndo(document.body); }catch(_){}
+        // ★自分自身も対象にする（2026-08-01・実報告）。透けていたのは右クリックした
+        //   そのセクション（top02）自身だったのに、「自分より下」しか見ておらず
+        //   「すでに色が付いています」と誤って返していた。
+        var n2=target, cnt=0;
+        while(n2){
+          if(n2.nodeType===1 && !(n2.id&&n2.id.indexOf('__ce')===0) && n2.offsetHeight>40
+             && !(n2.getAttribute&&n2.getAttribute('data-cepband'))){      // 帯自身は塗らない（写真が消える）
+            var bg2=''; try{ bg2=getComputedStyle(n2).backgroundColor; }catch(_){}
+            if(!bg2||bg2==='transparent'||/rgba\\(0, 0, 0, 0\\)/.test(bg2)){
+              n2.style.setProperty('background-color',base,'important');
+              n2.setAttribute('data-ceovbg','1');       // あとで🏞をやめた時に一緒に外れる印
+              cnt++;
+            }
+          }
+          n2=n2.nextElementSibling;
+        }
+        // ★保険：押した場所によっては相手がズレる（帯の上／カードの上など）。1個も塗れなかった時は、
+        //   留めた帯と同じ列に並ぶ「透明な塊」を全部塗る＝どこで押しても効くようにする。
+        if(!cnt){
+          var _bd2=document.querySelector('[data-cepband]');
+          var _hs=_bd2?_bd2.parentElement:null;
+          if(_hs) [].slice.call(_hs.children).forEach(function(c){
+            if(c===_bd2||(c.id&&c.id.indexOf('__ce')===0)||c.offsetHeight<=40) return;
+            var _cb=''; try{ _cb=getComputedStyle(c).backgroundColor; }catch(_){}
+            if(!_cb||_cb==='transparent'||/rgba\\(0, 0, 0, 0\\)/.test(_cb)){
+              c.style.setProperty('background-color',base,'important');
+              c.setAttribute('data-ceovbg','1'); cnt++;
+            }
+          });
+        }
+        markDirty();
+        var _fm=cnt?('⬇ '+cnt+'個に下地（'+base+'）を敷きました＝留めた写真はここから出てきません')
+                   :'⬇ この下はすでに色が付いています（透けているのは別の場所かもしれません）';
+        if(msg) msg.textContent=_fm;
+        try{ ceFlash(_fm); }catch(_){}
+        return;
+      }
+      if(ev.target.getAttribute('data-clr')){
+        try{ pushUndo(target); }catch(_){}
+        target.style.setProperty('background-color','transparent','important');
+        target.removeAttribute('data-ceovbg');            // 🏞が敷いた地の色の印も外す（もう塗っていないので）
+        markDirty();
+        // ★背景が「画像」だと、色を透明にしても画像が上に残るので見た目は変わらない（実報告）。
+        //   黙って無反応にせず、次にどうすればいいかまで出す。
+        var _bi=''; try{ _bi=getComputedStyle(target).backgroundImage||''; }catch(_){}
+        var _hasImg=(_bi&&_bi!=='none'&&_bi.indexOf('url(')>=0);
+        if(msg) msg.textContent=_hasImg
+          ? '🫧 色は透明にしましたが、このセクションは背景が「画像」なので見た目は変わりません。画像の上側を溶かすには 右クリック →🖼写真を加工 →🫧一部だけ透明にする →「上を少し」を使ってください'
+          : '🫧 このセクションの背景を透明にしました（上の写真・帯が透けます・⟲戻すで取り消し）';
+        if(_hasImg) ceFlash('🫧 背景が画像です → 🖼写真を加工 →🫧一部だけ透明にする を使ってください');
+        return;
+      }
       var b=ev.target.closest('.__ce_sbgsw'); if(b){ applySecBg(b.getAttribute('data-c')); return; }
     });
     p.querySelector('#__ce_sbgc').addEventListener('input',function(){ applySecBg(this.value); });
@@ -16310,7 +17181,8 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_vline','▎ 文字の左に縦線を引く（引用風・AIなし）'],
     ['__ce_q_deco','🎨 この飾りの色・形・傾きを変える'],
     ['__ce_q_psgrab','🔓 数字や飾り（01など）を掴めるようにする'],
-    ['__ce_q_pal','📌 パレットに入れる（コピー／切り取りは板で選ぶ）']
+    ['__ce_q_pal','📌 パレットに入れる（コピー／切り取りは板で選ぶ）'],
+    ['__ce_q_gapfix','🧹 囲んだ範囲の余白を詰める']
   ];
   // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
   //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
@@ -16319,7 +17191,7 @@ html.__ce_altmode{cursor:text}
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix','__ce_q_overpass','__ce_q_photoband','__ce_q_bandpat',
-    'sep:🧹 整える・消す','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_pal','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
+    'sep:🧹 整える・消す','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_pal','__ce_q_gapfix','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
   ];
   function qmDefMap(){ var m={}; QM_DEFS.forEach(function(d){ m[d[0]]=d[1]; }); return m; }
@@ -16951,6 +17823,16 @@ html.__ce_altmode{cursor:text}
       if(!ok){ delete _qmM['__ce_q_txtbg']; delete _qmM['__ce_q_vline']; return; }
       _qmM['__ce_q_txtbg']='🖌 文字の背景に色を塗る（〈'+_te.tagName.toLowerCase()+'〉の行・AIなし）';
       _qmM['__ce_q_vline']=(_te.getAttribute('data-cevl')?'▎ 左の縦線を調整する（色・太さ・間隔）':'▎ 文字の左に縦線を引く（引用風・AIなし）');
+    })();
+    // 🧹 余白詰めは「Shift+ドラッグで囲んだ直後」だけ出す＝ふだんメニューが増えない。
+    //    ★押す前に効き目（何px詰まるか）をラベルに出す（効かない時に押させない）。
+    (function(){
+      var rg=window.__ceMqRegion;
+      if(!rg||Date.now()-rg.at>600000){ delete _qmM['__ce_q_gapfix']; return; }
+      var px=0, cnt=0;
+      try{ gapScan(rg.t,rg.b).forEach(function(g){ px+=g.h; cnt++; }); }catch(_){}
+      if(!cnt){ delete _qmM['__ce_q_gapfix']; return; }
+      _qmM['__ce_q_gapfix']='🧹 囲んだ範囲の余白を詰める（'+cnt+'か所・約'+Math.round(px)+'px）';
     })();
     // 🎨 右クリックした場所に飾り（丸・リング・縁取り線・図形/線）があるときだけ出す
     (function(){
@@ -18474,6 +19356,11 @@ html.__ce_altmode{cursor:text}
         ceFlash('📌 パレットに'+_pn+'件入れました（カードを掴んで置きたい場所へドラッグ）');
         return;
       }
+      if(t.id==='__ce_q_gapfix'){
+        var _rg=window.__ceMqRegion; closeMenu();
+        if(_rg) gapFixRegion(_rg); else if(msg) msg.textContent='先に Shift+ドラッグで範囲を囲んでください';
+        return;
+      }
       if(t.id==='__ce_q_deco'){
         var _dqe=null,_bde=null;
         try{ _dqe=dqHitAt(qx,qy,curEl); }catch(_){ }
@@ -18587,13 +19474,14 @@ html.__ce_altmode{cursor:text}
     if(e.key!=='Escape') return;
     var recovered=(window.__ceInspOn||window.__ceFlyMode);
     // まずは各モードの正規の終了処理（後片付けごとやってくれる）
+    try{ if(window.__cePalPickEnd) window.__cePalPickEnd(); }catch(_){}
     try{ if(window.__ceInspOn && window.__ceInspExit) window.__ceInspExit(); }catch(_){}
     try{ if(window.__ceFlyMode && typeof flyEnd==='function'){ flyStopPrev(); flyEnd(); } }catch(_){}
     // ★正規終了が例外で途中まで＝フラグが残ると右クリックが死んだままになるので、最後に必ず強制で落とす
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);

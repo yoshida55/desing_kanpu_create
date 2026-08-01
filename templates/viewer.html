@@ -1095,11 +1095,25 @@
         autofocus>
       <input class="search_top" type="number" id="top" value="24" min="1" max="100" title="表示件数">
       <button class="search_button" id="go">検索</button>
+      <!-- ↩ さっきまで直していたカンプへ1クリックで戻る（ホーム→一覧から探し直すのが面倒・2026-08-01 要望） -->
+      <button class="tool_btn" id="last_camp" hidden style="background:#2b6cb0;color:#fff;border-color:#2b6cb0"></button>
       <button class="tool_btn tool_fav" id="fav_toggle">⭐ お気に入り一覧</button>
       <button class="tool_btn tool_set" id="set_toggle">⚙ 設定</button>
       <button class="tool_btn tool_camp" id="camp_toggle">🎨 カンプ生成</button>
       <button class="tool_btn tool_add" id="add_toggle">＋ 登録</button>
     </div>
+    <script>
+    (function(){
+      // カンプ側（編集バー）が開くたびに localStorage へファイル名を控えている。それを1クリックで開き直す。
+      var b=document.getElementById('last_camp'); if(!b) return;
+      var d=null; try{ d=JSON.parse(localStorage.getItem('__ce_lastcamp')||'null'); }catch(_){}
+      if(!d||!d.file) return;
+      b.hidden=false;
+      b.textContent='↩ さっきのカンプに戻る';
+      b.title=d.file;
+      b.addEventListener('click',function(){ location.href='/camp/'+encodeURIComponent(d.file); });
+    })();
+    </script>
 
     <!-- 設定パネル（生成エンジン・APIキー・一括言語化。トグルで開く） -->
     <div class="set_panel" id="set_panel">
