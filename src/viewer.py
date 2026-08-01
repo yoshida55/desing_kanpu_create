@@ -3122,6 +3122,9 @@ html.__ce_altmode{cursor:text}
   //   図形バーから置くので、写真の上でも・ただのセクションの上でも同じ手順で使える。
   //   ★種類を足したいときは、この配列に1件足すだけ。
   var TEXTSET_PATS=[
+    // ★「もやっとした光」を最初から敷いた版（2026-08-01 要望）。写真の上に置くだけで文字が読めるので、
+    //   ✨ふんわり光を別に置いて位置を合わせる手間が要らない。光は文字のうしろ（背景）に入れている。
+    {id:'glow',   nm:'見出し＋ひとこと（もやっと光つき）', note:'写真の上に置くならこれ'},
     {id:'center', nm:'見出し＋ひとこと（中央）', note:'いちばん使いやすい'},
     {id:'big',    nm:'見出しだけ（大きく）',     note:'言葉を1つだけ見せる'},
     {id:'left',   nm:'見出し＋ひとこと（左）',   note:'写真の主役が右にある時'},
@@ -3140,23 +3143,60 @@ html.__ce_altmode{cursor:text}
     if(id==='cta')  return '<div style="font-size:34px;'+H+'">まずは話してみませんか。</div>'
       +'<div style="display:inline-block;background:#7fbf4d;color:#fff;font-weight:700;letter-spacing:.08em;'
       +'padding:16px 46px;border-radius:999px;box-shadow:0 10px 24px rgba(90,150,60,.28)">ご相談はこちら</div>';
+    // 'glow' は 'center' と同じ文面（違いは後ろに光を敷くかどうかだけ）
     var h=(id==='left')?'まちの中で、<br>はたらく。':'社会復帰への道を、<br>一歩ずつ、ともに。';
     var p=(id==='left')?'地域とつながりながら、自分らしい毎日をつくります。':'一人ひとりに合った支援を通して、<br>次の一歩を支えます。';
     return '<div style="font-size:34px;'+H+'">'+h+'</div><div style="font-size:15px;'+P+'">'+p+'</div>';
+  }
+  // ★置いた物が🏞帯の上にあるなら、帯の中へ入れ直す（2026-08-01・実測で判明）。
+  //   `placeFree` は position:sticky の器を避ける仕様（§7・固定ヘッダー対策）なので、
+  //   帯の上に置いたつもりでも body 直下に入り、**帯と一緒に留まらず先にスクロールで流れていく**。
+  //   見た目の位置は変えずに親だけ差し替える（left/top を帯からの相対に計算し直す）。
+  function _adoptIntoBand(el){
+    if(!el||!el.getBoundingClientRect) return false;
+    var r=el.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2, bd=null;
+    try{
+      [].slice.call(document.querySelectorAll('[data-cepband]')).forEach(function(b){
+        var q=b.getBoundingClientRect();
+        if(cx>=q.left&&cx<=q.right&&cy>=q.top&&cy<=q.bottom) bd=b;
+      });
+    }catch(_){ }
+    if(!bd) return false;
+    if(el.closest&&el.closest('[data-cepband]')===bd) return true;   // もう中にいる
+    var q=bd.getBoundingClientRect();
+    bd.appendChild(el);
+    el.style.setProperty('position','absolute');
+    el.style.setProperty('left', Math.round(r.left-q.left)+'px');
+    el.style.setProperty('top',  Math.round(r.top -q.top )+'px');
+    el.style.removeProperty('right'); el.style.removeProperty('bottom');
+    markDirty();
+    return true;
   }
   function addTextSet(id){
     var d=document.createElement('div');
     d.className='ce_textset'; d.setAttribute('data-cetextset',id);
     var align=(id==='left')?'flex-start':'center';
     var ta=(id==='left'||id==='card')?'left':'center';
+    var extra='';
+    if(id==='glow'){
+      // 文字のうしろに「もやっとした光」を敷く。✨ふんわり光の図形と同じ濃さの並びにしてある。
+      extra='padding:74px 96px;background:radial-gradient(ellipse at center,'
+        +'rgba(255,255,255,.95) 0%,rgba(255,255,255,.78) 32%,rgba(255,255,255,.38) 58%,rgba(255,255,255,0) 78%);';
+    }
     d.setAttribute('style','box-sizing:border-box;display:flex;flex-direction:column;gap:16px;'
-      +'align-items:'+align+';text-align:'+ta+';max-width:820px;');
+      +'align-items:'+align+';text-align:'+ta+';max-width:820px;'+extra);
     d.innerHTML=_tsHtml(id);
     placeFree(d, (window.scrollX||0)+window.innerWidth/2, (window.scrollY||0)+window.innerHeight/2);
     // placeFree が文字用に足す折り返し無効を外す（改行が効かなくなるため）
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){ d.style.removeProperty('white-space'); }); });
+    var _inBand=false;
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      d.style.removeProperty('white-space');
+      _inBand=_adoptIntoBand(d);
+      if(msg) msg.textContent='📝 文字セットを置きました'
+        +(_inBand?'（🏞帯の中に入れたので、帯と一緒に留まります）':'')
+        +'。掴んで移動／文字は右クリック→✏で書き換え・💾保存で確定';
+    }); });
     _lastShape=d; markDirty();
-    if(msg) msg.textContent='📝 文字セットを置きました（掴んで移動／文字は右クリック→✏で書き換え・💾保存で確定）';
     return d;
   }
   function openTextSetPicker(){
@@ -3200,6 +3240,7 @@ html.__ce_altmode{cursor:text}
     // placeFreeは文字用に max-width / white-space を足す＝〇が横だけ縮んで楕円になるので外す
     requestAnimationFrame(function(){ requestAnimationFrame(function(){
       d.style.removeProperty('max-width'); d.style.removeProperty('white-space');
+      try{ _adoptIntoBand(d); }catch(_){ }   // 🏞帯の上に置いたなら帯の中へ（一緒に留まるように）
     }); });
     myColsAdd(SHAPE_ST.col);      // 使った色はマイ色に残す（次も1クリックで同じ色）
     _lastShape=d;                 // 置いた直後は「これをいじっている」＝色替えがすぐ効く
@@ -3232,6 +3273,8 @@ html.__ce_altmode{cursor:text}
         +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
         +'<b style="font-size:12px;color:#5b6472">アイコン</b>'+icons
         +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
+        // ✏ ふつうの文字：型ではなく自分で書きたい時（2026-08-01 要望「文字も図形バーに入れて」）
+        +btn('txt','✏ 文字')
         // 📝 文字セット：バーにボタンを何個も増やさず、押したら一覧から選ぶ（要望）
         +btn('tset','📝 文字セット')
         +'<span style="width:1px;height:22px;background:#e2e2e8"></span>'
@@ -3264,6 +3307,22 @@ html.__ce_altmode{cursor:text}
       if(b){
         var k=b.getAttribute('data-sb');
         if(k==='x'){ bar.remove(); var _tp=document.getElementById('__ce_tsp'); if(_tp) _tp.remove(); return; }
+        // ✏ 画面の中央に文字を1つ置いて、そのまま書き換えられる状態にする
+        if(k==='txt'){
+          var _tx=(window.scrollX||0)+window.innerWidth/2, _ty=(window.scrollY||0)+window.innerHeight/2;
+          try{ _scAddText(_tx,_ty); }catch(_){ }
+          // 🏞帯の上に置いたなら帯の中へ入れ直す（帯と一緒に留まるように）
+          requestAnimationFrame(function(){ requestAnimationFrame(function(){
+            try{
+              var nodes=document.querySelectorAll('body *'), last=null;
+              [].slice.call(nodes).forEach(function(n){
+                if(n.textContent==='ここに文字'&&!n.closest('[id^="__ce"]')) last=n;
+              });
+              if(last) _adoptIntoBand(last);
+            }catch(_){ }
+          }); });
+          return;
+        }
         if(k==='tset'){ openTextSetPicker(); return; }
         if(k==='fill'){ SHAPE_ST.fill=SHAPE_ST.fill?0:1; _shapeStSave(); render(); repaintSel(); return; }
         if(k==='water'){
@@ -3623,6 +3682,10 @@ html.__ce_altmode{cursor:text}
       // 🕊 飛ぶ・移動する要素はダブルクリックでルート編集（スライドショーより先に見る）
       var fl=t.closest('[data-fxa-fly],[data-cefly]');
       if(fl){ if(window.__ceFlyEdit){ try{ window.__ceFlyEdit(fl); }catch(_){} } return; }
+      // 🏞 写真の帯はダブルクリックで「中身を選ぶ」に戻れる（2026-08-01 要望）。
+      //   作った直後だけしか設定できないと、あとで変えたくなった時に詰むため。
+      var bd=t.closest('[data-cepband]');
+      if(bd){ try{ openBandPatternPanel(bd); }catch(_){ } return; }
       var w=t.closest('[data-slshow]'); if(!w) return;
       if(document.getElementById('__ce_pk')) return;                      // 画像パネルを開いている最中は二重に出さない
       try{ slidePanel(w.querySelector('img'), w); }catch(_){}
@@ -5891,16 +5954,25 @@ html.__ce_altmode{cursor:text}
     while(n && n!==document.body && i<10){ out.push({n:n,h:n.offsetHeight,s:n.scrollHeight}); n=n.parentElement; i++; }
     return out;
   }
-  function _growHosts(snap){
+  // ★増えた分(delta)を渡して、**伸びなかった先祖を全部**伸ばす（2026-08-01・実報告で作り直し）。
+  //   旧版の問題2つ：
+  //   ① 増加量を scrollHeight の差で測っていた。中身が絶対配置だと scrollHeight が増えず、
+  //      「増えていない」と判定されて何も伸ばさなかった。
+  //   ② 1つ伸ばしたら return していた。実際は section も article も両方 height 固定で、
+  //      section だけ伸ばしても article が伸びず、はみ出した中身がフッターに食い込んだ
+  //      （実測：CONTACTがフッターに292px食い込む）。
+  function _growHosts(snap, delta){
+    var hit=null;
     for(var i=0;i<snap.length;i++){
-      var n=snap[i].n, grow=n.scrollHeight-snap[i].s;
-      if(grow>2 && n.offsetHeight===snap[i].h){
+      var n=snap[i].n;
+      var grow=(delta>0)?delta:(n.scrollHeight-snap[i].s);
+      if(grow>2 && n.offsetHeight===snap[i].h){          // 中身が増えたのに伸びなかった＝高さが固定されている
         if(n.getAttribute('data-cehgrow')==null) n.setAttribute('data-cehgrow', n.style.getPropertyValue('height')||'');
         n.style.setProperty('height',(snap[i].h+grow)+'px','important');
-        return n;                     // 1つ伸ばせば、その上は自動で追従する
+        hit=n;
       }
     }
-    return null;
+    return hit;
   }
   // 足した物を消すとき、伸ばした入れ物の高さを元に戻す
   function _shrinkHosts(el){
@@ -5914,10 +5986,47 @@ html.__ce_altmode{cursor:text}
       n=n.parentElement; i++;
     }
   }
-  function openSpacer(el,y){
+  // ⇕の「広げる相手」を切り替えられるようにするための下ごしらえ（2026-08-01 要望）。
+  //   ★今までは右クリックした場所から自動で決めていたので、狙いと違うもの（帯／別のセクション）が
+  //     広がってしまい「選んだセクションじゃないところが大きくなる」報告になった。相手を明示で選べるようにする。
+  function _nextSectionOf(sec){
+    var n=sec&&sec.nextElementSibling;
+    while(n){
+      if(/^(SECTION|HEADER|FOOTER|ARTICLE|MAIN|DIV)$/.test(n.tagName) && (n.offsetHeight||0)>40) return n;
+      n=n.nextElementSibling;
+    }
+    return null;
+  }
+  // ➕ 空っぽの新しいセクションを、今いるセクションの「下」に足す（2026-08-01・要望）。
+  //   ★高さは height ではなく min-height で持つ：⇕パネル（mode='section'）が min-height を書くので、
+  //     height を入れておくと「広げられるのに縮められない」（height が下限として残る）になる。
+  //   ★入れ物が height 固定のカンプでは挿しても伸びないので、必ず _hostSnap/_growHosts を通す（§7㊺）。
+  function secAddEmpty(ref){
+    if(!ref||!ref.parentElement) return null;
+    var parent=ref.parentElement;
+    try{ pushUndo(parent); }catch(_){}
+    var s=document.createElement('section');
+    s.className='ce_newsec'; s.setAttribute('data-cenewsec','1');
+    var h=Math.round(window.innerHeight||800);
+    s.style.setProperty('position','relative');
+    s.style.setProperty('width','100%');
+    s.style.setProperty('min-height',h+'px');
+    s.style.setProperty('flex','0 0 auto');            // flexの親でも潰れない
+    try{ s.style.setProperty('background',_ovPageBg()||'#ffffff'); }catch(_){ s.style.setProperty('background','#ffffff'); }
+    s.style.setProperty('outline','1px dashed #b9c7d6');   // 編集中の目印（保存時に外す）
+    var snap=_hostSnap(ref);
+    parent.insertBefore(s, ref.nextSibling);
+    _growHosts(snap, s.offsetHeight);
+    try{ markDirty(); }catch(_){}
+    return s;
+  }
+  function openSpacer(el,y,force){
     var oldp=document.getElementById('__ce_vsp'); if(oldp) oldp.remove();
     var host=_spacerHost(el||document.body);
     var mode='spacer', sp=null, secEl=null, where='';
+    var _tBand=(el&&el.closest)?el.closest('[data-cepband]'):null;
+    var _tSelf=(el&&el.closest)?el.closest('section,header,footer,main'):null;
+    var _tNext=_nextSectionOf(_tSelf);
     // ★押した場所がすでに作った余白の中なら、新しく作らずそれを調整する。
     //   これが無いと同じ所で2回押すたびに余白が増え、値も40pxに戻る（実測：1個→2個・200px→40px）。
     //   ユーザーからは「さっき広げた余白に戻れない／掴めない」に見える。
@@ -5935,8 +6044,16 @@ html.__ce_altmode{cursor:text}
       }
     }catch(_){ }
     // 🏞写真の帯は「隙間を足す」のではなく帯そのものを高くしたい。同じパネルを使い回して高さを変える。
-    var _band=(el&&el.closest)?el.closest('[data-cepband]'):null;
-    if(_band){
+    var _band=(force==='gap'||force==='self'||force==='next')?null:_tBand;
+    if(force==='self' && _tSelf){
+      mode='section'; secEl=_tSelf;
+      where='① 今いるセクション〈'+_tSelf.tagName.toLowerCase()+'〉そのものを高くします（中身はそのまま・下に空きが増えます）';
+    }
+    else if(force==='next' && _tNext){
+      mode='section'; secEl=_tNext;
+      where='③ 次のセクション〈'+_tNext.tagName.toLowerCase()+'〉そのものを高くします';
+    }
+    else if(_band){
       mode='band'; sp=_band; host=_band.parentElement;
       sp.style.setProperty('min-height','0');     // 作った時の min-height:420px が邪魔で縮められない
       where='🏞 写真の帯の高さ';
@@ -5966,10 +6083,11 @@ html.__ce_altmode{cursor:text}
         // 挿入で伸びなかった入れ物（もっと上かもしれない）を伸ばす
         var _snap=_hostSnap(before||host.lastElementChild||host);
         if(before) host.insertBefore(sp,before); else host.appendChild(sp);
-        _growHosts(_snap);
+        _growHosts(_snap, sp.offsetHeight);      // 作った余白のぶん、伸びない入れ物を全部伸ばす
       }
-      where=host.tagName.toLowerCase()+(host.className&&typeof host.className==='string'?('.'+host.className.trim().split(/\\s+/)[0]):'')
-        +(before?'（'+before.tagName.toLowerCase()+' の上）':'（いちばん下）');
+      where='② 新しい空間を作って広げます（'+host.tagName.toLowerCase()
+        +(host.className&&typeof host.className==='string'?('.'+host.className.trim().split(/\\s+/)[0]):'')
+        +(before?' の '+before.tagName.toLowerCase()+' の上':' のいちばん下')+'・セクション自体は変えません）';
     }else{
       mode='section';
       secEl=(el&&el.closest)?el.closest('section,header,footer,main'):null;
@@ -5997,16 +6115,21 @@ html.__ce_altmode{cursor:text}
       }catch(_){ }
       return {vh:vh, half:Math.round(vh/2), sec:Math.round(sec)};
     })();
+    function _vspTgt(k,lb,on){
+      return '<button class="__vsptg" data-tg="'+k+'" style="border:1px solid '+(on?'#0d9488':'#ddd')+';'
+        +'background:'+(on?'#0d9488':'#f7f7f9')+';color:'+(on?'#fff':'#1d1d1f')+';border-radius:7px;'
+        +'padding:3px 8px;cursor:pointer;font:11.5px sans-serif">'+lb+'</button>';
+    }
     var p=document.createElement('div'); p.id='__ce_vsp';
     function setPx(v){
       v=Math.max(0,Math.round(v));
       // ★帯も余白も同じ手当てが要る（2026-08-01・実報告）。高さを直接指定した入れ物の中で
       //   広げても入れ物が伸びず、はみ出した中身が後ろに重なって「下のセクションが縮んだ」に見える。
       if(mode==='band'||mode==='spacer'){
-        var _sn=_hostSnap(sp);
+        var _sn=_hostSnap(sp), _h0=sp.offsetHeight;
         if(mode==='band') sp.style.setProperty('height',v+'px','important');
         else sp.style.setProperty('height',v+'px');
-        _growHosts(_sn);
+        _growHosts(_sn, sp.offsetHeight-_h0);       // 増えた分をそのまま先祖にも足す
       }
       else{ try{ pushUndo(secEl); }catch(_){} secEl.style.setProperty('min-height',v+'px','important'); }
       try{ markDirty(); }catch(_){}
@@ -6016,6 +6139,15 @@ html.__ce_altmode{cursor:text}
     p.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'
       +'<b>⇕ 縦の空間を広げる</b><span id="__vspnum" style="color:#0b6bcb;font-weight:700"></span>'
       +'<button id="__vspx" style="margin-left:auto;border:none;background:#eee;border-radius:999px;padding:1px 9px;cursor:pointer">×</button></div>'
+      // 「広げる相手」を自分で選べるようにする（右クリックした場所で勝手に決まると狙いと違う物が広がる）
+      +'<div style="display:flex;gap:4px;align-items:center;margin-bottom:5px;flex-wrap:wrap">'
+      +'<span style="font-size:11px;color:#777;flex:none">どれを広げる？</span>'
+      +(_tSelf?_vspTgt('self','① 今いるセクションを広げる', force==='self'):'')
+      +_vspTgt('gap','② 新しい空間を作って広げる', mode==='spacer')
+      +(_tNext?_vspTgt('next','③ 次のセクションを広げる', force==='next'):'')
+      +(_tBand?_vspTgt('band','🏞 写真の帯を広げる', mode==='band'):'')
+      +'<button id="__vspnew" style="border:1px solid #1a7f37;background:#1a7f37;color:#fff;border-radius:7px;padding:3px 8px;cursor:pointer;font:11.5px sans-serif">➕ 新しいセクションを足す</button>'
+      +'</div>'
       +'<div style="font-size:11px;color:#777;margin-bottom:6px">'+esc(where)+'</div>'
       +'<div style="display:flex;gap:5px;align-items:center">'
       +'<button class="__vspb" data-d="-40" style="border:1px solid #ddd;background:#f7f7f9;border-radius:7px;padding:5px 9px;cursor:pointer">−40</button>'
@@ -6035,6 +6167,28 @@ html.__ce_altmode{cursor:text}
     document.body.appendChild(p);
     setPx(nowPx());
     p.querySelector('#__vspx').addEventListener('click',function(){ p.remove(); });
+    // ➕ 空のセクションを足す → そのままそのセクションを広げるモードで開き直す
+    (function(){
+      var nb=p.querySelector('#__vspnew'); if(!nb) return;
+      nb.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        var ref=_tSelf||(sp&&sp.closest?sp.closest('section,header,footer,main'):null)||secEl;
+        var ns=secAddEmpty(ref);
+        if(!ns){ if(msg) msg.textContent='ここには新しいセクションを足せませんでした（セクションの中で試してください）'; return; }
+        p.remove();
+        try{ ns.scrollIntoView({block:'center'}); }catch(_){}
+        var r=ns.getBoundingClientRect();
+        openSpacer(ns, r.top+r.height/2, 'self');
+        try{ ceFlash('➕ 新しいセクションを足しました（1画面ぶん・右クリックで背景色や写真の帯にできます）'); }catch(_){}
+      });
+    })();
+    // 「広げる相手」の切り替え＝同じ場所・同じ高さのまま、相手だけ変えて開き直す
+    [].forEach.call(p.querySelectorAll('.__vsptg'),function(b){
+      b.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        openSpacer(el, y, b.getAttribute('data-tg'));
+      });
+    });
     [].forEach.call(p.querySelectorAll('.__vspb'),function(b){
       b.addEventListener('click',function(){ setPx(nowPx()+(+b.getAttribute('data-d'))); });
     });
@@ -8778,6 +8932,103 @@ html.__ce_altmode{cursor:text}
     });
   }
 
+  // 🫧 写真の「一部だけ」を透明にする（2026-08-01 要望「上半分とか？」）。
+  //   ★✂切り抜き（AIで背景を消す）とは別物：あちらは「何が写っているか」を見て背景を消すので
+  //     必ず全体が対象になる。「上半分だけ」は範囲の話なので **mask** で作るのが正解。一瞬・無料。
+  var MASK_PATS=[
+    {id:'top',    nm:'上半分を透明に',   css:'linear-gradient(to bottom, transparent 0%, transparent 38%, #000 62%, #000 100%)'},
+    {id:'bottom', nm:'下半分を透明に',   css:'linear-gradient(to bottom, #000 0%, #000 38%, transparent 62%, transparent 100%)'},
+    {id:'left',   nm:'左半分を透明に',   css:'linear-gradient(to right, transparent 0%, transparent 38%, #000 62%, #000 100%)'},
+    {id:'right',  nm:'右半分を透明に',   css:'linear-gradient(to right, #000 0%, #000 38%, transparent 62%, transparent 100%)'},
+    {id:'fadeT',  nm:'上を少しだけ',     css:'linear-gradient(to bottom, transparent 0%, #000 26%, #000 100%)'},
+    {id:'fadeB',  nm:'下を少しだけ',     css:'linear-gradient(to bottom, #000 0%, #000 74%, transparent 100%)'},
+    {id:'round',  nm:'ふちを溶かす',     css:'radial-gradient(ellipse at center, #000 52%, transparent 94%)'}
+  ];
+  function maskApply(el, id){
+    if(!el) return;
+    try{ pushUndo(el); }catch(_){ }
+    if(!id){
+      el.style.removeProperty('mask-image'); el.style.removeProperty('-webkit-mask-image');
+      el.style.removeProperty('mask-size'); el.style.removeProperty('-webkit-mask-size');
+      el.removeAttribute('data-cemask'); markDirty(); return;
+    }
+    var o=null; MASK_PATS.forEach(function(x){ if(x.id===id) o=x; });
+    if(!o) return;
+    el.style.setProperty('-webkit-mask-image',o.css); el.style.setProperty('mask-image',o.css);
+    el.style.setProperty('-webkit-mask-size','100% 100%'); el.style.setProperty('mask-size','100% 100%');
+    el.setAttribute('data-cemask', id);
+    markDirty();
+  }
+  function openMaskPanel(el){
+    if(!el){ msg.textContent='対象が見つかりません'; return; }
+    var old=document.getElementById('__ce_mkp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    // ★「押しても何も起きない」の正体は、たいてい**効かせた相手が違う**こと（2026-08-01 実報告）。
+    //   マスクは押した瞬間に効くので「適用ボタン」は要らない。代わりに
+    //   ①今の相手を名前と大きさで出す ②青枠で光らせる ③⬆で外側へ変えられる、を用意する。
+    var _nameOf=function(n){
+      return n.tagName.toLowerCase()+(n.className&&typeof n.className==='string'&&n.className.trim()
+        ?('.'+n.className.trim().split(/\\s+/)[0]):'')+'（'+n.offsetWidth+'×'+n.offsetHeight+'）';
+    };
+    var B='border:1px solid #cfd8e3;background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font:12px sans-serif';
+    var ON=';background:#0d9488;color:#fff;border-color:#0d9488';
+    var p=document.createElement('div'); p.id='__ce_mkp';
+    p.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:2147483647;background:#fff;'
+      +'color:#1d1d1f;border:1px solid #dbe4ee;border-radius:12px;padding:11px 13px;font:12.5px/1.6 sans-serif;'
+      +'box-shadow:0 14px 40px rgba(0,0,0,.28);max-width:96vw');
+    var _hl=null;
+    function mark(){                       // 今の相手を青枠で光らせる（閉じる時に必ず戻す）
+      if(_hl&&_hl.n){ if(_hl.o) _hl.n.style.outline=_hl.o; else _hl.n.style.removeProperty('outline'); }
+      _hl={n:el, o:el.style.outline};
+      el.style.setProperty('outline','3px solid #0d9488');
+      el.style.setProperty('outline-offset','-3px');
+    }
+    function draw(){
+      var cur=el.getAttribute('data-cemask')||'';
+      p.innerHTML='<div style="font-weight:700;margin-bottom:5px">🫧 一部を透明にする（AIなし・押した瞬間に効きます）</div>'
+        +'<div style="font-size:11.5px;color:#0d9488;margin-bottom:6px">いま効かせる相手：<b>'+esc(_nameOf(el))+'</b>'
+        +' <button data-mkup="1" style="'+B+';padding:2px 8px;margin-left:6px">⬆ 外側にする</button></div>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;max-width:720px">'
+        + MASK_PATS.map(function(o){ return '<button data-mk="'+o.id+'" style="'+B+((cur===o.id)?ON:'')+'">'+o.nm+'</button>'; }).join('')
+        +'</div>'
+        +'<div style="display:flex;gap:6px;margin-top:10px">'
+        +'<button data-mkr="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer">⟲ 元に戻す</button>'
+        +'<button data-mkx="1" style="background:#0b6bcb;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer">閉じる</button></div>'
+        +'<div style="opacity:.6;font-size:11px;margin-top:6px">青い枠が「効かせる相手」です。'
+        +'何も変わらない時は、その相手に色や写真が付いていません。⬆で外側に変えてみてください</div>';
+      mark();
+    }
+    draw(); document.body.appendChild(p);
+    p.__close=function(){
+      if(_hl&&_hl.n){ if(_hl.o) _hl.n.style.outline=_hl.o; else { _hl.n.style.removeProperty('outline'); _hl.n.style.removeProperty('outline-offset'); } }
+      p.remove();
+    };
+    p.addEventListener('mousedown',function(e){ e.stopPropagation(); },true);
+    p.addEventListener('click',function(e){
+      e.stopPropagation();
+      var t=e.target.closest?e.target.closest('button'):null; if(!t) return;
+      if(t.getAttribute('data-mkx')){ p.__close(); return; }
+      // ⬆ 相手を1つ外側へ（今の相手に色も写真も無くて何も起きない時に使う）
+      if(t.getAttribute('data-mkup')){
+        var up=el.parentElement;
+        if(!up||up===document.body||up===document.documentElement){ msg.textContent='これ以上そとに出られません'; return; }
+        maskApply(el,'');                     // いまの相手からは外してから移る
+        el=up; draw();
+        msg.textContent='相手を「'+_nameOf(el)+'」にしました';
+        return;
+      }
+      if(t.getAttribute('data-mkr')){ maskApply(el,''); draw(); msg.textContent='透明にするのをやめました'; return; }
+      var mk=t.getAttribute('data-mk');
+      if(mk){
+        maskApply(el,mk); draw();
+        // 効いたかどうかを実測して伝える（何も起きない時に原因が分かるように）
+        var bg='',bi=''; try{ var cs=getComputedStyle(el); bg=cs.backgroundColor; bi=cs.backgroundImage; }catch(_){ }
+        var 見える=(el.tagName==='IMG')||(bi&&bi!=='none')||(bg&&bg.indexOf('rgba(0, 0, 0, 0)')<0);
+        msg.textContent=見える
+          ? '🫧 一部を透明にしました（💾保存で確定）'
+          : '⚠ この相手（'+_nameOf(el)+'）には色も写真も付いていないので、見た目は変わりません。「⬆ 外側にする」で相手を変えてください';
+      }
+    });
+  }
   // 🖼 写真を加工：白フチ／はみ出しカード／背景の飾り／背景に設定／水彩(AI) の入口をまとめた1つのボタン用ピッカー。
   //   ボタンを増やさず、選択肢はこの中の一覧から選ぶ形にする。
   function openPhotoDecoPicker(el, imgEl, sIdx){
@@ -8798,6 +9049,8 @@ html.__ce_altmode{cursor:text}
       +((!imgEl&&bgOfEl(el))?'<button class="go2" id="__ce_pdcutbg" style="background:#7c3aed;margin-bottom:8px">✂ この背景の写真を切り抜く（透過・AIなし・無料）</button>':'')
       // 🎨 写真そのものを水彩ふうに（AIなし）。上の「背後に水彩画像を敷く」(AI課金)とは別物なので
       //   並べて置き、無料のほうを先に出す＝素人が間違って課金側を押さないように。
+      // 🫧 一部だけ透明に＝✂切り抜き（AIで背景を消す・全体が対象）とは別物なので隣に並べる
+      +'<button class="go2" id="__ce_pdmask" style="background:#0d9488;margin-bottom:8px">🫧 一部だけ透明にする（上半分など・AIなし・一瞬）</button>'
       +(imgEl?'<button class="go2" id="__ce_pdwcfx" style="background:#0d9488;margin-bottom:8px">🎨 この写真を水彩ふうにする（AIなし・無料）</button>':'')
       +(imgEl?'<button class="go2" id="__ce_pdwater" style="background:#c026a6">🎨 背後に水彩画像を敷く（AI・数十円）</button>':'')
       +'</div>';
@@ -8815,6 +9068,7 @@ html.__ce_altmode{cursor:text}
         if(_bc) bgCutToggle(_bc, e.target);
         return;
       }
+      if(e.target.id==='__ce_pdmask'){ ov.remove(); openMaskPanel(imgEl||el); return; }
       if(e.target.id==='__ce_pdwcfx'){ ov.remove(); openWaterFxPanel(imgEl); return; }
       if(e.target.id==='__ce_pdwater'){ ov.remove(); openBgPicker(imgEl, sIdx); return; }
     });
@@ -9208,6 +9462,257 @@ html.__ce_altmode{cursor:text}
       +'font-weight:700;box-shadow:0 12px 32px rgba(0,0,0,.38);pointer-events:none;max-width:88vw;text-align:center';
     document.body.appendChild(n);
     setTimeout(function(){ if(n.parentElement) n.remove(); }, 2400);
+  }
+  // ===== 📌 パレット（部品の一時置き場）＝要素を貯めて、別の場所・別のカンプへドラッグで置く（2026-08-01）=====
+  //   ★中身は localStorage に持つ＝カンプを閉じても・ツールを再起動しても消えない（このPCに残る）。
+  //     DOMの参照を覚えても再読み込みで消えるので、**HTMLの文字列**で貯めるのが正解。
+  //   ★「コピー（元は残す）／切り取り（元を消す）」は板の上のスイッチで選ぶ。
+  //     右クリックメニューは1行のまま＝項目を増やさない（増えるほど素人には見つけられなくなる）。
+  var PAL_KEY='__ce_palette', PAL_MAX=24;
+  // 直前に入れた物＝「入れたあとに📋/✂を押し直せる」ようにするための控え（元の場所も覚える）
+  var _palLast=[];
+  function palResetLast(){ _palLast=[]; }
+  function palApplyLast(m){
+    var n=0;
+    _palLast.forEach(function(rc){
+      if(m==='cut' && !rc.cut && rc.el.isConnected){
+        try{ pushUndo(rc.parent||document.body); }catch(_){}
+        rc.el.remove(); rc.cut=true; n++;
+      }else if(m==='copy' && rc.cut){
+        try{
+          if(rc.parent&&rc.parent.isConnected) rc.parent.insertBefore(rc.el, (rc.next&&rc.next.parentElement===rc.parent)?rc.next:null);
+          rc.cut=false; n++;
+        }catch(_){}
+      }
+    });
+    if(n){ try{ markDirty(); }catch(_){} ceFlash(m==='cut'?('✂ 元の'+n+'件を消しました（⟲でも戻せます）'):('📋 元の'+n+'件を戻しました')); }
+  }
+  function palLoad(){ try{ var a=JSON.parse(localStorage.getItem(PAL_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(_){ return []; } }
+  function palStore(list){
+    try{ localStorage.setItem(PAL_KEY, JSON.stringify(list.slice(0,PAL_MAX))); return true; }
+    catch(_){ try{ ceFlash('⚠ パレットがいっぱいです（🗑で古い物を減らしてください）'); }catch(__){} return false; }
+  }
+  function _palName(el){
+    if(!el) return '要素';
+    var t=(el.tagName||'').toLowerCase();
+    var tx=(el.textContent||'').replace(/[ \t　]+/g,' ').trim().slice(0,18);
+    if(tx) return tx;
+    if(t==='img') return '写真';
+    var c=(el.className&&el.className.baseVal!==undefined?el.className.baseVal:el.className)||'';
+    c=(''+c).split(/[ \t]+/).filter(function(s){ return s&&s.indexOf('__ce')!==0&&s.indexOf('fxa_')!==0; })[0]||'';
+    return '<'+t+'>'+(c?'.'+c:'');
+  }
+  function _palThumb(el){
+    try{
+      if(el.tagName==='IMG'&&el.src) return el.src;
+      var img=el.querySelector&&el.querySelector('img[src]'); if(img&&img.src) return img.src;
+      var bg=''; try{ bg=getComputedStyle(el).backgroundImage||''; }catch(_){}
+      var m=/url\(["']?([^"')]+)/.exec(bg); if(m) return m[1];
+    }catch(_){}
+    return '';
+  }
+  // 編集用の目印（選択の青枠・ハンドル・ツールのUI）は貯める前に落とす＝貼った先に持ち込まない
+  function _palClean(el){
+    var c=el.cloneNode(true);
+    try{
+      c.classList.remove('__ce_sel','__ce_hl','__ce_sechl','__ce_busy');
+      [].slice.call(c.querySelectorAll('[id^="__ce"],.__ce_hdl')).forEach(function(n){ n.remove(); });
+      [].slice.call(c.querySelectorAll('.__ce_sel,.__ce_hl,.__ce_sechl,.__ce_busy')).forEach(function(n){ n.classList.remove('__ce_sel','__ce_hl','__ce_sechl','__ce_busy'); });
+      c.style.removeProperty('outline'); c.style.removeProperty('outline-offset');
+    }catch(_){}
+    return c.outerHTML||'';
+  }
+  function palAdd(el){
+    if(!el||el===document.body||(el.closest&&el.closest('[id^="__ce"]'))) return false;
+    var cs=null; try{ cs=getComputedStyle(el); }catch(_){}
+    var html=''; try{ html=_palClean(el); }catch(_){ html=el.outerHTML||''; }
+    if(!html) return false;
+    if(html.length>400000){ ceFlash('⚠ 大きすぎてパレットに入れられません'); return false; }
+    var list=palLoad();
+    list.unshift({ id:'p'+Date.now()+'_'+Math.round(Math.random()*9999), name:_palName(el), html:html,
+                   pos:(cs&&cs.position)||'static', w:el.offsetWidth||0, h:el.offsetHeight||0,
+                   thumb:_palThumb(el), ts:Date.now() });
+    if(!palStore(list)) return false;
+    // 元を消すかどうかは「入れた直後に板で聞く」＝入れる時点では消さない（押し間違えても失わない）
+    _palLast.push({ el:el, parent:el.parentElement, next:el.nextSibling, cut:false });
+    return true;
+  }
+  // 落とした場所の「差し込む相手」＝ツールUIを除いた最初の実体（インラインなら親まで上がる）
+  function _palDropTarget(pageX,pageY,self){
+    var vx=pageX-(window.scrollX||0), vy=pageY-(window.scrollY||0), n=null;
+    try{
+      var st=document.elementsFromPoint(vx,vy)||[];
+      for(var i=0;i<st.length;i++){
+        var q=st[i];
+        if(!q||q.nodeType!==1) continue;
+        if(q.closest&&q.closest('[id^="__ce"]')) continue;
+        if(self&&(q===self||self.contains(q))) continue;
+        n=q; break;
+      }
+    }catch(_){}
+    while(n&&n.parentElement&&n!==document.body){
+      var d=''; try{ d=getComputedStyle(n).display; }catch(_){}
+      if(d.indexOf('inline')===0){ n=n.parentElement; continue; }
+      break;
+    }
+    return (n&&n!==document.body&&n!==document.documentElement)?n:null;
+  }
+  function palPlace(it,pageX,pageY){
+    var tmp=document.createElement('div');
+    tmp.innerHTML=it.html;
+    var el=tmp.firstElementChild;
+    if(!el){ ceFlash('⚠ 置けませんでした（中身が壊れています）'); return; }
+    try{ pushUndo(document.body); }catch(_){}
+    el.removeAttribute('data-cetx'); el.removeAttribute('data-cety');   // 前のドラッグ跡は捨てる
+    try{ el.style.removeProperty('translate'); }catch(_){}
+    var free=(it.pos==='absolute'||it.pos==='fixed');
+    if(free){
+      el.style.position='absolute';
+      el.style.removeProperty('right'); el.style.removeProperty('bottom');
+      document.body.appendChild(el);                  // placeFree が測れるよう先に置いてから
+      try{ placeFree(el,pageX,pageY); }catch(_){}
+      // ★入れた時と同じ見た目の大きさで置く（親が変わると % 幅の意味が変わって大きさが変わるため）。
+      //   px で焼かず「新しい親に対する%」に直す＝大きさは合ったまま、画面幅にも追従する。
+      //   placeFree も rAF の中で幅を当てるので、その後（2フレーム後）に上書きする。
+      if(it.w>0) requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        try{
+          var hw=el.parentElement?el.parentElement.getBoundingClientRect().width:0;
+          if(hw>0){
+            el.style.setProperty('width',(it.w/hw*100).toFixed(2)+'%');
+            if(el.tagName==='IMG') el.style.setProperty('height','auto');
+          }
+        }catch(_){}
+      }); });
+    }else{
+      var tgt=_palDropTarget(pageX,pageY,null);
+      if(tgt&&tgt.parentElement){
+        var r=tgt.getBoundingClientRect(), mid=r.top+(window.scrollY||0)+r.height/2;
+        var snap=_hostSnap(tgt);                      // 高さ固定の入れ物でも押し出せるように（§7㊺）
+        if(pageY>mid) tgt.parentElement.insertBefore(el,tgt.nextSibling);
+        else tgt.parentElement.insertBefore(el,tgt);
+        try{ _growHosts(snap, el.offsetHeight); }catch(_){}
+      }else{
+        document.body.appendChild(el);
+        try{ placeFree(el,pageX,pageY); }catch(_){}
+      }
+    }
+    try{ markDirty(); }catch(_){}
+    try{ groupBlink([el]); }catch(_){}
+    ceFlash('📌 「'+it.name+'」を置きました（💾保存で確定）');
+  }
+  function palDragStart(it,e){
+    var g=document.createElement('div'); g.id='__ce_palghost';
+    g.textContent='📌 '+it.name;
+    g.style.cssText='position:fixed;z-index:2147483647;pointer-events:none;background:#1a7f37;color:#fff;'
+      +'border-radius:8px;padding:6px 12px;font:12px/1.4 system-ui,sans-serif;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,.3)';
+    document.body.appendChild(g);
+    function mv(ev){
+      g.style.left=(ev.clientX+14)+'px'; g.style.top=(ev.clientY+14)+'px';
+      var m=70;                                        // 画面の上下端では自動スクロール（画面外へ運べないため）
+      if(ev.clientY<m) window.scrollBy(0,-18);
+      else if(ev.clientY>window.innerHeight-m) window.scrollBy(0,18);
+    }
+    function up(ev){
+      document.removeEventListener('mousemove',mv,true); document.removeEventListener('mouseup',up,true);
+      g.remove();
+      if(ev.target&&ev.target.closest&&ev.target.closest('[id^="__ce"]')) return;   // 板の上で離した＝置かない
+      palPlace(it, ev.clientX+(window.scrollX||0), ev.clientY+(window.scrollY||0));
+    }
+    mv(e);
+    document.addEventListener('mousemove',mv,true); document.addEventListener('mouseup',up,true);
+  }
+  function palRender(){
+    var p=document.getElementById('__ce_pal'); if(!p) return;
+    var ask=p.querySelector('.ask');
+    if(ask) ask.style.display=_palLast.length?'block':'none';   // 入れた直後だけ出す（押したら消える）
+    var list=palLoad(), box=p.querySelector('.pl'); if(!box) return;
+    var cnt=p.querySelector('.cnt'); if(cnt) cnt.textContent=list.length?(list.length+'件'):'';
+    box.innerHTML='';
+    if(!list.length){
+      box.innerHTML='<div style="color:#8a8a8e;font-size:11.5px;padding:14px 4px;text-align:center;line-height:1.7">'
+        +'空です<br>要素を右クリック →「📌 パレットに入れる」</div>';
+      return;
+    }
+    list.forEach(function(it){
+      var card=document.createElement('div');
+      card.style.cssText='position:relative;border:1px solid #e0e0e6;border-radius:10px;overflow:hidden;background:#fff;'
+        +'box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:grab';
+      card.title='掴んで、置きたい場所までドラッグ';
+      var th=document.createElement('div');
+      th.style.cssText='height:56px;background:#f2f2f5 '+(it.thumb?('url("'+it.thumb.replace(/"/g,'')+'") center/cover no-repeat'):'')+';'
+        +'display:flex;align-items:center;justify-content:center;font-size:20px;color:#b0b0b6';
+      if(!it.thumb) th.textContent='▦';
+      var nm=document.createElement('div');
+      nm.textContent=it.name;
+      nm.style.cssText='padding:5px 6px;font:11px/1.35 system-ui,sans-serif;color:#1d1d1f;height:31px;overflow:hidden';
+      var del=document.createElement('button');
+      del.textContent='🗑'; del.title='パレットから消す';
+      del.style.cssText='position:absolute;right:3px;top:3px;border:none;background:rgba(255,255,255,.9);border-radius:6px;'
+        +'cursor:pointer;font-size:11px;padding:1px 5px;box-shadow:0 1px 3px rgba(0,0,0,.2)';
+      del.addEventListener('mousedown',function(ev){ ev.stopPropagation(); },true);
+      del.onclick=function(ev){
+        ev.stopPropagation();
+        palStore(palLoad().filter(function(x){ return x.id!==it.id; }));
+        palRender();
+      };
+      card.addEventListener('mousedown',function(ev){
+        if(ev.button!==0) return;
+        ev.preventDefault(); ev.stopPropagation();
+        palDragStart(it,ev);
+      },true);
+      var mvb=document.createElement('button');
+      mvb.textContent='✥'; mvb.title='ここを掴んで、置きたい場所までドラッグ';
+      mvb.style.cssText='position:absolute;left:3px;top:3px;border:none;background:rgba(255,255,255,.9);border-radius:6px;'
+        +'cursor:grab;font-size:11px;line-height:1;padding:3px 5px;box-shadow:0 1px 3px rgba(0,0,0,.2)';
+      mvb.addEventListener('mousedown',function(ev){
+        if(ev.button!==0) return;
+        ev.preventDefault(); ev.stopPropagation(); palDragStart(it,ev);
+      },true);
+      card.appendChild(th); card.appendChild(nm); card.appendChild(del); card.appendChild(mvb);
+      box.appendChild(card);
+    });
+  }
+  function openPalette(){
+    var p=document.getElementById('__ce_pal');
+    if(p){ palRender(); return p; }
+    p=document.createElement('div'); p.id='__ce_pal';
+    p.style.cssText='position:fixed;right:16px;top:110px;z-index:2147483647;width:262px;max-height:70vh;overflow:auto;'
+      +'background:#fff;border:1px solid #c9c9cf;border-radius:14px;padding:0 0 10px;box-shadow:0 16px 44px rgba(0,0,0,.3);'
+      +'font:12px/1.5 system-ui,sans-serif;color:#1d1d1f';
+    p.innerHTML='<div class="hd" style="display:flex;align-items:center;gap:6px;padding:9px 11px;background:#f0f0f4;'
+        +'border-bottom:1px solid #e0e0e6;border-radius:14px 14px 0 0;cursor:move;user-select:none;position:sticky;top:0;z-index:2">'
+        +'<span style="font-size:14px;color:#8a8a8e">⠿</span>'
+        +'<b style="font-size:13px">📌 パレット</b><span class="cnt" style="color:#8a8a8e;font-size:11px"></span>'
+        +'<button id="__ce_palx" style="margin-left:auto;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;padding:2px 7px">✕</button></div>'
+      +'<div class="ask" style="display:none;margin:9px 11px 2px;padding:7px 8px;background:#fffbe8;border:1px solid #f0e0a0;border-radius:9px">'
+        +'<div style="font-size:11px;color:#7a6a20;margin-bottom:5px">いま入れた元はどうする？</div>'
+        +'<div style="display:flex;gap:5px">'
+        +'<button class="askb" data-m="copy" style="flex:1;border:1px solid #d0d0d5;background:#fff;border-radius:8px;padding:5px 4px;cursor:pointer;font:11px system-ui,sans-serif">📋 残す</button>'
+        +'<button class="askb" data-m="cut"  style="flex:1;border:1px solid #d0d0d5;background:#fff;border-radius:8px;padding:5px 4px;cursor:pointer;font:11px system-ui,sans-serif">✂ 消す</button>'
+        +'</div></div>'
+      +'<div style="color:#8a8a8e;font-size:10.5px;padding:8px 11px 7px;line-height:1.6">中身は再起動しても残ります。カードを掴んで置きたい場所へドラッグ。</div>'
+      +'<div class="pl" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 11px"></div>'
+      +'<div style="padding:9px 11px 0"><button id="__ce_palclr" style="width:100%;border:1px solid #f0c0c0;background:#fdeeee;color:#b03636;border-radius:8px;padding:5px;cursor:pointer;font:11px system-ui,sans-serif">🧹 パレットを空にする</button></div>';
+    document.body.appendChild(p);
+    p.__close=function(){ p.remove(); };     // 中身は localStorage に残るので、閉じても失われない
+    p.querySelector('#__ce_palx').onclick=function(){ p.__close(); };
+    p.querySelector('#__ce_palclr').onclick=function(){
+      if(!palLoad().length) return;
+      palStore([]); palRender(); ceFlash('🧹 パレットを空にしました');
+    };
+    [].forEach.call(p.querySelectorAll('.askb'),function(b){
+      b.addEventListener('mousedown',function(ev){ ev.stopPropagation(); },true);
+      b.onclick=function(){
+        // ★その場かぎりの確認なので、押したら消す（ずっと出ていると「これ何？」になる・実報告）
+        palApplyLast(b.getAttribute('data-m'));
+        palResetLast(); palRender();
+      };
+    });
+    // ★掴む所は「板のどこでも」（細い見出しだけだと掴みづらい・実報告）。
+    //   カード側は mousedown を capture で止めているので、カードを掴んだ時に板は動かない。
+    try{ panelDrag(p); }catch(_){}
+    palRender();
+    return p;
   }
   // グループに入ったものを数秒だけ光らせる＝「どれが入ったか」を目で確かめられる
   function groupBlink(list){
@@ -13696,8 +14201,11 @@ html.__ce_altmode{cursor:text}
   // ★z-index を最大にするだけでは足りない：クローン元のCSSが同じ大きさの z を持っていたり、
   //   親が別の重なりの土台(stacking context)を作っていると、数字が同じでも相手が上に来る。
   //   数字で勝負せず「バーの上の点で、バーより手前にいる物」を実際に拾って下げる＝確実。
-  function barToFront(){
-    var bar=document.getElementById('__ce'); if(!bar) return 0;
+  function barToFront(){ return panelToFront(document.getElementById('__ce')); }
+  // ★z-index の数字だけでは前面を取れない（相手が同じ数字／別の重なりの土台を作ると負ける）。
+  //   実際に重なりを見て、手前にいるページ側の要素を下げる＝確実。右クリックメニュー等でも使う。
+  function panelToFront(bar){
+    if(!bar) return 0;
     var r=bar.getBoundingClientRect(); if(!(r.width>0&&r.height>0)) return 0;
     var pts=[[0.5,0.15],[0.15,0.15],[0.85,0.15],[0.5,0.5],[0.15,0.85],[0.85,0.85]], fixed=0;
     pts.forEach(function(f){
@@ -13951,7 +14459,13 @@ html.__ce_altmode{cursor:text}
       band.style.setProperty('background-size','cover','important');
     }
     band.style.setProperty('background-repeat','no-repeat','important');
-    band.style.setProperty('background-position','center','important');
+    // 上／中央／下の選択は写真の扱いを変えても保つ
+    band.style.setProperty('background-position','center '+(band.getAttribute('data-cebandpos')||'center'),'important');
+    // 余った所（写真が届かない部分）はページの地の色にして目立たせない。古い灰色の帯も直す。
+    var bc=''; try{ bc=getComputedStyle(band).backgroundColor; }catch(_){ }
+    if(!bc || bc.indexOf('233, 238, 242')>=0 || bc.indexOf('rgba(0, 0, 0, 0)')>=0){
+      band.style.setProperty('background-color', _ovPageBg(),'important');
+    }
     band.setAttribute('data-cebandfit', id);
     markDirty();
   }
@@ -13999,6 +14513,19 @@ html.__ce_altmode{cursor:text}
     band.appendChild(box);
     markDirty();
   }
+  // 🏞 帯の高さをその場で決める（2026-08-01 要望「操作が多い」）。
+  //   ★⇕パネルを別に開かせない＝ダブルクリック1か所で「高さ・中身・写真」が全部そろう。
+  //   高さを変えたぶんは、高さが固定された入れ物にも足す（§7㊺ と同じ処理を共用）。
+  function bandSetHeight(band, px){
+    if(!band) return 0;
+    try{ pushUndo(band); }catch(_){ }
+    var snap=_hostSnap(band), h0=band.offsetHeight;
+    band.style.setProperty('min-height','0');
+    band.style.setProperty('height', Math.max(80,Math.round(px))+'px','important');
+    _growHosts(snap, band.offsetHeight-h0);
+    markDirty();
+    return band.offsetHeight;
+  }
   function openBandPatternPanel(band){
     if(!band){ msg.textContent='対象の帯がありません'; return; }
     var old=document.getElementById('__ce_bdp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
@@ -14013,7 +14540,24 @@ html.__ce_altmode{cursor:text}
     function draw(){
       var id=band.getAttribute('data-cebandpat')||'none';
       var vv=parseFloat(band.getAttribute('data-cebandveil')); if(isNaN(vv)) vv=curV;
-      p.innerHTML='<div class="__ce_bdpmv" style="font-weight:700;margin-bottom:7px;cursor:move">🏞 帯の中身を選ぶ（あとから文字は書き換えられます）</div>'
+      var vh=Math.round(window.innerHeight||800), nowH=band.offsetHeight;
+      var HS=[['半画面',Math.round(vh/2)],['1画面',vh],['1.5画面',Math.round(vh*1.5)],['2画面',vh*2]];
+      p.innerHTML='<div class="__ce_bdpmv" style="font-weight:700;margin-bottom:7px;cursor:move">🏞 写真の帯（今の高さ '+nowH+'px）</div>'
+        +'<div style="opacity:.7">高さ</div>'
+        +'<div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">'
+        + HS.map(function(o){
+            var on=(Math.abs(nowH-o[1])<20);
+            return '<button data-bh="'+o[1]+'" style="'+B.replace('text-align:left','')+(on?ON:'')+'">'+o[0]+' '+o[1]+'px</button>';
+          }).join('')
+        +'<button data-bhd="-160" style="'+B.replace('text-align:left','')+'">－低く</button>'
+        +'<button data-bhd="160" style="'+B.replace('text-align:left','')+'">＋高く</button>'
+        // ★写真の比率どおりの高さにする＝拡大もされず、上下に余白も出ない唯一の高さ。
+        //   「箱が高いほど cover が拡大する」問題の根本解（2026-08-01 報告）。
+        +'<button data-bfit="1" style="'+B.replace('text-align:left','')+';background:#0d9488;color:#fff;border-color:#0d9488">📐 写真にぴったり</button>'
+        +'</div>'
+        +'<div style="opacity:.55;font-size:11px;margin-top:3px">高い帯にすると写真は拡大されます（切り取って埋める＝coverの仕組み）。'
+        +'拡大したくない時は「📐 写真にぴったり」か「幅に合わせる」を選んでください</div>'
+        +'<div style="opacity:.7;margin-top:9px">中身（文字のレイアウト）</div>'
         +'<div style="display:flex;gap:6px;flex-wrap:wrap;max-width:760px">'
         + BAND_PATS.map(function(o){
             return '<button data-bp="'+o.id+'" style="'+B+(id===o.id?ON:'')+'">'+o.nm
@@ -14028,6 +14572,15 @@ html.__ce_altmode{cursor:text}
               +'<span style="display:block;font-size:10.5px;opacity:.65">'+o.note+'</span></button>';
           }).join('')
         +'</div>'
+        // ★帯が写真より高い時、写真は既定で「中央」に来る。画面2つ分の帯だと中央＝1画面目の下端に
+        //   なるので「下に張り付いた」ように見える（2026-08-01 報告）。上／中央／下を選べるようにする。
+        +'<div style="opacity:.7;margin-top:9px">写真を置く位置（帯が写真より高い時）</div>'
+        +'<div style="display:flex;gap:5px;margin-top:3px">'
+        + [['top','上'],['center','中央'],['bottom','下']].map(function(o){
+            var cur=(band.getAttribute('data-cebandpos')||'center');
+            return '<button data-bpv="'+o[0]+'" style="'+B.replace('text-align:left','')+((cur===o[0])?ON:'')+'">'+o[1]+'</button>';
+          }).join('')
+        +'</div>'
         +'<div style="opacity:.7;margin-top:9px">写真を白くぼかして文字を読みやすく</div>'
         +'<div style="display:flex;gap:5px;margin-top:3px">'
         + BAND_VEIL.map(function(v,i){
@@ -14036,7 +14589,13 @@ html.__ce_altmode{cursor:text}
           }).join('')
         +'</div>'
         +'<div style="display:flex;gap:6px;margin-top:10px">'
-        +'<button data-bx="1" style="background:#0b6bcb;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer">閉じる</button></div>';
+        // ★決まった型で足りない時の逃げ道（2026-08-01 要望「選択肢が足りない／Bのバーでしかできないことがある」）。
+        //   ここに機能を増やすとごちゃごちゃするので、**図形バーを開くボタン1つ**だけ置く。
+        +'<button data-bfree="1" style="background:#0d9488;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer">🔶 自由に足す（図形・文字セット）</button>'
+        +'<button data-bpos="1" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer">🖼 写真の位置を動かす</button>'
+        +'<button data-bimg="1" style="background:#1a7f37;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer">🖼 写真を変える</button>'
+        +'<button data-bx="1" style="background:#0b6bcb;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer">閉じる</button></div>'
+        +'<div style="opacity:.55;font-size:11px;margin-top:6px">この板は帯をダブルクリックすればいつでも開けます</div>';
       try{ panelDrag(p, p.querySelector('.__ce_bdpmv')); }catch(_){ }
     }
     draw(); document.body.appendChild(p);
@@ -14046,7 +14605,74 @@ html.__ce_altmode{cursor:text}
       ev.stopPropagation();
       var t=ev.target.closest?ev.target.closest('button'):null; if(!t) return;
       if(t.getAttribute('data-bx')){ p.__close(); return; }
+      // 🔶 決まった型で足りない時は図形バーを開く（文字セット・もや・ふんわり光・図形が自由に置ける）
+      if(t.getAttribute('data-bfree')){
+        p.__close();
+        // 帯の真ん中へスクロールしてから開く＝置いた物が帯の中に入る（外に落ちると一緒に留まらない）
+        try{
+          var r=band.getBoundingClientRect();
+          window.scrollTo(0, Math.max(0, r.top+window.scrollY - (window.innerHeight-Math.min(r.height,window.innerHeight))/2));
+        }catch(_){ }
+        setTimeout(function(){
+          var sb=document.getElementById('__ce_shapebar');
+          if(!sb){ var btn=document.getElementById('__ce_shapes'); if(btn) btn.click(); }
+          msg.textContent='🔶 図形バーを開きました。「📝 文字セット」や「✨ ふんわり光」を置くと、帯の上に自由に配置できます'
+            +'（置いた物が帯と一緒に留まるよう、帯の上で置いてください）';
+        },250);
+        return;
+      }
+      // 🖼 帯を高くすると「置き場所だけ広がって写真は動かせない」ので、写真の位置調整を開けるようにする
+      //   （2026-08-01 報告）。既にある背景画像パネルをそのまま使う＝位置・大きさをドラッグで動かせる。
+      if(t.getAttribute('data-bpos')){
+        var _bc2=null; try{ _bc2=bgOfEl(band); }catch(_){ }
+        if(!_bc2){ msg.textContent='この帯にはまだ写真が入っていません（先に「🖼 写真を変える」で選んでください）'; return; }
+        p.__close(); openBgSizePanel([_bc2]);
+        return;
+      }
+      if(t.getAttribute('data-bimg')){
+        // ★nosave を付ける：付けないと選んだ瞬間にファイル保存＋リロードされ、この板ごと消える
+        p.__close();
+        openPicker({el:band, type:'bg', fresh:true, nosave:true, done:function(){
+          bandFitApply(band, band.getAttribute('data-cebandfit')||'cover');   // 合わせ方の指定を写真差し替え後も保つ
+          try{ openBandPatternPanel(band); }catch(_){ }
+          msg.textContent='🖼 帯の写真を変えました（💾保存で確定）';
+        }});
+        return;
+      }
       var vv=parseFloat(band.getAttribute('data-cebandveil')); if(isNaN(vv)) vv=curV;
+      // 📐 写真の縦横比どおりの高さにする（拡大もされず、余白も出ない）
+      if(t.getAttribute('data-bfit')){
+        var url=''; try{ url=(bgOfEl(band)||{}).url||''; }catch(_){ }
+        if(!url){ msg.textContent='この帯にはまだ写真が入っていません'; return; }
+        var im=new Image();
+        im.onload=function(){
+          if(!im.naturalWidth||!im.naturalHeight){ msg.textContent='写真の大きさが読めませんでした'; return; }
+          var w=band.offsetWidth||window.innerWidth;
+          var got=bandSetHeight(band, w*im.naturalHeight/im.naturalWidth);
+          bandFitApply(band,'width');            // 幅に合わせる＝この高さなら拡大も余白も起きない
+          draw();
+          msg.textContent='📐 写真の比率どおり（高さ '+got+'px）にしました。拡大も上下の余白も出ません（💾保存で確定）';
+        };
+        im.onerror=function(){ msg.textContent='写真を読み込めませんでした'; };
+        im.src=url;
+        return;
+      }
+      // 写真を帯のどこに置くか（上／中央／下）
+      var bpv=t.getAttribute('data-bpv');
+      if(bpv){
+        band.setAttribute('data-cebandpos', bpv);
+        band.style.setProperty('background-position','center '+bpv,'important');
+        markDirty(); draw();
+        msg.textContent='🖼 写真を「'+({top:'上',center:'中央',bottom:'下'}[bpv])+'」に寄せました（💾保存で確定）';
+        return;
+      }
+      var bh=t.getAttribute('data-bh'), bhd=t.getAttribute('data-bhd');
+      if(bh!=null||bhd!=null){
+        var nh=(bh!=null)?parseFloat(bh):(band.offsetHeight+parseFloat(bhd));
+        var got=bandSetHeight(band, nh); draw();
+        msg.textContent='🏞 帯の高さを '+got+'px にしました（下のセクションも一緒にずらしています・💾保存で確定）';
+        return;
+      }
       var bp=t.getAttribute('data-bp'), bv=t.getAttribute('data-bv'), bf=t.getAttribute('data-bf');
       if(bf!=null){
         bandFitApply(band, bf); draw();
@@ -14078,8 +14704,10 @@ html.__ce_altmode{cursor:text}
     var band=document.createElement('section');
     band.className='ce_photoband';
     band.setAttribute('data-cepband','1');
+    // ★下地は灰色ではなくページの地の色にする（2026-08-01 報告）。写真より帯が高い時に
+    //   余った所が「灰色の帯」として目立ってしまうため。地の色なら余りが見えなくなる。
     band.style.cssText='position:relative;width:100%;height:80vh;min-height:420px;'
-      +'background-color:#e9eef2;background-size:cover;background-position:center;background-repeat:no-repeat';
+      +'background-color:'+_ovPageBg()+';background-size:cover;background-position:center;background-repeat:no-repeat';
     // ★入れ物に高さが直接指定されていると、帯を入れても伸びない（実測：article が height:4195px 固定）。
     //   はみ出した中身が後ろのセクションに重なり、ユーザーには「次の次のセクションが縮んだ」に見える。
     // ★伸ばす量は「scrollHeight と clientHeight の差」ではない：この article は帯を入れる前から
@@ -14087,7 +14715,7 @@ html.__ce_altmode{cursor:text}
     //   **帯を入れたことで増えた分だけ**を測って足す。
     var _snapB=_hostSnap(sec);
     sec.parentNode.insertBefore(band, sec.nextSibling);
-    _growHosts(_snapB);
+    _growHosts(_snapB, band.offsetHeight);      // 帯の高さぶん、伸びない入れ物を全部伸ばす
     var room=_ovRoom(band);
     // ★留めるのは「写真を選んだ後」ではなく**帯を作った時点で**行う。
     //   選ぶ前は留まっていないので、写真を選ばずに閉じると「灰色の帯が普通にスクロールするだけ」に
@@ -14779,7 +15407,7 @@ html.__ce_altmode{cursor:text}
     // 飾りを選択中の青い点線（編集用の目印）が焼き込まれないように必ず外す
     [].slice.call(doc.querySelectorAll('.ce_bgdeco,.ce_ringdeco,.ce_outlinedeco,[data-celine]')).forEach(function(n){ n.style.removeProperty('outline'); });
     // ⇕余白は編集用に ns-resize カーソルを付けている。納品物には要らないので保存時に外す。
-    [].slice.call(doc.querySelectorAll('[data-cespacer]')).forEach(function(n){ n.style.removeProperty('cursor'); n.style.removeProperty('outline'); });
+    [].slice.call(doc.querySelectorAll('[data-cespacer],[data-cenewsec]')).forEach(function(n){ n.style.removeProperty('cursor'); n.style.removeProperty('outline'); });
     // ★保険：↑の一覧に書き足し忘れたパネルを開いたまま💾保存すると、パネルがHTMLに焼き込まれて
     //   「開くたびに出るのに閉じられない板」になる（実例：🖌文字の背景パレット __ce_tbgp）。
     //   id が __ce で始まる要素はツールのUIだけなので、丸ごと掃除する。
@@ -15681,7 +16309,8 @@ html.__ce_altmode{cursor:text}
     ['__ce_q_txtbg','🖌 文字の背景に色を塗る（行ごと・AIなし）'],
     ['__ce_q_vline','▎ 文字の左に縦線を引く（引用風・AIなし）'],
     ['__ce_q_deco','🎨 この飾りの色・形・傾きを変える'],
-    ['__ce_q_psgrab','🔓 数字や飾り（01など）を掴めるようにする']
+    ['__ce_q_psgrab','🔓 数字や飾り（01など）を掴めるようにする'],
+    ['__ce_q_pal','📌 パレットに入れる（コピー／切り取りは板で選ぶ）']
   ];
   // ★既定の並び＝見出し(sep:ラベル)入り。この見出しがそのまま「親メニュー」になり、
   //   中身はホバー／クリックで開くサブメニューに畳まれる（項目30個で縦に長すぎた対策・2026-07-21）。
@@ -15690,7 +16319,7 @@ html.__ce_altmode{cursor:text}
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_secbg','__ce_q_fav','__ce_q_secadd','__ce_q_secswap','__ce_q_secdel','__ce_q_secout','__ce_q_edge',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_zup','__ce_q_zdn','__ce_q_ovup','__ce_q_ovdn','__ce_q_ovshow','__ce_q_pin','__ce_q_unfix','__ce_q_overpass','__ce_q_photoband','__ce_q_bandpat',
-    'sep:🧹 整える・消す','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
+    'sep:🧹 整える・消す','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_pal','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
   ];
   function qmDefMap(){ var m={}; QM_DEFS.forEach(function(d){ m[d[0]]=d[1]; }); return m; }
@@ -16613,6 +17242,9 @@ html.__ce_altmode{cursor:text}
       //   scRun('edit') に食われる、の二重で**押しても並べ替えが出なかった**（実報告）。
       +'<button id="__ce_q_reorder" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer">⚙ 並べ替え</button></div>';
     document.body.appendChild(qm);
+    // ★右クリックメニューも「実際の重なり」で前面を取る（数字だけだと後ろの要素を掴んでしまう・実報告）。
+    //   位置が決まった後（次の描画）にもう一度やる＝置き場所が変わっても効く。
+    try{ panelToFront(qm); requestAnimationFrame(function(){ try{ panelToFront(qm); }catch(_){ } }); }catch(_){ }
     // 🔎 メニューの曖昧検索（2026-07-30）
     //   項目が増えて「どこにあるか分からない」を解消する。まず言い換え表でローカル検索（一瞬・無料）、
     //   1件も当たらなかった時だけ Gemini に聞く＝ふだんは費用ゼロ。
@@ -17564,6 +18196,16 @@ html.__ce_altmode{cursor:text}
         var ov=ovOf(x,y), d=Math.abs(x-e.clientX)+Math.abs(y-e.clientY);
         if(!best||ov<best.ov-1||(ov<=best.ov+1&&d<best.d)) best={x:x,y:y,ov:ov,d:d};
       });
+      // ★どこに置いてもかぶる時（＝画面いっぱいのセクション等）は、**クリックした側と反対の端**へ寄せる。
+      //   2026-08-01 実報告「横にする設定をしたはずなのに、また被る」。
+      //   原因は候補の中に「必ずかぶる場所しかない」状況で、いちばんマシな場所＝カーソルの真横が
+      //   選ばれ続けること。メニューは画面いっぱいの高さまで伸びる（max-height:100vh）ので、
+      //   面積の比較だけでは逃げ場が作れない。**押した点が見えていること**を優先する。
+      if(best && best.ov > w*h*0.35){
+        var fx=(e.clientX < W/2) ? (W-w-M) : M;      // 左を押したら右端／右を押したら左端
+        var fy=clampY(e.clientY-h/2);
+        best={x:clampX(fx), y:fy};
+      }
       qm.style.left=best.x+'px'; qm.style.top=best.y+'px';
     })();
     curMenu=qm;
@@ -17822,6 +18464,16 @@ html.__ce_altmode{cursor:text}
         } else if(msg) msg.textContent='作り替えに失敗しました';
         return;
       }
+      if(t.id==='__ce_q_pal'){
+        var _pls=(selEls&&selEls.length?selEls.slice():[curEl]).filter(function(n){ return n&&n!==document.body; });
+        closeMenu();
+        var _pn=0;
+        palResetLast();
+        _pls.forEach(function(n){ if(palAdd(n)) _pn++; });
+        openPalette();
+        ceFlash('📌 パレットに'+_pn+'件入れました（カードを掴んで置きたい場所へドラッグ）');
+        return;
+      }
       if(t.id==='__ce_q_deco'){
         var _dqe=null,_bde=null;
         try{ _dqe=dqHitAt(qx,qy,curEl); }catch(_){ }
@@ -17941,7 +18593,7 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
