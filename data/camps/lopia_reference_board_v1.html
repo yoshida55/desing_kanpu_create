@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LOPIA Reference Board 01</title>
+  <style>
+    :root {
+      --ink: #173f34;
+      --paper: #f4f0e7;
+      --white: #fffdf8;
+      --lime: #d8ff62;
+      --coral: #ff725f;
+      --blue: #7dbdd5;
+      --line: rgba(23, 63, 52, .22);
+      --serif: "Yu Mincho", "Hiragino Mincho ProN", serif;
+      --sans: "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 1180px;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+
+    .topbar {
+      position: sticky;
+      inset: 0 0 auto;
+      z-index: 20;
+      height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 34px;
+      color: #fff;
+      background: rgba(23, 63, 52, .96);
+      border-bottom: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(12px);
+    }
+    .brand { display: flex; align-items: center; gap: 18px; }
+    .brand__mark {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--lime); color: var(--ink);
+      display: grid; place-items: center; font-weight: 900;
+    }
+    .brand__name { font-size: 14px; font-weight: 800; letter-spacing: .16em; }
+    .brand__meta { opacity: .62; font-size: 11px; letter-spacing: .1em; }
+    .topbar nav { display: flex; gap: 6px; }
+    .topbar nav a {
+      text-decoration: none; font-size: 12px; letter-spacing: .08em;
+      padding: 10px 13px; border-radius: 999px;
+      transition: .25s ease;
+    }
+    .topbar nav a:hover { color: var(--ink); background: var(--lime); }
+
+    .hero {
+      position: relative;
+      min-height: 650px;
+      overflow: hidden;
+      padding: 86px 6.5vw 70px;
+      color: #fff;
+      background: var(--ink);
+    }
+    .hero::before {
+      content: "";
+      position: absolute; width: 570px; height: 570px;
+      top: -200px; right: 2vw; border: 1px solid rgba(255,255,255,.2);
+      border-radius: 50%;
+    }
+    .hero::after {
+      content: "REFERENCE";
+      position: absolute; right: -22px; bottom: -58px;
+      color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.12);
+      font-size: clamp(120px, 14vw, 250px); font-weight: 900; line-height: 1;
+      letter-spacing: -.07em;
+    }
+    .hero__grid {
+      position: relative; z-index: 1; max-width: 1540px; margin: 0 auto;
+      display: grid; grid-template-columns: 1.35fr .65fr; gap: 9vw;
+      align-items: end;
+    }
+    .eyebrow { display: flex; align-items: center; gap: 14px; font-size: 12px; font-weight: 800; letter-spacing: .2em; }
+    .eyebrow::before { content: ""; width: 44px; height: 2px; background: currentColor; }
+    h1 { margin: 44px 0 28px; font-size: clamp(64px, 7vw, 118px); letter-spacing: -.07em; line-height: .88; }
+    h1 small { display: block; margin-top: 28px; font-family: var(--serif); font-size: .32em; font-weight: 500; letter-spacing: .06em; line-height: 1.55; }
+    .hero__lead { max-width: 570px; margin: 0; font-family: var(--serif); font-size: 18px; line-height: 2; }
+    .brief {
+      border-top: 1px solid rgba(255,255,255,.4);
+      padding-top: 24px;
+    }
+    .brief__label { margin: 0 0 18px; color: var(--lime); font-size: 11px; font-weight: 900; letter-spacing: .2em; }
+    .brief dl { display: grid; grid-template-columns: 88px 1fr; gap: 13px 12px; margin: 0; font-size: 13px; line-height: 1.65; }
+    .brief dt { opacity: .5; }
+    .brief dd { margin: 0; }
+
+    .section { padding: 112px 6.5vw; }
+    .section__inner { max-width: 1540px; margin: 0 auto; }
+    .section-head { display: grid; grid-template-columns: 260px 1fr; gap: 5vw; margin-bottom: 58px; }
+    .section-no { font-size: 12px; font-weight: 900; letter-spacing: .2em; }
+    .section-no strong { display: block; margin-bottom: 16px; font-size: 54px; letter-spacing: -.06em; }
+    .section-title { margin: 0; font-family: var(--serif); font-size: 42px; line-height: 1.45; font-weight: 600; letter-spacing: .02em; }
+    .section-note { max-width: 690px; margin: 22px 0 0; font-size: 15px; line-height: 1.9; }
+
+    .diagnosis { background: var(--lime); }
+    .pattern-row { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+    .pattern {
+      min-height: 255px; padding: 26px 22px; border-right: 1px solid var(--ink);
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .pattern:last-child { border-right: 0; }
+    .pattern__icon { height: 105px; position: relative; opacity: .85; }
+    .pattern__icon i { position: absolute; display: block; background: var(--ink); }
+    .pattern:nth-child(1) .pattern__icon i:nth-child(1) { left: 10%; top: 20%; width: 26%; height: 62%; }
+    .pattern:nth-child(1) .pattern__icon i:nth-child(2) { right: 8%; top: 8%; width: 50%; height: 82%; border-radius: 2px; }
+    .pattern:nth-child(2) .pattern__icon i:nth-child(1) { inset: 12% 4% 12% 4%; border-radius: 16px; }
+    .pattern:nth-child(3) .pattern__icon { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 8px; }
+    .pattern:nth-child(3) .pattern__icon i { position: static; border-radius: 12px; }
+    .pattern:nth-child(4) .pattern__icon i:nth-child(1) { left: 5%; top: 8%; width: 40%; height: 7px; }
+    .pattern:nth-child(4) .pattern__icon i:nth-child(2) { left: 5%; top: 28%; width: 80%; height: 22px; }
+    .pattern:nth-child(4) .pattern__icon i:nth-child(3) { left: 5%; top: 61%; width: 58%; height: 7px; }
+    .pattern:nth-child(5) .pattern__icon i:nth-child(1) { left: 5%; bottom: 10%; width: 90%; height: 2px; }
+    .pattern:nth-child(5) .pattern__icon i:nth-child(2) { left: 32%; top: 6%; width: 42%; height: 76%; border-radius: 50%; }
+    .pattern__name { font-weight: 900; font-size: 16px; }
+    .pattern__name span { display: block; margin-top: 8px; font-weight: 500; font-size: 12px; opacity: .68; }
+    .ruleline { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .ruleline span { padding: 10px 15px; border: 1px solid var(--ink); border-radius: 999px; font-size: 12px; font-weight: 800; }
+
+    .sources { background: var(--white); }
+    .source-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .source-card { border: 1px solid var(--line); background: #fff; overflow: hidden; }
+    .source-card__image { height: 288px; overflow: hidden; background: #eee; }
+    .source-card__image img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform .7s cubic-bezier(.2,.8,.2,1); }
+    .source-card:hover img { transform: scale(1.045); }
+    .source-card__body { padding: 25px 25px 28px; }
+    .source-card__top { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .source-card h3 { margin: 0; font-size: 23px; }
+    .source-card a { text-decoration: none; font-size: 12px; font-weight: 800; border-bottom: 1px solid; }
+    .source-card p { min-height: 75px; margin: 19px 0 0; color: #47655d; font-size: 13px; line-height: 1.85; }
+    .takeaway { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12px; font-weight: 800; }
+    .takeaway span { color: var(--coral); }
+
+    .directions { background: #efe7d8; }
+    .direction-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 30px 310px; }
+    .direction-tab {
+      border: 1px solid var(--ink); background: transparent; color: var(--ink);
+      padding: 17px 20px; cursor: pointer; text-align: left;
+      transition: .25s ease;
+    }
+    .direction-tab small { display: block; margin-bottom: 5px; font-size: 10px; letter-spacing: .18em; }
+    .direction-tab strong { font-size: 15px; }
+    .direction-tab.is-active { background: var(--ink); color: #fff; }
+    .direction-panel { display: none; }
+    .direction-panel.is-active { display: grid; grid-template-columns: 1.2fr .8fr; min-height: 680px; border: 1px solid var(--ink); background: #fff; animation: appear .45s ease both; }
+    @keyframes appear { from { opacity: 0; transform: translateY(12px); } }
+    .mock { min-height: 680px; position: relative; overflow: hidden; border-right: 1px solid var(--ink); }
+    .panel-copy { padding: 56px 48px; display: flex; flex-direction: column; }
+    .panel-copy__index { font-size: 12px; font-weight: 900; letter-spacing: .18em; }
+    .panel-copy h3 { margin: 32px 0 20px; font-family: var(--serif); font-size: 46px; line-height: 1.35; }
+    .panel-copy > p { margin: 0; color: #47655d; font-size: 14px; line-height: 1.95; }
+    .panel-spec { margin-top: auto; padding-top: 35px; border-top: 1px solid var(--line); display: grid; gap: 18px; }
+    .panel-spec div { display: grid; grid-template-columns: 90px 1fr; gap: 16px; font-size: 12px; line-height: 1.65; }
+    .panel-spec b { color: var(--coral); }
+
+    .mock-a { background: #f8f3e7; padding: 38px; }
+    .mock-a__nav { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: .14em; }
+    .mock-a__big { position: absolute; z-index: 2; left: 42px; top: 100px; margin: 0; font-family: var(--serif); font-size: 73px; line-height: 1.08; font-weight: 500; letter-spacing: -.05em; }
+    .mock-a__num { position: absolute; z-index: 3; right: 44px; top: 120px; font-size: 13px; font-weight: 900; }
+    .mock-a__photo { position: absolute; right: 38px; bottom: 48px; width: 64%; height: 68%; overflow: hidden; }
+    .mock-a__photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.78); transition: transform 1s ease; }
+    .mock-a:hover img { transform: scale(1.04); }
+    .mock-a__vertical { position: absolute; z-index: 3; left: 48px; bottom: 47px; writing-mode: vertical-rl; font-family: var(--serif); font-size: 15px; letter-spacing: .14em; }
+    .mock-a__stamp { position: absolute; z-index: 4; right: 28px; bottom: 30px; width: 106px; height: 106px; border-radius: 50%; background: var(--coral); color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 900; transform: rotate(9deg); }
+
+    .mock-b { background: #132e28; color: #fff; padding: 38px; }
+    .mock-b__top { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: .15em; }
+    .mock-b__title { margin-top: 70px; font-size: 64px; line-height: .9; letter-spacing: -.06em; }
+    .filmstrip { position: absolute; left: 0; right: 0; bottom: 90px; display: flex; gap: 18px; transform: translateX(-70px); transition: transform .9s cubic-bezier(.2,.8,.2,1); }
+    .mock-b:hover .filmstrip { transform: translateX(-125px); }
+    .film { flex: 0 0 270px; height: 230px; position: relative; overflow: hidden; background: #315c4e; }
+    .film:nth-child(2) { flex-basis: 390px; height: 310px; margin-top: -80px; }
+    .film img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.7) contrast(1.06); }
+    .film span { position: absolute; left: 14px; bottom: 12px; padding: 6px 9px; color: #132e28; background: var(--lime); font-size: 9px; font-weight: 900; }
+    .mock-b__rail { position: absolute; left: 38px; right: 38px; bottom: 40px; height: 2px; background: rgba(255,255,255,.25); }
+    .mock-b__rail::after { content: ""; display: block; width: 38%; height: 100%; background: var(--lime); }
+
+    .mock-c { background: #86c8df; padding: 34px; }
+    .mock-c::after { content: ""; position: absolute; width: 330px; height: 330px; border-radius: 50%; background: var(--lime); right: -100px; top: -80px; }
+    .mock-c__brand { position: relative; z-index: 2; font-size: 12px; font-weight: 900; letter-spacing: .18em; }
+    .mock-c__message { position: relative; z-index: 2; margin: 48px 0 22px; font-size: 76px; line-height: .9; letter-spacing: -.08em; }
+    .mock-c__message span { display: inline-block; transition: transform .25s ease; }
+    .mock-c:hover .mock-c__message span:nth-child(odd) { transform: translateY(-8px) rotate(-2deg); }
+    .mock-c:hover .mock-c__message span:nth-child(even) { transform: translateY(8px) rotate(2deg); }
+    .tile-grid { position: absolute; left: 34px; right: 34px; bottom: 34px; height: 310px; display: grid; grid-template-columns: 1.1fr .8fr .7fr; grid-template-rows: 1fr 1fr; gap: 10px; }
+    .tile { padding: 16px; border: 2px solid var(--ink); background: var(--white); font-size: 10px; font-weight: 900; overflow: hidden; }
+    .tile:first-child { grid-row: 1 / 3; background: var(--coral); display: flex; flex-direction: column; justify-content: space-between; }
+    .tile:first-child img { width: calc(100% + 32px); height: 210px; margin: -16px -16px 0; object-fit: cover; mix-blend-mode: multiply; }
+    .tile:nth-child(2) { background: var(--lime); font-size: 28px; line-height: 1; }
+    .tile:nth-child(5) { background: var(--ink); color: #fff; }
+
+    .storyboard { background: var(--ink); color: #fff; }
+    .storyboard .section-head { margin-bottom: 42px; }
+    .storyboard .section-note { color: rgba(255,255,255,.7); }
+    .board-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; align-items: end; }
+    .beat { position: relative; min-height: 470px; padding: 18px 14px; background: #fff; color: var(--ink); overflow: hidden; transition: transform .25s ease; }
+    .beat:hover { transform: translateY(-10px); }
+    .beat__num { position: relative; z-index: 3; font-size: 10px; font-weight: 900; }
+    .beat__name { position: absolute; z-index: 3; left: 14px; right: 14px; bottom: 15px; font-size: 12px; font-weight: 900; }
+    .beat__name span { display: block; margin-top: 5px; font-weight: 500; font-size: 9px; opacity: .6; }
+    .beat::before, .beat::after { content: ""; position: absolute; display: block; }
+    .beat:nth-child(1) { height: 430px; background: #e2f2f5; }
+    .beat:nth-child(1)::before { inset: 70px 18px 90px; background: url('/uploads/employment-support-hero-workroom.png') center/cover; clip-path: ellipse(48% 46%); }
+    .beat:nth-child(2) { height: 390px; background: #f8f0e2; }
+    .beat:nth-child(2)::before { left: 25px; top: 80px; width: 70px; height: 230px; background: var(--coral); }
+    .beat:nth-child(2)::after { right: 18px; top: 52px; width: 45px; height: 160px; border: 2px solid var(--ink); }
+    .beat:nth-child(3) { height: 470px; background: #142f28; color: #fff; }
+    .beat:nth-child(3)::before { left: -30px; right: -30px; top: 105px; height: 190px; background: url('/uploads/生成画像2.png') center/cover; transform: rotate(-3deg); }
+    .beat:nth-child(4) { height: 410px; background: var(--blue); }
+    .beat:nth-child(4)::before { left: 48%; top: 50px; bottom: 95px; width: 2px; background: var(--ink); }
+    .beat:nth-child(4)::after { left: calc(48% - 7px); top: 96px; width: 16px; height: 16px; border-radius: 50%; background: var(--lime); box-shadow: 0 75px 0 var(--coral), 0 150px 0 #fff; }
+    .beat:nth-child(5) { height: 350px; background: var(--lime); }
+    .beat:nth-child(5)::before { content: "87"; left: 12px; top: 90px; font-size: 86px; font-weight: 900; letter-spacing: -.09em; }
+    .beat:nth-child(5)::after { content: "%"; right: 18px; top: 142px; font-size: 22px; font-weight: 900; }
+    .beat:nth-child(6) { height: 440px; background: #e6d0c2; }
+    .beat:nth-child(6)::before { inset: 58px 14px 100px; border-radius: 90px 90px 4px 4px; background: url('/uploads/lopia-concept-workshop-v1.png') center/cover; }
+    .beat:nth-child(7) { height: 375px; background: var(--coral); }
+    .beat:nth-child(7)::before { content: "話そう。"; left: -7px; top: 100px; font-family: var(--serif); font-size: 48px; transform: rotate(-9deg); }
+    .rhythm { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.25); }
+    .rhythm p { margin: 0; max-width: 760px; font-size: 13px; line-height: 1.8; color: rgba(255,255,255,.7); }
+    .rhythm strong { color: var(--lime); font-size: 13px; }
+
+    .decision { background: #f8f3e7; }
+    .decision-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 70px; align-items: start; }
+    .decision h2 { margin: 0 0 25px; font-family: var(--serif); font-size: 52px; line-height: 1.35; }
+    .decision p { margin: 0; max-width: 680px; font-size: 15px; line-height: 2; }
+    .pick-list { border-top: 1px solid var(--ink); }
+    .pick { display: grid; grid-template-columns: 62px 1fr auto; gap: 18px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--ink); }
+    .pick span { font-size: 12px; font-weight: 900; }
+    .pick strong { font-family: var(--serif); font-size: 17px; }
+    .pick em { font-style: normal; padding: 7px 10px; color: #fff; background: var(--ink); border-radius: 999px; font-size: 10px; }
+    footer { padding: 30px 6.5vw; color: rgba(255,255,255,.65); background: #0f2d25; display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .08em; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand__mark">L</span><span class="brand__name">LOPIA / REFERENCE BOARD</span><span class="brand__meta">DESKTOP CONCEPT · 01</span></div>
+    <nav aria-label="ボード内メニュー">
+      <a href="#diagnosis">課題</a><a href="#sources">参考元</a><a href="#directions">3方向</a><a href="#storyboard">構成</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero__grid">
+        <div>
+          <div class="eyebrow">DESIGN RESEARCH / 2026.08</div>
+          <h1>Break<br>the Pattern.<small>「同じ見せ方」を一度壊して、<br>ロピアらしいページのリズムを探す。</small></h1>
+          <p class="hero__lead">完成案ではなく、次のセクションを決めるための材料集。レイアウト・写真・文字・動きを別々に採集し、ロピア用に組み直した比較ボードです。</p>
+        </div>
+        <aside class="brief">
+          <p class="brief__label">DESIGN BRIEF</p>
+          <dl>
+            <dt>目的</dt><dd>「こんなサイトが作れます」を伝える営業用ポートフォリオ</dd>
+            <dt>題材</dt><dd>就労継続支援B型事業所 ロピア</dd>
+            <dt>固定</dt><dd>現在のファーストビューは維持</dd>
+            <dt>優先</dt><dd>デスクトップの表現力・技術・デザインバランス</dd>
+            <dt>避ける</dt><dd>各節を同じ2カラム／カードUIで揃えること</dd>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section diagnosis" id="diagnosis">
+      <div class="section__inner">
+        <div class="section-head">
+          <div class="section-no"><strong>01</strong>DIAGNOSIS</div>
+          <div><h2 class="section-title">色を変えても、骨格が同じなら<br>同じデザインに見える。</h2><p class="section-note">現在繰り返しやすい5要素を可視化。この先は「見た目」ではなく「構成原理」を変えます。</p></div>
+        </div>
+        <div class="pattern-row">
+          <article class="pattern"><div class="pattern__icon"><i></i><i></i></div><div class="pattern__name">左右2カラム<span>写真＋文章の定番構成</span></div></article>
+          <article class="pattern"><div class="pattern__icon"><i></i></div><div class="pattern__name">大きな角丸写真<span>安心感はあるが連続すると単調</span></div></article>
+          <article class="pattern"><div class="pattern__icon"><i></i><i></i><i></i></div><div class="pattern__name">3枚カード<span>情報整理が毎回同じになる</span></div></article>
+          <article class="pattern"><div class="pattern__icon"><i></i><i></i><i></i></div><div class="pattern__name">英字＋和文見出し<span>章タイトルの型が固定される</span></div></article>
+          <article class="pattern"><div class="pattern__icon"><i></i><i></i></div><div class="pattern__name">同じフェード演出<span>技術を使っても差が出にくい</span></div></article>
+        </div>
+        <div class="ruleline"><span>2カラムは1回まで</span><span>カードを連続させない</span><span>節ごとに異なる動き</span><span>角丸の量を意図的に変える</span><span>静→動→静のリズム</span></div>
+      </div>
+    </section>
+
+    <section class="section sources" id="sources">
+      <div class="section__inner">
+        <div class="section-head">
+          <div class="section-no"><strong>02</strong>SOURCES</div>
+          <div><h2 class="section-title">サイト全体ではなく、<br>参考にする「部位」を決める。</h2><p class="section-note">3つのギャラリーは用途を分けて使用。画像は2026年8月2日に調査用として取得した画面で、クリックすると各サイトを開きます。</p></div>
+        </div>
+        <div class="source-grid">
+          <article class="source-card">
+            <div class="source-card__image"><img src="lopia_reference_assets/sankou.png" alt="SANKOU!の一覧画面"></div>
+            <div class="source-card__body"><div class="source-card__top"><h3>SANKOU!</h3><a href="https://sankoudesign.com/" target="_blank" rel="noreferrer">SOURCE ↗</a></div><p>国内の実案件から、信頼感、和文のサイズ感、事業サイトとして成立する情報密度を確認する。</p><div class="takeaway"><span>採る：</span> 現実的な文字組みと安心感</div></div>
+          </article>
+          <article class="source-card">
+            <div class="source-card__image"><img src="lopia_reference_assets/siteinspire.png" alt="SiteinspireのUnusual Layout一覧画面"></div>
+            <div class="source-card__body"><div class="source-card__top"><h3>Siteinspire</h3><a href="https://www.siteinspire.com/websites/category/unusual-layout" target="_blank" rel="noreferrer">SOURCE ↗</a></div><p>Unusual LayoutやTypographicから、非対称構成、大胆な余白、通常とは異なるナビゲーションを採集する。</p><div class="takeaway"><span>採る：</span> レイアウトの意外性と緊張感</div></div>
+          </article>
+          <article class="source-card">
+            <div class="source-card__image"><img src="lopia_reference_assets/muuuuu.png" alt="MUUUUU.ORGの画面"></div>
+            <div class="source-card__body"><div class="source-card__top"><h3>MUUUUU.ORG</h3><a href="https://muuuuu.org/" target="_blank" rel="noreferrer">SOURCE ↗</a></div><p>受賞・注目サイトから、強いファーストビュー、写真のトリミング、演出を含んだ見せ場の作り方を探す。</p><div class="takeaway"><span>採る：</span> 一画面ごとのインパクト</div></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section directions" id="directions">
+      <div class="section__inner">
+        <div class="section-head">
+          <div class="section-no"><strong>03</strong>DIRECTIONS</div>
+          <div><h2 class="section-title">ロピアに置き換えた、<br>性格の違う3つの方向。</h2><p class="section-note">ボタンで切り替えて比較できます。どれか一案をページ全体へ適用するのではなく、節ごとに必要な表現を借ります。</p></div>
+        </div>
+        <div class="direction-tabs" role="tablist" aria-label="デザイン方向">
+          <button class="direction-tab is-active" role="tab" aria-selected="true" data-panel="a"><small>DIRECTION A</small><strong>EDITORIAL / 静かな編集</strong></button>
+          <button class="direction-tab" role="tab" aria-selected="false" data-panel="b"><small>DIRECTION B</small><strong>DOCUMENTARY / 仕事の記録</strong></button>
+          <button class="direction-tab" role="tab" aria-selected="false" data-panel="c"><small>DIRECTION C</small><strong>PLAYFUL / できるの発見</strong></button>
+        </div>
+
+        <article class="direction-panel is-active" data-direction="a">
+          <div class="mock mock-a"><div class="mock-a__nav"><span>LOPIA JOURNAL</span><span>WORK / PEOPLE / PLACE</span></div><h3 class="mock-a__big">今日の<br>小さな<br>できた。</h3><span class="mock-a__num">STORY 02</span><div class="mock-a__photo"><img src="/uploads/lopia-concept-workshop-v1.png" alt="ロピアの作業風景イメージ"></div><div class="mock-a__vertical">仕事が、人の輪郭をつくっていく。</div><div class="mock-a__stamp">READ<br>STORY →</div></div>
+          <div class="panel-copy"><span class="panel-copy__index">A / EDITORIAL</span><h3>福祉サイトではなく、<br>一冊の雑誌として見せる。</h3><p>大きな明朝体、縦書き、写真の重なり、余白。理念や利用者・スタッフの物語に向く、静かで品のある方向です。</p><div class="panel-spec"><div><b>向く節</b><span>理念／利用者ストーリー／スタッフ紹介</span></div><div><b>技術</b><span>文字のマスク表示、写真の微細なパララックス、縦書き</span></div><div><b>注意</b><span>全編で使うと動きが弱い。強い節の間の「静」に使う。</span></div></div></div>
+        </article>
+
+        <article class="direction-panel" data-direction="b">
+          <div class="mock mock-b"><div class="mock-b__top"><span>LOPIA / WORK ARCHIVE</span><span>DRAG TO EXPLORE →</span></div><div class="mock-b__title">WORK<br>IS A<br>STORY.</div><div class="filmstrip"><div class="film"><img src="/uploads/生成画像1.png" alt="作業イメージ1"><span>01 / LIGHT WORK</span></div><div class="film"><img src="/uploads/生成画像2.png" alt="作業イメージ2"><span>02 / DIGITAL</span></div><div class="film"><img src="/uploads/生成画像3.png" alt="作業イメージ3"><span>03 / CLEANING</span></div></div><div class="mock-b__rail"></div></div>
+          <div class="panel-copy"><span class="panel-copy__index">B / DOCUMENTARY</span><h3>仕事内容を、<br>横に流れる記録映画に。</h3><p>深い緑の舞台に写真を横並びで展開。説明カードではなく「現場をのぞく」体験にして、技術力も最も伝えやすい方向です。</p><div class="panel-spec"><div><b>向く節</b><span>仕事内容／設備／一日の流れ</span></div><div><b>技術</b><span>横スクロール、ドラッグ操作、スクロール進捗、慣性</span></div><div><b>注意</b><span>操作を主役にしすぎず、通常スクロールでも意味が通る設計にする。</span></div></div></div>
+        </article>
+
+        <article class="direction-panel" data-direction="c">
+          <div class="mock mock-c"><div class="mock-c__brand">LOPIA / FIND YOUR PIECE</div><div class="mock-c__message"><span>で</span><span>き</span><span>る</span><span>、</span><br><span>み</span><span>つ</span><span>け</span><span>た</span><span>。</span></div><div class="tile-grid"><div class="tile"><img src="/uploads/lopia-concept-workshop-v1.png" alt="作業風景"><span>PEOPLE / 01</span></div><div class="tile">87%<br><small>NEW SKILL</small></div><div class="tile">PC</div><div class="tile">PACK</div><div class="tile">NEXT<br>→</div></div></div>
+          <div class="panel-copy"><span class="panel-copy__index">C / PLAYFUL SYSTEM</span><h3>得意を組み合わせる、<br>動くワークボード。</h3><p>色とグリッドを大胆に使い、仕事やスキルをパーツとして組み替える方向。親しみと先進性を同時に表現できます。</p><div class="panel-spec"><div><b>向く節</b><span>数字／得意分野／サービス一覧／問い合わせ</span></div><div><b>技術</b><span>可変グリッド、ホバー変形、マウス追従、フィルター</span></div><div><b>注意</b><span>福祉の落ち着きを失わないよう、ページ内では一か所に絞る。</span></div></div></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section storyboard" id="storyboard">
+      <div class="section__inner">
+        <div class="section-head">
+          <div class="section-no"><strong>04</strong>RHYTHM</div>
+          <div><h2 class="section-title">ページを「同じ箱の連続」ではなく、<br>七つの異なる場面として設計する。</h2><p class="section-note">各縦長パネルはセクションの縮図。高さ・密度・色・写真量を意図的に変えています。</p></div>
+        </div>
+        <div class="board-grid">
+          <article class="beat"><span class="beat__num">01</span><div class="beat__name">FIRST VIEW<span>水彩／現在案を維持</span></div></article>
+          <article class="beat"><span class="beat__num">02</span><div class="beat__name">PHILOSOPHY<span>編集的／静</span></div></article>
+          <article class="beat"><span class="beat__num">03</span><div class="beat__name">WORKS<span>横移動／動</span></div></article>
+          <article class="beat"><span class="beat__num">04</span><div class="beat__name">ONE DAY<span>時間軸／静→動</span></div></article>
+          <article class="beat"><span class="beat__num">05</span><div class="beat__name">NUMBERS<span>文字主体／強</span></div></article>
+          <article class="beat"><span class="beat__num">06</span><div class="beat__name">PEOPLE<span>肖像／静</span></div></article>
+          <article class="beat"><span class="beat__num">07</span><div class="beat__name">CONTACT<span>ポスター／強</span></div></article>
+        </div>
+        <div class="rhythm"><p>推奨する基本リズムは、Aの編集性を土台に、Bを最大の技術的見せ場として一度だけ使い、Cを数字または問い合わせのアクセントとして使う構成。</p><strong>A → B → A → C</strong></div>
+      </div>
+    </section>
+
+    <section class="section decision">
+      <div class="section__inner decision-grid">
+        <div><div class="eyebrow">RECOMMENDATION</div><h2>Aを土台に、<br>Bを見せ場にする。</h2><p>ロピアらしい柔らかさはAで守り、「ホームページ制作を任せられる技術力」はBの仕事内容セクションで見せます。Cは少量だけ使うと、ページに新しいリズムが生まれます。</p></div>
+        <div class="pick-list"><div class="pick"><span>BASE</span><strong>A / Editorial</strong><em>60%</em></div><div class="pick"><span>FEATURE</span><strong>B / Documentary</strong><em>30%</em></div><div class="pick"><span>ACCENT</span><strong>C / Playful</strong><em>10%</em></div></div>
+      </div>
+    </section>
+  </main>
+  <footer><span>LOPIA REFERENCE BOARD / INTERNAL DESIGN MATERIAL</span><span>本体カンプへの適用なし · DESKTOP ONLY</span></footer>
+
+  <script>
+    const tabs = [...document.querySelectorAll('.direction-tab')];
+    const panels = [...document.querySelectorAll('.direction-panel')];
+    function selectDirection(key) {
+      tabs.forEach(tab => {
+        const active = tab.dataset.panel === key;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', String(active));
+      });
+      panels.forEach(panel => panel.classList.toggle('is-active', panel.dataset.direction === key));
+    }
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => selectDirection(tab.dataset.panel));
+      tab.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        const next = (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        tabs[next].focus();
+        selectDirection(tabs[next].dataset.panel);
+      });
+    });
+  </script>
+</body>
+</html>

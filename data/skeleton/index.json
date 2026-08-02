@@ -1,0 +1,10213 @@
+{
+ "built_at": "2026-08-02 15:12:55",
+ "viewport": [
+  1440,
+  900
+ ],
+ "n_files": 36,
+ "n_sections": 194,
+ "sections": [
+  {
+   "type_id": "grid|col2|txtsm",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "sm",
+   "band": "full",
+   "img_ratio": 0.209,
+   "chars": 69,
+   "n_img": 3,
+   "n_text": 10,
+   "bg_rgb": [
+    8,
+    120,
+    184
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 900,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260702_224555_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 0,
+   "thumb": "clone_ichizenbooks_jp_20260702_224555_js__00.jpg",
+   "pal": [
+    [
+     239,
+     242,
+     244
+    ],
+    [
+     2,
+     113,
+     184
+    ],
+    [
+     165,
+     213,
+     236
+    ],
+    [
+     99,
+     168,
+     211
+    ]
+   ],
+   "role": "hero",
+   "dark": true,
+   "vec": 0
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.027,
+   "chars": 331,
+   "n_img": 1,
+   "n_text": 13,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 1781,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260702_224555_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 900,
+   "thumb": "clone_ichizenbooks_jp_20260702_224555_js__01.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     249
+    ],
+    [
+     2,
+     111,
+     184
+    ],
+    [
+     172,
+     206,
+     229
+    ],
+    [
+     95,
+     164,
+     209
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 1
+  },
+  {
+   "type_id": "grid|col2|txtlg",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.034,
+   "chars": 699,
+   "n_img": 11,
+   "n_text": 27,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 2273,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260702_224555_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 2681,
+   "thumb": "clone_ichizenbooks_jp_20260702_224555_js__02.jpg",
+   "pal": [
+    [
+     244,
+     245,
+     247
+    ],
+    [
+     176,
+     210,
+     232
+    ],
+    [
+     147,
+     183,
+     209
+    ],
+    [
+     102,
+     168,
+     211
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 2
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.026,
+   "chars": 284,
+   "n_img": 12,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 1230,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260702_224555_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 4954,
+   "thumb": "clone_ichizenbooks_jp_20260702_224555_js__03.jpg",
+   "pal": [
+    [
+     246,
+     247,
+     248
+    ],
+    [
+     170,
+     205,
+     227
+    ],
+    [
+     99,
+     166,
+     210
+    ],
+    [
+     148,
+     186,
+     212
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 3
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.078,
+   "chars": 530,
+   "n_img": 6,
+   "n_text": 40,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 2347,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260702_224555_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 6184,
+   "thumb": "clone_ichizenbooks_jp_20260702_224555_js__04.jpg",
+   "pal": [
+    [
+     248,
+     250,
+     252
+    ],
+    [
+     172,
+     207,
+     229
+    ],
+    [
+     6,
+     114,
+     184
+    ],
+    [
+     96,
+     165,
+     210
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 4
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 1335,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1240,
+   "h": 560,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260702_224555_js.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 8671,
+   "thumb": "clone_ichizenbooks_jp_20260702_224555_js__05.jpg",
+   "pal": [
+    [
+     232,
+     240,
+     245
+    ],
+    [
+     145,
+     163,
+     180
+    ],
+    [
+     180,
+     200,
+     216
+    ],
+    [
+     161,
+     183,
+     200
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 5
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "half",
+   "img_ratio": 0.023,
+   "chars": 481,
+   "n_img": 7,
+   "n_text": 41,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 675,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260702_224555_js.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 9231,
+   "thumb": "clone_ichizenbooks_jp_20260702_224555_js__06.jpg",
+   "pal": [
+    [
+     249,
+     250,
+     250
+    ],
+    [
+     179,
+     209,
+     229
+    ],
+    [
+     156,
+     165,
+     178
+    ],
+    [
+     162,
+     186,
+     206
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 6
+  },
+  {
+   "type_id": "bottom|col2|txtsm",
+   "imgpos": "bottom",
+   "cols": 2,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.12,
+   "chars": 77,
+   "n_img": 1,
+   "n_text": 8,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260702_224555_js.html",
+   "idx": 7,
+   "tag": "footer",
+   "cls": "sd appear",
+   "y": 10403,
+   "thumb": "clone_ichizenbooks_jp_20260702_224555_js__07.jpg",
+   "pal": [
+    [
+     253,
+     253,
+     254
+    ],
+    [
+     165,
+     203,
+     228
+    ],
+    [
+     101,
+     168,
+     212
+    ],
+    [
+     43,
+     136,
+     196
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 7
+  },
+  {
+   "type_id": "grid|col2|txtsm",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "sm",
+   "band": "full",
+   "img_ratio": 0.209,
+   "chars": 69,
+   "n_img": 3,
+   "n_text": 10,
+   "bg_rgb": [
+    8,
+    120,
+    184
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 900,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260711_164722_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 0,
+   "thumb": "clone_ichizenbooks_jp_20260711_164722_js__00.jpg",
+   "pal": [
+    [
+     239,
+     242,
+     244
+    ],
+    [
+     2,
+     113,
+     184
+    ],
+    [
+     165,
+     213,
+     236
+    ],
+    [
+     99,
+     168,
+     211
+    ]
+   ],
+   "role": "hero",
+   "dark": true,
+   "vec": 8
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.027,
+   "chars": 331,
+   "n_img": 1,
+   "n_text": 13,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 1781,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260711_164722_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 900,
+   "thumb": "clone_ichizenbooks_jp_20260711_164722_js__01.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     249
+    ],
+    [
+     2,
+     111,
+     184
+    ],
+    [
+     172,
+     206,
+     229
+    ],
+    [
+     95,
+     164,
+     209
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 9
+  },
+  {
+   "type_id": "grid|col2|txtlg",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.034,
+   "chars": 699,
+   "n_img": 11,
+   "n_text": 27,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 2273,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260711_164722_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 2681,
+   "thumb": "clone_ichizenbooks_jp_20260711_164722_js__02.jpg",
+   "pal": [
+    [
+     244,
+     245,
+     247
+    ],
+    [
+     176,
+     210,
+     232
+    ],
+    [
+     147,
+     183,
+     209
+    ],
+    [
+     102,
+     168,
+     211
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 10
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.026,
+   "chars": 284,
+   "n_img": 12,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 1230,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260711_164722_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 4954,
+   "thumb": "clone_ichizenbooks_jp_20260711_164722_js__03.jpg",
+   "pal": [
+    [
+     246,
+     247,
+     248
+    ],
+    [
+     170,
+     205,
+     227
+    ],
+    [
+     99,
+     166,
+     210
+    ],
+    [
+     148,
+     186,
+     212
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 11
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.078,
+   "chars": 530,
+   "n_img": 6,
+   "n_text": 40,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 2347,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260711_164722_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 6184,
+   "thumb": "clone_ichizenbooks_jp_20260711_164722_js__04.jpg",
+   "pal": [
+    [
+     248,
+     250,
+     252
+    ],
+    [
+     172,
+     207,
+     229
+    ],
+    [
+     6,
+     114,
+     184
+    ],
+    [
+     96,
+     165,
+     210
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 12
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 1335,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1240,
+   "h": 560,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260711_164722_js.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 8671,
+   "thumb": "clone_ichizenbooks_jp_20260711_164722_js__05.jpg",
+   "pal": [
+    [
+     232,
+     240,
+     245
+    ],
+    [
+     145,
+     163,
+     180
+    ],
+    [
+     180,
+     200,
+     216
+    ],
+    [
+     161,
+     183,
+     200
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 13
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "half",
+   "img_ratio": 0.023,
+   "chars": 477,
+   "n_img": 7,
+   "n_text": 41,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 675,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260711_164722_js.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 9231,
+   "thumb": "clone_ichizenbooks_jp_20260711_164722_js__06.jpg",
+   "pal": [
+    [
+     249,
+     250,
+     250
+    ],
+    [
+     179,
+     209,
+     229
+    ],
+    [
+     156,
+     165,
+     178
+    ],
+    [
+     162,
+     186,
+     206
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 14
+  },
+  {
+   "type_id": "bottom|col2|txtsm",
+   "imgpos": "bottom",
+   "cols": 2,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.12,
+   "chars": 77,
+   "n_img": 1,
+   "n_text": 8,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260711_164722_js.html",
+   "idx": 7,
+   "tag": "footer",
+   "cls": "sd appear",
+   "y": 10403,
+   "thumb": "clone_ichizenbooks_jp_20260711_164722_js__07.jpg",
+   "pal": [
+    [
+     253,
+     253,
+     254
+    ],
+    [
+     165,
+     203,
+     228
+    ],
+    [
+     101,
+     168,
+     212
+    ],
+    [
+     43,
+     136,
+     196
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 15
+  },
+  {
+   "type_id": "grid|col2|txtsm",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "sm",
+   "band": "full",
+   "img_ratio": 0.209,
+   "chars": 69,
+   "n_img": 3,
+   "n_text": 10,
+   "bg_rgb": [
+    8,
+    120,
+    184
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 900,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260714_073452_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 0,
+   "thumb": "clone_ichizenbooks_jp_20260714_073452_js__00.jpg",
+   "pal": [
+    [
+     239,
+     242,
+     244
+    ],
+    [
+     2,
+     113,
+     184
+    ],
+    [
+     165,
+     213,
+     236
+    ],
+    [
+     99,
+     168,
+     211
+    ]
+   ],
+   "role": "hero",
+   "dark": true,
+   "vec": 16
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.027,
+   "chars": 331,
+   "n_img": 1,
+   "n_text": 13,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 1781,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260714_073452_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 900,
+   "thumb": "clone_ichizenbooks_jp_20260714_073452_js__01.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     249
+    ],
+    [
+     2,
+     111,
+     184
+    ],
+    [
+     172,
+     206,
+     229
+    ],
+    [
+     95,
+     164,
+     209
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 17
+  },
+  {
+   "type_id": "grid|col2|txtlg",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.034,
+   "chars": 699,
+   "n_img": 11,
+   "n_text": 27,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 2273,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260714_073452_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 2681,
+   "thumb": "clone_ichizenbooks_jp_20260714_073452_js__02.jpg",
+   "pal": [
+    [
+     244,
+     245,
+     247
+    ],
+    [
+     176,
+     210,
+     232
+    ],
+    [
+     147,
+     183,
+     209
+    ],
+    [
+     101,
+     168,
+     211
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 18
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.026,
+   "chars": 284,
+   "n_img": 12,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 1230,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260714_073452_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 4954,
+   "thumb": "clone_ichizenbooks_jp_20260714_073452_js__03.jpg",
+   "pal": [
+    [
+     246,
+     247,
+     248
+    ],
+    [
+     170,
+     205,
+     227
+    ],
+    [
+     99,
+     166,
+     210
+    ],
+    [
+     148,
+     186,
+     212
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 19
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.078,
+   "chars": 530,
+   "n_img": 6,
+   "n_text": 40,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 2347,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260714_073452_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 6184,
+   "thumb": "clone_ichizenbooks_jp_20260714_073452_js__04.jpg",
+   "pal": [
+    [
+     248,
+     250,
+     252
+    ],
+    [
+     172,
+     207,
+     229
+    ],
+    [
+     6,
+     114,
+     184
+    ],
+    [
+     96,
+     165,
+     210
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 20
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 1335,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1240,
+   "h": 560,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260714_073452_js.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 8671,
+   "thumb": "clone_ichizenbooks_jp_20260714_073452_js__05.jpg",
+   "pal": [
+    [
+     232,
+     240,
+     245
+    ],
+    [
+     145,
+     163,
+     180
+    ],
+    [
+     180,
+     200,
+     216
+    ],
+    [
+     161,
+     183,
+     200
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 21
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "half",
+   "img_ratio": 0.023,
+   "chars": 477,
+   "n_img": 7,
+   "n_text": 41,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 675,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260714_073452_js.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 9231,
+   "thumb": "clone_ichizenbooks_jp_20260714_073452_js__06.jpg",
+   "pal": [
+    [
+     249,
+     250,
+     250
+    ],
+    [
+     179,
+     209,
+     229
+    ],
+    [
+     156,
+     165,
+     178
+    ],
+    [
+     162,
+     186,
+     206
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 22
+  },
+  {
+   "type_id": "bottom|col2|txtsm",
+   "imgpos": "bottom",
+   "cols": 2,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.12,
+   "chars": 77,
+   "n_img": 1,
+   "n_text": 8,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260714_073452_js.html",
+   "idx": 7,
+   "tag": "footer",
+   "cls": "sd appear",
+   "y": 10403,
+   "thumb": "clone_ichizenbooks_jp_20260714_073452_js__07.jpg",
+   "pal": [
+    [
+     253,
+     253,
+     254
+    ],
+    [
+     165,
+     203,
+     228
+    ],
+    [
+     101,
+     168,
+     212
+    ],
+    [
+     43,
+     136,
+     196
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 23
+  },
+  {
+   "type_id": "grid|col2|txtsm",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "sm",
+   "band": "full",
+   "img_ratio": 0.209,
+   "chars": 69,
+   "n_img": 3,
+   "n_text": 10,
+   "bg_rgb": [
+    8,
+    120,
+    184
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 900,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260722_020134_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 0,
+   "thumb": "clone_ichizenbooks_jp_20260722_020134_js__00.jpg",
+   "pal": [
+    [
+     239,
+     242,
+     244
+    ],
+    [
+     2,
+     113,
+     184
+    ],
+    [
+     165,
+     213,
+     236
+    ],
+    [
+     99,
+     168,
+     211
+    ]
+   ],
+   "role": "hero",
+   "dark": true,
+   "vec": 24
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.027,
+   "chars": 331,
+   "n_img": 1,
+   "n_text": 13,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 1781,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260722_020134_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 900,
+   "thumb": "clone_ichizenbooks_jp_20260722_020134_js__01.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     249
+    ],
+    [
+     2,
+     111,
+     184
+    ],
+    [
+     172,
+     206,
+     229
+    ],
+    [
+     95,
+     164,
+     209
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 25
+  },
+  {
+   "type_id": "grid|col2|txtlg",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.034,
+   "chars": 699,
+   "n_img": 11,
+   "n_text": 27,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 2273,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260722_020134_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 2681,
+   "thumb": "clone_ichizenbooks_jp_20260722_020134_js__02.jpg",
+   "pal": [
+    [
+     244,
+     245,
+     247
+    ],
+    [
+     176,
+     210,
+     232
+    ],
+    [
+     147,
+     183,
+     209
+    ],
+    [
+     101,
+     168,
+     211
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 26
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.026,
+   "chars": 284,
+   "n_img": 12,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 1230,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260722_020134_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 4954,
+   "thumb": "clone_ichizenbooks_jp_20260722_020134_js__03.jpg",
+   "pal": [
+    [
+     246,
+     247,
+     248
+    ],
+    [
+     170,
+     205,
+     227
+    ],
+    [
+     99,
+     166,
+     210
+    ],
+    [
+     148,
+     186,
+     212
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 27
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.078,
+   "chars": 530,
+   "n_img": 6,
+   "n_text": 40,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 2347,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260722_020134_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 6184,
+   "thumb": "clone_ichizenbooks_jp_20260722_020134_js__04.jpg",
+   "pal": [
+    [
+     248,
+     250,
+     252
+    ],
+    [
+     172,
+     207,
+     229
+    ],
+    [
+     6,
+     114,
+     184
+    ],
+    [
+     96,
+     165,
+     210
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 28
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 1335,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1240,
+   "h": 560,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260722_020134_js.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 8671,
+   "thumb": "clone_ichizenbooks_jp_20260722_020134_js__05.jpg",
+   "pal": [
+    [
+     232,
+     240,
+     245
+    ],
+    [
+     145,
+     163,
+     180
+    ],
+    [
+     180,
+     200,
+     216
+    ],
+    [
+     161,
+     183,
+     200
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 29
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "half",
+   "img_ratio": 0.023,
+   "chars": 477,
+   "n_img": 7,
+   "n_text": 41,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 675,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260722_020134_js.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "sd appear",
+   "y": 9231,
+   "thumb": "clone_ichizenbooks_jp_20260722_020134_js__06.jpg",
+   "pal": [
+    [
+     249,
+     250,
+     250
+    ],
+    [
+     179,
+     209,
+     229
+    ],
+    [
+     156,
+     165,
+     178
+    ],
+    [
+     162,
+     186,
+     206
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 30
+  },
+  {
+   "type_id": "bottom|col2|txtsm",
+   "imgpos": "bottom",
+   "cols": 2,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.12,
+   "chars": 77,
+   "n_img": 1,
+   "n_text": 8,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    113,
+    185
+   ],
+   "w": 1440,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_ichizenbooks_jp_20260722_020134_js.html",
+   "idx": 7,
+   "tag": "footer",
+   "cls": "sd appear",
+   "y": 10403,
+   "thumb": "clone_ichizenbooks_jp_20260722_020134_js__07.jpg",
+   "pal": [
+    [
+     253,
+     253,
+     254
+    ],
+    [
+     165,
+     203,
+     228
+    ],
+    [
+     101,
+     168,
+     212
+    ],
+    [
+     43,
+     136,
+     196
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 31
+  },
+  {
+   "type_id": "bg|col1|txtlg",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "lg",
+   "band": "band",
+   "img_ratio": 0.715,
+   "chars": 400,
+   "n_img": 6,
+   "n_text": 42,
+   "bg_rgb": [
+    136,
+    152,
+    152
+   ],
+   "fg_rgb": [
+    40,
+    95,
+    172
+   ],
+   "w": 1440,
+   "h": 199,
+   "vw": 1440,
+   "file": "clone_recruit_asuzacgroup_jp_20260720_185029_js.html",
+   "idx": 0,
+   "tag": "header",
+   "cls": "header--scroll",
+   "y": 0,
+   "thumb": "clone_recruit_asuzacgroup_jp_20260720_185029_js__00.jpg",
+   "pal": [
+    [
+     145,
+     149,
+     150
+    ],
+    [
+     125,
+     140,
+     144
+    ],
+    [
+     247,
+     111,
+     52
+    ],
+    [
+     93,
+     118,
+     151
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 32
+  },
+  {
+   "type_id": "grid|col3|txtlg",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.068,
+   "chars": 2013,
+   "n_img": 60,
+   "n_text": 200,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    40,
+    95,
+    172
+   ],
+   "w": 1440,
+   "h": 1021,
+   "vw": 1440,
+   "file": "clone_recruit_asuzacgroup_jp_20260720_185029_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "lcl-works",
+   "y": 1557,
+   "thumb": "clone_recruit_asuzacgroup_jp_20260720_185029_js__01.jpg",
+   "pal": [
+    [
+     246,
+     247,
+     247
+    ],
+    [
+     39,
+     94,
+     169
+    ],
+    [
+     102,
+     176,
+     75
+    ],
+    [
+     222,
+     94,
+     76
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 33
+  },
+  {
+   "type_id": "bg|col3|txtmd",
+   "imgpos": "bg",
+   "cols": 3,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 1.21,
+   "chars": 223,
+   "n_img": 7,
+   "n_text": 22,
+   "bg_rgb": [
+    216,
+    216,
+    216
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 912,
+   "vw": 1440,
+   "file": "clone_recruit_asuzacgroup_jp_20260720_185029_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "lcl-interview",
+   "y": 2578,
+   "thumb": "clone_recruit_asuzacgroup_jp_20260720_185029_js__02.jpg",
+   "pal": [
+    [
+     239,
+     237,
+     225
+    ],
+    [
+     215,
+     216,
+     171
+    ],
+    [
+     163,
+     164,
+     162
+    ],
+    [
+     38,
+     92,
+     169
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 34
+  },
+  {
+   "type_id": "grid|col3|txtsm",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.141,
+   "chars": 42,
+   "n_img": 5,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    200
+   ],
+   "fg_rgb": [
+    40,
+    95,
+    172
+   ],
+   "w": 1440,
+   "h": 628,
+   "vw": 1440,
+   "file": "clone_recruit_asuzacgroup_jp_20260720_185029_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "lcl-env",
+   "y": 3252,
+   "thumb": "clone_recruit_asuzacgroup_jp_20260720_185029_js__03.jpg",
+   "pal": [
+    [
+     252,
+     246,
+     220
+    ],
+    [
+     209,
+     222,
+     170
+    ],
+    [
+     211,
+     163,
+     98
+    ],
+    [
+     162,
+     168,
+     160
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 35
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 5,
+   "n_img": 0,
+   "n_text": 1,
+   "bg_rgb": [
+    248,
+    248,
+    232
+   ],
+   "fg_rgb": [
+    40,
+    95,
+    172
+   ],
+   "w": 1440,
+   "h": 819,
+   "vw": 1440,
+   "file": "clone_recruit_asuzacgroup_jp_20260720_185029_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "lcl-movie",
+   "y": 4653,
+   "thumb": "clone_recruit_asuzacgroup_jp_20260720_185029_js__04.jpg",
+   "pal": [
+    [
+     241,
+     240,
+     237
+    ],
+    [
+     158,
+     180,
+     209
+    ],
+    [
+     219,
+     224,
+     229
+    ],
+    [
+     182,
+     197,
+     217
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 36
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.083,
+   "chars": 155,
+   "n_img": 4,
+   "n_text": 14,
+   "bg_rgb": [
+    248,
+    248,
+    232
+   ],
+   "fg_rgb": [
+    40,
+    95,
+    172
+   ],
+   "w": 1440,
+   "h": 508,
+   "vw": 1440,
+   "file": "clone_recruit_asuzacgroup_jp_20260720_185029_js.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "lcl-news inner mt50-w mt40-n",
+   "y": 5528,
+   "thumb": "clone_recruit_asuzacgroup_jp_20260720_185029_js__05.jpg",
+   "pal": [
+    [
+     240,
+     239,
+     236
+    ],
+    [
+     97,
+     91,
+     90
+    ],
+    [
+     223,
+     177,
+     151
+    ],
+    [
+     235,
+     203,
+     173
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 37
+  },
+  {
+   "type_id": "none|col3|txtsm",
+   "imgpos": "none",
+   "cols": 3,
+   "txt": "sm",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 44,
+   "n_img": 0,
+   "n_text": 4,
+   "bg_rgb": [
+    248,
+    248,
+    200
+   ],
+   "fg_rgb": [
+    40,
+    95,
+    172
+   ],
+   "w": 1229,
+   "h": 311,
+   "vw": 1440,
+   "file": "clone_recruit_asuzacgroup_jp_20260720_185029_js.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "lcl-entry mt45-w mt40-n mla mra",
+   "y": 6650,
+   "thumb": "clone_recruit_asuzacgroup_jp_20260720_185029_js__06.jpg",
+   "pal": [
+    [
+     254,
+     244,
+     202
+    ],
+    [
+     247,
+     111,
+     53
+    ],
+    [
+     244,
+     207,
+     165
+    ],
+    [
+     248,
+     146,
+     96
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 38
+  },
+  {
+   "type_id": "left|col2|txtmd",
+   "imgpos": "left",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.022,
+   "chars": 211,
+   "n_img": 1,
+   "n_text": 19,
+   "bg_rgb": [
+    248,
+    248,
+    232
+   ],
+   "fg_rgb": [
+    40,
+    95,
+    172
+   ],
+   "w": 1440,
+   "h": 564,
+   "vw": 1440,
+   "file": "clone_recruit_asuzacgroup_jp_20260720_185029_js.html",
+   "idx": 7,
+   "tag": "footer",
+   "cls": "",
+   "y": 8086,
+   "thumb": "clone_recruit_asuzacgroup_jp_20260720_185029_js__07.jpg",
+   "pal": [
+    [
+     240,
+     239,
+     235
+    ],
+    [
+     160,
+     221,
+     242
+    ],
+    [
+     241,
+     237,
+     104
+    ],
+    [
+     170,
+     171,
+     166
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 39
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 1.376,
+   "chars": 150,
+   "n_img": 1,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 685,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "hds-color-mode hero-section-container section section--white hds-mode--light",
+   "y": 76,
+   "thumb": "clone_stripe_com_20260702_223155__00.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     252
+    ],
+    [
+     239,
+     143,
+     230
+    ],
+    [
+     253,
+     145,
+     29
+    ],
+    [
+     248,
+     153,
+     152
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 40
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.191,
+   "chars": 1739,
+   "n_img": 12,
+   "n_text": 200,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 2231,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "hds-color-mode section section--white hds-mode--light",
+   "y": 761,
+   "thumb": "clone_stripe_com_20260702_223155__01.jpg",
+   "pal": [
+    [
+     250,
+     248,
+     250
+    ],
+    [
+     219,
+     150,
+     239
+    ],
+    [
+     252,
+     217,
+     168
+    ],
+    [
+     241,
+     167,
+     163
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 41
+  },
+  {
+   "type_id": "top|col2|txtlg",
+   "imgpos": "top",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.374,
+   "chars": 536,
+   "n_img": 1,
+   "n_text": 27,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 1420,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 4851,
+   "thumb": "clone_stripe_com_20260702_223155__02.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 42
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 111,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 130,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 3,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 4851,
+   "thumb": "clone_stripe_com_20260702_223155__03.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 43
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 127,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 130,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 4,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 6430,
+   "thumb": "clone_stripe_com_20260702_223155__04.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 44
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.193,
+   "chars": 395,
+   "n_img": 7,
+   "n_text": 14,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 649,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "startups-carousel",
+   "y": 6584,
+   "thumb": "clone_stripe_com_20260702_223155__05.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 45
+  },
+  {
+   "type_id": "top|col3|txtlg",
+   "imgpos": "top",
+   "cols": 3,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.348,
+   "chars": 1808,
+   "n_img": 1,
+   "n_text": 117,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 1527,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 7645,
+   "thumb": "clone_stripe_com_20260702_223155__06.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 46
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 140,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 130,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 7,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 7645,
+   "thumb": "clone_stripe_com_20260702_223155__07.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 47
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 988,
+   "n_img": 0,
+   "n_text": 26,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 726,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_223155.html",
+   "idx": 8,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 11660,
+   "thumb": "clone_stripe_com_20260702_223155__08.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 48
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 1.376,
+   "chars": 150,
+   "n_img": 1,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 685,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "hds-color-mode hero-section-container section section--white hds-mode--light",
+   "y": 76,
+   "thumb": "clone_stripe_com_20260702_224143__00.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     252
+    ],
+    [
+     239,
+     143,
+     230
+    ],
+    [
+     253,
+     145,
+     29
+    ],
+    [
+     248,
+     153,
+     153
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 49
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.191,
+   "chars": 1739,
+   "n_img": 12,
+   "n_text": 200,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 2231,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "hds-color-mode section section--white hds-mode--light",
+   "y": 761,
+   "thumb": "clone_stripe_com_20260702_224143__01.jpg",
+   "pal": [
+    [
+     249,
+     248,
+     249
+    ],
+    [
+     219,
+     150,
+     239
+    ],
+    [
+     252,
+     217,
+     168
+    ],
+    [
+     169,
+     170,
+     174
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 50
+  },
+  {
+   "type_id": "top|col2|txtlg",
+   "imgpos": "top",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.374,
+   "chars": 536,
+   "n_img": 1,
+   "n_text": 27,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1158,
+   "h": 1334,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 4947,
+   "thumb": "clone_stripe_com_20260702_224143__02.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 51
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 111,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1158,
+   "h": 122,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 3,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 4947,
+   "thumb": "clone_stripe_com_20260702_224143__03.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 52
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 127,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1158,
+   "h": 122,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 4,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 6432,
+   "thumb": "clone_stripe_com_20260702_224143__04.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 53
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.193,
+   "chars": 395,
+   "n_img": 7,
+   "n_text": 14,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1158,
+   "h": 610,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "startups-carousel",
+   "y": 6577,
+   "thumb": "clone_stripe_com_20260702_224143__05.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 54
+  },
+  {
+   "type_id": "top|col3|txtlg",
+   "imgpos": "top",
+   "cols": 3,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.348,
+   "chars": 1808,
+   "n_img": 1,
+   "n_text": 117,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1158,
+   "h": 1435,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 7573,
+   "thumb": "clone_stripe_com_20260702_224143__06.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 55
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 140,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1158,
+   "h": 122,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 7,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 7573,
+   "thumb": "clone_stripe_com_20260702_224143__07.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 56
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 988,
+   "n_img": 0,
+   "n_text": 26,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 726,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224143.html",
+   "idx": 8,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 11664,
+   "thumb": "clone_stripe_com_20260702_224143__08.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 57
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 1.376,
+   "chars": 150,
+   "n_img": 1,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 685,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "hds-color-mode hero-section-container section section--white hds-mode--light",
+   "y": 76,
+   "thumb": "clone_stripe_com_20260702_224153_js__00.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     252
+    ],
+    [
+     239,
+     143,
+     230
+    ],
+    [
+     253,
+     145,
+     29
+    ],
+    [
+     248,
+     153,
+     152
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 58
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.191,
+   "chars": 1313,
+   "n_img": 10,
+   "n_text": 148,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 2231,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "hds-color-mode section section--white hds-mode--light",
+   "y": 761,
+   "thumb": "clone_stripe_com_20260702_224153_js__01.jpg",
+   "pal": [
+    [
+     250,
+     248,
+     250
+    ],
+    [
+     219,
+     150,
+     239
+    ],
+    [
+     252,
+     217,
+     168
+    ],
+    [
+     241,
+     167,
+     163
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 59
+  },
+  {
+   "type_id": "bottom|col1|txtmd",
+   "imgpos": "bottom",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.611,
+   "chars": 105,
+   "n_img": 1,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 560,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "hds-color-mode section section--white hds-mode--light",
+   "y": 2992,
+   "thumb": "clone_stripe_com_20260702_224153_js__02.jpg",
+   "pal": [
+    [
+     250,
+     247,
+     252
+    ],
+    [
+     214,
+     156,
+     249
+    ],
+    [
+     156,
+     101,
+     244
+    ],
+    [
+     224,
+     116,
+     247
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 60
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 103,
+   "n_img": 0,
+   "n_text": 10,
+   "bg_rgb": [
+    24,
+    40,
+    72
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 977,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "hds-color-mode stats-section stats-section--time-daytime section section--white hds-mode--light",
+   "y": 3552,
+   "thumb": "clone_stripe_com_20260702_224153_js__03.jpg",
+   "pal": [
+    [
+     33,
+     37,
+     98
+    ],
+    [
+     96,
+     91,
+     213
+    ],
+    [
+     54,
+     47,
+     143
+    ],
+    [
+     68,
+     59,
+     170
+    ]
+   ],
+   "role": "content",
+   "dark": true,
+   "vec": 61
+  },
+  {
+   "type_id": "top|col2|txtlg",
+   "imgpos": "top",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.374,
+   "chars": 536,
+   "n_img": 1,
+   "n_text": 27,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 1420,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 4825,
+   "thumb": "clone_stripe_com_20260702_224153_js__04.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     252
+    ],
+    [
+     184,
+     181,
+     226
+    ],
+    [
+     166,
+     171,
+     176
+    ],
+    [
+     103,
+     81,
+     253
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 62
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 111,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 130,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 5,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 4825,
+   "thumb": "clone_stripe_com_20260702_224153_js__05.jpg",
+   "pal": [
+    [
+     248,
+     249,
+     250
+    ],
+    [
+     81,
+     56,
+     253
+    ],
+    [
+     175,
+     174,
+     222
+    ],
+    [
+     159,
+     168,
+     177
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 63
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 127,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 130,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 6,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 6404,
+   "thumb": "clone_stripe_com_20260702_224153_js__06.jpg",
+   "pal": [
+    [
+     248,
+     248,
+     249
+    ],
+    [
+     81,
+     56,
+     253
+    ],
+    [
+     170,
+     166,
+     224
+    ],
+    [
+     163,
+     171,
+     180
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 64
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.193,
+   "chars": 395,
+   "n_img": 7,
+   "n_text": 14,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 649,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 7,
+   "tag": "section",
+   "cls": "startups-carousel",
+   "y": 6558,
+   "thumb": "clone_stripe_com_20260702_224153_js__07.jpg",
+   "pal": [
+    [
+     229,
+     236,
+     245
+    ],
+    [
+     248,
+     249,
+     251
+    ],
+    [
+     177,
+     170,
+     238
+    ],
+    [
+     170,
+     177,
+     184
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 65
+  },
+  {
+   "type_id": "top|col3|txtlg",
+   "imgpos": "top",
+   "cols": 3,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.348,
+   "chars": 912,
+   "n_img": 1,
+   "n_text": 28,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 1527,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 8,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 7619,
+   "thumb": "clone_stripe_com_20260702_224153_js__08.jpg",
+   "pal": [
+    [
+     251,
+     252,
+     252
+    ],
+    [
+     115,
+     95,
+     253
+    ],
+    [
+     135,
+     117,
+     254
+    ],
+    [
+     172,
+     178,
+     184
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 66
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 140,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 130,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 9,
+   "tag": "header",
+   "cls": "section-header section-header--title-span-5",
+   "y": 7619,
+   "thumb": "clone_stripe_com_20260702_224153_js__09.jpg",
+   "pal": [
+    [
+     248,
+     248,
+     249
+    ],
+    [
+     81,
+     56,
+     253
+    ],
+    [
+     168,
+     163,
+     228
+    ],
+    [
+     159,
+     167,
+     176
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 67
+  },
+  {
+   "type_id": "none|col2|txtlg",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.0,
+   "chars": 579,
+   "n_img": 0,
+   "n_text": 25,
+   "bg_rgb": [
+    8,
+    24,
+    56
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 2344,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 10,
+   "tag": "section",
+   "cls": "hds-color-mode section hds-mode--dark",
+   "y": 9194,
+   "thumb": "clone_stripe_com_20260702_224153_js__10.jpg",
+   "pal": [
+    [
+     13,
+     23,
+     56
+    ],
+    [
+     32,
+     42,
+     79
+    ],
+    [
+     80,
+     85,
+     109
+    ],
+    [
+     56,
+     67,
+     100
+    ]
+   ],
+   "role": "content",
+   "dark": true,
+   "vec": 68
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 988,
+   "n_img": 0,
+   "n_text": 26,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 726,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 11,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 11634,
+   "thumb": "clone_stripe_com_20260702_224153_js__11.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     252
+    ],
+    [
+     158,
+     166,
+     175
+    ],
+    [
+     188,
+     194,
+     203
+    ],
+    [
+     180,
+     184,
+     205
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 69
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 177,
+   "n_img": 0,
+   "n_text": 10,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 383,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 12,
+   "tag": "section",
+   "cls": "hds-color-mode section hds-mode--light",
+   "y": 13339,
+   "thumb": "clone_stripe_com_20260702_224153_js__12.jpg",
+   "pal": [
+    [
+     245,
+     247,
+     251
+    ],
+    [
+     171,
+     168,
+     229
+    ],
+    [
+     157,
+     166,
+     176
+    ],
+    [
+     80,
+     54,
+     253
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 70
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 787,
+   "n_img": 0,
+   "n_text": 90,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 1035,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_224153_js.html",
+   "idx": 13,
+   "tag": "footer",
+   "cls": "hds-color-mode footer section hds-mode--light",
+   "y": 13722,
+   "thumb": "clone_stripe_com_20260702_224153_js__13.jpg",
+   "pal": [
+    [
+     244,
+     246,
+     250
+    ],
+    [
+     159,
+     167,
+     177
+    ],
+    [
+     188,
+     195,
+     204
+    ],
+    [
+     180,
+     184,
+     206
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 71
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 1.376,
+   "chars": 150,
+   "n_img": 1,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 685,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_225526.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "hds-color-mode hero-section-container section section--white hds-mode--light __cl_pre __cl_in",
+   "y": 76,
+   "thumb": "clone_stripe_com_20260702_225526__00.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     252
+    ],
+    [
+     239,
+     143,
+     230
+    ],
+    [
+     253,
+     145,
+     29
+    ],
+    [
+     248,
+     153,
+     153
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 72
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.191,
+   "chars": 1739,
+   "n_img": 12,
+   "n_text": 200,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1440,
+   "h": 2231,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_225526.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "hds-color-mode section section--white hds-mode--light __cl_pre __cl_in",
+   "y": 761,
+   "thumb": "clone_stripe_com_20260702_225526__01.jpg",
+   "pal": [
+    [
+     250,
+     248,
+     250
+    ],
+    [
+     219,
+     150,
+     239
+    ],
+    [
+     252,
+     217,
+     168
+    ],
+    [
+     241,
+     167,
+     163
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 73
+  },
+  {
+   "type_id": "top|col2|txtlg",
+   "imgpos": "top",
+   "cols": 2,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.374,
+   "chars": 536,
+   "n_img": 1,
+   "n_text": 27,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1084,
+   "h": 1249,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_225526.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 5069,
+   "thumb": "clone_stripe_com_20260702_225526__02.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 74
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.193,
+   "chars": 395,
+   "n_img": 7,
+   "n_text": 14,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1084,
+   "h": 571,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_225526.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "startups-carousel",
+   "y": 6595,
+   "thumb": "clone_stripe_com_20260702_225526__03.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 75
+  },
+  {
+   "type_id": "top|col3|txtlg",
+   "imgpos": "top",
+   "cols": 3,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.348,
+   "chars": 1808,
+   "n_img": 1,
+   "n_text": 117,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1084,
+   "h": 1344,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_225526.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 7528,
+   "thumb": "clone_stripe_com_20260702_225526__04.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 76
+  },
+  {
+   "type_id": "none|col1|txtlg",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 988,
+   "n_img": 0,
+   "n_text": 26,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    49
+   ],
+   "w": 1232,
+   "h": 726,
+   "vw": 1440,
+   "file": "clone_stripe_com_20260702_225526.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "section-row section-row-gap",
+   "y": 11694,
+   "thumb": "clone_stripe_com_20260702_225526__05.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 77
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 0,
+   "n_img": 0,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 400,
+   "vw": 1440,
+   "file": "clone_visst_co_jp_20260718_005804_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "curved",
+   "y": 100,
+   "thumb": "clone_visst_co_jp_20260718_005804_js__00.jpg",
+   "pal": [
+    [
+     248,
+     247,
+     247
+    ],
+    [
+     223,
+     161,
+     158
+    ],
+    [
+     160,
+     160,
+     162
+    ],
+    [
+     19,
+     160,
+     137
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 78
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 0,
+   "n_img": 0,
+   "n_text": 0,
+   "bg_rgb": [
+    24,
+    168,
+    136
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 250,
+   "vw": 1440,
+   "file": "clone_visst_co_jp_20260718_005804_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "shibafu",
+   "y": 400,
+   "thumb": "clone_visst_co_jp_20260718_005804_js__01.jpg",
+   "pal": [
+    [
+     17,
+     161,
+     136
+    ],
+    [
+     237,
+     237,
+     237
+    ],
+    [
+     93,
+     159,
+     153
+    ],
+    [
+     229,
+     159,
+     152
+    ]
+   ],
+   "role": "content",
+   "dark": true,
+   "vec": 79
+  },
+  {
+   "type_id": "left|col1|txtmd",
+   "imgpos": "left",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.03,
+   "chars": 109,
+   "n_img": 2,
+   "n_text": 10,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 532,
+   "vw": 1440,
+   "file": "clone_visst_co_jp_20260718_005804_js.html",
+   "idx": 2,
+   "tag": "footer",
+   "cls": "",
+   "y": 8525,
+   "thumb": "clone_visst_co_jp_20260718_005804_js__02.jpg",
+   "pal": [
+    [
+     243,
+     243,
+     243
+    ],
+    [
+     56,
+     53,
+     53
+    ],
+    [
+     77,
+     74,
+     74
+    ],
+    [
+     173,
+     173,
+     173
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 80
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 0,
+   "n_img": 0,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 400,
+   "vw": 1440,
+   "file": "clone_visst_co_jp_20260718_011535_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "curved",
+   "y": 100,
+   "thumb": "clone_visst_co_jp_20260718_011535_js__00.jpg",
+   "pal": [
+    [
+     248,
+     247,
+     247
+    ],
+    [
+     223,
+     161,
+     158
+    ],
+    [
+     160,
+     160,
+     162
+    ],
+    [
+     19,
+     160,
+     137
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 81
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 0,
+   "n_img": 0,
+   "n_text": 0,
+   "bg_rgb": [
+    24,
+    168,
+    136
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 250,
+   "vw": 1440,
+   "file": "clone_visst_co_jp_20260718_011535_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "shibafu",
+   "y": 400,
+   "thumb": "clone_visst_co_jp_20260718_011535_js__01.jpg",
+   "pal": [
+    [
+     17,
+     161,
+     136
+    ],
+    [
+     237,
+     237,
+     237
+    ],
+    [
+     93,
+     159,
+     153
+    ],
+    [
+     229,
+     159,
+     152
+    ]
+   ],
+   "role": "content",
+   "dark": true,
+   "vec": 82
+  },
+  {
+   "type_id": "left|col1|txtmd",
+   "imgpos": "left",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.03,
+   "chars": 109,
+   "n_img": 2,
+   "n_text": 10,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 532,
+   "vw": 1440,
+   "file": "clone_visst_co_jp_20260718_011535_js.html",
+   "idx": 2,
+   "tag": "footer",
+   "cls": "",
+   "y": 8427,
+   "thumb": "clone_visst_co_jp_20260718_011535_js__02.jpg",
+   "pal": [
+    [
+     243,
+     243,
+     243
+    ],
+    [
+     56,
+     53,
+     53
+    ],
+    [
+     77,
+     74,
+     74
+    ],
+    [
+     174,
+     173,
+     173
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 83
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.0,
+   "chars": 218,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    22,
+    94,
+    131
+   ],
+   "w": 1440,
+   "h": 1601,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_195447_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "top_message_wrap bg1",
+   "y": 900,
+   "thumb": "clone_withnote_co_jp_20260727_195447_js__00.jpg",
+   "pal": [
+    [
+     247,
+     250,
+     251
+    ],
+    [
+     23,
+     95,
+     131
+    ],
+    [
+     164,
+     173,
+     176
+    ],
+    [
+     104,
+     148,
+     171
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 84
+  },
+  {
+   "type_id": "left|col2|txtmd",
+   "imgpos": "left",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.124,
+   "chars": 101,
+   "n_img": 2,
+   "n_text": 12,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    35
+   ],
+   "w": 1440,
+   "h": 1640,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_195447_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "bg2",
+   "y": 2501,
+   "thumb": "clone_withnote_co_jp_20260727_195447_js__01.jpg",
+   "pal": [
+    [
+     244,
+     247,
+     248
+    ],
+    [
+     168,
+     168,
+     167
+    ],
+    [
+     101,
+     98,
+     93
+    ],
+    [
+     33,
+     101,
+     136
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 85
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.0,
+   "chars": 100,
+   "n_img": 0,
+   "n_text": 11,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    22,
+    94,
+    131
+   ],
+   "w": 1440,
+   "h": 1564,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_195447_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "news",
+   "y": 4382,
+   "thumb": "clone_withnote_co_jp_20260727_195447_js__02.jpg",
+   "pal": [
+    [
+     240,
+     249,
+     251
+    ],
+    [
+     33,
+     101,
+     137
+    ],
+    [
+     102,
+     149,
+     173
+    ],
+    [
+     151,
+     165,
+     170
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 86
+  },
+  {
+   "type_id": "grid|col1|txtsm",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "sm",
+   "band": "full",
+   "img_ratio": 0.134,
+   "chars": 14,
+   "n_img": 3,
+   "n_text": 2,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    22,
+    94,
+    131
+   ],
+   "w": 1440,
+   "h": 1159,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_195447_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "instagram",
+   "y": 6186,
+   "thumb": "clone_withnote_co_jp_20260727_195447_js__03.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     249
+    ],
+    [
+     111,
+     112,
+     99
+    ],
+    [
+     156,
+     155,
+     155
+    ],
+    [
+     156,
+     182,
+     208
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 87
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 0,
+   "n_img": 0,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 640,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_195447_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "gmap_wrap",
+   "y": 8503,
+   "thumb": "clone_withnote_co_jp_20260727_195447_js__04.jpg",
+   "pal": [
+    [
+     255,
+     255,
+     255
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 88
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.0,
+   "chars": 218,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    22,
+    94,
+    131
+   ],
+   "w": 1440,
+   "h": 1601,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_200936_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "top_message_wrap bg1",
+   "y": 900,
+   "thumb": "clone_withnote_co_jp_20260727_200936_js__00.jpg",
+   "pal": [
+    [
+     247,
+     249,
+     250
+    ],
+    [
+     23,
+     94,
+     131
+    ],
+    [
+     166,
+     171,
+     172
+    ],
+    [
+     101,
+     146,
+     170
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 89
+  },
+  {
+   "type_id": "grid|col3|txtnone",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "none",
+   "band": "half",
+   "img_ratio": 0.06,
+   "chars": 0,
+   "n_img": 16,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 672,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_200936_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "scroll-infinity",
+   "y": 2501,
+   "thumb": "clone_withnote_co_jp_20260727_200936_js__01.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     252
+    ],
+    [
+     168,
+     164,
+     155
+    ],
+    [
+     206,
+     200,
+     177
+    ],
+    [
+     99,
+     101,
+     93
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 90
+  },
+  {
+   "type_id": "left|col2|txtmd",
+   "imgpos": "left",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.124,
+   "chars": 101,
+   "n_img": 2,
+   "n_text": 12,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    6,
+    27,
+    35
+   ],
+   "w": 1440,
+   "h": 1640,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_200936_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "bg2",
+   "y": 3173,
+   "thumb": "clone_withnote_co_jp_20260727_200936_js__02.jpg",
+   "pal": [
+    [
+     246,
+     249,
+     250
+    ],
+    [
+     166,
+     170,
+     172
+    ],
+    [
+     34,
+     102,
+     137
+    ],
+    [
+     101,
+     100,
+     96
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 91
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.0,
+   "chars": 100,
+   "n_img": 0,
+   "n_text": 11,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    22,
+    94,
+    131
+   ],
+   "w": 1440,
+   "h": 1564,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_200936_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "news",
+   "y": 5054,
+   "thumb": "clone_withnote_co_jp_20260727_200936_js__03.jpg",
+   "pal": [
+    [
+     240,
+     249,
+     251
+    ],
+    [
+     33,
+     101,
+     137
+    ],
+    [
+     100,
+     149,
+     173
+    ],
+    [
+     151,
+     165,
+     170
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 92
+  },
+  {
+   "type_id": "grid|col1|txtsm",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "sm",
+   "band": "full",
+   "img_ratio": 0.134,
+   "chars": 14,
+   "n_img": 3,
+   "n_text": 2,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    22,
+    94,
+    131
+   ],
+   "w": 1440,
+   "h": 1159,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_200936_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "instagram",
+   "y": 6858,
+   "thumb": "clone_withnote_co_jp_20260727_200936_js__04.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     249
+    ],
+    [
+     111,
+     112,
+     99
+    ],
+    [
+     156,
+     155,
+     155
+    ],
+    [
+     156,
+     183,
+     208
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 93
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 0,
+   "n_img": 0,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 640,
+   "vw": 1440,
+   "file": "clone_withnote_co_jp_20260727_200936_js.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "gmap_wrap",
+   "y": 9175,
+   "thumb": "clone_withnote_co_jp_20260727_200936_js__05.jpg",
+   "pal": [
+    [
+     254,
+     254,
+     254
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 94
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.986,
+   "chars": 392,
+   "n_img": 15,
+   "n_text": 14,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    34,
+    24,
+    20
+   ],
+   "w": 1440,
+   "h": 2639,
+   "vw": 1440,
+   "file": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "p-top-learn",
+   "y": 2700,
+   "thumb": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js__00.jpg",
+   "pal": [
+    [
+     241,
+     241,
+     241
+    ],
+    [
+     179,
+     209,
+     221
+    ],
+    [
+     36,
+     41,
+     39
+    ],
+    [
+     158,
+     165,
+     163
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 95
+  },
+  {
+   "type_id": "grid|col3|txtlg",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.212,
+   "chars": 421,
+   "n_img": 11,
+   "n_text": 33,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    34,
+    24,
+    20
+   ],
+   "w": 1440,
+   "h": 1359,
+   "vw": 1440,
+   "file": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "p-top-employees",
+   "y": 5339,
+   "thumb": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js__01.jpg",
+   "pal": [
+    [
+     236,
+     236,
+     236
+    ],
+    [
+     169,
+     165,
+     164
+    ],
+    [
+     35,
+     181,
+     116
+    ],
+    [
+     105,
+     199,
+     157
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 96
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.832,
+   "chars": 88,
+   "n_img": 3,
+   "n_text": 6,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    34,
+    24,
+    20
+   ],
+   "w": 1400,
+   "h": 830,
+   "vw": 1440,
+   "file": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "p-top-crosstalk",
+   "y": 6698,
+   "thumb": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js__02.jpg",
+   "pal": [
+    [
+     218,
+     232,
+     239
+    ],
+    [
+     156,
+     165,
+     170
+    ],
+    [
+     180,
+     203,
+     217
+    ],
+    [
+     163,
+     184,
+     200
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 97
+  },
+  {
+   "type_id": "grid|col2|txtsm",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "sm",
+   "band": "tall",
+   "img_ratio": 0.463,
+   "chars": 54,
+   "n_img": 11,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    34,
+    24,
+    20
+   ],
+   "w": 1440,
+   "h": 1944,
+   "vw": 1440,
+   "file": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "p-top-welfare",
+   "y": 7528,
+   "thumb": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js__03.jpg",
+   "pal": [
+    [
+     244,
+     245,
+     244
+    ],
+    [
+     141,
+     215,
+     171
+    ],
+    [
+     34,
+     180,
+     115
+    ],
+    [
+     87,
+     159,
+     157
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 98
+  },
+  {
+   "type_id": "top|col1|txtmd",
+   "imgpos": "top",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.339,
+   "chars": 89,
+   "n_img": 5,
+   "n_text": 6,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    34,
+    24,
+    20
+   ],
+   "w": 1440,
+   "h": 1202,
+   "vw": 1440,
+   "file": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "p-top-recruit",
+   "y": 9472,
+   "thumb": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js__04.jpg",
+   "pal": [
+    [
+     240,
+     240,
+     240
+    ],
+    [
+     164,
+     168,
+     161
+    ],
+    [
+     92,
+     98,
+     98
+    ],
+    [
+     168,
+     208,
+     222
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 99
+  },
+  {
+   "type_id": "left|col2|txtmd",
+   "imgpos": "left",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.008,
+   "chars": 241,
+   "n_img": 1,
+   "n_text": 29,
+   "bg_rgb": [
+    40,
+    184,
+    120
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 883,
+   "vw": 1440,
+   "file": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js.html",
+   "idx": 5,
+   "tag": "footer",
+   "cls": "js-footer l-footer",
+   "y": 11895,
+   "thumb": "clone_www_azumagumi_co_jp_recruit_20260710_014514_js__05.jpg",
+   "pal": [
+    [
+     34,
+     181,
+     115
+    ],
+    [
+     93,
+     199,
+     152
+    ],
+    [
+     241,
+     249,
+     245
+    ],
+    [
+     58,
+     189,
+     130
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 100
+  },
+  {
+   "type_id": "left|col3|txtsm",
+   "imgpos": "left",
+   "cols": 3,
+   "txt": "sm",
+   "band": "band",
+   "img_ratio": 0.116,
+   "chars": 25,
+   "n_img": 1,
+   "n_text": 5,
+   "bg_rgb": [
+    216,
+    184,
+    152
+   ],
+   "fg_rgb": [
+    255,
+    248,
+    243
+   ],
+   "w": 1440,
+   "h": 120,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260703_001205_js.html",
+   "idx": 0,
+   "tag": "header",
+   "cls": "text-pretty fixed top-0 left-0 w-full z-3",
+   "y": 0,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260703_001205_js__00.jpg",
+   "pal": [
+    [
+     222,
+     186,
+     147
+    ],
+    [
+     228,
+     200,
+     169
+    ],
+    [
+     253,
+     253,
+     252
+    ],
+    [
+     236,
+     223,
+     217
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 101
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.903,
+   "chars": 124,
+   "n_img": 1,
+   "n_text": 2,
+   "bg_rgb": [
+    216,
+    184,
+    152
+   ],
+   "fg_rgb": [
+    0,
+    0,
+    0
+   ],
+   "w": 1440,
+   "h": 600,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260703_001205_js.html",
+   "idx": 1,
+   "tag": "header",
+   "cls": "relative",
+   "y": 120,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260703_001205_js__01.jpg",
+   "pal": [
+    [
+     218,
+     219,
+     220
+    ],
+    [
+     166,
+     163,
+     161
+    ],
+    [
+     217,
+     184,
+     152
+    ],
+    [
+     88,
+     93,
+     95
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 102
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.077,
+   "chars": 93,
+   "n_img": 3,
+   "n_text": 9,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    51,
+    51,
+    51
+   ],
+   "w": 1296,
+   "h": 631,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260703_001205_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "",
+   "y": 1012,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260703_001205_js__02.jpg",
+   "pal": [
+    [
+     248,
+     245,
+     241
+    ],
+    [
+     222,
+     185,
+     147
+    ],
+    [
+     224,
+     205,
+     178
+    ],
+    [
+     163,
+     210,
+     228
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 103
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.111,
+   "chars": 128,
+   "n_img": 3,
+   "n_text": 8,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    51,
+    51,
+    51
+   ],
+   "w": 1296,
+   "h": 529,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260703_001205_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "",
+   "y": 1783,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260703_001205_js__03.jpg",
+   "pal": [
+    [
+     244,
+     244,
+     243
+    ],
+    [
+     167,
+     163,
+     160
+    ],
+    [
+     211,
+     167,
+     151
+    ],
+    [
+     106,
+     100,
+     91
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 104
+  },
+  {
+   "type_id": "none|col1|txtsm",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 65,
+   "n_img": 0,
+   "n_text": 5,
+   "bg_rgb": [
+    232,
+    232,
+    232
+   ],
+   "fg_rgb": [
+    62,
+    69,
+    85
+   ],
+   "w": 1440,
+   "h": 519,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260703_001205_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "bg-[#eee]",
+   "y": 2504,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260703_001205_js__04.jpg",
+   "pal": [
+    [
+     246,
+     246,
+     246
+    ],
+    [
+     161,
+     161,
+     161
+    ],
+    [
+     107,
+     104,
+     102
+    ],
+    [
+     193,
+     187,
+     179
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 105
+  },
+  {
+   "type_id": "left|col3|txtsm",
+   "imgpos": "left",
+   "cols": 3,
+   "txt": "sm",
+   "band": "band",
+   "img_ratio": 0.116,
+   "chars": 25,
+   "n_img": 1,
+   "n_text": 5,
+   "bg_rgb": [
+    216,
+    184,
+    152
+   ],
+   "fg_rgb": [
+    255,
+    248,
+    243
+   ],
+   "w": 1440,
+   "h": 120,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260728_191005.html",
+   "idx": 0,
+   "tag": "header",
+   "cls": "text-pretty fixed top-0 left-0 right-0 w-full max-w-[1920px] mx-auto z-3",
+   "y": 0,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260728_191005__00.jpg",
+   "pal": [
+    [
+     222,
+     186,
+     147
+    ],
+    [
+     228,
+     200,
+     169
+    ],
+    [
+     253,
+     253,
+     252
+    ],
+    [
+     236,
+     223,
+     217
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 106
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.903,
+   "chars": 124,
+   "n_img": 1,
+   "n_text": 2,
+   "bg_rgb": [
+    216,
+    184,
+    152
+   ],
+   "fg_rgb": [
+    0,
+    0,
+    0
+   ],
+   "w": 1440,
+   "h": 600,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260728_191005.html",
+   "idx": 1,
+   "tag": "header",
+   "cls": "relative __cl_kid",
+   "y": 120,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260728_191005__01.jpg",
+   "pal": [
+    [
+     218,
+     219,
+     220
+    ],
+    [
+     166,
+     163,
+     161
+    ],
+    [
+     217,
+     184,
+     152
+    ],
+    [
+     88,
+     93,
+     95
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 107
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.077,
+   "chars": 93,
+   "n_img": 3,
+   "n_text": 9,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    51,
+    51,
+    51
+   ],
+   "w": 1296,
+   "h": 631,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260728_191005.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "",
+   "y": 1012,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260728_191005__02.jpg",
+   "pal": [
+    [
+     248,
+     245,
+     241
+    ],
+    [
+     222,
+     185,
+     147
+    ],
+    [
+     224,
+     205,
+     178
+    ],
+    [
+     163,
+     210,
+     228
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 108
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.111,
+   "chars": 128,
+   "n_img": 3,
+   "n_text": 8,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    51,
+    51,
+    51
+   ],
+   "w": 1296,
+   "h": 529,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260728_191005.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "",
+   "y": 1783,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260728_191005__03.jpg",
+   "pal": [
+    [
+     244,
+     244,
+     243
+    ],
+    [
+     167,
+     163,
+     160
+    ],
+    [
+     211,
+     167,
+     151
+    ],
+    [
+     106,
+     100,
+     91
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 109
+  },
+  {
+   "type_id": "none|col1|txtsm",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 65,
+   "n_img": 0,
+   "n_text": 5,
+   "bg_rgb": [
+    232,
+    232,
+    232
+   ],
+   "fg_rgb": [
+    62,
+    69,
+    85
+   ],
+   "w": 1440,
+   "h": 519,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_20260728_191005.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "bg-[#eee] __cl_kid",
+   "y": 2504,
+   "thumb": "clone_www_big_advance_site_c_144_2375_20260728_191005__04.jpg",
+   "pal": [
+    [
+     246,
+     246,
+     246
+    ],
+    [
+     161,
+     161,
+     161
+    ],
+    [
+     107,
+     104,
+     102
+    ],
+    [
+     193,
+     187,
+     179
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 110
+  },
+  {
+   "type_id": "left|col3|txtsm",
+   "imgpos": "left",
+   "cols": 3,
+   "txt": "sm",
+   "band": "band",
+   "img_ratio": 0.116,
+   "chars": 25,
+   "n_img": 1,
+   "n_text": 5,
+   "bg_rgb": [
+    216,
+    184,
+    152
+   ],
+   "fg_rgb": [
+    255,
+    248,
+    243
+   ],
+   "w": 1440,
+   "h": 120,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_service_20260728_190848.html",
+   "idx": 0,
+   "tag": "header",
+   "cls": "text-pretty fixed top-0 left-0 right-0 w-full max-w-[1920px] mx-auto z-3",
+   "y": 0,
+   "thumb": "clone_www_big_advance_site_c_144_2375_service_20260728_190848__00.jpg",
+   "pal": [
+    [
+     222,
+     186,
+     147
+    ],
+    [
+     228,
+     200,
+     169
+    ],
+    [
+     253,
+     253,
+     252
+    ],
+    [
+     237,
+     224,
+     216
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 111
+  },
+  {
+   "type_id": "none|col1|txtsm",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "sm",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 12,
+   "n_img": 0,
+   "n_text": 2,
+   "bg_rgb": [
+    216,
+    184,
+    152
+   ],
+   "fg_rgb": [
+    255,
+    248,
+    243
+   ],
+   "w": 1440,
+   "h": 180,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_service_20260728_190848.html",
+   "idx": 1,
+   "tag": "header",
+   "cls": "relative bg-cover __cl_kid",
+   "y": 120,
+   "thumb": "clone_www_big_advance_site_c_144_2375_service_20260728_190848__01.jpg",
+   "pal": [
+    [
+     222,
+     186,
+     147
+    ],
+    [
+     241,
+     222,
+     203
+    ],
+    [
+     235,
+     211,
+     186
+    ],
+    [
+     229,
+     199,
+     167
+    ]
+   ],
+   "role": "nav",
+   "dark": false,
+   "vec": 112
+  },
+  {
+   "type_id": "left|col2|txtmd",
+   "imgpos": "left",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.236,
+   "chars": 198,
+   "n_img": 1,
+   "n_text": 2,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    50,
+    69,
+    85
+   ],
+   "w": 1296,
+   "h": 751,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_service_20260728_190848.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "relative pointer-events-none",
+   "y": 237,
+   "thumb": "clone_www_big_advance_site_c_144_2375_service_20260728_190848__02.jpg",
+   "pal": [
+    [
+     251,
+     250,
+     250
+    ],
+    [
+     223,
+     185,
+     149
+    ],
+    [
+     154,
+     210,
+     230
+    ],
+    [
+     102,
+     98,
+     90
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 113
+  },
+  {
+   "type_id": "left|col2|txtmd",
+   "imgpos": "left",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.217,
+   "chars": 92,
+   "n_img": 1,
+   "n_text": 2,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    50,
+    69,
+    85
+   ],
+   "w": 1296,
+   "h": 743,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_service_20260728_190848.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "relative pointer-events-none",
+   "y": 988,
+   "thumb": "clone_www_big_advance_site_c_144_2375_service_20260728_190848__03.jpg",
+   "pal": [
+    [
+     251,
+     250,
+     248
+    ],
+    [
+     219,
+     209,
+     182
+    ],
+    [
+     172,
+     174,
+     170
+    ],
+    [
+     180,
+     205,
+     206
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 114
+  },
+  {
+   "type_id": "left|col1|txtmd",
+   "imgpos": "left",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.243,
+   "chars": 112,
+   "n_img": 1,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    50,
+    69,
+    85
+   ],
+   "w": 1296,
+   "h": 785,
+   "vw": 1440,
+   "file": "clone_www_big_advance_site_c_144_2375_service_20260728_190848.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "relative pointer-events-none",
+   "y": 1731,
+   "thumb": "clone_www_big_advance_site_c_144_2375_service_20260728_190848__04.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     252
+    ],
+    [
+     172,
+     171,
+     171
+    ],
+    [
+     212,
+     199,
+     183
+    ],
+    [
+     188,
+     203,
+     219
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 115
+  },
+  {
+   "type_id": "right|col1|txtnone",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.147,
+   "chars": 0,
+   "n_img": 2,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 289,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_191816_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "cm",
+   "y": 1502,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_191816_js__00.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     1
+    ],
+    [
+     164,
+     167,
+     20
+    ],
+    [
+     252,
+     242,
+     215
+    ],
+    [
+     178,
+     204,
+     15
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 116
+  },
+  {
+   "type_id": "grid|col3|txtnone",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "none",
+   "band": "half",
+   "img_ratio": 0.059,
+   "chars": 0,
+   "n_img": 9,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 545,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_191816_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "link",
+   "y": 1880,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_191816_js__01.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     3
+    ],
+    [
+     244,
+     242,
+     238
+    ],
+    [
+     34,
+     34,
+     22
+    ],
+    [
+     158,
+     164,
+     160
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 117
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 160,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    8,
+    24,
+    24
+   ],
+   "fg_rgb": [
+    6,
+    23,
+    31
+   ],
+   "w": 1425,
+   "h": 216,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_191816_js.html",
+   "idx": 2,
+   "tag": "footer",
+   "cls": "l-footer",
+   "y": 2763,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_191816_js__02.jpg",
+   "pal": [
+    [
+     7,
+     24,
+     31
+    ],
+    [
+     236,
+     242,
+     245
+    ],
+    [
+     86,
+     98,
+     103
+    ],
+    [
+     151,
+     158,
+     161
+    ]
+   ],
+   "role": "footer",
+   "dark": true,
+   "vec": 118
+  },
+  {
+   "type_id": "right|col1|txtnone",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.147,
+   "chars": 0,
+   "n_img": 2,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 289,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_192322_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "cm",
+   "y": 1502,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_192322_js__00.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     1
+    ],
+    [
+     164,
+     167,
+     20
+    ],
+    [
+     252,
+     242,
+     215
+    ],
+    [
+     178,
+     204,
+     15
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 119
+  },
+  {
+   "type_id": "grid|col3|txtnone",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "none",
+   "band": "half",
+   "img_ratio": 0.059,
+   "chars": 0,
+   "n_img": 9,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 545,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_192322_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "link",
+   "y": 1880,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_192322_js__01.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     3
+    ],
+    [
+     244,
+     242,
+     238
+    ],
+    [
+     34,
+     34,
+     22
+    ],
+    [
+     158,
+     164,
+     160
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 120
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 160,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    8,
+    24,
+    24
+   ],
+   "fg_rgb": [
+    6,
+    23,
+    31
+   ],
+   "w": 1425,
+   "h": 216,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_192322_js.html",
+   "idx": 2,
+   "tag": "footer",
+   "cls": "l-footer",
+   "y": 2763,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_192322_js__02.jpg",
+   "pal": [
+    [
+     7,
+     24,
+     31
+    ],
+    [
+     236,
+     242,
+     245
+    ],
+    [
+     86,
+     98,
+     103
+    ],
+    [
+     151,
+     158,
+     161
+    ]
+   ],
+   "role": "footer",
+   "dark": true,
+   "vec": 121
+  },
+  {
+   "type_id": "right|col1|txtnone",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.147,
+   "chars": 0,
+   "n_img": 2,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 289,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193059_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "cm",
+   "y": 1502,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193059_js__00.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     1
+    ],
+    [
+     164,
+     167,
+     20
+    ],
+    [
+     252,
+     242,
+     215
+    ],
+    [
+     178,
+     204,
+     15
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 122
+  },
+  {
+   "type_id": "grid|col3|txtnone",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "none",
+   "band": "half",
+   "img_ratio": 0.059,
+   "chars": 0,
+   "n_img": 9,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 545,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193059_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "link",
+   "y": 1880,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193059_js__01.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     3
+    ],
+    [
+     244,
+     242,
+     238
+    ],
+    [
+     34,
+     34,
+     22
+    ],
+    [
+     158,
+     164,
+     160
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 123
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 160,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    8,
+    24,
+    24
+   ],
+   "fg_rgb": [
+    6,
+    23,
+    31
+   ],
+   "w": 1425,
+   "h": 216,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193059_js.html",
+   "idx": 2,
+   "tag": "footer",
+   "cls": "l-footer",
+   "y": 2763,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193059_js__02.jpg",
+   "pal": [
+    [
+     7,
+     24,
+     31
+    ],
+    [
+     236,
+     242,
+     245
+    ],
+    [
+     86,
+     98,
+     103
+    ],
+    [
+     151,
+     158,
+     161
+    ]
+   ],
+   "role": "footer",
+   "dark": true,
+   "vec": 124
+  },
+  {
+   "type_id": "right|col1|txtnone",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.147,
+   "chars": 0,
+   "n_img": 2,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 289,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193259_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "cm",
+   "y": 1502,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193259_js__00.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     1
+    ],
+    [
+     164,
+     167,
+     20
+    ],
+    [
+     252,
+     242,
+     215
+    ],
+    [
+     178,
+     204,
+     15
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 125
+  },
+  {
+   "type_id": "grid|col3|txtnone",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "none",
+   "band": "half",
+   "img_ratio": 0.059,
+   "chars": 0,
+   "n_img": 9,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 545,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193259_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "link",
+   "y": 1880,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193259_js__01.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     3
+    ],
+    [
+     244,
+     242,
+     238
+    ],
+    [
+     34,
+     34,
+     22
+    ],
+    [
+     158,
+     164,
+     160
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 126
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 160,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    8,
+    24,
+    24
+   ],
+   "fg_rgb": [
+    6,
+    23,
+    31
+   ],
+   "w": 1425,
+   "h": 216,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193259_js.html",
+   "idx": 2,
+   "tag": "footer",
+   "cls": "l-footer",
+   "y": 2763,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_193259_js__02.jpg",
+   "pal": [
+    [
+     7,
+     24,
+     31
+    ],
+    [
+     236,
+     242,
+     245
+    ],
+    [
+     86,
+     98,
+     103
+    ],
+    [
+     151,
+     158,
+     161
+    ]
+   ],
+   "role": "footer",
+   "dark": true,
+   "vec": 127
+  },
+  {
+   "type_id": "right|col1|txtnone",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "none",
+   "band": "band",
+   "img_ratio": 0.147,
+   "chars": 0,
+   "n_img": 2,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 289,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194239_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "cm",
+   "y": 1502,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194239_js__00.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     1
+    ],
+    [
+     164,
+     167,
+     20
+    ],
+    [
+     252,
+     242,
+     215
+    ],
+    [
+     178,
+     204,
+     15
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 128
+  },
+  {
+   "type_id": "grid|col3|txtnone",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "none",
+   "band": "half",
+   "img_ratio": 0.059,
+   "chars": 0,
+   "n_img": 9,
+   "n_text": 0,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1425,
+   "h": 545,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194239_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "link",
+   "y": 1880,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194239_js__01.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     3
+    ],
+    [
+     244,
+     242,
+     238
+    ],
+    [
+     34,
+     34,
+     22
+    ],
+    [
+     158,
+     164,
+     160
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 129
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 160,
+   "n_img": 0,
+   "n_text": 15,
+   "bg_rgb": [
+    8,
+    24,
+    24
+   ],
+   "fg_rgb": [
+    6,
+    23,
+    31
+   ],
+   "w": 1425,
+   "h": 216,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194239_js.html",
+   "idx": 2,
+   "tag": "footer",
+   "cls": "l-footer",
+   "y": 2763,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194239_js__02.jpg",
+   "pal": [
+    [
+     7,
+     24,
+     31
+    ],
+    [
+     236,
+     242,
+     245
+    ],
+    [
+     86,
+     98,
+     103
+    ],
+    [
+     151,
+     158,
+     161
+    ]
+   ],
+   "role": "footer",
+   "dark": true,
+   "vec": 130
+  },
+  {
+   "type_id": "bg|col1|txtlg",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.896,
+   "chars": 487,
+   "n_img": 34,
+   "n_text": 33,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    6,
+    23,
+    31
+   ],
+   "w": 1425,
+   "h": 2979,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194438.html",
+   "idx": 0,
+   "tag": "div",
+   "cls": "l-wrapper",
+   "y": 0,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194438__00.jpg",
+   "pal": [
+    [
+     248,
+     244,
+     4
+    ],
+    [
+     243,
+     239,
+     224
+    ],
+    [
+     8,
+     49,
+     87
+    ],
+    [
+     229,
+     219,
+     170
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 131
+  },
+  {
+   "type_id": "bg|col1|txtlg",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.896,
+   "chars": 487,
+   "n_img": 34,
+   "n_text": 33,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    6,
+    23,
+    31
+   ],
+   "w": 1425,
+   "h": 2979,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194555.html",
+   "idx": 0,
+   "tag": "div",
+   "cls": "l-wrapper",
+   "y": 0,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_194555__00.jpg",
+   "pal": [
+    [
+     248,
+     244,
+     4
+    ],
+    [
+     243,
+     239,
+     224
+    ],
+    [
+     8,
+     49,
+     87
+    ],
+    [
+     229,
+     219,
+     170
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 132
+  },
+  {
+   "type_id": "bg|col1|txtlg",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.895,
+   "chars": 487,
+   "n_img": 33,
+   "n_text": 33,
+   "bg_rgb": [
+    248,
+    248,
+    8
+   ],
+   "fg_rgb": [
+    6,
+    23,
+    31
+   ],
+   "w": 1425,
+   "h": 2968,
+   "vw": 1440,
+   "file": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_200941.html",
+   "idx": 0,
+   "tag": "div",
+   "cls": "l-wrapper",
+   "y": 0,
+   "thumb": "clone_www_meiji_co_jp_products_brand_kinotake_20260704_200941__00.jpg",
+   "pal": [
+    [
+     243,
+     237,
+     5
+    ],
+    [
+     242,
+     240,
+     234
+    ],
+    [
+     169,
+     203,
+     16
+    ],
+    [
+     26,
+     147,
+     48
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 133
+  },
+  {
+   "type_id": "bg|col1|txtmd",
+   "imgpos": "bg",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 1.0,
+   "chars": 211,
+   "n_img": 1,
+   "n_text": 15,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    145,
+    145,
+    145
+   ],
+   "w": 1440,
+   "h": 1045,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260708_012336_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "fv scrollanime fadeIn",
+   "y": 0,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260708_012336_js__00.jpg",
+   "pal": [
+    [
+     240,
+     246,
+     241
+    ],
+    [
+     200,
+     213,
+     95
+    ],
+    [
+     179,
+     204,
+     79
+    ],
+    [
+     214,
+     223,
+     172
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 134
+  },
+  {
+   "type_id": "right|col2|txtlg",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.129,
+   "chars": 476,
+   "n_img": 2,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    199,
+    227,
+    178
+   ],
+   "w": 1440,
+   "h": 1112,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260708_012336_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "top01",
+   "y": 1145,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260708_012336_js__01.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     250
+    ],
+    [
+     153,
+     208,
+     109
+    ],
+    [
+     174,
+     217,
+     140
+    ],
+    [
+     208,
+     229,
+     177
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 135
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.148,
+   "chars": 316,
+   "n_img": 3,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 1331,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260708_012336_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "top02",
+   "y": 2257,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260708_012336_js__02.jpg",
+   "pal": [
+    [
+     159,
+     202,
+     86
+    ],
+    [
+     250,
+     251,
+     248
+    ],
+    [
+     198,
+     212,
+     91
+    ],
+    [
+     216,
+     229,
+     169
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 136
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.037,
+   "chars": 99,
+   "n_img": 1,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    199,
+    227,
+    178
+   ],
+   "w": 1440,
+   "h": 424,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260708_012336_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "top03",
+   "y": 3730,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260708_012336_js__03.jpg",
+   "pal": [
+    [
+     254,
+     254,
+     254
+    ],
+    [
+     230,
+     235,
+     226
+    ],
+    [
+     139,
+     199,
+     92
+    ],
+    [
+     176,
+     217,
+     144
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 137
+  },
+  {
+   "type_id": "top|col2|txtmd",
+   "imgpos": "top",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.627,
+   "chars": 252,
+   "n_img": 5,
+   "n_text": 24,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 818,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260708_012336_js.html",
+   "idx": 4,
+   "tag": "footer",
+   "cls": "footer",
+   "y": 4154,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260708_012336_js__04.jpg",
+   "pal": [
+    [
+     153,
+     201,
+     88
+    ],
+    [
+     251,
+     251,
+     250
+    ],
+    [
+     204,
+     224,
+     169
+    ],
+    [
+     182,
+     216,
+     141
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 138
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.674,
+   "chars": 171,
+   "n_img": 4,
+   "n_text": 13,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    51,
+    51,
+    51
+   ],
+   "w": 1440,
+   "h": 529,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260729_095707_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "fv scrollanime fadeIn in show is-visible active visible in-view inview animated revealed aos-animate is-inview is-show r",
+   "y": 64,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260729_095707_js__00.jpg",
+   "pal": [
+    [
+     248,
+     249,
+     245
+    ],
+    [
+     211,
+     207,
+     181
+    ],
+    [
+     173,
+     174,
+     158
+    ],
+    [
+     197,
+     187,
+     163
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 139
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 395,
+   "n_img": 0,
+   "n_text": 8,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    138,
+    199,
+    90
+   ],
+   "w": 1440,
+   "h": 1092,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260729_095707_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "top01",
+   "y": 1027,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260729_095707_js__01.jpg",
+   "pal": [
+    [
+     254,
+     254,
+     254
+    ],
+    [
+     226,
+     236,
+     229
+    ],
+    [
+     141,
+     200,
+     95
+    ],
+    [
+     202,
+     230,
+     181
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 140
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.239,
+   "chars": 174,
+   "n_img": 1,
+   "n_text": 6,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 1560,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260729_095707_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "top02",
+   "y": 2119,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260729_095707_js__02.jpg",
+   "pal": [
+    [
+     254,
+     254,
+     254
+    ],
+    [
+     162,
+     202,
+     84
+    ],
+    [
+     198,
+     212,
+     91
+    ],
+    [
+     235,
+     240,
+     227
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 141
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 99,
+   "n_img": 0,
+   "n_text": 3,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    199,
+    227,
+    178
+   ],
+   "w": 1440,
+   "h": 428,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260729_095707_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "top03",
+   "y": 3820,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260729_095707_js__03.jpg",
+   "pal": [
+    [
+     252,
+     252,
+     252
+    ],
+    [
+     140,
+     200,
+     93
+    ],
+    [
+     177,
+     217,
+     145
+    ],
+    [
+     202,
+     230,
+     181
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 142
+  },
+  {
+   "type_id": "bg|col2|txtmd",
+   "imgpos": "bg",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.803,
+   "chars": 166,
+   "n_img": 2,
+   "n_text": 22,
+   "bg_rgb": [
+    152,
+    200,
+    88
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 639,
+   "vw": 1440,
+   "file": "clone_www_npo_ashitaba_or_jp_20260729_095707_js.html",
+   "idx": 4,
+   "tag": "footer",
+   "cls": "footer",
+   "y": 4248,
+   "thumb": "clone_www_npo_ashitaba_or_jp_20260729_095707_js__04.jpg",
+   "pal": [
+    [
+     153,
+     201,
+     88
+    ],
+    [
+     250,
+     251,
+     248
+    ],
+    [
+     204,
+     223,
+     171
+    ],
+    [
+     183,
+     216,
+     142
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 143
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 0,
+   "n_img": 0,
+   "n_text": 0,
+   "bg_rgb": [
+    120,
+    200,
+    232
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 900,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "full",
+   "y": 0,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__00.jpg",
+   "pal": [
+    [
+     37,
+     151,
+     210
+    ],
+    [
+     96,
+     175,
+     216
+    ],
+    [
+     29,
+     135,
+     187
+    ],
+    [
+     119,
+     195,
+     234
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 144
+  },
+  {
+   "type_id": "right|col1|txtmd",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.031,
+   "chars": 176,
+   "n_img": 1,
+   "n_text": 6,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 835,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "",
+   "y": 922,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__01.jpg",
+   "pal": [
+    [
+     254,
+     254,
+     254
+    ],
+    [
+     238,
+     248,
+     252
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 145
+  },
+  {
+   "type_id": "left|col1|txtmd",
+   "imgpos": "left",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.002,
+   "chars": 242,
+   "n_img": 1,
+   "n_text": 22,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 821,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "section",
+   "y": 1756,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__02.jpg",
+   "pal": [
+    [
+     251,
+     252,
+     252
+    ],
+    [
+     1,
+     142,
+     216
+    ],
+    [
+     172,
+     208,
+     227
+    ],
+    [
+     90,
+     181,
+     230
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 146
+  },
+  {
+   "type_id": "grid|col2|txtlg",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.036,
+   "chars": 633,
+   "n_img": 8,
+   "n_text": 18,
+   "bg_rgb": [
+    232,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 1029,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "section",
+   "y": 2577,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__03.jpg",
+   "pal": [
+    [
+     233,
+     240,
+     243
+    ],
+    [
+     92,
+     92,
+     92
+    ],
+    [
+     181,
+     202,
+     215
+    ],
+    [
+     161,
+     161,
+     162
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 147
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.241,
+   "chars": 156,
+   "n_img": 7,
+   "n_text": 11,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 786,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "section",
+   "y": 3606,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__04.jpg",
+   "pal": [
+    [
+     249,
+     251,
+     251
+    ],
+    [
+     170,
+     203,
+     220
+    ],
+    [
+     161,
+     181,
+     200
+    ],
+    [
+     103,
+     150,
+     169
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 148
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.088,
+   "chars": 207,
+   "n_img": 3,
+   "n_text": 12,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 759,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "section",
+   "y": 4392,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__05.jpg",
+   "pal": [
+    [
+     245,
+     248,
+     249
+    ],
+    [
+     158,
+     164,
+     167
+    ],
+    [
+     92,
+     101,
+     96
+    ],
+    [
+     177,
+     200,
+     220
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 149
+  },
+  {
+   "type_id": "right|col1|txtsm",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.004,
+   "chars": 53,
+   "n_img": 1,
+   "n_text": 3,
+   "bg_rgb": [
+    232,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 570,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "section",
+   "y": 5151,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__06.jpg",
+   "pal": [
+    [
+     231,
+     239,
+     246
+    ],
+    [
+     83,
+     81,
+     91
+    ],
+    [
+     174,
+     204,
+     220
+    ],
+    [
+     152,
+     161,
+     167
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 150
+  },
+  {
+   "type_id": "grid|col1|txtmd",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.119,
+   "chars": 186,
+   "n_img": 11,
+   "n_text": 12,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 1171,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 7,
+   "tag": "section",
+   "cls": "section",
+   "y": 5721,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__07.jpg",
+   "pal": [
+    [
+     243,
+     245,
+     246
+    ],
+    [
+     156,
+     166,
+     167
+    ],
+    [
+     172,
+     204,
+     222
+    ],
+    [
+     112,
+     141,
+     155
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 151
+  },
+  {
+   "type_id": "left|col1|txtmd",
+   "imgpos": "left",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.026,
+   "chars": 160,
+   "n_img": 1,
+   "n_text": 17,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    10,
+    39,
+    63
+   ],
+   "w": 1440,
+   "h": 326,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_225658_js.html",
+   "idx": 8,
+   "tag": "footer",
+   "cls": "",
+   "y": 7949,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_225658_js__08.jpg",
+   "pal": [
+    [
+     252,
+     253,
+     253
+    ],
+    [
+     160,
+     167,
+     173
+    ],
+    [
+     177,
+     198,
+     209
+    ],
+    [
+     97,
+     97,
+     97
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 152
+  },
+  {
+   "type_id": "none|col1|txtnone",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "none",
+   "band": "full",
+   "img_ratio": 0.0,
+   "chars": 0,
+   "n_img": 0,
+   "n_text": 0,
+   "bg_rgb": [
+    232,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    17,
+    17,
+    17
+   ],
+   "w": 1440,
+   "h": 900,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "full",
+   "y": 0,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__00.jpg",
+   "pal": [
+    [
+     12,
+     20,
+     26
+    ],
+    [
+     216,
+     225,
+     231
+    ],
+    [
+     165,
+     211,
+     224
+    ],
+    [
+     155,
+     166,
+     167
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 153
+  },
+  {
+   "type_id": "right|col1|txtmd",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.031,
+   "chars": 176,
+   "n_img": 1,
+   "n_text": 6,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 835,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "",
+   "y": 922,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__01.jpg",
+   "pal": [
+    [
+     254,
+     254,
+     254
+    ],
+    [
+     238,
+     248,
+     252
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 154
+  },
+  {
+   "type_id": "left|col1|txtmd",
+   "imgpos": "left",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.002,
+   "chars": 242,
+   "n_img": 1,
+   "n_text": 22,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 821,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "section",
+   "y": 1756,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__02.jpg",
+   "pal": [
+    [
+     251,
+     252,
+     252
+    ],
+    [
+     1,
+     142,
+     216
+    ],
+    [
+     172,
+     208,
+     227
+    ],
+    [
+     90,
+     181,
+     230
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 155
+  },
+  {
+   "type_id": "grid|col2|txtlg",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "lg",
+   "band": "full",
+   "img_ratio": 0.036,
+   "chars": 633,
+   "n_img": 8,
+   "n_text": 18,
+   "bg_rgb": [
+    232,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 1029,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "section",
+   "y": 2577,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__03.jpg",
+   "pal": [
+    [
+     233,
+     240,
+     243
+    ],
+    [
+     92,
+     92,
+     92
+    ],
+    [
+     181,
+     202,
+     215
+    ],
+    [
+     161,
+     161,
+     162
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 156
+  },
+  {
+   "type_id": "right|col2|txtmd",
+   "imgpos": "right",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.241,
+   "chars": 156,
+   "n_img": 7,
+   "n_text": 11,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 786,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "section",
+   "y": 3606,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__04.jpg",
+   "pal": [
+    [
+     249,
+     251,
+     251
+    ],
+    [
+     170,
+     203,
+     220
+    ],
+    [
+     161,
+     181,
+     200
+    ],
+    [
+     103,
+     150,
+     169
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 157
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.088,
+   "chars": 207,
+   "n_img": 3,
+   "n_text": 12,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 759,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 5,
+   "tag": "section",
+   "cls": "section",
+   "y": 4392,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__05.jpg",
+   "pal": [
+    [
+     245,
+     248,
+     249
+    ],
+    [
+     158,
+     164,
+     167
+    ],
+    [
+     92,
+     101,
+     96
+    ],
+    [
+     177,
+     200,
+     220
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 158
+  },
+  {
+   "type_id": "right|col1|txtsm",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "sm",
+   "band": "half",
+   "img_ratio": 0.004,
+   "chars": 53,
+   "n_img": 1,
+   "n_text": 3,
+   "bg_rgb": [
+    232,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 570,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 6,
+   "tag": "section",
+   "cls": "section",
+   "y": 5151,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__06.jpg",
+   "pal": [
+    [
+     231,
+     239,
+     246
+    ],
+    [
+     83,
+     81,
+     91
+    ],
+    [
+     174,
+     204,
+     220
+    ],
+    [
+     152,
+     161,
+     167
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 159
+  },
+  {
+   "type_id": "grid|col1|txtmd",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.119,
+   "chars": 186,
+   "n_img": 11,
+   "n_text": 12,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    0,
+    142,
+    216
+   ],
+   "w": 1440,
+   "h": 1171,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 7,
+   "tag": "section",
+   "cls": "section",
+   "y": 5721,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__07.jpg",
+   "pal": [
+    [
+     243,
+     245,
+     246
+    ],
+    [
+     156,
+     166,
+     167
+    ],
+    [
+     172,
+     204,
+     222
+    ],
+    [
+     112,
+     141,
+     155
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 160
+  },
+  {
+   "type_id": "left|col1|txtmd",
+   "imgpos": "left",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.026,
+   "chars": 160,
+   "n_img": 1,
+   "n_text": 17,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    10,
+    39,
+    63
+   ],
+   "w": 1440,
+   "h": 326,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260702_231501_js.html",
+   "idx": 8,
+   "tag": "footer",
+   "cls": "",
+   "y": 7949,
+   "thumb": "clone_www_okumuragumi_co_jp_20260702_231501_js__08.jpg",
+   "pal": [
+    [
+     252,
+     253,
+     253
+    ],
+    [
+     159,
+     167,
+     172
+    ],
+    [
+     177,
+     198,
+     209
+    ],
+    [
+     97,
+     97,
+     97
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 161
+  },
+  {
+   "type_id": "grid|col1|txtlg",
+   "imgpos": "grid",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.13,
+   "chars": 1812,
+   "n_img": 38,
+   "n_text": 96,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 6900,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260704_211725.html",
+   "idx": 0,
+   "tag": "main",
+   "cls": "mainWrap",
+   "y": 0,
+   "thumb": "clone_www_okumuragumi_co_jp_20260704_211725__00.jpg",
+   "pal": [
+    [
+     254,
+     254,
+     254
+    ],
+    [
+     36,
+     150,
+     209
+    ],
+    [
+     4,
+     120,
+     183
+    ],
+    [
+     26,
+     134,
+     186
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 162
+  },
+  {
+   "type_id": "right|col1|txtlg",
+   "imgpos": "right",
+   "cols": 1,
+   "txt": "lg",
+   "band": "tall",
+   "img_ratio": 0.024,
+   "chars": 1812,
+   "n_img": 37,
+   "n_text": 96,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    255,
+    255,
+    255
+   ],
+   "w": 1440,
+   "h": 7800,
+   "vw": 1440,
+   "file": "clone_www_okumuragumi_co_jp_20260704_212257.html",
+   "idx": 0,
+   "tag": "main",
+   "cls": "mainWrap",
+   "y": -1,
+   "thumb": "clone_www_okumuragumi_co_jp_20260704_212257__00.jpg",
+   "pal": [
+    [
+     249,
+     250,
+     251
+    ],
+    [
+     18,
+     29,
+     33
+    ],
+    [
+     155,
+     166,
+     165
+    ],
+    [
+     87,
+     98,
+     98
+    ]
+   ],
+   "role": "hero",
+   "dark": false,
+   "vec": 163
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 142,
+   "n_img": 0,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 374,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_042329_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "top-common top-about",
+   "y": 1070,
+   "thumb": "clone_www_tanpopoen_net_20260714_042329_js__00.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 164
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.099,
+   "chars": 107,
+   "n_img": 5,
+   "n_text": 4,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1719,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_042329_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "top-common top-policy",
+   "y": 1544,
+   "thumb": "clone_www_tanpopoen_net_20260714_042329_js__01.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 165
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 369,
+   "n_img": 0,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1160,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_042329_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "office-list-wrap",
+   "y": 3885,
+   "thumb": "clone_www_tanpopoen_net_20260714_042329_js__02.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     248
+    ],
+    [
+     238,
+     230,
+     159
+    ],
+    [
+     55,
+     128,
+     58
+    ],
+    [
+     161,
+     177,
+     155
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 166
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.247,
+   "chars": 186,
+   "n_img": 60,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1440,
+   "h": 1112,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_042329_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "top-recruit img-fadein",
+   "y": 4803,
+   "thumb": "clone_www_tanpopoen_net_20260714_042329_js__03.jpg",
+   "pal": [
+    [
+     247,
+     247,
+     242
+    ],
+    [
+     181,
+     206,
+     178
+    ],
+    [
+     205,
+     207,
+     184
+    ],
+    [
+     237,
+     200,
+     98
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 167
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.069,
+   "chars": 192,
+   "n_img": 5,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1061,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_042329_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "top-news img-fadein",
+   "y": 6055,
+   "thumb": "clone_www_tanpopoen_net_20260714_042329_js__04.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     243
+    ],
+    [
+     175,
+     203,
+     174
+    ],
+    [
+     99,
+     154,
+     99
+    ],
+    [
+     152,
+     188,
+     150
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 168
+  },
+  {
+   "type_id": "bg|col2|txtmd",
+   "imgpos": "bg",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 1.001,
+   "chars": 115,
+   "n_img": 4,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    63,
+    46,
+    26
+   ],
+   "w": 1440,
+   "h": 1060,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_042329_js.html",
+   "idx": 5,
+   "tag": "footer",
+   "cls": "",
+   "y": 7116,
+   "thumb": "clone_www_tanpopoen_net_20260714_042329_js__05.jpg",
+   "pal": [
+    [
+     248,
+     248,
+     243
+    ],
+    [
+     214,
+     208,
+     181
+    ],
+    [
+     193,
+     188,
+     178
+    ],
+    [
+     237,
+     206,
+     47
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 169
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 142,
+   "n_img": 0,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 374,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044607_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "top-common top-about",
+   "y": 1070,
+   "thumb": "clone_www_tanpopoen_net_20260714_044607_js__00.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 170
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.099,
+   "chars": 107,
+   "n_img": 5,
+   "n_text": 4,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1719,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044607_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "top-common top-policy",
+   "y": 1544,
+   "thumb": "clone_www_tanpopoen_net_20260714_044607_js__01.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 171
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 369,
+   "n_img": 0,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1160,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044607_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "office-list-wrap",
+   "y": 3886,
+   "thumb": "clone_www_tanpopoen_net_20260714_044607_js__02.jpg",
+   "pal": [
+    [
+     250,
+     251,
+     248
+    ],
+    [
+     249,
+     234,
+     152
+    ],
+    [
+     48,
+     123,
+     50
+    ],
+    [
+     160,
+     178,
+     155
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 172
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.247,
+   "chars": 186,
+   "n_img": 60,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1440,
+   "h": 1112,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044607_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "top-recruit img-fadein",
+   "y": 4803,
+   "thumb": "clone_www_tanpopoen_net_20260714_044607_js__03.jpg",
+   "pal": [
+    [
+     247,
+     247,
+     242
+    ],
+    [
+     181,
+     206,
+     178
+    ],
+    [
+     205,
+     207,
+     184
+    ],
+    [
+     237,
+     200,
+     98
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 173
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.069,
+   "chars": 192,
+   "n_img": 5,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1061,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044607_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "top-news img-fadein",
+   "y": 6055,
+   "thumb": "clone_www_tanpopoen_net_20260714_044607_js__04.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     243
+    ],
+    [
+     175,
+     203,
+     174
+    ],
+    [
+     99,
+     154,
+     99
+    ],
+    [
+     152,
+     188,
+     150
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 174
+  },
+  {
+   "type_id": "bg|col2|txtmd",
+   "imgpos": "bg",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 1.001,
+   "chars": 115,
+   "n_img": 4,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    63,
+    46,
+    26
+   ],
+   "w": 1440,
+   "h": 1060,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044607_js.html",
+   "idx": 5,
+   "tag": "footer",
+   "cls": "",
+   "y": 7116,
+   "thumb": "clone_www_tanpopoen_net_20260714_044607_js__05.jpg",
+   "pal": [
+    [
+     248,
+     248,
+     243
+    ],
+    [
+     214,
+     208,
+     181
+    ],
+    [
+     193,
+     188,
+     178
+    ],
+    [
+     237,
+     206,
+     47
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 175
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 142,
+   "n_img": 0,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 374,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044935_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "top-common top-about",
+   "y": 1070,
+   "thumb": "clone_www_tanpopoen_net_20260714_044935_js__00.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 176
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.099,
+   "chars": 107,
+   "n_img": 5,
+   "n_text": 4,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1719,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044935_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "top-common top-policy",
+   "y": 1544,
+   "thumb": "clone_www_tanpopoen_net_20260714_044935_js__01.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 177
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 369,
+   "n_img": 0,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1160,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044935_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "office-list-wrap",
+   "y": 3885,
+   "thumb": "clone_www_tanpopoen_net_20260714_044935_js__02.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     248
+    ],
+    [
+     238,
+     230,
+     159
+    ],
+    [
+     55,
+     128,
+     58
+    ],
+    [
+     161,
+     177,
+     155
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 178
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.247,
+   "chars": 186,
+   "n_img": 60,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1440,
+   "h": 1112,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044935_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "top-recruit img-fadein",
+   "y": 4803,
+   "thumb": "clone_www_tanpopoen_net_20260714_044935_js__03.jpg",
+   "pal": [
+    [
+     247,
+     247,
+     242
+    ],
+    [
+     181,
+     206,
+     178
+    ],
+    [
+     205,
+     207,
+     184
+    ],
+    [
+     237,
+     200,
+     98
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 179
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.069,
+   "chars": 192,
+   "n_img": 5,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1061,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044935_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "top-news img-fadein",
+   "y": 6055,
+   "thumb": "clone_www_tanpopoen_net_20260714_044935_js__04.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     243
+    ],
+    [
+     175,
+     203,
+     174
+    ],
+    [
+     99,
+     154,
+     99
+    ],
+    [
+     152,
+     188,
+     150
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 180
+  },
+  {
+   "type_id": "bg|col2|txtmd",
+   "imgpos": "bg",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 1.001,
+   "chars": 115,
+   "n_img": 4,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    63,
+    46,
+    26
+   ],
+   "w": 1440,
+   "h": 1060,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_044935_js.html",
+   "idx": 5,
+   "tag": "footer",
+   "cls": "",
+   "y": 7116,
+   "thumb": "clone_www_tanpopoen_net_20260714_044935_js__05.jpg",
+   "pal": [
+    [
+     248,
+     248,
+     243
+    ],
+    [
+     214,
+     208,
+     181
+    ],
+    [
+     193,
+     188,
+     178
+    ],
+    [
+     237,
+     206,
+     47
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 181
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 142,
+   "n_img": 0,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 374,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_065903_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "top-common top-about",
+   "y": 1070,
+   "thumb": "clone_www_tanpopoen_net_20260714_065903_js__00.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 182
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.099,
+   "chars": 107,
+   "n_img": 5,
+   "n_text": 4,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1719,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_065903_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "top-common top-policy",
+   "y": 1544,
+   "thumb": "clone_www_tanpopoen_net_20260714_065903_js__01.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 183
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 369,
+   "n_img": 0,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1160,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_065903_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "office-list-wrap",
+   "y": 3885,
+   "thumb": "clone_www_tanpopoen_net_20260714_065903_js__02.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     248
+    ],
+    [
+     238,
+     230,
+     159
+    ],
+    [
+     55,
+     128,
+     58
+    ],
+    [
+     161,
+     177,
+     155
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 184
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.247,
+   "chars": 186,
+   "n_img": 60,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1440,
+   "h": 1112,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_065903_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "top-recruit img-fadein",
+   "y": 4803,
+   "thumb": "clone_www_tanpopoen_net_20260714_065903_js__03.jpg",
+   "pal": [
+    [
+     247,
+     247,
+     242
+    ],
+    [
+     181,
+     206,
+     178
+    ],
+    [
+     205,
+     207,
+     184
+    ],
+    [
+     237,
+     200,
+     98
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 185
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.069,
+   "chars": 192,
+   "n_img": 5,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1061,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_065903_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "top-news img-fadein",
+   "y": 6055,
+   "thumb": "clone_www_tanpopoen_net_20260714_065903_js__04.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     243
+    ],
+    [
+     175,
+     203,
+     174
+    ],
+    [
+     99,
+     154,
+     99
+    ],
+    [
+     152,
+     188,
+     150
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 186
+  },
+  {
+   "type_id": "bg|col2|txtmd",
+   "imgpos": "bg",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 1.001,
+   "chars": 115,
+   "n_img": 4,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    63,
+    46,
+    26
+   ],
+   "w": 1440,
+   "h": 1060,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_065903_js.html",
+   "idx": 5,
+   "tag": "footer",
+   "cls": "",
+   "y": 7116,
+   "thumb": "clone_www_tanpopoen_net_20260714_065903_js__05.jpg",
+   "pal": [
+    [
+     248,
+     248,
+     243
+    ],
+    [
+     214,
+     208,
+     181
+    ],
+    [
+     193,
+     188,
+     178
+    ],
+    [
+     237,
+     206,
+     47
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 187
+  },
+  {
+   "type_id": "none|col1|txtmd",
+   "imgpos": "none",
+   "cols": 1,
+   "txt": "md",
+   "band": "band",
+   "img_ratio": 0.0,
+   "chars": 142,
+   "n_img": 0,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 374,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_072420_js.html",
+   "idx": 0,
+   "tag": "section",
+   "cls": "top-common top-about",
+   "y": 1070,
+   "thumb": "clone_www_tanpopoen_net_20260714_072420_js__00.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 188
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "tall",
+   "img_ratio": 0.099,
+   "chars": 107,
+   "n_img": 5,
+   "n_text": 4,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1719,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_072420_js.html",
+   "idx": 1,
+   "tag": "section",
+   "cls": "top-common top-policy",
+   "y": 1544,
+   "thumb": "clone_www_tanpopoen_net_20260714_072420_js__01.jpg",
+   "pal": [
+    [
+     249,
+     249,
+     244
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 189
+  },
+  {
+   "type_id": "none|col2|txtmd",
+   "imgpos": "none",
+   "cols": 2,
+   "txt": "md",
+   "band": "half",
+   "img_ratio": 0.0,
+   "chars": 369,
+   "n_img": 0,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1160,
+   "h": 717,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_072420_js.html",
+   "idx": 2,
+   "tag": "section",
+   "cls": "office-list-wrap",
+   "y": 3885,
+   "thumb": "clone_www_tanpopoen_net_20260714_072420_js__02.jpg",
+   "pal": [
+    [
+     251,
+     251,
+     248
+    ],
+    [
+     238,
+     230,
+     159
+    ],
+    [
+     55,
+     128,
+     58
+    ],
+    [
+     161,
+     177,
+     155
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 190
+  },
+  {
+   "type_id": "grid|col2|txtmd",
+   "imgpos": "grid",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.247,
+   "chars": 186,
+   "n_img": 60,
+   "n_text": 7,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1440,
+   "h": 1112,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_072420_js.html",
+   "idx": 3,
+   "tag": "section",
+   "cls": "top-recruit img-fadein",
+   "y": 4803,
+   "thumb": "clone_www_tanpopoen_net_20260714_072420_js__03.jpg",
+   "pal": [
+    [
+     247,
+     247,
+     242
+    ],
+    [
+     181,
+     206,
+     178
+    ],
+    [
+     205,
+     207,
+     184
+    ],
+    [
+     237,
+     200,
+     98
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 191
+  },
+  {
+   "type_id": "grid|col3|txtmd",
+   "imgpos": "grid",
+   "cols": 3,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 0.069,
+   "chars": 192,
+   "n_img": 5,
+   "n_text": 18,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    26,
+    109,
+    29
+   ],
+   "w": 1140,
+   "h": 1061,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_072420_js.html",
+   "idx": 4,
+   "tag": "section",
+   "cls": "top-news img-fadein",
+   "y": 6055,
+   "thumb": "clone_www_tanpopoen_net_20260714_072420_js__04.jpg",
+   "pal": [
+    [
+     247,
+     248,
+     243
+    ],
+    [
+     175,
+     203,
+     174
+    ],
+    [
+     99,
+     154,
+     99
+    ],
+    [
+     152,
+     188,
+     150
+    ]
+   ],
+   "role": "content",
+   "dark": false,
+   "vec": 192
+  },
+  {
+   "type_id": "bg|col2|txtmd",
+   "imgpos": "bg",
+   "cols": 2,
+   "txt": "md",
+   "band": "full",
+   "img_ratio": 1.001,
+   "chars": 115,
+   "n_img": 4,
+   "n_text": 5,
+   "bg_rgb": [
+    248,
+    248,
+    248
+   ],
+   "fg_rgb": [
+    63,
+    46,
+    26
+   ],
+   "w": 1440,
+   "h": 1060,
+   "vw": 1440,
+   "file": "clone_www_tanpopoen_net_20260714_072420_js.html",
+   "idx": 5,
+   "tag": "footer",
+   "cls": "",
+   "y": 7116,
+   "thumb": "clone_www_tanpopoen_net_20260714_072420_js__05.jpg",
+   "pal": [
+    [
+     248,
+     248,
+     243
+    ],
+    [
+     214,
+     208,
+     181
+    ],
+    [
+     193,
+     188,
+     178
+    ],
+    [
+     237,
+     206,
+     47
+    ]
+   ],
+   "role": "footer",
+   "dark": false,
+   "vec": 193
+  }
+ ],
+ "embed_model": "google/siglip2-so400m-patch14-384",
+ "n_vec": 194
+}

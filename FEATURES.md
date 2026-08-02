@@ -7,7 +7,7 @@
 読む人へ：`CLAUDE.md` は**設計の約束と落とし穴**、`docs/実装履歴.md` は**なぜそう作ったか・試してダメだった案**の記録で、
 どちらも機能一覧ではありません。「何ができるか」を知りたいならこのファイルだけで足ります。
 
-規模: 右クリック 34項目 / 編集バー 33項目 / APIパス 86本 / モジュール 28本
+規模: 右クリック 35項目 / 編集バー 33項目 / APIパス 90本 / モジュール 30本
 
 💰=AIを呼ぶ（お金がかかる） ／ 無料=AIを使わない。ほとんどの操作は無料です。
 
@@ -31,6 +31,7 @@
 | 🧐 デザイン指摘をもらう（プロの目・AI数円） | `__ce_q_dcq` | 💰 |
 | 🌙 自動磨き（指摘→修正を自動で数周・AI課金） | `__ce_q_brush` | 💰 |
 | 🧩 セクション（保存・追加・入れ替え・削除・背景色・境目） | `__ce_q_sec` | 無料 |
+| 🔀 このセクションの形を変える（実サイトの候補を次々・AIなし） | `__ce_q_secswap` | 無料 |
 | 🎯 重なっている要素から選ぶ（下の層） | `__ce_q_pickov` | 無料 |
 | 🗑 この要素を削除 | `__ce_q_del` | 無料 |
 | 🔼 重なり・食い込みを調整（手前/後ろ・はみ出し） | `__ce_q_stack` | 無料 |
@@ -101,6 +102,7 @@
 | `src/assets.py` | 画像の抜き出し（Feature：登録サイトから実画像を集める）。 |
 | `src/bgremove.py` | アップロード画像の背景を除去して透過PNGにする（onnxruntime + U2-Net・ローカル・無料）。 |
 | `src/camp.py` | カンプ生成（仕様 4.7 / Phase 4 ＝ 最終目標）。 |
+| `src/camp_patch.py` | Codex 用パッチの読み書きと検証（共同編集 Phase 2）。 |
 | `src/clone.py` | 実サイトの忠実クローン（DOMスナップショット方式）。 |
 | `src/config.py` | 設定値を1か所に集約するモジュール。 |
 | `src/db.py` | SQLite アクセス層。仕様 4.2 の `site` テーブルをそのまま実装する。 |
@@ -117,6 +119,7 @@
 | `src/recipes.py` | 業種別デザインレシピ。 |
 | `src/respcheck.py` | レスポンシブ自動監査（カンプHTML → 3画面幅の実測レポート）。 |
 | `src/search.py` | 検索（search）。仕様 4.4 / 4.5 を実装する。 |
+| `src/skeleton.py` | セクションの「骨格」を実測して型（レイアウトの種類）に正規化する。 |
 | `src/sp_convert.py` | スマホ版のおおよそ自動変換（カンプHTML → SP用 @media を注入した1ファイル）。 |
 | `src/spec.py` | コーディング仕様書の生成（カンプHTML → 寸法・色・フォント・動き入りの1枚HTML）。 |
 | `src/style_check.py` | おしゃれ度チェック（納品前の最終QC）。 |
@@ -127,7 +130,7 @@
 
 ## 4. APIエンドポイント
 
-<details><summary>全86本（クリックで展開）</summary>
+<details><summary>全90本（クリックで展開）</summary>
 
 - `/`
 - `/anim/<site_id>/<path:filename>`
@@ -184,11 +187,15 @@
 - `/api/save_favorite`
 - `/api/save_spec_html`
 - `/api/search`
+- `/api/sec_cands`
+- `/api/sec_part`
+- `/api/sec_thumb/<path:name>`
 - `/api/section_advice`
 - `/api/section_fav/delete`
 - `/api/section_fav/list`
 - `/api/section_fav/save`
 - `/api/settings`
+- `/api/shape_ai`
 - `/api/shortcuts`
 - `/api/similar`
 - `/api/site/<site_id>`

@@ -19,6 +19,7 @@ import json as _json
 import os
 import re
 import threading
+import time
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -2153,6 +2154,20 @@ def api_camp_backup():
     return jsonify({"ok": True, "file": new.name})
 
 
+_SAVE_LOCKS: dict[str, threading.Lock] = {}
+_SAVE_LOCKS_GUARD = threading.Lock()
+
+
+def _save_lock_for(name: str) -> threading.Lock:
+    """カンプ1ファイルにつき1つの鍵。保存とパッチ消化を割り込ませない（共同編集 Phase 4）。"""
+    with _SAVE_LOCKS_GUARD:
+        lk = _SAVE_LOCKS.get(name)
+        if lk is None:
+            lk = threading.Lock()
+            _SAVE_LOCKS[name] = lk
+        return lk
+
+
 @app.route("/api/save_camp_html", methods=["POST"])
 def api_save_camp_html():
     """ドラッグ/矢印での位置調整をHTMLに焼き込む（LLM不使用・その場保存）。
@@ -2171,14 +2186,52 @@ def api_save_camp_html():
     # 焼き込み保険(_REVIEW_FALLBACK)を最新版に入れ替える＝古いカンプも保存するだけで
     # 保険のバグ修正（例：data-cedelay無視で全要素同時に出る）が反映される
     html = camp._finalize_html(html)
-    try:
-        # 一時ファイルに書いてから差し替え＝書き込み途中で落ちても元ファイルが壊れない
-        tmp = p.with_suffix(".html.tmp")
-        tmp.write_text(html, encoding="utf-8")
-        os.replace(tmp, p)
-    except Exception as exc:  # noqa: BLE001
-        return jsonify({"ok": False, "message": str(exc)}), 500
-    return jsonify({"ok": True, "file": fn})
+    # 🩹 共同編集（Phase 4）：世代チェックとパッチの消化。
+    # ★baseSha256 が来ない呼び出し（部品保存など従来の保存経路）は今までどおり素通しする＝後方互換。
+    from . import camp_patch as _cpatch
+    base_sha = (data.get("baseSha256") or "").strip()
+    applied_rev = data.get("appliedPatchRevision")
+    lock = _save_lock_for(fn)
+    with lock:
+        if base_sha:
+            try:
+                now_sha = _cpatch.sha256_of(p)
+            except Exception:  # noqa: BLE001
+                now_sha = ""
+            if now_sha and now_sha != base_sha:
+                # 開いた後に別の場所から保存された＝上書きすると相手の変更が消える
+                return jsonify({"ok": False, "conflict": True, "message":
+                                "このページは別の編集によって更新されています。"
+                                "上書きすると変更が失われるため保存を中止しました。"
+                                "ページを再読み込みし、変更内容を確認してください。"}), 409
+            try:
+                cur = _cpatch.load(fn)
+            except Exception:  # noqa: BLE001
+                cur = None
+            if cur and applied_rev is not None and int(cur.get("revision", 0)) != int(applied_rev):
+                return jsonify({"ok": False, "conflict": True, "message":
+                                "Codexの修正がこの後に更新されています。"
+                                "安全のため保存を中止しました。再読み込みしてください。"}), 409
+        try:
+            # 一時ファイルに書いてから差し替え＝書き込み途中で落ちても元ファイルが壊れない
+            tmp = p.with_suffix(".html.tmp")
+            tmp.write_text(html, encoding="utf-8")
+            os.replace(tmp, p)
+        except Exception as exc:  # noqa: BLE001
+            return jsonify({"ok": False, "message": str(exc)}), 500
+        # ★HTMLの保存に成功した後にだけパッチを消化する（先に消すと変更が消える）
+        consumed = 0
+        if base_sha and applied_rev:
+            try:
+                _cpatch.consume(fn, int(applied_rev))
+                consumed = int(applied_rev)
+            except Exception:  # noqa: BLE001
+                pass    # 消化に失敗しても保存は成立している。次回は二重適用になるので下でsha を返して検知させる
+        try:
+            new_sha = _cpatch.sha256_of(p)
+        except Exception:  # noqa: BLE001
+            new_sha = ""
+    return jsonify({"ok": True, "file": fn, "sha256": new_sha, "consumedPatchRevision": consumed})
 
 
 @app.route("/api/brush_apply", methods=["POST"])
@@ -2523,6 +2576,263 @@ def api_camp_sections():
     return jsonify({"ok": True, "sections": camp.list_camp_sections(html)})
 
 
+@app.route("/api/sec_cands", methods=["POST"])
+def api_sec_cands():
+    """編集中のセクションに似た「別の形」の候補を、雰囲気と色が近い順で返す。
+
+    素材＝登録済みクローンから切り出した実在サイトのセクション（型辞書）。
+    AI（Claude/GPT）は呼ばない＝候補を次々出すのに課金も待ち時間も出さないため。
+    """
+    from . import skeleton
+
+    d = request.get_json(silent=True) or {}
+    fn = (d.get("file") or "").strip()
+    try:
+        idx = int(d.get("idx", -1))
+    except Exception:  # noqa: BLE001
+        idx = -1
+    if not fn or idx < 0:
+        return jsonify({"ok": False, "error": "file と idx が要ります"}), 400
+    try:
+        r = skeleton.candidates(fn, idx,
+                                same_role=bool(d.get("same_role", True)),
+                                w_mood=float(d.get("w_mood", 0.7)),
+                                w_color=float(d.get("w_color", 0.3)))
+    except Exception as e:  # noqa: BLE001
+        return jsonify({"ok": False, "error": f"{e}"}), 500
+    return jsonify(r)
+
+
+_SHAPE_AI_SYS = """あなたはWebデザイナーです。すでにある「見出し・本文・写真」を、
+新しいレイアウトに並べ替える指示書だけを作ります。
+
+厳守：
+- 文言や写真を新しく考えてはいけません。渡された中身を並べ替えるだけです。
+- 出力はJSONのみ。説明文やコードフェンスは書かない。
+- 定番（横3カラム均等・左右対称の繰り返し）は禁止。毎回ちがう構成にすること。
+- 使えるのは渡された個数まで。無い番号を指定しない。
+
+JSONの形：
+{"name":"日本語で15字以内の型の名前",
+ "style":"箱全体のCSS（display:grid や flex など。; 区切り）",
+ "slots":[ ... ]}
+
+slotの種類：
+{"type":"head","idx":0,"style":"..."}   見出し（idxは0が一番大きい見出し）
+{"type":"text","idx":0,"style":"..."}   本文（idxは0が一番長い）
+{"type":"img","idx":0,"h":"320px","style":"..."}  写真
+{"type":"btn","idx":0,"style":"..."}    ボタン
+{"type":"group","style":"...","children":[ 上のslot ]}  まとめて囲む
+
+styleに書いてよいのは配置と間隔だけ（display/grid/flex/gap/align/justify/margin/padding/
+max-width/text-align/order/position:relative/aspect-ratio/border-radius/overflow）。
+色・フォント・font-sizeは書かないこと（今のカンプの見た目をそのまま使うため）。"""
+
+
+# ══ 🎲AIが作った型のカタログ（貯めて使い回す）════════════════════════
+# ★置き場は data/skeleton/ ＝ .gitignore に入っていないので家↔会社で自動的に同期される。
+#   localStorage に入れるとこのPCだけになる（memoryと同じ落とし穴・CLAUDE.md 冒頭）。
+_SHAPE_LIB_LOCK = threading.Lock()
+
+
+def _shape_lib_path():
+    from . import skeleton
+
+    skeleton.OUT_DIR.mkdir(parents=True, exist_ok=True)
+    return skeleton.OUT_DIR / "ai_shapes.json"
+
+
+def _shape_lib_load() -> list:
+    p = _shape_lib_path()
+    if not p.exists():
+        return []
+    try:
+        got = _json.loads(p.read_text(encoding="utf-8"))
+        return got if isinstance(got, list) else []
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def _shape_lib_save(items: list) -> None:
+    # 読む→書くが同時に走ると壊れるのでロック＋一時ファイル→置換（camp.py と同じ流儀）
+    p = _shape_lib_path()
+    tmp = p.with_suffix(".json.tmp")
+    tmp.write_text(_json.dumps(items, ensure_ascii=False, indent=1), encoding="utf-8")
+    os.replace(tmp, p)
+
+
+@app.route("/api/shape_lib")
+def api_shape_lib():
+    """貯めてある型の一覧。"""
+    return jsonify({"ok": True, "items": _shape_lib_load()})
+
+
+@app.route("/api/shape_lib_add", methods=["POST"])
+def api_shape_lib_add():
+    """AIが作った型を1つ貯める。
+
+    ★「何個ぶんの中身に合わせて作った型か」(need) も一緒に残す。
+      見出し4個・写真1枚を前提に作った型を、写真0枚のセクションに当てるとスカスカになるため、
+      一覧で「合う／合わない」を出すのに使う。
+    """
+    d = request.get_json(silent=True) or {}
+    spec = d.get("spec")
+    if not isinstance(spec, dict) or not spec.get("slots"):
+        return jsonify({"ok": False, "error": "型の中身がありません"}), 400
+    item = {
+        "id": f"ai{int(time.time() * 1000) % 100000000:08d}",
+        "name": str(spec.get("name") or "新しい型")[:20],
+        "spec": spec,
+        "need": d.get("need") or {},
+        "created": time.strftime("%Y-%m-%d %H:%M"),
+    }
+    with _SHAPE_LIB_LOCK:
+        items = _shape_lib_load()
+        items.append(item)
+        items = items[-200:]                       # 貯まりすぎ防止
+        _shape_lib_save(items)
+    return jsonify({"ok": True, "item": item, "n": len(items)})
+
+
+@app.route("/api/shape_lib_del", methods=["POST"])
+def api_shape_lib_del():
+    """気に入らない型を捨てる。"""
+    d = request.get_json(silent=True) or {}
+    tid = str(d.get("id") or "")
+    with _SHAPE_LIB_LOCK:
+        items = [x for x in _shape_lib_load() if x.get("id") != tid]
+        _shape_lib_save(items)
+    return jsonify({"ok": True, "n": len(items)})
+
+
+def _first_json_object(text: str):
+    """返事から一番外側の {...} を1つ取り出す（```json 付きでも読める）。"""
+    if not text:
+        return None
+    s = text.strip()
+    if s.startswith("```"):
+        s = re.sub(r"^```[a-zA-Z]*\s*|\s*```$", "", s).strip()
+    try:
+        got = _json.loads(s)
+        return got if isinstance(got, dict) else None
+    except Exception:  # noqa: BLE001
+        pass
+    i = s.find("{")
+    while i >= 0:
+        depth, instr, esc = 0, False, False
+        for j in range(i, len(s)):
+            ch = s[j]
+            if instr:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    instr = False
+                continue
+            if ch == '"':
+                instr = True
+            elif ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    try:
+                        got = _json.loads(s[i:j + 1])
+                        if isinstance(got, dict):
+                            return got
+                    except Exception:  # noqa: BLE001
+                        pass
+                    break
+        i = s.find("{", i + 1)
+    return None
+
+
+@app.route("/api/shape_ai", methods=["POST"])
+def api_shape_ai():
+    """今のセクションの中身を使って、AIに「新しい並べ方」を1つ考えさせる。
+
+    ★HTMLは書かせない。**配置の指示書(JSON)だけ**を受け取り、中身の差し込みは画面側でやる。
+      こうしないとAIが文言や写真を勝手に作り、「中身は今のカンプのまま」という約束が壊れる。
+    """
+    d = request.get_json(silent=True) or {}
+    heads = [str(x)[:40] for x in (d.get("heads") or [])][:8]
+    texts = [str(x)[:80] for x in (d.get("texts") or [])][:8]
+    n_img = int(d.get("imgs") or 0)
+    n_btn = int(d.get("btns") or 0)
+    avoid = [str(x)[:30] for x in (d.get("avoid") or [])][:8]
+
+    if not heads and not texts and not n_img:
+        return jsonify({"ok": False, "error": "このセクションに並べ替えられる中身がありません"}), 400
+
+    u = [f"見出し {len(heads)}個: " + " / ".join(heads),
+         f"本文 {len(texts)}個: " + " / ".join(t[:40] for t in texts),
+         f"写真 {n_img}枚 ／ ボタン {n_btn}個"]
+    if avoid:
+        u.append("すでに出した型（これとは違うものにする）: " + " / ".join(avoid))
+    u.append("この中身に合う新しいレイアウトの指示書をJSONで1つ返してください。")
+
+    try:
+        # ★_call_llm は (本文, 使ったモデル) のタプルを返す。文字列だと思って渡すと
+        #   「expected string or bytes-like object, got 'tuple'」で落ちる。
+        raw, used = camp._call_llm(_SHAPE_AI_SYS, [{"type": "text", "text": "\n".join(u)}])
+        # ★camp._extract_json は使わない：中の "slots":[…] を先に拾って **配列** を返してしまう
+        #   （実測でここに引っかかった）。欲しいのは一番外側のオブジェクト。
+        spec = _first_json_object(raw)
+    except Exception as e:  # noqa: BLE001
+        return jsonify({"ok": False, "error": f"AI呼び出しに失敗しました: {e}"}), 500
+
+    if not isinstance(spec, dict) or not spec.get("slots"):
+        return jsonify({"ok": False, "error": "AIの返事を読み取れませんでした"}), 500
+    spec["name"] = str(spec.get("name") or "新しい型")[:20]
+    return jsonify({"ok": True, "spec": spec})
+
+
+@app.route("/api/sec_thumb/<path:name>")
+def api_sec_thumb(name: str):
+    """候補セクションのサムネ画像。"""
+    from . import skeleton
+
+    p = (skeleton.THUMB_DIR / name).resolve()
+    if not str(p).startswith(str(skeleton.THUMB_DIR.resolve())) or not p.exists():
+        return "not found", 404
+    return send_file(str(p), mimetype="image/jpeg")
+
+
+@app.route("/api/sec_part", methods=["POST"])
+def api_sec_part():
+    """候補セクションを『部品』として取り出す（HTML＋そこに当たるCSSだけ）。
+
+    ★クラス名は cep<ID>- で名前空間化してから返す。しないと差し込んだ先の同名クラスと
+      衝突して、相手ページのCSS（特に疑似要素のcontent）が部品に当たる（⭐部品と同じ既知の罠）。
+    """
+    from . import skeleton
+
+    d = request.get_json(silent=True) or {}
+    src = (d.get("src_file") or "").strip()
+    try:
+        sidx = int(d.get("src_idx", -1))
+    except Exception:  # noqa: BLE001
+        sidx = -1
+    if not src or sidx < 0:
+        return jsonify({"ok": False, "error": "src_file と src_idx が要ります"}), 400
+    try:
+        r = skeleton.extract_part(src, sidx)
+    except Exception as e:  # noqa: BLE001
+        return jsonify({"ok": False, "error": f"{e}"}), 500
+    if not r.get("ok"):
+        return jsonify(r), 400
+
+    prefix = f"cepk{abs(hash((src, sidx))) % 100000:05d}"
+    try:
+        html, css = camp._namespace_part_classes(r["html"], r["css"], prefix)
+        r["html"], r["css"] = html, css
+        r["prefix"] = prefix
+    except Exception as e:  # noqa: BLE001
+        print(f"[sec_part] 名前空間化に失敗（そのまま返します）: {e}")
+    return jsonify(r)
+
+
 @app.route("/api/edit_element", methods=["POST"])
 def api_edit_element():
     """右クリックした『その要素1つだけ』をAIで直す（他は触らない）。DOM側で差し替える。"""
@@ -2791,6 +3101,8 @@ html.__ce_altmode{cursor:text}
 <script>
 (function(){
   var FILE=%FILE_JSON%;
+  var CE_PATCH=%PATCH_JSON%;   // 🩹 Codexのパッチ（無ければ null）。適用は _bootDeco の中
+  var CE_PATCH_BASE_SHA=%SHA_JSON%;   // 開いた時点の正式HTMLの指紋（保存時の世代チェックに使う）
   var box=document.getElementById('__ce');
   var sec=document.getElementById('__ce_sec'),inp=document.getElementById('__ce_in'),
       sg=document.getElementById('__ce_sg'),go=document.getElementById('__ce_go'),
@@ -3554,6 +3866,10 @@ html.__ce_altmode{cursor:text}
   function _bootDeco(){
     _warnBrokenImages(); try{ dqArm(); }catch(_){ } try{ opUpgrade(); }catch(_){ } try{ _unbakeSafety(); }catch(_){ }
     try{ _fixBodyTransform(); }catch(_){ }
+    try{ ceidEnsure(document.body); ceidAudit(true); }catch(_){ }   // 🆔 安定IDを配る（見た目は変わらない）
+    // 🩹 Codexのパッチを当てる（無ければ何もしない）。当てるのはすぐ、お知らせは最後に出す
+    //    ★他の起動時メッセージ（保険の掃除など）に上書きされて読めなくなるため（実測で消えた）
+    try{ var _pr=cePatchApply(); setTimeout(function(){ cePatchNotice(_pr); },1500); }catch(_){ }
     try{ _fixBlankingDelay(); }catch(_){ }
     try{ _fixCharAnimSafety(); }catch(_){ }
     // 古いクローンは保険が内蔵されたまま＝4秒後にまた塗られるので、その直後にもう一度だけ後始末する
@@ -4514,7 +4830,10 @@ html.__ce_altmode{cursor:text}
       // それ以外のdata-ce*（ドラッグ署名data-cetx等）は編集の内部印なので外す。
       // data-cepin/data-cepinbg（📌貼り付け固定）も「動き＝残す」側＝保存後も解除できるように保持する
       var _keepCe={'data-cedelay':1,'data-cepin':1,'data-cepinbg':1};
-      if(n.attributes){ [].slice.call(n.attributes).forEach(function(a){ if(a.name.indexOf('data-ce')===0 && !_keepCe[a.name]){ edited=true; n.removeAttribute(a.name); } }); }
+      // ★data-ceid は「編集した印」ではなく単なる識別子。外すが edited は立てない。
+      //   立てると全要素が「編集済み」扱いになり、下の行で transform/width/height/opacity まで消えて部品が壊れる。
+      if(n.attributes){ [].slice.call(n.attributes).forEach(function(a){
+        if(a.name.indexOf('data-ce')===0 && !_keepCe[a.name]){ if(a.name!=='data-ceid') edited=true; n.removeAttribute(a.name); } }); }
       if(n.style){
         ['animation','transition'].forEach(function(p){ n.style.removeProperty(p); });      // 一時アニメは常に除去
         if(edited){ ['transform','transform-origin','width','height','max-width','object-fit','opacity','filter'].forEach(function(p){ n.style.removeProperty(p); }); }  // 編集で動かした要素だけサイズ・位置も戻す
@@ -13771,6 +14090,129 @@ html.__ce_altmode{cursor:text}
       if(d&&d.keys&&typeof d.keys==='object'){ try{ localStorage.setItem('__ce_shortcuts',JSON.stringify(d.keys)); }catch(_){} _scKeys=null; }
     }).catch(function(){}); }catch(_){}
   })();
+  // ===== 🆔 安定ID（data-ceid）＝Codexが対象を指すための永続的な名札（2026-08-02・Phase 1）=====
+  // ★連番にしない（§7の教訓：保存で焼き込まれ、開き直すと1から振り直されて別要素と衝突する）。
+  //   時刻36進＋乱数でユニークにする。
+  // ★全ノードには付けない（このカンプは1024ノード・77%がクラス名なし）。編集の対象になりうる物だけ。
+  // ★見た目は1pxも変えない（属性を足すだけ）。
+  var CEID_SEL='section,header,footer,main,article,img,picture,video,svg,'
+    +'.ce_shape,.ce_photoband,.ce_spacer,[data-cetx],[data-cedelay],[data-slshow],[data-fxa-fly]';
+  function ceidNew(){ return 'ce_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+  function _ceidWant(n){
+    if(!n||n.nodeType!==1) return false;
+    if(n.closest&&n.closest('[id^="__ce"]')) return false;
+    if(/^(SCRIPT|STYLE|LINK|META|BR|HEAD|HTML|BODY|TITLE|NOSCRIPT)$/.test(n.tagName)) return false;
+    if(n.matches&&n.matches(CEID_SEL)) return true;
+    // 自分が直接文字を持つ要素（＝文言・文字サイズを触る対象）
+    for(var i=0;i<n.childNodes.length;i++){
+      var c=n.childNodes[i];
+      if(c.nodeType===3&&(c.nodeValue||'').replace(/[\\s\\u200b]/g,'')) return true;
+    }
+    return false;
+  }
+  function ceidEnsure(root){
+    var n=0;
+    try{
+      var list=[].slice.call((root||document.body).querySelectorAll('*'));
+      if(root&&root.nodeType===1) list.push(root);
+      list.forEach(function(e){
+        if(e.getAttribute&&e.getAttribute('data-ceid')) return;
+        if(!_ceidWant(e)) return;
+        e.setAttribute('data-ceid', ceidNew()); n++;
+      });
+    }catch(_){}
+    return n;
+  }
+  // 複製した物は必ず新しい名札にする（元と重複するとCodexの指定先が二重になる）
+  function ceidRenew(node){
+    try{
+      var list=[node].concat([].slice.call(node.querySelectorAll?node.querySelectorAll('[data-ceid]'):[]));
+      list.forEach(function(e){ if(e&&e.setAttribute&&e.getAttribute&&e.getAttribute('data-ceid')) e.setAttribute('data-ceid', ceidNew()); });
+      ceidEnsure(node);
+    }catch(_){}
+  }
+  // 重複検査（重複があると「どっちに当たるか分からない」ので必ず潰す）
+  function ceidAudit(fix){
+    var seen={}, dup=[];
+    [].slice.call(document.querySelectorAll('[data-ceid]')).forEach(function(e){
+      var k=e.getAttribute('data-ceid');
+      if(seen[k]){ dup.push(e); if(fix) e.setAttribute('data-ceid', ceidNew()); } else seen[k]=1;
+    });
+    return dup.length;
+  }
+  window.ceidAudit=ceidAudit;
+  // ===== 🩹 Codexパッチの適用（共同編集 Phase 3・2026-08-02）=====
+  // ★適用は _bootDeco の中＝「安定IDを配った後・ユーザーが触る前」。
+  //   仕様書は「編集バーの初期化より前」と書いてあるが、このツールは起動時に自動修復
+  //   （body の移動跡はがし・保険の掃除・アニメ復旧）を走らせる。先に当てると、その修復に
+  //   パッチの結果を剥がされる。だから修復の後に当てる。
+  // ★applied は「DOMに書けた」でしかない。このカンプはクローン元CSSが !important の塊で、
+  //   書いても見た目が1pxも変わらないことが普通にある（実測で何度も踏んだ型）。
+  //   なので set_style は**当てる前後の computed を比べて、効かなかったものを別に数える**。
+  var CE_PATCH_REPORT=null;
+  function cePatchApply(){
+    var rep={applied:0, missing:[], rejected:[], noeffect:[], revision:0};
+    var pt=(typeof CE_PATCH!=='undefined')?CE_PATCH:null;
+    if(!pt||!pt.operations||!pt.operations.length){ CE_PATCH_REPORT=rep; return rep; }
+    rep.revision=pt.revision||0;
+    pt.operations.forEach(function(o){
+      var el=null;
+      try{ el=document.querySelector('[data-ceid="'+String(o.target).replace(/"/g,'')+'"]'); }catch(_){}
+      if(!el){ rep.missing.push(o.target); return; }
+      try{
+        if(o.op==='set_style'){
+          // ★色は color だけでは変わらない（2026-08-02・実測）。-webkit-text-fill-color が
+          //   別に指定されているとそちらが勝ち、computed の color はピンクなのに画面は黒のままになる。
+          //   ツール自身の文字色機能も両方セットしている＝パッチも合わせる。
+          var _props=(o.property==='color')?['color','-webkit-text-fill-color']:[o.property];
+          var _chk=(o.property==='color')?'-webkit-text-fill-color':o.property;
+          var was=getComputedStyle(el).getPropertyValue(_chk);
+          _props.forEach(function(pp){ el.style.setProperty(pp, o.value, o.priority==='important'?'important':''); });
+          var now=getComputedStyle(el).getPropertyValue(_chk);
+          if(was===now) rep.noeffect.push(o.target+' の '+o.property);
+        }
+        else if(o.op==='remove_style'){ el.style.removeProperty(o.property); }
+        else if(o.op==='set_attribute'){ el.setAttribute(o.name, o.value); }
+        else if(o.op==='remove_attribute'){ el.removeAttribute(o.name); }
+        else if(o.op==='replace_image'){
+          if(el.tagName==='IMG'){ el.src=o.src; if(o.alt!=null) el.alt=o.alt; }
+          else { el.style.setProperty('background-image','url("'+o.src.replace(/"/g,'')+'")','important'); }
+        }
+        else if(o.op==='set_text'){
+          // ★子要素がある物には当てない（1文字ずつのspanや飾りの入れ子が消える）
+          if(el.children.length){ rep.rejected.push(o.target+'（中に部品があるので文字だけ差し替えできません）'); return; }
+          el.textContent=o.value;
+        }
+        else if(o.op==='set_transform_state'){
+          // 編集ツールと同じ状態表現で書く（CSSだけ変えると次のドラッグで位置が飛ぶ）
+          if(o.translateX!=null) el.setAttribute('data-cetx', o.translateX);
+          if(o.translateY!=null) el.setAttribute('data-cety', o.translateY);
+          if(o.scaleX!=null) el.setAttribute('data-cesx', o.scaleX);
+          if(o.scaleY!=null) el.setAttribute('data-cesy', o.scaleY);
+          if(o.rotate!=null) el.setAttribute('data-cero', o.rotate);
+          applyTf(el);
+        }
+        else { rep.rejected.push(o.target+'（未対応の操作 '+o.op+'）'); return; }
+        rep.applied++;
+      }catch(e){ rep.rejected.push(o.target+'（'+(e&&e.message||'失敗')+'）'); }
+    });
+    CE_PATCH_REPORT=rep;
+    window.CE_PATCH_REPORT=rep;
+    if(rep.applied) markDirty();     // 保存すれば正式HTMLに取り込まれる（Phase 4で消化まで繋ぐ）
+    return rep;
+  }
+  function cePatchNotice(rep){
+    if(!msg) return;
+    if(!rep||(!rep.applied&&!rep.missing.length&&!rep.rejected.length)) return;
+    var s='🩹 Codexの修正 '+rep.applied+'件を適用しました。';
+    if(rep.noeffect.length) s+='（'+rep.noeffect.length+'件は元のCSSに負けて見た目が変わっていません）';
+    if(rep.missing.length) s+=' '+rep.missing.length+'件は対象が見つかりません。';
+    if(rep.rejected.length) s+=' '+rep.rejected.length+'件は安全に適用できないので無効にしました。';
+    msg.textContent=s+' このまま確認して💾保存してください';
+    // ★編集バーの1行メッセージは、他の起動時のお知らせにすぐ上書きされて読めない（実報告）。
+    //   画面下の通知にも出す＝こちらは他に潰されない。
+    try{ ceFlash(s); }catch(_){ }
+  }
   // ===== 🧭 パンくず（今どこを選んでいるかの道すじ・2026-08-02・要望）=====
   // ★Figma型のレイヤーツリーは作らないと決めた。実測（このカンプ）：ノード1024個・**77%がクラス名なし**
   //   ＝ツリーに出しても「div／span」の羅列で読めない。さらにツリーでの並べ替えは**DOMの親を変える**ので、
@@ -14068,6 +14510,514 @@ html.__ce_altmode{cursor:text}
   // 右クリックに5項目（手前／後ろ／食い込み＋／−／はみ出し許可）がバラバラに並んでいたのを1枚に集約。
   // ★どれも「連打して様子を見る」操作なので、板のほうが押しやすい（メニューは押すたび閉じる項目が混ざる）。
   // ★今の値（重なり順・食い込みpx）を常に出す＝押した結果が見えるので「効いていない」と誤解されない。
+  /* ══ 🦴 骨格だけ借りる（今の中身のまま、並びだけ実サイトの型に組み直す）════════
+     ★「まるごと差し替え」だと他社の文字と写真がそのまま入るので、良くなったというより
+       異物が混じって見える（実報告「ピンとこない」）。中身は今のカンプのまま、
+       **並びだけ**入れ替えるのがデザイン提案として正しい形。
+     ★型の種類と並び順は、登録済みクローン130セクションの実測分布から決めた（カード3枚29件が最頻）。
+       AIが考えた型ではなく「実在サイトで実際によく使われている型」＝偏りの解消になる。
+     ★組み直しは全部ブラウザの中で完結する＝←→を押した瞬間に変わる（サーバも課金も無し）。 */
+  var SHAPE_PATS=[
+    {id:'cards3',  name:'カード3枚ならび',        n:29, img:1},
+    {id:'textonly',name:'文章だけ・中央ぞろえ',    n:20, img:0},
+    {id:'cards2',  name:'カード2枚ならび',        n:17, img:1},
+    {id:'stack',   name:'縦に積む（見出し→写真→文章）', n:16, img:1},
+    {id:'imgright',name:'右に写真・左に文章',      n:19, img:1},
+    {id:'imgtop',  name:'上に大きい写真・下に文章', n:9,  img:1},
+    {id:'headleft',name:'左に見出し・右に本文',    n:9,  img:0},
+    {id:'imgleft', name:'左に写真・右に文章',      n:6,  img:1},
+    {id:'imgfull', name:'写真を全面・文字を重ねる', n:3,  img:1}
+  ];
+  /* ★カンプの部品は position:absolute ＋ ツールの translate が付いていることが多い（CLAUDE.md）。
+       そのまま並べ直しても1pxも動かないので、位置に関する指定を必ず落としてから組む。 */
+  function _shapeClean(el){
+    var rm=['position','top','left','right','bottom','translate','transform','rotate','scale',
+            'width','height','min-height','max-height','margin','margin-top','margin-left',
+            'float','z-index','white-space'];
+    [el].concat([].slice.call(el.querySelectorAll('*'))).forEach(function(n){
+      if(!n.style) return;
+      rm.forEach(function(p){ n.style.removeProperty(p); });
+      ['cetx','cety','cegid','cedelay'].forEach(function(a){ n.removeAttribute('data-'+a); });
+      n.classList.remove('fxa_pre','fxa_in');
+    });
+    return el;
+  }
+  /* 今のセクションから中身を拾う（見出し・本文・写真・ボタン） */
+  function _shapeParts(sec){
+    var heads=[], ps=[], imgs=[], btns=[], seen=[];
+    function txtOf(n){ var s=''; for(var i=0;i<n.childNodes.length;i++){ if(n.childNodes[i].nodeType===3) s+=n.childNodes[i].nodeValue; } return s.replace(/\s+/g,' ').trim(); }
+    [].slice.call(sec.querySelectorAll('*')).forEach(function(n){
+      if(n.closest('[id^="__ce"]')) return;
+      var cs=getComputedStyle(n);
+      if(cs.display==='none'||cs.visibility==='hidden') return;
+      if(n.tagName==='IMG'){ if(n.offsetWidth>=60&&n.offsetHeight>=60) imgs.push(n); return; }
+      var t=txtOf(n); if(t.length<2) return;
+      if(seen.indexOf(t)>=0) return; seen.push(t);
+      var fs=parseFloat(cs.fontSize)||16;
+      if((n.tagName==='A'||n.tagName==='BUTTON')&&t.length<=24) btns.push({n:n,fs:fs,len:t.length});
+      else if(/^H[1-6]$/.test(n.tagName)||t.length<8) heads.push({n:n,fs:fs,len:t.length});
+      else ps.push({n:n,fs:fs,len:t.length});
+    });
+    /* ★DOM順に取ると「署名・補足」「私たち」のような飾りラベルが先に来て、
+         肝心の見出しと本文が使われない（実測で踏んだ）。見出しは文字の大きい順、
+         本文は長い順＝ページの主役から順に並べ直す。 */
+    heads.sort(function(a,b){ return b.fs-a.fs; });
+    ps.sort(function(a,b){ return b.len-a.len; });
+    imgs.sort(function(a,b){ return b.offsetWidth*b.offsetHeight-a.offsetWidth*a.offsetHeight; });
+    function cp(list,max){ return list.slice(0,max).map(function(o){ return _shapeClean((o.n||o).cloneNode(true)); }); }
+    return {heads:cp(heads,8), ps:cp(ps,8), imgs:cp(imgs,9), btns:cp(btns,3)};
+  }
+  function _shapeImg(node,h){
+    var d=document.createElement('div');
+    d.setAttribute('style','width:100%;height:'+h+';overflow:hidden;border-radius:10px');
+    node.setAttribute('style','width:100%;height:100%;object-fit:cover;display:block');
+    d.appendChild(node); return d;
+  }
+  /* 選んだ型で組み直す。中身は clone なので何度でも作り直せる（←→の連打に耐える） */
+  function shapeMake(parts, pat){
+    var P=function(list,i){ return list[i]? list[i].cloneNode(true):null; };
+    var box=document.createElement('div');
+    box.className='ce_shapebox';
+    box.setAttribute('data-ceshape2', pat.id);
+    box.setAttribute('style','box-sizing:border-box;padding:72px 6%;width:100%');
+    var head=P(parts.heads,0), lead=P(parts.ps,0);
+    function addHead(al){
+      var w=document.createElement('div');
+      w.setAttribute('style','margin-bottom:28px'+(al?';text-align:'+al:''));
+      if(head) w.appendChild(head);
+      if(lead) w.appendChild(lead);
+      if(head||lead) box.appendChild(w);
+    }
+    function cards(cols){
+      addHead('center');
+      var g=document.createElement('div');
+      g.setAttribute('style','display:grid;grid-template-columns:repeat('+cols+',1fr);gap:32px');
+      for(var i=0;i<cols;i++){
+        var c=document.createElement('div');
+        var im=P(parts.imgs,i); if(im) c.appendChild(_shapeImg(im,'220px'));
+        var h=P(parts.heads,i+1); if(h){ h.setAttribute('style','margin:16px 0 8px'); c.appendChild(h); }
+        var p=P(parts.ps,i+1); if(p) c.appendChild(p);
+        g.appendChild(c);
+      }
+      box.appendChild(g);
+    }
+    function side(imgRight){
+      var g=document.createElement('div');
+      g.setAttribute('style','display:flex;gap:56px;align-items:center;flex-direction:'+(imgRight?'row':'row-reverse'));
+      var tx=document.createElement('div'); tx.setAttribute('style','flex:1 1 0;min-width:0');
+      if(head) tx.appendChild(head);
+      parts.ps.slice(0,2).forEach(function(n){ tx.appendChild(n.cloneNode(true)); });
+      var b=P(parts.btns,0); if(b){ b.setAttribute('style','display:inline-block;margin-top:20px'); tx.appendChild(b); }
+      var pic=document.createElement('div'); pic.setAttribute('style','flex:1 1 0;min-width:0');
+      var im=P(parts.imgs,0); if(im) pic.appendChild(_shapeImg(im,'380px'));
+      g.appendChild(tx); g.appendChild(pic); box.appendChild(g);
+    }
+    /* ★AIが作った型は「配置の指示書(JSON)」として受け取り、中身はこちらで差し込む。
+         HTMLを丸ごと書かせない＝AIが勝手に文言や写真を作れないので、
+         「中身は今のカンプのまま」という約束が絶対に破られない。 */
+    if(pat.spec){
+      var S=pat.spec;
+      function node(o){
+        if(!o||!o.type) return null;
+        var el;
+        if(o.type==='img'){ var im=P(parts.imgs, o.idx||0); if(!im) return null; el=_shapeImg(im, o.h||'300px'); }
+        else if(o.type==='head'){ el=P(parts.heads, o.idx||0); }
+        else if(o.type==='text'){ el=P(parts.ps, o.idx||0); }
+        else if(o.type==='btn'){ el=P(parts.btns, o.idx||0); }
+        else if(o.type==='group'){
+          el=document.createElement('div');
+          (o.children||[]).forEach(function(ch){ var c=node(ch); if(c) el.appendChild(c); });
+          if(!el.childNodes.length) return null;
+        } else return null;
+        if(!el) return null;
+        if(o.style) el.setAttribute('style', (el.getAttribute('style')||'')+';'+o.style);
+        return el;
+      }
+      if(S.style) box.setAttribute('style','box-sizing:border-box;padding:72px 6%;width:100%;'+S.style);
+      (S.slots||[]).forEach(function(o){ var n=node(o); if(n) box.appendChild(n); });
+      return box;
+    }
+    if(pat.id==='cards3') cards(3);
+    else if(pat.id==='cards2') cards(2);
+    else if(pat.id==='imgright') side(true);
+    else if(pat.id==='imgleft') side(false);
+    else if(pat.id==='textonly'){
+      var w=document.createElement('div');
+      w.setAttribute('style','max-width:760px;margin:0 auto;text-align:center');
+      if(head) w.appendChild(head);
+      parts.ps.slice(0,3).forEach(function(n){ w.appendChild(n.cloneNode(true)); });
+      var b0=P(parts.btns,0); if(b0){ b0.setAttribute('style','display:inline-block;margin-top:24px'); w.appendChild(b0); }
+      box.appendChild(w);
+    } else if(pat.id==='headleft'){
+      var g2=document.createElement('div');
+      g2.setAttribute('style','display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:56px');
+      var L=document.createElement('div'); if(head) L.appendChild(head);
+      var R=document.createElement('div');
+      parts.ps.slice(0,3).forEach(function(n){ R.appendChild(n.cloneNode(true)); });
+      g2.appendChild(L); g2.appendChild(R); box.appendChild(g2);
+    } else if(pat.id==='imgtop'){
+      var im2=P(parts.imgs,0); if(im2) box.appendChild(_shapeImg(im2,'420px'));
+      var w2=document.createElement('div');
+      w2.setAttribute('style','max-width:820px;margin:36px auto 0;text-align:center');
+      if(head) w2.appendChild(head);
+      parts.ps.slice(0,2).forEach(function(n){ w2.appendChild(n.cloneNode(true)); });
+      box.appendChild(w2);
+    } else if(pat.id==='stack'){
+      addHead('');
+      var im3=P(parts.imgs,0); if(im3) box.appendChild(_shapeImg(im3,'360px'));
+      var w3=document.createElement('div'); w3.setAttribute('style','margin-top:28px');
+      parts.ps.slice(1,3).forEach(function(n){ w3.appendChild(n.cloneNode(true)); });
+      box.appendChild(w3);
+    } else if(pat.id==='imgfull'){
+      box.setAttribute('style','box-sizing:border-box;padding:0;width:100%;position:relative;min-height:480px;overflow:hidden;border-radius:12px');
+      var im4=P(parts.imgs,0);
+      if(im4){ im4.setAttribute('style','position:absolute;inset:0;width:100%;height:100%;object-fit:cover'); box.appendChild(im4); }
+      var ov=document.createElement('div');
+      ov.setAttribute('style','position:absolute;inset:0;background:rgba(0,0,0,.35)');
+      box.appendChild(ov);
+      var w4=document.createElement('div');
+      w4.setAttribute('style','position:relative;z-index:2;min-height:480px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:40px 8%');
+      if(head){ head.style.color='#fff'; w4.appendChild(head); }
+      var p4=P(parts.ps,0); if(p4){ p4.style.color='#fff'; w4.appendChild(p4); }
+      box.appendChild(w4);
+    }
+    return box;
+  }
+  /* ★セクションの高さ固定を外す。カンプは height:1095px のように固定されていることが多く、
+       外さないと組み直した中身が上に潰れて「下がぜんぶ空き地」になる（実測で踏んだ）。
+       元の値は data-ceshapeh に控えて ⟲ で戻す。 */
+  function _shapeFreeH(sec){
+    /* ★height だけでなく min-height も控える。カンプの高さは min-height で決まっていることが
+         多く（実測：min-height:1095px）、控え忘れると ⟲ で戻した時に 900px(=100vh) に落ちて
+         「元に戻したのに高さが違う」になる。 */
+    if(sec.getAttribute('data-ceshapeh')==null){
+      sec.setAttribute('data-ceshapeh', sec.style.getPropertyValue('height')||'');
+      sec.setAttribute('data-ceshapemh', sec.style.getPropertyValue('min-height')||'');
+    }
+    sec.style.setProperty('height','auto','important');
+    sec.style.setProperty('min-height','0','important');
+  }
+  function shapeBuild(sec, parts, pat){
+    var box=shapeMake(parts, pat);
+    _shapeFreeH(sec);
+    sec.innerHTML='';
+    sec.appendChild(box);
+    return box;
+  }
+  /* ══ 🎲AI製の型カタログ（サーバに貯めてある分を並びに足す）══════════════
+     ★同じidを二度足さない。パネルを開くたびに読み込むので、しないと同じ型が増殖する。 */
+  function shapeAddPat(it){
+    if(!it||!it.spec) return null;
+    for(var i=0;i<SHAPE_PATS.length;i++){ if(SHAPE_PATS[i].libid===it.id) return SHAPE_PATS[i]; }
+    var p={id:it.id, libid:it.id, name:'🎲 '+it.name, n:0, spec:it.spec, need:it.need||null, ai:1};
+    SHAPE_PATS.push(p); return p;
+  }
+  function shapeLibLoad(cb){
+    fetch('/api/shape_lib').then(function(r){ return r.json(); }).then(function(d){
+      (d.items||[]).forEach(shapeAddPat);
+      cb && cb(d.items||[]);
+    }).catch(function(){ cb && cb([]); });
+  }
+  /* この型が「今の中身の個数」に合っているか（合わないとスカスカ／余る） */
+  function shapeFit(pat, parts){
+    if(!pat.need) return '';
+    var n=pat.need, w=[];
+    if((n.imgs||0)>parts.imgs.length) w.push('写真が'+((n.imgs||0)-parts.imgs.length)+'枚足りません');
+    if((n.heads||0)>parts.heads.length) w.push('見出しが足りません');
+    if((n.texts||0)>parts.ps.length) w.push('本文が足りません');
+    return w.join('・');
+  }
+
+  /* ══ 🔳 9種を一度に並べて見比べる ══════════════════════════════
+     ★型の名前だけ出しても素人には見た目が想像できない（実報告「思い浮かばない」）。
+       1つずつ当てて見る方式だと、前の型が消えるので**比べられない**のが根本。
+     ★ミニ見本は**セクションの中に描く**のが要点。パネルの中（body直下）に描くと
+       `.section.about h3{…}` のような「祖先ありき」のCSSが当たらず、
+       見本だけ素の文字になって別物に見える。中に描けば本番と同じCSSが効く。 */
+  function shapeGallery(sec, parts, onPick){
+    _shapeFreeH(sec);
+    var W=sec.offsetWidth||1440, cols=3, gap=14;
+    var tileW=Math.floor((W-gap*(cols+1))/cols), sc=tileW/W;
+    sec.innerHTML='';
+    var wrap=document.createElement('div');
+    wrap.setAttribute('style','padding:'+gap+'px;display:grid;grid-template-columns:repeat('+cols+',1fr);gap:'+gap+'px;background:#f7f9fb');
+    SHAPE_PATS.forEach(function(pat,i){
+      var cell=document.createElement('div');
+      cell.setAttribute('style','background:#fff;border:2px solid #dde5ee;border-radius:10px;overflow:hidden;cursor:pointer');
+      cell.setAttribute('data-shpick', i);
+      var cap=document.createElement('div');
+      cap.setAttribute('style','padding:7px 10px;font:bold 13px/1.4 system-ui,sans-serif;color:#1d1d1f;background:'+(pat.ai?'#efecff':'#eef3f8')+';display:flex;align-items:center;gap:6px');
+      var lab=document.createElement('span');
+      lab.setAttribute('style','pointer-events:none;flex:1;min-width:0');
+      var bad=pat.ai? shapeFit(pat, parts):'';
+      lab.textContent=(i+1)+'. '+pat.name+(pat.ai?'（AI作）':'（実サイト'+pat.n+'件）')+(bad?' ⚠'+bad:'');
+      if(bad) lab.style.color='#a15c00';
+      cap.appendChild(lab);
+      if(pat.ai&&pat.libid){                       /* AI製だけ捨てられる（既定の9種は消せない） */
+        var del=document.createElement('span');
+        del.setAttribute('style','cursor:pointer;opacity:.55;font-size:14px;padding:0 2px');
+        del.setAttribute('data-shdel', pat.libid); del.textContent='🗑';
+        cap.appendChild(del);
+      }
+      var view=document.createElement('div');
+      view.setAttribute('style','height:230px;overflow:hidden;position:relative;pointer-events:none');
+      var inner=document.createElement('div');
+      /* 本番と同じ幅(1440px相当)で組んでから縮める＝実際の見た目そのままの縮小見本になる */
+      inner.setAttribute('style','width:'+W+'px;transform:scale('+sc.toFixed(4)+');transform-origin:top left');
+      inner.appendChild(shapeMake(parts, pat));
+      view.appendChild(inner); cell.appendChild(cap); cell.appendChild(view);
+      wrap.appendChild(cell);
+    });
+    sec.appendChild(wrap);
+    /* 🚫★タイルの上に addEventListener しても届かない。ツール側が document の capture 段で
+         mousedown を stopPropagation しているので、**wrap まで降りてこない**（実測：
+         document までは来るのに wrap には来ない＝🗑が永久に押せなかった）。
+       ★stopPropagation は「同じノードの他のリスナー」は止めないので、
+         こちらも document に付ければ必ず動く。付け替え時と板を閉じる時に必ず外すこと。 */
+    if(window.__ceGalH) document.removeEventListener('mousedown', window.__ceGalH, true);
+    window.__ceGalH=function(ev){
+      var t=ev.target;
+      if(!t||!t.closest||!sec.contains(t)) return;
+      var dn=t.closest('[data-shdel]');
+      var dl=dn&&dn.getAttribute('data-shdel');
+      if(dl){                                     /* 🗑＝カタログから消す */
+        ev.preventDefault(); ev.stopPropagation();
+        fetch('/api/shape_lib_del',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({id:dl})}).then(function(){
+          for(var i=SHAPE_PATS.length-1;i>=0;i--){ if(SHAPE_PATS[i].libid===dl) SHAPE_PATS.splice(i,1); }
+          shapeGallery(sec, parts, onPick);       /* 並べ直す */
+          if(msg) msg.textContent='🗑 型をカタログから消しました';
+        });
+        return;
+      }
+      var c=t.closest('[data-shpick]');
+      if(!c) return;
+      ev.preventDefault(); ev.stopPropagation();
+      onPick(parseInt(c.getAttribute('data-shpick'),10));
+    };
+    document.addEventListener('mousedown', window.__ceGalH, true);
+    return wrap;
+  }
+
+  /* ══ 🔀 セクションの形を変える（実サイトの候補を次々出す・2026-08-02）══════════
+     狙い：AI一本で組むとレイアウトが平均に寄って偏る。登録済みクローンから切り出した
+     「実在サイトのセクション」を候補として出すことで、確実に別の形が混ざる。
+     ★AI（Claude/GPT）は呼ばない：候補1枚ごとにAPIへ投げると課金と待ち時間が出て、
+       「テンポよく次々見る」というこの機能の価値そのものが消える。並べ替えはSigLIP（無料・ローカル）。 */
+%SECS_JS%
+  function openSecSwapPanel(el,x,y){
+    var old=document.getElementById('__ce_swp'); if(old) old.remove();
+    if(!el){ if(msg) msg.textContent='先にセクションを右クリックで選んでください'; return; }
+    var idx=-1; try{ idx=window.__ceSkelIndexOf(el); }catch(_){}
+    if(idx<0){ if(msg) msg.textContent='ここはセクションとして数えられませんでした（もう少し外側を右クリックしてください）'; return; }
+    var target=null; try{ target=window.__ceSkelSecs()[idx]; }catch(_){}
+    if(!target){ if(msg) msg.textContent='セクションが取れませんでした'; return; }
+
+    var BS='background:#eef2f7;color:#333;border:1px solid #d7e0ea;border-radius:6px;padding:6px 10px;cursor:pointer;font:12px system-ui,sans-serif';
+    var p=document.createElement('div'); p.id='__ce_swp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.3);width:430px');
+    var TB='background:#fff;color:#444;border:1px solid #d7e0ea;border-radius:6px;padding:6px 12px;cursor:pointer;font:12px system-ui,sans-serif';
+    p.innerHTML='<b>🔀 セクションの形を変える</b>'
+      +'<div style="display:flex;gap:6px;margin:8px 0 10px">'
+      +'<button data-m="shape" style="'+TB+';flex:1">🦴 型だけ借りる（中身は今のまま）</button>'
+      +'<button data-m="whole" style="'+TB+';flex:1">📦 まるごと差し替え</button></div>'
+      +'<div id="__ce_swinfo" style="opacity:.75;margin:4px 0 6px"></div>'
+      +'<div id="__ce_swshot" style="display:none;height:240px;background:#f3f5f8;border:1px solid #e3e9f0;border-radius:8px;align-items:center;justify-content:center;overflow:hidden"></div>'
+      +'<div id="__ce_swmeta" style="opacity:.7;margin:6px 0 8px;min-height:18px"></div>'
+      +'<div style="display:flex;gap:5px"><button data-a="prev" style="'+BS+';flex:1">← 前</button>'
+      +'<button data-a="next" style="'+BS+';flex:1">次 →（←→キーでも動きます）</button></div>'
+      +'<button data-a="gal" style="'+BS+';width:100%;margin-top:6px">🔳 9種を一覧で見比べる（押して選ぶ）</button>'
+      +'<button data-a="ai" style="'+BS+';width:100%;margin-top:5px;background:#4b3fd6;color:#fff;border-color:#4b3fd6">🎲 AIに新しい型を作らせる（1回 約1円）</button>'
+      +'<button data-a="apply" style="'+BS+';width:100%;margin-top:6px;background:#1a7f37;color:#fff;border-color:#1a7f37">✅ この形にする</button>'
+      +'<button data-a="undo" style="'+BS+';width:100%;margin-top:5px">⟲ 元に戻す</button>'
+      +'<label id="__ce_swrolew" style="display:block;margin-top:8px;opacity:.8"><input type="checkbox" id="__ce_swrole" checked> 同じ役割だけ出す（ヒーローにはヒーローの候補）</label>'
+      +'<div style="display:flex;margin-top:8px"><button data-x="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;margin-left:auto">閉じる</button></div>';
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    panelDrag(p);
+
+    var cands=[], cur=0;
+    var $=function(s){ return p.querySelector(s); };
+    var mode='shape', spat=0, parts=null, orig=target.innerHTML, oh0=target.offsetHeight, snap0=_hostSnap(target);
+    /* ★avoid は「貯めてある型の名前ぜんぶ」を送る。パネル内で覚えるだけだと、
+         開き直すたびにリセットされて同じような型が何度も出る。 */
+    function aiAvoid(){
+      return SHAPE_PATS.filter(function(x){ return x.ai; })
+                       .map(function(x){ return x.name.replace('🎲 ',''); }).slice(-20);
+    }
+
+    /* ── 🦴 型だけ借りるモード：押した瞬間にその場で組み直す（サーバを使わない＝一瞬） ── */
+    function shapeShow(){
+      if(!parts) parts=_shapeParts(target);
+      var pt=SHAPE_PATS[spat];
+      $('#__ce_swinfo').textContent='型 '+(spat+1)+' / '+SHAPE_PATS.length+'：'+pt.name;
+      shapeBuild(target, parts, pt);
+      requestAnimationFrame(function(){
+        var g=target.offsetHeight-oh0; if(g>2) _growHosts(snap0,g);
+        $('#__ce_swmeta').textContent='実サイト '+pt.n+' 件で使われている型 ／ 中身は今のカンプのまま（見出し'
+          +parts.heads.length+'・本文'+parts.ps.length+'・写真'+parts.imgs.length+'枚を並べ直しました）';
+      });
+    }
+    function setMode(m){
+      mode=m;
+      p.querySelectorAll('[data-m]').forEach(function(b){
+        var on=b.getAttribute('data-m')===m;
+        b.style.background=on?'#1a7f37':'#fff'; b.style.color=on?'#fff':'#444';
+        b.style.borderColor=on?'#1a7f37':'#d7e0ea';
+      });
+      $('#__ce_swshot').style.display=(m==='whole')?'flex':'none';
+      $('#__ce_swrolew').style.display=(m==='whole')?'block':'none';
+      $('#__ce_swp_apply')&&0;
+      if(m==='shape'){ shapeShow(); } else { if(!cands.length) load(); else show(); }
+    }
+    function show(){
+      if(!cands.length){ $('#__ce_swinfo').textContent='似た候補が見つかりませんでした（登録サイトを増やすと出ます）';
+        $('#__ce_swshot').innerHTML='<span style="opacity:.5">候補なし</span>'; $('#__ce_swmeta').textContent=''; return; }
+      var c=cands[cur];
+      $('#__ce_swinfo').textContent='候補 '+(cur+1)+' / '+cands.length;
+      $('#__ce_swshot').innerHTML='<img src="/api/sec_thumb/'+encodeURIComponent(c.thumb)+'" style="max-width:100%;max-height:240px;display:block">';
+      $('#__ce_swmeta').textContent='形: '+c.type_id+' ／ 雰囲気 '+Math.round(c.mood*100)+'% ・ 色 '+Math.round(c.color*100)+'%';
+    }
+    function load(){
+      $('#__ce_swinfo').textContent='候補を探しています…（このカンプを測るので初回だけ数秒かかります）';
+      fetch('/api/sec_cands',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({file:FILE, idx:idx, same_role:$('#__ce_swrole').checked})})
+       .then(function(r){ return r.json(); }).then(function(d){
+         if(!d.ok){ $('#__ce_swinfo').textContent='✗ '+(d.error||'失敗しました'); return; }
+         cands=d.cands||[]; cur=0; show();
+       }).catch(function(e){ $('#__ce_swinfo').textContent='✗ '+e; });
+    }
+    /* 貯めてある型を読み込んでから並べる（読み込み前でも既定の9種は使える） */
+    shapeLibLoad(function(items){
+      if(items.length && mode==='shape'){
+        $('#__ce_swmeta').textContent='貯めてある型 '+items.length+'個を読み込みました（←→か🔳一覧で選べます）';
+      }
+    });
+    setMode('shape');
+
+    function step(n){
+      if(mode==='shape'){ spat=(spat+n+SHAPE_PATS.length)%SHAPE_PATS.length; shapeShow(); return; }
+      if(!cands.length) return; cur=(cur+n+cands.length)%cands.length; show();
+    }
+    /* ★←→キーで送れるようにする＝「次々見る」がこの機能の本体なので、
+         毎回ボタンへマウスを運ばせない。板を閉じたら必ず外す。 */
+    function onKey(ev){
+      if(!document.contains(p)){ document.removeEventListener('keydown',onKey,true); return; }
+      if(ev.key==='ArrowRight'){ ev.preventDefault(); ev.stopPropagation(); step(1); }
+      else if(ev.key==='ArrowLeft'){ ev.preventDefault(); ev.stopPropagation(); step(-1); }
+    }
+    document.addEventListener('keydown',onKey,true);
+    /* ★Escの「最後の砦」は __close があればそれだけを呼ぶ（p.remove() は呼ばれない）。
+         後片付けだけ書いて板を消し忘れると、Escで閉じない板になる。 */
+    p.__close=function(){
+      document.removeEventListener('keydown',onKey,true);
+      if(window.__ceGalH){ document.removeEventListener('mousedown', window.__ceGalH, true); window.__ceGalH=null; }
+      p.remove();
+    };
+
+    p.addEventListener('change',function(ev){ if(ev.target.id==='__ce_swrole') load(); });
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      if(ev.target.getAttribute('data-x')){ p.__close(); return; }
+      var m=ev.target.getAttribute('data-m'); if(m){ setMode(m); return; }
+      var a=ev.target.getAttribute('data-a'); if(!a) return;
+      if(a==='prev'){ step(-1); return; }
+      if(a==='next'){ step(1); return; }
+      if(a==='gal'){
+        if(!parts) parts=_shapeParts(target);
+        $('#__ce_swinfo').textContent='🔳 9種を並べました。使いたい形を押してください';
+        $('#__ce_swmeta').textContent='※どれも中身は今のカンプのまま・並びだけ違います';
+        shapeGallery(target, parts, function(i){ spat=i; shapeShow(); });
+        try{ target.scrollIntoView({block:'center'}); }catch(_){}
+        return;
+      }
+      if(a==='ai'){
+        if(!parts) parts=_shapeParts(target);
+        var ab=ev.target; ab.disabled=true; ab.textContent='… AIが考えています（10秒ほど）';
+        fetch('/api/shape_ai',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({heads:parts.heads.map(function(n){return (n.innerText||'').trim().slice(0,40);}),
+                               texts:parts.ps.map(function(n){return (n.innerText||'').trim().slice(0,80);}),
+                               imgs:parts.imgs.length, btns:parts.btns.length,
+                               avoid:aiAvoid()})})
+         .then(function(r){ return r.json(); }).then(function(d){
+           ab.disabled=false; ab.textContent='🎲 AIに新しい型を作らせる（1回 約1円）';
+           if(!d.ok){ $('#__ce_swinfo').textContent='✗ '+(d.error||'失敗しました'); return; }
+           /* ★作った型はその場でカタログに保存する（＝リロードしても残る・別のカンプでも使える）。
+                「あとで見たい」型を作らせておいて消えるのが一番もったいない。 */
+           var need={heads:parts.heads.length, texts:parts.ps.length, imgs:parts.imgs.length, btns:parts.btns.length};
+           fetch('/api/shape_lib_add',{method:'POST',headers:{'Content-Type':'application/json'},
+             body:JSON.stringify({spec:d.spec, need:need})})
+            .then(function(r){ return r.json(); }).then(function(s){
+              var it=s.item||{id:'tmp'+Date.now(), name:d.spec.name, spec:d.spec, need:need};
+              shapeAddPat(it);
+              spat=SHAPE_PATS.length-1; shapeShow();
+              if(msg) msg.textContent='🎲 新しい型「'+it.name+'」を作って保存しました（貯めた型 '+(s.n||'?')+'個・次からも使えます）';
+            }).catch(function(){
+              shapeAddPat({id:'tmp'+Date.now(), name:d.spec.name, spec:d.spec, need:need});
+              spat=SHAPE_PATS.length-1; shapeShow();
+              if(msg) msg.textContent='🎲 型を作りました（⚠保存には失敗＝今回だけ使えます）';
+            });
+         }).catch(function(e){ ab.disabled=false; ab.textContent='🎲 AIに新しい型を作らせる（1回 約1円）'; $('#__ce_swinfo').textContent='✗ '+e; });
+        return;
+      }
+      if(a==='undo'){
+        target.innerHTML=orig; parts=null;
+        var h0=target.getAttribute('data-ceshapeh'), m0=target.getAttribute('data-ceshapemh');
+        if(h0!=null){
+          if(h0) target.style.setProperty('height',h0); else target.style.removeProperty('height');
+          if(m0) target.style.setProperty('min-height',m0); else target.style.removeProperty('min-height');
+          target.removeAttribute('data-ceshapeh'); target.removeAttribute('data-ceshapemh'); }
+        if(mode==='shape') $('#__ce_swinfo').textContent='⟲ 元の形に戻しました（←→でまた試せます）';
+        markDirty(); return;
+      }
+      if(a==='apply'){
+        if(mode==='shape'){
+          /* 型モードは押した時点で既に画面に反映済み＝ここは「確定」だけ */
+          markDirty();
+          if(msg) msg.textContent='🦴 '+SHAPE_PATS[spat].name+' に組み直しました（中身は今のカンプのまま）／💾保存で確定';
+          return;
+        }
+        var c=cands[cur]; if(!c) return;
+        var btn=ev.target; btn.textContent='… 取り出しています'; btn.disabled=true;
+        fetch('/api/sec_part',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({src_file:c.file, src_idx:c.idx})})
+         .then(function(r){ return r.json(); }).then(function(d){
+           btn.textContent='✅ この形にする'; btn.disabled=false;
+           if(!d.ok){ if(msg) msg.textContent='✗ '+(d.error||'取り出せませんでした'); return; }
+           if(!document.contains(target)){ if(msg) msg.textContent='元のセクションが見つかりません（消された可能性があります）'; return; }
+           try{ pushUndo(target.parentElement||target); }catch(_){}
+           /* CSSは <style data-cepart> で持ち込む。cleanHtml は <style> を消さないので保存版でも生きる。 */
+           if(d.css){
+             var st=document.createElement('style');
+             st.setAttribute('data-cepart', d.prefix||'swap');
+             st.textContent=d.css; document.head.appendChild(st);
+           }
+           var box=document.createElement('div'); box.innerHTML=d.html;
+           var neo=box.firstElementChild;
+           if(!neo){ if(msg) msg.textContent='中身が空でした'; return; }
+           /* ★入れ替えで背が変わると、高さを固定している先祖（article・section）が付いてこず
+                下のセクションやフッターに食い込む（§7㊺で実害あり）。既存の _hostSnap/_growHosts を通す。 */
+           var oldH=target.offsetHeight, snap=_hostSnap(target);
+           target.replaceWith(neo); target=neo;
+           requestAnimationFrame(function(){
+             /* ★高さは offsetHeight／位置は offsetTop で測る。getBoundingClientRect は
+                  出現アニメの transform を含んだ値を返すので、重なりの判定に使うと嘘が出る
+                  （検証中に自分で踏んで「141px食い込んでいる」と誤判定した）。 */
+             var grew=neo.offsetHeight-oldH;
+             var fixed=(grew>2)? _growHosts(snap, grew) : null;
+             markDirty();
+             if(msg) msg.textContent='🔀 入れ替えました（'+c.type_id+'・元サイト '+c.file.slice(0,28)+'…／高さ '
+               +oldH+'→'+neo.offsetHeight+'px'+(fixed?'・高さ固定の入れ物も伸ばしました':'')+'）／💾保存で確定・Ctrl+Zで戻せます';
+           });
+         }).catch(function(e){ btn.textContent='✅ この形にする'; btn.disabled=false; if(msg) msg.textContent='✗ '+e; });
+      }
+    });
+  }
+
+  window.__ceSecSwap=openSecSwapPanel;   // 外（検証・他の板）から呼べるように
+  window.__ceShapePats=SHAPE_PATS;       // 貯めた型の確認用
+
   function openStackPanel(el,x,y){
     var old=document.getElementById('__ce_stkp'); if(old) old.remove();
     if(!el){ if(msg) msg.textContent='先に対象を右クリックで選んでください'; return; }
@@ -14692,6 +15642,7 @@ html.__ce_altmode{cursor:text}
     e.preventDefault();
     var tpl=document.createElement('template'); tpl.innerHTML=_ceClip.html;
     var nd=tpl.content.firstElementChild; if(!nd) return;
+    try{ ceidRenew(nd); }catch(_){ }   // 🆔 複製は必ず新しい名札にする（元と重複させない）
     // ドラッグ移動の署名は複製に持ち込まない（貼った位置からさらにズレるのを防ぐ）
     ['data-cetx','data-cety','data-cero','data-cesx','data-cesy'].forEach(function(a){ nd.removeAttribute(a); });
     nd.style.removeProperty('translate');
@@ -16839,7 +17790,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu','#__ce_tbgp','#__ce_vlp','#__ce_dqp','#__ce_secp','#__ce_pkpos','#__ce_bgp','#__ce_ruler','#__ce_grab','#__ce_noanimcss','#__ce_opbar'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu','#__ce_tbgp','#__ce_vlp','#__ce_dqp','#__ce_secp','#__ce_pkpos','#__ce_bgp','#__ce_ruler','#__ce_grab','#__ce_noanimcss','#__ce_opbar','#__ce_swp'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // 飾りを選択中の青い点線（編集用の目印）が焼き込まれないように必ず外す
@@ -16956,9 +17907,21 @@ html.__ce_altmode{cursor:text}
   }
   function saveLayout(){
     var b=document.getElementById('__ce_save'); if(b) b.textContent='保存中…';
-    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:FILE,html:cleanHtml()})})
-    .then(function(r){return r.json();}).then(function(d){
+    // 🩹 共同編集（Phase 4）：開いた時点のHTMLの指紋と、当てたパッチの世代を一緒に送る。
+    //    サーバー側で食い違えば 409 になり、相手の変更を消さずに保存を中止する。
+    var _body={file:FILE, html:cleanHtml()};
+    try{
+      if(typeof CE_PATCH_BASE_SHA==='string'&&CE_PATCH_BASE_SHA) _body.baseSha256=CE_PATCH_BASE_SHA;
+      if(CE_PATCH_REPORT&&CE_PATCH_REPORT.revision) _body.appliedPatchRevision=CE_PATCH_REPORT.revision;
+    }catch(_){ }
+    fetch('/api/save_camp_html',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_body)})
+    .then(function(r){return r.json().then(function(d){ d._status=r.status; return d; });}).then(function(d){
       if(d.ok){ if(b) b.textContent='✅ 保存しました'; setTimeout(function(){location.reload();},600); }
+      else if(d._status===409){
+        // ★勝手に上書きしない。読み直してから確認してもらう
+        if(b) b.textContent='⚠ 保存を中止';
+        if(msg) msg.textContent='⚠ '+(d.message||'別の編集と競合しました');
+      }
       else { if(b) b.textContent='⚠ 失敗：'+(d.message||''); }
     }).catch(function(){ if(b) b.textContent='⚠ 通信エラー'; });
   }
@@ -17979,6 +18942,7 @@ html.__ce_altmode{cursor:text}
     // ★セクション系7項目（保存/追加/入れ替え/削除/背景色/境目の形/境目の表示）は
     //   「🧩 セクション（保存・追加・入れ替え・削除・背景色・境目）」の板へまとめた（2026-08-02）。
     ['__ce_q_sec','🧩 セクション（保存・追加・入れ替え・削除・背景色・境目）'],
+    ['__ce_q_secswap','🔀 このセクションの形を変える（実サイトの候補を次々・AIなし）'],
     ['__ce_q_pickov','🎯 重なっている要素から選ぶ（下の層）'],
     ['__ce_q_del','🗑 この要素を削除'],
     // ★手前/後ろ・食い込み＋/−・はみ出し許可の5項目は「🔼 重なり・食い込みを調整」の板へまとめた（2026-08-02）。
@@ -18010,7 +18974,7 @@ html.__ce_altmode{cursor:text}
   var QM_DEF_LAYOUT=[
     'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_edit','__ce_q_img','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_deco','__ce_q_psgrab',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
-    'sep:🧩 セクション','__ce_q_sec',
+    'sep:🧩 セクション','__ce_q_sec','__ce_q_secswap',
     'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_stack','__ce_q_pin','__ce_q_unfix','__ce_q_overpass','__ce_q_photoband','__ce_q_bandpat',
     'sep:🧹 整える・消す','__ce_q_hfix','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_pal','__ce_q_gapfix','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
@@ -19933,6 +20897,7 @@ html.__ce_altmode{cursor:text}
       if(t.id==='__ce_q_dly'){ var dle=curEl; closeMenu(); dlyOpen(dle,qx,qy); return; }
       // 🧩セクション系（保存/追加/入れ替え/削除/背景色/境目の形/境目の表示）は1枚の板へ集約（2026-08-02）
       if(t.id==='__ce_q_sec'){ var _sce=curEl; closeMenu(); openSectionPanel(_sce,qx,qy); return; }
+      if(t.id==='__ce_q_secswap'){ var _swe=curEl; closeMenu(); openSecSwapPanel(_swe,qx,qy); return; }
       if(t.id==='__ce_q_ref'){ var rse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); refOpen(rse); return; }
       if(t.id==='__ce_q_dcq'){ var dse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); dcqOpen(dse); return; }
       if(t.id==='__ce_q_brush'){ var bsi=curEl?secIndexOf(curEl):-1; closeMenu(); brushOpen(bsi); return; }
@@ -20214,7 +21179,7 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
@@ -21031,8 +21996,26 @@ def _inject_edit_bar(html: str, filename: str) -> str:
     # 最新版はfxa要素を除外する→既存ファイルもこの差し替えで直る。
     html = _SAFE_BLOCK_RE.sub(lambda m: camp._REVIEW_FALLBACK, html)
     html = _upgrade_opening(html, editing=True)   # 幕→ヒーローの順番を当てる＋編集中は幕を流さない
+    # 🩹 Codexパッチ（共同編集 Phase 3）。読めない・壊れている時は握りつぶして従来どおり開く
+    #    （パッチのせいでカンプが開けなくなるのが一番困る）。パッチが無ければ完全に従来と同じ。
+    from . import camp_patch as _cpatch
+    try:
+        _pdata = _cpatch.load(filename)
+    except Exception as _e:                      # noqa: BLE001
+        _pdata = {"_error": str(_e)}
+    try:
+        _sha = _cpatch.sha256_of(config.CAMP_DIR / filename)
+    except Exception:                            # noqa: BLE001
+        _sha = ""
+    # ★セクションの数え方は skeleton.py の1本だけを正とする（サーバ側の型辞書と番号を合わせる）。
+    #   ここでコピーを書くと、片方だけ直した時に番号が1個ずれて別のセクションが入れ替わる。
+    from . import skeleton as _skel
+
     bar = _SERVE_SAFETY + _EDIT_BAR.replace("%FILE_JSON%", _json.dumps(filename)).replace(
-        "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider))
+        "%EDIT_PROVIDER_JSON%", _json.dumps(config.CONFIG.htmlgen.edit_provider)).replace(
+        "%PATCH_JSON%", _json.dumps(_pdata)).replace(
+        "%SHA_JSON%", _json.dumps(_sha)).replace(
+        "%SECS_JS%", _skel.SECS_JS)
     low = html.lower()
     if "</body>" in low:
         i = low.rfind("</body>")

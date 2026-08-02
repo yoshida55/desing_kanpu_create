@@ -1,0 +1,148 @@
+[
+ {
+  "id": "ai56198357",
+  "name": "段丘回遊ストーリー",
+  "spec": {
+   "name": "段丘回遊ストーリー",
+   "slots": [
+    {
+     "children": [
+      {
+       "idx": 6,
+       "style": "text-align:left",
+       "type": "head"
+      },
+      {
+       "idx": 4,
+       "style": "max-width:640px",
+       "type": "text"
+      },
+      {
+       "idx": 5,
+       "style": "margin-left:auto;max-width:480px",
+       "type": "text"
+      },
+      {
+       "h": "520px",
+       "idx": 0,
+       "style": "aspect-ratio:4/5;border-radius:24px;overflow:hidden",
+       "type": "img"
+      }
+     ],
+     "style": "display:flex;flex-direction:column;gap:24px",
+     "type": "group"
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "idx": 0,
+         "style": "text-align:right",
+         "type": "head"
+        },
+        {
+         "idx": 3,
+         "style": "text-align:left",
+         "type": "head"
+        },
+        {
+         "idx": 1,
+         "style": "max-width:420px",
+         "type": "text"
+        }
+       ],
+       "style": "display:flex;flex-direction:column;gap:12px",
+       "type": "group"
+      },
+      {
+       "children": [
+        {
+         "idx": 1,
+         "style": "text-align:right",
+         "type": "head"
+        },
+        {
+         "idx": 5,
+         "style": "text-align:left",
+         "type": "head"
+        },
+        {
+         "idx": 3,
+         "style": "max-width:420px",
+         "type": "text"
+        }
+       ],
+       "style": "display:flex;flex-direction:column;gap:12px;margin-left:32px",
+       "type": "group"
+      },
+      {
+       "children": [
+        {
+         "idx": 2,
+         "style": "text-align:right",
+         "type": "head"
+        },
+        {
+         "idx": 4,
+         "style": "text-align:left",
+         "type": "head"
+        },
+        {
+         "idx": 2,
+         "style": "max-width:420px",
+         "type": "text"
+        }
+       ],
+       "style": "display:flex;flex-direction:column;gap:12px;margin-right:32px",
+       "type": "group"
+      }
+     ],
+     "style": "display:flex;flex-direction:column;gap:56px;padding:80px 0 0",
+     "type": "group"
+    },
+    {
+     "children": [
+      {
+       "children": [
+        {
+         "idx": 6,
+         "style": "margin-left:auto",
+         "type": "text"
+        },
+        {
+         "idx": 7,
+         "style": "margin-left:auto",
+         "type": "text"
+        }
+       ],
+       "style": "display:flex;flex-direction:column;gap:8px;text-align:right",
+       "type": "group"
+      },
+      {
+       "children": [
+        {
+         "idx": 7,
+         "style": "text-align:left",
+         "type": "head"
+        }
+       ],
+       "style": "display:flex;flex-direction:column;gap:12px;padding:24px 0 0",
+       "type": "group"
+      }
+     ],
+     "style": "display:grid;grid-template-columns:1fr 2fr;gap:32px;align-items:end;margin:48px 0 0;grid-column:1/3",
+     "type": "group"
+    }
+   ],
+   "style": "display:grid;grid-template-columns:2fr 1fr;gap:40px;align-items:start;max-width:1200px;margin:0 auto;padding:48px 24px"
+  },
+  "need": {
+   "heads": 8,
+   "texts": 8,
+   "imgs": 1,
+   "btns": 0
+  },
+  "created": "2026-08-02 16:36"
+ }
+]

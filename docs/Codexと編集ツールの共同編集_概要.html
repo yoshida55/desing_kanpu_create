@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codexと編集ツールの共同編集 — 処理の流れ</title>
+  <style>
+    :root {
+      --ink: #24342c;
+      --muted: #65736c;
+      --green: #5f966f;
+      --green-dark: #376149;
+      --green-soft: #eaf5ec;
+      --blue: #3e8298;
+      --blue-soft: #e8f5f8;
+      --amber: #a36d18;
+      --amber-soft: #fff4d9;
+      --red: #a34d4d;
+      --red-soft: #fff0ee;
+      --paper: #fffefb;
+      --line: #d9e4dc;
+      --shadow: 0 18px 45px rgba(48, 70, 57, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 3%, rgba(170, 215, 180, .25), transparent 24rem),
+        radial-gradient(circle at 94% 16%, rgba(168, 220, 232, .23), transparent 26rem),
+        #f6f8f4;
+      font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+      line-height: 1.7;
+    }
+
+    a { color: var(--green-dark); }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 42px 0 72px;
+    }
+
+    .hero,
+    .panel {
+      background: rgba(255, 254, 251, .94);
+      border: 1px solid rgba(95, 150, 111, .18);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: clamp(28px, 5vw, 56px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      right: -90px;
+      top: -110px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, rgba(131, 190, 147, .28), rgba(126, 200, 219, .15));
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--green);
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(28px, 5vw, 50px);
+      line-height: 1.3;
+      letter-spacing: .02em;
+    }
+
+    .lead {
+      max-width: 840px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 19px);
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .badge.warn { color: var(--amber); background: var(--amber-soft); }
+    .badge.good { color: var(--green-dark); background: var(--green-soft); }
+
+    .summary {
+      margin-top: 24px;
+      padding: 18px 20px;
+      border-left: 5px solid var(--green);
+      border-radius: 12px;
+      background: var(--green-soft);
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 58px 0 18px;
+      font-size: clamp(23px, 3vw, 31px);
+      line-height: 1.4;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr 46px 1fr 46px 1fr 46px 1fr;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .step {
+      min-width: 0;
+      padding: 24px 20px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--paper);
+      box-shadow: 0 10px 28px rgba(48, 70, 57, .07);
+    }
+
+    .step.tool { border-top: 6px solid var(--green); }
+    .step.codex { border-top: 6px solid var(--blue); }
+    .step.merge { border-top: 6px solid #8d75ab; }
+
+    .num {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      margin-bottom: 12px;
+      border-radius: 50%;
+      color: white;
+      background: var(--green);
+      font-weight: 900;
+    }
+
+    .codex .num { background: var(--blue); }
+    .merge .num { background: #8d75ab; }
+
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      line-height: 1.4;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .arrow {
+      display: grid;
+      place-items: center;
+      color: var(--green);
+      font-size: 30px;
+      font-weight: 900;
+    }
+
+    .loop {
+      margin: 18px auto 0;
+      padding: 12px 18px;
+      text-align: center;
+      color: var(--green-dark);
+      font-weight: 800;
+    }
+
+    .file-map {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .file-card {
+      padding: 24px;
+      border-radius: 20px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .file-card h3 { margin: 0 0 10px; }
+    .file-card p { margin: 8px 0 0; color: var(--muted); }
+    .file-card strong { color: var(--ink); }
+    .file-card.primary { border-color: #9bc4a4; background: #fbfffb; }
+    .file-card.patch { border-color: #99cad5; background: #fbfeff; }
+    .file-card.retired { border-color: #e5b3ad; background: #fffafa; }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(36, 52, 44, .07);
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: .9em;
+      overflow-wrap: anywhere;
+    }
+
+    .panel { padding: clamp(22px, 4vw, 38px); }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .do,
+    .dont {
+      padding: 22px;
+      border-radius: 17px;
+    }
+
+    .do { background: var(--green-soft); }
+    .dont { background: var(--red-soft); }
+    .do h3, .dont h3 { margin-top: 0; }
+
+    ul { margin: 10px 0 0; padding-left: 1.4em; }
+    li + li { margin-top: 7px; }
+
+    .warning {
+      margin-top: 24px;
+      padding: 22px 24px;
+      border: 2px solid #e6bd6c;
+      border-radius: 18px;
+      background: var(--amber-soft);
+    }
+
+    .warning h3 { margin: 0 0 6px; color: #82540f; }
+    .warning p { margin: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      background: var(--paper);
+      box-shadow: 0 8px 24px rgba(48, 70, 57, .06);
+    }
+
+    th, td {
+      padding: 15px 17px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th { background: #edf4ee; }
+    tr:last-child td { border-bottom: 0; }
+
+    .footer {
+      margin-top: 40px;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .footer a {
+      display: inline-block;
+      padding: 10px 16px;
+      border: 1px solid #9ab7a1;
+      border-radius: 10px;
+      background: white;
+      font-weight: 750;
+      text-decoration: none;
+    }
+
+    @media (max-width: 920px) {
+      .flow { grid-template-columns: 1fr; gap: 10px; }
+      .arrow { transform: rotate(90deg); min-height: 34px; }
+      .file-map { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 650px) {
+      .page { width: min(100% - 20px, 1180px); padding-top: 18px; }
+      .hero, .panel { border-radius: 17px; }
+      .two-col { grid-template-columns: 1fr; }
+      table { font-size: 14px; }
+      th, td { padding: 12px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Visual editor × Codex</p>
+      <h1>同じページを、壊さず交互に編集する仕組み</h1>
+      <p class="lead">
+        編集ツールは正式なHTMLを保存し、CodexはそのHTMLを直接書き換えずに
+        「どこを、どう直すか」というパッチを作ります。次にツールで開いたとき、
+        パッチが先に反映されるため、そのまま編集を続けられます。
+      </p>
+      <div class="badges">
+        <span class="badge warn">● 現在は仕様段階・機能は未実装</span>
+        <span class="badge good">● 完成後はコピー運用不要</span>
+      </div>
+      <div class="summary">
+        結論：対象は同じページ。ただし、ツールとCodexが同じHTMLを同時に直接書き換えるわけではありません。
+      </div>
+    </header>
+
+    <section aria-labelledby="flow-title">
+      <h2 id="flow-title">処理の流れ</h2>
+      <div class="flow">
+        <article class="step tool">
+          <span class="num">1</span>
+          <h3>ツールで編集・保存</h3>
+          <p>ユーザーが要素を移動し、文字や画像を変更します。正式なキャンプHTMLへ保存します。</p>
+        </article>
+        <div class="arrow" aria-hidden="true">→</div>
+        <article class="step codex">
+          <span class="num">2</span>
+          <h3>Codexがパッチを作る</h3>
+          <p>安定IDで対象を確認し、位置・余白・文字・画像などの安全な変更だけを別ファイルへ記録します。</p>
+        </article>
+        <div class="arrow" aria-hidden="true">→</div>
+        <article class="step tool">
+          <span class="num">3</span>
+          <h3>ツールで再び開く</h3>
+          <p>編集機能が始まる前にパッチを適用します。ツールからは、修正済みの通常要素として見えます。</p>
+        </article>
+        <div class="arrow" aria-hidden="true">→</div>
+        <article class="step merge">
+          <span class="num">4</span>
+          <h3>確認・再編集・正式保存</h3>
+          <p>ユーザーがさらに編集できます。保存成功後、変更をHTMLへ統合し、パッチは消化済みにします。</p>
+        </article>
+      </div>
+      <div class="loop">↻ 必要なだけ「ツール → Codex → ツール」を繰り返す</div>
+    </section>
+
+    <section aria-labelledby="files-title">
+      <h2 id="files-title">どのファイルを使うのか</h2>
+      <div class="file-map">
+        <article class="file-card primary">
+          <h3>① 正式なキャンプHTML</h3>
+          <p><strong>ツールが保存する本体。</strong></p>
+          <p>最終的な正本は一つだけです。コピーを本番として並行管理しません。</p>
+        </article>
+        <article class="file-card patch">
+          <h3>② Codexパッチ</h3>
+          <p><strong>Codexが作る一時的な変更指示。</strong></p>
+          <p><code>data/camp_patches/*.patch.json</code> を想定。ツール保存後は消化済みになります。</p>
+        </article>
+        <article class="file-card retired">
+          <h3>③ codex_test</h3>
+          <p><strong>以前の試作用コピー。</strong></p>
+          <p>本番の共同編集では使いません。パッチ機能が完成するまでの参考資料にすぎません。</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="roles-title">
+      <h2 id="roles-title">ツールとCodexの役割</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>担当</th>
+            <th>行うこと</th>
+            <th>行わないこと</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>編集ツール</strong></td>
+            <td>HTMLの表示、選択、移動、編集、パッチの取込み、正式保存</td>
+            <td>世代が古いHTMLやパッチを強制上書きしない</td>
+          </tr>
+          <tr>
+            <td><strong>Codex</strong></td>
+            <td>対象IDを確認し、検証済みの位置・文字・画像・装飾パッチを作成</td>
+            <td>本番HTMLの直接書換え、任意のdiv追加・削除、編集用属性の破壊</td>
+          </tr>
+          <tr>
+            <td><strong>ユーザー</strong></td>
+            <td>ツールとCodexを交互に使い、結果を確認して正式保存</td>
+            <td>同じページをツールとCodexで同時進行させない</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section aria-labelledby="safe-title">
+      <h2 id="safe-title">安全に往復するための約束</h2>
+      <div class="panel two-col">
+        <div class="do">
+          <h3>できること</h3>
+          <ul>
+            <li>位置・大きさ・余白・文字組みを整える</li>
+            <li>色・背景・枠線・角丸・影を調整する</li>
+            <li>文字や画像を安全な方法で差し替える</li>
+            <li>ツールで再編集し、同じHTMLへ正式保存する</li>
+          </ul>
+        </div>
+        <div class="dont">
+          <h3>初期版ではしないこと</h3>
+          <ul>
+            <li>Codexによる本番HTMLの直接編集</li>
+            <li>任意のdiv追加・削除・親子関係の変更</li>
+            <li><code>innerHTML</code> やスクリプトの自由挿入</li>
+            <li>競合を無視した強制上書き</li>
+          </ul>
+        </div>
+      </div>
+
+      <aside class="warning">
+        <h3>同時編集は避ける</h3>
+        <p>
+          「ツールで保存 → Codexがパッチ作成 → ツールで確認・保存」の順で進めます。
+          念のため世代の不一致もシステム側で検出し、変更を失う可能性がある保存は停止します。
+        </p>
+      </aside>
+    </section>
+
+    <section aria-labelledby="now-title">
+      <h2 id="now-title">現在と完成後の違い</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>現在</th>
+            <th>共同編集機能の完成後</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Codexの修正</strong></td>
+            <td>試作コピーでの確認が中心</td>
+            <td>同じ対象ページ用の安全なパッチを作成</td>
+          </tr>
+          <tr>
+            <td><strong>codex_test</strong></td>
+            <td>過去の試作・参考</td>
+            <td>本番運用では不要</td>
+          </tr>
+          <tr>
+            <td><strong>ツールへ戻る</strong></td>
+            <td>直接変更したHTMLでは動作保証なし</td>
+            <td>パッチ反映後も選択・移動・保存可能</td>
+          </tr>
+          <tr>
+            <td><strong>競合時</strong></td>
+            <td>運用で避ける</td>
+            <td>ハッシュとrevisionで検出し、安全に停止</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="footer">
+      <p>
+        このHTMLは概要資料です。実装の細かな条件、例外、テスト項目はMarkdown仕様書を正とします。
+      </p>
+      <a href="./Codexと編集ツールの共同編集仕様書.md">詳細な共同編集仕様書を開く</a>
+    </footer>
+  </main>
+</body>
+</html>
