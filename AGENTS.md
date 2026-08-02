@@ -42,6 +42,51 @@ The specification above is the source of truth for this co-editing workflow.
 If it conflicts with the current implementation, inspect the current code and report
 the difference before changing behavior. Do not silently weaken the safety rules.
 
+## Mandatory uncertainty disclosure
+
+- Never fill gaps in understanding with a confident guess. If the specification,
+  current implementation, supported operation, or round-trip safety is not fully
+  understood or verified, explicitly tell the user `分かりません` or `未確認です`
+  before proceeding.
+- Clearly distinguish facts confirmed from the specification or code, inferences,
+  and unknowns. Rendering correctly in a browser is not evidence that the visual
+  editor can select, move, save, and reopen the same structure safely.
+- Before changing a canonical camp HTML file, classify the proposed change as a
+  validated patch operation, an explicitly authorized risky direct edit, or an
+  unknown/unsupported operation. Stop on unknown/unsupported operations unless the
+  user knowingly authorizes the exact risky direct edit.
+- Do not claim that a preview can be promoted, that the editor will understand it,
+  or that saving is safe without concrete verification. When verification has not
+  been completed, say so plainly even if that pauses the task.
+
+## Save handoff communication
+
+- Never leave the user to infer whether the visual editor may save. At every
+  Codex/tool handoff, explicitly say either `まだ保存しないでください` or
+  `いま「変更を保存」を押してOKです`.
+- While Codex is inspecting, editing, generating, or validating a camp patch, tell
+  the user not to save from the visual editor.
+- After a patch has been validated and Codex has finished its turn of editing, give
+  the exact `/camp/` URL as plain, unmasked text and explicitly tell the user to
+  review it and press `変更を保存` once if it looks correct.
+- Do not describe a pending patch as adopted into the canonical HTML until the user
+  has saved it successfully. Before starting the next Codex edit, check patch/save
+  status again.
+- Write local preview URLs directly in chat so the user can copy and paste them;
+  do not provide only a Markdown link with a substituted label.
+
+## Durable user design preferences
+
+- Before proposing or changing a design comp, read
+  `D:\50_knowledge\各種資料\03_デザイン\design_ルールブック.md` and use its
+  recorded preferences and process.
+- The user has authorized Codex to record reusable design preferences as they emerge.
+  When the user repeatedly approves, rejects, or explains the reason for a visual
+  choice, append a concise dated note to that design rulebook without asking again.
+- Record durable tendencies and the reason behind them, not every temporary choice
+  made for one page. Keep detailed preferences in the design rulebook and keep this
+  `AGENTS.md` limited to the recording workflow.
+
 ## Design-comp purpose and review viewport
 
 - Pages served from `/camp/` are editable design comps, not the final artifacts

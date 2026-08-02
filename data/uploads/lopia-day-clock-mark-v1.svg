@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="時間の流れ">
+  <circle cx="48" cy="48" r="45" fill="#fffdf8"/>
+  <path d="M25 26a31 31 0 1 0 13-8" fill="none" stroke="#254c43" stroke-width="8" stroke-linecap="round"/>
+  <path d="M18 15v18h18" fill="none" stroke="#254c43" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M48 29v20l14-13" fill="none" stroke="#254c43" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="48" cy="49" r="5" fill="#e97667"/>
+</svg>

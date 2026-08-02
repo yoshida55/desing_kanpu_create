@@ -17813,6 +17813,15 @@ html.__ce_altmode{cursor:text}
     // ブラウザ拡張機能（Glasp等）がページに注入したUIが紛れ込むと、保存のたびに増殖してファイルが重くなる。
     // 編集UI以外の"見た目に無関係な"拡張機能の断片はここで丸ごと除去する。
     [].slice.call(doc.querySelectorAll('[class*="glasp-extension"]')).forEach(function(n){ n.remove(); });
+    // 🚫★一覧の行に触れた時に出す「赤い枠」(#ff3b30)が焼き込まれる事故を防ぐ（2026-08-03・実報告）。
+    //   ➖飾りを消す／🎯重なり／⇔ズレ直し などの行は mouseenter で赤枠を付け mouseleave で外すが、
+    //   **枠が付いたままメニューが閉じると外す処理が走らない**。そのまま💾保存すると
+    //   `outline: rgb(255,59,48) solid 2px !important` が残り、カンプに赤い線が焼き付く
+    //   （実測：高さ0の<p>に付いていて「消せない赤い線」に見えた）。色で見分けて必ず外す。
+    [].slice.call(doc.querySelectorAll('[style*="255, 59, 48"],[style*="255,59,48"],[style*="ff3b30"]')).forEach(function(n){
+      var o=(n.style.getPropertyValue('outline')||'');
+      if(/255,\s*59,\s*48|ff3b30/i.test(o)){ n.style.removeProperty('outline'); n.style.removeProperty('outline-offset'); }
+    });
     [].slice.call(doc.querySelectorAll('.__ce_sel,.__ce_hl,.__ce_sechl,.__ce_busy')).forEach(function(n){n.classList.remove('__ce_sel','__ce_hl','__ce_sechl','__ce_busy');});
     // プレビュー用アニメ(__ceax_*)は一時的なものなので保存に残さない（クラス・インライン両方）
     [].slice.call(doc.querySelectorAll('[class*="__ceax_"]')).forEach(function(n){ [].slice.call(n.classList).forEach(function(cl){ if(cl.indexOf('__ceax_')===0) n.classList.remove(cl); }); });
@@ -18253,10 +18262,21 @@ html.__ce_altmode{cursor:text}
       if(r.width<5||r.height<5) continue;
       if(r.bottom<0||r.top>window.innerHeight) continue;            // 画面の外にあるものは出さない
       if(mustHit && (x<r.left||x>r.right||y<r.top||y>r.bottom)) continue;
-      // ★「絵」だけに限る（文字を持つ箱や空のdivは拾わない）＝文字の上を右クリックした時に
-      //   飾りが横取りする誤爆を防ぐ。実測で空divに横取りされたので条件を絞った。
+      // ★拾うのは「絵」と「自分で文字を持っている飾り」だけ。空のdivは拾わない
+      //   （実測で空divに横取りされたので絞った経緯がある）。
+      // 🚫★文字を全部弾いてはいけない（2026-08-03・実報告「英語の大きい文字がEで編集できない」）。
+      //   実測：装飾の大見出し span.lw2-work__ghost「DIGITAL WORK」は pointer-events:none。
+      //   pointer-events:none の要素は elementsFromPoint に出てこないので、
+      //   ここで弾くと **🎯「ここに重なっているもの」にも一生出てこない＝選ぶ手段がゼロ**になる。
+      //   （CLAUDE.mdの「すり抜ける飾りは🎯で押せば起こせる」が、文字の飾りでは成立していなかった）
+      var _ownTxt=false;
+      for(var _ci=0;_ci<e.childNodes.length;_ci++){
+        var _cn=e.childNodes[_ci];
+        if(_cn.nodeType===3&&(_cn.nodeValue||'').replace(/[\\s\\u200b]/g,'')){ _ownTxt=true; break; }
+      }
       var isArt=/^(IMG|SVG|CANVAS|VIDEO|PICTURE)$/.test(e.tagName)
-        || (cs.backgroundImage&&cs.backgroundImage!=='none'&&cs.backgroundImage.indexOf('gradient')<0);
+        || (cs.backgroundImage&&cs.backgroundImage!=='none'&&cs.backgroundImage.indexOf('gradient')<0)
+        || _ownTxt;
       if(!isArt) continue;
       if(r.width*r.height > window.innerWidth*window.innerHeight*0.6) continue;  // 画面いっぱいの膜は掴まない
       if(mustHit && e.tagName==='IMG' && _clearPixel(e,x,y)) continue;           // 透明な部分は掴まない
@@ -18943,6 +18963,10 @@ html.__ce_altmode{cursor:text}
     //   「🧩 セクション（保存・追加・入れ替え・削除・背景色・境目）」の板へまとめた（2026-08-02）。
     ['__ce_q_sec','🧩 セクション（保存・追加・入れ替え・削除・背景色・境目）'],
     ['__ce_q_secswap','🔀 このセクションの形を変える（実サイトの候補を次々・AIなし）'],
+    // 🚫★セクション/ヘッダー/フッターは「普通のドラッグ」では動かせないガードがある（§7⑮の事故対策）。
+    //   案内は「右クリック→🖱掴んで動かす」だったのに、その項目がクイックメニューに無く
+    //   **動かす手段が存在しなかった**（2026-08-03・実報告「セクションをつかんで左に持ってこれない」）。
+    ['__ce_q_drag','🖱 掴んで動かす（押してからドラッグ／セクションはこれで動かす）'],
     ['__ce_q_pickov','🎯 重なっている要素から選ぶ（下の層）'],
     ['__ce_q_del','🗑 この要素を削除'],
     // ★手前/後ろ・食い込み＋/−・はみ出し許可の5項目は「🔼 重なり・食い込みを調整」の板へまとめた（2026-08-02）。
@@ -18975,7 +18999,7 @@ html.__ce_altmode{cursor:text}
     'sep:➕ 要素を足す・変える','__ce_q_txt','__ce_q_edit','__ce_q_img','__ce_q_photo','__ce_q_slide','__ce_q_addline','__ce_q_deco','__ce_q_psgrab',
     'sep:✨ 動き・演出','__ce_q_fx','__ce_q_fly','__ce_q_dly','__ce_q_gaya',
     'sep:🧩 セクション','__ce_q_sec','__ce_q_secswap',
-    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_pickov','__ce_q_stack','__ce_q_pin','__ce_q_unfix','__ce_q_overpass','__ce_q_photoband','__ce_q_bandpat',
+    'sep:🎯 選ぶ・重なり','__ce_q_up','__ce_q_drag','__ce_q_pickov','__ce_q_stack','__ce_q_pin','__ce_q_unfix','__ce_q_overpass','__ce_q_photoband','__ce_q_bandpat',
     'sep:🧹 整える・消す','__ce_q_hfix','__ce_q_heroout','__ce_q_frmfit','__ce_q_align','__ce_q_pskill','__ce_q_pal','__ce_q_gapfix','__ce_q_fxrm','__ce_q_rst','__ce_q_del',
     'sep:🤖 AIに頼む','__ce_q_ref','__ce_q_dcq','__ce_q_brush'
   ];
@@ -20898,6 +20922,14 @@ html.__ce_altmode{cursor:text}
       // 🧩セクション系（保存/追加/入れ替え/削除/背景色/境目の形/境目の表示）は1枚の板へ集約（2026-08-02）
       if(t.id==='__ce_q_sec'){ var _sce=curEl; closeMenu(); openSectionPanel(_sce,qx,qy); return; }
       if(t.id==='__ce_q_secswap'){ var _swe=curEl; closeMenu(); openSecSwapPanel(_swe,qx,qy); return; }
+      // 🖱 掴んで動かす：セクション等はガードで普通ドラッグを止めてあるので、ここで明示的に許可する
+      if(t.id==='__ce_q_drag'){
+        var _dre=curEl; closeMenu();
+        if(!_dre){ if(msg) msg.textContent='先に動かしたいものを右クリックで選んでください'; return; }
+        setDragOn(_dre,null);
+        if(msg) msg.textContent='🖱 掴んで動かせます（そのままドラッグ／矢印キーでも動きます・💾保存で確定）';
+        return;
+      }
       if(t.id==='__ce_q_ref'){ var rse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); refOpen(rse); return; }
       if(t.id==='__ce_q_dcq'){ var dse=curEl&&curEl.closest?curEl.closest('section,header,footer'):null; closeMenu(); dcqOpen(dse); return; }
       if(t.id==='__ce_q_brush'){ var bsi=curEl?secIndexOf(curEl):-1; closeMenu(); brushOpen(bsi); return; }

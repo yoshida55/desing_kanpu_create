@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "targetFile": "camp_lopia_codex_work_20260802_171659.html",
+  "baseSha256": "57af9a7c1c2df7ff97ce4a3cacf71cf74474afc857f071c9f2f331d364690ced",
+  "revision": 5,
+  "createdBy": "codex",
+  "createdAt": "2026-08-02T19:34:14+09:00",
+  "updatedAt": "2026-08-02T19:34:14+09:00",
+  "operations": [
+    {
+      "op": "set_style",
+      "target": "ce_msb6l7sovj1zgy",
+      "property": "background-image",
+      "value": "linear-gradient(rgba(244,239,227,.75),rgba(244,239,227,.75)),url(/uploads/lopia-watercolor-botanicals-v1.png),url(/uploads/lopia-watercolor-botanicals-v1.png),linear-gradient(rgba(24,63,52,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(24,63,52,.035) 1px,transparent 1px)",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msb6l7sovj1zgy",
+      "property": "background-size",
+      "value": "auto,780px auto,590px auto,54px 54px,54px 54px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msb6l7sovj1zgy",
+      "property": "background-position",
+      "value": "0 0,right -130px top -120px,left -180px bottom -110px,0 0,0 0",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msb6l7sovj1zgy",
+      "property": "background-repeat",
+      "value": "no-repeat,no-repeat,no-repeat,repeat,repeat",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msb6l7sovj1zgy",
+      "property": "background-color",
+      "value": "#f4efe3",
+      "priority": "important"
+    }
+  ]
+}
