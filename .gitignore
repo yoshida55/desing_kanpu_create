@@ -9,3 +9,10 @@ data/camps/*_files/
 data/camps/figma/
 results.html
 .env
+
+# 🔀セクションの形を変える（skeleton）
+# ★index.json / vecs.npy / thumbs / ai_shapes.json は同期する。
+#   会社PCは clone_*_files（画像）を持っていないので型辞書を作り直せない＝
+#   ここを同期しないと会社では候補が1件も出ない。
+# ★_camp/ は編集中カンプごとの一時キャッシュ。開くたびに作り直されるので同期しない。
+data/skeleton/_camp/

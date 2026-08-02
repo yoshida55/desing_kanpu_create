@@ -7,7 +7,7 @@
 読む人へ：`CLAUDE.md` は**設計の約束と落とし穴**、`docs/実装履歴.md` は**なぜそう作ったか・試してダメだった案**の記録で、
 どちらも機能一覧ではありません。「何ができるか」を知りたいならこのファイルだけで足ります。
 
-規模: 右クリック 35項目 / 編集バー 33項目 / APIパス 90本 / モジュール 30本
+規模: 右クリック 35項目 / 編集バー 33項目 / APIパス 93本 / モジュール 30本
 
 💰=AIを呼ぶ（お金がかかる） ／ 無料=AIを使わない。ほとんどの操作は無料です。
 
@@ -130,7 +130,7 @@
 
 ## 4. APIエンドポイント
 
-<details><summary>全90本（クリックで展開）</summary>
+<details><summary>全93本（クリックで展開）</summary>
 
 - `/`
 - `/anim/<site_id>/<path:filename>`
@@ -196,6 +196,9 @@
 - `/api/section_fav/save`
 - `/api/settings`
 - `/api/shape_ai`
+- `/api/shape_lib`
+- `/api/shape_lib_add`
+- `/api/shape_lib_del`
 - `/api/shortcuts`
 - `/api/similar`
 - `/api/site/<site_id>`

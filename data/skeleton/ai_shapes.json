@@ -1,35 +1,93 @@
 [
  {
-  "id": "ai56198357",
-  "name": "段丘回遊ストーリー",
+  "id": "ai56478591",
+  "name": "斜行する物語の小径",
   "spec": {
-   "name": "段丘回遊ストーリー",
+   "name": "斜行する物語の小径",
    "slots": [
     {
      "children": [
       {
+       "idx": 4,
+       "style": "margin:0",
+       "type": "text"
+      },
+      {
        "idx": 6,
-       "style": "text-align:left",
+       "style": "margin:0",
        "type": "head"
       },
       {
-       "idx": 4,
-       "style": "max-width:640px",
+       "idx": 5,
+       "style": "margin:0",
        "type": "text"
+      },
+      {
+       "idx": 6,
+       "style": "margin:16px 0 0",
+       "type": "text"
+      }
+     ],
+     "style": "display:flex;flex-direction:column;gap:16px;grid-column:1;max-width:680px",
+     "type": "group"
+    },
+    {
+     "h": "460px",
+     "idx": 0,
+     "style": "grid-column:2;grid-row:1 / span 2;aspect-ratio:3 / 4;border-radius:24px;overflow:hidden;margin:72px 0 0",
+     "type": "img"
+    },
+    {
+     "children": [
+      {
+       "idx": 0,
+       "style": "margin:0;text-align:right",
+       "type": "head"
+      },
+      {
+       "children": [
+        {
+         "idx": 3,
+         "style": "margin:0",
+         "type": "head"
+        },
+        {
+         "idx": 0,
+         "style": "margin:0",
+         "type": "text"
+        },
+        {
+         "idx": 1,
+         "style": "margin:0",
+         "type": "text"
+        }
+       ],
+       "style": "display:flex;flex-direction:column;gap:14px;padding:24px 0",
+       "type": "group"
+      }
+     ],
+     "style": "display:grid;grid-template-columns:minmax(0,0.28fr) minmax(0,0.72fr);gap:20px;grid-column:1;align-items:start",
+     "type": "group"
+    },
+    {
+     "children": [
+      {
+       "idx": 1,
+       "style": "margin:0",
+       "type": "head"
       },
       {
        "idx": 5,
-       "style": "margin-left:auto;max-width:480px",
-       "type": "text"
+       "style": "margin:0",
+       "type": "head"
       },
       {
-       "h": "520px",
-       "idx": 0,
-       "style": "aspect-ratio:4/5;border-radius:24px;overflow:hidden",
-       "type": "img"
+       "idx": 2,
+       "style": "margin:0",
+       "type": "text"
       }
      ],
-     "style": "display:flex;flex-direction:column;gap:24px",
+     "style": "display:flex;flex-direction:column;gap:18px;grid-column:2;max-width:440px;margin:0 0 0 auto;padding:0 0 48px",
      "type": "group"
     },
     {
@@ -37,105 +95,56 @@
       {
        "children": [
         {
-         "idx": 0,
-         "style": "text-align:right",
-         "type": "head"
-        },
-        {
-         "idx": 3,
-         "style": "text-align:left",
-         "type": "head"
-        },
-        {
-         "idx": 1,
-         "style": "max-width:420px",
-         "type": "text"
-        }
-       ],
-       "style": "display:flex;flex-direction:column;gap:12px",
-       "type": "group"
-      },
-      {
-       "children": [
-        {
-         "idx": 1,
-         "style": "text-align:right",
-         "type": "head"
-        },
-        {
-         "idx": 5,
-         "style": "text-align:left",
-         "type": "head"
-        },
-        {
-         "idx": 3,
-         "style": "max-width:420px",
-         "type": "text"
-        }
-       ],
-       "style": "display:flex;flex-direction:column;gap:12px;margin-left:32px",
-       "type": "group"
-      },
-      {
-       "children": [
-        {
          "idx": 2,
-         "style": "text-align:right",
+         "style": "margin:0",
          "type": "head"
         },
         {
          "idx": 4,
-         "style": "text-align:left",
+         "style": "margin:0",
          "type": "head"
         },
         {
-         "idx": 2,
-         "style": "max-width:420px",
+         "idx": 3,
+         "style": "margin:0",
          "type": "text"
         }
        ],
-       "style": "display:flex;flex-direction:column;gap:12px;margin-right:32px",
+       "style": "display:flex;flex-direction:column;gap:16px",
        "type": "group"
+      },
+      {
+       "idx": 7,
+       "style": "margin:0;text-align:right",
+       "type": "text"
       }
      ],
-     "style": "display:flex;flex-direction:column;gap:56px;padding:80px 0 0",
+     "style": "display:grid;grid-template-columns:minmax(0,0.7fr) minmax(0,0.3fr);gap:28px;grid-column:1 / span 2;align-items:end;max-width:920px;margin:0 auto 0 0;padding:32px 0",
      "type": "group"
     },
     {
      "children": [
       {
-       "children": [
-        {
-         "idx": 6,
-         "style": "margin-left:auto",
-         "type": "text"
-        },
-        {
-         "idx": 7,
-         "style": "margin-left:auto",
-         "type": "text"
-        }
-       ],
-       "style": "display:flex;flex-direction:column;gap:8px;text-align:right",
-       "type": "group"
+       "idx": 7,
+       "style": "margin:0",
+       "type": "head"
       },
       {
-       "children": [
-        {
-         "idx": 7,
-         "style": "text-align:left",
-         "type": "head"
-        }
-       ],
-       "style": "display:flex;flex-direction:column;gap:12px;padding:24px 0 0",
-       "type": "group"
+       "idx": 6,
+       "style": "margin:0",
+       "type": "text"
+      },
+      {
+       "idx": 7,
+       "style": "margin:0",
+       "type": "text"
       }
      ],
-     "style": "display:grid;grid-template-columns:1fr 2fr;gap:32px;align-items:end;margin:48px 0 0;grid-column:1/3",
+     "style": "display:flex;flex-direction:column;gap:12px;grid-column:2;align-items:flex-end;text-align:right;margin:24px 0 0",
      "type": "group"
     }
    ],
-   "style": "display:grid;grid-template-columns:2fr 1fr;gap:40px;align-items:start;max-width:1200px;margin:0 auto;padding:48px 24px"
+   "style": "display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,0.7fr);gap:72px 32px;align-items:start;max-width:1200px;margin:0 auto;padding:48px 24px"
   },
   "need": {
    "heads": 8,
@@ -143,6 +152,136 @@
    "imgs": 1,
    "btns": 0
   },
-  "created": "2026-08-02 16:36"
+  "created": "2026-08-02 16:41"
+ },
+ {
+  "id": "ai56769172",
+  "name": "段差で巡る作業風景",
+  "spec": {
+   "name": "段差で巡る作業風景",
+   "slots": [
+    {
+     "children": [
+      {
+       "idx": 0,
+       "style": "grid-column:1 / 5;margin:0 0 12px 0",
+       "type": "head"
+      },
+      {
+       "idx": 0,
+       "style": "grid-column:2 / 7;max-width:520px",
+       "type": "text"
+      },
+      {
+       "h": "420px",
+       "idx": 0,
+       "style": "grid-column:1 / 6;aspect-ratio:4 / 3;border-radius:24px;overflow:hidden",
+       "type": "img"
+      },
+      {
+       "h": "240px",
+       "idx": 1,
+       "style": "grid-column:6 / 8;aspect-ratio:3 / 4;border-radius:24px;overflow:hidden;margin:0 0 36px 0",
+       "type": "img"
+      }
+     ],
+     "style": "display:grid;grid-template-columns:repeat(7,1fr);gap:20px;grid-column:1 / 9;align-items:end",
+     "type": "group"
+    },
+    {
+     "children": [
+      {
+       "idx": 4,
+       "style": "max-width:240px",
+       "type": "text"
+      },
+      {
+       "h": "300px",
+       "idx": 2,
+       "style": "aspect-ratio:3 / 4;border-radius:24px;overflow:hidden",
+       "type": "img"
+      },
+      {
+       "idx": 3,
+       "style": "text-align:right;margin:0 0 0 auto",
+       "type": "text"
+      }
+     ],
+     "style": "display:flex;flex-direction:column;gap:20px;grid-column:9 / 13;margin:96px 0 0 0",
+     "type": "group"
+    },
+    {
+     "h": "260px",
+     "idx": 3,
+     "style": "grid-column:2 / 5;aspect-ratio:1 / 1;border-radius:24px;overflow:hidden;margin:24px 0 0 0",
+     "type": "img"
+    },
+    {
+     "h": "340px",
+     "idx": 4,
+     "style": "grid-column:5 / 9;aspect-ratio:4 / 5;border-radius:24px;overflow:hidden;margin:88px 0 0 0",
+     "type": "img"
+    },
+    {
+     "children": [
+      {
+       "idx": 1,
+       "style": "grid-column:1 / 6;text-align:right",
+       "type": "head"
+      },
+      {
+       "idx": 1,
+       "style": "grid-column:2 / 6;max-width:420px;margin:0 0 0 auto;text-align:right",
+       "type": "text"
+      },
+      {
+       "h": "280px",
+       "idx": 5,
+       "style": "grid-column:1 / 4;aspect-ratio:4 / 3;border-radius:24px;overflow:hidden",
+       "type": "img"
+      },
+      {
+       "h": "220px",
+       "idx": 6,
+       "style": "grid-column:4 / 6;aspect-ratio:1 / 1;border-radius:24px;overflow:hidden;margin:60px 0 0 0",
+       "type": "img"
+      }
+     ],
+     "style": "display:grid;grid-template-columns:repeat(5,1fr);gap:20px;grid-column:8 / 13;margin:28px 0 0 0;align-items:start",
+     "type": "group"
+    },
+    {
+     "children": [
+      {
+       "h": "360px",
+       "idx": 7,
+       "style": "grid-column:1 / 6;aspect-ratio:16 / 10;border-radius:24px;overflow:hidden",
+       "type": "img"
+      },
+      {
+       "idx": 2,
+       "style": "grid-column:6 / 9;max-width:300px;text-align:center",
+       "type": "text"
+      },
+      {
+       "h": "250px",
+       "idx": 8,
+       "style": "grid-column:8 / 10;aspect-ratio:3 / 4;border-radius:24px;overflow:hidden;margin:72px 0 0 0",
+       "type": "img"
+      }
+     ],
+     "style": "display:grid;grid-template-columns:repeat(9,1fr);gap:24px;grid-column:1 / 11;margin:40px 0 0 0;align-items:center",
+     "type": "group"
+    }
+   ],
+   "style": "display:grid;grid-template-columns:repeat(12,1fr);gap:32px;align-items:start;max-width:1200px;margin:0 auto;padding:40px"
+  },
+  "need": {
+   "heads": 2,
+   "texts": 5,
+   "imgs": 9,
+   "btns": 0
+  },
+  "created": "2026-08-02 16:46"
  }
 ]
