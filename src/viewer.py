@@ -10760,6 +10760,14 @@ html.__ce_altmode{cursor:text}
         ov.style.padding='12px';
         ov.style.justifyContent=((r.left+r.width/2) < vw/2) ? 'flex-end' : 'flex-start';
         ov.style.alignItems='flex-start';   // 縦は上寄せ＝縦長パネルでも上から全部見える
+        // ★右に寄せた時は編集バーの下まで下げる（2026-08-02・要望「一番上だと編集バーに隠れて操作できない」）。
+        //   編集バーは z-index が実質最大（§7㊱）なので、パネルを上げても勝てない＝**避けるのが正解**。
+        //   高さは畳んでいるか開いているかで変わるので、決め打ちせず実際の下端を測る。
+        var _bar=document.getElementById('__ce');
+        var _br=_bar?_bar.getBoundingClientRect():null;
+        var _right=(ov.style.justifyContent==='flex-end');
+        if(_right&&_br&&_br.bottom>0&&_br.width>0)
+          ov.style.paddingTop=Math.min(Math.round(_br.bottom)+10, Math.round(window.innerHeight*0.45))+'px';
       }catch(_){}
     })();
     // 🎨 ページで実際に使われている文字色（頻度順10色）＝ここから選べば色が統一できる
@@ -13798,6 +13806,97 @@ html.__ce_altmode{cursor:text}
     else if(el.tagName==='IMG') t+='（写真）';
     return t;
   }
+  // 🩺 「選んだのに見えない」理由を一言で返す（2026-08-02・報告「コピーした図形が、手前にしても出ない」）。
+  // ★見えない原因は数が決まっている。当てずっぽうで「手前に」を押し続けるより、原因を名指しするほうが早い。
+  //   先祖までさかのぼって見る（自分は opacity:1 でも、親が0なら見えない・§7㉝で実際に踏んだ型）。
+  // 自分を閉じ込めている「重なりの土台（stacking context）」の先祖を返す（無ければ null）。
+  // ★ここに閉じ込められていると、中の要素は z-index をいくつにしても外の物より前に出られない。
+  //   実測：section.top01 に translate:0px 253px（ドラッグの跡）が残っていて、
+  //   中の図形を z-index:9999 にしても隣のセクションより後ろのままだった。
+  function _stackRoot(el){
+    try{
+      var q=el&&el.parentElement, lim=0;
+      while(q&&q!==document.documentElement&&lim++<14){
+        var s=getComputedStyle(q);
+        var made=(s.translate&&s.translate!=='none')||(s.transform&&s.transform!=='none')
+              ||(s.rotate&&s.rotate!=='none'&&s.rotate!=='0deg')||(s.scale&&s.scale!=='none'&&s.scale!=='1')
+              ||(s.filter&&s.filter!=='none')||(parseFloat(s.opacity)<1)
+              ||(s.isolation==='isolate')||(s.willChange&&/transform|opacity|filter/.test(s.willChange))
+              ||(s.mixBlendMode&&s.mixBlendMode!=='normal')||(s.perspective&&s.perspective!=='none')
+              ||(s.contain&&/paint|layout|strict|content/.test(s.contain))
+              ||(s.position!=='static'&&s.zIndex!=='auto');
+        if(made) return q;
+        q=q.parentElement;
+      }
+    }catch(_){}
+    return null;
+  }
+  function _whyInvisible(el){
+    try{
+      if(!el||el.nodeType!==1) return '';
+      var r=el.getBoundingClientRect();
+      if(r.width<2||r.height<2) return '大きさがほぼ0です（■ハンドルを引いて広げてください）';
+      var q=el, lim=0;
+      while(q&&q!==document.documentElement&&lim++<12){
+        var s=getComputedStyle(q);
+        var who=(q===el)?'':('親の〈'+q.tagName.toLowerCase()+'〉が');
+        if(s.display==='none') return who+'非表示(display:none)になっています';
+        if(s.visibility!=='visible') return who+'非表示(visibility)になっています';
+        if(parseFloat(s.opacity)<0.05) return who+'透明(opacity:'+s.opacity+')になっています'
+          +(q===el?'（⏳動きの演出が再生されていない時にも起きます）':'');
+        q=q.parentElement;
+      }
+      var c=getComputedStyle(el);
+      var bg=c.backgroundColor||'', bi=c.backgroundImage||'';
+      var noPaint=/^rgba\\(0, 0, 0, 0\\)$|^transparent$/.test(bg) && (!bi||bi==='none')
+                  && !(el.textContent||'').trim() && !(parseFloat(c.borderTopWidth)>0)
+                  && el.tagName!=='IMG' && !el.children.length;
+      if(noPaint) return '色も絵も枠も入っていない空の箱です（左クリックで色を選べます）';
+      // ★親の overflow で切り取られていないかを、覆われ判定より**先に**見る（2026-08-02・実報告
+      //   「別のセクションへ動かしたら消えた。⏫一発で手前へ を押しても出てこない」）。
+      //   実測：図形は `section.top01{overflow:hidden}` の中にあり、ドラッグでその箱の外へ出ていた。
+      //   ＝**重なり順の問題ではないので「手前に」では永久に直らない**。ここを先に言わないと、
+      //   「覆われています」と誤診して、効かないボタンを押させ続けることになる（実際にそうなっていた）。
+      var q2=el.parentElement, lim2=0;
+      while(q2&&q2!==document.documentElement&&lim2++<12){
+        var s2=getComputedStyle(q2);
+        if(/hidden|clip|auto|scroll/.test(''+s2.overflow+s2.overflowX+s2.overflowY)){
+          var qr=q2.getBoundingClientRect();
+          if(qr.width>1&&qr.height>1&&(r.right<qr.left||r.left>qr.right||r.bottom<qr.top||r.top>qr.bottom)){
+            var nm2=q2.tagName.toLowerCase()+(q2.className?('.'+(q2.className+'').split(' ')[0]):'');
+            return '〈'+nm2+'〉の外へ出たので切り取られています（重なりでは直りません：'
+                 +'🔼重なり →🔦 とにかく出す）';
+          }
+        }
+        q2=q2.parentElement;
+      }
+      // 中心と四隅を見て、全部が「自分ではない不透明な物」なら覆われている
+      var pts=[[r.left+r.width/2,r.top+r.height/2],[r.left+4,r.top+4],[r.right-4,r.bottom-4]];
+      var cover=null, n=0;
+      for(var i=0;i<pts.length;i++){
+        var x=pts[i][0], y=pts[i][1];
+        if(x<0||y<0||x>window.innerWidth||y>window.innerHeight) return '';   // 画面の外＝判定できない
+        var t=document.elementFromPoint(x,y);
+        if(!t||t===el||el.contains(t)||(t.closest&&t.closest('[id^="__ce"]'))) continue;
+        n++; cover=t;
+      }
+      if(n===pts.length&&cover){
+        var cn='〈'+cover.tagName.toLowerCase()+(cover.className?('.'+(cover.className+'').split(' ')[0]):'')+'〉';
+        // ★z-indexで勝てるかどうかを先に見る（2026-08-02・報告「10006まで上げても出ない」）。
+        //   自分と相手の間に「重なりの土台(stacking context)」があると、**どんな数字にしても勝てない**。
+        //   土台を作るのは translate/transform/filter/opacity<1/will-change/isolation/contain、
+        //   および「位置指定つき＋z-indexが数値」の要素。ここを言わないと⏫を押させ続けることになる。
+        var sc=_stackRoot(el);
+        if(sc&&!sc.contains(cover)){
+          var sn='〈'+sc.tagName.toLowerCase()+(sc.className?('.'+(sc.className+'').split(' ')[0]):'')+'〉';
+          return cn+'に覆われています。'+sn+'が重なりの土台を作っているので、'
+               +'数字をいくつ上げても前に出られません（🔼重なり →🔦 とにかく出す）';
+        }
+        return cn+'に覆われています（🔼重なり・食い込みを調整 →⏫ 一発で手前へ）';
+      }
+      return '';
+    }catch(_){ return ''; }
+  }
   function crumbShow(el){
     var old=document.getElementById('__ce_crumb'); if(old) old.remove();
     crumbLight(null);
@@ -13827,9 +13926,16 @@ html.__ce_altmode{cursor:text}
         +'padding:3px 7px;font:'+(last?'700':'400')+' 12px system-ui,sans-serif;'
         +(last?'background:#2b7fff;color:#fff':'background:rgba(255,255,255,.12);color:#e8e8ee')+'">'+esc(crumbLabel(n))+'</button>';
     });
+    // ★選んだのに見えない時だけ、理由をその場に出す（当てずっぽうで「手前に」を押させない）
+    var _wi=_whyInvisible(el);
+    if(_wi){
+      html+='<span id="__ce_crumbwhy" style="flex:none;margin-left:8px;background:#b8530a;color:#fff;'
+           +'border-radius:6px;padding:3px 8px;font-size:11.5px">🩺 '+esc(_wi)+'</span>';
+    }
     html+='<button id="__ce_crumbx" title="閉じる" style="flex:none;margin-left:6px;border:0;background:none;color:#aaa;cursor:pointer;font-size:14px">✕</button>';
     b.innerHTML=html;
     document.body.appendChild(b);
+    if(_wi&&msg) msg.textContent='🩺 選んだものが見えていません：'+_wi;
     b.addEventListener('mouseover',function(ev){
       var t=ev.target.closest('.__crb'); if(!t) return;
       crumbLight(path[+t.getAttribute('data-i')]);
@@ -13979,6 +14085,9 @@ html.__ce_altmode{cursor:text}
       +'<button data-a="ovdn" style="'+BS+';flex:1">⬇ 戻す</button></div>'
       +'<div style="opacity:.7;margin-top:10px">写真の上下が切れている時</div>'
       +'<button data-a="ovshow" style="'+BS+';width:100%;margin-top:3px">📤 切れてる画像を全部見せる（はみ出し許可）</button>'
+      // ★「見えない」は原因が1つとは限らない（実測：切り取り解除だけでは足りず、次は別のDIVが上に来た）。
+      //   素人に2手を順番に踏ませない＝**まとめて全部やる1ボタン**を置く。結果は必ず測って伝える。
+      +'<button data-a="reveal" style="'+BS+';width:100%;margin-top:5px;background:#1a7f37;color:#fff;border-color:#1a7f37">🔦 見えないので とにかく出す（切り取り解除＋手前へ）</button>'
       +'<div style="display:flex;margin-top:10px"><button data-x="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;margin-left:auto">閉じる</button></div>';
     document.body.appendChild(p);
     p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
@@ -14010,6 +14119,71 @@ html.__ce_altmode{cursor:text}
         el.style.setProperty('margin-top', Math.round(mt)+'px','important');
         markDirty();
         if(msg) msg.textContent='⬆ 食い込み: '+Math.round(mt)+'px（マイナスほど上に重なる・💾保存で確定）';
+      } else if(a==='reveal'){
+        // ★「別のセクションへドラッグしたら消えた」の正しい直し方は**引っ越し**（2026-08-02・実測で判明）。
+        //   実測した原因は2つ重なっていた：
+        //     ①元のセクション `section.top01{overflow:hidden}` の外へ出たので切り取られる
+        //     ②そのセクションに**ドラッグの跡 translate:0px 253px** が残っていて**重なりの土台**を作る
+        //       → 中の要素は z-index を 9999 にしても、次のセクションより前には出られない（実測で確認）
+        //   ＝z-index をいじる方向では絶対に直らない。**今いる場所のセクションへ入れ直す**のが正解。
+        //   引っ越しは placeFree（見た目の位置を保ったまま入れ直す）に任せる＝新規追加と同じ道を通る。
+        var st=[], rr0=el.getBoundingClientRect();
+        var oldHost=el.parentElement;
+        var px0=(window.scrollX||window.pageXOffset||0)+rr0.left;
+        var py0=(window.scrollY||window.pageYOffset||0)+rr0.top;
+        ['data-cetx','data-cety'].forEach(function(a2){ el.removeAttribute(a2); });
+        el.style.removeProperty('translate'); el.style.removeProperty('z-index');
+        try{ placeFree(el,px0,py0); }catch(_){}      // 中で _toFrontHere まで面倒を見る
+        if(el.parentElement!==oldHost)
+          st.push('〈'+(el.parentElement?el.parentElement.tagName.toLowerCase():'?')+'〉の中へ引っ越しました（見た目の位置はそのまま）');
+        else st.push('引っ越し先が変わりませんでした');
+        // まだ透明なら戻す（先祖まで見る）
+        var pe=el, pl=0;
+        while(pe&&pe!==document.documentElement&&pl++<12){
+          if(parseFloat(getComputedStyle(pe).opacity)<0.05){ pe.style.setProperty('opacity','1','important'); st.push('透明だったので戻しました'); }
+          pe=pe.parentElement;
+        }
+        markDirty();
+        setTimeout(function(){
+          // ★確かめる時はツールのUI（この板そのもの）を数えない。数えると、板が図形の上に
+          //   出ているだけで「まだ見えません」と誤って言う（実測で踏んだ）。
+          var seeOk=function(){
+            var rr=el.getBoundingClientRect();
+            var list=document.elementsFromPoint(rr.left+rr.width/2, rr.top+rr.height/2)||[];
+            for(var i=0;i<list.length;i++){
+              var t2=list[i];
+              if(t2.closest&&t2.closest('[id^="__ce"]')) continue;   // ツールのUIは無視
+              return (t2===el||el.contains(t2));
+            }
+            return false;
+          };
+          var okv=seeOk();
+          if(!okv){ _toFrontHere(el); okv=seeOk(); if(okv) st.push('さらに手前へ出しました'); }
+          // ★最後の手段：「重なりの土台」に閉じ込められている時は、数字では絶対に勝てないので
+          //   **土台の外（body直下）へ出す**（2026-08-02・報告「10006まで上げても出ない」）。
+          //   見た目の位置はページ座標で固定して保つ。ここまでやれば必ず前に出る。
+          if(!okv){
+            var sc2=_stackRoot(el);
+            if(sc2){
+              var rr2=el.getBoundingClientRect();
+              var ax=(window.scrollX||window.pageXOffset||0)+rr2.left;
+              var ay=(window.scrollY||window.pageYOffset||0)+rr2.top;
+              ['data-cetx','data-cety'].forEach(function(a3){ el.removeAttribute(a3); });
+              el.style.removeProperty('translate');
+              el.style.setProperty('position','absolute','important');
+              el.style.setProperty('left',Math.round(ax)+'px','important');
+              el.style.setProperty('top',Math.round(ay)+'px','important');
+              el.style.removeProperty('right'); el.style.removeProperty('bottom');
+              document.body.appendChild(el);
+              _toFrontHere(el);
+              okv=seeOk();
+              if(okv) st.push('〈'+sc2.tagName.toLowerCase()+'〉が重なりの土台だったので、その外へ出しました');
+            }
+          }
+          if(msg) msg.textContent='🔦 '+st.join('／')+'。'+(okv?'見えるようになりました（💾保存で確定）'
+            :'それでも出てきません → 🩺の理由をもう一度見てください（色が入っていない／大きさが0 の可能性）');
+          nowShow();
+        },60);
       } else if(a==='ovshow'){
         // 親の overflow:hidden（枠からはみ出た部分を刈り取る設定）をセクションまで遡って解除。
         // 画像の上下が切れて見える時の定番原因。重なり順では直らないタイプ。
