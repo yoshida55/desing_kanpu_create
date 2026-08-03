@@ -5332,12 +5332,131 @@ html.__ce_altmode{cursor:text}
   var opEditBtn=document.getElementById('__ce_op_edit');
   if(opEditBtn) opEditBtn.addEventListener('click',toggleOpening);
   // ⭐このセクションをお気に入り（右クリックメニューから呼ぶ・2026-07-12に編集バーから移設）
+  // 🧾 名前を聞く小さな板（window.prompt の代わり）
+  //   🚫★window.prompt を使ってはいけない（2026-08-04・実報告「上の三つは保存できない」）。
+  //     Chrome は同じページで続けてダイアログを出すと「このページでは今後表示しない」を出し、
+  //     一度選ばれると prompt() は**以後ずっと null を返す**。呼び出し側は「やめる」と区別できず
+  //     黙って return する＝**押しても何も起きない**（1回目だけ成功したように見える）。
+  //     同じ地雷は2026-07-30に別の箇所で踏んで潰してある（4244行のコメント）。ここが残っていた。
+  function _askName(title, def, cb, extra){
+    var old=document.getElementById('__ce_askname'); if(old) old.remove();
+    var p=document.createElement('div'); p.id='__ce_askname';
+    p.setAttribute('style','position:fixed;left:50%;top:80px;transform:translateX(-50%);z-index:2147483647;'
+      +'background:#fff;border:1px solid #ccc;border-radius:12px;padding:14px 16px;'
+      +'box-shadow:0 14px 40px rgba(0,0,0,.3);font:13px/1.6 system-ui,sans-serif;min-width:380px');
+    p.innerHTML='<div style="font-weight:700;margin-bottom:4px">'+esc(title)+'</div>'
+      +'<div style="opacity:.7;font-size:12px;margin-bottom:8px">別のカンプの同じ枠に、AIなしで入れ替えできます。</div>'
+      +'<input id="__ce_asknamei" style="width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid #bbb;border-radius:7px;font-size:14px">'
+      +(extra?('<label style="display:flex;align-items:flex-start;gap:6px;margin-top:10px;cursor:pointer;background:#f4f7f4;border-radius:8px;padding:8px 10px">'
+        +'<input type="checkbox" id="__ce_asknamex" style="margin-top:3px"'+(extra.checked?' checked':'')+'>'
+        +'<span style="font-size:12.5px">'+esc(extra.label)+'</span></label>'):'')
+      +'<div style="margin-top:10px;text-align:right">'
+      +'<button id="__ce_asknamec" style="border:1px solid #ddd;border-radius:7px;padding:5px 12px;cursor:pointer;background:#f2f2f4">やめる</button>'
+      +'<button id="__ce_asknameo" style="margin-left:6px;border:0;border-radius:7px;padding:5px 14px;cursor:pointer;background:#1a7f37;color:#fff;font-weight:700">保存</button></div>';
+    document.body.appendChild(p);
+    var i=p.querySelector('#__ce_asknamei'); i.value=def||'';
+    try{ i.focus(); i.select(); }catch(_){ }
+    function _cl(){ try{ p.remove(); }catch(_){ } }
+    function _chk(){ var c=p.querySelector('#__ce_asknamex'); return c?!!c.checked:false; }
+    function _ok(){ var v=i.value, c=_chk(); _cl(); cb(v, c); }
+    p.querySelector('#__ce_asknamec').addEventListener('click',function(e){ e.stopPropagation(); _cl(); });
+    p.querySelector('#__ce_asknameo').addEventListener('click',function(e){ e.stopPropagation(); _ok(); });
+    // ★入力中はツールのショートカット（t/e/i/s…）に食われないよう必ず止める
+    i.addEventListener('keydown',function(e){ e.stopPropagation();
+      if(e.key==='Enter'){ _ok(); }
+      else if(e.key==='Escape'){ _cl(); } });
+  }
+  // 📏 見た目の帯＝自分＋子孫の矩形の合併（箱の高さでは測らない・§7-69）
+  function _favBand(el){
+    var r=el.getBoundingClientRect(), sy=(window.scrollY||0);
+    var t=r.top+sy, b=t+r.height;
+    try{
+      [].slice.call(el.querySelectorAll('*')).slice(0,600).forEach(function(k){
+        var kr=k.getBoundingClientRect(); if(kr.width<4||kr.height<4) return;
+        var kt=kr.top+sy;
+        if(kt<t) t=kt;
+        if(kt+kr.height>b) b=kt+kr.height;
+      });
+    }catch(_){ }
+    return {top:t, bot:b, rect:r};
+  }
+  // 🧲 帯の中に見えている「別のセクションの中身」を集める（直接の子だけ＝入れ子の二重取りを防ぐ）
+  function _favOthers(el, band){
+    var out=[], sy=(window.scrollY||0);
+    try{
+      [].slice.call(document.querySelectorAll('section,header,footer')).forEach(function(s){
+        if(s===el||el.contains(s)||s.contains(el)) return;
+        [].slice.call(s.children).forEach(function(c){
+          if((c.id||'').indexOf('__ce')===0) return;
+          if(['SCRIPT','STYLE','LINK','META','NOSCRIPT'].indexOf(c.tagName)>=0) return;
+          var r=c.getBoundingClientRect(); if(r.width<20||r.height<12) return;
+          var cs; try{ cs=getComputedStyle(c); }catch(_){ return; }
+          if(cs.visibility==='hidden'||cs.display==='none') return;
+          var cy=r.top+sy+r.height/2;
+          if(cy<band.top||cy>band.bot) return;
+          out.push(c);
+        });
+      });
+    }catch(_){ }
+    return out;
+  }
+  // 👀 そのセクションが「自分で持っている見える中身」の数
+  function _favVisCount(s){
+    var n=0;
+    try{
+      [].slice.call(s.querySelectorAll('*')).slice(0,400).forEach(function(e){
+        var t=(e.textContent||'').trim();
+        if((!t||e.children.length)&&e.tagName!=='IMG') return;
+        var r=e.getBoundingClientRect(); if(r.width<20||r.height<12) return;
+        n++;
+      });
+    }catch(_){ }
+    return n;
+  }
+  // 🔁 中身がほとんど無いセクションを選んでいたら、そこに見えている中身を持つセクションへ乗り換える
+  //   （2026-08-04・ユーザーの指摘「第三セクションこれしかないからじゃない？」＝そのとおりだった）
+  //   ★カンプは「薄い帯だけのセクション」の上に、別セクションの中身が重なって見えていることがある。
+  //     右クリックで掴めるのは帯のほうなので、そのまま保存すると飾りしか入らない。
+  function _favRicher(el){
+    var mine=_favVisCount(el);
+    if(mine>=3) return null;                     // 十分に中身がある＝乗り換えない
+    var band=_favBand(el), best=null, bn=mine+2, sy=(window.scrollY||0);
+    try{
+      [].slice.call(document.querySelectorAll('section,header,footer')).forEach(function(s){
+        if(s===el||s.contains(el)||el.contains(s)) return;
+        var r=s.getBoundingClientRect(); if(r.height<60) return;
+        var st=r.top+sy;
+        if(st>band.bot+40||st+r.height<band.top-40) return;   // 見た目が重なっていない
+        var c=_favVisCount(s);
+        if(c>bn){ bn=c; best=s; }
+      });
+    }catch(_){ }
+    return best;
+  }
   function favSaveSection(el){
     if(!el){ msg.textContent='セクションが見つかりません（保存したいセクションの中で右クリックしてください）'; return; }
+    var _sw=_favRicher(el);
+    if(_sw){
+      el=_sw;
+      try{ ceFlash('中身を持っている〈'+(el.tagName.toLowerCase()+'.'+(el.className||'').toString().split(' ')[0])+'〉を保存します（選んだ帯は中身が空でした）'); }catch(_){ }
+    }
     var kind=el.tagName.toLowerCase(); if(kind!=='header'&&kind!=='footer') kind='section';
     var h=el.querySelector('h1,h2,h3');
     var label=(h&&(h.textContent||'').replace(/\\s+/g,' ').trim().slice(0,20))||'セクション';
-    var name=window.prompt('この'+(kind==='section'?'セクション':kind==='header'?'ヘッダー':'フッター')+'を「部品」として保存します。別のカンプの同じ枠にAIなしで入れ替えできます。\\n名前をどうぞ：', label);
+    // 🧭 保存の単位を「DOMのセクション」ではなく「見えている帯」にする
+    //   （2026-08-04・実報告「保存しても、この鳥しか追加されない」）。
+    //   ★根本原因：**セクションの箱と見えている塊が一致していない**。カンプは中身が座標で
+    //     置かれていて、セクション同士が重なる。右クリックで掴めるのは「飾りだけのセクション」で、
+    //     見出し・文章・イラストは**重なっている別のセクション**にある、ということが普通に起きる。
+    //   ★だから「そのセクションのDOMの中身」を保存する限り、何度直しても取りこぼす。
+    //     見た目の帯に入っている物を**持ち主に関係なく**集めるのが正しい単位。
+    var _band=_favBand(el), _ovs=_favOthers(el, _band);
+    var _extra=_ovs.length?{checked:true,
+      label:'見えているものを全部入れる（重なっている別のセクションの中身 '+_ovs.length+'件）'}:null;
+    _askName('この'+(kind==='section'?'セクション':kind==='header'?'ヘッダー':'フッター')+'を「部品」として保存します', label, _favGo, _extra);
+    return;
+    // ★関数宣言なので巻き上げられる＝上で先に渡してよい
+    function _favGo(name, _alsoOthers){
     if(name===null) return;
     // 🎨 その部品で使っている色を覚えておく（2026-07-31・要望「同じ色にしたいから部品保存時の色を覚えて」）。
     // ★狙い：あとで別の場所を同じ色にしたい時、パレットの「前に使った色」から一発で選べるようにする。
@@ -5363,7 +5482,48 @@ html.__ce_altmode{cursor:text}
     //      属さない迷子になる。⭐保存は「そのセクションの中身」だけを取るので、黙って落ちていた。
     //    ★他のセクションが持っている要素は**取らない**（それは向こうの持ち物。奪うと二重になる）。
     //      代わりに件数だけ知らせて、取りこぼしを見えるようにする。
+    // 🚫★複製の中の「同じ子」を番号（index）で探さない。cleanSection は style[data-cepart] を
+    //   1個消すことがあり、消えると番号が1つずれて**別の子に座標を焼く**。→ 先に印を付けて結ぶ。
+    // 🚫★印（data-属性）で複製の中の同じ要素を探してはいけない。
+    //   **`cleanSection` は複製から data-* を消す**ので、印は保存に残らず、
+    //   探しても必ず null＝焼き込みが**全部空振りする**（実測：保存物に 1164 が1つも無かった）。
+    //   → 元と複製を**同じ順番で並べて突き合わせる**。cleanSection が消すのは
+    //     `style[data-cepart]` 1個だけなので、それを外せば並びは一致する。
+    // 🚫★「切り取る箱」（overflow が visible でない入れ物）にも印を付けて、**今の大きさを焼く**。
+    //   実測（2026-08-04・報告「この鳥しか追加されない」）：抜き出すと入れ物が
+    //   1100x131 まで潰れ、中身（y=402にある見出し・本文・イラスト）を丸ごと切り落としていた。
+    //   元のページでは中身の高さぶん（1164px）あったのに、部品にすると内在的な高さを失うため。
+    //   ★潰れるのは「切り取る箱」だけ＝そこだけ大きさを固定すれば直る。位置は元のCSSのままでよい。
+    var _clip=[];
+    try{
+      // 🚫★「もう印が付いている（＝直接の子）」を理由に飛ばしてはいけない（実測で踏んだ）。
+      //   直接の子が同時に切り取る箱のとき、直接の子の焼き込みは _needBake が false だと走らず、
+      //   こちらも飛ばすので**どちらからも漏れて潰れる**（`span.fxa_bgtxt` がこれで 1100x131 のまま）。
+      //   ★印は付け直さず再利用するだけにする。
+      [].slice.call(el.querySelectorAll('*')).slice(0,400).forEach(function(k){
+        var cs; try{ cs=getComputedStyle(k); }catch(_){ return; }
+        if(cs.overflow==='visible') return;
+        var r=k.getBoundingClientRect(); if(r.width<8||r.height<8) return;
+        _clip.push(k);
+      });
+    }catch(_){ }
     var _node=cleanSection(el, true), _sr=el.getBoundingClientRect();
+    // 元と複製の対応表（同じ並び順で突き合わせる）
+    var _srcL=[].slice.call(el.querySelectorAll('*')).filter(function(n){
+      return !(n.tagName==='STYLE'&&n.hasAttribute('data-cepart')); });
+    var _dstL=[].slice.call(_node.querySelectorAll('*')).filter(function(n){
+      return !(n.tagName==='STYLE'&&n.hasAttribute('data-cepart')); });
+    // 🎨 見た目（書体・大きさ・字間・色）を焼き込む。
+    //   ★これが無いと、貼り先のCSSで**文字の幅がわずかに変わり、その分が切り落とされる**
+    //     （2026-08-04・実報告「入れ替えたら崩れた」＝見出しが「ろぴあ」につ…で切れた）。
+    //   ★📋コピー＆貼り付けで同じ問題を解いた `_bakeLook` をそのまま使う（処理を二重に作らない）。
+    try{ _bakeLook(el, _node); }catch(_){ }
+    function _twin(k){
+      var i=_srcL.indexOf(k);
+      if(i<0) return null;
+      var d=_dstL[i];
+      return (d&&d.tagName===k.tagName)?d:null;   // ずれていたら諦める（誤爆させない）
+    }
     // 🚫★範囲は「箱の高さ」で測らない。このカンプの <header> は箱73pxなのに中のヒーローは948px
     //   （§7㊷と同じ形）。箱で測ると迷子が1個も見つからない（実測で踏んだ）。
     //   → **自分＋子孫の矩形の合併**＝見た目の範囲で測る。
@@ -5397,15 +5557,103 @@ html.__ce_altmode{cursor:text}
       });
       if(_adopt && getComputedStyle(el).position==='static') _node.style.setProperty('position','relative');
     }catch(_){ }
-    // 見た目が重なっている「別のセクション」の数＝取りこぼしとして正直に伝える
+    // 🧲 帯に見えている「別のセクションの中身」も入れる（板でチェックが入っている時だけ）。
+    //   ★これが「見た目の帯を保存する」の本体。持ち主（DOMの親）ではなく**見えている位置**で決める。
+    //   ★元のカンプは1ミリも変えない（複製を足すだけ）ので、向こうのセクションは無傷。
     var _miss=0;
+    if(_alsoOthers){
+      try{
+        _ovs.forEach(function(c){
+          if(!c.isConnected) return;
+          var r=c.getBoundingClientRect();
+          var oc=cleanSection(c, false);
+          oc.style.setProperty('position','absolute','important');
+          oc.style.setProperty('left', Math.round(r.left-_sr.left)+'px','important');
+          oc.style.setProperty('top',  Math.round(r.top -_sr.top )+'px','important');
+          oc.style.setProperty('width', Math.round(r.width)+'px','important');
+          oc.style.setProperty('height',Math.round(r.height)+'px','important');
+          ['translate','transform'].forEach(function(p){ oc.style.removeProperty(p); });
+          _node.appendChild(oc); _adopt++;
+        });
+        if(getComputedStyle(el).position==='static') _node.style.setProperty('position','relative');
+      }catch(_){ }
+    }else{
+      _miss=_ovs.length;   // 入れなかったぶんは正直に件数を出す
+    }
+    // 🚫★保存する部品から「見えなくする側の演出」を外す（2026-08-04・実報告「まだ保存できない」）。
+    //   実測：保存済み部品は中身18,737字とちゃんと入っているのに、見本も貼り先も真っ白だった。
+    //   原因は2つとも「再生されるまで透明」だから：
+    //     ① 入れ物に 🎨背景→文字（fxa_bgt/fxa_bgf）が付いていると、中の文字は fxa_in が付くまで opacity:0
+    //        （§7-64と同じ形。入れ物に当ててはいけない動きが、古いカンプにはまだ残っている）
+    //     ② 出現アニメ待ちの fxa_pre は fxa_in が付くまで opacity:0（実測 pre 6個・in 0個）
+    //   → 部品は「完成した見た目」で保存する。動きは貼った先で付け直せばよい。
     try{
-      [].slice.call(document.querySelectorAll('section,header,footer')).forEach(function(s){
-        if(s===el||el.contains(s)||s.contains(el)) return;
-        var r=s.getBoundingClientRect(), t=r.top+(window.scrollY||0);
-        if(r.height<100) return;
-        if(t+r.height>_top+40 && t<_bot-40) _miss++;
+      var _hid=[].slice.call(_node.querySelectorAll('.fxa_bgt,.fxa_bgf'));
+      if(_node.classList && (_node.classList.contains('fxa_bgt')||_node.classList.contains('fxa_bgf'))) _hid.push(_node);
+      _hid.forEach(function(n){
+        n.classList.remove('fxa_bgt'); n.classList.remove('fxa_bgf');
+        // 色を ::before に逃がしていた痕跡を戻す（これが残ると地の色が消えたままになる）
+        ['background-image','background-color'].forEach(function(p){
+          var v=(n.style.getPropertyValue(p)||'').trim();
+          if(v==='none'||v==='transparent') n.style.removeProperty(p);
+        });
       });
+      [].slice.call(_node.querySelectorAll('.fxa_pre')).forEach(function(n){ n.classList.add('fxa_in'); });
+      if(_node.classList && _node.classList.contains('fxa_pre')) _node.classList.add('fxa_in');
+    }catch(_){ }
+    // 🚫★自由配置のセクションは「見た目どおりの座標」で焼いてから保存する。
+    //   実測（2026-08-04）：焼かずに保存すると、中身は入っているのに描画すると座標が飛び、
+    //   セクションの overflow:hidden で切られて**部品が真っ白**になる（見出しが半分だけ出る等）。
+    //   ★焼くのは**直接の子だけ**。孫まで焼くと入れ子の基準が二重にずれる（実験で確認）。
+    //   ★あわせて器の切り取りと移動の跡を外す（root の overflow:hidden / top / translate）。
+    //   ★流れで組まれたセクション（絶対配置の子が無く、切り取りもしていない）は触らない
+    //     ＝今まで正しく保存できていた部品の作りを変えない。
+    try{
+      var _kids=[].slice.call(el.children);
+      var _needBake=false;
+      try{ if(getComputedStyle(el).overflow!=='visible') _needBake=true; }catch(_){ }
+      _kids.forEach(function(k){ try{ if(getComputedStyle(k).position==='absolute') _needBake=true; }catch(_){ } });
+      if(_needBake){
+        _kids.forEach(function(k){
+          var d=_twin(k);
+          if(!d||!d.style) return;
+          var kr=k.getBoundingClientRect(); if(kr.width<6||kr.height<6) return;
+          var kc; try{ kc=getComputedStyle(k); }catch(_){ return; }
+          if(kc.visibility==='hidden'||kc.display==='none') return;
+          d.style.setProperty('position','absolute','important');
+          d.style.setProperty('left', Math.round(kr.left-_sr.left)+'px','important');
+          d.style.setProperty('top',  Math.round(kr.top -_sr.top )+'px','important');
+          d.style.setProperty('width', Math.round(kr.width)+'px','important');
+          d.style.setProperty('height',Math.round(kr.height)+'px','important');
+          ['translate','transform'].forEach(function(p){ d.style.removeProperty(p); });
+        });
+        _node.style.setProperty('position','relative','important');
+        _node.style.setProperty('overflow','visible','important');
+        _node.style.setProperty('width','100%','important');
+        _node.style.setProperty('height', Math.round(_sr.height)+'px','important');
+        ['top','left','translate','transform'].forEach(function(p){ _node.style.removeProperty(p); });
+      }
+      // 切り取る箱は「今の大きさ」で固定する（焼き込み判定に関係なく必ず行う＝潰れ防止）
+      _clip.forEach(function(k){
+        var d=_twin(k);
+        if(!d||!d.style) return;
+        var r=k.getBoundingClientRect();
+        d.style.setProperty('width', Math.round(r.width)+'px','important');
+        d.style.setProperty('height',Math.round(r.height)+'px','important');
+        // 🚫★大きさを固定しただけでは、貼り先で文字幅がわずかに違うと**その分が切り落とされる**
+        //   （2026-08-04・実報告「入れ替えたら崩れた」＝見出しが「ろぴあ」につ…で切れていた）。
+        //   ★元のページで**中身が収まっていた箱**は、切る必要がそもそも無い＝切らない設定にする。
+        //     元からはみ出していた箱（写真の切り抜き等）は意図した切り取りなので、そのまま残す。
+        try{
+          if(k.scrollHeight<=k.clientHeight+4 && k.scrollWidth<=k.clientWidth+4){
+            d.style.setProperty('overflow','visible','important');
+          }
+        }catch(_){ }
+      });
+    }catch(_){ }
+    // 念のため：過去の版が付けた印が残っていたら掃除する（カンプ側に残すと💾保存で焼き付く）
+    try{
+      [].slice.call(el.querySelectorAll('[data-cebk]')).forEach(function(k){ k.removeAttribute('data-cebk'); });
     }catch(_){ }
     // 効いているCSSルールを@scopeで抱かせて自己完結させる（selfContain=true・種類問わず）。
     // ★以前はセクションだけselfContain=falseだった＝別カンプ（特にクローン由来）に🔀/➕すると
@@ -5413,10 +5661,11 @@ html.__ce_altmode{cursor:text}
     fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:_node.outerHTML,headcss:headCss(),name:name,kind:kind})})
     .then(function(r){return r.json();}).then(function(d){
       var _warn=(window.__cePartRem>5)?'　⚠この部品はrem基準のサイトです。貼り先で大きさが数倍になる可能性があります（元サイトのクローンページを開いた状態で保存し直すと直ります）':'';
-      var _add=_adopt?('　＋セクションの外にいた部品'+_adopt+'個も一緒に入れました'):'';
-      var _mm=_miss?('　⚠見た目が重なっている別のセクションが'+_miss+'個あります。そちらの中身は入っていません（必要ならそのセクションも保存してください）'):'';
+      var _add=_adopt?('　＋見えていた部品'+_adopt+'個も一緒に入れました'):'';
+      var _mm=_miss?('　⚠重なっている別のセクションの中身'+_miss+'件は入れていません（板のチェックを入れると入ります）'):'';
       msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'+_add+_mm+_warn):('保存失敗：'+(d.message||''));
     }).catch(function(){ msg.textContent='通信エラー'; });
+    }
   }
   // 🎨 おしゃれ度チェック：現DOMを保存→AIが有名サイト基準で採点＋改善点。結果はモーダル表示。
   function _scBar(label, n){
@@ -21903,7 +22152,7 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
