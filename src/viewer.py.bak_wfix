@@ -3863,90 +3863,9 @@ html.__ce_altmode{cursor:text}
     }
     return n;
   }
-  // 🧯 焼き込まれた「固定px幅」を 100% に直す（2026-08-04・実報告「なんでこんな横にすごい長くなってんの？」）
-  //   ★高さは px で焼いてよいが、**幅だけは px で焼いてはいけない**。
-  //     測った時の画面幅がそのまま残るので、別の幅で開くとページが横に伸びる
-  //     （実測：ヒーローに width:2109px が残り、画面1280でもページ幅2109のままだった）。
-  //   ★見るのは**インラインstyleのpx幅だけ**。CSSファイル側の固定幅は元デザインの意図なので触らない。
-  //   ★直す条件は2つ（どちらかに当たれば直す）：
-  //     ① ツールが焼いた入れ物（下のリスト）で 900px以上
-  //     ② **親からはみ出している**（＝その数値は今の画面では確実に間違い）で 900px以上
-  //     ②があるので、**まだ知らない機能が焼いた幅も拾える**（リストの取りこぼしを塞ぐ）。
-  var _BAKEDW_SEL = '[data-slshow],[data-ceheroout],[data-fxpw],[data-cepband],.fxa_bgtxt';
-  // 🚫★手で大きさを決めた物は触らない（図形・線・余白・文字の背景）。
-  //    ここを外すと「せっかく広げた図形が開くたびに勝手に伸びる」になる（§7-68の手動サイズと同じ話）。
-  var _BAKEDW_KEEP = '.ce_shape,.ce_psel,[data-ceshape],[data-cetxbg],[data-celine],[data-cespacer],[data-cedqx]';
-  function _fixBakedWidth(){
-    var n = 0, seen = [];
-    function _do(el, forced){
-      if(!el || !el.style || seen.indexOf(el) >= 0) return;
-      if(el.closest && el.closest('[id^="__ce"]')) return;          // ツールの板は触らない
-      if(el.matches && el.matches(_BAKEDW_KEEP)) return;            // 手で決めた大きさは尊重する
-      var wv = (el.style.getPropertyValue('width') || '').trim();
-      var m = /^(\\d+(?:\\.\\d+)?)px$/.exec(wv);
-      if(!m) return;
-      var w = parseFloat(m[1]);
-      if(w < 900) return;                                           // 小さい飾りの固定幅は正しい
-      if(!forced){
-        // 親の内側の幅より広い＝その数値は今の画面では確実に間違い
-        var par = el.parentElement; if(!par) return;
-        if(w <= par.clientWidth + 2) return;
-      }
-      var pr = el.style.getPropertyPriority('width');
-      el.style.setProperty('width', '100%', pr);
-      if((el.style.getPropertyValue('max-width') || '').trim() === 'none') el.style.removeProperty('max-width');
-      seen.push(el); n++;
-    }
-    // ① ツールが焼いた入れ物（はみ出していなくても直す）＋その中の画像など
-    [].slice.call(document.querySelectorAll(_BAKEDW_SEL)).forEach(function(el){
-      _do(el, true);
-      [].slice.call(el.querySelectorAll('img,span,div')).forEach(function(c){ _do(c, true); });
-    });
-    // ② 知らない機能が焼いた分：インラインにpx幅があって親からはみ出している物すべて
-    [].slice.call(document.querySelectorAll('[style*="width"]')).forEach(function(el){ _do(el, false); });
-    if(n){
-      markDirty();
-      if(msg) msg.textContent = '🧯 焼き込まれていた固定の幅を ' + n + '箇所 直しました（画面幅に追従するようになります）。💾保存で確定';
-    }
-    return n;
-  }
-  window.__ceFixBakedWidth = _fixBakedWidth;   // 検証・手動実行用
-  // 🖥 設計幅より広い画面では、入れ物を中央に寄せる（2026-08-04・実報告「結局このままなのね？」）
-  //   ★カンプの中身は `position:absolute` の**固定座標**で置かれている。入れ物(header/article/footer)
-  //     だけが width:100% で伸びるので、画面を広げると**中身は左に取り残されて右が大きく空く**。
-  //   ★直し方は「中身を伸ばす」ではなく「入れ物を設計幅で止めて中央に置く」。
-  //     自由配置を流れに戻すのは現実的でないので、これが唯一まともに効く手。
-  //   ★id は `__ce` で始めない（保存時に id^=__ce は除去されるため・§7㉔）。`ce_` 始まりにする。
-  //   ★狭い画面（設計幅以下）には一切影響しない＝今までの見え方は変わらない。
-  var CE_DESIGN_W = 1920;   // 設計幅。別の幅で作ったカンプは <html data-cedesignw="1440"> で上書きできる
-  function _fixWideCenter(){
-    if(document.getElementById('ce_widefix')) return 0;
-    var dw = parseInt(document.documentElement.getAttribute('data-cedesignw'), 10) || CE_DESIGN_W;
-    var st = document.createElement('style');
-    st.id = 'ce_widefix';
-    // 🚫★ここに \\n を書かない（このファイルのJSはPython文字列の中にある＝生の \\n は本物の改行になり、
-    //   JSの文字列リテラルが途中で切れて「Invalid or unexpected token」で編集バーが丸ごと死ぬ）。
-    //   CSSは1行でも効くので、改行そのものを使わない書き方にしてある。
-    // 🚫★入れ物(header/article/footer)だけを中央に寄せてはいけない（実測で悪化した）。
-    //   §7-55の救出で **body直下へ出した図形（緑のはけ跡など）** が置き去りになり、
-    //   中央に寄った本体の左外にはみ出す。→ **body そのもの**を設計幅にして中央に置く。
-    //   ★あわせて body を position:relative にする。そうしないと body直下の絶対配置は
-    //   「画面(初期包含ブロック)」を基準にしたままなので、body を寄せても一緒に動かない。
-    st.textContent =
-      '@media (min-width:' + (dw + 1) + 'px){'
-      + ' html{overflow-x:clip}'
-      + ' body{ width:' + dw + 'px !important; margin-left:auto !important; margin-right:auto !important;'
-      + ' position:relative !important; }'
-      + ' }';
-    (document.head || document.documentElement).appendChild(st);
-    markDirty();
-    return 1;
-  }
   function _bootDeco(){
     _warnBrokenImages(); try{ dqArm(); }catch(_){ } try{ opUpgrade(); }catch(_){ } try{ _unbakeSafety(); }catch(_){ }
     try{ _fixBodyTransform(); }catch(_){ }
-    try{ _fixBakedWidth(); }catch(_){ }
-    try{ _fixWideCenter(); }catch(_){ }
     try{ ceidEnsure(document.body); ceidAudit(true); }catch(_){ }   // 🆔 安定IDを配る（見た目は変わらない）
     // 🩹 Codexのパッチを当てる（無ければ何もしない）。当てるのはすぐ、お知らせは最後に出す
     //    ★他の起動時メッセージ（保険の掃除など）に上書きされて読めなくなるため（実測で消えた）
@@ -5357,65 +5276,13 @@ html.__ce_altmode{cursor:text}
         .slice(-4).forEach(function(c){ boxColsPut(c); });
     }catch(_){ }
     msg.textContent='⭐保存中…';
-    // 🧭 見た目はこのセクションの中なのに、DOM上は外にいる部品を一緒に入れる
-    //    （2026-08-04・実報告「保存はできるけど、全部できない」）。
-    //    ★原因：§7-55の救出（🔦とにかく出す）で **body直下へ出した部品**は、どのセクションにも
-    //      属さない迷子になる。⭐保存は「そのセクションの中身」だけを取るので、黙って落ちていた。
-    //    ★他のセクションが持っている要素は**取らない**（それは向こうの持ち物。奪うと二重になる）。
-    //      代わりに件数だけ知らせて、取りこぼしを見えるようにする。
-    var _node=cleanSection(el, true), _sr=el.getBoundingClientRect();
-    // 🚫★範囲は「箱の高さ」で測らない。このカンプの <header> は箱73pxなのに中のヒーローは948px
-    //   （§7㊷と同じ形）。箱で測ると迷子が1個も見つからない（実測で踏んだ）。
-    //   → **自分＋子孫の矩形の合併**＝見た目の範囲で測る。
-    var _top=_sr.top+(window.scrollY||0), _bot=_top+_sr.height;
-    try{
-      [].slice.call(el.querySelectorAll('*')).slice(0,600).forEach(function(k){
-        var kr=k.getBoundingClientRect(); if(kr.width<4||kr.height<4) return;
-        var kt=kr.top+(window.scrollY||0);
-        if(kt<_top) _top=kt;
-        if(kt+kr.height>_bot) _bot=kt+kr.height;
-      });
-    }catch(_){ }
-    var _adopt=0;
-    try{
-      [].slice.call(document.body.children).forEach(function(o){
-        if(o===el||el.contains(o)||o.contains(el)) return;
-        if((o.id||'').indexOf('__ce')===0) return;
-        if(['SCRIPT','STYLE','LINK','META','NOSCRIPT'].indexOf(o.tagName)>=0) return;
-        if(o.closest&&o.closest('section,header,footer')) return;          // 他所の持ち物
-        if(o.querySelector&&o.querySelector('section,header,footer,article')) return;  // 器は取らない
-        var r=o.getBoundingClientRect(); if(r.width<8||r.height<8) return;
-        var cy=r.top+(window.scrollY||0)+r.height/2;
-        if(cy<_top||cy>_bot) return;
-        var oc=cleanSection(o, false);
-        // 位置は「セクションの左上からの実測px」で焼く（移動の跡は含まれているので消す）
-        oc.style.setProperty('position','absolute','important');
-        oc.style.setProperty('left', Math.round(r.left-_sr.left)+'px','important');
-        oc.style.setProperty('top',  Math.round(r.top -_sr.top )+'px','important');
-        ['translate','transform'].forEach(function(p){ oc.style.removeProperty(p); });
-        _node.appendChild(oc); _adopt++;
-      });
-      if(_adopt && getComputedStyle(el).position==='static') _node.style.setProperty('position','relative');
-    }catch(_){ }
-    // 見た目が重なっている「別のセクション」の数＝取りこぼしとして正直に伝える
-    var _miss=0;
-    try{
-      [].slice.call(document.querySelectorAll('section,header,footer')).forEach(function(s){
-        if(s===el||el.contains(s)||s.contains(el)) return;
-        var r=s.getBoundingClientRect(), t=r.top+(window.scrollY||0);
-        if(r.height<100) return;
-        if(t+r.height>_top+40 && t<_bot-40) _miss++;
-      });
-    }catch(_){ }
     // 効いているCSSルールを@scopeで抱かせて自己完結させる（selfContain=true・種類問わず）。
     // ★以前はセクションだけselfContain=falseだった＝別カンプ（特にクローン由来）に🔀/➕すると
     //   持ち込み先にクラス定義が無く、レイアウトが崩れて縦に間延びする実害があった→常時trueに統一。
-    fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:_node.outerHTML,headcss:headCss(),name:name,kind:kind})})
+    fetch('/api/section_fav/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:cleanSection(el, true).outerHTML,headcss:headCss(),name:name,kind:kind})})
     .then(function(r){return r.json();}).then(function(d){
       var _warn=(window.__cePartRem>5)?'　⚠この部品はrem基準のサイトです。貼り先で大きさが数倍になる可能性があります（元サイトのクローンページを開いた状態で保存し直すと直ります）':'';
-      var _add=_adopt?('　＋セクションの外にいた部品'+_adopt+'個も一緒に入れました'):'';
-      var _mm=_miss?('　⚠見た目が重なっている別のセクションが'+_miss+'個あります。そちらの中身は入っていません（必要ならそのセクションも保存してください）'):'';
-      msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'+_add+_mm+_warn):('保存失敗：'+(d.message||''));
+      msg.textContent=d.ok?('⭐保存しました「'+((d.fav&&d.fav.name)||'')+'」。🔀から他のカンプでも使えます'+_warn):('保存失敗：'+(d.message||''));
     }).catch(function(){ msg.textContent='通信エラー'; });
   }
   // 🎨 おしゃれ度チェック：現DOMを保存→AIが有名サイト基準で採点＋改善点。結果はモーダル表示。
@@ -13711,10 +13578,7 @@ html.__ce_altmode{cursor:text}
       w.dataset.fxpw='1';
       w.style.position=cs.position;
       w.style.left=ol+'px'; w.style.top=ot+'px';
-      // 🚫★画面幅級の要素の幅を px で焼かない（別の画面幅で開くとページが横に伸びる）。
-      //   高さは px でよい（§7㊻の vh 禁止と同じ理由＝実寸で確定させたい）。
-      w.style.width = (ow >= window.innerWidth * 0.9) ? '100%' : (ow + 'px');
-      w.style.height = oh + 'px';
+      w.style.width=ow+'px'; w.style.height=oh+'px';
       if(zi && zi!=='auto') w.style.zIndex=zi;
       el.parentNode.insertBefore(w,el); w.appendChild(el);
       el.style.setProperty('position','static','important');
@@ -14102,9 +13966,7 @@ html.__ce_altmode{cursor:text}
       hd.parentNode.insertBefore(n, hd.nextSibling);          // ヘッダーのすぐ後ろへ（兄弟にする）
       n.setAttribute('data-ceheroout','1');
       n.style.setProperty('position','absolute','important');
-      // 帯の大きさに依存していた分を固定する。ただし**画面幅級なら 100%**で焼く
-      //   （px で焼くと、測った時の画面幅がそのまま残ってページが横に伸びる）
-      if(w>4) n.style.setProperty('width', (w >= window.innerWidth*0.9) ? '100%' : (w+'px'), 'important');
+      if(w>4) n.style.setProperty('width', w+'px','important');   // 帯の大きさに依存していた分を固定
       if(h>4) n.style.setProperty('height',h+'px','important');
       // 位置合わせは2回まわす：1回目で大きさを固定したぶん箱がずれることがあるため
       for(var _pass=0;_pass<2;_pass++){
