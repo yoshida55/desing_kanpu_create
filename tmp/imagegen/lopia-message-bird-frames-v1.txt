@@ -1,0 +1,9 @@
+file '../../data/uploads/ChatGPT Image 2026年8月3日 19_06_02.png'
+duration 0.48
+file '../../data/uploads/lopia-message-bird-mid-composited-v2.png'
+duration 0.48
+file '../../data/uploads/lopia-message-bird-down-composited-v2.png'
+duration 0.48
+file '../../data/uploads/lopia-message-bird-mid-composited-v2.png'
+duration 0.48
+file '../../data/uploads/ChatGPT Image 2026年8月3日 19_06_02.png'

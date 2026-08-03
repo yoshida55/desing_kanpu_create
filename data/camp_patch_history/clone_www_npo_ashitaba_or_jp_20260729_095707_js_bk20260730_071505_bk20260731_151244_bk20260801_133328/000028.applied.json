@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "targetFile": "clone_www_npo_ashitaba_or_jp_20260729_095707_js_bk20260730_071505_bk20260731_151244_bk20260801_133328.html",
+  "baseSha256": "4ec78212ece8eef81390a565ee36ea95f11e69b6d570559f5b792c73bc757f71",
+  "revision": 28,
+  "createdBy": "codex",
+  "createdAt": "2026-08-04T00:41:06+09:00",
+  "updatedAt": "2026-08-04T00:59:09+09:00",
+  "operations": [
+    {
+      "op": "replace_image",
+      "target": "ce_msd5oew18qgwv5",
+      "src": "/uploads/ChatGPT Image 2026年8月3日 19_49_36.png",
+      "alt": "水彩の葉の区切り"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msd5oew18qgwv5",
+      "property": "left",
+      "value": "calc(71.3% + 0.1px)",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msd5oew18qgwv5",
+      "property": "top",
+      "value": "851.1px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msd5oew18qgwv5",
+      "property": "width",
+      "value": "379.1px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msd5oew18qgwv5",
+      "property": "height",
+      "value": "86.1px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msd5oew18qgwv5",
+      "property": "object-fit",
+      "value": "fill",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msd1i9ssgvsr81",
+      "property": "top",
+      "value": "41px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_mscu2sbsaxzq5l",
+      "property": "top",
+      "value": "-90px",
+      "priority": "important"
+    }
+  ]
+}

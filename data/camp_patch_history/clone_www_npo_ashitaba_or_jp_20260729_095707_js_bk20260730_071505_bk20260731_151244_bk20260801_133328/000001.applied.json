@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "targetFile": "clone_www_npo_ashitaba_or_jp_20260729_095707_js_bk20260730_071505_bk20260731_151244_bk20260801_133328.html",
+  "baseSha256": "065dff67794d109e7fd2eff8ee2507f025c05853538feefd9ff68067087eb525",
+  "revision": 1,
+  "createdBy": "codex",
+  "createdAt": "2026-08-04T00:18:05+09:00",
+  "updatedAt": "2026-08-04T00:18:05+09:00",
+  "operations": [
+    {
+      "op": "replace_image",
+      "target": "ce_msd1i9ssgvsr81",
+      "src": "/uploads/lopia-about-walk-turn-smile-animation-v7.webp",
+      "alt": "水彩の街並みを歩き、すぐに振り向いて微笑む二人"
+    }
+  ]
+}
