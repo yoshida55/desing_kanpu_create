@@ -4078,7 +4078,10 @@ html.__ce_altmode{cursor:text}
         var exist=key&&t.parentElement? t.parentElement.querySelector('[data-cetxbg="'+key+'"]') : null;
         var r=t.getBoundingClientRect();
         try{
-          if(exist) openDecoQuick(exist, Math.min(window.innerWidth-320, r.right+12), Math.max(10, r.top));
+          // 既に敷いてある図形は、開く前に位置と大きさを合わせ直す
+          //   （文字を動かしたあとでもダブルクリックすれば元の位置関係に戻せる）
+          if(exist){ try{ textBgToShape(t, exist.getAttribute('data-ceshapenm')||''); }catch(_){
+            openDecoQuick(exist, Math.min(window.innerWidth-320, r.right+12), Math.max(10, r.top)); } }
           else openTextBg(t, Math.min(window.innerWidth-340, r.left), Math.min(window.innerHeight-120, r.bottom+8));
         }catch(_){}
         _dblDone=true;
@@ -19088,12 +19091,25 @@ html.__ce_altmode{cursor:text}
     }
     var w=Math.round(el.offsetWidth||0), h=Math.round(el.offsetHeight||0);
     var pad=Math.max(10, Math.round(h*0.18));
-    // ★位置は offsetLeft/offsetTop（同じ offsetParent 基準）で合わせる。
-    //   getBoundingClientRect は出現アニメの transform を含むのでズレる（CLAUDE.md）。
     if(getComputedStyle(par).position==='static') par.style.setProperty('position','relative');
     d.style.setProperty('position','absolute','important');
-    d.style.setProperty('left',(el.offsetLeft-pad)+'px','important');
-    d.style.setProperty('top',(el.offsetTop-Math.round(pad/2))+'px','important');
+    // 🚫★el.offsetLeft をそのまま使ってはいけない。あれは「el の offsetParent」基準の値で、
+    //   図形の left は「図形の offsetParent」基準で解決される。親が文字の入れ物(span.ce_tnode)
+    //   だと基準が食い違い、図形が画面の左外まで飛ぶ（2026-08-04・実報告「左端で切れている」）。
+    //   → 図形の offsetParent との差分で出す。同じ祖先の transform は引き算で打ち消えるので安全。
+    (function(){
+      var op=d.offsetParent||par;
+      var opr=op.getBoundingClientRect(), elr=el.getBoundingClientRect();
+      d.style.setProperty('left', Math.round(elr.left-opr.left-pad)+'px','important');
+      d.style.setProperty('top',  Math.round(elr.top -opr.top -Math.round(pad/2))+'px','important');
+    })();
+    // ★文字をドラッグで動かすと translate が付く。図形にも同じ量を写して一緒に動かす
+    //   （写さないと文字だけ動いて背景が置いていかれる＝「下に動かすと変になる」）。
+    (function(){
+      var tv=''; try{ tv=getComputedStyle(el).translate; }catch(_){}
+      if(tv && tv!=='none') d.style.setProperty('translate', tv);
+      else d.style.removeProperty('translate');
+    })();
     d.style.setProperty('width',(w+pad*2)+'px','important');
     d.style.setProperty('height',(h+pad)+'px','important');
     d.style.removeProperty('max-width'); d.style.removeProperty('white-space');
