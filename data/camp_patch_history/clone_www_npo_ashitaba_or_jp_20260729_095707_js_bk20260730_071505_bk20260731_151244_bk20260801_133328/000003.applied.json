@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "targetFile": "clone_www_npo_ashitaba_or_jp_20260729_095707_js_bk20260730_071505_bk20260731_151244_bk20260801_133328.html",
+  "baseSha256": "2b0d624a1b1f2d4543e8dc2e2047e82de56f6fce28e666a52a9ca18af93020c8",
+  "revision": 3,
+  "createdBy": "codex",
+  "createdAt": "2026-08-03T21:47:20+09:00",
+  "updatedAt": "2026-08-03T21:58:19+09:00",
+  "operations": [
+    {
+      "op": "replace_image",
+      "target": "ce_msd1i9ssgvsr81",
+      "src": "/uploads/lopia-about-walk-animation-v3.webp",
+      "alt": "水彩の街並みをゆっくり歩く二人"
+    }
+  ]
+}

@@ -3789,7 +3789,7 @@ html.__ce_altmode{cursor:text}
         if(el.style.getPropertyPriority('opacity')!=='important') return;
         el.style.removeProperty('opacity');
         if(el.style.getPropertyValue('transform')==='none') el.style.removeProperty('transform');
-        var h=el.closest('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines,.fxa_wave');
+        var h=el.closest('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_rise,.fxa_lines,.fxa_wave');
         if(h && hosts.indexOf(h)<0) hosts.push(h);
         n++;
       });
@@ -4047,6 +4047,7 @@ html.__ce_altmode{cursor:text}
       if(e.button!==0) return;                                            // 右クリックは今までどおりメニュー
       if(Math.abs(e.clientX-dx)>4||Math.abs(e.clientY-dy)>4){ lastT=0; return; }  // ドラッグ＝移動なので数えない
       var now=Date.now(), near=(Math.abs(e.clientX-lastX)<8&&Math.abs(e.clientY-lastY)<8);
+      var _dblDone=false;
       var dbl=(now-lastT<400)&&near;
       lastT=dbl?0:now; lastX=e.clientX; lastY=e.clientY;                  // 3回目が続けて反応しないよう1回リセット
       if(!dbl) return;
@@ -4060,6 +4061,29 @@ html.__ce_altmode{cursor:text}
       //   作った直後だけしか設定できないと、あとで変えたくなった時に詰むため。
       var bd=t.closest('[data-cepband]');
       if(bd){ try{ openBandPatternPanel(bd); }catch(_){ } return; }
+      // 🖌 文字をダブルクリック → 背景（色・かたち・水彩）の板を開く（2026-08-03・要望
+      //   「ダブルクリックでできないの？」）。文字の背景は background-color なので実体が無く、
+      //   直接クリックできない＝入口が右クリックの奥にしか無かった。
+      //   ★既に背景の図形を敷いてあるなら、図形の板のほうを開く（形・水彩をすぐ直せる）。
+      (function(){
+        if(document.getElementById('__ce_pk')||document.getElementById('__ce_tbgp')||document.getElementById('__ce_dqp')) return;
+        if(t.closest('[data-slshow],[data-cepband],[data-fxa-fly]')) return;
+        if(t.closest('.ce_shape')) return;                    // 図形自体は既存の板が受け持つ
+        // 自分が直接持っている文字だけを見る（余白で押して大きな入れ物を掴まない・§7の流儀）
+        var own=false;
+        for(var i=0;i<t.childNodes.length;i++){ var c=t.childNodes[i];
+          if(c.nodeType===3&&(c.nodeValue||'').replace(/[\s​]/g,'')){ own=true; break; } }
+        if(!own) return;
+        var key=t.getAttribute('data-ceid')||'';
+        var exist=key&&t.parentElement? t.parentElement.querySelector('[data-cetxbg="'+key+'"]') : null;
+        var r=t.getBoundingClientRect();
+        try{
+          if(exist) openDecoQuick(exist, Math.min(window.innerWidth-320, r.right+12), Math.max(10, r.top));
+          else openTextBg(t, Math.min(window.innerWidth-340, r.left), Math.min(window.innerHeight-120, r.bottom+8));
+        }catch(_){}
+        _dblDone=true;
+      })();
+      if(_dblDone){ _dblDone=false; return; }
       var w=t.closest('[data-slshow]'); if(!w) return;
       if(document.getElementById('__ce_pk')) return;                      // 画像パネルを開いている最中は二重に出さない
       try{ slidePanel(w.querySelector('img'), w); }catch(_){}
@@ -5439,8 +5463,8 @@ html.__ce_altmode{cursor:text}
     if(!chN&&!junk&&!emp){ if(msg) msg.textContent='🧹 掃除する物が見つかりませんでした（もう軽い状態です）'; return; }
     if(!confirm('🧹 大掃除します：\\n・文字分割span '+chN+'個 → 素のテキストへ（一文字ずつ系の動きは解除）\\n・残骸style '+junk+'件\\n・空のspan/div '+emp+'個\\n\\n⟲（Ctrl+Z）で戻せます。実行しますか？')) return;
     fxUnsplit(document.body);
-    [].slice.call(document.querySelectorAll('.fxa_tw,.fxa_cpre,.fxa_sk,.fxa_wave,.fxa_lines')).forEach(function(e){
-      e.classList.remove('fxa_tw','fxa_cpre','fxa_sk','fxa_wave','fxa_lines');
+    [].slice.call(document.querySelectorAll('.fxa_tw,.fxa_cpre,.fxa_sk,.fxa_rise,.fxa_wave,.fxa_lines')).forEach(function(e){
+      e.classList.remove('fxa_tw','fxa_cpre','fxa_sk','fxa_rise','fxa_riseclip','fxa_wave','fxa_lines');
       e.style.removeProperty('--fxa-stag'); e.style.removeProperty('--fxa-bnc');
       if(!/fxa_(y|yd|xl|xr|s|bl|ry|fl|wp|cl|cc|clip)( |$)/.test(e.className)){ e.classList.remove('fxa_pre','fxa_in'); e.style.removeProperty('--fxa-dist'); }
     });
@@ -5472,7 +5496,7 @@ html.__ce_altmode{cursor:text}
   //     除去リストに明示してある（<style>は「id^=__ce 丸ごと除去」の例外なので書かないと焼き込まれる・§7㉔）。
   //   ★translate: は触らない：このツールのドラッグ移動が translate を使っているため（§7㉕）。
   //     transform だけ none にすれば、出現アニメのズレは消えて手で動かした位置は残る。
-  var NOANIM_SHOW='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines,.fxa_ch,.fxa_lni,.fxa_hl,.fxa_ud,'
+  var NOANIM_SHOW='.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_rise,.fxa_lines,.fxa_ch,.fxa_lni,.fxa_hl,.fxa_ud,'
     +'.scrollanime,.updown,.downup,.slide-left,.slide-right,.scaleup,.eachTextAnime,'
     +'[class*="reveal"],[class*="fade"],[class*="animate"],[class*="inview"],[class*="in-view"],'
     +'[class*="stagger"],[class*="slide"],[class*="appear"],[data-reveal]';
@@ -5492,7 +5516,7 @@ html.__ce_altmode{cursor:text}
       st.textContent=noAnimCss();
       document.documentElement.classList.add('__ce_noanim');
       // 出現待ちのものは「出たあと」の状態にしておく（マーカー/下線は--hlwを引き切る）
-      [].slice.call(document.querySelectorAll('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_lines')).forEach(function(n){ n.classList.add('fxa_in'); });
+      [].slice.call(document.querySelectorAll('.fxa_pre,.fxa_cpre,.fxa_tw,.fxa_sk,.fxa_rise,.fxa_lines')).forEach(function(n){ n.classList.add('fxa_in'); });
       [].slice.call(document.querySelectorAll('.fxa_hl,.fxa_ud')).forEach(function(n){ n.style.setProperty('--hlw',100); n.classList.add('fxa_in'); });
     } else {
       document.documentElement.classList.remove('__ce_noanim');
@@ -5760,7 +5784,7 @@ html.__ce_altmode{cursor:text}
       var M=[['fxa_yd','rv rv-down'],['fxa_y','rv rv-up'],['fxa_xl','rv rv-left'],['fxa_xr','rv rv-right'],
         ['fxa_s','rv rv-zoom'],['fxa_bl','rv rv-blur'],['fxa_ry','rv rv-flip'],['fxa_clip','rv rv-up'],
         ['fxa_fl','rv rv-page'],['fxa_wp','rv rv-curtain-l'],['fxa_cl','rv rv-curtain-l'],['fxa_cc','rv rv-curtain-c'],
-        ['fxa_lines','rv-lines'],['fxa_cpre','chars'],['fxa_tw','chars'],['fxa_sk','chars'],['fxa_wave','chars lp-wave'],
+        ['fxa_lines','rv-lines'],['fxa_cpre','chars'],['fxa_tw','chars'],['fxa_sk','chars'],['fxa_rise','chars'],['fxa_wave','chars lp-wave'],
         ['fxa_lp_pulse','lp-pulse'],['fxa_lp_float','lp-float'],['fxa_lp_bounce','lp-bounce'],['fxa_lp_glow','lp-glow'],
         ['fxa_hl','mk'],['fxa_ud','ud'],['fxa_cnt','cnt']];
       var out=[];
@@ -6480,7 +6504,10 @@ html.__ce_altmode{cursor:text}
   //   ★高さは height ではなく min-height で持つ：⇕パネル（mode='section'）が min-height を書くので、
   //     height を入れておくと「広げられるのに縮められない」（height が下限として残る）になる。
   //   ★入れ物が height 固定のカンプでは挿しても伸びないので、必ず _hostSnap/_growHosts を通す（§7㊺）。
-  function secAddEmpty(ref){
+  // before=true なら ref の「上」に差し込む（既定は下）。
+  // ★上に入れる時も _hostSnap/_growHosts を通す：高さ固定の入れ物では挿しても伸びず、
+  //   下のセクションに潜り込む（§7㊺）。挿す位置が変わっても必要なのは同じ。
+  function secAddEmpty(ref, before){
     if(!ref||!ref.parentElement) return null;
     var parent=ref.parentElement;
     try{ pushUndo(parent); }catch(_){}
@@ -6494,10 +6521,33 @@ html.__ce_altmode{cursor:text}
     try{ s.style.setProperty('background',_ovPageBg()||'#ffffff'); }catch(_){ s.style.setProperty('background','#ffffff'); }
     s.style.setProperty('outline','1px dashed #b9c7d6');   // 編集中の目印（保存時に外す）
     var snap=_hostSnap(ref);
-    parent.insertBefore(s, ref.nextSibling);
+    parent.insertBefore(s, before? ref : ref.nextSibling);
     _growHosts(snap, s.offsetHeight);
     try{ markDirty(); }catch(_){}
     return s;
+  }
+  // ⇅ セクションの「順番」を入れ替える（一つ上／一つ下へ）。
+  // ★🔀入れ替え（favSwapOpen）は「お気に入り部品と差し替える」＝中身の話。こちらは並び順の話で別物。
+  // ★相手は「同じ親にいる次／前のセクション級の兄弟」だけ。飾りの小物や空divと入れ替えると
+  //   見た目は何も変わらないのに順番だけ狂うので、高さのある塊に限る。
+  function secMoveOrder(ref, up){
+    if(!ref||!ref.parentElement) return null;
+    var parent=ref.parentElement;
+    var sibs=[].slice.call(parent.children).filter(function(n){
+      if(n.nodeType!==1) return false;
+      if(n.id&&n.id.indexOf('__ce')===0) return false;
+      if(getComputedStyle(n).display==='none') return false;
+      return n.offsetHeight>=60;                       // 塊だけ（小物は相手にしない）
+    });
+    var i=sibs.indexOf(ref);
+    if(i<0) return null;
+    var mate=up? sibs[i-1] : sibs[i+1];
+    if(!mate) return 'end';                            // もう端っこ
+    try{ pushUndo(parent); }catch(_){}
+    if(up) parent.insertBefore(ref, mate);
+    else   parent.insertBefore(mate, ref);             // 相手を自分の前へ＝自分が一つ下がる
+    try{ markDirty(); }catch(_){}
+    return mate;
   }
   function openSpacer(el,y,force){
     var oldp=document.getElementById('__ce_vsp'); if(oldp) oldp.remove();
@@ -6870,7 +6920,7 @@ html.__ce_altmode{cursor:text}
   // 〰 セクションの境目の形（clip-pathで端をけずる・AIなし）。%指定のpolygonなので画面幅が変わっても崩れない。
   // 上端・下端は別々に持てる（data-cecliptop/data-ceclipbot）＝両方かけると1つのpolygonに合成。
   function edgeShapeApply(sec, edge, kind){
-    if(edge==='off'){ sec.removeAttribute('data-cecliptop'); sec.removeAttribute('data-ceclipbot'); sec.removeAttribute('data-ceclipamp'); sec.style.removeProperty('clip-path'); markDirty(); return; }
+    if(edge==='off'){ sec.removeAttribute('data-cecliptop'); sec.removeAttribute('data-ceclipbot'); sec.removeAttribute('data-ceclipamp'); sec.removeAttribute('data-ceclip'); sec.style.removeProperty('clip-path'); markDirty(); return; }
     // 深さ（2026-07-19）：%は対象の高さ基準なので、背の低い帯だと同じ6%でも浅く見える
     // → data-ceclipampで深さを選べるように（形はそのまま作り直す）
     if(edge==='amp'){ sec.setAttribute('data-ceclipamp', kind); }
@@ -6890,6 +6940,9 @@ html.__ce_altmode{cursor:text}
     for(var i=0;i<=steps;i++){ var x=i/steps*100; pts.push(x.toFixed(1)+'% '+yOf(tk,x).toFixed(1)+'%'); }
     for(var j=steps;j>=0;j--){ var x2=j/steps*100; pts.push(x2.toFixed(1)+'% '+(100-yOf(bk,x2)).toFixed(1)+'%'); }
     sec.style.setProperty('clip-path','polygon('+pts.join(',')+')','important');
+    // 動きを付ける前の掃除(purgeInlineFx)に消させない印。これが無いと
+    //   ⏳順番の調整などを触った瞬間に境目の形が「まっすぐ」に戻る（2026-08-03・実報告）。
+    sec.setAttribute('data-ceclip','1');
     markDirty();
   }
   function edgeOpen(sec){
@@ -7017,6 +7070,9 @@ html.__ce_altmode{cursor:text}
     {k:'typewriter',b:'タイプライター',d:'打ち込み風',g:'char',type:1,sl:[{k:'stag',l:'打つ速さ',min:20,max:200,def:60,u:'ms'}]},
     // にじみ出る：ぼかしを解きながらゆっくり浮かび上がる。1文字の時間(dur)を文字の間隔(stag)より
     // ずっと長くすることで隣の文字と重なり、カタカタせず「染み込む」ように見える（2026-07-30）。
+    // ⬆ 枠に隠れた文字が下からせり上がる（クローン元サイトで使われている定番の見出し演出）。
+    //   ★フェードしないのが要点：薄く浮き上がる『一文字ずつ』とは見え方が別物になる。
+    {k:'chrise',b:'⬆ 1文字ずつせり上がる',d:'枠の下から1文字ずつ順に現れる（フェードなし・左から右へ）',g:'char',type:3,sl:[{k:'stag',l:'文字の間隔',min:20,max:260,def:100,u:'ms'},{k:'dur',l:'上がる速さ（1文字）',min:300,max:2000,def:1000,u:'ms'}]},
     {k:'soak',b:'にじみ出る',d:'ゆったり染み込むように',g:'char',type:2,sl:[{k:'stag',l:'文字の間隔',min:40,max:400,def:140,u:'ms'},{k:'dur',l:'にじむ速さ（1文字）',min:600,max:3000,def:1600,u:'ms'},{k:'blur',l:'にじみの強さ',min:2,max:24,def:10,u:'px'}]},
     {k:'wave',b:'波打ち',d:'文字が波打つ(ループ)',g:'char',loop:1,sl:[{k:'amp',l:'ゆれ幅',min:4,max:30,def:10},{k:'dur',l:'速さ',min:800,max:3000,def:1600,u:'ms'}]},
     {k:'glow',b:'ネオングロー',d:'光る(ループ)',g:'loop',glow:1,sl:[{k:'dur',l:'速さ',min:600,max:3200,def:1800,u:'ms'}]},
@@ -8790,8 +8846,16 @@ html.__ce_altmode{cursor:text}
     el.style.setProperty('background-image','none','important');
   }
   function dqShape(el, shape){
+    // 🚫★知らない形の名前が来た時に「楕円」へ落とすと、はけ跡などが**勝手に丸くなる**
+    //   （2026-08-03・実報告「はけ跡にしたのにアニメを付けたら丸くなった。しかも直らない」）。
+    //   名前が分からない時は**今の形のまま何もしない**のが正しい（黙って別の形にしない）。
+    if(!BG_SHAPES[shape]){
+      if(msg) msg.textContent='この形は分かりませんでした（形は変えていません）';
+      return;
+    }
     pushUndo(el);
-    var v=BG_SHAPES[shape]||BG_SHAPES.oval;
+    var v=BG_SHAPES[shape];
+    el.setAttribute('data-ceshapenm', shape);   // 何の形かを覚えておく（戻したい時の手がかり）
     // 形は2種類ある：角の丸みだけで作れるもの（文字列）と、切り抜きが要るもの（{r,c}）。
     // ★切り抜きを使わない形に戻す時は clip-path を必ず消す（残ると次の形が欠けたままになる）。
     var r=(typeof v==='string')?v:(v.r||'0'), c=(typeof v==='string')?'':(v.c||'');
@@ -8799,9 +8863,26 @@ html.__ce_altmode{cursor:text}
     // ★印を付ける：動きを付ける時の掃除(purgeInlineFx)に消させないため（消えると四角に戻る）
     if(c){ el.style.setProperty('clip-path', c); el.style.setProperty('-webkit-clip-path', c); el.setAttribute('data-ceclip','1'); }
     else { el.style.removeProperty('clip-path'); el.style.removeProperty('-webkit-clip-path'); el.removeAttribute('data-ceclip'); }
+    // 🎨「背景→文字」の帯（::before）にも同じ形を当てる。ここを飛ばすと
+    //   帯が四角いまま前面に残り、後ろの図形を直しても見た目が変わらない＝「押しても直らない」。
+    (function(){
+      var bt=(el.classList&&el.classList.contains('fxa_bgt'))?el:(el.closest?el.closest('.fxa_bgt'):null);
+      if(!bt) return;
+      bt.style.setProperty('--fxa-bgr', r||'0');
+      bt.setAttribute('data-cebgshape', shape);
+      // 🚫★帯の clip-path は「左から広がる」演出そのものが使っているので、形には使えない
+      //   （上書きすると動きが壊れる／上書きされて形が効かない）。
+      //   角の丸みで作れる形（角丸・たまご・雲・波・石ころ）は効くが、
+      //   切り抜きが要る形（はけ跡・ななめ）は帯では作れない＝黙って無視せず理由を出す。
+      if(c && msg){
+        msg.textContent='この形（切り抜きが必要な形）は「背景→文字」の帯では作れません。'
+          +'はけ跡にしたい時は、文字をダブルクリック →「🖌 はけ跡にする」で"図形"を敷いてください';
+      }
+    })();
     if(dqKind(el)==='bg') el.dataset.shape=shape;
     markDirty();
   }
+  window.__ceDqShape=dqShape;   // 外（検証・他の板）から形を当てられるように
   function dqBigger(el, d){
     var k=dqKind(el); pushUndo(el);
     if(k==='bg'){
@@ -8921,6 +9002,11 @@ html.__ce_altmode{cursor:text}
         +'</div>'
         +'<div style="opacity:.6;font-size:11px;margin-top:2px">種類で濃さ・ぼかし・形が変わります（押すと水彩ONになります）</div>';
     }
+    // 🔼 重なり：飾りは「文字の後ろに回したい／写真より前に出したい」が一番多い操作なので板から直接押せるようにする
+    h+='<div style="opacity:.7;margin-top:8px">🔼 重なり（前後）</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px">'
+      +'<button data-zz="back" style="'+B+'">⤵ 最背面へ</button>'
+      +'<button data-zz="front" style="'+B+'">⤴ 手前へ</button></div>';
     h+='<div style="opacity:.7;margin-top:8px">⤴ 傾き（少し斜めにするとおしゃれ）</div>'
       +'<div style="display:flex;gap:5px;margin-top:3px"><button data-ro="-3" style="'+B+'">↖ 左へ</button><button data-ro="3" style="'+B+'">↗ 右へ</button><button data-ror="1" style="'+B+'">⟲ まっすぐ</button></div>'
       +'<div style="display:flex;gap:6px;margin-top:10px">'
@@ -8956,6 +9042,24 @@ html.__ce_altmode{cursor:text}
         dqColor(el,cv); boxColsPut(cv);                 // 使った色を覚える（次からこの板の上に出る）
         if(msg) msg.textContent='色を変えました（この色は次からも「前に使った色」に出ます・💾保存で確定）';
         return;
+      }
+      var zz=t.getAttribute('data-zz');
+      if(zz){
+        pushUndo(el);
+        if(zz==='back'){
+          // ★最背面＝負のz-index。飾りは「文字や写真の後ろ」に回したいので -1 まで下げる。
+          //   位置指定が static だと z-index が効かないので relative にしておく。
+          if(getComputedStyle(el).position==='static') el.style.setProperty('position','relative');
+          el.style.setProperty('z-index','-1');
+          if(msg) msg.textContent='⤵ 最背面へ回しました（文字や写真の後ろになります・💾保存で確定）';
+        } else {
+          // ★_toFrontHere は「わざと後ろへ回してある物（z-index が負）」を触らない作りなので、
+          //   手前へ戻す時はいったん負の指定を外してから呼ぶ（外さないと何も起きない）。
+          el.style.removeProperty('z-index');
+          _toFrontHere(el);
+          if(msg) msg.textContent='⤴ 手前に出しました（重なり順 '+(getComputedStyle(el).zIndex||'auto')+'・💾保存で確定）';
+        }
+        markDirty(); return;
       }
       var op=t.getAttribute('data-op'); if(op){ var n=dqFade(el,parseFloat(op)); if(msg) msg.textContent='濃さ：'+Math.round(n*100)+'%'; return; }
       var sh=t.getAttribute('data-sh'); if(sh){ dqShape(el,sh); return; }
@@ -11006,6 +11110,44 @@ html.__ce_altmode{cursor:text}
     return true;
   }
   // ✏ 文字を編集：改行・大きさ・フォント・色をこの1枠でまとめて変える（すべてAIなし・即反映）。
+  // 🅱 文字の太さ（100〜900）。d>0で太く／d<0で細く／d===0で元に戻す。
+  // ★大きさ(_fontSize)と同じ理由で「自前の太さを持つ子孫」も一緒に変える必要がある（§7㊵）。
+  //   入れ子の <span style="font-weight:700"> が中にあると、親だけ変えても見た目が変わらない。
+  var FW_STEPS=[100,200,300,400,500,600,700,800,900];
+  function _fwOf(n){ var v=parseInt(getComputedStyle(n).fontWeight,10); return isNaN(v)?400:v; }
+  function _fwKids(el){
+    var out=[], pv=_fwOf(el);
+    try{
+      [].slice.call(el.querySelectorAll('*')).slice(0,300).forEach(function(n){
+        if(!(n.textContent||'').trim()) return;
+        if(_fwOf(n)!==pv) out.push(n);               // 親と違う＝自前で太さを持っている
+      });
+    }catch(_){}
+    return out;
+  }
+  function _fwStep(v, d){
+    var i=0, best=1e9;
+    for(var k=0;k<FW_STEPS.length;k++){ var dd=Math.abs(FW_STEPS[k]-v); if(dd<best){best=dd;i=k;} }
+    i=Math.max(0, Math.min(FW_STEPS.length-1, i+(d>0?1:-1)));
+    return FW_STEPS[i];
+  }
+  function _fontWeight(el, d){
+    if(!el) return;
+    pushUndo(el);
+    var targets=[el].concat(_fwKids(el));
+    targets.forEach(function(n){
+      if(n.getAttribute('data-cefw')==null) n.setAttribute('data-cefw', n.style.getPropertyValue('font-weight')||'');
+      if(d===0){
+        var o=n.getAttribute('data-cefw');
+        if(o) n.style.setProperty('font-weight', o, 'important'); else n.style.removeProperty('font-weight');
+        n.removeAttribute('data-cefw');
+      } else {
+        n.style.setProperty('font-weight', String(_fwStep(_fwOf(n), d)), 'important');
+      }
+    });
+    markDirty();
+    if(msg) msg.textContent=(d===0?'⟲ 文字の太さを元に戻しました':'🅱 文字の太さ：'+_fwOf(el))+'（💾保存で確定）';
+  }
   function openBreakEditor(el){
     if(!el){ msg.textContent='対象の要素がありません'; return; }
     // ★1文字ずつに割られた文字（スタッガー／タイプライター／にじみ出る等）を掴んだ状態で開くと、
@@ -11039,6 +11181,8 @@ html.__ce_altmode{cursor:text}
       +'<div style="border-top:1px solid #eee;margin:14px 0 0"></div>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:12px 0 6px">🔡 文字の大きさ <span id="__ce_brfsnow" style="font-weight:400;color:#666;font-size:11.5px"></span></div>'
       +'<div style="display:flex;gap:6px"><button class="go2" data-fs="1.1" style="background:#0b6bcb;margin:0;flex:1">＋ 大きく</button><button class="go2" data-fs="0.9" style="background:#0b6bcb;margin:0;flex:1">－ 小さく</button><button class="go2" data-fs="0" style="background:#888;margin:0">⟲</button></div>'
+      +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🅱 文字の太さ <span id="__ce_brfwnow" style="font-weight:400;color:#666;font-size:11.5px"></span></div>'
+      +'<div style="display:flex;gap:6px"><button class="go2" data-fw="1" style="background:#0b6bcb;margin:0;flex:1">＋ 太く</button><button class="go2" data-fw="-1" style="background:#0b6bcb;margin:0;flex:1">－ 細く</button><button class="go2" data-fw="0" style="background:#888;margin:0">⟲</button></div>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">↕ 行間（ラインハイト） <span id="__ce_brlhnow" style="font-weight:400;color:#666;font-size:11.5px"></span></div>'
       +'<div style="display:flex;gap:6px"><button class="go2" data-lh="0.15" style="background:#0b6bcb;margin:0;flex:1">＋ 広く</button><button class="go2" data-lh="-0.15" style="background:#0b6bcb;margin:0;flex:1">－ 狭く</button><button class="go2" data-lhr="1" style="background:#888;margin:0">⟲</button></div>'
       +'<div style="font-size:12.5px;font-weight:700;color:#2b6cb0;margin:14px 0 6px">🅰 フォント</div>'
@@ -11149,6 +11293,8 @@ html.__ce_altmode{cursor:text}
       }
       var fsb=e.target.closest('button[data-fs]');
       if(fsb){ _fontSize(el, +fsb.getAttribute('data-fs')); return; }
+      var fwb=e.target.closest('button[data-fw]');
+      if(fwb){ _fontWeight(el, +fwb.getAttribute('data-fw')); try{ _brSyncNow(); }catch(_){} return; }
       var lhb=e.target.closest('button[data-lh]');
       if(lhb){ _lineHeight(el, +lhb.getAttribute('data-lh')); return; }
       if(e.target.closest('button[data-lhr]')){ _lineHeight(el, 0, true); return; }
@@ -11249,6 +11395,12 @@ html.__ce_altmode{cursor:text}
       var f=(cs.fontFamily||'').split(',')[0].trim().replace(/["']/g,'');
       var n1=document.getElementById('__ce_brffnow');
       if(n1) n1.innerHTML='今のフォント：<b>'+esc(f||'（不明）')+'</b>'+(document.getElementById('__ce_fontall')?'　<span style="color:#7c3aed">※ページ全部に適用中</span>':'');
+      var nfw=document.getElementById('__ce_brfwnow');
+      if(nfw){
+        var _w=parseInt(cs.fontWeight,10)||400;
+        var _nm=(_w>=800?'とても太い':_w>=700?'太字':_w>=600?'やや太い':_w>=500?'ふつうより太い':_w>=400?'ふつう':'細い');
+        nfw.textContent='今 '+_w+'（'+_nm+'）';
+      }
       var n2=document.getElementById('__ce_brfsnow');
       // ★箱のfont-sizeだけ出すと、中のspanが自前で大きさを持つ見出しでは
       //   「今26.8px」なのに画面の文字は56px＝数字が別物に見える。実際に見えている一番大きい文字を出す。
@@ -11336,6 +11488,20 @@ html.__ce_altmode{cursor:text}
       msg.textContent='✅ 直しました。残すには『💾 変更を保存』を押してください（押さずに更新すると消えます）';
     }).catch(function(){ busy(false); hideToast(); msg.textContent='通信エラー'; });
   }
+  // 縦書きの中にある飾りには fxa_vw を付ける（線の向きを縦にするため）。
+  //   自分だけでなく先祖も見る：writing-mode は親（見出しの入れ物）に指定されていることが多い。
+  function _fxVertMark(el){
+    if(!el||el.nodeType!==1) return false;
+    var n=el, v=false;
+    for(var i=0;i<8&&n&&n!==document.body;i++){
+      var wm=''; try{ wm=getComputedStyle(n).writingMode||''; }catch(_){}
+      if(/^vertical/.test(wm)){ v=true; break; }
+      n=n.parentElement;
+    }
+    if(v) el.classList.add('fxa_vw'); else el.classList.remove('fxa_vw');
+    return v;
+  }
+  window.__ceVertMark=_fxVertMark;   // 外（検証・他の板）から縦書き判定を当てられるように
   // 🖍マーカー(.fxa_hl)の帯を今すぐ再生し直す（太さ/速さを変えた直後にプレビューさせるため）。
   // ★classの付け外し＋CSS transitionでの再生はこの環境で不安定だったため、
   //   FX_RUNのsweepHl（rAFで--hlwを毎フレーム手動更新）を直接呼ぶ方式にした。
@@ -11349,6 +11515,21 @@ html.__ce_altmode{cursor:text}
   // 帯の太さ（--hlt0/--hlt1・中心は固定でそこから上下に広げ縮め）。delta%pt単位、8〜70%の範囲。
   function fxHlThick(span, delta){
     if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return; }
+    // 〰下線は「帯の上下位置(--hlt0/--hlt1)」ではなく線そのものの太さ(--udw)で決まる。
+    //   ここを分けないと、下線を選んで太さを押しても何も変わらない（2026-08-03・要望）。
+    if(span.classList && (span.classList.contains('fxa_ud') || span.classList.contains('ceud'))){
+      var w = parseFloat(span.style.getPropertyValue('--udw')) || 3;
+      w = Math.max(1, Math.min(20, w + (delta > 0 ? 1 : -1)));
+      span.style.setProperty('--udw', w + 'px');
+      // 点線タイプは border で引いているので、そちらも同じ太さに合わせる
+      var bb = span.style.getPropertyValue('border-bottom');
+      if (bb) span.style.setProperty('border-bottom', w + 'px dotted ' + (span.style.getPropertyValue('--udc') || 'currentColor'), 'important');
+      var br = span.style.getPropertyValue('border-right');
+      if (br) span.style.setProperty('border-right', w + 'px dotted ' + (span.style.getPropertyValue('--udc') || 'currentColor'), 'important');
+      fxHlReplay(span); markDirty();
+      if (msg) msg.textContent = '下線の太さ：' + w + 'px（保存で確定）';
+      return;
+    }
     var t0=parseFloat(span.style.getPropertyValue('--hlt0'))||79;
     var t1=parseFloat(span.style.getPropertyValue('--hlt1'))||91;
     var center=(t0+t1)/2, th=Math.max(8,Math.min(70,(t1-t0)+delta));
@@ -12205,6 +12386,7 @@ html.__ce_altmode{cursor:text}
         try{ savedRange.surroundContents(span); }
         catch(_){ var frag=savedRange.extractContents(); span.appendChild(frag); savedRange.insertNode(span); }
         _unwrapAllIn(span,'.fxa_hl');  // 選択範囲に古いマーカーが混ざっていたら剥がして1枚に（二重防止）
+        _fxVertMark(span);            // 縦書きなら線の向きを縦にする
         if(typeof ensureFxAssets==='function') ensureFxAssets();  // アニメCSS/監視JSを注入（保存版で動く）
         if(window.__fxaSweepHl) window.__fxaSweepHl(span); else{ span.style.setProperty('--hlw',100); span.classList.add('fxa_in'); }  // 今すぐ線を引く（プレビュー）
         curHl=span; markDirty();
@@ -12225,7 +12407,7 @@ html.__ce_altmode{cursor:text}
         var span=document.createElement('span');
         if(anim===false){
           span.className='ceud';
-          span.style.setProperty('border-bottom','3px dotted '+color,'important');
+          span.style.setProperty('border-bottom','var(--udw,3px) dotted '+color,'important');
           span.style.setProperty('padding-bottom','0.15em','important');
         } else {
           span.className='ceud fxa_ud';
@@ -12235,6 +12417,17 @@ html.__ce_altmode{cursor:text}
         }
         try{ savedRange.surroundContents(span); }
         catch(_){ var frag=savedRange.extractContents(); span.appendChild(frag); savedRange.insertNode(span); }
+        // 縦書きなら線の向きを縦にする（横書きのままだと文字の下ではなく横に伸びる）
+        _fxVertMark(span);
+        if(span.classList.contains('fxa_vw')){
+          // 縦書きの点線下線は border-bottom ではなく border-right で引く（下＝右側になるため）
+          if(span.style.getPropertyValue('border-bottom')){
+            var _bb=span.style.getPropertyValue('border-bottom');
+            span.style.removeProperty('border-bottom'); span.style.removeProperty('padding-bottom');
+            span.style.setProperty('border-right', _bb, 'important');
+            span.style.setProperty('padding-right', '0.15em', 'important');
+          }
+        }
         _unwrapAllIn(span,'.ceud');  // 選択範囲に古い下線が混ざっていたら剥がして1本に（二重防止）
         if(anim!==false){
           if(typeof ensureFxAssets==='function') ensureFxAssets();  // アニメCSS/監視JSを注入（保存版で動く）
@@ -12853,9 +13046,10 @@ html.__ce_altmode{cursor:text}
     // ★かたちの「ななめ・はけ跡・ななめ帯」は clip-path で切り抜いて作っている。
     //   これも消すと四角に戻る＝「形をつけてからアニメを付けると形が戻る」の正体。
     var _keepClip=(el.getAttribute&&el.getAttribute('data-ceclip'))?el.style.getPropertyValue('clip-path'):'';
+    var _keepClipP=_keepClip?el.style.getPropertyPriority('clip-path'):'';   // !important も一緒に控える
     ['opacity','filter','clip-path','text-shadow','animation','transition'].forEach(function(p){ el.style.removeProperty(p); });
     if(_keepFil) el.style.setProperty('filter', _keepFil, _keepFilP);
-    if(_keepClip){ el.style.setProperty('clip-path', _keepClip); el.style.setProperty('-webkit-clip-path', _keepClip); }
+    if(_keepClip){ el.style.setProperty('clip-path', _keepClip, _keepClipP); el.style.setProperty('-webkit-clip-path', _keepClip, _keepClipP); }
     var edited=['data-cetx','data-cety','data-cesx','data-cesy','data-cero','data-cebt'].some(function(a){ return el.getAttribute(a)!=null; });
     if(edited){ applyTf(el); } else { ['transform','translate','rotate','scale'].forEach(function(p){ el.style.removeProperty(p); }); }
   }
@@ -13139,6 +13333,16 @@ html.__ce_altmode{cursor:text}
     // 跳ね具合は --fxa-bnc（cubic-bezierの行き過ぎ量）で調整する。大きいほど上に飛び跳ねてから戻る
     +'html.fxa-on .fxa_cpre .fxa_ch{opacity:0;transform:translateY(var(--fxa-dist,26px));transition:opacity var(--fxa-dur,.34s) cubic-bezier(.34,var(--fxa-bnc,1.56),.64,1),transform var(--fxa-dur,.34s) cubic-bezier(.34,var(--fxa-bnc,1.56),.64,1)}'
     +'html.fxa-on .fxa_cpre.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,32ms))}'
+    // ⬆ 下からせり上がる：親を overflow:hidden で切り、文字を「自分の高さぶん(100%)」下から上げる。
+    //   ★フェードは使わない＝枠の下から現れる見え方になる（薄く浮くのとは別物）。
+    //   ★translateY(100%) は「文字の高さ」基準なので、文字サイズが変わっても見え方が崩れない。
+    // 🚫★ここに overflow:hidden を書いてはいけない（2026-08-03・実報告「セクションごと消えた」）。
+    //   カンプの箱は中身が外にはみ出していることが多く（絶対配置）、切った瞬間に全部消える（§7㊷と同じ地雷）。
+    //   切るのは「はみ出していないと確かめられた時」だけ＝別クラス .fxa_riseclip を付ける方式にした。
+    +'html.fxa-on .fxa_pre.fxa_rise{opacity:1;transform:none;transition:none}'
+    +'html.fxa-on .fxa_pre.fxa_riseclip{overflow:hidden;display:block}'
+    +'html.fxa-on .fxa_rise .fxa_ch{transform:translateY(100%);transition:transform var(--fxa-dur,1s) ease-out}'
+    +'html.fxa-on .fxa_rise.fxa_in .fxa_ch{transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,100ms))}'
     +'html.fxa-on .fxa_tw .fxa_ch{opacity:0;transform:translateY(10px) scale(.9);transition:opacity .18s ease,transform .18s ease}'
     +'html.fxa-on .fxa_tw.fxa_in .fxa_ch{opacity:1;transform:none;transition-delay:calc(var(--i,0)*var(--fxa-stag,60ms))}'
     // にじみ出る：ぼかしを解きながら、ゆっくり浮かび上がる。1文字の時間(--fxa-dur)を文字の間隔
@@ -13185,7 +13389,13 @@ html.__ce_altmode{cursor:text}
     +'html body .fxa_hl.fxa_hl{background-image:linear-gradient(transparent var(--hlt0,79%),var(--hlc,#ffe66d) var(--hlt0,79%),var(--hlc,#ffe66d) var(--hlt1,91%),transparent var(--hlt1,91%))!important;background-repeat:no-repeat!important;background-size:calc(var(--hlw,0) * 1%) 100%!important;padding:0 .06em;-webkit-box-decoration-break:slice;box-decoration-break:slice}'
     // 〰 点線下線のアニメ版（2026-07-19）：マーカーと同じ--hlw(0〜100)で左→右にスーッと引かれる。
     //   点線はborderでなくrepeating-gradientで描く＝マーカーの仕組み(sweepHl/--hldur/data-cedelay)を丸ごと共用できる。色は--udc。
-    +'html body .fxa_ud.fxa_ud{background-image:repeating-linear-gradient(90deg,var(--udc,#0b6bcb) 0 6px,transparent 6px 11px)!important;background-repeat:no-repeat!important;background-position:left 100%!important;background-size:calc(var(--hlw,0) * 1%) 3px!important;padding-bottom:.15em;-webkit-box-decoration-break:slice;box-decoration-break:slice}'
+    +'html body .fxa_ud.fxa_ud{background-image:repeating-linear-gradient(90deg,var(--udc,#0b6bcb) 0 6px,transparent 6px 11px)!important;background-repeat:no-repeat!important;background-position:left 100%!important;background-size:calc(var(--hlw,0) * 1%) var(--udw,3px)!important;padding-bottom:.15em;-webkit-box-decoration-break:slice;box-decoration-break:slice}'
+    // 縦書き（writing-mode:vertical-*）用。横書きのままだと線が「文字の下」ではなく
+    //   横方向に伸びてしまい、縦書きの見出しに下線が引けなかった（2026-08-03・要望）。
+    //   伸びる向きも縦にする（background-size の高さ側に --hlw を入れる）＝走る動きはそのまま効く。
+    //   日本語の縦書きの傍線は文字の右側に引くのが習わしなので right top から伸ばす。
+    +'html body .fxa_hl.fxa_vw{background-image:linear-gradient(90deg,transparent var(--hlt0,79%),var(--hlc,#ffe66d) var(--hlt0,79%),var(--hlc,#ffe66d) var(--hlt1,91%),transparent var(--hlt1,91%))!important;background-size:100% calc(var(--hlw,0) * 1%)!important;background-position:left top!important;padding:.06em 0}'
+    +'html body .fxa_ud.fxa_vw{background-image:repeating-linear-gradient(0deg,var(--udc,#0b6bcb) 0 6px,transparent 6px 11px)!important;background-position:right top!important;background-size:var(--udw,3px) calc(var(--hlw,0) * 1%)!important;padding-bottom:0;padding-right:.15em}'
     // ★★ ページ自前の出現アニメに負けない（2026-07-28・実測で判明した「動きが付かない」の正体）
     //   カンプ側CSSに `.reveal.is-visible{opacity:1!important;transform:none!important}` があり、
     //   ページ自身のIntersectionObserverがスクロール時に is-visible を付け直す。
@@ -13213,6 +13423,10 @@ html.__ce_altmode{cursor:text}
     // ★色だけでなく模様(background-image＝水彩のグラデ)も引き継ぐ。色だけだと形が変わる（実報告）
     +'html.fxa-on .fxa_bgt::before{content:"";position:absolute;inset:0;'
     +'background-color:var(--fxa-bgc,#8fd6a8);background-image:var(--fxa-bgi,none);'
+    // ★帯の「かたち」も外から変えられるようにする（2026-08-03・実報告
+    //   「はけ跡にしたのに、動きを付けると緑の楕円になって、はけ跡を押しても直らない」）。
+    //   この帯は ::before なので、CSS変数を通さないと dqShape から形を当てられない。
+    +'border-radius:var(--fxa-bgr,0);clip-path:var(--fxa-bgclip,inset(0));'
     +'background-size:100% 100%;background-repeat:no-repeat;background-position:center;'
     +'border-radius:inherit;z-index:0;pointer-events:none;'
     +'transition:clip-path var(--fxa-dur,.9s) cubic-bezier(.22,.8,.24,1),opacity var(--fxa-dur,.9s) ease,filter var(--fxa-dur,.9s) ease}'
@@ -13377,7 +13591,58 @@ html.__ce_altmode{cursor:text}
   //   「グループ化して、ちゃんとアニメーションと一緒になるように」）。
   // ★再入り防止(__fxGrp)が要る：中で自分をもう一度呼ぶので、無いと無限ループになる。
   var __fxGrp=false;
+  // 🚫★「セクションのような大きな入れ物」に、見た目を壊す種類の動きを当てさせない（2026-08-03・実報告）。
+  //   実害：🎨背景→文字 を section に当てたら `background-image:none!important` と
+  //   `background-color:transparent!important` が入り、セクションの背景ごと消えて
+  //   「入力した文字と画像が消えた」に見えた（中身は残っていたのに気づけない）。
+  //   ★この種の動きは"文字1つ"に当てる前提のもの。入れ物に当てるのは事故しか起きない。
+  // 🚫★「背景→文字」は自分で四角い帯を描く動き。既に背景の図形を敷いてある文字に当てると
+  //   **もう1枚みどりの四角が増える**（2026-08-03・実報告「はけ跡しかなかったのに四角い緑が出た」）。
+  //   さらに文字を包み直すので、下に敷いてあった図形の位置までズレる。
+  //   → 既に背景の図形がある文字には当てず、「動きは図形のほうに付ける」と案内する。
+  function _fxHasBgShape(el){
+    if(!el||!el.parentElement) return false;
+    var key=el.getAttribute&&el.getAttribute('data-ceid');
+    if(key && el.parentElement.querySelector('[data-cetxbg="'+key+'"]')) return true;
+    return !!(el.querySelector&&el.querySelector('.ce_txtbg'));
+  }
+  function _fxTooBig(el,a){
+    if(!el||!a) return '';
+    var risky=(a.g==='bgt')||(a.g==='char');       // 背景を殺す／中身をspanに割る＝入れ物には危険
+    if(!risky) return '';
+    if(/^(IMG|VIDEO|CANVAS|SVG|PICTURE)$/.test(el.tagName)) return '写真';   // 写真は入れ物ではない＝言い方を変える
+    if(/^(SECTION|HEADER|FOOTER|ARTICLE|MAIN|BODY|HTML)$/.test(el.tagName)) return 'セクション';
+    try{
+      var r=el.getBoundingClientRect();
+      // 画面の半分以上を占める塊＝入れ物とみなす（クラス名では判別できないため大きさで見る）
+      if(r.width>=window.innerWidth*0.9 && r.height>=window.innerHeight*0.5) return '大きな入れ物';
+      // 中に別の塊（画像や見出し）を抱えている＝文字だけの要素ではない
+      if(el.querySelectorAll && el.querySelectorAll('img,section,article,figure').length) return '写真などを含む入れ物';
+    }catch(_){}
+    return '';
+  }
   function applyBake(el,k){
+    // ★止めるのは「危ない組み合わせ」だけ。ふつうの出現アニメ（フェード等）は入れ物にも当てられる。
+    (function(){
+      var _a=fxDef(k);
+      if(_a && _a.g==='bgt' && _fxHasBgShape(el)){
+        if(msg) msg.textContent='⚠ この文字にはもう背景（はけ跡などの図形）が付いています。'
+          +'この動きは自分で四角い帯を描くので二重になります＝付けませんでした。'
+          +'動きは背景の図形のほうに付けてください（図形をダブルクリック → ✨動きを付ける）';
+        el=null;
+      }
+      var _why=el?_fxTooBig(el,_a):'';
+      if(_why){
+        var _t=null;
+        try{ _t=el.querySelector('h1,h2,h3,h4,.ttl03__en,[class*=ttl],[class*=title]'); }catch(_){}
+        if(msg) msg.textContent=(_why==='写真'
+          ? '⚠ これは写真なので、文字の動きは付けられません。写真には「ふわっと出現」「スライドイン」などをお使いください'
+          : '⚠ この動きは「文字そのもの」に付けるものです（'+_why+'には付けません）。'
+            +(_t?'見出しの文字を右クリックして付け直してください':'直したい文字の上で右クリックしてください'));
+        el=null;
+      }
+    })();
+    if(!el) return;
     if(!__fxGrp && el && el.getAttribute && el.getAttribute('data-cegid')){
       var mates=groupMates(el);
       if(mates && mates.length>1){
@@ -13445,8 +13710,18 @@ html.__ce_altmode{cursor:text}
       if(!spans.length){ el.style.removeProperty('--fxa-dur'); if(msg)msg.textContent='⚠ ここには文字が無いので文字アニメは付けられません。画像には「ふわっと出現」「ズームイン」「ぼやけて出現」などを選んでください'; return; }
       if(a.loop){ el.style.setProperty('--fxa-amp', fxParam(a,'amp')+'px'); el.classList.add('fxa_wave'); }
       else {
-        el.classList.add('fxa_pre'); el.classList.add(a.type===2?'fxa_sk':(a.type?'fxa_tw':'fxa_cpre'));
+        el.classList.add('fxa_pre');
+        el.classList.add(a.type===3?'fxa_rise':(a.type===2?'fxa_sk':(a.type?'fxa_tw':'fxa_cpre')));
         el.style.setProperty('--fxa-stag', fxParam(a,'stag')+'ms');
+        if(a.type===3){  // せり上がる：1文字の時間（枠に隠れている距離＝文字の高さぶん）
+          el.style.setProperty('--fxa-dur', (fxParam(a,'dur')||1000)+'ms');
+          // ★「枠で切る」のは中身が箱に収まっている時だけ。はみ出している箱を切ると中身が丸ごと消える。
+          var _fit=false;
+          try{ _fit=(el.scrollHeight<=el.clientHeight+6)&&(el.scrollWidth<=el.clientWidth+6)&&el.clientHeight>0; }catch(_){}
+          if(_fit) el.classList.add('fxa_riseclip');
+          else if(msg) msg.textContent='⬆ せり上がりを付けました（この要素は中身が枠からはみ出しているので、'
+            +'隠す枠は使わずに動かします＝消えないようにするため）';
+        }
         if(a.type===2){  // にじみ出る：1文字の時間とぼかし量を持たせる（隣と重なって滑らかに見える）
           el.style.setProperty('--fxa-dur', (fxParam(a,'dur')||1600)+'ms');
           el.style.setProperty('--fxa-blur', (fxParam(a,'blur')||10)+'px');
@@ -13485,7 +13760,13 @@ html.__ce_altmode{cursor:text}
           if(hasC||hasI){ host=m; bc=hasC?c:'transparent'; bi=hasI?im:'none'; return; }
         }
       })();
-      if(!bc&&(!bi||bi==='none')){ bc='#8fd6a8'; host=el; if(msg) msg.textContent='⚠ 背景が見つからないので緑で仮置きしました（色は右クリック→🖌で変えられます）'; }
+      // ★背景が無い時の仮の色。決め打ちの緑だと「なぜか緑になる」と驚かれる（2026-08-03・実報告）。
+      //   前に使った色があればそれを使う＝そのカンプの配色に馴染む。無い時だけ緑。
+      if(!bc&&(!bi||bi==='none')){
+        var _rc=(function(){ try{ var a=boxColsGet(); return (a&&a[0])||''; }catch(_){ return ''; } })();
+        bc=_rc||'#8fd6a8'; host=el;
+        if(msg) msg.textContent='⚠ 背景が無かったので'+(_rc?'前に使った色':'緑')+'で仮置きしました（色は右クリック→🖌で変えられます）';
+      }
       // 文字を包む（既に包んであれば使い回す＝二重に包まない）
       var tw=host.querySelector(':scope > .fxa_bgtxt');
       if(!tw){
@@ -13505,6 +13786,13 @@ html.__ce_altmode{cursor:text}
       host.classList.add('fxa_bgt');
       host.classList.add(a.bgd==='c'?'fxa_bgc':(a.bgd==='f'?'fxa_bgf':'fxa_bgl'));
       if(host!==el){ try{ el.classList.remove('fxa_pre'); }catch(_){ } }
+      // 🚫★ここで fxa_in を付けないと、押しても何も起きないどころか
+      //   `.fxa_bgt>.fxa_bgtxt{opacity:0}` で**文字ごと消えたまま**になる。
+      //   保存してページを開き直すまで直らないので「保存しないと動きが付かない」に見える
+      //   （2026-08-03・実報告）。他の動きと同じく、付けた瞬間に1回再生して見せる。
+      host.classList.remove('fxa_in');
+      void host.offsetWidth;                       // 直前の状態を確定させてから付け直す＝必ず動く
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ host.classList.add('fxa_in'); }); });
       _fxShown=host;
     } else if(a.g==='lines'){
       // 行マスク：<br>区切りで行に分割して包む（戻すのはfxUnsplit）。--iは行番号＝時差の元
@@ -14480,7 +14768,15 @@ html.__ce_altmode{cursor:text}
       +'<button data-a="swap" style="'+BS+';flex:1">🔀 入れ替え</button></div>'
       +'<button data-a="del" style="'+BS+';width:100%;margin-top:5px;color:#c0392b">🗑 このセクションを削除</button>'
       +'<div style="opacity:.7;margin-top:10px">足す</div>'
-      +'<button data-a="add" style="'+BS+';width:100%;margin-top:3px">➕ セクションを追加（お気に入りから）</button>'
+      // ★空のセクションの差し込みは⇕パネルの奥にしか無く見つけてもらえなかった（実報告）。
+      //   「セクションを触る操作は🧩の板に集める」方針（§5.5）に合わせてここへ出す。
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-a="insup" style="'+BS+';flex:1">⬆ この上に足す</button>'
+      +'<button data-a="insdn" style="'+BS+';flex:1">⬇ この下に足す</button></div>'
+      +'<div style="opacity:.62;font-size:11px;margin-top:3px">空のセクション（1画面ぶん・あとから高さも背景も変えられます）</div>'
+      +'<button data-a="add" style="'+BS+';width:100%;margin-top:5px">➕ セクションを追加（お気に入りから）</button>'
+      +'<div style="opacity:.7;margin-top:10px">並び順</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-a="mvup" style="'+BS+';flex:1">⬆ 一つ上へ</button>'
+      +'<button data-a="mvdn" style="'+BS+';flex:1">⬇ 一つ下へ</button></div>'
       +'<div style="opacity:.7;margin-top:10px">見た目</div>'
       +'<div style="display:flex;gap:5px;margin-top:3px"><button data-a="bg" style="'+BS+';flex:1">🎨 背景色を変える</button>'
       +'<button data-a="edge" style="'+BS+';flex:1">〰 境目の形</button></div>'
@@ -14502,6 +14798,36 @@ html.__ce_altmode{cursor:text}
       else if(a==='swap') favSwapOpen(el.closest('section,header,footer'));
       else if(a==='del')  secDeleteOpen(el.closest('section,header,footer'));
       else if(a==='add'){ var ab=document.getElementById('__ce_favadd'); if(ab) ab.click(); }
+      else if(a==='mvup'||a==='mvdn'){
+        // 並び順の入れ替え。対象の決め方は差し込みと同じ共通判定（内側のheaderを掴まない）
+        var _mr=null;
+        try{ var _mi=window.__ceSkelIndexOf(el); if(_mi>=0) _mr=window.__ceSkelSecs()[_mi]; }catch(_){}
+        if(!_mr) _mr=el.closest('section,header,footer,article')||_secFavTarget(el);
+        var _got=secMoveOrder(_mr, a==='mvup');
+        // ★知らせ方は成功も失敗も ceFlash に揃える。編集バーの小さい文字だけだと気づかれず
+        //   「押しても何も起きない」に見える（§7の実報告と同じ型）。
+        if(!_got){ try{ ceFlash('ここは順番を変えられません（セクションの中で右クリックしてください）'); }catch(_){} return; }
+        if(_got==='end'){ try{ ceFlash('⇅ これ以上'+(a==='mvup'?'上':'下')+'へは動かせません（端です）'); }catch(_){} return; }
+        try{ _mr.scrollIntoView({block:'center'}); }catch(_){}
+        try{ ceFlash('⇅ '+(a==='mvup'?'一つ上':'一つ下')+'へ動かしました（💾保存で確定・Ctrl+Zで戻せます）'); }catch(_){}
+        return;
+      }
+      else if(a==='insup'||a==='insdn'){
+        // ★差し込む基準は「今いるセクション」。
+        // 🚫closest('section,header,footer,article') では**内側の<header>**を掴むことがある
+        //   （実測：ld-day の見出しで右クリック → header.ld-day__head が対象になり、
+        //    新しいセクションが ld-day の"中"に入って ld-day が980→1891pxに膨らんだ）。
+        //   セクションの数え方は 🔀 と同じ共通判定（__ceSkelSecs）に合わせる＝必ず外側の塊になる。
+        var _ref=null;
+        try{ var _i=window.__ceSkelIndexOf(el); if(_i>=0) _ref=window.__ceSkelSecs()[_i]; }catch(_){}
+        if(!_ref) _ref=el.closest('section,header,footer,article')||_secFavTarget(el);
+        var _ns=secAddEmpty(_ref, a==='insup');
+        if(!_ns){ if(msg) msg.textContent='ここには足せませんでした（セクションの中で右クリックしてください）'; return; }
+        try{ _ns.scrollIntoView({block:'center'}); }catch(_){}
+        try{ ceFlash('➕ '+(a==='insup'?'上':'下')+'に空のセクションを足しました（1画面ぶん・💾保存で確定）'); }catch(_){}
+        var _r=_ns.getBoundingClientRect();
+        openSpacer(_ns, _r.top+_r.height/2, 'self');   // そのまま高さを調整できる板を開く
+      }
       else if(a==='bg')   openSecBg(el,x,y);
       else if(a==='edge') edgeOpen(_secEdgeTarget(el,x,y));
     });
@@ -18660,6 +18986,16 @@ html.__ce_altmode{cursor:text}
   //   中身を span.ce_txtbg で包み、box-decoration-break:clone で複数行でも行ごとに背景が付く。
   function textBgApply(el,color){
     if(!el||el.nodeType!==1) return;
+    // 🎨「背景→文字」を付けてある要素は、色を描いているのが本体ではなく ::before（--fxa-bgc）。
+    // ★ここを一緒に直さないと、色を選んでも**動きの帯だけ前の色（緑など）のまま**残る
+    //   （2026-08-03・実報告「アニメすると色は緑になる」）。dqColor と同じ流儀に合わせる。
+    (function(){
+      var bt=(el.classList&&el.classList.contains('fxa_bgt'))?el:(el.closest?el.closest('.fxa_bgt'):null);
+      if(!bt) return;
+      bt.setAttribute('data-cebgc', color);
+      bt.setAttribute('data-cedqbase', color);
+      bt.style.setProperty('--fxa-bgc', color);
+    })();
     var sp;
     if(el.classList.contains('ce_txtbg')){ sp=el; }
     else {
@@ -18726,6 +19062,53 @@ html.__ce_altmode{cursor:text}
     try{ localStorage.setItem('__ce_boxcols', JSON.stringify(a.slice(0,10))); }catch(_){ }
   }
   // 🖌 文字の背景ボックスのパレット（右クリックから直接開く浮動パネル・openSecBg と同じ作り）
+  // 🔶 文字の後ろに「図形」を敷いて、図形の板（かたち・水彩・濃さ・傾き・重なり）で仕上げる。
+  //   ★狙い（2026-08-03・要望）：文字の背景は background-color なので**四角しか作れず、
+  //     クリックもできない**（実体が無いため）。帯・はけ跡・葉っぱ・水彩にしたい時は
+  //     「本物の図形を後ろに置く」以外に方法がない。既にある図形の板をそのまま使い回す。
+  function textBgToShape(el, kind){
+    if(!el){ if(msg) msg.textContent='文字のある要素を右クリックしてから使ってください'; return null; }
+    var par=el.parentElement;
+    if(!par){ if(msg) msg.textContent='この文字には背景を敷けません'; return null; }
+    try{ pushUndo(par); }catch(_){}
+    var key=el.getAttribute('data-ceid')||'txbg';
+    var d=par.querySelector('[data-cetxbg="'+key+'"]');
+    // 🚫★placeFree は座標から親を決めるので、**文字とは別のセクションに入ってしまう**ことがある
+    //   （実測：文字は section.ce_newsec(z=8) の中なのに、図形は section.top01 に入った。
+    //    top01 は translate で重なりの土台を作っているので、z-index を49に上げても
+    //    ce_newsec より前に出られず、永久に見えなかった＝§7-55と同じ形）。
+    //   → 図形は必ず **文字と同じ親** に、文字のすぐ前へ挿す。土台が同じなら重なりは素直に決まる。
+    if(!d){
+      d=document.createElement('div');
+      d.className='ce_shape'; d.setAttribute('data-ceshape','rect');
+      d.setAttribute('style','box-sizing:border-box;'+((SHAPE_DEF.rect&&SHAPE_DEF.rect.css)||''));
+      d.setAttribute('data-cetxbg', key);
+      shapePaint(d, SHAPE_ST.col, SHAPE_ST.fill, SHAPE_ST.op);
+      par.insertBefore(d, el);
+    }
+    var w=Math.round(el.offsetWidth||0), h=Math.round(el.offsetHeight||0);
+    var pad=Math.max(10, Math.round(h*0.18));
+    // ★位置は offsetLeft/offsetTop（同じ offsetParent 基準）で合わせる。
+    //   getBoundingClientRect は出現アニメの transform を含むのでズレる（CLAUDE.md）。
+    if(getComputedStyle(par).position==='static') par.style.setProperty('position','relative');
+    d.style.setProperty('position','absolute','important');
+    d.style.setProperty('left',(el.offsetLeft-pad)+'px','important');
+    d.style.setProperty('top',(el.offsetTop-Math.round(pad/2))+'px','important');
+    d.style.setProperty('width',(w+pad*2)+'px','important');
+    d.style.setProperty('height',(h+pad)+'px','important');
+    d.style.removeProperty('max-width'); d.style.removeProperty('white-space');
+    try{ if(kind) dqShape(d, kind); }catch(_){}
+    // 同じ親の中なので、図形を0・文字を1にすれば必ず「図形の上に文字」になる
+    d.style.setProperty('z-index','0');
+    if(getComputedStyle(el).position==='static') el.style.setProperty('position','relative');
+    el.style.setProperty('z-index','1');
+    try{ textBgRemove(el); }catch(_){}     // 平らな背景色は消す（図形と二重になるため）
+    markDirty();
+    var dr=d.getBoundingClientRect();
+    openDecoQuick(d, Math.min(window.innerWidth-320, dr.right+12), Math.max(10, dr.top));
+    if(msg) msg.textContent='🔶 文字の後ろに図形を敷きました（かたち・水彩・濃さ・傾きは出ている板で選べます）';
+    return d;
+  }
   function openTextBg(el,x,y){
     var old=document.getElementById('__ce_tbgp'); if(old) old.remove();
     if(!el||!(el.textContent||'').trim()){ if(msg) msg.textContent='文字のある要素を右クリックしてから使ってください'; return; }
@@ -18754,6 +19137,12 @@ html.__ce_altmode{cursor:text}
       +'<div style="opacity:.7;margin-top:6px">淡い定番色（画像のようなクリーム等）</div><div>'+softSw.join('')+'</div>'
       +'<div style="opacity:.7;margin-top:6px">ページで使われている色</div><div>'+(pgSw.join('')||'<span style="color:#999">（なし）</span>')+'</div>'
       +'<div style="opacity:.7;margin-top:6px">好きな色（選ぶと即反映）</div><input type="color" id="__ce_tbgc" value="'+(recent[0]&&/^#[0-9a-f]{6}$/i.test(recent[0])?recent[0]:'#fff3d6')+'" style="width:44px;height:26px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle">'
+      +'<div style="opacity:.7;margin-top:10px">形のある背景にする（水彩・帯・はけ跡など）</div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">'
+      +'<button data-tbs="band" style="background:#0b6bcb;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">🔶 帯にする</button>'
+      +'<button data-tbs="brush" style="background:#0b6bcb;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">🖌 はけ跡にする</button>'
+      +'<button data-tbs="round" style="background:#0b6bcb;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">▢ 角丸にする</button></div>'
+      +'<div style="opacity:.62;font-size:11px;margin-top:3px">押すと図形の板が開いて、かたち・水彩・濃さ・傾きを選べます</div>'
       +'<button data-flat="1" style="margin-left:8px;background:#eee;color:#333;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;vertical-align:middle">✕ 背景を消す</button>'
       +'<button data-x="1" style="margin-left:6px;background:#555;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;vertical-align:middle">閉じる</button>';
     document.body.appendChild(p);
@@ -18764,6 +19153,8 @@ html.__ce_altmode{cursor:text}
       ev.stopPropagation();
       if(ev.target.getAttribute('data-x')){ p.remove(); return; }
       if(ev.target.getAttribute('data-flat')){ textBgRemove(el); if(msg) msg.textContent='文字の背景を消しました（💾保存で確定）'; return; }
+      var tbs=ev.target.getAttribute('data-tbs');
+      if(tbs){ p.remove(); textBgToShape(el, tbs); return; }
       var b=ev.target.closest('.__ce_tbgsw');
       if(b){
         var c=b.getAttribute('data-c');
@@ -19322,7 +19713,23 @@ html.__ce_altmode{cursor:text}
         +'🖍<input type="color" id="__ce_q_selhlc" value="'+hlDefaultColor()+'" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><button id="__ce_q_selhlb" style="background:#eab308;border:none;border-radius:5px;padding:2px 8px;cursor:pointer;font-weight:700">'+(selApiQ.hasHl()?'マーカーを消す':'マーカー')+'</button> '
         +'〰<input type="color" id="__ce_q_seludc" value="#e07856" style="width:28px;height:21px;padding:0;border:none;border-radius:4px;vertical-align:middle;cursor:pointer"><button id="__ce_q_seludb" style="background:#f2f2f4;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer">'+(selApiQ.hasUd()?'下線を消す':'下線')+'</button>'
         +'<label title="ON=スクロールで左からスーッと走る／OFF=最初から引かれた静止下線" style="font-size:11px;margin-left:3px;cursor:pointer;user-select:none"><input type="checkbox" id="__ce_q_seluda"'+((localStorage.getItem('__ce_ud_anim')||'1')!=='0'?' checked':'')+' style="vertical-align:middle;cursor:pointer">走る</label>'
-        +'</div>';
+                // 〰下線の太さ（--udw）。マーカーの太さとは持ち方が違うので専用ボタンにする。
+        //   文字を選んで操作するのはこの板だけなので、ここに無いと太さを変える手段がゼロになる
+        //   （2026-08-03・実報告「できなくない？」）
+        // 🖍マーカーの太さ・上下位置。ここに無いと、文字を選んで触る道がゼロになる
+        //   （2026-08-03・実報告。⚙の大きいメニュー側にはあったが、普段使う板には無かった）
+        +'<br><span style="opacity:.8">マーカーの太さ</span> '
+        +'<button id="__ce_q_hlwm" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4">− 細く</button>'
+        +'<button id="__ce_q_hlwp" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4;margin-left:4px">＋ 太く</button>'
+        +'<span style="opacity:.8;margin-left:8px">位置</span> '
+        +'<button id="__ce_q_hlpu" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4" title="上へ">▲</button>'
+        +'<button id="__ce_q_hlpd" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4;margin-left:4px" title="下へ">▼</button>'
+        +'<span id="__ce_q_hlwnow" style="opacity:.7;margin-left:6px;font-size:11px"></span>'
+        +'<br><span style="opacity:.8">下線の太さ</span> '
+        +'<button id="__ce_q_udwm" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4">− 細く</button>'
+        +'<button id="__ce_q_udwp" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4;margin-left:4px">＋ 太く</button>'
+        +'<span id="__ce_q_udwnow" style="opacity:.7;margin-left:6px;font-size:11px"></span>'
++'</div>';
     }
     // 🖍/〰 右クリックした場所にマーカー・下線があれば「消す」を最上部に出す（AIなし）。
     // ★文字を選び直さなくても消せるのが肝：選択に頼ると「選び方によっては消すボタンが出ない」
@@ -20829,6 +21236,75 @@ html.__ce_altmode{cursor:text}
         if(selApiQ.hasHl()){ selApiQ.removeHl(); this.textContent='マーカー'; }
         else{ selApiQ.highlight(qm.querySelector('#__ce_q_selhlc').value); this.textContent='マーカーを消す'; }
       });
+      // 🖍 マーカーの太さ・位置：いまマーカーがかかっている span を探して帯を広げ縮めする
+      (function(){
+        function _hlSpan(){
+          var sp=null;
+          try{
+            var sel=document.getSelection();
+            if(sel && sel.rangeCount){
+              var n=sel.getRangeAt(0).commonAncestorContainer;
+              if(n && n.nodeType===3) n=n.parentElement;
+              if(n && n.closest) sp=n.closest('.fxa_hl');
+            }
+          }catch(_){}
+          if(!sp && typeof curEl!=='undefined' && curEl){
+            if(curEl.closest) sp=curEl.closest('.fxa_hl');
+            if(!sp && curEl.querySelector) sp=curEl.querySelector('.fxa_hl');
+          }
+          return sp;
+        }
+        function _show(){
+          var t=qm.querySelector('#__ce_q_hlwnow'); if(!t) return;
+          var sp=_hlSpan();
+          if(!sp){ t.textContent='（マーカーがありません）'; return; }
+          var a=parseFloat(sp.style.getPropertyValue('--hlt0'))||79;
+          var b2=parseFloat(sp.style.getPropertyValue('--hlt1'))||91;
+          t.textContent='今 太さ'+Math.round(b2-a)+'%';
+        }
+        function _go(fn,d){
+          var sp=_hlSpan();
+          if(!sp){ if(msg) msg.textContent='先に🖍マーカーを引いてから調整してください'; return; }
+          fn(sp,d); _show();
+        }
+        var _m=qm.querySelector('#__ce_q_hlwm'); if(_m) _m.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlThick,-6); });
+        var _p=qm.querySelector('#__ce_q_hlwp'); if(_p) _p.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlThick,6); });
+        var _u=qm.querySelector('#__ce_q_hlpu'); if(_u) _u.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlPos,-4); });
+        var _d=qm.querySelector('#__ce_q_hlpd'); if(_d) _d.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlPos,4); });
+        _show();
+      })();
+      // 〰 下線の太さ：いま下線がかかっている span を探して --udw を上げ下げする
+      (function(){
+        function _udSpan(){
+          var sp=null;
+          try{
+            var sel=document.getSelection();
+            if(sel && sel.rangeCount){
+              var n=sel.getRangeAt(0).commonAncestorContainer;
+              if(n && n.nodeType===3) n=n.parentElement;
+              if(n && n.closest) sp=n.closest('.fxa_ud,.ceud');
+            }
+          }catch(_){}
+          if(!sp && typeof curEl!=='undefined' && curEl){
+            if(curEl.closest) sp=curEl.closest('.fxa_ud,.ceud');
+            if(!sp && curEl.querySelector) sp=curEl.querySelector('.fxa_ud,.ceud');
+          }
+          return sp;
+        }
+        function _show(){
+          var t=qm.querySelector('#__ce_q_udwnow'); if(!t) return;
+          var sp=_udSpan();
+          t.textContent = sp ? ('今 '+(parseFloat(sp.style.getPropertyValue('--udw'))||3)+'px') : '（下線がありません）';
+        }
+        function _go(d){
+          var sp=_udSpan();
+          if(!sp){ if(msg) msg.textContent='先に〰下線を引いてから太さを変えてください'; return; }
+          fxHlThick(sp, d); _show();
+        }
+        var _m=qm.querySelector('#__ce_q_udwm'); if(_m) _m.addEventListener('click',function(ev){ ev.stopPropagation(); _go(-1); });
+        var _p=qm.querySelector('#__ce_q_udwp'); if(_p) _p.addEventListener('click',function(ev){ ev.stopPropagation(); _go(1); });
+        _show();
+      })();
       qm.querySelector('#__ce_q_selhlc').addEventListener('input',function(){ selApiQ.recolorHl(this.value); });                      // ドラッグ中は色だけ追従
       qm.querySelector('#__ce_q_selhlc').addEventListener('change',function(){ if(selApiQ.hasHl()) hlPushColorHistory(this.value); }); // 履歴は決定時に1回だけ
       qm.querySelector('#__ce_q_seludb').addEventListener('click',function(ev){ ev.stopPropagation();
