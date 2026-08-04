@@ -286,6 +286,46 @@ def add_operations(filename: str, ops: list[dict], created_by: str = "codex") ->
     return cur
 
 
+def rebase_stale(filename: str) -> dict:
+    """残った stale パッチを、現在の正式HTMLを基準に作り直す。
+
+    HTMLの変更を取り消す操作ではない。全 target が現在のHTMLにも残っている
+    場合に限り既存操作を保持して baseSha256 だけを更新し、元パッチは履歴へ
+    複製する。
+    """
+    camp = resolve_camp(filename)
+    cur = load(filename)
+    if not cur:
+        raise PatchError("作り直すパッチがありません")
+
+    now_sha = sha256_of(camp)
+    old_base = cur.get("baseSha256")
+    if old_base == now_sha:
+        raise PatchError("パッチは stale ではありません")
+
+    html = camp.read_text(encoding="utf-8", errors="replace")
+    ids = set(re.findall(r'''\bdata-ceid\s*=\s*["'](ce_[A-Za-z0-9_-]{4,64})["']''', html, re.I))
+    missing = sorted({op["target"] for op in cur["operations"] if op["target"] not in ids})
+    if missing:
+        raise PatchError("現在のHTMLに無い対象IDがあります: " + ", ".join(missing))
+
+    stem = camp.stem
+    dest_dir = HISTORY_DIR / stem
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    old_rev = int(cur.get("revision", 0))
+    archive = dest_dir / f"{old_rev:06d}.rebased.json"
+    if archive.exists():
+        raise PatchError(f"同じrevisionの再基準化履歴が既にあります: {archive.name}")
+    archive.write_text(json.dumps(cur, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    cur["baseSha256"] = now_sha
+    cur["revision"] = old_rev + 1
+    cur["updatedAt"] = _now()
+    cur["rebasedFromSha256"] = old_base
+    save(filename, cur)
+    return cur
+
+
 def consume(filename: str, revision: int) -> None:
     """HTMLへの取り込みが成功した後に呼ぶ。パッチを履歴へ移して消化済みにする。
 

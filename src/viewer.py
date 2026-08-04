@@ -9087,6 +9087,16 @@ html.__ce_altmode{cursor:text}
       if(e.target.closest('button,input,select,textarea,label')) return;   // 操作部品の上では動かさない
       e.preventDefault(); e.stopPropagation();
       var r=panel.getBoundingClientRect(), sx=e.clientX-r.left, sy=e.clientY-r.top;
+      // ★掴んだ瞬間に「今の見た目」を px で確定させる（2026-08-05・§7-74の恒久対策）。
+      //   ここを通さずに left/top だけ px で動かすと、板ごとに次の事故が起きる：
+      //   ①中央寄せ(transform:translateX(-50%))が残ったまま＝-50%が二重に効いて横にズレる
+      //   ②幅指定の無い板は「使える幅」が変わって横に広がり、中のボタンが押した場所から飛ぶ
+      //     （実測 800px→1200px・▶試すが x415→x924 へ移動してクリックが成立しなくなった）
+      //   ③bottom/right で位置を決めている板は、top/left と両方効いて縦横に引き伸ばされる
+      var cs=getComputedStyle(panel);
+      if(cs.transform&&cs.transform!=='none'){ panel.style.width=Math.round(r.width)+'px'; panel.style.transform='none'; }
+      panel.style.left=Math.round(r.left)+'px'; panel.style.top=Math.round(r.top)+'px';
+      panel.style.right='auto'; panel.style.bottom='auto';
       function mv(ev){
         panel.style.left=Math.max(4,Math.min(ev.clientX-sx, window.innerWidth-panel.offsetWidth-4))+'px';
         panel.style.top =Math.max(4,Math.min(ev.clientY-sy, window.innerHeight-panel.offsetHeight-4))+'px';
@@ -16791,16 +16801,19 @@ html.__ce_altmode{cursor:text}
     +'if(cfg.l){p=p%2;if(p>1){p=2-p;back=true;}}else if(p>1)p=1;'
     +'var e=0.5-0.5*Math.cos(Math.PI*p);var d1=e*pa.total,pt=at(pa,d1);'
     +'el.style.setProperty("translate",(bx+pt.x).toFixed(1)+"px "+(by+pt.y).toFixed(1)+"px","important");'
-    +'if(cfg.r){var aF=at(pa,Math.min(pa.total,d1+8)),aB=at(pa,Math.max(0,d1-8));'
+    // ★cfg.e＝🛬着地の向き（度・既定0＝水平に戻す）。未指定の古いカンプは0扱い＝従来と完全に同じ動き。
+    //   進行方向を向く(cfg.r)がOFFでも、着地の向きが指定されていれば回転だけは当てる。
+    +'if(cfg.r||cfg.e){var aF=at(pa,Math.min(pa.total,d1+8)),aB=at(pa,Math.max(0,d1-8));'
     +'var vx=back?(aB.x-aF.x):(aF.x-aB.x),vy=back?(aB.y-aF.y):(aF.y-aB.y),th=Math.atan2(vy,vx)*180/Math.PI;'
-    +'var st=(cfg.t==null?100:cfg.t)/100,tgt,fl=false;'
-    +'if(cfg.f){fl=Math.abs(th)>90;tgt=fl?(180-th):th;if(tgt>180)tgt-=360;}'
+    +'var st=(cfg.t==null?100:cfg.t)/100,tgt=0,fl=false;'
+    +'if(cfg.r){if(cfg.f){fl=Math.abs(th)>90;tgt=fl?(180-th):th;if(tgt>180)tgt-=360;}'
     +'else{tgt=Math.atan2(vy,Math.abs(vx))*180/Math.PI;}'
-    +'tgt*=st;if(tgt>75)tgt=75;if(tgt<-75)tgt=-75;'
-    +'if(!cfg.l&&p>0.85)tgt*=(1-p)/0.15;'
+    +'tgt*=st;if(tgt>75)tgt=75;if(tgt<-75)tgt=-75;}'
+    +'if(!cfg.l&&p>0.85){var ea=+cfg.e||0,k=(1-p)/0.15;tgt=tgt*k+ea*(1-k);}'
     +'if(fl!==prevFl){cur=tgt;}else{cur+=(tgt-cur)*(1-Math.exp(-dt/160));}'
+    +'if(!cfg.l&&p>=1)cur=tgt;'
     +'prevFl=fl;'
-    +'if(cfg.f)el.style.setProperty("scale",(fl?-bsx:bsx)+" "+bsy,"important");'
+    +'if(cfg.r&&cfg.f)el.style.setProperty("scale",(fl?-bsx:bsx)+" "+bsy,"important");'
     +'el.style.setProperty("rotate",(bro+(bsx<0?-cur:cur)).toFixed(1)+"deg","important");}'
     // ★飛び終わりはそのまま（画面の外なら外のまま）。編集中に元の位置へ戻すと
     //   「戻ってくるのが気になる」（ユーザー報告）ので、代わりに画面の左下に小さな点を置き、
@@ -16936,6 +16949,7 @@ html.__ce_altmode{cursor:text}
       +'<div style="font-size:12.5px;color:#555;margin-bottom:8px">'+t+'</div>'
       +_flyBtn('__ce_fly_no','✕ やめる（Esc）','#888');
   }
+  var _FLYB='border:1px solid #cfe0fb;border-radius:7px;padding:4px 9px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f';
   // 🛫🛬 入口/出口の行を作る（辺4つ＋「そのまま」＋位置1〜5）。2026-07-31・要望
   function _flyEdgeRow(kind, title, keepLabel){
     var S='border:1px solid #cfe0fb;border-radius:7px;padding:4px 9px;font-size:12px;cursor:pointer;font-weight:700;background:#eef3ff;color:#1d1d1f';
@@ -17006,6 +17020,20 @@ html.__ce_altmode{cursor:text}
       //   押すとその場で1回飛んで見せる（言葉で説明するより見せたほうが早い）。
       +_flyEdgeRow('in','🛫 入口（どこから飛んでくる）','⟲ 今いる場所から')
       +_flyEdgeRow('out','🛬 出口（どこへ抜ける）','✋ 今の終わりのまま')
+      // 🛬 着地したときの向き（2026-08-05・要望「おわったとき振り向く角度かえられる？」）。
+      // ★従来は最後の15%で必ず0°（水平）に戻していた。その戻し先を選べるようにしただけ＝既定0で完全互換。
+      +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px">'
+      +'<span style="font-size:12px;color:#555;min-width:150px">🛬 着地したときの向き</span>'
+      +'<button data-fend="-45" style="'+_FLYB+'">⤴ 上向き</button>'
+      +'<button data-fend="-20" style="'+_FLYB+'">↗ 少し上</button>'
+      +'<button data-fend="0" style="'+_FLYB+'">⟲ まっすぐ</button>'
+      +'<button data-fend="20" style="'+_FLYB+'">↘ 少し下</button>'
+      +'<button data-fend="45" style="'+_FLYB+'">⤵ 下向き</button>'
+      +'<input type="range" id="__ce_fly_end" min="-90" max="90" step="5" value="'+(+_fly.endang||0)+'" style="width:110px;vertical-align:middle;accent-color:#0284c7">'
+      +'<span id="__ce_fly_endv" style="font-size:12px;color:#0369a1;font-weight:700;min-width:40px">'+(+_fly.endang||0)+'°</span>'
+      +'</div>'
+      +'<div style="font-size:11px;color:#888;margin:0 0 8px">飛び終わりで向き直る角度です（マイナス＝頭が上／プラス＝頭が下）。'
+      +'▶試すは飛び終わりに元へ戻るので、実際の見え方は👁プレビューか保存版で確認してください</div>'
       +'<div style="font-size:11px;color:#888;margin:-4px 0 8px">数字＝その辺のどのへんか。'
       +'左右なら上から1〜5、上下なら左から1〜5です（○をドラッグでも動かせます）</div>'
       +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
@@ -17056,6 +17084,8 @@ html.__ce_altmode{cursor:text}
     var el=_fly.el, r=el.getBoundingClientRect();
     var cx=r.left+(window.scrollX||0)+r.width/2, cy=r.top+(window.scrollY||0)+r.height/2;
     return {m:_fly.mode, d:Math.round(_fly.dur*1000), r:_fly.rot?1:0, f:_fly.flip?1:0, t:_fly.tilt, l:_fly.loop?1:0,
+      e:(+_fly.endang||0),
+
       p:_fly.anchors.map(function(a){ return [Math.round(a[0]-cx), Math.round(a[1]-cy)]; })};
   }
   function flyStopPrev(){
@@ -17096,21 +17126,25 @@ html.__ce_altmode{cursor:text}
       var e2=0.5-0.5*Math.cos(Math.PI*p);
       var d1=e2*pa.total, pt=flyAt(pa,d1);
       el.style.setProperty('translate',(bx+pt.x).toFixed(1)+'px '+(by+pt.y).toFixed(1)+'px','important');
-      if(cfg.r){
+      if(cfg.r||cfg.e){
         // 進行方向（往復の戻りは接線を反転）へ「ジワッと」向く：
         // 接線に即スナップだとカーブでバタつく＝不自然だったので、0.16秒の慣性で追従させる。
         // ★接線は折れ線セグメントの向きでなく「前後±8px地点の中央差分」で取る＝区切りごとの段差が消える。
         var aF=flyAt(pa,Math.min(pa.total,d1+8)), aB=flyAt(pa,Math.max(0,d1-8));
         var vx=back?(aB.x-aF.x):(aF.x-aB.x), vy=back?(aB.y-aF.y):(aF.y-aB.y), th=Math.atan2(vy,vx)*180/Math.PI;
-        var st=(cfg.t==null?100:cfg.t)/100, tgt, fl=false;
-        if(cfg.f){ fl=Math.abs(th)>90; tgt=fl?(180-th):th; if(tgt>180)tgt-=360; }
-        else { tgt=Math.atan2(vy,Math.abs(vx))*180/Math.PI; }
-        tgt*=st; if(tgt>75)tgt=75; if(tgt<-75)tgt=-75;
-        if(!cfg.l&&p>0.85) tgt*=(1-p)/0.15;  // 着地前は水平に戻す（傾いたまま止まらない）
+        var st=(cfg.t==null?100:cfg.t)/100, tgt=0, fl=false;
+        if(cfg.r){
+          if(cfg.f){ fl=Math.abs(th)>90; tgt=fl?(180-th):th; if(tgt>180)tgt-=360; }
+          else { tgt=Math.atan2(vy,Math.abs(vx))*180/Math.PI; }
+          tgt*=st; if(tgt>75)tgt=75; if(tgt<-75)tgt=-75;
+        }
+        // 🛬 着地の向き（cfg.e・度）：最後の15%でルートの向きから決めた角度へ寄せる。既定0＝水平に戻す
+        if(!cfg.l&&p>0.85){ var ea=+cfg.e||0, k=(1-p)/0.15; tgt=tgt*k+ea*(1-k); }
         if(fl!==prevFl){ cur=tgt; }           // 鏡像切替の瞬間はスナップ（回転で補間すると一回転して見える）
         else { cur+=(tgt-cur)*(1-Math.exp(-dt/160)); }
+        if(!cfg.l&&p>=1) cur=tgt;             // 最後はぴったり合わせる（慣性の取り残しを消す）
         prevFl=fl;
-        if(cfg.f) el.style.setProperty('scale',(fl?-bsx:bsx)+' '+bsy,'important');
+        if(cfg.r&&cfg.f) el.style.setProperty('scale',(fl?-bsx:bsx)+' '+bsy,'important');
         // ⇄でキャラ絵を反転している(bsx<0)場合、scaleが回転の後に掛かるため傾きが鏡写しになる→符号を戻す
         el.style.setProperty('rotate',(bro+(bsx<0?-cur:cur)).toFixed(1)+'deg','important');
       }
@@ -17226,7 +17260,10 @@ html.__ce_altmode{cursor:text}
     document.removeEventListener('keydown',flyKey,true);
     window.removeEventListener('scroll',flyRedraw,true);
     window.removeEventListener('resize',flyRedraw);
-    _fly.cv.remove(); _fly.pn.remove();
+    // ★片方の remove で例外が出ても、もう片方は必ず消す（残ると画面を覆ってクリックを全部吸う）
+    try{ _fly.cv.remove(); }catch(_){ }
+    try{ _fly.pn.remove(); }catch(_){ }
+    [].slice.call(document.querySelectorAll('#__ce_flyov,#__ce_flypn')).forEach(function(n){ try{ n.remove(); }catch(_){ } });
     _fly=null; window.__ceFlyMode=false;
   }
   // 🕊 すでに付いている飛行ルートを「描き直し」ではなく編集で開く（2026-07-31・要望
@@ -17252,7 +17289,7 @@ html.__ce_altmode{cursor:text}
     _fly.smooth=(cfg.m==='s')?'line':'smooth';
     _fly.dur=Math.max(0.5,(cfg.d||4000)/1000);
     _fly.rot=(cfg.r!==0); _fly.flip=(cfg.f!==0);
-    _fly.tilt=(cfg.t==null?60:cfg.t); _fly.loop=!!cfg.l;
+    _fly.tilt=(cfg.t==null?60:cfg.t); _fly.loop=!!cfg.l; _fly.endang=(+cfg.e||0);
     try{ flyRedraw(); }catch(_){ }
     try{ flyPanelFull(); }catch(_){ }
     if(msg) msg.textContent='🕊 飛ぶルートを編集中：○をドラッグで形を調整（いちばん最初の○＝スタート地点）。✅で反映・Escでやめる';
@@ -17262,6 +17299,9 @@ html.__ce_altmode{cursor:text}
     if(!el){ if(msg)msg.textContent='⚠ 要素が選ばれていません（もう一度右クリックで選んでください）'; return; }
     if(_undraggable(el)){ if(msg)msg.textContent='⚠ ページ全体の器は飛ばせません（キャラの画像など小さめの要素を右クリックしてください）'; return; }
     if(_fly) flyEnd();
+    // ★前回の線／板が孤児で残っていたら必ず消してから開く（2026-08-05・実報告「線がのこっている」）。
+    //   古いcanvasが上に残ったまま新しいのを重ねると、クリックが古い方に吸われて板のボタンが効かない。
+    [].slice.call(document.querySelectorAll('#__ce_flyov,#__ce_flypn')).forEach(function(n){ try{ n.remove(); }catch(_){ } });
     var cv=document.createElement('canvas'); cv.id='__ce_flyov';
     cv.setAttribute('style','position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:2147483004;cursor:crosshair;background:rgba(15,23,42,.10)');
     var pn=document.createElement('div'); pn.id='__ce_flypn';
@@ -17270,14 +17310,10 @@ html.__ce_altmode{cursor:text}
     // 🖐 この板も掴んで動かせるようにする（2026-07-31・報告「飛ばす時の編集ボックスが動かせない」）。
     // ★中央そろえに transform を使っているので、動かす前に外す＝つかんだ位置とズレないようにする。
     //   線を描くのは下の canvas 側（cvのmousedown）なので、板の上で掴んでも描画は始まらない。
-    pn.addEventListener('mousedown',function(){
-      if(pn.style.transform){
-        var r=pn.getBoundingClientRect();
-        pn.style.transform=''; pn.style.left=Math.round(r.left)+'px'; pn.style.top=Math.round(r.top)+'px';
-      }
-    },true);
+    // ★この板だけの「掴んだら中央寄せを外す」処理は panelDrag 側へ統合した（2026-08-05・§7-74）。
+    //   板ごとに書くと、ボタンの上でも走って中のボタンが飛ぶ（＝押しても何も起きない）事故になる。
     panelDrag(pn);
-    _fly={el:el, raw:[], anchors:[], smooth:'smooth', mode:'c', dur:4, rot:true, flip:true, tilt:60, loop:false, drawing:false, dragIdx:-1, cv:cv, pn:pn};
+    _fly={el:el, raw:[], anchors:[], smooth:'smooth', mode:'c', dur:4, rot:true, flip:true, tilt:60, loop:false, endang:0, drawing:false, dragIdx:-1, cv:cv, pn:pn};
     window.__ceFlyMode=true;
     // パネルの操作（作り直しても効くよう委譲で1回だけ張る）
     pn.addEventListener('click',function(ev){
@@ -17336,6 +17372,16 @@ html.__ce_altmode{cursor:text}
           :((kind==='in'?'🛫 入口':'🛬 出口')+'＝画面の'+jp+'そと（'+(/[lr]/.test(slot.s)?'上':'左')+'から'+slot.n+'番目）にしました');
         return;
       }
+      // 🛬 着地の向きをボタンで決める（押したらその場で1回飛んで見せる）
+      var fend=ev.target.closest('[data-fend]');
+      if(fend){
+        _fly.endang=+fend.getAttribute('data-fend')||0;
+        var er=document.getElementById('__ce_fly_end'); if(er) er.value=_fly.endang;
+        var ev2=document.getElementById('__ce_fly_endv'); if(ev2) ev2.textContent=_fly.endang+'°';
+        if(_fly.anchors.length>1){ try{ flyStopPrev(); flyRunLocal(_fly.el, flyCfg()); }catch(_){ } }
+        if(msg) msg.textContent='🛬 着地したときの向き＝'+_fly.endang+'°（✅付けるで確定・👁プレビューで実際の止まり方が見られます）';
+        return;
+      }
       var b=ev.target.closest('button'); if(!b) return;
       // キャラの向き調整：反転中は回転が鏡写しになるので、ボタンの見た目の向きに合わせて符号を補正
       if(b.id==='__ce_fly_rl'||b.id==='__ce_fly_rr'){
@@ -17356,6 +17402,7 @@ html.__ce_altmode{cursor:text}
       if(ev.target.id==='__ce_fly_flip'){ _fly.flip=!!ev.target.checked; }
       if(ev.target.id==='__ce_fly_tilt'){ _fly.tilt=+ev.target.value; var tv=document.getElementById('__ce_fly_tiltv'); if(tv)tv.textContent=_fly.tilt+'%'; }
       if(ev.target.id==='__ce_fly_loop'){ _fly.loop=!!ev.target.checked; }
+      if(ev.target.id==='__ce_fly_end'){ _fly.endang=+ev.target.value||0; var ea2=document.getElementById('__ce_fly_endv'); if(ea2)ea2.textContent=_fly.endang+'°'; }
     });
     cv.addEventListener('mousedown',flyDown,true);
     cv.addEventListener('contextmenu',flyCtx,true);
@@ -22401,12 +22448,30 @@ html.__ce_altmode{cursor:text}
     // まずは各モードの正規の終了処理（後片付けごとやってくれる）
     try{ if(window.__cePalPickEnd) window.__cePalPickEnd(); }catch(_){}
     try{ if(window.__ceInspOn && window.__ceInspExit) window.__ceInspExit(); }catch(_){}
-    try{ if(window.__ceFlyMode && typeof flyEnd==='function'){ flyStopPrev(); flyEnd(); } }catch(_){}
+    // ★フラグ(__ceFlyMode)だけを条件にしない（2026-08-05・実報告「線がのこっている」）。
+    //   一度この砦を通るとフラグは強制falseになるので、次のEscでは flyEnd が呼ばれず、
+    //   全画面のcanvas(#__ce_flyov)だけが残る＝クリックを全部吸って「押しても何も起きない」になる。
+    try{ if((window.__ceFlyMode||document.getElementById('__ce_flyov')) && typeof flyEnd==='function'){ flyStopPrev(); flyEnd(); } }catch(_){}
     // ★正規終了が例外で途中まで＝フラグが残ると右クリックが死んだままになるので、最後に必ず強制で落とす
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname','__ce_veilp'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    // ★__ce_flyov（全画面の線キャンバス）と __ce_flypn（🕊の板）は必ずここでも消す。
+    //   残ると画面全体がクリックを吸うので、他のどのボタンも押せなくなる（＝ツールが壊れて見える）。
+    //   ⚠__ce_flydots（左下の小さい点）は飛ぶ絵への入口なので消さない。
+    ['__ce_flyov','__ce_flypn','__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname','__ce_veilp'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    // ★保険：上の一覧に足し忘れた板も、ここで必ず消す（2026-08-05・§7-74の恒久対策）。
+    //   新しい板を作るたびに一覧へ書き足すのは必ず忘れる（実例：🕊の線キャンバス __ce_flyov）。
+    //   取り残された板は画面を覆ってクリックを全部吸うので「ツールが丸ごと壊れた」ように見える。
+    //   ★見るのは body の直下だけ＝編集バーの中身や、要素にくっついた目印は巻き込まない。
+    //   ⚠常設のUI（編集バー・保存バー・通知・🕊の入口の点・パンくず）は消さないこと。
+    var CE_KEEP={'__ce':1,'__ce_savebar':1,'__ce_toast':1,'__ce_flydots':1,'__ce_crumb':1,'__ce_selc':1,'__ce_cm':1};
+    [].slice.call(document.body.children).forEach(function(n){
+      var nid=n.id||'';
+      if(nid.indexOf('__ce')!==0||CE_KEEP[nid]) return;
+      if(/^(STYLE|SCRIPT|LINK)$/.test(n.tagName)) return;   // 見た目用のCSSは残す（§7㉔と同じ流儀）
+      try{ if(n.__close) n.__close(); else { if(n.__off) n.__off(); n.remove(); } recovered=true; }catch(_){ }
+    });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);

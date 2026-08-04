@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "targetFile": "clone_www_npo_ashitaba_or_jp_20260729_095707_js_bk20260730_071505_bk20260731_151244_bk20260801_133328_codex_preview_dayflow_20260804_bk20260805_070554.html",
+  "baseSha256": "ea8345c3fd3a187e8ed9025496f5dcb25df48954929bea2050f0203e728c9e21",
+  "revision": 2,
+  "createdBy": "codex",
+  "createdAt": "2026-08-05T07:25:07+09:00",
+  "updatedAt": "2026-08-05T07:28:00+09:00",
+  "operations": [
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7btcf87yr",
+      "property": "margin-top",
+      "value": "-100vh",
+      "priority": "important"
+    }
+  ]
+}

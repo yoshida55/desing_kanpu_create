@@ -11,6 +11,7 @@
     python tools/camp_patch.py remove-style --file example.html --id ce_xxx --property box-shadow
     python tools/camp_patch.py set-text  --file example.html --id ce_xxx --value "新しい文章"
     python tools/camp_patch.py replace-image --file example.html --id ce_xxx --src /uploads/a.png --alt "説明"
+    python tools/camp_patch.py rebase-stale --file example.html
     python tools/camp_patch.py validate --file example.html
     python tools/camp_patch.py report   --file example.html
 
@@ -150,6 +151,19 @@ def cmd_replace_image(a) -> int:
     return _add(a, op)
 
 
+def cmd_rebase_stale(a) -> int:
+    """対象IDが残っている stale パッチだけを現在のHTML基準に作り直す。"""
+    try:
+        patch = cp.rebase_stale(a.file)
+    except cp.PatchError as e:
+        print(f"拒否: {e}")
+        return 1
+    print(json.dumps({"ok": True, "revision": patch["revision"],
+                      "operations": len(patch["operations"]),
+                      "baseSha256": patch["baseSha256"]}, ensure_ascii=False))
+    return 0
+
+
 def cmd_validate(a) -> int:
     """パッチが今のHTMLに当たるかを、ブラウザを開かずに確かめる。
 
@@ -229,6 +243,8 @@ def main() -> int:
     s.add_argument("--id", required=True)
     s.add_argument("--src", required=True)
     s.add_argument("--alt")
+
+    base("rebase-stale", cmd_rebase_stale, "対象IDが残る stale パッチを現在HTML基準に作り直す")
 
     s = base("validate", cmd_validate, "そのまま使えるか確かめる")
     s.add_argument("--live", action="store_true", help="ブラウザで対象IDの存在も確かめる")

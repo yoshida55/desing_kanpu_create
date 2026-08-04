@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "targetFile": "clone_www_npo_ashitaba_or_jp_20260729_095707_js_bk20260730_071505_bk20260731_151244_bk20260801_133328_codex_preview_dayflow_20260804_bk20260805_070554.html",
+  "baseSha256": "029afbe8e6a40dad81c88846a7c69e596387c6071d15769b0a32f141e01c630d",
+  "revision": 10,
+  "createdBy": "codex",
+  "createdAt": "2026-08-05T07:20:05+09:00",
+  "updatedAt": "2026-08-05T07:20:06+09:00",
+  "operations": [
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7btdtgd22",
+      "property": "font-size",
+      "value": "13px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7btdtgd22",
+      "property": "line-height",
+      "value": "1.7",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7bthpduoc",
+      "property": "font-size",
+      "value": "13px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7bthpduoc",
+      "property": "line-height",
+      "value": "1.7",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7bt46bnqp",
+      "property": "font-size",
+      "value": "13px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7bt46bnqp",
+      "property": "line-height",
+      "value": "1.7",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7btdy4a96",
+      "property": "font-size",
+      "value": "13px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7btdy4a96",
+      "property": "line-height",
+      "value": "1.7",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7bt7qi93p",
+      "property": "font-size",
+      "value": "13px",
+      "priority": "important"
+    },
+    {
+      "op": "set_style",
+      "target": "ce_msf1n7bt7qi93p",
+      "property": "line-height",
+      "value": "1.7",
+      "priority": "important"
+    }
+  ]
+}
