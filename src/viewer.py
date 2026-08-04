@@ -5004,8 +5004,25 @@ html.__ce_altmode{cursor:text}
       }
       return t.replace(/(-?\\d*\\.?\\d+)rem\\b/g,function(_,n){ return (Math.round(parseFloat(n)*rootPx*1000)/1000)+'px'; });
     }
+    // ★セレクタを「,」で割る時はカッコの中を数えること（2026-08-04・実報告で判明）。
+    //   :is(:hover,:focus-within) / :not(a,b) / :nth-child(2 of .x) など「カッコの中にカンマ」は普通にある。
+    //   単純な split(',') だと壊れたセレクタ2つに割れ、どちらも誰にも当たらない＝「効いていないルール」と
+    //   誤判定してルールごと捨てていた（実例：ろぴあのWORK一覧。ホバーで開く指定10本が全部消え、
+    //   ⭐で保存した部品が「押しても何も起きない」板になった）。
+    function splitSel(t){
+      var res=[], d=0, cur='';
+      for(var i=0;i<t.length;i++){
+        var ch=t.charAt(i);
+        if(ch==='('||ch==='[') d++;
+        else if(ch===')'||ch===']') d--;
+        if(ch===','&&d<=0){ res.push(cur); cur=''; continue; }
+        cur+=ch;
+      }
+      res.push(cur);
+      return res;
+    }
     function hitAny(selText){
-      return selText.split(',').some(function(s){
+      return splitSel(selText).some(function(s){
         // :hover/::before等は保存の瞬間は誰にも当たっていないので、疑似部分を外した本体で判定する
         s=s.replace(/::?[a-zA-Z-]+(\\((?:[^()]|\\([^()]*\\))*\\))?/g,'').replace(/[>+~\\s]+$/,'').trim();
         if(!s) return true;  // ::selection など疑似だけのセレクタは念のため持っていく
@@ -5020,7 +5037,7 @@ html.__ce_altmode{cursor:text}
     //   入れ替え先に同名クラス（.hero等）があっても、部品のstyleは文書の後ろ＝同点なら勝てる。
     function extraSels(selText){
       var res=[];
-      selText.split(',').forEach(function(s){
+      splitSel(selText).forEach(function(s){
         s=s.trim(); if(!s) return;
         // ①セレクタ全体がルート自身に当たる → :scope（末尾の疑似は残す。.hero:hover→:scope:hover）
         var m=s.match(/^(.*?)((?:::?[a-zA-Z-]+(?:\\([^()]*\\))?)*)$/);
