@@ -9268,6 +9268,7 @@ html.__ce_altmode{cursor:text}
     markDirty();
   }
   window.__ceDqShape=dqShape;   // 外（検証・他の板）から形を当てられるように
+  window.__ceDqMove=function(el,dx,dy){ dqMove(el,dx,dy); };   // 飾りの移動（検証用）
   function dqBigger(el, d){
     // 文字の背景に敷いた図形は、手で大きさを変えたら自動フィットに戻させない
     if (el && el.getAttribute && el.getAttribute('data-cetxbg') != null) el.setAttribute('data-cetxbgman', '1');
@@ -9293,6 +9294,10 @@ html.__ce_altmode{cursor:text}
   }
   function dqMove(el, dx, dy){
     pushUndo(el);
+    // ★飾りのドラッグは setPos を通らない（data-cedqx/y に持つ独自の経路）。
+    //   文字の背景に敷いた図形をここで動かすと、_txbgFit に毎回 文字の中央へ戻されるので印を付ける。
+    //   ★移動の経路は2本ある（setPos と ここ）。片方だけ塞ぐと「動かし方によって戻る/戻らない」になる。
+    if((dx||dy)&&el&&el.getAttribute&&el.getAttribute('data-cetxbg')!=null) el.setAttribute('data-cetxbgmov','1');
     if(dqKind(el)==='bg'){
       if(dx===0&&dy===0){ el.dataset.ox='0'; el.dataset.oy='0'; }
       else { el.dataset.ox=String((parseFloat(el.dataset.ox||'0'))+dx); el.dataset.oy=String((parseFloat(el.dataset.oy||'0'))+dy); }
@@ -10054,6 +10059,118 @@ html.__ce_altmode{cursor:text}
   }
   // 🖼 写真を加工：白フチ／はみ出しカード／背景の飾り／背景に設定／水彩(AI) の入口をまとめた1つのボタン用ピッカー。
   //   ボタンを増やさず、選択肢はこの中の一覧から選ぶ形にする。
+  // ===== 🌓 上から色をかぶせる（オーバーレイ・2026-08-04・要望）=====
+  // 写真の上に文字を置くと読めない時の定番。「暗くする／薄くする」を1枚の板で選ばせる。
+  // ★作り方は相手で分ける（どちらも要素を増やさない＝重なり順の事故が起きない）：
+  //   ①<img>  → filter: brightness()。位置も大きさも自動で付いてくるので、ずれる余地がない。
+  //   ②それ以外（背景写真・セクション）→ background-image の一番前に linear-gradient を1枚足す。
+  //     ★この方法だと **中の文字は暗くならない**（背景だけにかかる）＝読みやすくする用途にちょうど合う。
+  // 🚫★かぶせ用の要素を作って position:absolute で重ねる方法は採らない。
+  //   カンプに position を足すと中の絶対配置の基準が変わって崩れる（§7㊺で実害あり）。
+  var VEIL_LV=[0,0.15,0.3,0.45,0.6];
+  var VEIL_KINDS=[
+    {k:'dark',  t:'⬛ 暗く',      grad:false, c:function(a){ return 'linear-gradient(rgba(0,0,0,'+a+'),rgba(0,0,0,'+a+'))'; }},
+    {k:'light', t:'⬜ 薄く',      grad:false, c:function(a){ return 'linear-gradient(rgba(255,255,255,'+a+'),rgba(255,255,255,'+a+'))'; }},
+    {k:'bottom',t:'⬇ 下だけ暗く', grad:true,  c:function(a){ return 'linear-gradient(to top,rgba(0,0,0,'+a+') 0%,rgba(0,0,0,0) 62%)'; }},
+    {k:'top',   t:'⬆ 上だけ暗く', grad:true,  c:function(a){ return 'linear-gradient(to bottom,rgba(0,0,0,'+a+') 0%,rgba(0,0,0,0) 62%)'; }}
+  ];
+  function _veilDef(k){ for(var i=0;i<VEIL_KINDS.length;i++){ if(VEIL_KINDS[i].k===k) return VEIL_KINDS[i]; } return VEIL_KINDS[0]; }
+  function veilApply(el, kind, lvIdx){
+    if(!el) return '対象がありません';
+    try{ pushUndo(el); }catch(_){}
+    var isImg=(el.tagName==='IMG'), lv=VEIL_LV[lvIdx]||0;
+    if(!lv){                                   // ⟲ 外す＝控えておいた元の値へ戻す
+      if(isImg){
+        var b0=el.getAttribute('data-ceveilf');
+        if(b0!==null){ if(b0) el.style.setProperty('filter',b0,'important'); else el.style.removeProperty('filter'); }
+        el.removeAttribute('data-ceveilf');
+      } else {
+        var o0=el.getAttribute('data-ceveilbg');
+        if(o0!==null){
+          if(o0&&o0!=='none') el.style.setProperty('background-image',o0,'important');
+          else el.style.removeProperty('background-image');
+        }
+        el.removeAttribute('data-ceveilbg');
+      }
+      el.removeAttribute('data-ceveil'); el.removeAttribute('data-ceveillv');
+      markDirty(); return null;
+    }
+    if(isImg){
+      if(_veilDef(kind).grad) return 'グラデーションは写真そのものには掛けられません（⬆外側にする を押してください）';
+      // ★元の filter（🎨水彩など）は控えて、その後ろに brightness を足す＝重ねがけでも壊れない
+      var base=el.getAttribute('data-ceveilf');
+      if(base===null){ base=el.style.getPropertyValue('filter')||''; el.setAttribute('data-ceveilf',base); }
+      var v=(kind==='light')?(1+lv*0.85):(1-lv);
+      el.style.setProperty('filter',(base?(base+' '):'')+'brightness('+v.toFixed(2)+')','important');
+    } else {
+      // ★元の背景は computed から取る。インラインが空でも、CSS側で敷かれた写真を消さないため
+      var orig=el.getAttribute('data-ceveilbg');
+      if(orig===null){ orig=''; try{ orig=getComputedStyle(el).backgroundImage||''; }catch(_){} el.setAttribute('data-ceveilbg',orig); }
+      var under=(orig&&orig!=='none')?(', '+orig):'';
+      el.style.setProperty('background-image', _veilDef(kind).c(lv)+under, 'important');
+    }
+    el.setAttribute('data-ceveil',kind); el.setAttribute('data-ceveillv',String(lvIdx));
+    markDirty(); return null;
+  }
+  function openVeilPanel(el){
+    if(!el){ if(msg) msg.textContent='対象がありません'; return; }
+    var old=document.getElementById('__ce_veilp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    var BS='background:#eef2f7;color:#333;border:1px solid #d7e0ea;border-radius:6px;padding:6px 9px;cursor:pointer;font:12px system-ui,sans-serif';
+    var isImg=(el.tagName==='IMG');
+    var p=document.createElement('div'); p.id='__ce_veilp';
+    p.setAttribute('style','position:fixed;right:16px;top:96px;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:330px');
+    p.innerHTML='<b>🌓 上から色をかぶせる</b>'
+      +'<div id="__ce_veilnow" style="opacity:.75;margin:4px 0 8px"></div>'
+      +'<div style="opacity:.7">かぶせる色</div>'
+      +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin:3px 0 9px">'
+      +VEIL_KINDS.map(function(k){
+          return '<button data-k="'+k.k+'" style="'+BS+((isImg&&k.grad)?';opacity:.45':'')+'">'+k.t+'</button>';
+        }).join('')
+      +'</div>'
+      +'<div style="opacity:.7">濃さ</div>'
+      +'<div style="display:flex;gap:4px;margin:3px 0 9px">'
+      +['弱','中','強','最強'].map(function(t,i){ return '<button data-lv="'+(i+1)+'" style="'+BS+';flex:1">'+t+'</button>'; }).join('')
+      +'</div>'
+      +'<div style="display:flex;gap:5px"><button data-a="off" style="'+BS+';flex:1">⟲ 外す</button>'
+      +'<button data-a="up" style="'+BS+';flex:1">⬆ 外側にする</button></div>'
+      +'<div style="display:flex;margin-top:9px"><button data-x="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;margin-left:auto">閉じる</button></div>';
+    document.body.appendChild(p);
+    try{ panelDrag(p); }catch(_){}
+    // ★光らせるのは class（inline style だと光っている間に💾保存されて枠が焼き付く・§7-57）
+    try{ el.classList.add('__ce_hl'); }catch(_){}
+    p.__close=function(){ try{ el.classList.remove('__ce_hl'); }catch(_){} p.remove(); };
+    function nowShow(){
+      var k=el.getAttribute('data-ceveil'), lv=+el.getAttribute('data-ceveillv')||0;
+      var c=(el.className+'').split(' ')[0], nm=el.tagName.toLowerCase()+(c&&c.indexOf('__ce')!==0?('.'+c):'');
+      var n=p.querySelector('#__ce_veilnow');
+      if(n) n.textContent='相手：〈'+nm+'〉'+Math.round(el.offsetWidth)+'×'+Math.round(el.offsetHeight)
+        +' ／ 今：'+(k?(_veilDef(k).t+' '+['','弱','中','強','最強'][lv]):'かけていません')
+        +(isImg?'（写真そのもの）':'（背景にかけるので中の文字は暗くなりません）');
+    }
+    nowShow();
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var b=ev.target;
+      if(b.getAttribute('data-x')){ p.__close(); return; }
+      if(!document.contains(el)){ if(msg) msg.textContent='対象が見つかりません'; p.__close(); return; }
+      var kind=el.getAttribute('data-ceveil')||'dark';
+      var lv=+el.getAttribute('data-ceveillv')||2;
+      var err=null;
+      if(b.getAttribute('data-k')){ err=veilApply(el, b.getAttribute('data-k'), lv); }
+      else if(b.getAttribute('data-lv')){ err=veilApply(el, kind, +b.getAttribute('data-lv')); }
+      else if(b.getAttribute('data-a')==='off'){ err=veilApply(el, kind, 0); }
+      else if(b.getAttribute('data-a')==='up'){
+        var pa=el.parentElement;
+        if(!pa||pa===document.body){ if(msg) msg.textContent='これ以上外側はありません'; return; }
+        p.__close(); openVeilPanel(pa); return;
+      } else return;
+      if(msg) msg.textContent=err?('⚠ '+err):'🌓 かぶせました（⟲外す で元通り・💾保存で確定）';
+      nowShow();
+    });
+  }
+  window.__ceVeil=function(el,kind,lv){ return veilApply(el,kind,lv); };   // 検証用
+  window.__ceVeilPanel=function(el){ openVeilPanel(el); };                 // 検証用（板を開く）
+
   function openPhotoDecoPicker(el, imgEl, sIdx){
     if(!el){ msg.textContent='対象がありません'; return; }
     // ★写真まわりの入口を1つにまとめる（2026-08-02・要望「同じような機能が散らばっている」）。
@@ -10088,6 +10205,8 @@ html.__ce_altmode{cursor:text}
       //   並べて置き、無料のほうを先に出す＝素人が間違って課金側を押さないように。
       // 🫧 一部だけ透明に＝✂切り抜き（AIで背景を消す・全体が対象）とは別物なので隣に並べる
       +'<button class="go2" id="__ce_pdmask" style="background:#0d9488;margin-bottom:8px">🫧 一部だけ透明にする（上半分など・AIなし・一瞬）</button>'
+      // 🌓 ベール＝「写真の上に文字を置くと読めない」の定番の直し方。🫧透明とは逆の操作なので隣に置く
+      +'<button class="go2" id="__ce_pdveil" style="background:#334155;margin-bottom:8px">🌓 上から色をかぶせる（暗く／薄く・AIなし・一瞬）</button>'
       +(imgEl?'<button class="go2" id="__ce_pdwcfx" style="background:#0d9488;margin-bottom:8px">🎨 この写真を水彩ふうにする（AIなし・無料）</button>':'')
       +(imgEl?'<button class="go2" id="__ce_pdwater" style="background:#c026a6">🎨 背後に水彩画像を敷く（AI・数十円）</button>':'')
       +'</div>';
@@ -10114,6 +10233,9 @@ html.__ce_altmode{cursor:text}
         return;
       }
       if(e.target.id==='__ce_pdmask'){ ov.remove(); openMaskPanel(imgEl||el); return; }
+      // ★<img>があってもベールの相手は「その要素」を既定にする＝背景写真・セクションでもそのまま使える。
+      //   写真そのものを暗くしたい時は板の中で ⬆外側にする／中を選び直せばよい。
+      if(e.target.id==='__ce_pdveil'){ ov.remove(); openVeilPanel(imgEl||el); return; }
       if(e.target.id==='__ce_pdwcfx'){ ov.remove(); openWaterFxPanel(imgEl); return; }
       if(e.target.id==='__ce_pdwater'){ ov.remove(); openBgPicker(imgEl, sIdx); return; }
     });
@@ -13001,6 +13123,11 @@ html.__ce_altmode{cursor:text}
   function setPos(el,x,y){
     if(!el||el===document.body||el===document.documentElement) return;
     _cebt(el); el.setAttribute('data-cetx',x); el.setAttribute('data-cety',y); applyTf(el);
+    // ★文字の背景に敷いた図形は、動かしても開き直すと「文字の真ん中」へ戻されていた（2026-08-04・実報告
+    //   「やっぱり移動されるよ」）。_txbgFit が毎回 left/top を入れ直すため。
+    //   → 手で動かしたら印を付けて、位置は触らせない。ここは移動の入口が全部通る1か所（ドラッグも矢印キーも）。
+    // ★0,0 の時は付けない＝「ズレを0に戻す」内部処理（位置リセット）を手動と誤認しないため。
+    if((x||y)&&el.getAttribute&&el.getAttribute('data-cetxbg')!=null) el.setAttribute('data-cetxbgmov','1');
   }
   function nudge(el,dx,dy){ setPos(el,(+el.getAttribute('data-cetx')||0)+dx,(+el.getAttribute('data-cety')||0)+dy); }
   // ===== 🧲 掴む枠（透明な枠・空きスペース）を見た目の位置に合わせる（2026-07-30） =====
@@ -13324,6 +13451,13 @@ html.__ce_altmode{cursor:text}
           var dx=e2.clientX-sx, dy=e2.clientY-sy;
           bases.forEach(function(bs){
             var shx=0, shy=0;
+            // ★文字の背景に敷いた図形は「文字にぴったり」へ毎回測り直される（_txbgFit）。
+            //   手で変えた印(data-cetxbgman)を付けていたのは飾りの板の＋/−だけだったので、
+            //   ■ハンドルで広げた時は印が付かず、開き直すたびに文字サイズへ縮んでいた
+            //   （2026-08-04・実報告「広げても保存するとこのサイズになる」）。
+            // ★ボタンを押させて印を付けるのではなく、**広げた瞬間にここで付ける**＝メニューを増やさない。
+            if(bs.el.getAttribute&&bs.el.getAttribute('data-cetxbg')!=null&&!bs.el.getAttribute('data-cetxbgman'))
+              bs.el.setAttribute('data-cetxbgman','1');
             if(d.k.indexOf('e')>=0){
               var w=Math.max(bs.minw, bs.w+dx);
               bs.el.style.setProperty('width',Math.round(w)+'px','important');
@@ -13425,7 +13559,10 @@ html.__ce_altmode{cursor:text}
     // ★🎨水彩ふう(data-cewcfx)も filter で作っている。ここで消すと動きを付けた瞬間に
     //   元のツヤツヤした写真に戻る＝「水彩にしたのにアニメを付けたら外れた」になる。
     // ★🌫もや(data-ceshape=haze)も filter:blur で形を作っている。消すと四角い板に戻る。
+    // ★🌓ベール(data-ceveil)も <img> では filter:brightness で作っている。消すと
+    //   動きを付けた瞬間に元の明るさへ戻る＝「暗くしたのにアニメを付けたら外れた」になる（§66と同じ型）。
     var _hasFx=el.getAttribute&&(el.getAttribute('data-cewater')||el.getAttribute('data-cewcfx')
+      ||el.getAttribute('data-ceveil')
       ||el.getAttribute('data-ceshape')==='haze'||el.getAttribute('data-ceshape')==='glow');
     var _keepFil=(_isDeco||_hasFx)?el.style.getPropertyValue('filter'):'';
     // 元の !important も一緒に控える（付け直しで優先度が落ちるとページ側CSSに負ける）
@@ -15734,7 +15871,61 @@ html.__ce_altmode{cursor:text}
   }
 
   window.__ceSecSwap=openSecSwapPanel;   // 外（検証・他の板）から呼べるように
+  window.__ceStackPanel=function(el,x,y){ openStackPanel(el,x||60,y||60); };  // 🔼の板（検証用）
+  window.__ceHandles=function(el){ showHandles(el); };   // ■ハンドルを出す（検証用）
   window.__ceShapePats=SHAPE_PATS;       // 貯めた型の確認用
+
+  // ===== 切り取り（overflow）を先祖までたどって外す（2026-08-04・実報告「またがらせたいのに消える」）=====
+  // ★元の📤は「最初のセクションで break」していたので、その外側の入れ物が切っていると一生届かなかった。
+  //   実測（ashitabaのカンプ）＝犯人は <article style="overflow: clip !important; height:10086px">。
+  //   セクション(span.fxa_bgtxt の overflow:hidden)は外せるのに article が残るので「押しても同じ」になる。
+  // ★開け方は overflow:visible ではなく **overflow-x:clip / overflow-y:visible**。
+  //   全開にすると横に隠れていた物まで出てきて横スクロールが伸びる（§7㊷で実測 1627px→2242px）。
+  //   縦だけ開ければ「下のセクションへまたがる」用は足りる＝横は今までどおり切ったまま。
+  //   ⚠ overflow-y:visible は相方が hidden/auto/scroll だと auto に化けるが、clip が相方なら visible のまま残る。
+  // ★本物のスクロール領域(auto/scroll)は触らない＝ページの作りを壊さないため（数だけ数えて伝える）。
+  function _unclipUp(el){
+    var done=[], skipped=0, oe=(el&&el.parentElement), lim=0;
+    while(oe&&oe!==document.documentElement&&lim++<20){
+      var isTool=false;
+      try{ isTool=!!(oe.closest&&oe.closest('[id^="__ce"]')); }catch(_){}
+      if(!isTool){
+        try{
+          var s=getComputedStyle(oe), oy=s.overflowY, ox=s.overflowX;
+          if(oy==='auto'||oy==='scroll'){ skipped++; }
+          else if(oy!=='visible'){
+            try{ pushUndo(oe); }catch(_){}
+            // ★必ず先に shorthand を消す。あとで消すと、設定した longhand ごと巻き添えで消える
+            oe.style.removeProperty('overflow');
+            oe.style.setProperty('overflow-x',(ox==='auto'||ox==='scroll')?ox:'clip','important');
+            oe.style.setProperty('overflow-y','visible','important');
+            var cn=(oe.className+'').split(' ')[0];
+            done.push(oe.tagName.toLowerCase()+(cn?('.'+cn):''));
+          }
+          // contain:paint も箱の外を刈り取る（overflow と同じ効き方をする）
+          if(s.contain&&/paint|strict|content/.test(s.contain)) oe.style.setProperty('contain','none','important');
+        }catch(_){}
+      }
+      if(oe===document.body) break;
+      oe=oe.parentElement;
+    }
+    return {n:done.length, names:done, skipped:skipped};
+  }
+  // その要素が先祖の箱に「下をどれだけ切られているか」を実測する（px）。押した結果を数字で言うために使う
+  function _clipCut(el){
+    try{
+      var r=el.getBoundingClientRect(), cut=0, oe=el.parentElement, lim=0;
+      while(oe&&oe!==document.documentElement&&lim++<20){
+        if(getComputedStyle(oe).overflowY!=='visible'){
+          var q=oe.getBoundingClientRect();
+          if(r.bottom>q.bottom) cut=Math.max(cut, Math.round(r.bottom-q.bottom));
+        }
+        if(oe===document.body) break;
+        oe=oe.parentElement;
+      }
+      return cut;
+    }catch(_){ return 0; }
+  }
 
   function openStackPanel(el,x,y){
     var old=document.getElementById('__ce_stkp'); if(old) old.remove();
@@ -15751,7 +15942,10 @@ html.__ce_altmode{cursor:text}
       +'<div style="opacity:.7;margin-top:10px">上のセクションへの食い込み（詰めて重ねる）</div>'
       +'<div style="display:flex;gap:5px;margin-top:3px"><button data-a="ovup" style="'+BS+';flex:1">⬆ 食い込ませる</button>'
       +'<button data-a="ovdn" style="'+BS+';flex:1">⬇ 戻す</button></div>'
-      +'<div style="opacity:.7;margin-top:10px">写真の上下が切れている時</div>'
+      +'<div style="opacity:.7;margin-top:10px">セクションの境目で切れている時</div>'
+      // ★「またがらせる」を専用ボタンにする（2026-08-04・要望）。📤 と処理は同じ _unclipUp を通すが、
+      //   こちらは手前に出すところまで面倒を見て、切られていたpxを実測して伝える＝押した結果が分かる。
+      +'<button data-a="straddle" style="'+BS+';width:100%;margin-top:3px;background:#eaf3ff;border-color:#bcd6f5">⇵ 下のセクションにまたがらせる</button>'
       +'<button data-a="ovshow" style="'+BS+';width:100%;margin-top:3px">📤 切れてる画像を全部見せる（はみ出し許可）</button>'
       // ★「見えない」は原因が1つとは限らない（実測：切り取り解除だけでは足りず、次は別のDIVが上に来た）。
       //   素人に2手を順番に踏ませない＝**まとめて全部やる1ボタン**を置く。結果は必ず測って伝える。
@@ -15797,6 +15991,9 @@ html.__ce_altmode{cursor:text}
         //   引っ越しは placeFree（見た目の位置を保ったまま入れ直す）に任せる＝新規追加と同じ道を通る。
         var st=[], rr0=el.getBoundingClientRect();
         var oldHost=el.parentElement;
+        // ★ボタン名に「切り取り解除」と書いてあるのに、実際は引っ越ししかしていなかった（2026-08-04）。
+        //   先に切り取りを外す＝名前どおりの動きにする。
+        var _uc=_unclipUp(el); if(_uc.n) st.push(_uc.n+'箇所の切り取りを外しました');
         var px0=(window.scrollX||window.pageXOffset||0)+rr0.left;
         var py0=(window.scrollY||window.pageYOffset||0)+rr0.top;
         ['data-cetx','data-cety'].forEach(function(a2){ el.removeAttribute(a2); });
@@ -15815,15 +16012,30 @@ html.__ce_altmode{cursor:text}
         setTimeout(function(){
           // ★確かめる時はツールのUI（この板そのもの）を数えない。数えると、板が図形の上に
           //   出ているだけで「まだ見えません」と誤って言う（実測で踏んだ）。
+          // ★中心1点だけで判定してはいけない（2026-08-04・実報告「やっぱり出せない」）。
+          //   下半分が切られたままでも中心さえ見えていれば「見えるようになりました」と言ってしまい、
+          //   ユーザーの画面では半分だけの葉っぱが残る＝直っていないのに成功と報告する最悪の形になる。
+          //   点の取り方は _toFrontHere と同じ5点にそろえる（別々だと片方が直して片方が否定して振動する）。
           var seeOk=function(){
             var rr=el.getBoundingClientRect();
-            var list=document.elementsFromPoint(rr.left+rr.width/2, rr.top+rr.height/2)||[];
-            for(var i=0;i<list.length;i++){
-              var t2=list[i];
-              if(t2.closest&&t2.closest('[id^="__ce"]')) continue;   // ツールのUIは無視
-              return (t2===el||el.contains(t2));
+            if(rr.width<1||rr.height<1) return false;
+            var pts=[[rr.left+6,rr.top+rr.height/2],[rr.right-6,rr.top+rr.height/2],
+                     [rr.left+rr.width/2,rr.top+6],[rr.left+rr.width/2,rr.bottom-6],
+                     [rr.left+rr.width/2,rr.top+rr.height/2]];
+            var ok=0;
+            for(var k=0;k<pts.length;k++){
+              var pxx=pts[k][0], pyy=pts[k][1];
+              // 画面の外に出ている点は判定できない（見えない理由にならない）ので数えない
+              if(pxx<0||pyy<0||pxx>window.innerWidth||pyy>window.innerHeight){ ok++; continue; }
+              var list=document.elementsFromPoint(pxx,pyy)||[];
+              for(var i=0;i<list.length;i++){
+                var t2=list[i];
+                if(t2.closest&&t2.closest('[id^="__ce"]')) continue;   // ツールのUIは無視
+                if(t2===el||el.contains(t2)) ok++;
+                break;
+              }
             }
-            return false;
+            return ok>=pts.length;
           };
           var okv=seeOk();
           if(!okv){ _toFrontHere(el); okv=seeOk(); if(okv) st.push('さらに手前へ出しました'); }
@@ -15852,21 +16064,30 @@ html.__ce_altmode{cursor:text}
             :'それでも出てきません → 🩺の理由をもう一度見てください（色が入っていない／大きさが0 の可能性）');
           nowShow();
         },60);
-      } else if(a==='ovshow'){
-        // 親の overflow:hidden（枠からはみ出た部分を刈り取る設定）をセクションまで遡って解除。
-        // 画像の上下が切れて見える時の定番原因。重なり順では直らないタイプ。
-        var oe=el, ofn=0;
-        while(oe&&oe!==document.body){
-          try{
-            var os=getComputedStyle(oe);
-            if(/(hidden|clip|auto|scroll)/.test(''+os.overflow+os.overflowX+os.overflowY)){ oe.style.setProperty('overflow','visible','important'); ofn++; }
-          }catch(_){}
-          if(/^(SECTION|HEADER|FOOTER)$/.test(oe.tagName)) break;
-          oe=oe.parentElement;
-        }
+      } else if(a==='ovshow'||a==='straddle'){
+        // 親の切り取り（枠からはみ出た部分を刈り取る設定）を遡って解除。
+        // ★セクションで止めない（2026-08-04）。実測でセクションの外側の <article overflow:clip> が犯人だった。
+        // 画像の上下が切れて見える時の定番原因。重なり順（z-index）では絶対に直らないタイプ。
+        var cut0=_clipCut(el);
+        var r0=_unclipUp(el);
+        if(a==='straddle') _toFrontHere(el);
         markDirty();
-        if(msg) msg.textContent=ofn?('📤 '+ofn+'箇所の「はみ出し刈り取り」を解除しました（💾保存で確定・ダメなら保存せず開き直し）')
-                                   :'はみ出しを隠す設定は見つかりませんでした（🔼手前に、を試してください）';
+        setTimeout(function(){
+          var cut1=_clipCut(el);
+          var head=(a==='straddle'?'⇵ ':'📤 ');
+          if(!r0.n&&!cut0){
+            if(msg) msg.textContent=head+'切り取っている入れ物は見つかりませんでした'
+              +(r0.skipped?('（本物のスクロール領域が'+r0.skipped+'箇所あるので触っていません）'):'')
+              +'。見えないなら原因は別です（🔦 とにかく出す、を試してください）';
+          } else {
+            if(msg) msg.textContent=head+r0.n+'箇所の切り取りを外しました'
+              +(r0.names.length?('（'+r0.names.slice(0,3).join(' / ')+'）'):'')
+              +'。下のはみ出し '+cut0+'px → '+cut1+'px'
+              +(cut1?'（まだ切られています。もう一度押すか🔦 とにかく出す）':'（切られなくなりました）')
+              +'。横は今までどおり切ったままなので横スクロールは伸びません。💾保存で確定';
+          }
+          nowShow();
+        },40);
       }
       nowShow();
     });
@@ -19484,14 +19705,30 @@ html.__ce_altmode{cursor:text}
     var pad = Math.max(10, Math.round(h * 0.18));
     var op = d.offsetParent || d.parentElement;
     if (!op) return false;
+    var man = d.getAttribute('data-cetxbgman');
+    // 🚫★手で動かした図形の位置を勝手に戻さない（2026-08-04・実報告「やっぱり移動されるよ」）。
+    //   下の処理が毎回 translate を消して left/top を文字の中央へ入れ直すので、
+    //   ドラッグで置いた場所が開くたびに文字の上へ吸い寄せられていた。
+    //   ★印が無い古いカンプでも、ドラッグの跡(data-cetx/cety)があれば「手で動かした」とみなす
+    //     ＝すでに動かしてあるカンプは、開いた時点から戻らなくなる。
+    var mov = d.getAttribute('data-cetxbgmov')
+           || (+d.getAttribute('data-cetx')  || 0) || (+d.getAttribute('data-cety')  || 0)
+           || (+d.getAttribute('data-cedqx') || 0) || (+d.getAttribute('data-cedqy') || 0);
+    if (mov) {
+      // 位置は一切触らない。大きさだけは、手で広げていなければ文字に合わせ続ける
+      if (!man) {
+        d.style.setProperty('width', Math.round(w + pad * 2) + 'px', 'important');
+        d.style.setProperty('height', Math.round(h + pad) + 'px', 'important');
+      }
+      return true;
+    }
     // 🚫★図形自身の translate は先に外す。left/top は「文字の見えている位置」から計算するので、
     //   translate が残っていると二重に効いて横にズレる（実測：左-35 右55 と非対称になった）。
     d.style.removeProperty('translate'); d.style.removeProperty('transform');
     var opr = op.getBoundingClientRect(), tr = t.getBoundingClientRect();
     // 🚫★手で大きさを変えた図形の大きさを勝手に戻さない（2026-08-04・実報告「小さいままだよ」）。
     //   自動フィットが毎回「文字にぴったり」へ縮めるので、大きくしても開き直すと元に戻っていた。
-    //   → 手動の印がある時は **大きさは触らず、中心だけ文字に合わせる**。
-    var man = d.getAttribute('data-cetxbgman');
+    //   → 手動の印がある時は **大きさは触らず、中心だけ文字に合わせる**。（man は上で取得済み）
     if (man) {
       var mw = d.offsetWidth, mh = d.offsetHeight;
       d.style.setProperty('left', Math.round(tr.left - opr.left - (mw - w) / 2) + 'px', 'important');
@@ -22152,7 +22389,7 @@ html.__ce_altmode{cursor:text}
     window.__ceInspOn=false; window.__ceFlyMode=false;
     try{ document.documentElement.style.cursor=''; }catch(_){}
     // 閉じ損ねた各種パネル（暗幕クリックで閉じないもの含む）を掃除
-    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname','__ce_veilp'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     try{ if(typeof closeMenu==='function') closeMenu(); }catch(_){}
     if(recovered && msg) msg.textContent='元の状態に戻しました（右クリックが使えます）';
   },true);
