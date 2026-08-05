@@ -6794,7 +6794,7 @@ html.__ce_altmode{cursor:text}
   //   ★「描かれている物」だけを中身と数える：セクションの背景まで中身に数えると、
   //     背景色が敷いてあるだけの所が「埋まっている」ことになり、空白が1つも見つからない。
   function _gapIsInk(n,cs,r){
-    if(/^(IMG|SVG|VIDEO|CANVAS|INPUT|BUTTON|SELECT|TEXTAREA|PICTURE)$/.test(n.tagName)) return true;
+    if(/^(IMG|SVG|VIDEO|CANVAS|INPUT|BUTTON|SELECT|TEXTAREA|PICTURE)$/.test((n.tagName||'').toUpperCase())) return true;  // ★svgは小文字で返る
     for(var i=0;i<n.childNodes.length;i++){
       var c=n.childNodes[i];
       if(c.nodeType===3 && (c.nodeValue||'').trim()) return true;   // 自分が直接持っている文字
@@ -9221,6 +9221,26 @@ html.__ce_altmode{cursor:text}
   //   アニメを付けると purgeInlineFx が opacity を無条件で消す＝薄さが飛んで
   //   「アニメを付けたら色が濃く（青く）なった」に見える。色のアルファで持てば消されないし、
   //   出現アニメ側の opacity 制御ともケンカしない。
+  // 🌫 影を付ける（2026-08-05・要望「こういう影がはいっている箱もつくりたい」）。
+  //   ★カンプの「浮いているカード」の影は疑似要素(::before)で描かれていることが多く、DOMに実体が無い＝真似できない。
+  //     図形バーで箱は作れたのに影だけ付けられなかったので、ここに1行足すだけで作れるようにする。
+  //   ★purgeInlineFx は box-shadow を消さないので、動きを付けても影は外れない（filter/clip-pathと違って登録不要）。
+  var SHADOW_DEF={
+    none:['なし',''],
+    soft:['やわらか','0 18px 38px rgba(49,86,92,.08)'],       // カンプのカードの実測値そのまま
+    mid :['ふつう','0 12px 28px rgba(0,0,0,.13)'],
+    hard:['くっきり','0 8px 18px rgba(0,0,0,.24)'],
+    lift:['大きく浮く','0 28px 60px rgba(0,0,0,.16)']
+  };
+  function dqShadow(el,k){
+    if(!el) return;
+    var d=SHADOW_DEF[k]; if(!d) return;
+    pushUndo(el);
+    if(d[1]){ el.style.setProperty('box-shadow',d[1],'important'); el.setAttribute('data-ceshadow',k); }
+    else { el.style.removeProperty('box-shadow'); el.removeAttribute('data-ceshadow'); }
+    markDirty();
+    if(msg) msg.textContent='影：'+d[0]+'（💾保存で確定・⟲戻すで取り消せます）';
+  }
   function dqFade(el, d){
     var k=dqKind(el); pushUndo(el);
     el.style.removeProperty('opacity');                       // 旧方式で薄くしていた分は捨てる
@@ -9421,6 +9441,16 @@ html.__ce_altmode{cursor:text}
         +'</div>'
         +'<div style="opacity:.6;font-size:11px;margin-top:2px">種類で濃さ・ぼかし・形が変わります（押すと水彩ONになります）</div>';
     }
+    // 🌫 影：箱を「浮いているカード」に見せる。今どれが効いているかを data-ceshadow で出す
+    var _shNow=(el.getAttribute&&el.getAttribute('data-ceshadow'))||'none';
+    h+='<div style="opacity:.7;margin-top:8px">🌫 影（箱を浮かせる）'
+      +'<span class="__ce_shdnow" style="opacity:.75;font-size:11px;margin-left:5px">今：'+esc((SHADOW_DEF[_shNow]||SHADOW_DEF.none)[0])+'</span></div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">'
+      +['soft','mid','hard','lift','none'].map(function(k){
+          var on=(k===_shNow);
+          return '<button data-shd="'+k+'" style="'+B+(on?';outline:2px solid #0b6bcb':'')+'">'+esc(SHADOW_DEF[k][0])+'</button>';
+        }).join('')
+      +'</div>';
     // 🔼 重なり：飾りは「文字の後ろに回したい／写真より前に出したい」が一番多い操作なので板から直接押せるようにする
     h+='<div style="opacity:.7;margin-top:8px">🔼 重なり（前後）</div>'
       +'<div style="display:flex;gap:5px;margin-top:3px">'
@@ -9479,6 +9509,16 @@ html.__ce_altmode{cursor:text}
           if(msg) msg.textContent='⤴ 手前に出しました（重なり順 '+(getComputedStyle(el).zIndex||'auto')+'・💾保存で確定）';
         }
         markDirty(); return;
+      }
+      // 🌫 影：押した種類に枠を付け替えて「今どれか」を見せる（板は閉じない＝見比べながら選べる）
+      var shd=t.getAttribute('data-shd');
+      if(shd){
+        dqShadow(el,shd);
+        [].slice.call(p.querySelectorAll('[data-shd]')).forEach(function(b){
+          if(b.getAttribute('data-shd')===shd) b.style.outline='2px solid #0b6bcb'; else b.style.outline='';
+        });
+        var lb=p.querySelector('.__ce_shdnow'); if(lb) lb.textContent='今：'+SHADOW_DEF[shd][0];
+        return;
       }
       var op=t.getAttribute('data-op'); if(op){ var n=dqFade(el,parseFloat(op)); if(msg) msg.textContent='濃さ：'+Math.round(n*100)+'%'; return; }
       var sh=t.getAttribute('data-sh'); if(sh){ dqShape(el,sh); return; }
@@ -9683,6 +9723,289 @@ html.__ce_altmode{cursor:text}
     });
     p.querySelector('.__ce_dqc').addEventListener('input',function(){ setCol(this.value); });
   }
+  // ===== 📈 SVGで描かれた線を編集する（2026-08-05・実報告「こういう線は直接編集できないの？」）=====
+  //   カンプのつなぎ線・飾り線は <svg><path stroke=…> で描かれていることが多い。
+  //   🚫★実体はあるのに elementsFromPoint では絶対に拾えない（親svgが pointer-events:none）。
+  //     しかも線は「細い図形」なので矩形の当たり判定でも当たらない ＝ **座標から自分で探すしかない**。
+  //   ★線の上の点を等間隔にサンプリングして画面座標の最短距離で判定する（曲線でも効く）。
+  function _svgNearDist(pa,x,y){
+    try{
+      if(!pa.getTotalLength||!pa.getPointAtLength) return null;
+      var L=pa.getTotalLength(); if(!L||!isFinite(L)) return null;
+      var m=pa.getScreenCTM(); if(!m) return null;
+      var n=Math.max(24,Math.min(240,Math.round(L/6))), best=1e9;
+      for(var i=0;i<=n;i++){
+        var q=pa.getPointAtLength(L*i/n).matrixTransform(m);
+        var dx=q.x-x, dy=q.y-y, dd=Math.sqrt(dx*dx+dy*dy);
+        if(dd<best) best=dd;
+      }
+      return best;
+    }catch(_){ return null; }
+  }
+  function svgLinesAt(x,y,tol){
+    tol=tol||14; var out=[];
+    var svgs=document.querySelectorAll('svg');
+    for(var i=0;i<svgs.length && i<200;i++){
+      var sv=svgs[i];
+      if(sv.closest('[id^="__ce"]')) continue;
+      var sr=sv.getBoundingClientRect();
+      if(!sr.width||!sr.height) continue;
+      if(x<sr.left-tol||x>sr.right+tol||y<sr.top-tol||y>sr.bottom+tol) continue;
+      var ps=sv.querySelectorAll('path,line,polyline');
+      for(var j=0;j<ps.length && j<400;j++){
+        var pa=ps[j], cs; try{ cs=getComputedStyle(pa); }catch(_){ continue; }
+        if(cs.display==='none'||cs.visibility==='hidden') continue;
+        if(parseFloat(cs.opacity||'1')<0.05) continue;
+        if(!cs.stroke||cs.stroke==='none') continue;          // 塗りだけの図形は「線」ではない
+        var dd=_svgNearDist(pa,x,y);
+        if(dd!=null&&dd<=tol) out.push({el:pa,svg:sv,d:dd});
+      }
+    }
+    out.sort(function(a,b){ return a.d-b.d; });
+    return out;
+  }
+  // 同じ形(d)の兄弟＝見た目は1本の線（下地・本線・光が走る線を重ねる作りが多い）。
+  // ★ばらばらに変えると重なりがズレて「線が二重に見える」ので、必ずまとめて扱う。
+  function _svgSibs(pa){
+    var d=pa.getAttribute&&pa.getAttribute('d'), par=pa.parentElement, out=[pa];
+    if(!d||!par) return out;
+    [].slice.call(par.querySelectorAll('path')).forEach(function(o){
+      if(o!==pa && o.getAttribute('d')===d) out.push(o);
+    });
+    return out;
+  }
+  // 折れ線(M/L だけ)を点の配列にする。曲線・相対指定が混ざっていたら null＝形は触らない（壊さないため）
+  function _svgPts(pa){
+    var d=((pa.getAttribute&&pa.getAttribute('d'))||'').trim();
+    if(!d) return null;
+    if(/[cCsSqQtTaAhHvVzZmMlL]/.test(d.replace(/[ML]/g,''))) return null;   // M/L 以外の命令が残っていたら諦める
+    var out=[], re=/([ML])\s*(-?[\d.]+)[\s,]+(-?[\d.]+)/g, m, cnt=0;
+    while((m=re.exec(d))){ out.push({c:m[1],x:parseFloat(m[2]),y:parseFloat(m[3])}); cnt++; if(cnt>400) return null; }
+    if(out.length<2) return null;
+    // ★組み立て直して同じ点数に戻せるかを確かめる（戻せない書き方なら触らない）
+    if((_svgD(out).match(/[ML]/g)||[]).length!==out.length) return null;
+    return out;
+  }
+  function _svgD(pts){
+    return pts.map(function(p){ return p.c+' '+(Math.round(p.x*10)/10)+' '+(Math.round(p.y*10)/10); }).join(' ');
+  }
+  // 画面座標 → SVGの中の座標（viewBox＋preserveAspectRatio の拡大縮小はCTMが吸収する）
+  function _svgScr2Usr(pa,x,y){
+    try{
+      var m=pa.getScreenCTM(); if(!m) return null;
+      var sv=pa.ownerSVGElement; if(!sv||!sv.createSVGPoint) return null;
+      var q=sv.createSVGPoint(); q.x=x; q.y=y;
+      return q.matrixTransform(m.inverse());
+    }catch(_){ return null; }
+  }
+  var SVG_DASH={solid:['実線',''],dash:['破線','10 8'],dot:['点線','1 7']};
+  function svgLineApply(pa,fn){ _svgSibs(pa).forEach(fn); markDirty(); }
+  function svgLineColor(pa,c){
+    pushUndo(pa.ownerSVGElement||pa);
+    svgLineApply(pa,function(o){
+      if(o.getAttribute('data-cesvgc0')==null) o.setAttribute('data-cesvgc0', o.style.stroke||o.getAttribute('stroke')||'');
+      o.style.setProperty('stroke',c,'important');
+    });
+    if(msg) msg.textContent='線の色を変えました（💾保存で確定・⟲戻すで取り消せます）';
+  }
+  function svgLineWidth(pa,mul){
+    pushUndo(pa.ownerSVGElement||pa);
+    var m=Math.max(0.3,Math.min(8,(parseFloat(pa.getAttribute('data-cesvgwm')||'1'))*mul));
+    m=Math.round(m*100)/100;
+    svgLineApply(pa,function(o){
+      var base=parseFloat(o.getAttribute('data-cesvgw0'));
+      if(!isFinite(base)){ base=parseFloat(getComputedStyle(o).strokeWidth)||1; o.setAttribute('data-cesvgw0',String(base)); }
+      o.setAttribute('data-cesvgwm',String(m));
+      o.style.setProperty('stroke-width',(Math.round(base*m*100)/100)+'px','important');
+    });
+    if(msg) msg.textContent='線の太さ：元の '+m+' 倍（💾保存で確定）';
+    return m;
+  }
+  function svgLineDash(pa,k){
+    var d=SVG_DASH[k]; if(!d) return;
+    pushUndo(pa.ownerSVGElement||pa);
+    // ★「走って現れる線」は stroke-dasharray でその演出を作っている。破線にすると走りが止まるので、
+    //   黙って変えずに理由を出す（pathLength付き＝走る線の目印）。
+    var stopped=0;
+    svgLineApply(pa,function(o){
+      if(o.getAttribute('pathLength')!=null) stopped++;
+      o.setAttribute('data-cesvgdash',k);
+      if(d[1]) o.style.setProperty('stroke-dasharray',d[1],'important');
+      else o.style.removeProperty('stroke-dasharray');
+    });
+    if(msg) msg.textContent='線を'+d[0]+'にしました'+((k!=='solid'&&stopped)?'（走って現れる演出は止まります）':'')+'（💾保存で確定）';
+  }
+  function svgLineHide(pa,hide){
+    pushUndo(pa.ownerSVGElement||pa);
+    svgLineApply(pa,function(o){ if(hide) o.style.setProperty('display','none','important'); else o.style.removeProperty('display'); });
+    if(msg) msg.textContent=hide?'線を消しました（⟲元に戻すで戻せます）':'線を出しました';
+  }
+  function svgLineReset(pa){
+    pushUndo(pa.ownerSVGElement||pa);
+    svgLineApply(pa,function(o){
+      ['stroke','stroke-width','stroke-dasharray','display'].forEach(function(q){ o.style.removeProperty(q); });
+      var d0=o.getAttribute('data-cesvgd0'); if(d0) o.setAttribute('d',d0);
+      ['data-cesvgc0','data-cesvgw0','data-cesvgwm','data-cesvgdash','data-cesvgd0'].forEach(function(q){ o.removeAttribute(q); });
+    });
+    if(msg) msg.textContent='線を元に戻しました（💾保存で確定）';
+  }
+  // 📐 角の点をドラッグして形を変える。点は画面に固定の丸として出す（SVGの中に入れると保存で焼き付く）
+  function svgPtsEditOff(){
+    var o=document.getElementById('__ce_svgpts'); if(o){ if(o.__off) o.__off(); o.remove(); }
+  }
+  function svgPtsEditOn(pa){
+    svgPtsEditOff();
+    var pts=_svgPts(pa);
+    if(!pts){ if(msg) msg.textContent='この線は曲線などが混ざっているので、形は変えられません（色・太さは変えられます）'; return false; }
+    _svgSibs(pa).forEach(function(o){ if(o.getAttribute('data-cesvgd0')==null) o.setAttribute('data-cesvgd0', o.getAttribute('d')||''); });
+    var wrap=document.createElement('div'); wrap.id='__ce_svgpts';
+    wrap.setAttribute('style','position:fixed;left:0;top:0;width:0;height:0;z-index:2147483646;pointer-events:none');
+    document.body.appendChild(wrap);
+    var dots=pts.map(function(_,i){
+      var b=document.createElement('div');
+      b.setAttribute('style','position:fixed;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;border:2px solid #0b6bcb;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:grab;pointer-events:auto');
+      b.setAttribute('data-i',String(i));
+      wrap.appendChild(b); return b;
+    });
+    function place(){
+      var m=pa.getScreenCTM(); if(!m) return;
+      var sv=pa.ownerSVGElement; if(!sv||!sv.createSVGPoint) return;
+      pts.forEach(function(p,i){
+        var q=sv.createSVGPoint(); q.x=p.x; q.y=p.y; q=q.matrixTransform(m);
+        dots[i].style.left=q.x+'px'; dots[i].style.top=q.y+'px';
+      });
+    }
+    place();
+    var drag=null;
+    // 🚫★丸そのものに mousedown を付けても届かない（§5.5と同じ地雷・2026-08-05に実測で踏んだ）。
+    //   ツール側が document の capture 段で mousedown を stopPropagation しているため、
+    //   子まで伝わらず「点は出るのに掴めない」になる。stopPropagation は同じノードの
+    //   他のリスナーは止めないので、**document に付ければ必ず動く**。
+    function down(ev){
+      var b=ev.target&&ev.target.closest?ev.target.closest('#__ce_svgpts div'):null;
+      if(!b) return;
+      var i=parseInt(b.getAttribute('data-i'),10);
+      if(!isFinite(i)) return;
+      drag={i:i, x:ev.clientX, y:ev.clientY, p0:{x:pts[i].x,y:pts[i].y}};
+      ev.preventDefault(); ev.stopPropagation();
+    }
+    function move(ev){
+      if(!drag) return;
+      var a=_svgScr2Usr(pa,drag.x,drag.y), b=_svgScr2Usr(pa,ev.clientX,ev.clientY);
+      if(!a||!b) return;
+      pts[drag.i].x=drag.p0.x+(b.x-a.x);
+      pts[drag.i].y=drag.p0.y+(b.y-a.y);
+      var nd=_svgD(pts);
+      _svgSibs(pa).forEach(function(o){ o.setAttribute('d',nd); });
+      place();
+      ev.preventDefault(); ev.stopPropagation();
+    }
+    function up(){
+      if(!drag) return; drag=null; markDirty();
+      if(msg) msg.textContent='線の形を変えました（💾保存で確定・板の⟲で元の形に戻せます）';
+    }
+    document.addEventListener('mousedown',down,true);
+    document.addEventListener('mousemove',move,true);
+    document.addEventListener('mouseup',up,true);
+    window.addEventListener('scroll',place,true); window.addEventListener('resize',place);
+    wrap.__off=function(){
+      document.removeEventListener('mousedown',down,true);
+      document.removeEventListener('mousemove',move,true);
+      document.removeEventListener('mouseup',up,true);
+      window.removeEventListener('scroll',place,true); window.removeEventListener('resize',place);
+    };
+    // 🚫★板が点の上に乗ると、その点は永久に掴めない（実測：11点中2点が板の下に隠れて押せなかった）。
+    //   点を出した瞬間に、板を線と重ならない場所へ逃がす。
+    var _pn=document.getElementById('__ce_svgp');
+    if(_pn){
+      var lr=(pa.ownerSVGElement||pa).getBoundingClientRect();
+      var pw=_pn.offsetWidth, ph=_pn.offsetHeight, nx=null, ny=null;
+      if(lr.bottom+ph+16<window.innerHeight){ nx=12; ny=lr.bottom+12; }          // 線の下
+      else if(lr.top-ph-16>0){ nx=12; ny=lr.top-ph-12; }                          // 線の上
+      else if(lr.left-pw-16>0){ nx=lr.left-pw-12; ny=12; }                        // 線の左
+      else { nx=Math.max(6,window.innerWidth-pw-12); ny=12; }                     // 逃げ場が無ければ右上
+      _pn.style.left=Math.max(6,Math.min(nx,window.innerWidth-pw-8))+'px';
+      _pn.style.top=Math.max(6,Math.min(ny,window.innerHeight-ph-8))+'px';
+    }
+    if(msg) msg.textContent='青い丸をドラッグすると線の形が変わります（'+pts.length+'点）';
+    return true;
+  }
+  function openSvgLinePanel(pa,x,y){
+    var old=document.getElementById('__ce_svgp'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    var B='border:1px solid #d5d5dd;background:#f4f5f7;border-radius:6px;padding:4px 9px;cursor:pointer;font:12px/1.5 sans-serif';
+    var sibs=_svgSibs(pa), canShape=!!_svgPts(pa);
+    var cs=getComputedStyle(pa);
+    // ページで使われている色（線の色をここから選べば全体から浮かない）
+    var cnt={};
+    [].slice.call(document.querySelectorAll('body *')).slice(0,1200).forEach(function(n){
+      if(n.closest('[id^="__ce"]')) return;
+      var c; try{ c=getComputedStyle(n).color; }catch(_){ return; }
+      if(c&&c!=='rgba(0, 0, 0, 0)') cnt[c]=(cnt[c]||0)+1;
+    });
+    var sw=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a];}).slice(0,10).map(function(c){
+      return '<button class="__ce_svgsw" data-c="'+c+'" title="'+esc(c)+'" style="width:22px;height:22px;border:1px solid rgba(0,0,0,.25);border-radius:5px;background:'+c+';cursor:pointer;padding:0;margin:2px"></button>';
+    }).join('');
+    var h='<b class="__ce_svgmv" style="cursor:move">📈 線を編集</b>'
+      +'<div style="opacity:.65;font-size:11px;margin:2px 0 6px">'
+      +esc('〈'+pa.tagName+'〉'+(sibs.length>1?('・'+sibs.length+'本重ねて1本の線にしています'):''))+'</div>'
+      +'<div style="opacity:.7">🎨 色</div><div>'+(sw||'<span style="color:#999">（なし）</span>')
+      +'<input type="color" id="__ce_svgc" value="#4a7f68" style="width:34px;height:24px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;vertical-align:middle;margin-left:4px"></div>'
+      +'<div style="opacity:.7;margin-top:8px">📏 太さ <span id="__ce_svgwn" style="font-size:11px;opacity:.75"></span></div>'
+      +'<div style="display:flex;gap:5px;margin-top:3px"><button data-w="0.8" style="'+B+'">− 細く</button>'
+      +'<button data-w="1.25" style="'+B+'">＋ 太く</button><button data-w="reset" style="'+B+'">⟲ 元の太さ</button></div>'
+      +'<div style="opacity:.7;margin-top:8px">〰 種類</div><div style="display:flex;gap:5px;margin-top:3px">'
+      +['solid','dash','dot'].map(function(k){ return '<button data-dash="'+k+'" style="'+B+'">'+SVG_DASH[k][0]+'</button>'; }).join('')+'</div>'
+      +'<div style="opacity:.7;margin-top:8px">📐 形</div><div style="display:flex;gap:5px;margin-top:3px">'
+      +'<button data-pts="1" style="'+(canShape?'border:none;background:#0b6bcb;color:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font:12px/1.5 sans-serif':B+';opacity:.5')+'">'
+      +(canShape?'角の点を動かす':'この線は形を変えられません')+'</button></div>'
+      +'<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">'
+      +'<button data-hide="1" style="background:#c0392b;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">🚫 線を消す</button>'
+      +'<button data-rst="1" style="'+B+'">⟲ 元に戻す</button>'
+      +'<button data-x="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer">閉じる</button></div>';
+    var p=document.createElement('div'); p.id='__ce_svgp';
+    p.setAttribute('style','position:fixed;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:10px 12px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:310px');
+    p.innerHTML=h;
+    document.body.appendChild(p);
+    p.style.left=Math.max(6,Math.min(x,window.innerWidth-p.offsetWidth-8))+'px';
+    p.style.top=Math.max(6,Math.min(y,window.innerHeight-p.offsetHeight-8))+'px';
+    panelDrag(p,p.querySelector('.__ce_svgmv'));
+    // ★選択中の目印は class で付ける（inline style だと光っている間に💾保存されて枠が焼き付く・§7-57）。
+    //   ★光らせるのは path ではなく親の <svg>：細い線に outline を当てても見えないため。
+    var _lit=pa.ownerSVGElement||pa;
+    try{ _lit.classList.add('__ce_hl'); }catch(_){ }
+    function wn(){
+      var t=p.querySelector('#__ce_svgwn');
+      if(t) t.textContent='今 '+(Math.round(parseFloat(getComputedStyle(pa).strokeWidth)*10)/10)+'px（元の '+(parseFloat(pa.getAttribute('data-cesvgwm')||'1'))+' 倍）';
+    }
+    wn();
+    p.__close=function(){
+      try{ _lit.classList.remove('__ce_hl'); }catch(_){ }
+      svgPtsEditOff();
+      if(p.__off) p.__off();
+      p.remove();
+    };
+    var ctxFn=function(){ if(p.parentElement) p.__close(); };
+    p.__off=function(){ document.removeEventListener('contextmenu',ctxFn,true); };
+    setTimeout(function(){ document.addEventListener('contextmenu',ctxFn,true); },0);
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var t=ev.target;
+      if(t.getAttribute('data-x')){ p.__close(); return; }
+      var c=t.closest('.__ce_svgsw'); if(c){ svgLineColor(pa,c.getAttribute('data-c')); return; }
+      var w=t.getAttribute('data-w');
+      if(w){
+        if(w==='reset'){ svgLineApply(pa,function(o){ o.style.removeProperty('stroke-width'); o.removeAttribute('data-cesvgwm'); }); }
+        else svgLineWidth(pa,parseFloat(w));
+        wn(); return;
+      }
+      var dk=t.getAttribute('data-dash'); if(dk){ svgLineDash(pa,dk); return; }
+      if(t.getAttribute('data-pts')){ if(document.getElementById('__ce_svgpts')) svgPtsEditOff(); else svgPtsEditOn(pa); return; }
+      if(t.getAttribute('data-hide')){ svgLineHide(pa,true); p.__close(); return; }
+      if(t.getAttribute('data-rst')){ svgLineReset(pa); svgPtsEditOff(); wn(); return; }
+    });
+    p.querySelector('#__ce_svgc').addEventListener('input',function(){ svgLineColor(pa,this.value); });
+  }
+  window.__ceSvgLinePanel=function(x,y){ var l=svgLinesAt(x,y); if(l.length) openSvgLinePanel(l[0].el,x+10,y+10); return l.length; };
   // 左クリックで飾り・線を選ぶ（4px以上動いたらドラッグ扱い＝板は出さない）
   var _dqX=0,_dqY=0,_dqDown=null,_dqBd=null,_dqDrag=null;
   document.addEventListener('mousedown',function(e){
@@ -9732,8 +10055,16 @@ html.__ce_altmode{cursor:text}
       try{ document.documentElement.style.cursor=''; }catch(_){}
       if(wasMoved){ markDirty(); if(msg) msg.textContent='飾りを動かしました（💾保存で確定・⟲戻すで取り消せます）'; return; }
     }
-    if(!d&&!bd) return;
     if(Math.abs(e.clientX-_dqX)>4||Math.abs(e.clientY-_dqY)>4) return;   // 動かしていたらドラッグ＝板は出さない
+    if(!d&&!bd){
+      // 📈 SVGで描かれた線：飾りでも要素のborderでもない時だけ見る＝普通のクリックを横取りしない。
+      // ★ツールの板の上のクリックは無視（板の中のボタンが押せなくなる）
+      if(e.target&&e.target.closest&&e.target.closest('[id^="__ce"]')) return;
+      if(document.getElementById('__ce_svgp')) return;                   // もう開いている時は開き直さない
+      var sl=[]; try{ sl=svgLinesAt(e.clientX,e.clientY); }catch(_){ }
+      if(sl.length) openSvgLinePanel(sl[0].el, e.clientX+10, e.clientY+10);
+      return;
+    }
     if(d){
       if(d!==dqHitAt(e.clientX,e.clientY,e.target)) return;
       openDecoQuick(d, e.clientX+10, e.clientY+10);
@@ -12048,7 +12379,14 @@ html.__ce_altmode{cursor:text}
     if(window.__fxaSweepHl) window.__fxaSweepHl(span);
     else{ span.style.setProperty('--hlw',100); span.classList.add('fxa_in'); }
   }
-  // 帯の太さ（--hlt0/--hlt1・中心は固定でそこから上下に広げ縮め）。delta%pt単位、8〜70%の範囲。
+  // 帯の上下位置を読む（--hlt0/--hlt1・既定79%〜91%）。
+  // 🚫★`parseFloat(...)||79` と書いてはいけない：べた塗り(0%)のとき **0はfalsyなので79に化ける**。
+  //   実測で踏んだ＝べた塗り後に「今 太さ21%」と出て、もう一度押しても細い帯に戻らなかった。
+  function fxHlT(span, which){
+    var v=parseFloat(span.style.getPropertyValue(which==='1'?'--hlt1':'--hlt0'));
+    return isFinite(v) ? v : (which==='1' ? 91 : 79);
+  }
+  // 帯の太さ（--hlt0/--hlt1・中心は固定でそこから上下に広げ縮め）。delta%pt単位、8〜100%の範囲。
   function fxHlThick(span, delta){
     if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return; }
     // 〰下線は「帯の上下位置(--hlt0/--hlt1)」ではなく線そのものの太さ(--udw)で決まる。
@@ -12066,12 +12404,27 @@ html.__ce_altmode{cursor:text}
       if (msg) msg.textContent = '下線の太さ：' + w + 'px（保存で確定）';
       return;
     }
-    var t0=parseFloat(span.style.getPropertyValue('--hlt0'))||79;
-    var t1=parseFloat(span.style.getPropertyValue('--hlt1'))||91;
-    var center=(t0+t1)/2, th=Math.max(8,Math.min(70,(t1-t0)+delta));
+    var t0=fxHlT(span,'0'), t1=fxHlT(span,'1');
+    // 上限は100%＝文字の面を丸ごと塗る（べた塗り）。以前は70%止まりで「マーカーではなく色を塗りたい」に応えられなかった。
+    var center=(t0+t1)/2, th=Math.max(8,Math.min(100,(t1-t0)+delta));
+    // ★中心を固定したままだと、太くした帯が0〜100%の外へはみ出す＝はみ出た分は描かれず
+    //   「押しても太くならない」に見える。収まる位置へ中心を寄せてから当てる。
+    center=Math.max(th/2, Math.min(100-th/2, center));
     span.style.setProperty('--hlt0',(center-th/2)+'%'); span.style.setProperty('--hlt1',(center+th/2)+'%');
     fxHlReplay(span); markDirty();
-    if(msg) msg.textContent='マーカーの太さを変えました（保存で確定）';
+    if(msg) msg.textContent=(th>=99?'べた塗りにしました（色が走りながら面を塗ります・保存で確定）':'マーカーの太さ：'+Math.round(th)+'%（保存で確定）');
+  }
+  // ■ べた塗り：帯を0〜100%に広げて文字の面ごと塗る（走る動きはそのまま）。
+  //   ★もう一度押すと元の細い帯(79〜91%)に戻る＝行き来できるので「戻せない」不安が出ない。
+  //   ★背景色(textBgApply)との違いは「走る」こと。静止でよければそちらが軽い。
+  function fxHlFill(span){
+    if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return false; }
+    var full=(fxHlT(span,'1')-fxHlT(span,'0'))>=99;
+    span.style.setProperty('--hlt0', full?'79%':'0%');
+    span.style.setProperty('--hlt1', full?'91%':'100%');
+    fxHlReplay(span); markDirty();
+    if(msg) msg.textContent = full ? '細い帯に戻しました（保存で確定）' : 'べた塗りにしました（色が走りながら面を塗ります・保存で確定）';
+    return !full;
   }
   // 伸びる速さ（--hldur・秒）。delta秒、0.2〜2.5秒の範囲。
   function fxHlSpeed(span, delta){
@@ -12099,8 +12452,7 @@ html.__ce_altmode{cursor:text}
   // 帯の上下位置（--hlt0/--hlt1をまとめてずらす。太さは維持）。delta%pt単位、0〜100%からはみ出ないように収める。
   function fxHlPos(span, delta){
     if(!span){ if(msg) msg.textContent='先にマーカーを引いてください'; return; }
-    var t0=parseFloat(span.style.getPropertyValue('--hlt0'))||79;
-    var t1=parseFloat(span.style.getPropertyValue('--hlt1'))||91;
+    var t0=fxHlT(span,'0'), t1=fxHlT(span,'1');
     var th=t1-t0;
     var nt0=Math.max(0,Math.min(100-th,t0+delta));
     span.style.setProperty('--hlt0',nt0+'%'); span.style.setProperty('--hlt1',(nt0+th)+'%');
@@ -13046,6 +13398,9 @@ html.__ce_altmode{cursor:text}
       text:function(){ try{ return savedRange?String(savedRange):((curHl&&curHl.textContent)||(curUdot&&curUdot.textContent)||''); }catch(_){ return ''; } },
       hasHl:function(){ return !!curHl; },
       hasUd:function(){ return !!curUdot; },
+      // いま引いたばかりのマーカーspanを外へ渡す（引いた直後に太さ/べた塗りを当てるため。
+      // surroundContents の後は文書側の選択が変わるので、選択から探し直すと空振りする）
+      hlSpan:function(){ return curHl; },
       paint:paint, highlight:highlight, underline:underline, spacing:spacing, fontSize:fontSize,
       removeHl:removeHl, removeUd:removeUnderline,
       // 選択文字をspanで包んで返す（✏文字を編集の「選択文字だけ」対象用・2026-07-20）
@@ -14164,7 +14519,7 @@ html.__ce_altmode{cursor:text}
     if(!el||!a) return '';
     var risky=(a.g==='bgt')||(a.g==='char');       // 背景を殺す／中身をspanに割る＝入れ物には危険
     if(!risky) return '';
-    if(/^(IMG|VIDEO|CANVAS|SVG|PICTURE)$/.test(el.tagName)) return '写真';   // 写真は入れ物ではない＝言い方を変える
+    if(/^(IMG|VIDEO|CANVAS|SVG|PICTURE)$/.test((el.tagName||'').toUpperCase())) return '写真';   // 写真は入れ物ではない＝言い方を変える（★svgは小文字）
     if(/^(SECTION|HEADER|FOOTER|ARTICLE|MAIN|BODY|HTML)$/.test(el.tagName)) return 'セクション';
     try{
       var r=el.getBoundingClientRect();
@@ -18793,7 +19148,7 @@ html.__ce_altmode{cursor:text}
       });
     })();
     var doc=document.documentElement.cloneNode(true);
-    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu','#__ce_tbgp','#__ce_vlp','#__ce_dqp','#__ce_secp','#__ce_pkpos','#__ce_bgp','#__ce_ruler','#__ce_grab','#__ce_noanimcss','#__ce_opbar','#__ce_swp'].forEach(function(sel){
+    ['#__ce','#__ce_cm','#__ce_pk','#__ce_toast','#__ce_savebar','#__ce_selc','.__ce_hdl','#__ce_flyov','#__ce_flypn','#__ce_dlyp','#__ce_shp','#__ce_secout','.__ce_ipui','#__ce_pskill','#__ce_sbgp','#__ce_scset','#__ce_scmenu','#__ce_tbgp','#__ce_vlp','#__ce_dqp','#__ce_secp','#__ce_pkpos','#__ce_bgp','#__ce_ruler','#__ce_grab','#__ce_noanimcss','#__ce_opbar','#__ce_swp','#__ce_svgp','#__ce_svgpts'].forEach(function(sel){
       [].slice.call(doc.querySelectorAll(sel)).forEach(function(n){n.remove();});
     });
     // 飾りを選択中の青い点線（編集用の目印）が焼き込まれないように必ず外す
@@ -19277,7 +19632,10 @@ html.__ce_altmode{cursor:text}
         var _cn=e.childNodes[_ci];
         if(_cn.nodeType===3&&(_cn.nodeValue||'').replace(/[\\s\\u200b]/g,'')){ _ownTxt=true; break; }
       }
-      var isArt=/^(IMG|SVG|CANVAS|VIDEO|PICTURE)$/.test(e.tagName)
+      // 🚫★tagName をそのまま大文字と比べてはいけない：**インラインSVGの tagName は小文字 "svg"**
+      //   （HTML要素だけが大文字になる）。ここで弾いていたせいで、pointer-events:none のSVGの線・図は
+      //   elementsFromPoint にも🎯一覧にも一生出てこない＝**選ぶ手段がゼロ**だった（2026-08-05・実測）。
+      var isArt=/^(IMG|SVG|CANVAS|VIDEO|PICTURE)$/.test((e.tagName||'').toUpperCase())
         || (cs.backgroundImage&&cs.backgroundImage!=='none'&&cs.backgroundImage.indexOf('gradient')<0)
         || _ownTxt;
       if(!isArt) continue;
@@ -20487,10 +20845,18 @@ html.__ce_altmode{cursor:text}
         +'<br><span style="opacity:.8">マーカーの太さ</span> '
         +'<button id="__ce_q_hlwm" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4">− 細く</button>'
         +'<button id="__ce_q_hlwp" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4;margin-left:4px">＋ 太く</button>'
+        // ■べた塗り＝マーカーの帯を文字の面いっぱい(0〜100%)に広げる。走る動きはそのまま残る
+        //   （2026-08-05・要望「これマーカーじゃなくて色ぬることできる？できればはしりながら」）
+        +'<button id="__ce_q_hlfill" style="border:none;border-radius:5px;padding:2px 9px;cursor:pointer;background:#0b6bcb;color:#fff;margin-left:6px;font-weight:700" title="マーカーの帯を文字の面いっぱいに広げる（走る動きはそのまま）">■ べた塗り</button>'
         +'<span style="opacity:.8;margin-left:8px">位置</span> '
         +'<button id="__ce_q_hlpu" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4" title="上へ">▲</button>'
         +'<button id="__ce_q_hlpd" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4;margin-left:4px" title="下へ">▼</button>'
         +'<span id="__ce_q_hlwnow" style="opacity:.7;margin-left:6px;font-size:11px"></span>'
+        // 走る速さ（--hldur）。今まで⚙の大きいメニューにしか無く、普段使うこの板から触れなかった
+        +'<br><span style="opacity:.8">マーカーの速さ</span> '
+        +'<button id="__ce_q_hlsp" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4" title="短い時間で引き終わる">≫ はやく</button>'
+        +'<button id="__ce_q_hlsm" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4;margin-left:4px" title="ゆっくり引く">≪ ゆっくり</button>'
+        +'<span id="__ce_q_hlsnow" style="opacity:.7;margin-left:6px;font-size:11px"></span>'
         +'<br><span style="opacity:.8">下線の太さ</span> '
         +'<button id="__ce_q_udwm" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4">− 細く</button>'
         +'<button id="__ce_q_udwp" style="border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;background:#f2f2f4;margin-left:4px">＋ 太く</button>'
@@ -21068,7 +21434,21 @@ html.__ce_altmode{cursor:text}
           return '<button class="__ce_lnz" data-i="'+i+'" style="display:block;width:100%;text-align:left;margin:3px 0 0;background:#fff;border:1px solid #b5d9bf;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11.5px;font-family:inherit;color:#1d1d1f">'+esc(it.name)+'</button>';
         }).join('')+'</div>';
     }
-    var noticeL=[owRowQ,dgRowQ,pdRowQ,slRowQ,peRowQ,decoRowQ,radRowQ].filter(function(s){ return !!s; });
+    // 📈 SVGで描かれた線が右クリックの場所にあるなら「編集する」行を出す。
+    // ★メニューの項目を常設で増やさない（§5.5）＝**線がある時だけ**出す条件付きの行にする。
+    //   これが無いと、線はクリックで選ぶしかない＝そんな入口があると誰も気づけない（§7⑲）。
+    var svgRowQ='';
+    try{
+      var _sl=svgLinesAt(qx,qy);
+      if(_sl.length){
+        svgRowQ='<div style="background:#eaf7f0;border-bottom:1px solid #b9e0cc;padding:6px 10px 7px;font-size:12px;border-radius:7px">'
+          +'<b>📈 SVGで描かれた線があります</b><br>'
+          +'<span style="font-size:10.5px;color:#4b6b5c">クリックがすり抜ける線です。色・太さ・種類・形（角の点）を変えられます</span>'
+          +'<button id="__ce_q_svgline" style="display:block;width:100%;text-align:left;margin:3px 0 0;background:#fff;border:1px solid #a9d6c0;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11.5px;font-family:inherit;color:#1d1d1f">この線を編集する</button>'
+          +'</div>';
+      }
+    }catch(_){ }
+    var noticeL=[owRowQ,dgRowQ,pdRowQ,slRowQ,svgRowQ,peRowQ,decoRowQ,radRowQ].filter(function(s){ return !!s; });
     var noticeQ = noticeL.length
       ? '<div style="border-top:1px solid #b9b9c4;margin:4px 6px"></div>'
         +'<div class="__ce_grp"><button class="__ce_qi __ce_gbtn" data-g="n" style="display:flex;width:100%;align-items:center;gap:8px;text-align:left;background:none;border:none;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-family:inherit;color:#1d1d1f">'
@@ -21866,6 +22246,15 @@ html.__ce_altmode{cursor:text}
     var _slOff=qm.querySelector('#__ce_slzoff');
     if(_slOff) _slOff.addEventListener('click',function(ev){ ev.stopPropagation(); sliderUnfreeze(slQ); closeMenu(); });
     // 🫥「すり抜ける絵」を選ぶ配線：pointer-eventsを戻してから、その要素で右クリックを開き直す
+    // 📈 SVGの線：押したらメニューを閉じて線の板を開く（座標は右クリックした場所をそのまま使う）
+    var _svgB=qm.querySelector('#__ce_q_svgline');
+    if(_svgB) _svgB.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var lst=[]; try{ lst=svgLinesAt(qx,qy); }catch(_){ }
+      closeMenu();
+      if(lst.length) openSvgLinePanel(lst[0].el, Math.min(qx+10,window.innerWidth-330), qy+10);
+      else if(msg) msg.textContent='線が見つかりませんでした（線の上で右クリックし直してください）';
+    });
     [].slice.call(qm.querySelectorAll('.__ce_pez')).forEach(function(b){
       var n=peQ[+b.getAttribute('data-i')];
       b.addEventListener('mouseenter',function(){ try{ n.__pez=n.style.getPropertyValue('outline'); n.style.setProperty('outline','2px solid #ff3b30','important'); }catch(_){} });
@@ -22021,12 +22410,19 @@ html.__ce_altmode{cursor:text}
           return sp;
         }
         function _show(){
-          var t=qm.querySelector('#__ce_q_hlwnow'); if(!t) return;
+          var t=qm.querySelector('#__ce_q_hlwnow'), s=qm.querySelector('#__ce_q_hlsnow'), f=qm.querySelector('#__ce_q_hlfill');
           var sp=_hlSpan();
-          if(!sp){ t.textContent='（マーカーがありません）'; return; }
-          var a=parseFloat(sp.style.getPropertyValue('--hlt0'))||79;
-          var b2=parseFloat(sp.style.getPropertyValue('--hlt1'))||91;
-          t.textContent='今 太さ'+Math.round(b2-a)+'%';
+          if(!sp){
+            if(t) t.textContent='（マーカーがありません）';
+            if(s) s.textContent='';
+            if(f) f.textContent='■ べた塗り';
+            return;
+          }
+          var a=fxHlT(sp,'0'), b2=fxHlT(sp,'1');
+          var full=(b2-a)>=99;
+          if(t) t.textContent = full ? '今 べた塗り' : ('今 太さ'+Math.round(b2-a)+'%');
+          if(f) f.textContent = full ? '□ 細い帯に戻す' : '■ べた塗り';
+          if(s) s.textContent = '今 '+((parseFloat(sp.style.getPropertyValue('--hldur'))||0.45).toFixed(2))+'秒';
         }
         function _go(fn,d){
           var sp=_hlSpan();
@@ -22037,6 +22433,23 @@ html.__ce_altmode{cursor:text}
         var _p=qm.querySelector('#__ce_q_hlwp'); if(_p) _p.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlThick,6); });
         var _u=qm.querySelector('#__ce_q_hlpu'); if(_u) _u.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlPos,-4); });
         var _d=qm.querySelector('#__ce_q_hlpd'); if(_d) _d.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlPos,4); });
+        // 速さ：+でゆっくり(秒数が増える)／-ではやく。ラベルは「はやく/ゆっくり」で見た目どおりに揃える
+        var _sp=qm.querySelector('#__ce_q_hlsp'); if(_sp) _sp.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlSpeed,-0.15); });
+        var _sm=qm.querySelector('#__ce_q_hlsm'); if(_sm) _sm.addEventListener('click',function(ev){ ev.stopPropagation(); _go(fxHlSpeed,0.15); });
+        // ■ べた塗り：マーカーがまだ無ければ先に引いてから塗る＝「文字を選んで1回押すだけ」で済ませる
+        var _fl=qm.querySelector('#__ce_q_hlfill');
+        if(_fl) _fl.addEventListener('click',function(ev){
+          ev.stopPropagation();
+          var sp=_hlSpan();
+          if(!sp){
+            var ci=qm.querySelector('#__ce_q_selhlc');
+            selApiQ.highlight(ci?ci.value:hlDefaultColor());
+            sp=(selApiQ.hlSpan&&selApiQ.hlSpan())||_hlSpan();   // 引いた直後は選択が動くので窓口から受け取る
+            var hb=qm.querySelector('#__ce_q_selhlb'); if(hb) hb.textContent='マーカーを消す';
+          }
+          if(!sp){ if(msg) msg.textContent='この範囲はマーカーを引けませんでした（別々の要素にまたがっています）'; return; }
+          fxHlFill(sp); _show();
+        });
         _show();
       })();
       // 〰 下線の太さ：いま下線がかかっている span を探して --udw を上げ下げする
@@ -22459,7 +22872,7 @@ html.__ce_altmode{cursor:text}
     // ★__ce_flyov（全画面の線キャンバス）と __ce_flypn（🕊の板）は必ずここでも消す。
     //   残ると画面全体がクリックを吸うので、他のどのボタンも押せなくなる（＝ツールが壊れて見える）。
     //   ⚠__ce_flydots（左下の小さい点）は飛ぶ絵への入口なので消さない。
-    ['__ce_flyov','__ce_flypn','__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname','__ce_veilp'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_flyov','__ce_flypn','__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname','__ce_veilp','__ce_svgp','__ce_svgpts'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     // ★保険：上の一覧に足し忘れた板も、ここで必ず消す（2026-08-05・§7-74の恒久対策）。
     //   新しい板を作るたびに一覧へ書き足すのは必ず忘れる（実例：🕊の線キャンバス __ce_flyov）。
     //   取り残された板は画面を覆ってクリックを全部吸うので「ツールが丸ごと壊れた」ように見える。
