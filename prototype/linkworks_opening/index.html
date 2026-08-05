@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LinkWorksの仕事の世界へつながる、自動オープニング演出のプロトタイプです。">
+  <title>LinkWorks | Opening Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="page" data-page>
+  <!-- 読み込み直後に自動再生される、約5秒のオープニング -->
+  <div class="intro" data-intro aria-label="LinkWorksのオープニング">
+    <canvas class="intro_canvas" data-scene aria-hidden="true"></canvas>
+    <button class="intro_skip" type="button" data-skip>SKIP</button>
+
+    <div class="intro_stage">
+      <p class="intro_brand">LINK<span>WORKS</span></p>
+      <p class="intro_guide">A GATEWAY TO YOUR WORK</p>
+
+      <!-- perspectiveの基準となる扉全体 -->
+      <div class="portal" data-portal aria-hidden="true">
+        <div class="portal_light"></div>
+        <div class="portal_world">
+          <div class="world_sun"></div>
+          <div class="world_ring world_ring_one"></div>
+          <div class="world_ring world_ring_two"></div>
+          <div class="world_path"></div>
+
+          <div class="object object_it">
+            <span class="object_code">&lt;/&gt;</span>
+            <span class="object_label">IT WORK</span>
+          </div>
+
+          <div class="object object_light">
+            <span class="object_box"></span>
+            <span class="object_label">LIGHT WORK</span>
+          </div>
+        </div>
+
+        <div class="door door_left">
+          <span class="door_line"></span>
+          <span class="door_mark">L</span>
+        </div>
+        <div class="door door_right">
+          <span class="door_line"></span>
+          <span class="door_mark">W</span>
+        </div>
+      </div>
+
+      <p class="intro_message"><span>扉をひらく。</span><span>知らなかった自分が、そこで待っている。</span></p>
+      <div class="intro_progress" aria-hidden="true"><span class="progress_bar"></span></div>
+    </div>
+  </div>
+
+  <!-- オープニング終了後に表示される通常のホームページ -->
+  <div class="site" data-site>
+    <header class="site_header">
+      <a class="site_logo" href="#top" aria-label="LinkWorks トップへ">LINK<span>WORKS</span></a>
+      <nav class="site_nav" aria-label="メインナビゲーション">
+        <a href="#about">ABOUT</a>
+        <a href="#works">WORKS</a>
+        <a href="#contact">CONTACT</a>
+      </nav>
+      <a class="site_contact" href="#contact">見学・相談</a>
+    </header>
+
+    <main id="top">
+      <section class="main" id="about">
+        <div class="main_inner">
+          <p class="main_label">EMPLOYMENT SUPPORT / LINKWORKS</p>
+          <h1 class="main_title">はたらくを、<br><span>ひらく。</span></h1>
+          <p class="main_description">得意なことも、まだ知らない可能性も。LinkWorksは、一人ひとりのペースから仕事へつながる入口をつくります。</p>
+          <a class="main_link" href="#works">仕事の世界を見る <span>↓</span></a>
+        </div>
+
+        <!-- オープニングの世界観を通常ページへつなぐ立体オブジェクト -->
+        <div class="main_visual" aria-hidden="true">
+          <div class="visual_orbit visual_orbit_outer"></div>
+          <div class="visual_orbit visual_orbit_inner"></div>
+          <div class="visual_core">LW</div>
+          <div class="visual_chip visual_chip_it">IT</div>
+          <div class="visual_chip visual_chip_light">軽作業</div>
+          <div class="visual_chip visual_chip_future">NEXT</div>
+        </div>
+      </section>
+
+      <section class="works" id="works">
+        <div class="works_inner">
+          <div class="works_heading">
+            <p class="works_label">WORK FIELD 01—02</p>
+            <h2 class="works_title">仕事は、ひとつの形じゃない。</h2>
+            <p class="works_description">デジタルの集中と、手を動かすリズム。違う領域が同じ空間でゆるやかにつながります。</p>
+          </div>
+
+          <div class="works_list">
+            <article class="works_item works_it">
+              <div class="works_number">01</div>
+              <div class="works_icon" aria-hidden="true">
+                <span class="screen_code">{ }</span>
+                <span class="screen_cursor"></span>
+              </div>
+              <p class="works_en">DIGITAL FIELD</p>
+              <h3 class="works_name">IT・デザイン</h3>
+              <p class="works_text">PC入力、Web制作、デザイン補助。できることを少しずつ増やし、未来の選択肢へ変えていきます。</p>
+            </article>
+
+            <article class="works_item works_light">
+              <div class="works_number">02</div>
+              <div class="works_icon" aria-hidden="true">
+                <span class="package_top"></span>
+                <span class="package_side"></span>
+              </div>
+              <p class="works_en">CRAFT FIELD</p>
+              <h3 class="works_name">軽作業</h3>
+              <p class="works_text">梱包、検品、組み立て。手順を確かめながら、自分らしい集中のリズムを見つけます。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact" id="contact">
+        <p class="contact_label">THE NEXT GATE IS YOURS</p>
+        <h2 class="contact_title">あなたの入口を、<br>いっしょにつくろう。</h2>
+        <a class="contact_link" href="mailto:hello@example.com">見学・相談を予約する</a>
+        <button class="contact_replay" type="button" data-replay>OPENINGをもう一度見る</button>
+      </section>
+    </main>
+
+    <footer class="site_footer">
+      <p>LINKWORKS PROTOTYPE</p>
+      <p>THE FUTURE HAS MANY ENTRANCES.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+  <script type="module" src="scene.js"></script>
+</body>
+</html>
