@@ -3,6 +3,12 @@
 ## Scope
 
 This file applies to the entire repository.
+It applies only to files and work inside
+`D:\99_AIソフト\86_デザインカンプ作成ツール_claude`.
+The co-editing specification, camp patch workflow, and save-handoff rules do not
+apply to independent project folders outside this repository, including projects
+under `D:\50_knowledge`. Sharing images through this repository's `data/uploads`
+folder does not make an external project part of the co-editing workflow.
 
 ## Required knowledge guide
 
