@@ -1,0 +1,85 @@
+2026-08-09 12:05:29,802 [INFO] db: DB を初期化しました: D:\50_knowledge\ツール\desing_kanpu_create_data\design_stock.sqlite
+2026-08-09 12:05:29,803 [INFO] viewer: ビューア起動: http://127.0.0.1:5000  （Ctrl+C で停止）
+2026-08-09 12:05:29,851 [INFO] waitress: Serving on http://127.0.0.1:5000
+2026-08-09 12:05:34,804 [INFO] viewer: モデルをバックグラウンドで先読み中…（初回検索を速くするため）
+2026-08-09 12:06:19,234 [INFO] model: GPU を検出しました → cuda を使用
+2026-08-09 12:06:19,234 [INFO] model: モデルを読み込みます: google/siglip2-so400m-patch14-384 (device=cuda / dtype=torch.float16)
+[transformers] Model config: bos_token_id must be `None` or an integer within the vocabulary (between 0 and 31999), got 49406. This may result in unexpected behavior.
+[transformers] Model config: eos_token_id must be `None` or an integer within the vocabulary (between 0 and 31999), got 49407. This may result in unexpected behavior.
+Loading weights:   0%|          | 0/888 [00:00<?, ?it/s]Loading weights:   0%|          | 4/888 [00:01<07:20,  2.01it/s]Loading weights:  85%|████████▌ | 755/888 [00:02<00:00, 501.55it/s]Loading weights: 100%|██████████| 888/888 [00:02<00:00, 374.10it/s]
+2026-08-09 12:06:24,108 [DEBUG] model: ローカルキャッシュから読み込みました（オフライン）
+2026-08-09 12:06:24,798 [INFO] model: モデル読み込み完了
+2026-08-09 12:06:24,798 [INFO] viewer: モデル先読み完了。検索はすぐ返ります
+2026-08-09 12:07:13,279 [INFO] viewer: REQ GET /
+2026-08-09 12:07:13,426 [INFO] viewer: REQ GET /api/camps
+2026-08-09 12:07:13,427 [INFO] viewer: REQ GET /api/sites
+2026-08-09 12:07:13,428 [INFO] viewer: REQ GET /api/base_stats_all
+2026-08-09 12:07:13,429 [INFO] viewer: REQ GET /api/generate_camp/status
+2026-08-09 12:07:13,680 [INFO] viewer: REQ GET /img/b08e75e53844ddcf/firstview
+2026-08-09 12:07:13,680 [INFO] viewer: REQ GET /img/fb2f92b053e419d5/firstview
+2026-08-09 12:07:13,680 [INFO] viewer: REQ GET /img/7ece1c2e437a9286/firstview
+2026-08-09 12:07:13,682 [INFO] viewer: REQ GET /img/adc8878e425cb3fb/firstview
+2026-08-09 12:07:13,682 [INFO] viewer: REQ GET /img/d4f1b843744b04f5/firstview
+2026-08-09 12:07:13,971 [INFO] viewer: REQ GET /favicon.ico
+2026-08-09 12:07:14,140 [INFO] viewer: REQ GET /img/b9d6f7adb8c70590/firstview
+2026-08-09 12:07:14,140 [INFO] viewer: REQ GET /img/5e5e8c8b85e9c30c/firstview
+2026-08-09 12:07:14,142 [INFO] viewer: REQ GET /img/218fb2f8f8a02805/firstview
+2026-08-09 12:07:14,159 [INFO] viewer: REQ GET /img/74961f81f71ccfeb/firstview
+2026-08-09 12:07:14,163 [INFO] viewer: REQ GET /img/860f37a54fffb44c/firstview
+2026-08-09 12:07:14,171 [INFO] viewer: REQ GET /img/60bfe2092263d93d/firstview
+2026-08-09 12:07:14,173 [INFO] viewer: REQ GET /img/38a1ad2dc969d93c/firstview
+2026-08-09 12:07:14,182 [INFO] viewer: REQ GET /img/87ce36c2f82e11e0/firstview
+2026-08-09 12:07:14,233 [INFO] viewer: REQ GET /img/6c8ee5bb85e824b3/firstview
+2026-08-09 12:07:14,246 [INFO] viewer: REQ GET /img/1680901e1d58e3d0/firstview
+2026-08-09 12:07:27,036 [INFO] viewer: REQ GET /api/search
+2026-08-09 12:07:27,086 [INFO] viewer: REQ GET /img/0f3020eaf706ad60/firstview
+2026-08-09 12:07:27,086 [INFO] viewer: REQ GET /img/ff4d3da2e9eb4280/firstview
+2026-08-09 12:07:27,086 [INFO] viewer: REQ GET /img/8919406036b3832b/firstview
+2026-08-09 12:07:27,283 [INFO] search: text検索(ハイブリッド): '就労支援' / 対象 35 件（雰囲気文 1 件）
+2026-08-09 12:07:27,347 [INFO] viewer: REQ GET /img/85425282bfb5b5c9/firstview
+2026-08-09 12:07:27,347 [INFO] viewer: REQ GET /img/6ee0141b496b0aec/firstview
+2026-08-09 12:07:27,347 [INFO] viewer: REQ GET /img/a0f202c0d58744e1/firstview
+2026-08-09 12:07:27,348 [INFO] viewer: REQ GET /img/318476ce6a1c119f/firstview
+2026-08-09 12:07:27,348 [INFO] viewer: REQ GET /img/f510d6463a671c0f/firstview
+2026-08-09 12:07:27,348 [INFO] viewer: REQ GET /img/3497be3a69399dc6/firstview
+2026-08-09 12:07:27,366 [INFO] viewer: REQ GET /img/cc63c39c89c41e04/firstview
+2026-08-09 12:07:27,367 [INFO] viewer: REQ GET /img/acd96d1b84ac53af/firstview
+2026-08-09 12:07:27,369 [INFO] viewer: REQ GET /img/b7a130f2bc9f5e88/firstview
+2026-08-09 12:07:27,377 [INFO] viewer: REQ GET /img/2da8455438e2e91c/firstview
+2026-08-09 12:07:31,000 [INFO] viewer: REQ GET /img/d4f1b843744b04f5/fullpage
+2026-08-09 12:07:31,827 [INFO] viewer: REQ GET /img/f510d6463a671c0f/fullpage
+2026-08-09 12:07:32,444 [INFO] viewer: REQ GET /img/318476ce6a1c119f/fullpage
+2026-08-09 12:07:33,284 [INFO] viewer: REQ GET /img/1c2dda29b6686e32/firstview
+2026-08-09 12:07:33,305 [INFO] viewer: REQ GET /img/fb2f92b053e419d5/fullpage
+2026-08-09 12:07:37,796 [INFO] viewer: REQ GET /img/b08e75e53844ddcf/fullpage
+2026-08-09 12:07:39,579 [INFO] viewer: REQ GET /img/6c8ee5bb85e824b3/fullpage
+2026-08-09 12:07:42,184 [INFO] viewer: REQ GET /img/74961f81f71ccfeb/fullpage
+2026-08-09 12:07:46,052 [INFO] viewer: REQ GET /img/6ee0141b496b0aec/fullpage
+2026-08-09 12:07:51,915 [INFO] viewer: REQ GET /img/b9d6f7adb8c70590/fullpage
+2026-08-09 12:07:53,071 [INFO] viewer: REQ GET /img/acd96d1b84ac53af/fullpage
+2026-08-09 12:07:55,368 [INFO] viewer: REQ GET /img/8919406036b3832b/fullpage
+2026-08-09 12:07:56,652 [INFO] viewer: REQ GET /img/adc8878e425cb3fb/fullpage
+2026-08-09 12:07:59,257 [INFO] viewer: REQ GET /video/ff4d3da2e9eb4280
+2026-08-09 12:07:59,323 [INFO] viewer: REQ GET /img/218fb2f8f8a02805/fullpage
+2026-08-09 12:08:07,459 [INFO] viewer: REQ GET /api/search
+2026-08-09 12:08:07,621 [INFO] search: text検索(ハイブリッド): '上品な青系' / 対象 35 件（雰囲気文 1 件）
+2026-08-09 12:08:07,638 [INFO] viewer: REQ GET /api/search
+2026-08-09 12:08:07,763 [INFO] search: text検索(ハイブリッド): '和風 縦書き' / 対象 35 件（雰囲気文 1 件）
+2026-08-09 12:08:07,780 [INFO] viewer: REQ GET /api/search
+2026-08-09 12:08:07,800 [INFO] search: text検索(ハイブリッド): '黒背景の大胆なタイポ' / 対象 35 件（雰囲気文 1 件）
+2026-08-09 12:08:31,084 [INFO] db: DB を初期化しました: D:\50_knowledge\ツール\desing_kanpu_create_data\design_stock.sqlite
+2026-08-09 12:08:31,084 [INFO] viewer: ビューア起動: http://127.0.0.1:5000  （Ctrl+C で停止）
+2026-08-09 12:08:31,125 [INFO] waitress: Serving on http://127.0.0.1:5000
+2026-08-09 12:08:31,507 [INFO] viewer: REQ GET /api/search
+2026-08-09 12:08:35,468 [INFO] model: GPU を検出しました → cuda を使用
+2026-08-09 12:08:35,469 [INFO] model: モデルを読み込みます: google/siglip2-so400m-patch14-384 (device=cuda / dtype=torch.float16)
+[transformers] Model config: bos_token_id must be `None` or an integer within the vocabulary (between 0 and 31999), got 49406. This may result in unexpected behavior.
+[transformers] Model config: eos_token_id must be `None` or an integer within the vocabulary (between 0 and 31999), got 49407. This may result in unexpected behavior.
+2026-08-09 12:08:36,095 [INFO] viewer: モデルをバックグラウンドで先読み中…（初回検索を速くするため）
+Loading weights:   0%|          | 0/888 [00:00<?, ?it/s]Loading weights:  34%|███▎      | 298/888 [00:00<00:00, 2931.50it/s]Loading weights:  67%|██████▋   | 592/888 [00:00<00:00, 2899.74it/s]Loading weights:  99%|█████████▉| 882/888 [00:00<00:00, 2826.61it/s]Loading weights: 100%|██████████| 888/888 [00:00<00:00, 2868.61it/s]
+2026-08-09 12:08:37,856 [DEBUG] model: ローカルキャッシュから読み込みました（オフライン）
+2026-08-09 12:08:38,503 [INFO] model: モデル読み込み完了
+2026-08-09 12:08:38,503 [INFO] viewer: モデル先読み完了。検索はすぐ返ります
+2026-08-09 12:08:38,684 [INFO] search: text検索(ハイブリッド): '上品な青系' / 対象 35 件（雰囲気文 1 件）
+2026-08-09 12:08:38,725 [INFO] viewer: REQ GET /api/search
+2026-08-09 12:08:38,760 [INFO] search: text検索(ハイブリッド): '和風 縦書き' / 対象 35 件（雰囲気文 1 件）

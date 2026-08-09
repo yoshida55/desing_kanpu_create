@@ -613,6 +613,41 @@
       transition: opacity 0.2s;
     }
     .result_anchor:hover .result_peek { opacity: 1; }
+    /* ┌─────────────────────────────────────────┐
+       │ ホバーの大きなプレビュー（別枠で大きく見せる）│
+       └─────────────────────────────────────────┘
+       ★カード1枚は約350×220pxしかなく「どんなサイトか分からない」ため、
+         カードの中のミニ再生はそのままに、別枠の大きい窓で全体を流して見せる。
+       ★pointer-events:none ＝ マウスの邪魔をしない（下のカードを触り続けられる）。 */
+    .hover_peek {
+      position: fixed;
+      z-index: 60;
+      width: min(52vw, 78rem);
+      height: min(86vh, 92rem);
+      background: #ffffff;
+      border: 1px solid #e2e2e6;
+      border-radius: 1.2rem;
+      box-shadow: 0 2.4rem 6rem rgba(0, 0, 0, 0.32);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.18s;
+      pointer-events: none;
+    }
+    .hover_peek.is_show { opacity: 1; visibility: visible; }
+    .hover_peek_media { position: relative; flex: 1; overflow: hidden; background: #eef2f7; }
+    /* 全体画像は縦長のまま置き、JSで translateY して上から下へ流す */
+    .hover_peek_full { position: absolute; top: 0; left: 0; width: 100%; height: auto; display: block; }
+    .hover_peek_video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+    .hover_peek_bar {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.6rem 1rem; background: #fff; border-top: 1px solid #eee;
+      font-size: 1.2rem; color: #444;
+    }
+    .hover_peek_tag { font-size: 1.05rem; padding: 0.15rem 0.6rem; border-radius: 0.6rem; background: #eef2f7; color: #2b6cb0; white-space: nowrap; }
+    .hover_peek_url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     /* 画像左上に乗せるスコアのバッジ */
     .result_score {
       position: absolute;
@@ -1579,12 +1614,95 @@
         list.innerHTML = `<p class="result_empty">ヒットなし。言葉を変えてみてください。</p>`;
         return;
       }
+      peekHide();    // 描き直す前に大きなプレビューを消す（消えた要素を指したまま残るのを防ぐ）
       list.innerHTML = hits.map(card).join("");
       setupHover();  // カードごとにホバーの流し見を仕込む
     }
 
+    // ── ホバーの大きなプレビュー ────────────────────────────────
+    // カードは小さいので、少し止まったら別枠の大きな窓で全体を見せる。
+    // 録画(🎬)があれば動画、無ければ全体画像を上から下へ流す＝「動き」が分かる。
+    const HOVER_PEEK_DELAY = 260;  // ★通り過ぎただけでは出さない（出っぱなしを防ぐ）
+    let _peekEl = null;
+    let _peekTimer = null;
+
+    function peekBuild() {
+      if (_peekEl) return _peekEl;
+      _peekEl = document.createElement("div");
+      _peekEl.className = "hover_peek";
+      _peekEl.innerHTML = `
+        <div class="hover_peek_media">
+          <img class="hover_peek_full" alt="サイト全体">
+          <video class="hover_peek_video" muted loop playsinline preload="none" style="display:none"></video>
+        </div>
+        <div class="hover_peek_bar">
+          <span class="hover_peek_tag"></span><span class="hover_peek_url"></span>
+        </div>`;
+      document.body.appendChild(_peekEl);
+      return _peekEl;
+    }
+
+    function peekShow(anchor) {
+      const el = peekBuild();
+      const id = anchor.dataset.detail;
+      const hasVid = !!anchor.querySelector(".result_video");
+      const item = anchor.closest(".result_item");
+      const urlEl = item ? item.querySelector(".result_url") : null;
+      el.querySelector(".hover_peek_url").textContent = urlEl ? urlEl.textContent : "";
+      el.querySelector(".hover_peek_tag").textContent = hasVid ? "🎬 録画した動き" : "↕ 全体を流し見";
+
+      // ★置き場所は「今見ているカードと反対側」＝そのカードを隠さない
+      const r = anchor.getBoundingClientRect();
+      const cardOnLeft = (r.left + r.width / 2) < (window.innerWidth / 2);
+      el.style.left = cardOnLeft ? "auto" : "2.4rem";
+      el.style.right = cardOnLeft ? "2.4rem" : "auto";
+      el.style.top = "50%";
+      el.style.transform = "translateY(-50%)";
+
+      const img = el.querySelector(".hover_peek_full");
+      const vid = el.querySelector(".hover_peek_video");
+      if (hasVid) {
+        img.style.display = "none";
+        vid.style.display = "block";
+        if (vid.getAttribute("src") !== "/video/" + id) vid.src = "/video/" + id;
+        vid.currentTime = 0;
+        vid.play().catch(() => {});
+      } else {
+        vid.pause();
+        vid.style.display = "none";
+        img.style.display = "block";
+        img.style.transition = "none";       // ★先に止めてから0に戻す（前の流れを引きずらない）
+        img.style.transform = "translateY(0)";
+        const src = "/img/" + id + "/fullpage";
+        const run = () => {
+          const box = el.querySelector(".hover_peek_media");
+          const dist = img.offsetHeight - box.offsetHeight;  // 流す距離
+          if (dist <= 0) return;                             // 短いページは流さない
+          const dur = Math.min(14, Math.max(3, dist / 200));
+          requestAnimationFrame(() => {
+            img.style.transition = `transform ${dur}s linear`;
+            img.style.transform = `translateY(-${dist}px)`;
+          });
+        };
+        if (img.getAttribute("src") !== src) { img.onload = run; img.src = src; }
+        else if (img.complete && img.naturalHeight) run();
+        else img.onload = run;
+      }
+      el.classList.add("is_show");
+    }
+
+    function peekHide() {
+      clearTimeout(_peekTimer);
+      if (!_peekEl) return;
+      _peekEl.classList.remove("is_show");
+      _peekEl.querySelector(".hover_peek_video").pause();
+    }
+    // 一覧の外へ出た・Escを押した・描き直した時は必ず消す（出っぱなし防止）
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") peekHide(); });
+
     // ホバーすると、録画があれば動画を再生・なければ全体(fullpage)を流す
     function setupHover() {
+      list.addEventListener("mouseleave", peekHide);
       list.querySelectorAll(".result_anchor").forEach((anchor) => {
         const full = anchor.querySelector(".result_full");
         const vid = anchor.querySelector(".result_video");
@@ -1592,6 +1710,9 @@
 
         anchor.addEventListener("mouseenter", () => {
           anchor.classList.add("is_preview");
+          // 少しだけ止まったら、別枠の大きな窓も出す
+          clearTimeout(_peekTimer);
+          _peekTimer = setTimeout(() => peekShow(anchor), HOVER_PEEK_DELAY);
           if (vid) {
             // 動画があるカード：動画を再生（初回だけ読み込む）
             if (!vid.src) vid.src = vid.dataset.src;
@@ -1616,6 +1737,7 @@
 
         anchor.addEventListener("mouseleave", () => {
           anchor.classList.remove("is_preview");
+          peekHide();
           if (vid) { vid.pause(); return; }
           if (!full) return;
           full.style.transition = "transform 0.4s ease";

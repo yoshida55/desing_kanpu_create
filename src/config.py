@@ -308,6 +308,44 @@ class SearchConfig:
 
 
 @dataclass(frozen=True)
+class QuickConfig:
+    """常駐ランチャー（グローバルホットキーで検索窓を呼ぶ）の設定。
+
+    ★数値・文字列をランチャー側に直書きしないための置き場（このプロジェクトの約束）。
+    .env で上書きできる（家↔会社でキーの好みが違っても各PCで変えられる）。
+    """
+
+    # 呼び出しキー。"ctrl+alt+s" のように + で区切る（ctrl / alt / shift / win が使える）。
+    # ★既定を Ctrl+Alt+S にした理由（2026-08-09・このPCで実測）：
+    #   ・Ctrl+Shift+D は Chrome の「全タブをブックマーク」と衝突する。グローバル登録は
+    #     アプリより強いので、奪うとブラウザ側でそのキーが使えなくなる。
+    #   ・Ctrl+Alt+D と Ctrl+Alt+K は、このPCでは既に他アプリが取っていて登録できなかった。
+    hotkey: str = os.environ.get("DESIGN_STOCK_HOTKEY", "ctrl+alt+s").strip().lower()
+    # 上のキーが他アプリに取られていた時に、順に試す予備のキー（カンマ区切り）。
+    # ★ここが無いと「常駐したのに何も起きない」という一番わかりにくい壊れ方をする。
+    hotkey_alts: str = os.environ.get(
+        "DESIGN_STOCK_HOTKEY_ALTS", "ctrl+alt+g,ctrl+alt+space,ctrl+shift+space,ctrl+alt+f"
+    ).strip().lower()
+    # 常駐を終了するキー（トレイからも終了できるが、トレイが出ない環境の保険）
+    quit_hotkey: str = os.environ.get("DESIGN_STOCK_QUIT_HOTKEY", "ctrl+alt+shift+d").strip().lower()
+
+    host: str = os.environ.get("DESIGN_STOCK_HOST", "127.0.0.1").strip()
+    port: int = int(os.environ.get("DESIGN_STOCK_PORT", "5000") or 5000)
+
+    # 検索窓のサイズ（Chromeのアプリモードで開く窓）
+    window_w: int = int(os.environ.get("DESIGN_STOCK_WIN_W", "1280") or 1280)
+    window_h: int = int(os.environ.get("DESIGN_STOCK_WIN_H", "860") or 860)
+
+    # 窓を探すときの目印。templates/viewer.html の <title> の一部と一致させる。
+    # ★ここがズレると「毎回あたらしい窓が開く＝タブ（窓）が増える」に逆戻りするので注意。
+    window_title_mark: str = "デザイン参照ストック"
+
+    @property
+    def url(self) -> str:
+        return f"http://{self.host}:{self.port}"
+
+
+@dataclass(frozen=True)
 class AppConfig:
     capture: CaptureConfig = field(default_factory=CaptureConfig)
     embed: EmbedConfig = field(default_factory=EmbedConfig)
@@ -317,6 +355,7 @@ class AppConfig:
     gemini: GeminiConfig = field(default_factory=GeminiConfig)
     deepseek: DeepSeekConfig = field(default_factory=DeepSeekConfig)
     zai: ZaiConfig = field(default_factory=ZaiConfig)
+    quick: QuickConfig = field(default_factory=QuickConfig)
 
 
 # どこからでも import して使う共有インスタンス
