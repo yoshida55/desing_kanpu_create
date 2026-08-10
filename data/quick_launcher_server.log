@@ -1117,3 +1117,19 @@
 2026-08-09 23:24:30,872 [INFO] viewer: REQ GET /camp/clone_www_npo_ashitaba_or_jp_20260729_095707_js_files/b0f49d20b663.png
 2026-08-09 23:24:30,873 [INFO] viewer: REQ GET /uploads/ChatGPT Image 2026年8月4日 10_26_43.png
 2026-08-09 23:24:31,120 [INFO] viewer: REQ GET /uploads/lopia-transition-leaf-connect-v2.png
+2026-08-10 18:41:09,906 [INFO] viewer: REQ POST /api/section_fav/save
+2026-08-10 18:41:09,927 [INFO] viewer: REQ GET /api/sites
+2026-08-10 18:41:09,932 [INFO] viewer: REQ POST /api/register
+2026-08-10 18:41:09,934 [INFO] viewer: 登録ジョブ開始 [1e838699]: 1 件
+2026-08-10 18:41:09,935 [INFO] ingest: 撮影開始: https://www.oki.com/global/ja/profile/
+2026-08-10 18:41:18,713 [DEBUG] ingest: 同意バナーは見つからない or 閉じられませんでした（続行）
+2026-08-10 18:41:19,708 [DEBUG] ingest: firstview 保存: www_oki_com_global_ja_profile__c878386d72274934__firstview.png
+2026-08-10 18:41:24,007 [DEBUG] ingest: fullpage 保存: www_oki_com_global_ja_profile__c878386d72274934__fullpage.png
+2026-08-10 18:41:24,012 [DEBUG] ingest: 検出ライブラリ: Lenis
+2026-08-10 18:41:24,092 [INFO] ingest: 撮影完了・保存しました: https://www.oki.com/global/ja/profile/
+2026-08-10 18:41:24,093 [INFO] db: DB を初期化しました: D:\50_knowledge\ツール\desing_kanpu_create_data\design_stock.sqlite
+2026-08-10 18:41:24,095 [INFO] embed: 埋め込み対象: 1 件 / モデル=google/siglip2-so400m-patch14-384 / version=v1 / force=False
+2026-08-10 18:41:24,095 [INFO] embed: [1/1] 埋め込み中: https://www.oki.com/global/ja/profile/
+2026-08-10 18:41:24,522 [DEBUG] embed: 保存: dim=1152
+2026-08-10 18:41:24,522 [INFO] embed: 埋め込みサマリ: 完了=1 / 失敗=0
+2026-08-10 18:41:24,522 [INFO] viewer: 登録ジョブ完了: 完了：保存1 / スキップ0 / 失敗0 ／ ベクトル化 1件

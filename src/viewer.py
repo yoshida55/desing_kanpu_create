@@ -3093,6 +3093,8 @@ html.__ce_altmode{cursor:text}
     <button class="im" id="__ce_secswap" style="background:#0e7490;color:#fff">🔃 セクション並べ替え（順番を入れ替える）</button>
     <button class="im" id="__ce_bigclean" style="background:#4d7c0f;color:#fff">🧹 大掃除（分割span・残骸を消してソースを軽く）</button>
     <button class="im" id="__ce_bk" style="background:#475569;color:#fff">🗂 バックアップを取る（今の保存状態を複製）</button>
+    <div class="lbl plain">🎞 まとめて動きを付ける（クローンなど「動きが死んでいるページ」用・AIなし）<br><span style="opacity:.75">※クローンは元サイトのJSを持ってこないので、スクロール演出が丸ごと止まっています</span></div>
+    <button class="im" id="__ce_revealall" style="background:#0b6bcb;color:#fff">🎞 ページ全体に出現アニメを付ける</button>
     <div class="lbl plain">🛑 アニメを止める（編集中だけ・全部を「動き終わった形」で固定／保存版には残りません）</div>
     <button class="im" id="__ce_stopanim" style="background:#f2f2f4;color:#1d1d1f;border:1px solid #ddd">🛑 アニメを全部止める</button>
     <div class="msg" id="__ce_msg">💡 直したい所を<b>右クリック</b>すると、その要素に直接アニメ・指示が出せます</div>
@@ -10529,6 +10531,157 @@ html.__ce_altmode{cursor:text}
   window.__ceVeil=function(el,kind,lv){ return veilApply(el,kind,lv); };   // 検証用
   window.__ceVeilPanel=function(el){ openVeilPanel(el); };                 // 検証用（板を開く）
 
+  // ===== 🎞 ページ全体にまとめて出現アニメを付ける（2026-08-10・実報告「クローンしてもアニメーションつけられないの？」） =====
+  // ★背景：クローンは元サイトのJSを持ってこない。実測（www.oki.com のクローン）＝保存されたJSは0本、
+  //   残った外部scriptはCookie同意バナーの2本だけ＝元サイトのスクロール演出は丸ごと死んでいる。
+  //   通常クローンには汎用の出現アニメ(__clone_reveal)を注入しているが、拾う相手が section/article/footer
+  //   限定なので、div で組まれたサイトでは6個しか見つからず実質なにも動かなかった（実測）。
+  // ★ここでは「タグ名ではなく大きさで塊を選ぶ」。実測（同クローン・1440幅）＝7〜8個・ページの7〜8割を拾う。
+  // 🚫★横に動く動き（左から/右から）は使わない：画面いっぱいの塊を横にずらすと横スクロールが伸びる。
+  // 🚫★position:fixed/sticky の中は触らない：固定ヘッダーに transform が乗ると中の fixed が壊れる（§7-54）。
+  // 🚫★すでに動きが付いている塊は飛ばす＝手で付けた分を上書きしない。
+  var RA_KINDS=[
+    {k:'fadeup',t:'⬆ 下からふわっと',d:'いちばん自然（おすすめ）'},
+    {k:'fade',  t:'○ スッと出る',    d:'透明度だけ・いちばん控えめ'},
+    {k:'zoom',  t:'🔍 ズームイン',   d:'少し拡大しながら'},
+    {k:'mix',   t:'🎲 順ぐりに混ぜる',d:'塊ごとに種類を変える'}
+  ];
+  var RA_SKIP_TAG=/^(SCRIPT|STYLE|LINK|META|NOSCRIPT|BR|TEMPLATE|SVG|PATH|G|USE|BUTTON|INPUT|SELECT|TEXTAREA|A|SPAN|P|H1|H2|H3|H4|H5|H6|LI|IMG|VIDEO|IFRAME|CANVAS|FORM|LABEL|TABLE)$/;
+  // ツールが置いた物・すでに動きが付いている物のクラス（ce_newsec のような「普通のセクション」は外さない）
+  var RA_SKIP_CLS=/(^|\\s)(__ce|__cl_|fxa_|ce_shape|ce_psel|ce_bgdeco|ce_ringdeco|ce_outlinedeco|ce_spacer|ce_txtbg)/;
+  function _raSkip(e){
+    // ★SVGの中身は触らない（HTML要素ではないので className も文字列ではなく、transformの効き方も違う）
+    if(e.namespaceURI && e.namespaceURI.indexOf('1999/xhtml')<0) return true;
+    if(e.id && e.id.indexOf('__ce')===0) return true;
+    var c=(typeof e.className==='string')?e.className:'';
+    return RA_SKIP_CLS.test(c);
+  }
+  function _raFixedUp(e){   // 自分か先祖が画面に貼り付いている＝触らない
+    for(var n=e; n && n!==document.body; n=n.parentElement){
+      var cs=null; try{ cs=getComputedStyle(n); }catch(_){ return true; }
+      if(cs.position==='fixed'||cs.position==='sticky') return true;
+    }
+    return false;
+  }
+  function _raTargets(){
+    var vw=window.innerWidth, vh=window.innerHeight;
+    var MINH=110, MAXH=Math.max(vh*1.3, 700);
+    var cand=[].slice.call(document.querySelectorAll('body *')).filter(function(e){
+      if(RA_SKIP_TAG.test((e.tagName||'').toUpperCase())) return false;
+      if(_raSkip(e)) return false;
+      if(e.getAttribute&&e.getAttribute('data-fxa-fly')) return false;
+      var cs=null; try{ cs=getComputedStyle(e); }catch(_){ return false; }
+      if(cs.display==='none'||cs.visibility==='hidden') return false;
+      var h=e.offsetHeight, w=e.offsetWidth;
+      if(h<MINH||h>MAXH) return false;   // 小さい部品／大きすぎる器は対象外（器は中の子のほうが拾われる）
+      if(w<vw*0.45) return false;        // 幅が狭い＝ページの塊ではなく部品
+      if(_raFixedUp(e)) return false;
+      return true;
+    });
+    cand=cand.filter(function(e){ return !cand.some(function(o){ return o!==e && o.contains(e); }); });  // 入れ子は外側だけ
+    cand=cand.filter(function(e){        // 中に動きが付いている＝手で作った演出なので触らない
+      try{ return !e.querySelector(FX_HOST_SEL); }catch(_){ return true; }
+    });
+    cand.sort(function(a,b){ return a.getBoundingClientRect().top-b.getBoundingClientRect().top; });
+    return cand;
+  }
+  function _raCoverPct(els){
+    var dh=document.documentElement.scrollHeight||1, s=0;
+    els.forEach(function(e){ s+=e.offsetHeight; });
+    return Math.min(100, Math.round(s/dh*100));
+  }
+  function revealAllApply(kind){
+    var els=_raTargets();
+    if(!els.length) return 0;
+    try{ pushUndo(els[0]); }catch(_){}    // 一括の前に1回だけ控える＝⟲で「付ける前」に戻れる
+    var mix=['fadeup','fade','zoom'];
+    els.forEach(function(e,i){
+      try{
+        applyBake(e, kind==='mix'?mix[i%mix.length]:kind);
+        e.setAttribute('data-ceraall','1');   // ★この一括で付けた印＝「さっきの分だけ消す」ために要る
+      }catch(_){}
+    });
+    // ★applyBake は「付けた直後に1回再生して、見えている状態」で終わる（1つずつ付ける時はそれが正しい）。
+    //   一括だと全部が見えたままになり、スクロールしても何も起きない＝「効いていない」に見える。
+    //   → 画面より下の塊は隠し状態に戻す＝スクロールすると実際に出てくるので、付いたことが分かる。
+    //   ⚠applyBake の再生は rAF＋500msの保険で fxa_in を付け直すので、それより後に外すこと。
+    setTimeout(function(){
+      els.forEach(function(e){
+        var h=null; try{ h=e.closest('.fxa_pre'); }catch(_){}     // fxWrapで包まれた時は親がfxa_pre
+        if(!h) return;
+        var r=null; try{ r=h.getBoundingClientRect(); }catch(_){ return; }
+        if(r.top>window.innerHeight*0.9) h.classList.remove('fxa_in');
+      });
+      try{ if(window.fxaObs) window.fxaObs(); }catch(_){}   // 隠し状態に戻した分を監視に入れ直す
+    },700);
+    return els.length;
+  }
+  // ★「全部の動きを消す」にはしない：FX_HOST_SEL にはマーカー(.fxa_hl)や下線(.fxa_ud)も入っているので、
+  //   文字の飾りまで巻き添えで消える。この一括で付けた分（data-ceraall）だけを外す。
+  function revealAllRemove(){
+    var els=[].slice.call(document.querySelectorAll('[data-ceraall]'));
+    if(!els.length) return 0;
+    try{ pushUndo(els[0]); }catch(_){}
+    els.forEach(function(e){ try{ removeBake(e); }catch(_){} e.removeAttribute('data-ceraall'); });
+    return els.length;
+  }
+  function openRevealAllPanel(){
+    var old=document.getElementById('__ce_rap'); if(old){ if(old.__close) old.__close(); else old.remove(); }
+    var BS='background:#eef2f7;color:#333;border:1px solid #d7e0ea;border-radius:6px;padding:7px 10px;cursor:pointer;font:12px system-ui,sans-serif;text-align:left;width:100%';
+    var p=document.createElement('div'); p.id='__ce_rap';
+    p.setAttribute('style','position:fixed;right:16px;top:96px;z-index:2147483647;background:#fff;color:#1d1d1f;border:1px solid #dbe4ee;border-radius:11px;padding:11px 13px;font:12px/1.6 sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);max-width:330px');
+    p.innerHTML='<b>🎞 ページ全体に出現アニメを付ける</b>'
+      +'<div id="__ce_ranow" style="opacity:.75;margin:4px 0 8px"></div>'
+      +'<div style="opacity:.7">どの動きにしますか</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;margin:3px 0 9px">'
+      +RA_KINDS.map(function(k){
+          return '<button data-k="'+k.k+'" style="'+BS+'">'+k.t+' <span style="opacity:.6">'+k.d+'</span></button>';
+        }).join('')
+      +'</div>'
+      +'<button data-a="off" style="'+BS+'">⟲ さっき付けた分を消す</button>'
+      +'<div style="opacity:.65;margin-top:8px">スクロールで下から順に出ます。1つずつ変えたい時は、その塊を右クリック →✨動きを付ける</div>'
+      +'<div style="display:flex;margin-top:9px"><button data-x="1" style="background:#555;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;margin-left:auto">閉じる</button></div>';
+    document.body.appendChild(p);
+    try{ panelDrag(p); }catch(_){}
+    p.__close=function(){ p.remove(); };
+    function nowShow(){
+      var els=_raTargets(), n=p.querySelector('#__ce_ranow');
+      var done=document.querySelectorAll('[data-ceraall]').length;
+      if(n) n.textContent='動きを付けられる塊：'+els.length+'個（ページの約'+_raCoverPct(els)+'%）'
+        +(done?(' ／ 付け済み '+done+'個'):'');
+      return els.length;
+    }
+    nowShow();
+    p.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var b=ev.target; while(b&&b!==p&&b.tagName!=='BUTTON') b=b.parentElement;
+      if(!b||b===p) return;
+      if(b.getAttribute('data-x')){ p.__close(); return; }
+      if(b.getAttribute('data-a')==='off'){
+        var r=revealAllRemove();
+        if(msg) msg.textContent=r?('⟲ '+r+'個の動きを外しました（💾保存で確定）'):'⚠ この一括で付けた動きはありません';
+        ceFlash(r?('⟲ '+r+'個の動きを外しました'):'外す動きがありません');
+        nowShow(); return;
+      }
+      var k=b.getAttribute('data-k'); if(!k) return;
+      var c=revealAllApply(k);
+      if(!c){
+        if(msg) msg.textContent='⚠ 動きを付けられる塊が見つかりませんでした（すでに全部に付いているか、画面に貼り付く要素ばかりのページです）';
+        ceFlash('⚠ 対象が見つかりませんでした'); return;
+      }
+      if(msg) msg.textContent='✅ '+c+'個の塊に動きを付けました。スクロールすると下から順に出ます（💾保存で残ります）';
+      ceFlash('🎞 '+c+'個に動きを付けました（スクロールして確認してください）');
+      nowShow();
+    });
+  }
+  window.__ceRevealAll=function(kind){ return revealAllApply(kind); };   // 検証用
+  window.__ceRevealOff=function(){ return revealAllRemove(); };          // 検証用
+  window.__ceRevealTargets=function(){ return _raTargets(); };           // 検証用
+  (function(){
+    var b=document.getElementById('__ce_revealall');
+    if(b) b.addEventListener('click',function(){ openRevealAllPanel(); });
+  })();
+
   function openPhotoDecoPicker(el, imgEl, sIdx){
     if(!el){ msg.textContent='対象がありません'; return; }
     // ★写真まわりの入口を1つにまとめる（2026-08-02・要望「同じような機能が散らばっている」）。
@@ -14756,6 +14909,14 @@ html.__ce_altmode{cursor:text}
           setTimeout(function(){ n.classList.add('fxa_in'); },500);  // 保険：rAFが来ない環境でも必ず見える状態で終わる
         }catch(_){ n.classList.add('fxa_in'); }
       })(_fxShown);
+    }
+    // 🚫★動きが1つも無いページ（クローンなど）では、FX_RUN が読み込み時に「対象0件」で即 return しており、
+    //   html.fxa-on も window.fxaObs も存在しない（2026-08-10・実測で判明）。この状態だと
+    //   .fxa_pre を付けても opacity:0 のCSSが当たらず＝隠れないので、スクロールしても何も出てこない
+    //   ＝「動きを付けたのに動かない」になる。★1個目を付けた今、ランタイムを入れ直して起動させる。
+    //   ⚠textContent の書き換えでは再実行されないので、消して入れ直すこと（§7㊴）。
+    if(!document.documentElement.classList.contains('fxa-on')){
+      try{ var _or=document.getElementById('fxa-run'); if(_or) _or.remove(); ensureFxAssets(); }catch(_){}
     }
     try{ if(window.fxaObs) window.fxaObs(); }catch(_){}   // 監視に入れる（保存し直さなくてもスクロール再生が効く）
     markDirty();
@@ -22872,7 +23033,7 @@ html.__ce_altmode{cursor:text}
     // ★__ce_flyov（全画面の線キャンバス）と __ce_flypn（🕊の板）は必ずここでも消す。
     //   残ると画面全体がクリックを吸うので、他のどのボタンも押せなくなる（＝ツールが壊れて見える）。
     //   ⚠__ce_flydots（左下の小さい点）は飛ぶ絵への入口なので消さない。
-    ['__ce_flyov','__ce_flypn','__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname','__ce_veilp','__ce_svgp','__ce_svgpts'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
+    ['__ce_flyov','__ce_flypn','__ce_pk','__ce_dlyp','__ce_shp','__ce_sbgp','__ce_pskill','__ce_scset','__ce_scmenu','__ce_tbgp','__ce_vlp','__ce_dqp','__ce_secp','__ce_pkpos','__ce_ruler','__ce_bgp','__ce_grab','__ce_grab2','__ce_wcp','__ce_pal','__ce_holes','__ce_stkp','__ce_secpn','__ce_crumb','__ce_swp','__ce_askname','__ce_veilp','__ce_svgp','__ce_svgpts','__ce_rap'].forEach(function(id){ var p=document.getElementById(id); if(p){ if(p.__close) p.__close(); else { if(p.__off) p.__off(); p.remove(); } recovered=true; } });
     // ★保険：上の一覧に足し忘れた板も、ここで必ず消す（2026-08-05・§7-74の恒久対策）。
     //   新しい板を作るたびに一覧へ書き足すのは必ず忘れる（実例：🕊の線キャンバス __ce_flyov）。
     //   取り残された板は画面を覆ってクリックを全部吸うので「ツールが丸ごと壊れた」ように見える。
