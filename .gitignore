@@ -16,3 +16,6 @@ results.html
 #   ここを同期しないと会社では候補が1件も出ない。
 # ★_camp/ は編集中カンプごとの一時キャッシュ。開くたびに作り直されるので同期しない。
 data/skeleton/_camp/
+
+# Claude Code のPCごとのローカル許可設定（同期しない）
+**/.claude/settings.local.json
